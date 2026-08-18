@@ -13,14 +13,11 @@ export default async function SuppliersPage() {
     .order('created_at', { ascending: false })
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Fornecedores</h2>
-          <p className="text-muted-foreground">Gerencie os fornecedores da sua operação.</p>
-        </div>
+    <div className="mp-stack">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <p className="text-sm text-[#999]">Gerencie os fornecedores da sua operação.</p>
         <Link href="/suppliers/new">
-          <Button className="bg-blue-600 hover:bg-blue-700">
+          <Button className="bg-[#3483fa] hover:bg-[#2968c8]">
             <Plus className="w-4 h-4 mr-2" /> Novo Fornecedor
           </Button>
         </Link>
@@ -48,7 +45,7 @@ export default async function SuppliersPage() {
               <TableBody>
                 {suppliers?.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-6 text-muted-foreground">
+                    <TableCell colSpan={6} className="text-center py-6 text-[#999]">
                       Nenhum fornecedor cadastrado.
                     </TableCell>
                   </TableRow>

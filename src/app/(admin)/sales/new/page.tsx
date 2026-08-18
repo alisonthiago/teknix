@@ -12,18 +12,18 @@ export default async function NewSalePage() {
   const { data: products } = await supabase.from('products').select('id, name, sku, stock').order('name')
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
+    <div className="mp-stack max-w-4xl mx-auto">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Registrar Venda</h2>
-          <p className="text-muted-foreground">Registre uma saída e calcule a rentabilidade real da operação.</p>
+          <p className="text-[#999]">Registre uma saída e calcule a rentabilidade real da operação.</p>
         </div>
         <Link href="/sales">
           <Button variant="outline">Cancelar</Button>
         </Link>
       </div>
 
-      <form action={createSale} className="space-y-6">
+      <form action={createSale} className="mp-stack">
         <Card>
           <CardHeader>
             <CardTitle>Dados Gerais da Venda</CardTitle>
@@ -36,7 +36,7 @@ export default async function NewSalePage() {
                   id="marketplace_id" 
                   name="marketplace_id" 
                   required
-                  className="flex h-9 w-full items-center justify-between rounded-md border border-slate-200 bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-950 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-9 w-full items-center justify-between rounded-md border border-[#e6e6e6] bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-white placeholder:text-[#999] focus:outline-none focus:ring-1 focus:ring-[#3483fa] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <option value="">Selecione um canal</option>
                   {marketplaces?.map(mp => (
@@ -69,7 +69,7 @@ export default async function NewSalePage() {
                   id="product_id" 
                   name="product_id" 
                   required
-                  className="flex h-9 w-full items-center justify-between rounded-md border border-slate-200 bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-950 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-9 w-full items-center justify-between rounded-md border border-[#e6e6e6] bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-white placeholder:text-[#999] focus:outline-none focus:ring-1 focus:ring-[#3483fa] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <option value="">Selecione um produto</option>
                   {products?.map(product => (
@@ -89,7 +89,7 @@ export default async function NewSalePage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4 pt-4 border-t border-slate-100">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4 pt-4 border-t border-[#e6e6e6]">
               <div className="space-y-2">
                 <Label htmlFor="fees">Comissão do Canal (R$)</Label>
                 <Input id="fees" name="fees" type="number" step="0.01" min="0" defaultValue="0" />
@@ -109,7 +109,7 @@ export default async function NewSalePage() {
             </div>
 
             <div className="pt-6 flex justify-end">
-              <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+              <Button type="submit" className="bg-[#3483fa] hover:bg-[#2968c8]">
                 Registrar Venda e Abater Estoque
               </Button>
             </div>

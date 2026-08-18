@@ -3,11 +3,11 @@ import ImportExportClient from './ImportExportClient'
 
 export default function ImportExportPage() {
   return (
-    <div className="space-y-6">
+    <div className="mp-stack">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Importar / Exportar (Excel e CSV)</h2>
-          <p className="text-muted-foreground">Movimente dados em massa no seu sistema TEKTOU.</p>
+          <p className="text-[#999]">Movimente dados em massa no seu sistema TEKNIX.</p>
         </div>
       </div>
 

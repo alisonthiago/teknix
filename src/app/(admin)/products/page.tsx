@@ -17,14 +17,11 @@ export default async function ProductsPage() {
     .order('created_at', { ascending: false })
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Produtos</h2>
-          <p className="text-muted-foreground">Catálogo de produtos da sua operação.</p>
-        </div>
+    <div className="mp-stack">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <p className="text-sm text-[#999]">Catálogo de produtos da sua operação.</p>
         <Link href="/products/new">
-          <Button className="bg-blue-600 hover:bg-blue-700">
+          <Button className="bg-[#3483fa] hover:bg-[#2968c8]">
             <Plus className="w-4 h-4 mr-2" /> Novo Produto
           </Button>
         </Link>
@@ -53,7 +50,7 @@ export default async function ProductsPage() {
               <TableBody>
                 {products?.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-6 text-muted-foreground">
+                    <TableCell colSpan={7} className="text-center py-6 text-[#999]">
                       Nenhum produto cadastrado.
                     </TableCell>
                   </TableRow>
@@ -64,9 +61,9 @@ export default async function ProductsPage() {
                   
                   return (
                     <TableRow key={product.id}>
-                      <TableCell className="font-medium text-slate-500">{product.sku}</TableCell>
+                      <TableCell className="font-medium text-[#999]">{product.sku}</TableCell>
                       <TableCell className="font-semibold">{product.name}</TableCell>
-                      <TableCell className="text-slate-500">{product.suppliers?.name || '-'}</TableCell>
+                      <TableCell className="text-[#999]">{product.suppliers?.name || '-'}</TableCell>
                       <TableCell>
                         {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalCost)}
                       </TableCell>

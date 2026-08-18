@@ -9,11 +9,11 @@ export default async function PricingSimulatorPage() {
   const { data: marketplaces } = await supabase.from('marketplaces').select('*').order('name')
 
   return (
-    <div className="space-y-6">
+    <div className="mp-stack">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Simulador de Preço e Margem</h2>
-          <p className="text-muted-foreground">Calcule lucros, teste preços e descubra o preço sugerido.</p>
+          <p className="text-[#999]">Calcule lucros, teste preços e descubra o preço sugerido.</p>
         </div>
       </div>
       

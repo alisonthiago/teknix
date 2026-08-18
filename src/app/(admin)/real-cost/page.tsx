@@ -10,13 +10,8 @@ export default async function RealCostPage() {
     .order('name')
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Custo Real</h2>
-          <p className="text-muted-foreground">Composição do custo real de mercadoria em estoque.</p>
-        </div>
-      </div>
+    <div className="mp-stack">
+      <p className="text-sm text-[#999]">Composição do custo real de mercadoria em estoque.</p>
 
       <Card>
         <CardHeader>
@@ -36,15 +31,15 @@ export default async function RealCostPage() {
                   <TableHead className="text-right">Frete Unit.</TableHead>
                   <TableHead className="text-right">Embalagem</TableHead>
                   <TableHead className="text-right">Outros</TableHead>
-                  <TableHead className="text-right bg-slate-50 font-bold">Custo Real</TableHead>
+                  <TableHead className="text-right bg-[#fafafa] font-bold">Custo Real</TableHead>
                   <TableHead className="text-right">Estoque</TableHead>
-                  <TableHead className="text-right bg-blue-50 text-blue-900 font-bold">Total em Estoque</TableHead>
+                  <TableHead className="text-right bg-[#ecf3fe] text-blue-900 font-bold">Total em Estoque</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {products?.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center py-6 text-muted-foreground">
+                    <TableCell colSpan={9} className="text-center py-6 text-[#999]">
                       Nenhum produto cadastrado para calcular custo.
                     </TableCell>
                   </TableRow>
@@ -59,15 +54,15 @@ export default async function RealCostPage() {
                   
                   return (
                     <TableRow key={product.id}>
-                      <TableCell className="font-medium text-slate-500">{product.sku}</TableCell>
+                      <TableCell className="font-medium text-[#999]">{product.sku}</TableCell>
                       <TableCell className="font-semibold">{product.name}</TableCell>
                       <TableCell className="text-right">R$ {cost.toFixed(2)}</TableCell>
                       <TableCell className="text-right">R$ {freight.toFixed(2)}</TableCell>
                       <TableCell className="text-right">R$ {packaging.toFixed(2)}</TableCell>
                       <TableCell className="text-right">R$ {other.toFixed(2)}</TableCell>
-                      <TableCell className="text-right bg-slate-50 font-bold">R$ {realCost.toFixed(2)}</TableCell>
+                      <TableCell className="text-right bg-[#fafafa] font-bold">R$ {realCost.toFixed(2)}</TableCell>
                       <TableCell className="text-right">{product.stock} un</TableCell>
-                      <TableCell className="text-right bg-blue-50 text-blue-900 font-bold">
+                      <TableCell className="text-right bg-[#ecf3fe] text-blue-900 font-bold">
                         R$ {totalInStock.toFixed(2)}
                       </TableCell>
                     </TableRow>

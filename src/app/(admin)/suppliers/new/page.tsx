@@ -7,11 +7,11 @@ import Link from 'next/link'
 
 export default function NewSupplierPage() {
   return (
-    <div className="space-y-6 max-w-3xl mx-auto">
+    <div className="mp-stack max-w-3xl mx-auto">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Novo Fornecedor</h2>
-          <p className="text-muted-foreground">Cadastre um novo fornecedor no sistema.</p>
+          <p className="text-[#999]">Cadastre um novo fornecedor no sistema.</p>
         </div>
         <Link href="/suppliers">
           <Button variant="outline">Cancelar</Button>
@@ -82,7 +82,7 @@ export default function NewSupplierPage() {
             </div>
 
             <div className="pt-4 flex justify-end">
-              <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+              <Button type="submit" className="bg-[#3483fa] hover:bg-[#2968c8]">
                 Salvar Fornecedor
               </Button>
             </div>

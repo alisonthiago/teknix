@@ -12,18 +12,18 @@ export default async function NewPurchasePage() {
   const { data: products } = await supabase.from('products').select('id, name, sku').order('name')
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
+    <div className="mp-stack max-w-4xl mx-auto">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Nova Compra</h2>
-          <p className="text-muted-foreground">Registre a entrada de mercadorias no estoque.</p>
+          <p className="text-[#999]">Registre a entrada de mercadorias no estoque.</p>
         </div>
         <Link href="/purchases">
           <Button variant="outline">Cancelar</Button>
         </Link>
       </div>
 
-      <form action={createPurchase} className="space-y-6">
+      <form action={createPurchase} className="mp-stack">
         <Card>
           <CardHeader>
             <CardTitle>Dados Gerais da Compra</CardTitle>
@@ -36,7 +36,7 @@ export default async function NewPurchasePage() {
                   id="supplier_id" 
                   name="supplier_id" 
                   required
-                  className="flex h-9 w-full items-center justify-between rounded-md border border-slate-200 bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-950 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-9 w-full items-center justify-between rounded-md border border-[#e6e6e6] bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-white placeholder:text-[#999] focus:outline-none focus:ring-1 focus:ring-[#3483fa] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <option value="">Selecione um fornecedor</option>
                   {suppliers?.map(supplier => (
@@ -73,7 +73,7 @@ export default async function NewPurchasePage() {
                   id="product_id" 
                   name="product_id" 
                   required
-                  className="flex h-9 w-full items-center justify-between rounded-md border border-slate-200 bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-950 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-9 w-full items-center justify-between rounded-md border border-[#e6e6e6] bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-white placeholder:text-[#999] focus:outline-none focus:ring-1 focus:ring-[#3483fa] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <option value="">Selecione um produto</option>
                   {products?.map(product => (
@@ -105,7 +105,7 @@ export default async function NewPurchasePage() {
             </div>
 
             <div className="pt-6 flex justify-end">
-              <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+              <Button type="submit" className="bg-[#3483fa] hover:bg-[#2968c8]">
                 Registrar Compra e Estoque
               </Button>
             </div>

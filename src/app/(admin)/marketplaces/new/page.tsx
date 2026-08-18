@@ -7,18 +7,18 @@ import Link from 'next/link'
 
 export default function NewMarketplacePage() {
   return (
-    <div className="space-y-6 max-w-3xl mx-auto">
+    <div className="mp-stack max-w-3xl mx-auto">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Novo Canal de Venda</h2>
-          <p className="text-muted-foreground">Cadastre as taxas padrão de um marketplace.</p>
+          <p className="text-[#999]">Cadastre as taxas padrão de um marketplace.</p>
         </div>
         <Link href="/marketplaces">
           <Button variant="outline">Cancelar</Button>
         </Link>
       </div>
 
-      <form action={createMarketplace} className="space-y-6">
+      <form action={createMarketplace} className="mp-stack">
         <Card>
           <CardHeader>
             <CardTitle>Identificação</CardTitle>
@@ -74,7 +74,7 @@ export default function NewMarketplacePage() {
             </div>
 
             <div className="pt-6 flex justify-end">
-              <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+              <Button type="submit" className="bg-[#3483fa] hover:bg-[#2968c8]">
                 Salvar Configurações
               </Button>
             </div>
