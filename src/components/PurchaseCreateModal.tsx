@@ -121,7 +121,7 @@ export default function PurchaseCreateModal({ open, onClose, onCreated }: Purcha
       notify({
         type: 'error',
         title: 'Erro',
-        message: 'Não foi possível registrar a compra.'
+        message: err instanceof Error ? err.message : (err as any)?.message || 'Não foi possível registrar a compra.'
       })
     } finally {
       setSaving(false)
@@ -156,9 +156,9 @@ export default function PurchaseCreateModal({ open, onClose, onCreated }: Purcha
               <div className="grid grid-cols-1 gap-4">
                 <div>
                   <Label className="text-[11px] text-[#666] mb-1.5">Fornecedor *</Label>
-                  <Select value={form.supplier_id} onValueChange={v => updateField('supplier_id', v)}>
+                  <Select value={form.supplier_id} onValueChange={v => updateField('supplier_id', v)} disabled={suppliers.length === 0}>
                     <SelectTrigger className="h-9 text-[13px] rounded-md w-full border-[#e6e6e6]">
-                      <SelectValue placeholder="Selecione um fornecedor" />
+                      <SelectValue placeholder={suppliers.length === 0 ? "Carregando fornecedores..." : "Selecione um fornecedor"} />
                     </SelectTrigger>
                     <SelectContent>
                       {suppliers.map(s => (
@@ -169,9 +169,9 @@ export default function PurchaseCreateModal({ open, onClose, onCreated }: Purcha
                 </div>
                 <div>
                   <Label className="text-[11px] text-[#666] mb-1.5">Quem Comprou (Comprador) *</Label>
-                  <Select value={form.buyer_id} onValueChange={v => updateField('buyer_id', v)}>
+                  <Select value={form.buyer_id} onValueChange={v => updateField('buyer_id', v)} disabled={profiles.length === 0}>
                     <SelectTrigger className="h-9 text-[13px] rounded-md w-full border-[#e6e6e6]">
-                      <SelectValue placeholder="Selecione um comprador" />
+                      <SelectValue placeholder={profiles.length === 0 ? "Carregando compradores..." : "Selecione um comprador"} />
                     </SelectTrigger>
                     <SelectContent>
                       {profiles.map(p => (

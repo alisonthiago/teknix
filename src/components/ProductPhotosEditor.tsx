@@ -89,7 +89,7 @@ export default function ProductPhotosEditor({ productId }: { productId: string }
       notify({
         type: 'error',
         title: 'Erro',
-        message: 'Falha ao enviar fotos.'
+        message: err instanceof Error ? err.message : (err as any)?.message || 'Falha ao enviar fotos.'
       })
     } finally {
       setUploading(false)
