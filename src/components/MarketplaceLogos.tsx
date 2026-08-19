@@ -16,6 +16,6 @@ export function MarketplaceLogo({ name, className = 'w-5 h-5' }: { name: string;
       </div>
     )
   }
-  // eslint-disable-next-line @next/next/no-img-element
+  // Removed disable
   return <img src={src} alt={name} className={`${className} object-contain flex-shrink-0`} />
 }

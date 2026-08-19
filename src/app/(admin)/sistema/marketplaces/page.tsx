@@ -4,21 +4,50 @@ import ConfigSubLayout from '@/components/ConfigSubLayout'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
 
-interface Marketplace {
+interface MarketplaceConnection {
+  id: string
+  marketplace_id: string
+  seller_id: string
+  status: string
+  account_name?: string | null
+  last_sync_at?: string | null
+}
+
+interface MarketplaceWithConnections {
   id: string
   name: string
   code: string
   status: string
-  seller_id: string
-  last_sync: string | null
-  orders: number
+  default_percentage_fee: number
+  default_fixed_fee: number
+  connections: MarketplaceConnection[]
+  connected_count: number
 }
 
 export default function MarketplacesConfigPage() {
-  const { data: marketplaces, loading, error } = useSupabaseQuery<Marketplace[]>(async (s) => {
-    const { data, error } = await s.from('marketplaces').select('*').order('name')
-    if (error) throw error
-    return (data || []) as Marketplace[]
+  const { data: marketplaces, loading, error } = useSupabaseQuery<MarketplaceWithConnections[]>(async (s) => {
+    const { data: mps, error: mpError } = await s.from('marketplaces').select('*').order('name')
+    if (mpError) throw mpError
+
+    const { data: connections } = await s
+      .from('marketplace_connections')
+      .select('id, marketplace_id, seller_id, status, account_name, last_sync_at')
+
+    const connByMarketplace: Record<string, MarketplaceConnection[]> = {}
+    for (const conn of connections || []) {
+      const key = conn.marketplace_id?.toLowerCase() || ''
+      if (!connByMarketplace[key]) connByMarketplace[key] = []
+      connByMarketplace[key].push(conn)
+    }
+
+    return (mps || []).map(mp => {
+      const conns = connByMarketplace[mp.code.toLowerCase()] || connByMarketplace[mp.id] || []
+      return {
+        ...mp,
+        connections: conns,
+        connected_count: conns.filter(c => c.status === 'CONNECTED').length,
+      }
+    })
   })
 
   return (
@@ -38,22 +67,39 @@ export default function MarketplacesConfigPage() {
                   <MarketplaceLogo name={m.name} className="w-8 h-8" />
                   <div>
                     <h3 className="text-[13px] font-semibold text-[#333]">{m.name}</h3>
-                    <p className="text-[10px] text-[#999]">{m.seller_id || 'Não conectado'}</p>
+                    {m.connections.length > 0 ? (
+                      <p className="text-[10px] text-[#38a169]">
+                        {m.connected_count} conta{m.connected_count !== 1 ? 's' : ''} conectada{m.connected_count !== 1 ? 's' : ''}
+                      </p>
+                    ) : (
+                      <p className="text-[10px] text-[#999]">Não conectado</p>
+                    )}
                   </div>
                 </div>
-                <span className={`inline-flex px-2 py-[2px] rounded text-[10px] font-medium ${m.status === 'CONNECTED' ? 'bg-[#f0fff4] text-[#38a169]' : 'bg-[#f5f5f5] text-[#999]'}`}>
-                  {m.status === 'CONNECTED' ? 'Conectado' : 'Desconectado'}
+                <span className={`inline-flex px-2 py-[2px] rounded text-[10px] font-medium ${m.connected_count > 0 ? 'bg-[#f0fff4] text-[#38a169]' : 'bg-[#f5f5f5] text-[#999]'}`}>
+                  {m.connected_count > 0 ? 'Conectado' : 'Desconectado'}
                 </span>
               </div>
-              {m.last_sync && <p className="text-[10px] text-[#ccc] mb-3">Última sincronização: {new Date(m.last_sync).toLocaleString('pt-BR')}</p>}
+              {m.connections.length > 0 && (
+                <div className="space-y-1.5 mb-3">
+                  {m.connections.map(c => (
+                    <div key={c.id} className="flex items-center justify-between text-[10px]">
+                      <span className="text-[#666]">{c.account_name || c.seller_id}</span>
+                      <span className={`font-medium ${c.status === 'CONNECTED' ? 'text-[#38a169]' : 'text-[#999]'}`}>
+                        {c.status === 'CONNECTED' ? 'Conectado' : c.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
               <div className="flex gap-2">
-                {m.status === 'CONNECTED' ? (
+                {m.connected_count > 0 ? (
                   <>
                     <button className="px-3 py-1.5 bg-[#f5f5f5] text-[#666] text-[11px] font-medium rounded-md hover:bg-[#eee]">Sincronizar</button>
                     <button className="px-3 py-1.5 border border-[#e74c3c]/20 text-[#e74c3c] text-[11px] font-medium rounded-md hover:bg-[#fff5f5]">Desconectar</button>
                   </>
                 ) : (
-                  <button className="px-3 py-1.5 bg-[#3483fa] text-white text-[11px] font-medium rounded-md hover:bg-[#2968c8]">Conectar via OAuth</button>
+                  <a href={`/marketplaces/${m.id}`} className="px-3 py-1.5 bg-[#3483fa] text-white text-[11px] font-medium rounded-md hover:bg-[#2968c8] inline-block">Conectar via OAuth</a>
                 )}
               </div>
             </div>

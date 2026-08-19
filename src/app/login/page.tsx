@@ -154,8 +154,8 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
               <h3 className="font-semibold text-lg">Inovação e Eficiência</h3>
             </div>
             <p className="text-white/90 text-[15px] leading-relaxed mb-6 font-light">
-              "A TEKNIX transformou nossa gestão de vendas. A plataforma é intuitiva, 
-              rápida e nos ajudou a escalar nossa operação de forma sustentável e controlada."
+              &quot;A TEKNIX transformou nossa gestão de vendas. A plataforma é intuitiva, 
+              rápida e nos ajudou a escalar nossa operação de forma sustentável e controlada.&quot;
             </p>
             <Link href="#" className="inline-flex items-center gap-2 text-sm font-medium bg-white/20 hover:bg-white/30 px-5 py-2.5 rounded-full transition-colors backdrop-blur-sm">
               Conheça nossas histórias

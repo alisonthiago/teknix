@@ -5,7 +5,14 @@ import { useParams, useRouter } from 'next/navigation'
 import { ArrowLeft, Plus, Wifi, WifiOff, AlertTriangle, RefreshCw, ExternalLink, Power, Store } from 'lucide-react'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
-import ConnectAccountModal from '@/components/ConnectAccountModal'
+
+const OAUTH_MARKETPLACES: Record<string, string> = {
+  mercadolivre: '/api/auth/mercadolivre',
+  shopee: '/api/auth/shopee',
+  amazon: '/api/auth/amazon',
+  magalu: '/api/auth/magalu',
+  tiktok: '/api/auth/tiktok',
+}
 
 interface Account {
   id: string
@@ -40,7 +47,6 @@ export default function MarketplaceDetailPage() {
   const params = useParams()
   const router = useRouter()
   const marketplaceId = params.id as string
-  const [showConnectModal, setShowConnectModal] = useState(false)
   const [syncing, setSyncing] = useState<string | null>(null)
 
   const { data: marketplace, loading, error, refetch } = useSupabaseQuery<MarketplaceDetail>(async (s) => {
@@ -51,14 +57,23 @@ export default function MarketplaceDetailPage() {
       .single()
     if (mpError) throw mpError
 
-    const { data: accounts } = await s
-      .from('marketplace_accounts')
-      .select('*')
-      .eq('marketplace_id', marketplaceId)
-      .is('deleted_at', null)
-      .order('created_at')
+    const { data: connections } = await s
+      .from('marketplace_connections')
+      .select('id, marketplace_id, seller_id, status, account_name, last_sync_at, last_webhook_at, updated_at')
+      .or(`marketplace_id.eq.${mp.code.toLowerCase()},marketplace_id.eq.${marketplaceId}`)
 
-    return { ...mp, marketplace_accounts: accounts || [] }
+    const accounts = (connections || []).map(c => ({
+      id: c.id,
+      account_name: c.account_name || c.seller_id || 'Conta',
+      seller_id: c.seller_id,
+      status: c.status,
+      connection_status: c.status,
+      last_sync_at: c.last_sync_at,
+      last_webhook_at: c.last_webhook_at,
+      created_at: c.updated_at,
+    }))
+
+    return { ...mp, marketplace_accounts: accounts }
   }, [marketplaceId])
 
   const accounts = marketplace?.marketplace_accounts || []
@@ -100,6 +115,16 @@ export default function MarketplaceDetailPage() {
     setSyncing(null)
   }
 
+  const handleConnectAccount = () => {
+    if (!marketplace) return
+    const oauthPath = OAUTH_MARKETPLACES[marketplace.code.toLowerCase()]
+    if (oauthPath) {
+      window.location.href = oauthPath
+    } else {
+      alert(`A integração com ${marketplace.name} via OAuth não está configurada no momento.`)
+    }
+  }
+
   return (
     <div className="mp-stack">
       {/* Back + Header */}
@@ -130,7 +155,7 @@ export default function MarketplaceDetailPage() {
               </div>
             </div>
             <button
-              onClick={() => setShowConnectModal(true)}
+              onClick={handleConnectAccount}
               className="inline-flex items-center justify-center gap-2 bg-[#3483fa] text-white text-sm font-semibold px-4 py-2.5 rounded-lg hover:bg-[#2968c8] transition-colors w-full sm:w-auto"
             >
               <Plus className="w-4 h-4" /> Conectar conta
@@ -175,7 +200,7 @@ export default function MarketplaceDetailPage() {
               <Store className="w-12 h-12 text-[#ccc] mx-auto mb-3" />
               <p className="text-sm text-[#999] mb-4">Nenhuma conta conectada neste marketplace.</p>
               <button
-                onClick={() => setShowConnectModal(true)}
+                onClick={handleConnectAccount}
                 className="inline-flex items-center gap-2 bg-[#3483fa] text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-[#2968c8] transition-colors"
               >
                 <Plus className="w-4 h-4" /> Conectar primeira conta
@@ -238,7 +263,10 @@ export default function MarketplaceDetailPage() {
                         </button>
                       )}
                       {account.status !== 'CONNECTED' && account.status !== 'REAUTH_REQUIRED' && (
-                        <button className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#3483fa] text-white text-[11px] font-medium rounded-md hover:bg-[#2968c8] transition-colors">
+                        <button 
+                          onClick={handleConnectAccount}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#3483fa] text-white text-[11px] font-medium rounded-md hover:bg-[#2968c8] transition-colors"
+                        >
                           <ExternalLink className="w-3 h-3" /> Conectar
                         </button>
                       )}
@@ -265,18 +293,6 @@ export default function MarketplaceDetailPage() {
         </div>
       )}
 
-      {/* Connect Account Modal */}
-      {showConnectModal && (
-        <ConnectAccountModal
-          marketplaceId={marketplaceId}
-          marketplaceName={marketplace?.name || ''}
-          onClose={() => setShowConnectModal(false)}
-          onConnected={() => {
-            setShowConnectModal(false)
-            refetch()
-          }}
-        />
-      )}
     </div>
   )
 }

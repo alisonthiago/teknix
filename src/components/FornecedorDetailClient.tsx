@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowLeft, Truck, Clock, Phone, Mail, MessageCircle } from 'lucide-react'
+import { ArrowLeft, Truck, Clock, Phone, Mail, MessageCircle, MoreVertical, Plus } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import type { SupplierDetail } from '@/lib/detail-types'
 
@@ -185,21 +185,47 @@ export default function FornecedorDetailClient({ supplier }: { supplier: Supplie
             <Truck className="w-7 h-7 text-[#ccc]" />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-              <div>
-                <h1 className="text-[18px] font-semibold text-[#333]">{supplier.name}</h1>
-                <div className="flex flex-wrap items-center gap-2 mt-1">
-                  <span className="text-[11px] font-mono text-[#999]">{supplier.cnpj}</span>
-                  <span className="text-[10px] text-[#ccc]">•</span>
-                  <span className="text-[12px] text-[#999]">{supplier.city}/{supplier.state}</span>
-                  <span className="text-[10px] text-[#ccc]">•</span>
-                  <span className="inline-flex px-2 py-[2px] rounded text-[10px] font-medium bg-[#f0fff4] text-[#38a169]">Ativo</span>
-                </div>
-              </div>
-              <button className="px-3 py-1.5 bg-[#3483fa] text-white text-[11px] font-medium rounded-md hover:bg-[#2968c8] transition-colors">
-                Editar fornecedor
-              </button>
-            </div>
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+               <div>
+                 <h1 className="text-[18px] font-semibold text-[#333]">{supplier.name}</h1>
+                 <div className="flex flex-wrap items-center gap-2 mt-1">
+                   <span className="text-[11px] font-mono text-[#999]">{supplier.cnpj}</span>
+                   <span className="text-[10px] text-[#ccc]">•</span>
+                   <span className="text-[12px] text-[#999]">{supplier.city}/{supplier.state}</span>
+                   <span className="text-[10px] text-[#ccc]">•</span>
+                   <span className="inline-flex px-2 py-[2px] rounded text-[10px] font-medium bg-[#f0fff4] text-[#38a169]">Ativo</span>
+                 </div>
+               </div>
+               <div className="relative">
+                 <button
+                   onClick={(e) => {
+                     const menu = e.currentTarget.nextElementSibling
+                     if (menu) menu.classList.toggle('hidden')
+                   }}
+                   className="p-1.5 rounded-md border border-[#e6e6e6] text-[#666] hover:bg-[#f5f5f5] transition-colors"
+                 >
+                   <MoreVertical className="w-4 h-4" />
+                 </button>
+                 <div className="absolute right-0 mt-1 w-40 bg-white border border-[#e6e6e6] rounded-md shadow-lg hidden z-10">
+                   <Link href={`/fornecedores/${supplier.id}/edit`} className="flex items-center gap-2 px-3 py-2 text-[11px] text-[#333] hover:bg-[#f5f5f5]">
+                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5l9 9m-3 0l-9 9 1.5-9 9-1.5z" /></svg>
+                     Editar
+                   </Link>
+                   <Link href={`/purchases/new?supplier=${supplier.id}`} className="flex items-center gap-2 px-3 py-2 text-[11px] text-[#333] hover:bg-[#f5f5f5]">
+                     <Plus className="w-3 h-3" />
+                     Nova compra
+                   </Link>
+                   <a href={`https://wa.me/${supplier.whatsapp?.replace(/\D/g, '')}`} className="flex items-center gap-2 px-3 py-2 text-[11px] text-[#38a169] hover:bg-[#f5f5f5]">
+                     <MessageCircle className="w-3 h-3" />
+                     WhatsApp
+                   </a>
+                   <a href={`mailto:${supplier.email}`} className="flex items-center gap-2 px-3 py-2 text-[11px] text-[#3483fa] hover:bg-[#f5f5f5]">
+                     <Mail className="w-3 h-3" />
+                     E-mail
+                   </a>
+                 </div>
+               </div>
+             </div>
           </div>
         </div>
       </div>

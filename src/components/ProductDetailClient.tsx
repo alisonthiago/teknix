@@ -1,11 +1,21 @@
 'use client'
 
+import { useState } from 'react'
+
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, MoreHorizontal, Package, TrendingUp, ShoppingCart, Store, Clock } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import type { ProductDetail } from '@/lib/detail-types'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { createClient } from '@/utils/supabase/client'
 
 function formatBRL(value: number) {
   return `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -188,20 +198,55 @@ function VisaoGeralTab({ product }: { product: ProductDetail }) {
 }
 
 function VendasTab({ product }: { product: ProductDetail }) {
+  const [selectedAccount, setSelectedAccount] = useState<string>('ALL')
+  const accounts = Array.from(new Set(product.recent_sales.map(s => s.account_name).filter(Boolean))) as string[]
+  
+  const filteredSales = selectedAccount === 'ALL' 
+    ? product.recent_sales 
+    : product.recent_sales.filter(s => s.account_name === selectedAccount)
+
+  const filteredRevenue = filteredSales.reduce((acc, s) => acc + s.revenue, 0)
+  const filteredProfit = filteredSales.reduce((acc, s) => acc + s.profit, 0)
+  const filteredMargin = filteredRevenue > 0 ? (filteredProfit / filteredRevenue) * 100 : 0
+  const filteredTicket = filteredSales.length > 0 ? filteredRevenue / filteredSales.length : 0
+  const filteredOrders = Array.from(new Set(filteredSales.map(s => s.order_id))).length
+  const filteredQuantity = filteredSales.reduce((acc, s) => acc + s.quantity, 0)
+
   return (
     <div className="space-y-4">
+      {accounts.length > 0 && (
+        <div className="flex items-center gap-2 overflow-x-auto pb-2">
+          <button 
+            onClick={() => setSelectedAccount('ALL')}
+            className={`px-3 py-1.5 rounded-md text-[11px] font-medium whitespace-nowrap transition-colors ${selectedAccount === 'ALL' ? 'bg-[#333] text-white' : 'bg-[#f5f5f5] text-[#666] hover:bg-[#e6e6e6]'}`}
+          >
+            Todas as Contas
+          </button>
+          {accounts.map(acc => (
+            <button 
+              key={acc}
+              onClick={() => setSelectedAccount(acc)}
+              className={`px-3 py-1.5 rounded-md text-[11px] font-medium whitespace-nowrap transition-colors ${selectedAccount === acc ? 'bg-[#333] text-white' : 'bg-[#f5f5f5] text-[#666] hover:bg-[#e6e6e6]'}`}
+            >
+              {acc}
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-        <StatBox label="Total vendido" value={`${product.summary.total_sales} un`} />
-        <StatBox label="Faturamento" value={formatBRL(product.summary.total_revenue)} />
-        <StatBox label="Lucro" value={formatBRL(product.summary.total_profit)} />
-        <StatBox label="Margem média" value={`${product.summary.avg_margin}%`} />
-        <StatBox label="Ticket médio" value={formatBRL(product.summary.avg_ticket)} />
-        <StatBox label="Total pedidos" value={String(product.summary.total_orders)} />
+        <StatBox label="Total vendido" value={`${filteredQuantity} un`} />
+        <StatBox label="Faturamento" value={formatBRL(filteredRevenue)} />
+        <StatBox label="Lucro" value={formatBRL(filteredProfit)} />
+        <StatBox label="Margem média" value={`${filteredMargin.toFixed(1)}%`} />
+        <StatBox label="Ticket médio" value={formatBRL(filteredTicket)} />
+        <StatBox label="Total pedidos" value={String(filteredOrders)} />
       </div>
 
       <div className="bg-white border border-[#e6e6e6] rounded-md overflow-hidden">
-        <div className="px-4 py-3 border-b border-[#e6e6e6]">
+        <div className="px-4 py-3 border-b border-[#e6e6e6] flex items-center justify-between">
           <SectionTitle>Últimas vendas</SectionTitle>
+          {selectedAccount !== 'ALL' && <span className="text-[10px] bg-[#f5f5f5] px-2 py-1 rounded text-[#666]">Filtrado: {selectedAccount}</span>}
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-[12px]">
@@ -219,10 +264,13 @@ function VendasTab({ product }: { product: ProductDetail }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#eeeeee]">
-              {product.recent_sales.map(sale => (
+              {filteredSales.map(sale => (
                 <tr key={sale.id} className="hover:bg-[#fafafa] transition-colors">
                   <td className="py-2.5 px-4 font-mono text-[#999]">{sale.order_id}</td>
-                  <td className="py-2.5 px-4 text-[#333]">{sale.marketplace}</td>
+                  <td className="py-2.5 px-4 text-[#333]">
+                    <div className="font-medium text-[11px]">{sale.marketplace}</div>
+                    <div className="text-[9px] text-[#999]">{sale.account_name}</div>
+                  </td>
                   <td className="py-2.5 px-4 text-right text-[#999]">{sale.quantity}</td>
                   <td className="py-2.5 px-4 text-right text-[#999]">{formatBRL(sale.price)}</td>
                   <td className="py-2.5 px-4 text-right font-medium text-[#333]">{formatBRL(sale.revenue)}</td>
@@ -395,8 +443,15 @@ function MarketplacesTab({ product }: { product: ProductDetail }) {
               <div className="flex items-center gap-3">
                 <MarketplaceLogo name={mp.name} className="w-8 h-8" />
                 <div>
-                  <div className="text-[13px] font-medium text-[#333]">{mp.name}</div>
-                  <div className="text-[10px] font-mono text-[#999]">{mp.listing_id}</div>
+                  <div className="text-[13px] font-medium text-[#333] flex items-center gap-1.5">
+                    {mp.name}
+                    {mp.account_name && mp.account_name !== '—' && (
+                      <span className="text-[9px] bg-[#f5f5f5] text-[#666] px-1.5 py-0.5 rounded font-normal">
+                        {mp.account_name}
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-[10px] font-mono text-[#999]">ID: {mp.listing_id}</div>
                 </div>
               </div>
               <MarketplaceStatusBadge status={mp.status} />
@@ -453,6 +508,19 @@ function HistoricoTab({ product }: { product: ProductDetail }) {
 
 export default function ProductDetailClient({ product }: { product: ProductDetail }) {
   const router = useRouter()
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  
+  const handleDelete = async () => {
+    try {
+      const supabase = createClient()
+      const { error } = await supabase.from('products').delete().eq('id', product.id)
+      if (error) throw error
+      router.push('/operacao')
+    } catch (err) {
+      console.error('Error deleting product:', err)
+      alert('Erro ao excluir produto. Verifique sua conexão e tente novamente.')
+    }
+  }
 
   return (
     <div>
@@ -484,9 +552,19 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
                 <button onClick={() => router.push(`/produtos/${product.id}/editar`)} className="px-3 py-1.5 bg-[#3483fa] text-white text-[11px] font-medium rounded-md hover:bg-[#2968c8] transition-colors">
                   Editar produto
                 </button>
-                <button className="p-1.5 rounded-md border border-[#e6e6e6] text-[#999] hover:bg-[#f5f5f5] transition-colors">
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full border border-[#e6e6e6] text-[#666] hover:bg-[#f5f5f5] transition-colors focus:outline-none">
                   <MoreHorizontal className="w-4 h-4" />
-                </button>
+                </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-40">
+                    <DropdownMenuItem 
+                      className="text-[#e74c3c] focus:text-[#e74c3c] focus:bg-[#fff5f5] cursor-pointer"
+                      onClick={() => setShowDeleteModal(true)}
+                    >
+                      Excluir produto
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
           </div>
@@ -518,6 +596,14 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
         <TabsContent value="marketplaces"><MarketplacesTab product={product} /></TabsContent>
         <TabsContent value="historico"><HistoricoTab product={product} /></TabsContent>
       </Tabs>
+
+      <DeleteConfirmationModal 
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        itemName={product.name}
+        description="Esta ação excluirá o produto apenas do sistema TEKNIX. Ele não será excluído dos Marketplaces conectados."
+      />
     </div>
   )
 }

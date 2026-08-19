@@ -6,7 +6,7 @@ export async function GET(request: Request) {
   const code = searchParams.get('code')
   
   if (!code) {
-    return NextResponse.redirect(new URL('/settings/integrations?error=No code provided', request.url))
+    return NextResponse.redirect(new URL('/marketplaces?error=No_code', request.url))
   }
 
   const clientId = process.env.MERCADOLIVRE_CLIENT_ID
@@ -14,7 +14,7 @@ export async function GET(request: Request) {
   const redirectUri = process.env.MERCADOLIVRE_REDIRECT_URI
 
   if (!clientId || !clientSecret || !redirectUri) {
-    return NextResponse.redirect(new URL('/settings/integrations?error=Missing environment variables', request.url))
+    return NextResponse.redirect(new URL('/marketplaces?error=Missing_config', request.url))
   }
 
   try {
@@ -74,7 +74,7 @@ export async function GET(request: Request) {
     }
 
     // Redirect back to integrations page with success
-    return NextResponse.redirect(new URL('/settings/integrations?success=1', request.url))
+    return NextResponse.redirect(new URL('/marketplaces?success=ml', request.url))
 
   } catch (error) {
     console.error('Callback error:', error)

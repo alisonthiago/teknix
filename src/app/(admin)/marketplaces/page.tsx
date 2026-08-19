@@ -38,17 +38,28 @@ export default function MarketplacesPage() {
       .order('name')
     if (mpError) throw mpError
 
+    const { data: connections } = await s
+      .from('marketplace_connections')
+      .select('id, marketplace_id, seller_id, status, account_name, last_sync_at, updated_at')
+
+    const connByMarketplace: Record<string, typeof connections> = {}
+    for (const conn of connections || []) {
+      const mpId = conn.marketplace_id
+      if (!connByMarketplace[mpId]) connByMarketplace[mpId] = []
+      connByMarketplace[mpId].push(conn)
+    }
+
     const results: MarketplaceWithAccounts[] = []
 
     for (const mp of mps || []) {
-      const { data: accounts } = await s
-        .from('marketplace_accounts')
-        .select('id, account_name, seller_id, status, connection_status')
-        .eq('marketplace_id', mp.id)
-        .is('deleted_at', null)
-        .order('created_at')
-
-      const accountsList = accounts || []
+      const connList = connByMarketplace[mp.code.toLowerCase()] || connByMarketplace[mp.id] || []
+      const accountsList = connList.map(c => ({
+        id: c.id,
+        account_name: c.account_name || c.seller_id || 'Conta',
+        seller_id: c.seller_id,
+        status: c.status,
+        connection_status: c.status,
+      }))
       const connected = accountsList.filter(a => a.status === 'CONNECTED' || a.connection_status === 'CONNECTED').length
 
       results.push({

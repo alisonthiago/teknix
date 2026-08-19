@@ -65,8 +65,9 @@ export async function updateProduct(id: string, formData: FormData) {
   if (error) throw new Error(error.message)
 
   revalidatePath('/products')
-  revalidatePath(`/products/${id}/edit`)
-  redirect('/products')
+  revalidatePath('/operacao')
+  revalidatePath(`/produtos/${id}`)
+  redirect(`/produtos/${id}`)
 }
 
 export async function deleteProduct(id: string) {

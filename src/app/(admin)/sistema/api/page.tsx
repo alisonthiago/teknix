@@ -1,39 +1,121 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import ConfigSubLayout, { ConfigSection } from '@/components/ConfigSubLayout'
-import { Plus, Eye, EyeOff, Copy, Trash2 } from 'lucide-react'
-
-const keys = [
-  { id: '1', name: 'Integração ML', key: 'tk_live_abc...xyz', created: '10/08/2026', last_used: '17/08 15:30', status: 'ACTIVE' },
-  { id: '2', name: 'Webhook Tester', key: 'tk_test_def...uvw', created: '15/08/2026', last_used: '16/08 10:00', status: 'ACTIVE' },
-]
+import { Plus, Eye, EyeOff, Copy, Trash2, Loader2 } from 'lucide-react'
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal'
+import { createClient } from '@/utils/supabase/client'
 
 export default function ApiPage() {
   const [showKey, setShowKey] = useState<string | null>(null)
+  const [keys, setKeys] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [keyToDelete, setKeyToDelete] = useState<{ id: string, name: string } | null>(null)
+
+  const supabase = createClient()
+
+  useEffect(() => {
+    fetchKeys()
+  }, [])
+
+  const fetchKeys = async () => {
+    setLoading(true)
+    const { data } = await supabase.from('api_keys').select('*').order('created_at', { ascending: false })
+    if (data) {
+      setKeys(data.map(k => ({
+        id: k.id,
+        name: k.name,
+        key: k.key_hash, // Using key_hash to store the plain key for the mockup
+        created: new Date(k.created_at).toLocaleDateString('pt-BR'),
+        last_used: k.last_used_at ? new Date(k.last_used_at).toLocaleString('pt-BR') : 'Nunca',
+        status: k.is_active ? 'ACTIVE' : 'INACTIVE'
+      })))
+    }
+    setLoading(false)
+  }
+
+  const handleCreateKey = async () => {
+    setSaving(true)
+    const rawKey = `tk_live_${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 10)}`
+    
+    const { data: userData } = await supabase.auth.getUser()
+    const userId = userData.user?.id
+    
+    const { data, error } = await supabase.from('api_keys').insert({
+      user_id: userId,
+      name: `Nova Chave API ${keys.length + 1}`,
+      key_hash: rawKey,
+      key_prefix: rawKey.substring(0, 10),
+      is_active: true
+    }).select().single()
+
+    if (data) {
+      setKeys([{
+        id: data.id,
+        name: data.name,
+        key: data.key_hash,
+        created: new Date(data.created_at).toLocaleDateString('pt-BR'),
+        last_used: 'Nunca',
+        status: 'ACTIVE'
+      }, ...keys])
+    }
+    setSaving(false)
+  }
+
+  const handleDeleteKey = async () => {
+    if (keyToDelete) {
+      await supabase.from('api_keys').delete().eq('id', keyToDelete.id)
+      setKeys(keys.filter(k => k.id !== keyToDelete.id))
+      setShowDeleteModal(false)
+      setKeyToDelete(null)
+    }
+  }
+
+  const confirmDelete = (k: { id: string; name: string }) => {
+    setKeyToDelete(k)
+    setShowDeleteModal(true)
+  }
+
+  const handleCopyKey = (keyString: string) => {
+    navigator.clipboard.writeText(keyString)
+    alert('Chave copiada para a área de transferência!')
+  }
 
   return (
     <ConfigSubLayout title="API e desenvolvedores" description="Gerencie chaves de API e acesso programático">
       <ConfigSection title="Chaves de API">
         <div className="flex justify-between items-center mb-3">
           <p className="text-[11px] text-[#999]">{keys.length} chave(s) ativa(s)</p>
-          <button className="px-3 py-1.5 bg-[#3483fa] text-white text-[11px] font-medium rounded-md hover:bg-[#2968c8] flex items-center gap-1">
-            <Plus className="w-3.5 h-3.5" /> Criar chave
+          <button 
+            onClick={handleCreateKey}
+            disabled={saving || loading}
+            className="px-3 py-1.5 bg-[#3483fa] text-white text-[11px] font-medium rounded-md hover:bg-[#2968c8] flex items-center gap-1 disabled:opacity-50"
+          >
+            {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />} Criar chave
           </button>
         </div>
         <div className="space-y-2">
-          {keys.map(k => (
+          {loading ? (
+            <div className="p-4 text-center text-[#999] text-xs">Carregando chaves...</div>
+          ) : keys.length === 0 ? (
+            <div className="p-4 text-center text-[#999] text-xs bg-[#fafafa] rounded-md">Nenhuma chave de API encontrada.</div>
+          ) : keys.map(k => (
             <div key={k.id} className="flex items-center justify-between p-3 bg-[#fafafa] rounded-md">
               <div>
                 <p className="text-[12px] font-medium text-[#333]">{k.name}</p>
                 <div className="flex items-center gap-2 mt-1">
                   <code className="text-[10px] font-mono text-[#999] bg-[#f0f0f0] px-2 py-0.5 rounded">
-                    {showKey === k.id ? 'tk_live_abc123xyz789' : k.key}
+                    {showKey === k.id ? k.key : `${k.key.substring(0, 10)}...${k.key.substring(k.key.length - 4)}`}
                   </code>
                   <button onClick={() => setShowKey(showKey === k.id ? null : k.id)} className="text-[#ccc] hover:text-[#666]">
                     {showKey === k.id ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
                   </button>
-                  <button className="text-[#ccc] hover:text-[#666]"><Copy className="w-3 h-3" /></button>
+                  <button onClick={() => handleCopyKey(k.key)} className="text-[#ccc] hover:text-[#666]">
+                    <Copy className="w-3 h-3" />
+                  </button>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -41,11 +123,20 @@ export default function ApiPage() {
                   <p className="text-[10px] text-[#999]">Criada: {k.created}</p>
                   <p className="text-[10px] text-[#999]">Último uso: {k.last_used}</p>
                 </div>
-                <button className="text-[#ccc] hover:text-[#e74c3c]"><Trash2 className="w-3.5 h-3.5" /></button>
+                <button onClick={() => confirmDelete(k)} className="text-[#ccc] hover:text-[#e74c3c]">
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
               </div>
             </div>
           ))}
         </div>
+        
+        <DeleteConfirmationModal 
+          isOpen={showDeleteModal}
+          onClose={() => setShowDeleteModal(false)}
+          onConfirm={handleDeleteKey}
+          itemName={keyToDelete?.name}
+        />
       </ConfigSection>
 
       <ConfigSection title="Logs de API">

@@ -20,7 +20,7 @@ export default function AdminChrome({
   userEmail,
 }: AdminChromeProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [collapsed, setCollapsed] = useState(false)
+  const [collapsed, setCollapsed] = useState(true)
 
   return (
     <div className="min-h-screen bg-[#f5f5f5] flex">

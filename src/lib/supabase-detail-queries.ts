@@ -8,14 +8,14 @@ export async function getProductDetail(id: string) {
   const { data: movements } = await s.from('inventory_movements').select('*').eq('product_id', id).order('created_at', { ascending: false }).limit(20)
   const { data: purchaseItems } = await s.from('purchase_items').select('*, purchases(*, suppliers(*))').eq('product_id', id).limit(20)
   const { data: orderItems } = await s.from('order_items').select('*, orders(*, marketplaces(*))').eq('product_id', id).limit(20)
-  const { data: saleItems } = await s.from('sale_items').select('*, sales(*, marketplaces(*))').eq('product_id', id).limit(20)
+  const { data: saleItems } = await s.from('sale_items').select('*, sales(*, marketplaces(*), marketplace_accounts(*))').eq('product_id', id).limit(20)
   const { data: listings } = await s.from('marketplace_listings').select('*, marketplaces(*), marketplace_accounts(*)').eq('product_id', id)
 
   const supplier = product.suppliers as Record<string, unknown> | null
   const totalRevenue = (saleItems || []).reduce((a: number, si: Record<string, unknown>) => {
     const sale = si.sales as Record<string, unknown> | null
     return a + Number(si.unit_price || sale?.total_revenue || 0) * Number(si.quantity || 0)
-  })
+  }, 0)
   const totalCost = (saleItems || []).reduce((a: number, si: Record<string, unknown>) => a + (Number(si.cogs) || 0), 0)
   const totalFees = (saleItems || []).reduce((a: number, si: Record<string, unknown>) => a + Number(si.fees || 0) + Number(si.taxes || 0) + Number(si.other_costs || 0), 0)
 
@@ -62,8 +62,11 @@ export async function getProductDetail(id: string) {
     },
     marketplaces: (listings || []).map((l: Record<string, unknown>) => {
       const mp = l.marketplaces as Record<string, unknown> | null
+      const acc = l.marketplace_accounts as Record<string, unknown> | null
       return {
-        name: (mp?.name as string) || '—', listing_id: (l.external_id as string) || '—',
+        name: (mp?.name as string) || '—', 
+        account_name: (acc?.name as string) || '—',
+        listing_id: (l.external_id as string) || '—',
         price: Number(l.price || 0), stock: Number(l.stock_synced || 0),
         status: (l.status as string) === 'ACTIVE' ? 'ACTIVE' as const : 'INACTIVE' as const,
         last_sync: l.updated_at ? new Date(l.updated_at as string).toISOString() : new Date().toISOString(),
@@ -72,9 +75,11 @@ export async function getProductDetail(id: string) {
     recent_sales: (saleItems || []).slice(0, 10).map((si: Record<string, unknown>) => {
       const sale = si.sales as Record<string, unknown> | null
       const mp = sale?.marketplaces as Record<string, unknown> | null
+      const acc = sale?.marketplace_accounts as Record<string, unknown> | null
       return {
         id: si.id as string, order_id: (sale?.order_id as string) || '—',
         marketplace: (mp?.name as string) || '—',
+        account_name: (acc?.name as string) || '—',
         quantity: Number(si.quantity || 0), price: Number(si.unit_price || 0),
         revenue: Number(si.quantity || 0) * Number(si.unit_price || 0),
         profit: Number(si.profit || 0),
