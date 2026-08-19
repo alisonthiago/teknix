@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Plus, Trash2, ArrowRight } from 'lucide-react'
-import { createPurchase } from '@/lib/supabase-queries'
+import { createPurchase } from '@/app/(admin)/purchases/actions'
 import { useNotification } from '@/contexts/NotificationContext'
 
 interface Supplier {

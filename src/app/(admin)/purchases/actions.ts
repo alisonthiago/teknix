@@ -2,26 +2,35 @@
 
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 import { logActivity } from '@/lib/activity-logger'
 
-export async function createPurchase(formData: FormData) {
+interface PurchaseItemPayload {
+  product_id: string
+  quantity: number
+  unit_cost: number
+  freight: number
+  other_costs: number
+}
+
+interface CreatePurchasePayload {
+  supplier_id: string
+  date: string
+  invoice: string
+  payment_method: string
+  notes: string
+  items: PurchaseItemPayload[]
+}
+
+export async function createPurchase(payload: CreatePurchasePayload): Promise<string> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const supplier_id = formData.get('supplier_id') as string
-  const date = formData.get('date') as string
-  const invoice = formData.get('invoice') as string
-  const payment_method = formData.get('payment_method') as string
-  const notes = formData.get('notes') as string
-  const product_id = formData.get('product_id') as string
-  const quantity = parseInt(formData.get('quantity') as string) || 0
-  const unit_cost = parseFloat(formData.get('unit_cost') as string) || 0
-  const freight = parseFloat(formData.get('freight') as string) || 0
-  const other_costs = parseFloat(formData.get('other_costs') as string) || 0
+  const { supplier_id, date, invoice, payment_method, notes, items } = payload
 
-  const total_cost = (unit_cost * quantity) + freight + other_costs
-  const real_unit_cost = quantity > 0 ? (total_cost / quantity) : unit_cost
+  // Calcula total geral de todos os itens
+  const total_cost = items.reduce((acc, i) => {
+    return acc + (i.unit_cost * i.quantity) + i.freight + i.other_costs
+  }, 0)
 
   const { data: purchase, error: purchaseError } = await supabase
     .from('purchases')
@@ -39,49 +48,58 @@ export async function createPurchase(formData: FormData) {
 
   if (purchaseError) throw new Error(purchaseError.message)
 
-  const { data: product } = await supabase.from('products').select('sku, stock, name').eq('id', product_id).single()
+  // Processa cada item da compra
+  for (const item of items) {
+    const { product_id, quantity, unit_cost, freight, other_costs } = item
+    const item_total = (unit_cost * quantity) + freight + other_costs
+    const real_unit_cost = quantity > 0 ? (item_total / quantity) : unit_cost
 
-  const { error: itemError } = await supabase
-    .from('purchase_items')
-    .insert([{
-      purchase_id: purchase.id,
+    const { data: product } = await supabase
+      .from('products')
+      .select('sku, stock, name')
+      .eq('id', product_id)
+      .single()
+
+    const { error: itemError } = await supabase
+      .from('purchase_items')
+      .insert([{
+        purchase_id: purchase.id,
+        product_id,
+        sku: product?.sku || 'UNKNOWN',
+        quantity,
+        unit_cost,
+        freight,
+        other_costs,
+        total_cost: item_total,
+        real_unit_cost,
+        user_id: user?.id || null
+      }])
+
+    if (itemError) throw new Error(itemError.message)
+
+    const newStock = (product?.stock || 0) + quantity
+    await supabase
+      .from('products')
+      .update({
+        stock: newStock,
+        cost_purchase: unit_cost,
+        freight_purchase: quantity > 0 ? freight / quantity : 0
+      })
+      .eq('id', product_id)
+
+    await supabase.from('inventory_movements').insert([{
       product_id,
-      sku: product?.sku || 'UNKNOWN',
+      type: 'PURCHASE',
       quantity,
-      unit_cost,
-      freight,
-      other_costs,
-      total_cost,
-      real_unit_cost,
+      reference_id: purchase.id,
+      notes: `Compra via NFe: ${invoice}`,
       user_id: user?.id || null
     }])
-
-  if (itemError) throw new Error(itemError.message)
-
-  const newStock = (product?.stock || 0) + quantity
-  const { error: productUpdateError } = await supabase
-    .from('products')
-    .update({
-      stock: newStock,
-      cost_purchase: unit_cost,
-      freight_purchase: freight / quantity
-    })
-    .eq('id', product_id)
-
-  if (productUpdateError) throw new Error(productUpdateError.message)
-
-  await supabase.from('inventory_movements').insert([{
-    product_id,
-    type: 'PURCHASE',
-    quantity: quantity,
-    reference_id: purchase.id,
-    notes: `Compra via NFe: ${invoice}`,
-    user_id: user?.id || null
-  }])
+  }
 
   await logActivity({
     title: 'Nova Compra Adicionada',
-    message: `Uma compra via NFe ${invoice || 'Sem Nota'} no valor de R$ ${total_cost.toFixed(2)} foi adicionada ao estoque.`,
+    message: `Compra via NFe ${invoice || 'Sem Nota'} no valor de R$ ${total_cost.toFixed(2)} adicionada ao estoque.`,
     type: 'success',
     module: 'purchases',
     entity_id: purchase.id,
@@ -91,8 +109,10 @@ export async function createPurchase(formData: FormData) {
   revalidatePath('/purchases')
   revalidatePath('/products')
   revalidatePath('/dashboard')
-  redirect('/purchases')
+
+  return purchase.id
 }
+
 
 export async function deletePurchase(id: string) {
   const supabase = await createClient()
