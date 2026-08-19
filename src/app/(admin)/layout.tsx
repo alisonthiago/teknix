@@ -27,6 +27,7 @@ export default async function AdminLayout({
   const permissionsArray = Array.from(userPerms.permissions)
 
   const roleLabels: Record<string, string> = {
+    MASTER: 'Master',
     ADMIN: 'Administrador',
     GERENTE: 'Gerente',
     VENDEDOR: 'Vendedor',
@@ -35,17 +36,19 @@ export default async function AdminLayout({
     EXPEDICAO: 'Expedição',
     ESTOQUE: 'Estoque',
     CONSULTA: 'Somente Leitura',
+    OPERATOR: 'Operador',
   }
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('photo_url, name')
+    .select('avatar_url, photo_url, name')
     .eq('id', user.id)
     .single()
 
   const userName = profile?.name || (user.user_metadata?.name as string) || user.email?.split('@')[0] || 'Usuário'
   const userRole = roleLabels[userPerms.role] || userPerms.role
   const userEmail = user.email || ''
+  const avatarUrl = profile?.avatar_url || profile?.photo_url || null
 
   return (
     <PermissionProvider role={userPerms.role} permissions={permissionsArray}>
@@ -55,7 +58,7 @@ export default async function AdminLayout({
         userRole={userRole}
         userEmail={userEmail}
         userId={user.id}
-        userAvatarUrl={profile?.photo_url || null}
+        userAvatarUrl={avatarUrl}
       >
         {children}
       </AdminChrome>
