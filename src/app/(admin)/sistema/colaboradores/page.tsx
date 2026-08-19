@@ -46,7 +46,7 @@ export default function ColaboradoresPage() {
   }
 
   const handleDelete = (user: Profile) => {
-    if (user.email === 'alison@tektou.com') {
+    if ((user as any).is_master) {
       alert('O usuário Master não pode ser excluído.')
       return
     }
@@ -114,7 +114,7 @@ export default function ColaboradoresPage() {
               <tbody className="divide-y divide-[#eeeeee]">
                 {users.map(u => (
                   <tr key={u.id} className="hover:bg-[#fafafa]">
-                    <td className="py-2.5 px-3 font-medium text-[#333]">{u.name} {u.email === 'alison@tektou.com' && <span className="ml-2 text-[10px] bg-[#333] text-white px-1.5 py-0.5 rounded">MASTER</span>}</td>
+                    <td className="py-2.5 px-3 font-medium text-[#333]">{u.name} {(u as any).is_master && <span className="ml-2 text-[10px] bg-[#333] text-white px-1.5 py-0.5 rounded">MASTER</span>}</td>
                     <td className="py-2.5 px-3 text-[#999]">{u.email}</td>
                     <td className="py-2.5 px-3"><span className={`inline-flex px-2 py-[2px] rounded text-[10px] font-medium ${ROLE_COLORS[u.role] || 'bg-[#f5f5f5] text-[#666]'}`}>{ROLE_LABELS[u.role] || u.role}</span></td>
                     <td className="py-2.5 px-3 text-[#999]">{u.last_login ? new Date(u.last_login).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—'}</td>
@@ -124,7 +124,7 @@ export default function ColaboradoresPage() {
                         <button onClick={() => handleEdit(u)} className="p-1.5 rounded hover:bg-[#e6e6e6] text-[#666] transition-colors" title="Editar">
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
-                        {u.email !== 'alison@tektou.com' && (
+                        {!(u as any).is_master && (
                           <button onClick={() => handleDelete(u)} className="p-1.5 rounded hover:bg-[#fff5f5] text-[#e74c3c] transition-colors" title="Excluir">
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>

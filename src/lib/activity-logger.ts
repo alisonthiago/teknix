@@ -48,7 +48,7 @@ export async function logActivity(params: LogActivityParams) {
     const { data: masterProfile } = await supabase
       .from('profiles')
       .select('id')
-      .eq('email', 'alison@tektou.com')
+      .eq('is_master', true)
       .single()
 
     if (!masterProfile) return // Se não achar o master, aborta

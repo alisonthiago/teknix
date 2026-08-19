@@ -55,8 +55,8 @@ export async function updateColaborador(id: string, data: { name: string; email:
 
   try {
     // Protect master user
-    const { data: profile } = await supabase.from('profiles').select('email').eq('id', id).single()
-    if (profile?.email === 'alison@tektou.com') {
+    const { data: profile } = await supabase.from('profiles').select('email, is_master').eq('id', id).single()
+    if (profile?.is_master) {
       return { success: false, error: 'O usuário Master não pode ser editado desta forma.' }
     }
 
@@ -106,8 +106,8 @@ export async function deleteColaborador(id: string) {
 
   try {
     // Protect master user
-    const { data: profile } = await supabase.from('profiles').select('email').eq('id', id).single()
-    if (profile?.email === 'alison@tektou.com') {
+    const { data: profile } = await supabase.from('profiles').select('email, is_master').eq('id', id).single()
+    if (profile?.is_master) {
       return { success: false, error: 'O usuário Master não pode ser excluído.' }
     }
 
