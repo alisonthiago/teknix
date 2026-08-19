@@ -160,18 +160,22 @@ export async function createUser(formData: FormData) {
   const email = formData.get('email') as string
   const name = formData.get('name') as string
   const role = formData.get('role') as string
+  const password = formData.get('password') as string
 
-  if (!email || !name || !role) throw new Error('Preencha todos os campos')
+  if (!email || !name || !role) throw new Error('Preencha todos os campos obrigatórios')
+  if (!password) throw new Error('Defina uma senha par ao usuário')
 
-  const { data, error } = await supabase.auth.admin.inviteUserByEmail(email, {
-    data: { name },
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/login`,
+  const { data, error } = await supabase.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+    user_metadata: { name },
   })
 
   if (error) throw new Error(error.message)
 
   if (data.user) {
-    await supabase.from('profiles').update({ role, name }).eq('id', data.user.id)
+    await supabase.from('profiles').update({ role, name, status: 'ACTIVE' }).eq('id', data.user.id)
 
     await supabase.from('audit_logs').insert({
       user_id: currentUser.id,

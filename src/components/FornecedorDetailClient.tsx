@@ -207,7 +207,7 @@ export default function FornecedorDetailClient({ supplier }: { supplier: Supplie
                    <MoreVertical className="w-4 h-4" />
                  </button>
                  <div className="absolute right-0 mt-1 w-40 bg-white border border-[#e6e6e6] rounded-md shadow-lg hidden z-10">
-                   <Link href={`/fornecedores/${supplier.id}/edit`} className="flex items-center gap-2 px-3 py-2 text-[11px] text-[#333] hover:bg-[#f5f5f5]">
+                   <Link href={`/fornecedores/${supplier.id}/editar`} className="flex items-center gap-2 px-3 py-2 text-[11px] text-[#333] hover:bg-[#f5f5f5]">
                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5l9 9m-3 0l-9 9 1.5-9 9-1.5z" /></svg>
                      Editar
                    </Link>

@@ -67,6 +67,7 @@ export default function UsersClient({
   const [isPending, startTransition] = useTransition()
   const [newUserOpen, setNewUserOpen] = useState(false)
   const [createError, setCreateError] = useState('')
+  const [previewPerms, setPreviewPerms] = useState<string[]>(rolePermissions['CONSULTA'] || [])
 
   const loadUsers = async () => {
     setLoading(true)
@@ -173,7 +174,7 @@ export default function UsersClient({
           <DialogTrigger render={<Button className="bg-[#3483fa] hover:bg-[#2968c8]" />}>
             <Plus className="w-4 h-4 mr-2" /> Novo Usuário
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-lg">
             <DialogHeader>
               <DialogTitle>Novo Usuário</DialogTitle>
             </DialogHeader>
@@ -187,13 +188,35 @@ export default function UsersClient({
                 <Input name="email" type="email" required placeholder="email@exemplo.com" />
               </div>
               <div className="space-y-2">
+                <Label>Senha</Label>
+                <Input name="password" type="password" required placeholder="Senha de acesso" minLength={6} />
+              </div>
+              <div className="space-y-2">
                 <Label>Perfil</Label>
-                <select name="role" className="flex h-9 w-full rounded-md border border-[#e6e6e6] bg-transparent px-3 py-2 text-sm" defaultValue="CONSULTA">
+                <select name="role" className="flex h-9 w-full rounded-md border border-[#e6e6e6] bg-transparent px-3 py-2 text-sm" defaultValue="CONSULTA" onChange={(e) => setPreviewPerms(rolePermissions[e.target.value] || [])}>
                   {Object.entries(ROLE_LABELS).filter(([k]) => k !== 'ADMIN').map(([k, v]) => (
                     <option key={k} value={k}>{v}</option>
                   ))}
                 </select>
+                <p className="text-xs text-[#999]">O perfil definirá as permissões padrão.</p>
               </div>
+
+              {previewPerms.length > 0 && (
+                <div className="bg-[#f8f9fa] border border-[#e6e6e6] rounded-md p-3">
+                  <p className="text-[11px] font-medium text-[#666] mb-2">Permissões deste perfil:</p>
+                  <div className="flex flex-wrap gap-1">
+                    {previewPerms.slice(0, 8).map(code => (
+                      <span key={code} className="text-[10px] bg-[#e6f7ff] text-[#2968c8] px-2 py-0.5 rounded">
+                        {code}
+                      </span>
+                    ))}
+                    {previewPerms.length > 8 && (
+                      <span className="text-[10px] text-[#999]">+{previewPerms.length - 8} mais</span>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {createError && <p className="text-sm text-red-600">{createError}</p>}
               <Button type="submit" className="w-full bg-[#333]">Criar Usuário</Button>
             </form>
