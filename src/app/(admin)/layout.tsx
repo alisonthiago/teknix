@@ -41,6 +41,12 @@ export default async function AdminLayout({
   const userRole = roleLabels[userPerms.role] || userPerms.role
   const userEmail = user.email || ''
 
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('avatar_url')
+    .eq('id', user.id)
+    .single()
+
   return (
     <PermissionProvider role={userPerms.role} permissions={permissionsArray}>
       <AdminChrome
@@ -48,6 +54,8 @@ export default async function AdminLayout({
         userName={userName}
         userRole={userRole}
         userEmail={userEmail}
+        userId={user.id}
+        userAvatarUrl={profile?.avatar_url || null}
       >
         {children}
       </AdminChrome>

@@ -10,6 +10,8 @@ interface AdminChromeProps {
   userName: string
   userRole: string
   userEmail: string
+  userId: string
+  userAvatarUrl?: string | null
 }
 
 export default function AdminChrome({
@@ -18,6 +20,8 @@ export default function AdminChrome({
   userName,
   userRole,
   userEmail,
+  userId,
+  userAvatarUrl,
 }: AdminChromeProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [collapsed, setCollapsed] = useState(true)
@@ -36,6 +40,8 @@ export default function AdminChrome({
           userName={userName}
           userRole={userRole}
           userEmail={userEmail}
+          userId={userId}
+          userAvatarUrl={userAvatarUrl}
           onMenuOpen={() => setMobileOpen(true)}
           collapsed={collapsed}
           onToggleCollapse={() => setCollapsed(!collapsed)}

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Camera, User, Lock, Save, Eye, EyeOff, ArrowLeft } from 'lucide-react'
+import { Camera, User, Lock, Save, Eye, EyeOff, ArrowLeft, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
@@ -71,6 +71,48 @@ export default function PerfilPage() {
       // save failed silently
     } finally {
       setSaving(false)
+    }
+  }
+
+  const [changingPassword, setChangingPassword] = useState(false)
+  const [passwordError, setPasswordError] = useState('')
+  const [passwordSuccess, setPasswordSuccess] = useState('')
+
+  async function handleChangePassword() {
+    setPasswordError('')
+    setPasswordSuccess('')
+
+    if (!passwords.new || !passwords.confirm) {
+      setPasswordError('Preencha a nova senha.')
+      return
+    }
+
+    if (passwords.new !== passwords.confirm) {
+      setPasswordError('As senhas não coincidem.')
+      return
+    }
+
+    if (passwords.new.length < 6) {
+      setPasswordError('A senha deve ter pelo menos 6 caracteres.')
+      return
+    }
+
+    setChangingPassword(true)
+    try {
+      const supabase = createClient()
+      const { error } = await supabase.auth.updateUser({
+        password: passwords.new
+      })
+      
+      if (error) throw error
+      
+      setPasswordSuccess('Senha alterada com sucesso!')
+      setPasswords({ current: '', new: '', confirm: '' })
+      setTimeout(() => setPasswordSuccess(''), 3000)
+    } catch (err: any) {
+      setPasswordError(err.message || 'Erro ao alterar a senha.')
+    } finally {
+      setChangingPassword(false)
     }
   }
 
@@ -252,8 +294,15 @@ export default function PerfilPage() {
               />
             </div>
           </div>
-          <button className="px-4 py-2 bg-[#3483fa] text-white text-[12px] font-medium rounded-md hover:bg-[#2968c8] transition-colors flex items-center gap-1.5 mt-2">
-            <Lock className="w-3.5 h-3.5" /> Alterar senha
+          {passwordError && <div className="text-[12px] text-[#e74c3c] mt-1">{passwordError}</div>}
+          {passwordSuccess && <div className="text-[12px] text-[#38a169] mt-1">{passwordSuccess}</div>}
+          <button 
+            onClick={handleChangePassword}
+            disabled={changingPassword}
+            className="px-4 py-2 bg-[#3483fa] text-white text-[12px] font-medium rounded-md hover:bg-[#2968c8] transition-colors flex items-center gap-1.5 mt-2 disabled:opacity-50"
+          >
+            {changingPassword ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Lock className="w-3.5 h-3.5" />}
+            Alterar senha
           </button>
         </div>
       </div>

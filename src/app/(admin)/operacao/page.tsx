@@ -8,6 +8,8 @@ import { PageHeader, PrimaryButton, SecondaryButton, StatCard, SearchInput, Modu
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
 import { createClient } from '@/utils/supabase/client'
 import ProductCreateModal from '@/components/ProductCreateModal'
+import SupplierCreateModal from '@/components/SupplierCreateModal'
+import PurchaseCreateModal from '@/components/PurchaseCreateModal'
 
 function ProductsTab() {
   const router = useRouter()
@@ -20,7 +22,10 @@ function ProductsTab() {
   })
 
   const filtered = (products || []).filter((p: Record<string, unknown>) =>
-    !search || String(p.name).toLowerCase().includes(search.toLowerCase()) || String(p.sku).toLowerCase().includes(search.toLowerCase())
+    !search || 
+    String(p.name).toLowerCase().includes(search.toLowerCase()) || 
+    String(p.sku).toLowerCase().includes(search.toLowerCase()) ||
+    String(p.brand || '').toLowerCase().includes(search.toLowerCase())
   )
 
   function calcCost(p: Record<string, unknown>) {
@@ -83,7 +88,8 @@ function ProductsTab() {
 function SuppliersTab() {
   const router = useRouter()
   const [search, setSearch] = useState('')
-  const { data: suppliers, loading } = useSupabaseQuery(async (s) => {
+  const [showCreate, setShowCreate] = useState(false)
+  const { data: suppliers, loading, refetch } = useSupabaseQuery(async (s) => {
     const { data, error } = await s.from('suppliers').select('*').order('created_at', { ascending: false })
     if (error) throw error
     return data || []
@@ -100,7 +106,7 @@ function SuppliersTab() {
       </div>
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:justify-between mb-4">
         <SearchInput placeholder="Buscar fornecedor..." value={search} onChange={setSearch} />
-        <PrimaryButton><Plus className="w-3.5 h-3.5" /> Novo fornecedor</PrimaryButton>
+        <PrimaryButton onClick={() => setShowCreate(true)}><Plus className="w-3.5 h-3.5" /> Novo fornecedor</PrimaryButton>
       </div>
       {loading ? (
         <div className="bg-white rounded-2xl border border-[#e6e6e6] p-10 text-center text-[#999] text-[13px]">Carregando...</div>
@@ -121,13 +127,15 @@ function SuppliersTab() {
           </tbody>
         </ModuleTable>
       )}
+      {showCreate && <SupplierCreateModal open={showCreate} onClose={() => setShowCreate(false)} onCreated={() => { refetch() }} />}
     </div>
   )
 }
 
 function PurchasesTab() {
-  const { data: purchases, loading } = useSupabaseQuery(async (s) => {
-    const { data, error } = await s.from('purchases').select('*, suppliers(name), purchase_items(*)').order('created_at', { ascending: false })
+  const [showCreate, setShowCreate] = useState(false)
+  const { data: purchases, loading, refetch } = useSupabaseQuery(async (s) => {
+    const { data, error } = await s.from('purchases').select('*, suppliers(name), profiles(name), purchase_items(*)').order('created_at', { ascending: false })
     if (error) throw error
     return data || []
   })
@@ -140,24 +148,24 @@ function PurchasesTab() {
       </div>
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:justify-between mb-4">
         <SearchInput placeholder="Buscar compra..." />
-        <PrimaryButton><Plus className="w-3.5 h-3.5" /> Nova compra</PrimaryButton>
+        <PrimaryButton onClick={() => setShowCreate(true)}><Plus className="w-3.5 h-3.5" /> Nova compra</PrimaryButton>
       </div>
       {loading ? (
         <div className="bg-white rounded-2xl border border-[#e6e6e6] p-10 text-center text-[#999] text-[13px]">Carregando...</div>
       ) : (
         <ModuleTable>
-          <TableHead><Th>Data</Th><Th>Fornecedor</Th><Th>Nota Fiscal</Th><Th className="text-right">Itens</Th><Th className="text-right">Custo Total</Th><Th className="text-center">Status</Th></TableHead>
+          <TableHead><Th>Data</Th><Th>Fornecedor</Th><Th>Comprador</Th><Th>Nota Fiscal</Th><Th className="text-right">Custo Total</Th><Th className="text-center">Status</Th></TableHead>
           <tbody className="divide-y divide-[#eeeeee]">
             {(purchases || []).map((p: Record<string, unknown>) => {
               const supplierName = (p.suppliers as Record<string, unknown>)?.name as string || '—'
-              const items = p.purchase_items as Record<string, unknown>[] | null
+              const buyerName = (p.profiles as Record<string, unknown>)?.name as string || '—'
               return (
                 <tr key={p.id as string} className="hover:bg-[#fafafa] transition-colors">
                   <Td>{new Date(p.date as string).toLocaleDateString('pt-BR')}</Td>
                   <Td className="font-medium text-[#333]">{supplierName}</Td>
+                  <Td className="text-[#666]">{buyerName}</Td>
                   <Td className="font-mono text-[#999]">{(p.invoice as string) || '—'}</Td>
-                  <Td className="text-right text-[#999]">{items?.length || 0}</Td>
-                  <Td className="text-right font-medium text-[#333]">R$ {Number(p.total_cost).toLocaleString('pt-BR')}</Td>
+                  <Td className="text-right font-medium text-[#333]">R$ {Number(p.total_cost).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</Td>
                   <Td className="text-center"><span className="inline-flex px-2 py-[2px] rounded text-[10px] font-medium bg-[#f0fff4] text-[#38a169]">Concluída</span></Td>
                 </tr>
               )
@@ -165,6 +173,7 @@ function PurchasesTab() {
           </tbody>
         </ModuleTable>
       )}
+      {showCreate && <PurchaseCreateModal open={showCreate} onClose={() => setShowCreate(false)} onCreated={() => { refetch() }} />}
     </div>
   )
 }

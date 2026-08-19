@@ -87,16 +87,16 @@ export default function Sidebar({ permissions, mobileOpen, setMobileOpen, collap
     [pathname],
   )
 
-  const navLinks = (
+  const renderNavLinks = (isNavCollapsed: boolean) => (
     <>
       {visibleGroups.map((group, gi) => (
         <div key={gi}>
-          {group.label && !collapsed && (
+          {group.label && !isNavCollapsed && (
             <p className="px-4 pt-5 pb-2 text-xs text-[#999]">
               {group.label}
             </p>
           )}
-          {group.label && collapsed && <div className="pt-4" />}
+          {group.label && isNavCollapsed && <div className="pt-4" />}
           <div>
             {group.items.map(item => {
               const Icon = item.icon
@@ -106,9 +106,9 @@ export default function Sidebar({ permissions, mobileOpen, setMobileOpen, collap
                   key={item.href}
                   href={item.href}
                   onClick={() => setMobileOpen(false)}
-                  title={collapsed ? item.label : undefined}
+                  title={isNavCollapsed ? item.label : undefined}
                   className={`flex items-center transition-colors min-h-[44px] relative ${
-                    collapsed ? 'justify-center px-0 py-3 mx-2 rounded-lg' : 'gap-3 px-4 py-3'
+                    isNavCollapsed ? 'justify-center px-0 py-3 mx-2 rounded-lg' : 'gap-3 px-4 py-3'
                   } ${
                     active
                       ? 'text-[#3483fa] font-semibold bg-[#ecf3fe]/50'
@@ -119,7 +119,7 @@ export default function Sidebar({ permissions, mobileOpen, setMobileOpen, collap
                     className={`w-[22px] h-[22px] shrink-0 ${active ? 'text-[#3483fa]' : 'text-[#666]'}`}
                     strokeWidth={1.5}
                   />
-                  {!collapsed && <span>{item.label}</span>}
+                  {!isNavCollapsed && <span>{item.label}</span>}
                 </Link>
               )
             })}
@@ -164,7 +164,7 @@ export default function Sidebar({ permissions, mobileOpen, setMobileOpen, collap
           </button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto pb-4">{navLinks}</nav>
+        <nav className="flex-1 overflow-y-auto pb-4">{renderNavLinks(collapsed)}</nav>
 
         <div className={`shrink-0 ${collapsed ? 'p-2' : 'p-4'}`}>
           <form action={logout}>
@@ -203,7 +203,7 @@ export default function Sidebar({ permissions, mobileOpen, setMobileOpen, collap
             <X className="w-5 h-5 text-[#333]" strokeWidth={1.75} />
           </button>
         </div>
-        <nav className="flex-1 overflow-y-auto pb-4">{navLinks}</nav>
+        <nav className="flex-1 overflow-y-auto pb-4">{renderNavLinks(false)}</nav>
         <div className="p-4 shrink-0 border-t border-[#eeeeee]">
           <form action={logout}>
             <button

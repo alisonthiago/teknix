@@ -32,7 +32,7 @@ export function TabsList({
   className?: string
 }) {
   return (
-    <div className={`flex gap-6 border-b border-[#eeeeee] ${className}`}>
+    <div className={`flex gap-6 border-b border-[#eeeeee] overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${className}`}>
       {children}
     </div>
   )

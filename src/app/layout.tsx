@@ -13,10 +13,18 @@ export const metadata: Metadata = {
   description: "TEKNIX — Gestão inteligente de vendas e marketplaces",
 };
 
+import { NotificationProvider } from '@/contexts/NotificationContext';
+import { ToastContainer } from '@/components/ui/ToastContainer';
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR" className="h-full antialiased">
-      <body className={`${nunitoSans.className} min-h-full flex flex-col`}>{children}</body>
+      <body className={`${nunitoSans.className} min-h-full flex flex-col`}>
+        <NotificationProvider>
+          {children}
+          <ToastContainer />
+        </NotificationProvider>
+      </body>
     </html>
   );
 }

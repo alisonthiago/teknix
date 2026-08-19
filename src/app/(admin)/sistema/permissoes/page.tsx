@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import ConfigSubLayout, { ConfigSection } from '@/components/ConfigSubLayout'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
+import { Plus } from 'lucide-react'
+import CreateCollaboratorModal from '@/components/CreateCollaboratorModal'
 
 interface Profile {
   id: string
@@ -11,27 +13,30 @@ interface Profile {
 }
 
 interface Permission {
-  id: string
-  permission_key: string
-  action: string
-  label: string
+  code: string
+  module: string
+  description: string
 }
 
 interface RolePermission {
   role: string
-  permission_key: string
-  action: string
+  permission_code: string
 }
 
 const PAGE_LABELS: Record<string, string> = {
-  dashboard: 'Dashboard', produtos: 'Produtos', estoque: 'Estoque', pedidos: 'Pedidos',
-  separacao: 'Separação', expedicao: 'Expedição', vendas: 'Vendas', marketplaces: 'Marketplaces',
-  precificacao: 'Precificação', financeiro: 'Financeiro', relatorios: 'Relatórios', configuracoes: 'Configurações',
+  products: 'Produtos', sales: 'Vendas', orders: 'Pedidos',
+  picking: 'Separação', shipping: 'Expedição', inventory: 'Estoque',
+  finance: 'Financeiro', revenue: 'Faturamento', cost: 'Custos',
+  profit: 'Lucro', margin: 'Margem', reports: 'Relatórios',
+  marketplaces: 'Marketplaces', settings: 'Configurações', users: 'Usuários',
+  permissions: 'Permissões', imports: 'Importação', exports: 'Exportação',
+  notifications: 'Notificações', dashboard: 'Dashboard'
 }
 
 const ACTION_LABELS: Record<string, string> = {
   view: 'Ver', create: 'Criar', edit: 'Editar', delete: 'Excluir',
-  export: 'Exportar', import: 'Importar', manage: 'Gerenciar',
+  manage: 'Gerenciar', execute: 'Executar', adjust: 'Ajustar',
+  export: 'Exportar', connect: 'Conectar', use: 'Usar'
 }
 
 export default function PermissoesPage() {
@@ -54,22 +59,41 @@ export default function PermissoesPage() {
   })
 
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const loading = profilesLoading || permissionsLoading || rpLoading
 
   const selectedProfile = profiles?.find(p => p.id === selectedId) || profiles?.[0]
   const userRole = selectedProfile?.role
 
+  const refreshProfiles = () => {
+    window.location.reload()
+  }
+
   const allowedPerms = new Set(
-    rolePermissions?.filter(rp => rp.role === userRole).map(rp => `${rp.permission_key}:${rp.action}`) || []
+    rolePermissions?.filter(rp => rp.role === userRole).map(rp => rp.permission_code) || []
   )
 
-  const allPermissionKeys = [...new Set(permissions?.map(p => p.permission_key) || [])]
-  const allActions = [...new Set(permissions?.map(p => p.action) || [])]
+  const parsedPermissions = (permissions || []).map(p => {
+    const [key, action] = p.code.split('.')
+    return { code: p.code, key: key || p.code, action: action || 'view', module: p.module }
+  })
+
+  const allPermissionKeys = [...new Set(parsedPermissions.map(p => p.key))]
+  const allActions = [...new Set(parsedPermissions.map(p => p.action))]
 
   return (
     <ConfigSubLayout title="Permissões" description="Controle o que cada colaborador pode ver e fazer">
-      <ConfigSection title="Selecionar colaborador">
+      <ConfigSection title="Colaboradores">
+        <div className="flex justify-between items-center mb-3">
+          <p className="text-[11px] text-[#999]">Selecione um colaborador para ver suas permissões</p>
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="px-3 py-1.5 bg-[#3483fa] text-white text-[11px] font-medium rounded-md hover:bg-[#2968c8] flex items-center gap-1"
+          >
+            <Plus className="w-3.5 h-3.5" /> Adicionar Colaborador
+          </button>
+        </div>
         {loading ? (
           <div className="text-[13px] text-[#999]">Carregando...</div>
         ) : !profiles?.length ? (
@@ -92,6 +116,11 @@ export default function PermissoesPage() {
             {selectedProfile && (
               <p className="text-[11px] text-[#999] mt-2">Função: <strong className="text-[#333]">{selectedProfile.role}</strong></p>
             )}
+            <CreateCollaboratorModal 
+              isOpen={isModalOpen} 
+              onClose={() => setIsModalOpen(false)} 
+              onSuccess={refreshProfiles} 
+            />
           </>
         )}
       </ConfigSection>
@@ -107,23 +136,30 @@ export default function PermissoesPage() {
               <table className="w-full text-[12px]">
                 <thead>
                   <tr className="border-b border-[#f5f5f5]">
-                    <th className="text-left py-2 px-3 text-[10px] font-medium text-[#999] uppercase">Página</th>
-                    {allActions.map(action => (
-                      <th key={action} className="text-center py-2 px-2 text-[10px] font-medium text-[#999] uppercase">{ACTION_LABELS[action] || action}</th>
+                    <th className="text-left py-2 px-3 text-[10px] font-medium text-[#999] uppercase">Módulo / Página</th>
+                    {allActions.map((action, idx) => (
+                      <th key={`th-${action}-${idx}`} className="text-center py-2 px-2 text-[10px] font-medium text-[#999] uppercase">{ACTION_LABELS[action] || action}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#f5f5f5]">
-                  {allPermissionKeys.map(key => (
-                    <tr key={key} className="hover:bg-[#fafafa]">
+                  {allPermissionKeys.map((key, rowIdx) => (
+                    <tr key={`tr-${key}-${rowIdx}`} className="hover:bg-[#fafafa]">
                       <td className="py-2 px-3 font-medium text-[#333]">{PAGE_LABELS[key] || key}</td>
-                      {allActions.map(action => {
-                        const has = allowedPerms.has(`${key}:${action}`)
+                      {allActions.map((action, colIdx) => {
+                        const code = `${key}.${action}`
+                        const hasPermissionObject = parsedPermissions.some(p => p.code === code)
+                        const hasPermissionGranted = allowedPerms.has(code)
+                        
                         return (
-                          <td key={action} className="text-center py-2 px-2">
-                            <span className={`inline-flex w-5 h-5 rounded items-center justify-center text-[10px] cursor-pointer transition-colors ${has ? 'bg-[#f0fff4] text-[#38a169]' : 'bg-[#f5f5f5] text-[#ccc]'}`}>
-                              {has ? '✓' : '—'}
-                            </span>
+                          <td key={`td-${action}-${colIdx}`} className="text-center py-2 px-2">
+                            {hasPermissionObject ? (
+                              <span className={`inline-flex w-5 h-5 rounded items-center justify-center text-[10px] cursor-pointer transition-colors ${hasPermissionGranted ? 'bg-[#f0fff4] text-[#38a169]' : 'bg-[#f5f5f5] text-[#ccc]'}`}>
+                                {hasPermissionGranted ? '✓' : '—'}
+                              </span>
+                            ) : (
+                              <span className="text-[#eee]">—</span>
+                            )}
                           </td>
                         )
                       })}

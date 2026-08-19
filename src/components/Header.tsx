@@ -2,8 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { Bell, ChevronDown, LogOut, User, Settings, Calculator, Menu, X } from 'lucide-react'
+import { usePathname, useRouter } from 'next/navigation'
+import { Bell, ChevronDown, LogOut, User, Settings, Calculator, Menu, X, Camera } from 'lucide-react'
 import Image from 'next/image'
 import { logout } from '@/app/login/actions'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
@@ -44,15 +44,21 @@ interface HeaderProps {
   userName: string
   userRole: string
   userEmail: string
+  userId: string
+  userAvatarUrl?: string | null
   onMenuOpen: () => void
   collapsed?: boolean
   onToggleCollapse?: () => void
 }
 
+import { useNotification } from '@/contexts/NotificationContext'
+
 function HeaderActions({
   userName,
   userRole,
   userEmail,
+  userId,
+  userAvatarUrl,
   userOpen,
   setUserOpen,
   notifOpen,
@@ -62,6 +68,8 @@ function HeaderActions({
   userName: string
   userRole: string
   userEmail: string
+  userId: string
+  userAvatarUrl?: string | null
   userOpen: boolean
   setUserOpen: (v: boolean) => void
   notifOpen: boolean
@@ -70,13 +78,28 @@ function HeaderActions({
 }) {
   const userRef = useRef<HTMLDivElement>(null)
   const notifRef = useRef<HTMLDivElement>(null)
-  const { data: notifData } = useSupabaseQuery(async (s) => {
-    const { data, error } = await s.from('notifications').select('*').order('created_at', { ascending: false }).limit(10)
-    if (error) throw error
-    return data || []
-  })
-  const notifications = (notifData || []) as Record<string, unknown>[]
-  const unreadCount = notifications.filter(n => !n.is_read).length
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const { notifications, unreadCount, markAllAsRead, markAsRead } = useNotification()
+  const pathname = usePathname()
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !userId) return
+
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('userId', userId)
+
+    try {
+      const res = await fetch('/api/upload/avatar', { method: 'POST', body: formData })
+      const result = await res.json()
+      if (result.success) {
+        window.location.reload()
+      }
+    } catch (err) {
+      console.error('Avatar upload failed:', err)
+    }
+  }
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -86,6 +109,11 @@ function HeaderActions({
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
   }, [setUserOpen, setNotifOpen])
+
+  useEffect(() => {
+    setUserOpen(false)
+    setNotifOpen(false)
+  }, [pathname, setUserOpen, setNotifOpen])
 
   return (
     <>
@@ -103,17 +131,30 @@ function HeaderActions({
           <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl border border-[#e6e6e6] shadow-[0_8px_24px_rgba(0,0,0,0.1)] overflow-hidden z-50">
             <div className="p-4 border-b border-[#eeeeee] flex items-center justify-between">
               <h3 className="text-sm font-semibold text-[#333]">Notificações</h3>
-              <span className="text-xs text-[#3483fa] font-medium cursor-pointer">Marcar como lidas</span>
+              {unreadCount > 0 && (
+                <button onClick={markAllAsRead} className="text-[11px] text-[#3483fa] hover:underline">Marcar lidas</button>
+              )}
             </div>
-            <div className="max-h-72 overflow-y-auto divide-y divide-[#eeeeee]">
-              {notifications.slice(0, 5).map(n => (
-                <div key={n.id as string} className={`p-4 hover:bg-[#fafafa] cursor-pointer ${!n.is_read ? 'bg-[#ecf3fe]/50' : ''}`}>
-                  <p className="text-sm font-medium text-[#333]">{n.title as string}</p>
-                  <p className="text-xs text-[#999] mt-0.5 truncate">{n.message as string}</p>
-                </div>
-              ))}
-              {notifications.length === 0 && (
-                <div className="p-4 text-center text-[11px] text-[#999]">Nenhuma notificação</div>
+            <div className="max-h-[300px] overflow-y-auto p-2">
+              {notifications.length === 0 ? (
+                <div className="p-4 text-center text-[12px] text-[#999]">Nenhuma notificação</div>
+              ) : (
+                notifications.map(n => (
+                  <div
+                    key={n.id}
+                    onClick={() => {
+                      if (!n.is_read) markAsRead(n.id)
+                    }}
+                    className={`p-3 rounded-xl mb-1 cursor-pointer transition-colors ${n.is_read ? 'hover:bg-[#f5f5f5]' : 'bg-[#f0f7ff] hover:bg-[#e6f0ff]'}`}
+                  >
+                    <div className="flex gap-3">
+                      <div>
+                        <p className={`text-[13px] ${n.is_read ? 'text-[#666]' : 'text-[#333] font-medium'}`}>{n.title}</p>
+                        <p className="text-[11px] text-[#666] mt-0.5">{n.message}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))
               )}
             </div>
           </div>
@@ -133,15 +174,41 @@ function HeaderActions({
           onClick={() => setUserOpen(!userOpen)}
           className="flex items-center gap-1.5 pl-1 pr-2 py-1 rounded-full hover:bg-[#EEFFB3]/60 transition-colors"
         >
-          <div className="h-9 w-9 rounded-full overflow-hidden bg-[#f5f5f5]">
-            <Image
-              src={`https://api.dicebear.com/7.x/notionists/svg?seed=${userEmail || 'user'}`}
-              alt="Avatar"
-              width={36}
-              height={36}
-              className="h-full w-full object-cover"
-            />
-          </div>
+       <div className="relative group">
+             <div className="h-9 w-9 rounded-full overflow-hidden bg-[#f5f5f5]">
+               {userAvatarUrl ? (
+                 <Image
+                   src={userAvatarUrl}
+                   alt={userName}
+                   width={36}
+                   height={36}
+                   className="h-full w-full object-cover"
+                 />
+               ) : (
+                 <Image
+                   src={`https://api.dicebear.com/7.x/notionists/svg?seed=${userEmail || 'user'}`}
+                   alt="Avatar"
+                   width={36}
+                   height={36}
+                   className="h-full w-full object-cover"
+                 />
+               )}
+             </div>
+             <input
+               type="file"
+               ref={fileInputRef}
+               accept="image/*"
+               className="hidden"
+               onChange={handleAvatarUpload}
+             />
+             <button
+               onClick={() => fileInputRef.current?.click()}
+               className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+               title="Alterar foto"
+             >
+               <Camera className="w-5 h-5 text-white" />
+             </button>
+           </div>
           <span className="hidden sm:block text-sm font-medium text-[#333] max-w-[90px] truncate">{userName}</span>
           <ChevronDown className="w-4 h-4 text-[#666] hidden sm:block" strokeWidth={2} />
         </button>
@@ -152,10 +219,10 @@ function HeaderActions({
               <p className="text-xs text-[#999] mt-0.5">{userRole}</p>
             </div>
             <div className="p-1.5">
-              <Link href="/sistema/perfil" onClick={() => setUserOpen(false)} className="flex items-center gap-2.5 px-3 py-2.5 text-sm text-[#666] hover:bg-[#f5f5f5] rounded-xl">
+              <Link href="/sistema/perfil" className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-[#666] hover:bg-[#f5f5f5] rounded-xl">
                 <User className="w-4 h-4" strokeWidth={1.5} /> Meu Perfil
               </Link>
-              <Link href="/sistema" onClick={() => setUserOpen(false)} className="flex items-center gap-2.5 px-3 py-2.5 text-sm text-[#666] hover:bg-[#f5f5f5] rounded-xl">
+              <Link href="/sistema" className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-[#666] hover:bg-[#f5f5f5] rounded-xl">
                 <Settings className="w-4 h-4" strokeWidth={1.5} /> Configurações
               </Link>
             </div>
@@ -320,7 +387,7 @@ function BasicCalculatorPopup({ onClose }: { onClose: () => void }) {
   )
 }
 
-export default function Header({ userName, userRole, userEmail, onMenuOpen }: HeaderProps) {
+export default function Header({ userName, userRole, userEmail, userId, userAvatarUrl, onMenuOpen, collapsed, onToggleCollapse }: HeaderProps) {
   const pathname = usePathname()
   const pageTitle = getPageTitle(pathname)
   const [userOpen, setUserOpen] = useState(false)
@@ -348,6 +415,8 @@ export default function Header({ userName, userRole, userEmail, onMenuOpen }: He
               userName={userName}
               userRole={userRole}
               userEmail={userEmail}
+              userId={userId}
+              userAvatarUrl={userAvatarUrl}
               userOpen={userOpen}
               setUserOpen={setUserOpen}
               notifOpen={notifOpen}
@@ -390,6 +459,8 @@ export default function Header({ userName, userRole, userEmail, onMenuOpen }: He
             userName={userName}
             userRole={userRole}
             userEmail={userEmail}
+            userId={userId}
+            userAvatarUrl={userAvatarUrl}
             userOpen={userOpen}
             setUserOpen={setUserOpen}
             notifOpen={notifOpen}
