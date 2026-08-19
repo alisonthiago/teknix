@@ -96,9 +96,11 @@ export default function PurchaseCreateModal({ open, onClose, onCreated }: Purcha
     setSaving(true)
 
     try {
+      const selectedBuyer = profiles.find(p => p.id === form.buyer_id)
       const { error } = await supabase.from('purchases').insert({
         supplier_id: form.supplier_id,
         buyer_id: form.buyer_id,
+        buyer_name: selectedBuyer?.name || null,
         date: form.date,
         invoice: form.invoice.trim() || null,
         total_cost: parseFloat(form.total_cost) || 0,

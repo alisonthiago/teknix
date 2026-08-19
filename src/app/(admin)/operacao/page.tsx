@@ -356,7 +356,7 @@ function PurchasesTab() {
   const [showCreate, setShowCreate] = useState(false)
   const [selectedItems, setSelectedItems] = useState<string[]>([])
   const { data: purchases, loading, refetch } = useSupabaseQuery(async (s) => {
-    const { data, error } = await s.from('purchases').select('*, suppliers(name), profiles(name), purchase_items(*)').order('created_at', { ascending: false }).limit(100)
+    const { data, error } = await s.from('purchases').select('*, suppliers(name), purchase_items(*)').order('created_at', { ascending: false }).limit(100)
     if (error) throw error
     return data || []
   })
@@ -478,7 +478,7 @@ function PurchasesTab() {
           <tbody className="divide-y divide-[#eeeeee]">
             {filtered.map((p: Record<string, unknown>) => {
               const supplierName = (p.suppliers as Record<string, unknown>)?.name as string || '—'
-              const buyerName = (p.profiles as Record<string, unknown>)?.name as string || '—'
+              const buyerName = (p.buyer_name as string) || ((p as any).profiles?.name as string) || 'Admin'
               return (
                 <tr key={p.id as string} className="hover:bg-[#fafafa] transition-colors">
                   <Td>
