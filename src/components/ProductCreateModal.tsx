@@ -183,30 +183,29 @@ export default function ProductCreateModal({ open, onClose, onCreated }: Product
 
     try {
       const sku = form.sku.trim() || generateSKU(form.brand)
+      const stockQty = parseInt(form.initial_stock) || 0
 
       const { data: product, error: prodError } = await supabase
         .from('products')
         .insert({
           name: form.name.trim(),
           sku,
-          manufacturer_code: form.manufacturer_code.trim() || null,
           ean: form.ean.trim() || null,
           brand: form.brand.trim() || null,
           model: form.model.trim() || null,
-          segment: form.segment || null,
           category: form.category.trim() || null,
-          description: form.description.trim() || null,
+          notes: form.description.trim() || null,
           supplier_id: form.supplier_id || null,
-          supplier_code: form.supplier_code.trim() || null,
           cost_purchase: parseFloat(form.cost_purchase) || 0,
-          cost_freight: parseFloat(form.cost_freight) || 0,
-          cost_packaging: parseFloat(form.cost_packaging) || 0,
-          cost_other: parseFloat(form.cost_other) || 0,
-          cost_real: totalCost,
+          freight_purchase: parseFloat(form.cost_freight) || 0,
+          packaging_cost: parseFloat(form.cost_packaging) || 0,
+          other_costs: parseFloat(form.cost_other) || 0,
           weight: parseFloat(form.weight) || null,
           height: parseFloat(form.height) || null,
           width: parseFloat(form.width) || null,
           length: parseFloat(form.length) || null,
+          min_stock: parseInt(form.min_stock) || 0,
+          stock: stockQty,
           status: 'ACTIVE',
         })
         .select('id')
@@ -247,13 +246,11 @@ export default function ProductCreateModal({ open, onClose, onCreated }: Product
         }
       }
 
-      const stockQty = parseInt(form.initial_stock) || 0
       if (stockQty > 0) {
-        await supabase.from('inventory_movements').insert({
+        await supabase.from('stock_movements').insert({
           product_id: productId,
-          type: 'INITIAL_STOCK',
+          type: 'ADJUSTMENT',
           quantity: stockQty,
-          balance: stockQty,
           notes: 'Estoque inicial do cadastro',
         })
       }

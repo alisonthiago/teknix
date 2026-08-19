@@ -3,9 +3,9 @@
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Bell, ChevronDown, LogOut, User, Settings, Calculator, Menu, X, Camera } from 'lucide-react'
+import { Bell, ChevronDown, LogOut, User, Settings, Calculator, Menu, X } from 'lucide-react'
 import Image from 'next/image'
-import { logout } from '@/app/login/actions'
+import { createClient } from '@/utils/supabase/client'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
 import MarginCalculator from '@/components/MarginCalculator'
 
@@ -78,28 +78,8 @@ function HeaderActions({
 }) {
   const userRef = useRef<HTMLDivElement>(null)
   const notifRef = useRef<HTMLDivElement>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
   const { notifications, unreadCount, markAllAsRead, markAsRead } = useNotification()
   const pathname = usePathname()
-
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file || !userId) return
-
-    const formData = new FormData()
-    formData.append('file', file)
-    formData.append('userId', userId)
-
-    try {
-      const res = await fetch('/api/upload/avatar', { method: 'POST', body: formData })
-      const result = await res.json()
-      if (result.success) {
-        window.location.reload()
-      }
-    } catch (err) {
-      console.error('Avatar upload failed:', err)
-    }
-  }
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -174,7 +154,7 @@ function HeaderActions({
           onClick={() => setUserOpen(!userOpen)}
           className="flex items-center gap-1.5 pl-1 pr-2 py-1 rounded-full hover:bg-[#EEFFB3]/60 transition-colors"
         >
-          <div className="relative group">
+          <div className="relative">
             <div className="h-9 w-9 rounded-full overflow-hidden bg-[#f5f5f5]">
               {userAvatarUrl ? (
                 <Image
@@ -194,24 +174,6 @@ function HeaderActions({
                 />
               )}
             </div>
-            <input
-              type="file"
-              ref={fileInputRef}
-              accept="image/*"
-              className="hidden"
-              onChange={handleAvatarUpload}
-            />
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                e.preventDefault()
-                fileInputRef.current?.click()
-              }}
-              className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
-              title="Alterar foto"
-            >
-              <Camera className="w-5 h-5 text-white" />
-            </button>
           </div>
           <span className="hidden sm:block text-sm font-medium text-[#333] max-w-[90px] truncate">{userName}</span>
           <ChevronDown className="w-4 h-4 text-[#666] hidden sm:block" strokeWidth={2} />
@@ -231,11 +193,16 @@ function HeaderActions({
               </Link>
             </div>
             <div className="p-1.5 border-t border-[#eeeeee]">
-              <form action={logout}>
-                <button type="submit" className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-[#f23d4f] hover:bg-[#fff5f5] rounded-xl">
-                  <LogOut className="w-4 h-4" strokeWidth={1.5} /> Sair
-                </button>
-              </form>
+              <button 
+                onClick={async () => {
+                  const supabase = createClient()
+                  await supabase.auth.signOut()
+                  window.location.href = '/login'
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-[#f23d4f] hover:bg-[#fff5f5] rounded-xl"
+              >
+                <LogOut className="w-4 h-4" strokeWidth={1.5} /> Sair
+              </button>
             </div>
           </div>
         )}

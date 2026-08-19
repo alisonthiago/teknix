@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Camera, User, Lock, Save, Eye, EyeOff, ArrowLeft, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -50,6 +50,34 @@ export default function PerfilPage() {
   const [saved, setSaved] = useState(false)
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState({ name: '', nickname: '', email: '' })
+  const [uploadingPhoto, setUploadingPhoto] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file || !profile) return
+
+    setUploadingPhoto(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('userId', profile.id)
+
+      const res = await fetch('/api/upload/avatar', {
+        method: 'POST',
+        body: formData,
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      
+      window.location.reload()
+    } catch (err: any) {
+      console.error('Failed to upload photo:', err)
+      alert(`Erro ao enviar foto: ${err.message || err}`)
+    } finally {
+      setUploadingPhoto(false)
+    }
+  }
 
   function startEditing() {
     if (profile) {
@@ -65,8 +93,7 @@ export default function PerfilPage() {
       const { error } = await supabase.from('profiles').update({ name: form.name, nickname: form.nickname, email: form.email }).eq('id', AUTH_USER_ID)
       if (error) throw error
       setEditing(false)
-      setSaved(true)
-      setTimeout(() => setSaved(false), 2000)
+      window.location.reload()
     } catch {
       // save failed silently
     } finally {
@@ -165,14 +192,21 @@ export default function PerfilPage() {
       <div className="bg-white border border-[#e6e6e6] rounded-md p-6 mb-4">
         <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
           <div className="relative group">
-            <div className="w-20 h-20 rounded-full bg-[#f5f5f5] border-2 border-[#e6e6e6] flex items-center justify-center overflow-hidden">
-              {profile.photo_url ? (
+            <div className="w-20 h-20 rounded-full bg-[#f5f5f5] border-2 border-[#e6e6e6] flex items-center justify-center overflow-hidden relative">
+              {uploadingPhoto ? (
+                <Loader2 className="w-6 h-6 text-[#999] animate-spin" />
+              ) : profile.photo_url ? (
                 <Image src={profile.photo_url} alt={profile.name} width={80} height={80} className="w-full h-full object-cover" unoptimized />
               ) : (
                 <User className="w-8 h-8 text-[#ccc]" />
               )}
             </div>
-            <button className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+            <input type="file" accept="image/*" ref={fileInputRef} onChange={handlePhotoUpload} className="hidden" />
+            <button 
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadingPhoto}
+              className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+            >
               <Camera className="w-5 h-5 text-white" />
             </button>
           </div>

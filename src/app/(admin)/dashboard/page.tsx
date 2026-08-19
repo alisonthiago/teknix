@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { CheckCircle2, ShoppingCart, Eye, EyeOff, Filter } from 'lucide-react'
+import Image from 'next/image'
+import { CheckCircle2, ShoppingCart, Eye, EyeOff, Filter, User } from 'lucide-react'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
 
@@ -45,6 +46,13 @@ export default function DashboardPage() {
   const filteredAccounts = (filterData?.accounts || []).filter(
     a => selectedMarketplace === 'ALL' || a.marketplace_id === selectedMarketplace
   )
+
+  const { data: userProfile } = useSupabaseQuery(async (s) => {
+    const { data: { user } } = await s.auth.getUser()
+    if (!user) return null
+    const { data } = await s.from('profiles').select('name, photo_url').eq('id', user.id).single()
+    return { name: data?.name || user.email?.split('@')[0], photo_url: data?.photo_url }
+  }, [])
 
   const { data: stats } = useSupabaseQuery(async (s) => {
     let salesQuery = s.from('sales').select('total_revenue, status, marketplace_id, marketplace_account_id')
@@ -119,6 +127,23 @@ export default function DashboardPage() {
 
   return (
     <div className="mp-stack">
+      {/* Welcome Banner */}
+      {userProfile && (
+        <div className="flex items-center gap-4 mb-2">
+          <div className="w-14 h-14 rounded-full overflow-hidden bg-[#f5f5f5] border-2 border-[#e6e6e6] flex items-center justify-center flex-shrink-0">
+            {userProfile.photo_url ? (
+              <Image src={userProfile.photo_url} alt={userProfile.name} width={56} height={56} className="w-full h-full object-cover" unoptimized />
+            ) : (
+              <User className="w-6 h-6 text-[#ccc]" />
+            )}
+          </div>
+          <div>
+            <h1 className="text-[28px] font-bold text-[#333]">Olá, {userProfile.name} 👋</h1>
+            <p className="text-[13px] text-[#666] font-medium">Bem-vindo de volta ao sistema!</p>
+          </div>
+        </div>
+      )}
+
       {/* Global Filter Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 bg-white border border-[#e6e6e6] rounded-lg px-4 py-3">
         <div className="flex items-center gap-2 text-xs text-[#999]">

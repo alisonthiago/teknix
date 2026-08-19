@@ -37,15 +37,15 @@ export default async function AdminLayout({
     CONSULTA: 'Somente Leitura',
   }
 
-  const userName = (user.user_metadata?.name as string) || user.email?.split('@')[0] || 'Usuário'
-  const userRole = roleLabels[userPerms.role] || userPerms.role
-  const userEmail = user.email || ''
-
   const { data: profile } = await supabase
     .from('profiles')
-    .select('avatar_url')
+    .select('photo_url, name')
     .eq('id', user.id)
     .single()
+
+  const userName = profile?.name || (user.user_metadata?.name as string) || user.email?.split('@')[0] || 'Usuário'
+  const userRole = roleLabels[userPerms.role] || userPerms.role
+  const userEmail = user.email || ''
 
   return (
     <PermissionProvider role={userPerms.role} permissions={permissionsArray}>
@@ -55,7 +55,7 @@ export default async function AdminLayout({
         userRole={userRole}
         userEmail={userEmail}
         userId={user.id}
-        userAvatarUrl={profile?.avatar_url || null}
+        userAvatarUrl={profile?.photo_url || null}
       >
         {children}
       </AdminChrome>

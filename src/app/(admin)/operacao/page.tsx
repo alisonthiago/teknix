@@ -2,21 +2,23 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Download, Upload, Package, Truck, ShoppingCart, Warehouse, Eye, Edit, Trash2, ClipboardCheck, CheckCircle2, AlertTriangle } from 'lucide-react'
+import { Plus, Download, Upload, Package, Truck, ShoppingCart, Warehouse, Eye, Edit, Trash2, ClipboardCheck, CheckCircle2, AlertTriangle, Building2 } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { PageHeader, PrimaryButton, SecondaryButton, StatCard, SearchInput, ModuleTable, TableHead, Th, Td } from '@/components/ui/module'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
 import { createClient } from '@/utils/supabase/client'
-import ProductCreateModal from '@/components/ProductCreateModal'
-import SupplierCreateModal from '@/components/SupplierCreateModal'
-import PurchaseCreateModal from '@/components/PurchaseCreateModal'
+import dynamic from 'next/dynamic'
+
+const ProductCreateModal = dynamic(() => import('@/components/ProductCreateModal'), { ssr: false })
+const SupplierCreateModal = dynamic(() => import('@/components/SupplierCreateModal'), { ssr: false })
+const PurchaseCreateModal = dynamic(() => import('@/components/PurchaseCreateModal'), { ssr: false })
 
 function ProductsTab() {
   const router = useRouter()
   const [search, setSearch] = useState('')
   const [showCreate, setShowCreate] = useState(false)
   const { data: products, loading, refetch } = useSupabaseQuery(async (s) => {
-    const { data, error } = await s.from('products').select('*, suppliers(name)').order('created_at', { ascending: false })
+    const { data, error } = await s.from('products').select('*, suppliers(name), product_images(url)').order('created_at', { ascending: false }).limit(100)
     if (error) throw error
     return data || []
   })
@@ -64,7 +66,21 @@ function ProductsTab() {
               return (
                 <tr key={p.id as string} onClick={() => router.push(`/produtos/${p.id}`)} className="hover:bg-[#fafafa] transition-colors cursor-pointer">
                   <Td className="font-mono text-[#999]">{p.sku as string}</Td>
-                  <Td><span className="font-medium text-[#333]">{p.name as string}</span> <span className="text-[#ccc] ml-1">{p.brand as string}</span></Td>
+                  <Td>
+                    <div className="flex items-center gap-4">
+                      <div className="w-11 h-11 rounded-full bg-[#f5f5f5] border-2 border-[#e6e6e6] overflow-hidden flex items-center justify-center flex-shrink-0">
+                        {(p.product_images as any)?.[0]?.url ? (
+                          <img src={(p.product_images as any)[0].url} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <Package className="w-5 h-5 text-[#ccc]" />
+                        )}
+                      </div>
+                      <div className="flex flex-col justify-center">
+                        <p className="font-semibold text-[#1f2328] text-[14px] leading-tight mb-0.5">{p.name as string}</p>
+                        <p className="text-[13px] text-[#656d76] leading-tight">{p.brand as string || 'Sem marca'}</p>
+                      </div>
+                    </div>
+                  </Td>
                   <Td className="text-[#999]">{supplierName}</Td>
                   <Td className="text-right">R$ {cost.toFixed(2)}</Td>
                   <Td className="text-right"><span className={`font-medium ${stock === 0 ? 'text-[#e74c3c]' : stock <= minStock ? 'text-[#e67e22]' : 'text-[#333]'}`}>{stock}</span></Td>
@@ -90,7 +106,7 @@ function SuppliersTab() {
   const [search, setSearch] = useState('')
   const [showCreate, setShowCreate] = useState(false)
   const { data: suppliers, loading, refetch } = useSupabaseQuery(async (s) => {
-    const { data, error } = await s.from('suppliers').select('*').order('created_at', { ascending: false })
+    const { data, error } = await s.from('suppliers').select('*').order('created_at', { ascending: false }).limit(100)
     if (error) throw error
     return data || []
   })
@@ -112,12 +128,21 @@ function SuppliersTab() {
         <div className="bg-white rounded-2xl border border-[#e6e6e6] p-10 text-center text-[#999] text-[13px]">Carregando...</div>
       ) : (
         <ModuleTable>
-          <TableHead><Th>Nome</Th><Th>CNPJ</Th><Th>Contato</Th><Th>Cidade</Th><Th className="text-right">Prazo</Th><Th className="text-right">Ações</Th></TableHead>
+          <TableHead><Th>Fornecedor</Th><Th>Contato</Th><Th>Cidade</Th><Th className="text-right">Prazo</Th><Th className="text-right">Ações</Th></TableHead>
           <tbody className="divide-y divide-[#eeeeee]">
             {filtered.map((s: Record<string, unknown>) => (
               <tr key={s.id as string} onClick={() => router.push(`/fornecedores/${s.id}`)} className="hover:bg-[#fafafa] transition-colors cursor-pointer">
-                <Td className="font-medium text-[#333]">{s.name as string}</Td>
-                <Td className="font-mono text-[#999]">{s.cnpj as string || '—'}</Td>
+                <Td>
+                  <div className="flex items-center gap-4">
+                    <div className="w-11 h-11 rounded-full bg-[#f5f5f5] border-2 border-[#e6e6e6] overflow-hidden flex items-center justify-center flex-shrink-0">
+                      <Building2 className="w-5 h-5 text-[#ccc]" />
+                    </div>
+                    <div className="flex flex-col justify-center">
+                      <p className="font-semibold text-[#1f2328] text-[14px] leading-tight mb-0.5">{s.name as string}</p>
+                      <p className="text-[13px] text-[#656d76] leading-tight">{s.cnpj as string || s.email as string || 'Sem CNPJ'}</p>
+                    </div>
+                  </div>
+                </Td>
                 <Td>{s.contact as string || '—'}</Td>
                 <Td className="text-[#999]">{[s.city, s.state].filter(Boolean).join('/') || '—'}</Td>
                 <Td className="text-right text-[#999]">{s.delivery_time ? `${s.delivery_time} dias` : '—'}</Td>
@@ -135,7 +160,7 @@ function SuppliersTab() {
 function PurchasesTab() {
   const [showCreate, setShowCreate] = useState(false)
   const { data: purchases, loading, refetch } = useSupabaseQuery(async (s) => {
-    const { data, error } = await s.from('purchases').select('*, suppliers(name), profiles(name), purchase_items(*)').order('created_at', { ascending: false })
+    const { data, error } = await s.from('purchases').select('*, suppliers(name), profiles(name), purchase_items(*)').order('created_at', { ascending: false }).limit(100)
     if (error) throw error
     return data || []
   })
@@ -154,7 +179,7 @@ function PurchasesTab() {
         <div className="bg-white rounded-2xl border border-[#e6e6e6] p-10 text-center text-[#999] text-[13px]">Carregando...</div>
       ) : (
         <ModuleTable>
-          <TableHead><Th>Data</Th><Th>Fornecedor</Th><Th>Comprador</Th><Th>Nota Fiscal</Th><Th className="text-right">Custo Total</Th><Th className="text-center">Status</Th></TableHead>
+          <TableHead><Th>Data</Th><Th>Fornecedor</Th><Th>Comprador</Th><Th className="text-right">Custo Total</Th><Th className="text-center">Status</Th></TableHead>
           <tbody className="divide-y divide-[#eeeeee]">
             {(purchases || []).map((p: Record<string, unknown>) => {
               const supplierName = (p.suppliers as Record<string, unknown>)?.name as string || '—'
@@ -162,9 +187,18 @@ function PurchasesTab() {
               return (
                 <tr key={p.id as string} className="hover:bg-[#fafafa] transition-colors">
                   <Td>{new Date(p.date as string).toLocaleDateString('pt-BR')}</Td>
-                  <Td className="font-medium text-[#333]">{supplierName}</Td>
+                  <Td>
+                    <div className="flex items-center gap-4">
+                      <div className="w-11 h-11 rounded-full bg-[#f5f5f5] border-2 border-[#e6e6e6] overflow-hidden flex items-center justify-center flex-shrink-0">
+                        <ShoppingCart className="w-5 h-5 text-[#ccc]" />
+                      </div>
+                      <div className="flex flex-col justify-center">
+                        <p className="font-semibold text-[#1f2328] text-[14px] leading-tight mb-0.5">{supplierName}</p>
+                        <p className="text-[13px] text-[#656d76] leading-tight">Nota: {(p.invoice as string) || 'S/N'}</p>
+                      </div>
+                    </div>
+                  </Td>
                   <Td className="text-[#666]">{buyerName}</Td>
-                  <Td className="font-mono text-[#999]">{(p.invoice as string) || '—'}</Td>
                   <Td className="text-right font-medium text-[#333]">R$ {Number(p.total_cost).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</Td>
                   <Td className="text-center"><span className="inline-flex px-2 py-[2px] rounded text-[10px] font-medium bg-[#f0fff4] text-[#38a169]">Concluída</span></Td>
                 </tr>
@@ -181,7 +215,7 @@ function PurchasesTab() {
 function StockTab() {
   const router = useRouter()
   const { data: products, loading } = useSupabaseQuery(async (s) => {
-    const { data, error } = await s.from('products').select('*').order('name')
+    const { data, error } = await s.from('products').select('*, product_images(url)').order('name').limit(200)
     if (error) throw error
     return data || []
   })
@@ -210,7 +244,21 @@ function StockTab() {
               return (
                 <tr key={p.id as string} onClick={() => router.push(`/produtos/${p.id}`)} className="hover:bg-[#fafafa] transition-colors cursor-pointer">
                   <Td className="font-mono text-[#999]">{p.sku as string}</Td>
-                  <Td className="font-medium text-[#333]">{p.name as string}</Td>
+                  <Td>
+                    <div className="flex items-center gap-4">
+                      <div className="w-11 h-11 rounded-full bg-[#f5f5f5] border-2 border-[#e6e6e6] overflow-hidden flex items-center justify-center flex-shrink-0">
+                        {(p.product_images as any)?.[0]?.url ? (
+                          <img src={(p.product_images as any)[0].url} alt="" className="w-full h-full object-cover" loading="lazy" />
+                        ) : (
+                          <Package className="w-5 h-5 text-[#ccc]" />
+                        )}
+                      </div>
+                      <div className="flex flex-col justify-center">
+                        <p className="font-semibold text-[#1f2328] text-[14px] leading-tight mb-0.5">{p.name as string}</p>
+                        <p className="text-[13px] text-[#656d76] leading-tight">{p.brand as string || 'Sem marca'}</p>
+                      </div>
+                    </div>
+                  </Td>
                   <Td className="text-right"><span className={`font-medium ${stock === 0 ? 'text-[#e74c3c]' : stock <= minStock ? 'text-[#e67e22]' : 'text-[#333]'}`}>{stock}</span></Td>
                   <Td className="text-right text-[#999]">{minStock}</Td>
                   <Td className="text-right text-[#999]">R$ {cost.toFixed(2)}</Td>
