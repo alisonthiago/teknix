@@ -128,17 +128,23 @@ function VisaoGeralTab({ supplier }: { supplier: SupplierDetail }) {
                   <th className="text-right py-2 px-3 text-[10px] font-medium text-[#999] uppercase">Itens</th>
                   <th className="text-right py-2 px-3 text-[10px] font-medium text-[#999] uppercase">Total</th>
                   <th className="text-center py-2 px-3 text-[10px] font-medium text-[#999] uppercase">Status</th>
+                  <th className="text-right py-2 px-3 text-[10px] font-medium text-[#999] uppercase">Nota Interna</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#eeeeee]">
                 {supplier.purchases.map(p => (
                   <tr key={p.id} className="hover:bg-[#fafafa] transition-colors">
                     <td className="py-2.5 px-3 text-[#999]">{p.date}</td>
-                    <td className="py-2.5 px-3 font-mono text-[#333]">{p.invoice}</td>
+                    <td className="py-2.5 px-3 font-mono text-[#333]">{p.invoice || 'S/N'}</td>
                     <td className="py-2.5 px-3 text-right text-[#999]">{p.items}</td>
                     <td className="py-2.5 px-3 text-right font-medium text-[#333]">{formatBRL(p.total)}</td>
                     <td className="py-2.5 px-3 text-center">
                       <span className="inline-flex px-2 py-[2px] rounded text-[10px] font-medium bg-[#f0fff4] text-[#38a169]">{p.status}</span>
+                    </td>
+                    <td className="py-2.5 px-3 text-right">
+                      <Link href={`/purchases/${p.id}/nota`} className="inline-flex items-center justify-center w-7 h-7 rounded bg-[#f5f5f5] text-[#666] hover:bg-[#3483fa] hover:text-white transition-colors" title="Ver Nota Interna">
+                        <FileText className="w-3.5 h-3.5" />
+                      </Link>
                     </td>
                   </tr>
                 ))}
@@ -154,18 +160,36 @@ function VisaoGeralTab({ supplier }: { supplier: SupplierDetail }) {
         <div className="bg-white border border-[#e6e6e6] rounded-md p-4">
           <SectionTitle>Contato</SectionTitle>
           <div className="space-y-1">
-            <InfoRow label="Responsável" value={supplier.contact} bold />
-            <InfoRow label="Telefone" value={supplier.phone} />
-            <InfoRow label="WhatsApp" value={supplier.whatsapp} />
+            {supplier.contacts?.map(c => (
+               <InfoRow 
+                 key={c.id} 
+                 label={c.name || (c.is_whatsapp ? 'WhatsApp' : 'Telefone')} 
+                 value={c.phone} 
+                 bold={!!c.name}
+               />
+            ))}
+            {/* Fallback for legacy data */}
+            {(!supplier.contacts || supplier.contacts.length === 0) && (
+              <>
+                <InfoRow label="Responsável" value={supplier.contact} bold />
+                <InfoRow label="Telefone" value={supplier.phone} />
+                <InfoRow label="WhatsApp" value={supplier.whatsapp} />
+              </>
+            )}
             <InfoRow label="E-mail" value={supplier.email} />
           </div>
           <div className="flex flex-wrap gap-2 mt-3">
-            <a href={`tel:${supplier.phone}`} className="p-2 rounded-md border border-[#e6e6e6] text-[#999] hover:bg-[#f5f5f5] hover:text-[#333] transition-colors">
-              <Phone className="w-3.5 h-3.5" />
-            </a>
-            <a href={`https://wa.me/${supplier.whatsapp.replace(/\D/g, '')}`} className="p-2 rounded-md border border-[#e6e6e6] text-[#999] hover:bg-[#f5f5f5] hover:text-[#38a169] transition-colors">
-              <MessageCircle className="w-3.5 h-3.5" />
-            </a>
+            {supplier.contacts?.filter(c => c.is_whatsapp).map(c => (
+              <a key={c.id} href={`https://wa.me/55${c.phone.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="p-2 rounded-md border border-[#e6e6e6] text-[#999] hover:bg-[#f5f5f5] hover:text-[#38a169] transition-colors" title={`WhatsApp ${c.name || ''}`}>
+                <MessageCircle className="w-3.5 h-3.5" />
+              </a>
+            ))}
+            {/* Fallback */}
+            {(!supplier.contacts || supplier.contacts.length === 0) && supplier.whatsapp && (
+              <a href={`https://wa.me/55${supplier.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="p-2 rounded-md border border-[#e6e6e6] text-[#999] hover:bg-[#f5f5f5] hover:text-[#38a169] transition-colors">
+                <MessageCircle className="w-3.5 h-3.5" />
+              </a>
+            )}
             <a href={`mailto:${supplier.email}`} className="p-2 rounded-md border border-[#e6e6e6] text-[#999] hover:bg-[#f5f5f5] hover:text-[#3483fa] transition-colors">
               <Mail className="w-3.5 h-3.5" />
             </a>
@@ -178,7 +202,7 @@ function VisaoGeralTab({ supplier }: { supplier: SupplierDetail }) {
             <InfoRow label="Banco" value={supplier.bank} />
             <InfoRow label="Agência" value={supplier.agency} mono />
             <InfoRow label="Conta" value={supplier.account} mono />
-            <InfoRow label="Chave PIX" value={supplier.pix_key} mono />
+            <InfoRow label="Chave PIX" value={supplier.pix_key || '—'} mono />
           </div>
         </div>
 
@@ -186,8 +210,13 @@ function VisaoGeralTab({ supplier }: { supplier: SupplierDetail }) {
           <SectionTitle>Informações</SectionTitle>
           <div className="space-y-1">
             <InfoRow label="CNPJ" value={supplier.cnpj} mono />
-            <InfoRow label="Cidade" value={`${supplier.city}/${supplier.state}`} />
-            <InfoRow label="Endereço" value={supplier.address} />
+            <InfoRow label="Matriz (Receita)" value={`${supplier.city}/${supplier.state}`} />
+            {supplier.distributor_city && supplier.distributor_state && (
+              <InfoRow label="Distribuidor" value={`${supplier.distributor_city}/${supplier.distributor_state}`} />
+            )}
+            {supplier.pickup_address && (
+              <InfoRow label="Retirada/Coleta" value={supplier.pickup_address} />
+            )}
             <InfoRow label="Prazo entrega" value={`${supplier.delivery_time} dias`} />
             <InfoRow label="Pedido mínimo" value={formatBRL(supplier.min_order)} />
             <InfoRow label="Condição pagamento" value={supplier.payment_terms} />
@@ -257,7 +286,14 @@ export default function FornecedorDetailClient({ supplier }: { supplier: Supplie
                    <span className="inline-flex px-2 py-[2px] rounded text-[10px] font-medium bg-[#f0fff4] text-[#38a169]">Ativo</span>
                  </div>
                </div>
-               <div className="relative">
+               <div className="flex items-center gap-2 relative">
+                 <Link 
+                   href={`/purchases/new?supplier=${supplier.id}`}
+                   className="h-[30px] inline-flex items-center gap-1.5 px-3 bg-[#3483fa] hover:bg-[#2968c8] text-white text-[12px] font-medium rounded-md transition-colors"
+                 >
+                   <Plus className="w-3.5 h-3.5" />
+                   Comprar
+                 </Link>
                  <button
                    onClick={(e) => {
                      const menu = e.currentTarget.nextElementSibling
@@ -276,7 +312,7 @@ export default function FornecedorDetailClient({ supplier }: { supplier: Supplie
                      <Plus className="w-3 h-3" />
                      Nova compra
                    </Link>
-                   <a href={`https://wa.me/${supplier.whatsapp?.replace(/\D/g, '')}`} className="flex items-center gap-2 px-3 py-2 text-[11px] text-[#38a169] hover:bg-[#f5f5f5]">
+                   <a href={`https://wa.me/55${supplier.contacts?.[0]?.phone.replace(/\D/g, '') || supplier.whatsapp?.replace(/\D/g, '')}`} className="flex items-center gap-2 px-3 py-2 text-[11px] text-[#38a169] hover:bg-[#f5f5f5]">
                      <MessageCircle className="w-3 h-3" />
                      WhatsApp
                    </a>

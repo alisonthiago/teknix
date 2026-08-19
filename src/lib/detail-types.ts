@@ -23,7 +23,7 @@ export interface ProductDetail {
   marketplaces: Array<{ name: string; account_name?: string; listing_id: string; price: number; stock: number; status: 'ACTIVE' | 'INACTIVE'; last_sync: string }>
   recent_sales: Array<{ id: string; order_id: string; marketplace: string; account_name?: string; quantity: number; price: number; revenue: number; profit: number; margin: number; status: string; date: string }>
   stock_movements: Array<{ id: string; date: string; type: 'COMPRA' | 'VENDA' | 'CANCELAMENTO' | 'DEVOLUCAO' | 'AJUSTE' | 'PERDA' | 'TRANSFERENCIA'; quantity: number; balance: number; order_ref: string; user: string }>
-  purchases_history: Array<{ id: string; order_ref: string; supplier: string; quantity: number; unit_cost: number; total: number; date: string; status: string }>
+  purchases_history: Array<{ id: string; purchase_id?: string; order_ref: string; supplier: string; quantity: number; unit_cost: number; total: number; date: string; status: string }>
   history: Array<{ id: string; date: string; time: string; action: string; user: string; details: string }>
   sales_chart: Array<{ period: string; units: number; revenue: number }>
 }
@@ -81,10 +81,14 @@ export interface SupplierDetail {
   bank: string
   agency: string
   account: string
-  pix_key: string
+  pix_key: string | null
+  distributor_state: string | null
+  distributor_city: string | null
+  pickup_address: string | null
   notes: string
   status: string
   created_at: string
+  contacts: Array<{ id: string; name: string | null; phone: string; is_whatsapp: boolean }>
   products: Array<{ id: string; sku: string; name: string; cost: number; stock: number }>
   purchases: Array<{ id: string; date: string; invoice: string; items: number; total: number; status: string }>
   stats: { total_purchased: number; total_orders: number; avg_ticket: number; products_count: number }

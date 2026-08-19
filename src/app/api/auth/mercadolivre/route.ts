@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
+import { getBaseUrl } from '@/utils/url'
 
-export async function GET() {
+export async function GET(request: Request) {
   const clientId = process.env.MERCADOLIVRE_CLIENT_ID
-  const redirectUri = process.env.MERCADOLIVRE_REDIRECT_URI
+  const redirectUri = `${getBaseUrl()}/api/auth/mercadolivre/callback`
 
   if (!clientId || !redirectUri) {
     return NextResponse.json({ error: 'Mercado Livre integration not configured' }, { status: 500 })

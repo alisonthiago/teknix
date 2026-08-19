@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { X, Calculator, TrendingUp, Search, Package, Info } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 import { MarketplaceLogo } from './MarketplaceLogos'
+import BasicCalculatorPopup from './BasicCalculatorPopup'
 
 interface MarginCalculatorProps {
   open: boolean
@@ -547,6 +548,7 @@ export default function MarginCalculator({ open, onClose }: MarginCalculatorProp
   const overlayRef = useRef<HTMLDivElement>(null)
   const [activeTab, setActiveTab] = useState<'simulador' | 'produtos' | 'comparar'>('simulador')
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
+  const [calcOpen, setCalcOpen] = useState(false)
 
   if (!open) return null
 
@@ -572,6 +574,13 @@ export default function MarginCalculator({ open, onClose }: MarginCalculatorProp
           </div>
           <div className="flex items-center gap-2">
             <button
+              onClick={() => setCalcOpen(!calcOpen)}
+              className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors border border-transparent ${calcOpen ? 'bg-[#ecf3fe] text-[#3483fa] border-[#3483fa]' : 'hover:bg-[#f5f5f5] text-[#999] hover:text-[#3483fa]'}`}
+              title="Abrir Calculadora Básica"
+            >
+              <Calculator className="w-4 h-4" />
+            </button>
+            <button
               onClick={onClose}
               className="w-8 h-8 rounded-full hover:bg-[#f5f5f5] text-[#999] flex items-center justify-center transition-colors"
               title="Fechar"
@@ -595,6 +604,7 @@ export default function MarginCalculator({ open, onClose }: MarginCalculatorProp
           {activeTab === 'comparar' && <CompareTab />}
         </div>
       </div>
+      {calcOpen && <BasicCalculatorPopup onClose={() => setCalcOpen(false)} initialPosition={{ x: typeof window !== 'undefined' ? window.innerWidth - 300 : 800, y: 150 }} />}
     </div>
   )
 }

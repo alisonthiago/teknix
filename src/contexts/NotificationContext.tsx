@@ -12,6 +12,10 @@ export interface AppNotification {
   type: NotificationType
   is_read: boolean
   created_at: string
+  actor_name?: string
+  module?: string
+  entity_id?: string
+  entity_type?: string
 }
 
 export interface NotifyOptions {
@@ -69,7 +73,42 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     fetchNotifications()
-  }, [fetchNotifications])
+    
+    // Setup realtime subscription
+    let channel: ReturnType<typeof supabase.channel> | null = null
+    
+    const setupRealtime = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      channel = supabase
+        .channel('public:notifications')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'notifications',
+            filter: `user_id=eq.${user.id}`,
+          },
+          (payload) => {
+            const newNotif = payload.new as AppNotification
+            setNotifications(prev => [newNotif, ...prev].slice(0, 50))
+            setActiveToasts(prev => [...prev, newNotif])
+            setTimeout(() => {
+              dismissToast(newNotif.id)
+            }, 5000)
+          }
+        )
+        .subscribe()
+    }
+    
+    setupRealtime()
+
+    return () => {
+      if (channel) supabase.removeChannel(channel)
+    }
+  }, [fetchNotifications, supabase])
 
   const notify = async ({ title, message, type }: NotifyOptions) => {
     const tempId = crypto.randomUUID()

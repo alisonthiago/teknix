@@ -3,6 +3,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { logActivity } from '@/lib/activity-logger'
 
 export async function createSale(formData: FormData) {
   const supabase = await createClient()
@@ -110,6 +111,15 @@ export async function createSale(formData: FormData) {
     }])
   }
 
+  await logActivity({
+    title: 'Nova Venda Registrada',
+    message: `Venda do pedido #${order_id || sale.id.split('-')[0]} no valor de R$ ${total_revenue.toFixed(2)} cadastrada.`,
+    type: 'success',
+    module: 'sales',
+    entity_id: sale.id,
+    entity_type: 'sale'
+  })
+
   revalidatePath('/sales')
   revalidatePath('/products')
   revalidatePath('/dashboard')
@@ -134,6 +144,15 @@ export async function deleteSale(id: string) {
   await supabase.from('sale_items').delete().eq('sale_id', id)
   const { error } = await supabase.from('sales').delete().eq('id', id)
   if (error) throw new Error(error.message)
+
+  await logActivity({
+    title: 'Venda Excluída',
+    message: `A venda #${id.split('-')[0]} foi excluída e o estoque do produto devolvido.`,
+    type: 'error',
+    module: 'sales',
+    entity_id: id,
+    entity_type: 'sale'
+  })
 
   revalidatePath('/sales')
   revalidatePath('/products')

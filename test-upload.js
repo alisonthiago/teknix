@@ -1,5 +1,6 @@
 const fs = require('fs');
-fetch('http://localhost:3000/api/upload/avatar', {
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
+fetch(`${BASE_URL}/api/upload/avatar`, {
   method: 'POST',
   body: (() => {
     const fd = new FormData();

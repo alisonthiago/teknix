@@ -7,7 +7,6 @@ import Image from 'next/image'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
 import { createClient } from '@/utils/supabase/client'
 
-const AUTH_USER_ID = '6f58029b-c770-4f25-a9f9-86dec6fb6137'
 
 interface Profile {
   id: string
@@ -39,10 +38,12 @@ const ROLE_COLORS: Record<string, string> = {
 
 export default function PerfilPage() {
   const { data: profile, loading, error } = useSupabaseQuery<Profile>(async (s) => {
-    const { data, error } = await s.from('profiles').select('*').eq('id', AUTH_USER_ID).single()
+    const { data: { user } } = await s.auth.getUser()
+    if (!user) throw new Error('Usuário não autenticado')
+    const { data, error } = await s.from('profiles').select('*').eq('id', user.id).single()
     if (error) throw error
     return data as Profile
-  }, [AUTH_USER_ID])
+  }, [])
 
   const [editing, setEditing] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -89,8 +90,9 @@ export default function PerfilPage() {
   async function handleSave() {
     setSaving(true)
     try {
+      if (!profile) return
       const supabase = createClient()
-      const { error } = await supabase.from('profiles').update({ name: form.name, nickname: form.nickname, email: form.email }).eq('id', AUTH_USER_ID)
+      const { error } = await supabase.from('profiles').update({ name: form.name, nickname: form.nickname, email: form.email }).eq('id', profile.id)
       if (error) throw error
       setEditing(false)
       window.location.reload()
@@ -145,7 +147,7 @@ export default function PerfilPage() {
 
   if (loading) {
     return (
-      <div className="max-w-[800px]">
+      <div className="max-w-[800px] mx-auto w-full">
         <div className="mb-4">
           <Link href="/sistema" className="inline-flex items-center gap-1.5 text-[12px] text-[#999] hover:text-[#333] transition-colors">
             <ArrowLeft className="w-3.5 h-3.5" />
@@ -159,7 +161,7 @@ export default function PerfilPage() {
 
   if (error || !profile) {
     return (
-      <div className="max-w-[800px]">
+      <div className="max-w-[800px] mx-auto w-full">
         <div className="mb-4">
           <Link href="/sistema" className="inline-flex items-center gap-1.5 text-[12px] text-[#999] hover:text-[#333] transition-colors">
             <ArrowLeft className="w-3.5 h-3.5" />
@@ -174,7 +176,7 @@ export default function PerfilPage() {
   const user = editing ? { ...profile, ...form } : profile
 
   return (
-    <div className="max-w-[800px]">
+    <div className="max-w-[800px] mx-auto w-full">
       <div className="mb-4">
         <Link href="/sistema" className="inline-flex items-center gap-1.5 text-[12px] text-[#999] hover:text-[#333] transition-colors">
           <ArrowLeft className="w-3.5 h-3.5" />

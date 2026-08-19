@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/utils/supabase/server'
+import { logActivity } from '@/lib/activity-logger'
 
 export async function moveOrderToPaid(orderId: string) {
   const s = await createClient()
@@ -56,6 +57,15 @@ export async function moveOrderToPaid(orderId: string) {
     from_status: 'NOVO',
     to_status: 'PAGO',
     notes: 'Pagamento confirmado — estoque baixado automaticamente',
+  })
+
+  await logActivity({
+    title: 'Pedido Pago',
+    message: `O pedido #${orderId.split('-')[0]} foi marcado como PAGO e o estoque foi baixado.`,
+    type: 'success',
+    module: 'orders',
+    entity_id: orderId,
+    entity_type: 'order'
   })
 
   return { success: true }

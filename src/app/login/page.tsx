@@ -48,26 +48,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
             </p>
           </div>
 
-          {/* Oauth Buttons (Design Only) */}
-          <div className="flex flex-col sm:flex-row gap-3">
-            <button type="button" className="flex-1 inline-flex items-center justify-center gap-2 rounded-full border border-[#e6e6e6] bg-white px-4 py-2.5 text-sm font-medium text-[#333] hover:bg-gray-50 transition-colors">
-              <svg className="h-4 w-4" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-              Google
-            </button>
-            <button type="button" className="flex-1 inline-flex items-center justify-center gap-2 rounded-full border border-[#e6e6e6] bg-white px-4 py-2.5 text-sm font-medium text-[#333] hover:bg-gray-50 transition-colors">
-              <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.04 2.26-.79 3.59-.76 1.56.09 2.85.73 3.63 1.89-3.24 1.95-2.73 6.37.52 7.74-.75 1.91-1.74 3.35-2.82 4.3zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
-              Apple
-            </button>
-          </div>
 
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-[#e6e6e6]" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white px-2 text-[#999]">Ou</span>
-            </div>
-          </div>
 
           {params?.error && (
             <div className="p-4 text-sm font-medium text-[#f23d4f] bg-[#fff0f1] border border-[#ffcdd2] rounded-xl animate-in fade-in zoom-in duration-300">
@@ -130,41 +111,9 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
       </div>
 
       {/* Right Column - Graphic */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-[#f5f5f5]">
-        <Image 
-          src="/login-bg.jpg" 
-          alt="Teknix Tech Office" 
-          fill 
-          priority
-          className="object-cover object-center"
-        />
-        
-        {/* Subtle overlay gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-
-        {/* Content over image based on reference */}
-        <div className="absolute bottom-12 left-12 right-12">
-          <div className="backdrop-blur-md bg-white/10 border border-white/20 p-8 rounded-[24px] shadow-2xl text-white">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 rounded-full bg-[#B5F500] flex items-center justify-center">
-                <svg className="w-4 h-4 text-[#333]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <h3 className="font-semibold text-lg">Inovação e Eficiência</h3>
-            </div>
-            <p className="text-white/90 text-[15px] leading-relaxed mb-6 font-light">
-              &quot;A TEKNIX transformou nossa gestão de vendas. A plataforma é intuitiva, 
-              rápida e nos ajudou a escalar nossa operação de forma sustentável e controlada.&quot;
-            </p>
-            <Link href="#" className="inline-flex items-center gap-2 text-sm font-medium bg-white/20 hover:bg-white/30 px-5 py-2.5 rounded-full transition-colors backdrop-blur-sm">
-              Conheça nossas histórias
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-            </Link>
-          </div>
-        </div>
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-[#1a1a1a] via-[#2a2a2a] to-[#000000]">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+        <div className="absolute left-0 right-0 top-0 -z-10 m-auto h-[310px] w-[310px] rounded-full bg-[#B5F500] opacity-20 blur-[100px]"></div>
       </div>
     </div>
   )

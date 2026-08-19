@@ -3,6 +3,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { logActivity } from '@/lib/activity-logger'
 
 export async function createProduct(formData: FormData) {
   const supabase = await createClient()
@@ -30,8 +31,17 @@ export async function createProduct(formData: FormData) {
     user_id: user?.id || null,
   }
 
-  const { error } = await supabase.from('products').insert([data])
+  const { data: insertedProduct, error } = await supabase.from('products').insert([data]).select('id').single()
   if (error) throw new Error(error.message)
+
+  await logActivity({
+    title: 'Novo Produto Adicionado',
+    message: `Um novo produto "${data.name}" (SKU: ${data.sku}) foi cadastrado.`,
+    type: 'success',
+    module: 'products',
+    entity_id: insertedProduct.id,
+    entity_type: 'product'
+  })
 
   revalidatePath('/products')
   redirect('/products')
@@ -64,6 +74,15 @@ export async function updateProduct(id: string, formData: FormData) {
   const { error } = await supabase.from('products').update(data).eq('id', id)
   if (error) throw new Error(error.message)
 
+  await logActivity({
+    title: 'Produto Atualizado',
+    message: `O produto "${data.name}" (SKU: ${data.sku}) foi modificado.`,
+    type: 'info',
+    module: 'products',
+    entity_id: id,
+    entity_type: 'product'
+  })
+
   revalidatePath('/products')
   revalidatePath('/operacao')
   revalidatePath(`/produtos/${id}`)
@@ -72,7 +91,21 @@ export async function updateProduct(id: string, formData: FormData) {
 
 export async function deleteProduct(id: string) {
   const supabase = await createClient()
+  const { data: product } = await supabase.from('products').select('name, sku').eq('id', id).single()
+
   const { error } = await supabase.from('products').delete().eq('id', id)
   if (error) throw new Error(error.message)
+
+  if (product) {
+    await logActivity({
+      title: 'Produto Excluído',
+      message: `O produto "${product.name}" (SKU: ${product.sku}) foi excluído do sistema.`,
+      type: 'error',
+      module: 'products',
+      entity_id: id,
+      entity_type: 'product'
+    })
+  }
+
   revalidatePath('/products')
 }

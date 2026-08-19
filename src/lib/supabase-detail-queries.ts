@@ -103,11 +103,13 @@ export async function getProductDetail(id: string) {
     purchases_history: (purchaseItems || []).map((pi: Record<string, unknown>) => {
       const purchase = pi.purchases as Record<string, unknown> | null
       return {
-        id: pi.id as string, order_ref: (purchase?.order_number as string) || '—',
+        id: pi.id as string, 
+        purchase_id: purchase?.id as string || '',
+        order_ref: (purchase?.invoice as string) || 'S/N',
         supplier: (purchase?.suppliers as Record<string, unknown>)?.name as string || '—',
         quantity: Number(pi.quantity || 0), unit_cost: Number(pi.unit_cost || 0),
         total: Number(pi.quantity || 0) * Number(pi.unit_cost || 0),
-        date: purchase?.created_at ? new Date(purchase.created_at as string).toLocaleDateString('pt-BR') : '—',
+        date: purchase?.date ? new Date(purchase.date as string).toLocaleDateString('pt-BR') : '—',
         status: (purchase?.status as string) || 'CONCLUIDA',
       }
     }),
@@ -242,6 +244,7 @@ export async function getSupplierDetail(id: string) {
 
   const { data: products } = await s.from('products').select('id, sku, name, cost_purchase, stock').eq('supplier_id', id)
   const { data: purchases } = await s.from('purchases').select('*, purchase_items(*)').eq('supplier_id', id).order('created_at', { ascending: false })
+  const { data: contacts } = await s.from('supplier_contacts').select('*').eq('supplier_id', id).order('created_at', { ascending: true })
 
   const totalPurchased = (purchases || []).reduce((a: number, p: Record<string, unknown>) => a + Number(p.total_cost || 0), 0)
 
@@ -252,12 +255,22 @@ export async function getSupplierDetail(id: string) {
     phone: supplier.phone as string || '—', whatsapp: supplier.whatsapp as string || '—',
     email: supplier.email as string || '—', city: supplier.city as string || '—',
     state: supplier.state as string || '—', address: supplier.address as string || '—',
+    distributor_city: supplier.distributor_city as string || '',
+    distributor_state: supplier.distributor_state as string || '',
+    pickup_address: supplier.pickup_address as string || '',
     delivery_time: Number(supplier.delivery_time || 0), min_order: Number(supplier.min_order || 0),
+    freight: Number(supplier.freight || 0),
     payment_terms: supplier.payment_terms as string || '—',
     bank: (supplier.bank_name as string) || '—', agency: (supplier.bank_agency as string) || '—',
     account: (supplier.bank_account as string) || '—', pix_key: supplier.pix_key as string || '—',
     notes: supplier.notes as string || '', status: supplier.status as string || 'ACTIVE',
     created_at: supplier.created_at ? new Date(supplier.created_at as string).toLocaleDateString('pt-BR') : '—',
+    contacts: (contacts || []).map((c: Record<string, unknown>) => ({
+      id: c.id as string,
+      name: c.name as string | null,
+      phone: c.phone as string,
+      is_whatsapp: Boolean(c.is_whatsapp)
+    })),
     products: (products || []).map((p: Record<string, unknown>) => ({
       id: p.id as string, sku: p.sku as string, name: p.name as string,
       cost: Number(p.cost_purchase || 0), stock: Number(p.stock || 0),

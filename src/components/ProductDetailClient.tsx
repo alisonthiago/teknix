@@ -4,7 +4,7 @@ import { useState } from 'react'
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, MoreHorizontal, Package, TrendingUp, ShoppingCart, Store, Clock } from 'lucide-react'
+import { ArrowLeft, MoreHorizontal, Package, TrendingUp, ShoppingCart, Store, Clock, FileText } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import type { ProductDetail } from '@/lib/detail-types'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
@@ -409,6 +409,7 @@ function ComprasTab({ product }: { product: ProductDetail }) {
                 <th className="text-right py-2 px-4 text-[10px] font-medium text-[#999] uppercase">Total</th>
                 <th className="text-right py-2 px-4 text-[10px] font-medium text-[#999] uppercase">Data</th>
                 <th className="text-center py-2 px-4 text-[10px] font-medium text-[#999] uppercase">Status</th>
+                <th className="text-right py-2 px-4 text-[10px] font-medium text-[#999] uppercase">Nota Interna</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#eeeeee]">
@@ -422,6 +423,13 @@ function ComprasTab({ product }: { product: ProductDetail }) {
                   <td className="py-2.5 px-4 text-right text-[#999]">{p.date}</td>
                   <td className="py-2.5 px-4 text-center">
                     <span className="inline-flex px-2 py-[2px] rounded text-[10px] font-medium bg-[#f0fff4] text-[#38a169]">{p.status}</span>
+                  </td>
+                  <td className="py-2.5 px-4 text-right">
+                    {p.purchase_id && (
+                      <Link href={`/purchases/${p.purchase_id}/nota`} className="inline-flex items-center justify-center w-7 h-7 rounded bg-[#f5f5f5] text-[#666] hover:bg-[#3483fa] hover:text-white transition-colors" title="Ver Nota Interna">
+                        <FileText className="w-3.5 h-3.5" />
+                      </Link>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -549,6 +557,9 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2">
+                <button onClick={() => router.push(`/purchases/new?product=${product.id}`)} className="px-3 py-1.5 bg-[#f0fff4] text-[#38a169] border border-[#38a169]/20 text-[11px] font-medium rounded-md hover:bg-[#dcfce7] transition-colors flex items-center gap-1">
+                  <ShoppingCart className="w-3.5 h-3.5" /> Comprar
+                </button>
                 <button onClick={() => router.push(`/produtos/${product.id}/editar`)} className="px-3 py-1.5 bg-[#3483fa] text-white text-[11px] font-medium rounded-md hover:bg-[#2968c8] transition-colors">
                   Editar produto
                 </button>

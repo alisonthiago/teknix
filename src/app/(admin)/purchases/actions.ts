@@ -3,6 +3,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { logActivity } from '@/lib/activity-logger'
 
 export async function createPurchase(formData: FormData) {
   const supabase = await createClient()
@@ -78,6 +79,15 @@ export async function createPurchase(formData: FormData) {
     user_id: user?.id || null
   }])
 
+  await logActivity({
+    title: 'Nova Compra Adicionada',
+    message: `Uma compra via NFe ${invoice || 'Sem Nota'} no valor de R$ ${total_cost.toFixed(2)} foi adicionada ao estoque.`,
+    type: 'success',
+    module: 'purchases',
+    entity_id: purchase.id,
+    entity_type: 'purchase'
+  })
+
   revalidatePath('/purchases')
   revalidatePath('/products')
   revalidatePath('/dashboard')
@@ -102,6 +112,15 @@ export async function deletePurchase(id: string) {
   await supabase.from('purchase_items').delete().eq('purchase_id', id)
   const { error } = await supabase.from('purchases').delete().eq('id', id)
   if (error) throw new Error(error.message)
+
+  await logActivity({
+    title: 'Compra Cancelada/Excluída',
+    message: `A compra #${id.split('-')[0]} foi excluída e o estoque dos produtos foi revertido.`,
+    type: 'error',
+    module: 'purchases',
+    entity_id: id,
+    entity_type: 'purchase'
+  })
 
   revalidatePath('/purchases')
   revalidatePath('/products')

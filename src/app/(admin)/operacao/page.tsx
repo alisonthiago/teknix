@@ -2,21 +2,24 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Download, Upload, Package, Truck, ShoppingCart, Warehouse, Eye, Edit, Trash2, ClipboardCheck, CheckCircle2, AlertTriangle, Building2 } from 'lucide-react'
+import { Plus, Download, Upload, Package, Truck, ShoppingCart, Warehouse, Eye, Edit, Trash2, ClipboardCheck, CheckCircle2, AlertTriangle, Building2, Ban, MoreVertical, Printer } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { PageHeader, PrimaryButton, SecondaryButton, StatCard, SearchInput, ModuleTable, TableHead, Th, Td } from '@/components/ui/module'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
 import { createClient } from '@/utils/supabase/client'
+import { exportToExcel, importFromExcel } from '@/utils/excel'
 import dynamic from 'next/dynamic'
 
 const ProductCreateModal = dynamic(() => import('@/components/ProductCreateModal'), { ssr: false })
 const SupplierCreateModal = dynamic(() => import('@/components/SupplierCreateModal'), { ssr: false })
 const PurchaseCreateModal = dynamic(() => import('@/components/PurchaseCreateModal'), { ssr: false })
+const DeleteConfirmationModal = dynamic(() => import('@/components/DeleteConfirmationModal'), { ssr: false })
 
 function ProductsTab() {
   const router = useRouter()
   const [search, setSearch] = useState('')
   const [showCreate, setShowCreate] = useState(false)
+  const [selectedItems, setSelectedItems] = useState<string[]>([])
   const { data: products, loading, refetch } = useSupabaseQuery(async (s) => {
     const { data, error } = await s.from('products').select('*, suppliers(name), product_images(url)').order('created_at', { ascending: false }).limit(100)
     if (error) throw error
@@ -34,6 +37,41 @@ function ProductsTab() {
     return (Number(p.cost_purchase) || 0) + (Number(p.freight_purchase) || 0) + (Number(p.packaging_cost) || 0) + (Number(p.other_costs) || 0)
   }
 
+  const toggleSelectAll = () => {
+    if (selectedItems.length === filtered.length) {
+      setSelectedItems([])
+    } else {
+      setSelectedItems(filtered.map((p: any) => p.id as string))
+    }
+  }
+
+  const toggleSelect = (id: string) => {
+    if (selectedItems.includes(id)) {
+      setSelectedItems(selectedItems.filter(i => i !== id))
+    } else {
+      setSelectedItems([...selectedItems, id])
+    }
+  }
+
+  const handleDeleteSelected = async () => {
+    if (!confirm(`Tem certeza que deseja excluir ${selectedItems.length} produto(s)?`)) return
+    const supabase = createClient()
+    await supabase.from('products').delete().in('id', selectedItems)
+    setSelectedItems([])
+    refetch()
+  }
+
+  const handleExportSelected = () => {
+    if (selectedItems.length === 0) return
+    const dataToExport = products?.filter((p: any) => selectedItems.includes(p.id)) || []
+    exportToExcel(dataToExport, 'produtos_selecionados')
+    setSelectedItems([])
+  }
+
+  const handleExportAll = () => {
+    exportToExcel(products || [], 'todos_os_produtos')
+  }
+
   return (
     <div>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
@@ -44,17 +82,63 @@ function ProductsTab() {
       </div>
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:justify-between mb-4">
         <SearchInput placeholder="Buscar produto..." value={search} onChange={setSearch} />
-        <div className="flex flex-wrap items-center gap-2">
-          <SecondaryButton><Upload className="w-3.5 h-3.5" /> Importar</SecondaryButton>
-          <SecondaryButton><Download className="w-3.5 h-3.5" /> Exportar</SecondaryButton>
-          <PrimaryButton onClick={() => setShowCreate(true)}><Plus className="w-3.5 h-3.5" /> Novo produto</PrimaryButton>
-        </div>
+        {selectedItems.length > 0 ? (
+          <div className="flex items-center gap-2 bg-[#f0f7ff] px-3 py-1.5 rounded-md border border-[#3483fa]/20">
+            <span className="text-[12px] font-medium text-[#3483fa] mr-2">{selectedItems.length} selecionado(s)</span>
+            <button onClick={handleExportSelected} className="flex items-center gap-1.5 text-[12px] font-medium text-[#3483fa] bg-white px-2.5 py-1.5 rounded border border-[#3483fa]/20 hover:bg-[#3483fa] hover:text-white transition-colors"><Download className="w-3.5 h-3.5" /> Exportar</button>
+            <button onClick={handleDeleteSelected} className="flex items-center gap-1.5 text-[12px] font-medium text-[#e74c3c] bg-white px-2.5 py-1.5 rounded border border-[#e74c3c]/20 hover:bg-[#e74c3c] hover:text-white transition-colors"><Trash2 className="w-3.5 h-3.5" /> Excluir</button>
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center gap-2">
+            <SecondaryButton onClick={() => document.getElementById('import-products')?.click()}><Upload className="w-3.5 h-3.5" /> Importar</SecondaryButton>
+            <input 
+              type="file" 
+              id="import-products" 
+              className="hidden" 
+              accept=".xlsx,.xls,.csv" 
+              onChange={async (e) => {
+                const file = e.target.files?.[0]
+                if (!file) return
+                try {
+                  const data = await importFromExcel(file, {
+                    name: ['nome', 'name', 'produto', 'título'],
+                    sku: ['sku', 'código', 'ref'],
+                    ean: ['ean', 'código de barras', 'gtin'],
+                    category: ['categoria', 'category'],
+                    cost_purchase: ['custo', 'preço de custo', 'cost'],
+                    current_price: ['preço', 'price', 'valor'],
+                    stock: ['estoque', 'quantidade', 'stock']
+                  })
+                  if (data.length > 0) {
+                    const supabase = createClient()
+                    await supabase.from('products').insert(data)
+                    refetch()
+                    alert(`${data.length} produtos importados com sucesso!`)
+                  }
+                } catch (err) {
+                  alert('Erro ao importar arquivo.')
+                }
+                e.target.value = ''
+              }} 
+            />
+            <SecondaryButton onClick={handleExportAll}><Download className="w-3.5 h-3.5" /> Exportar</SecondaryButton>
+            <PrimaryButton onClick={() => setShowCreate(true)}><Plus className="w-3.5 h-3.5" /> Novo produto</PrimaryButton>
+          </div>
+        )}
       </div>
       {loading ? (
         <div className="bg-white rounded-2xl border border-[#e6e6e6] p-10 text-center text-[#999] text-[13px]">Carregando...</div>
       ) : (
         <ModuleTable>
           <TableHead>
+            <Th className="w-10">
+              <input 
+                type="checkbox" 
+                checked={filtered.length > 0 && selectedItems.length === filtered.length}
+                onChange={toggleSelectAll}
+                className="rounded border-[#ccc] text-[#3483fa] focus:ring-[#3483fa]"
+              />
+            </Th>
             <Th>SKU</Th><Th>Produto</Th><Th>Fornecedor</Th><Th className="text-right">Custo</Th><Th className="text-right">Estoque</Th><Th className="text-center">Status</Th><Th className="text-right">Ações</Th>
           </TableHead>
           <tbody className="divide-y divide-[#eeeeee]">
@@ -65,6 +149,16 @@ function ProductsTab() {
               const supplierName = (p.suppliers as Record<string, unknown>)?.name as string || '—'
               return (
                 <tr key={p.id as string} onClick={() => router.push(`/produtos/${p.id}`)} className="hover:bg-[#fafafa] transition-colors cursor-pointer">
+                  <Td>
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <input 
+                        type="checkbox" 
+                        checked={selectedItems.includes(p.id as string)}
+                        onChange={() => toggleSelect(p.id as string)}
+                        className="rounded border-[#ccc] text-[#3483fa] focus:ring-[#3483fa]"
+                      />
+                    </div>
+                  </Td>
                   <Td className="font-mono text-[#999]">{p.sku as string}</Td>
                   <Td>
                     <div className="flex items-center gap-4">
@@ -105,6 +199,7 @@ function SuppliersTab() {
   const router = useRouter()
   const [search, setSearch] = useState('')
   const [showCreate, setShowCreate] = useState(false)
+  const [selectedItems, setSelectedItems] = useState<string[]>([])
   const { data: suppliers, loading, refetch } = useSupabaseQuery(async (s) => {
     const { data, error } = await s.from('suppliers').select('*').order('created_at', { ascending: false }).limit(100)
     if (error) throw error
@@ -115,6 +210,41 @@ function SuppliersTab() {
     !search || String(s.name).toLowerCase().includes(search.toLowerCase())
   )
 
+  const toggleSelectAll = () => {
+    if (selectedItems.length === filtered.length) {
+      setSelectedItems([])
+    } else {
+      setSelectedItems(filtered.map((s: any) => s.id as string))
+    }
+  }
+
+  const toggleSelect = (id: string) => {
+    if (selectedItems.includes(id)) {
+      setSelectedItems(selectedItems.filter(i => i !== id))
+    } else {
+      setSelectedItems([...selectedItems, id])
+    }
+  }
+
+  const handleDeleteSelected = async () => {
+    if (!confirm(`Tem certeza que deseja excluir ${selectedItems.length} fornecedor(es)?`)) return
+    const supabase = createClient()
+    await supabase.from('suppliers').delete().in('id', selectedItems)
+    setSelectedItems([])
+    refetch()
+  }
+
+  const handleExportSelected = () => {
+    if (selectedItems.length === 0) return
+    const dataToExport = suppliers?.filter((s: any) => selectedItems.includes(s.id)) || []
+    exportToExcel(dataToExport, 'fornecedores_selecionados')
+    setSelectedItems([])
+  }
+
+  const handleExportAll = () => {
+    exportToExcel(suppliers || [], 'todos_os_fornecedores')
+  }
+
   return (
     <div>
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
@@ -122,16 +252,75 @@ function SuppliersTab() {
       </div>
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:justify-between mb-4">
         <SearchInput placeholder="Buscar fornecedor..." value={search} onChange={setSearch} />
-        <PrimaryButton onClick={() => setShowCreate(true)}><Plus className="w-3.5 h-3.5" /> Novo fornecedor</PrimaryButton>
+        {selectedItems.length > 0 ? (
+          <div className="flex items-center gap-2 bg-[#f0f7ff] px-3 py-1.5 rounded-md border border-[#3483fa]/20">
+            <span className="text-[12px] font-medium text-[#3483fa] mr-2">{selectedItems.length} selecionado(s)</span>
+            <button onClick={handleExportSelected} className="flex items-center gap-1.5 text-[12px] font-medium text-[#3483fa] bg-white px-2.5 py-1.5 rounded border border-[#3483fa]/20 hover:bg-[#3483fa] hover:text-white transition-colors"><Download className="w-3.5 h-3.5" /> Exportar</button>
+            <button onClick={handleDeleteSelected} className="flex items-center gap-1.5 text-[12px] font-medium text-[#e74c3c] bg-white px-2.5 py-1.5 rounded border border-[#e74c3c]/20 hover:bg-[#e74c3c] hover:text-white transition-colors"><Trash2 className="w-3.5 h-3.5" /> Excluir</button>
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center gap-2">
+            <SecondaryButton onClick={() => document.getElementById('import-suppliers')?.click()}><Upload className="w-3.5 h-3.5" /> Importar</SecondaryButton>
+            <input 
+              type="file" 
+              id="import-suppliers" 
+              className="hidden" 
+              accept=".xlsx,.xls,.csv" 
+              onChange={async (e) => {
+                const file = e.target.files?.[0]
+                if (!file) return
+                try {
+                  const data = await importFromExcel(file, {
+                    name: ['nome', 'name', 'fornecedor', 'razão', 'empresa'],
+                    cnpj: ['cnpj', 'documento'],
+                    phone: ['telefone', 'phone', 'celular', 'contato'],
+                    email: ['email', 'e-mail', 'correio']
+                  })
+                  if (data.length > 0) {
+                    const supabase = createClient()
+                    await supabase.from('suppliers').insert(data)
+                    refetch()
+                    alert(`${data.length} fornecedores importados com sucesso!`)
+                  }
+                } catch (err) {
+                  alert('Erro ao importar arquivo.')
+                }
+                e.target.value = ''
+              }} 
+            />
+            <SecondaryButton onClick={handleExportAll}><Download className="w-3.5 h-3.5" /> Exportar</SecondaryButton>
+            <PrimaryButton onClick={() => setShowCreate(true)}><Plus className="w-3.5 h-3.5" /> Novo fornecedor</PrimaryButton>
+          </div>
+        )}
       </div>
       {loading ? (
         <div className="bg-white rounded-2xl border border-[#e6e6e6] p-10 text-center text-[#999] text-[13px]">Carregando...</div>
       ) : (
         <ModuleTable>
-          <TableHead><Th>Fornecedor</Th><Th>Contato</Th><Th>Cidade</Th><Th className="text-right">Prazo</Th><Th className="text-right">Ações</Th></TableHead>
+          <TableHead>
+            <Th className="w-10">
+              <input 
+                type="checkbox" 
+                checked={filtered.length > 0 && selectedItems.length === filtered.length}
+                onChange={toggleSelectAll}
+                className="rounded border-[#ccc] text-[#3483fa] focus:ring-[#3483fa]"
+              />
+            </Th>
+            <Th>Fornecedor</Th><Th>Contato</Th><Th>Cidade</Th><Th className="text-right">Prazo</Th><Th className="text-right">Ações</Th>
+          </TableHead>
           <tbody className="divide-y divide-[#eeeeee]">
             {filtered.map((s: Record<string, unknown>) => (
               <tr key={s.id as string} onClick={() => router.push(`/fornecedores/${s.id}`)} className="hover:bg-[#fafafa] transition-colors cursor-pointer">
+                <Td>
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <input 
+                      type="checkbox" 
+                      checked={selectedItems.includes(s.id as string)}
+                      onChange={() => toggleSelect(s.id as string)}
+                      className="rounded border-[#ccc] text-[#3483fa] focus:ring-[#3483fa]"
+                    />
+                  </div>
+                </Td>
                 <Td>
                   <div className="flex items-center gap-4">
                     <div className="w-11 h-11 rounded-full bg-[#f5f5f5] border-2 border-[#e6e6e6] overflow-hidden flex items-center justify-center flex-shrink-0">
@@ -162,12 +351,66 @@ function SuppliersTab() {
 }
 
 function PurchasesTab() {
+  const router = useRouter()
+  const [search, setSearch] = useState('')
   const [showCreate, setShowCreate] = useState(false)
+  const [selectedItems, setSelectedItems] = useState<string[]>([])
   const { data: purchases, loading, refetch } = useSupabaseQuery(async (s) => {
     const { data, error } = await s.from('purchases').select('*, suppliers(name), profiles(name), purchase_items(*)').order('created_at', { ascending: false }).limit(100)
     if (error) throw error
     return data || []
   })
+
+  const filtered = (purchases || []).filter((p: Record<string, unknown>) => {
+    const invoiceStr = String(p.invoice || 'S/N').toLowerCase()
+    const supplierStr = String((p.suppliers as any)?.name || '').toLowerCase()
+    return !search || invoiceStr.includes(search.toLowerCase()) || supplierStr.includes(search.toLowerCase())
+  })
+
+  const toggleSelectAll = () => {
+    if (selectedItems.length === filtered.length) {
+      setSelectedItems([])
+    } else {
+      setSelectedItems(filtered.map((p: any) => p.id as string))
+    }
+  }
+
+  const toggleSelect = (id: string) => {
+    if (selectedItems.includes(id)) {
+      setSelectedItems(selectedItems.filter(i => i !== id))
+    } else {
+      setSelectedItems([...selectedItems, id])
+    }
+  }
+
+  const handleDeleteSelected = async () => {
+    if (!confirm(`Tem certeza que deseja excluir ${selectedItems.length} compra(s)? Essa ação não pode ser desfeita.`)) return
+    const supabase = createClient()
+    await supabase.from('purchases').delete().in('id', selectedItems)
+    setSelectedItems([])
+    refetch()
+  }
+
+  const handleExportSelected = () => {
+    if (selectedItems.length === 0) return
+    const dataToExport = purchases?.filter((p: any) => selectedItems.includes(p.id)) || []
+    exportToExcel(dataToExport, 'compras_selecionadas')
+    setSelectedItems([])
+  }
+
+  const handleExportAll = () => {
+    exportToExcel(purchases || [], 'todas_as_compras')
+  }
+
+  const [cancelModalId, setCancelModalId] = useState<string | null>(null)
+
+  const confirmCancelPurchase = async () => {
+    if (!cancelModalId) return
+    const supabase = createClient()
+    await supabase.from('purchases').update({ status: 'CANCELED' }).eq('id', cancelModalId)
+    setCancelModalId(null)
+    refetch()
+  }
 
   return (
     <div>
@@ -176,20 +419,78 @@ function PurchasesTab() {
         <StatCard label="Valor Total" value={`R$ ${(purchases || []).reduce((a: number, b: Record<string, unknown>) => a + (Number(b.total_cost) || 0), 0).toLocaleString('pt-BR')}`} />
       </div>
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:justify-between mb-4">
-        <SearchInput placeholder="Buscar compra..." />
-        <PrimaryButton onClick={() => setShowCreate(true)}><Plus className="w-3.5 h-3.5" /> Nova compra</PrimaryButton>
+        <SearchInput placeholder="Buscar compra..." value={search} onChange={setSearch} />
+        {selectedItems.length > 0 ? (
+          <div className="flex items-center gap-2 bg-[#f0f7ff] px-3 py-1.5 rounded-md border border-[#3483fa]/20">
+            <span className="text-[12px] font-medium text-[#3483fa] mr-2">{selectedItems.length} selecionado(s)</span>
+            <button onClick={handleExportSelected} className="flex items-center gap-1.5 text-[12px] font-medium text-[#3483fa] bg-white px-2.5 py-1.5 rounded border border-[#3483fa]/20 hover:bg-[#3483fa] hover:text-white transition-colors"><Download className="w-3.5 h-3.5" /> Exportar</button>
+            <button onClick={handleDeleteSelected} className="flex items-center gap-1.5 text-[12px] font-medium text-[#e74c3c] bg-white px-2.5 py-1.5 rounded border border-[#e74c3c]/20 hover:bg-[#e74c3c] hover:text-white transition-colors"><Trash2 className="w-3.5 h-3.5" /> Excluir</button>
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center gap-2">
+            <SecondaryButton onClick={() => document.getElementById('import-purchases')?.click()}><Upload className="w-3.5 h-3.5" /> Importar</SecondaryButton>
+            <input 
+              type="file" 
+              id="import-purchases" 
+              className="hidden" 
+              accept=".xlsx,.xls,.csv" 
+              onChange={async (e) => {
+                const file = e.target.files?.[0]
+                if (!file) return
+                try {
+                  const data = await importFromExcel(file, {
+                    invoice: ['nota', 'nf', 'invoice', 'documento'],
+                    total_cost: ['custo total', 'total', 'valor', 'montante'],
+                    notes: ['observação', 'notas', 'observações', 'obs']
+                  })
+                  if (data.length > 0) {
+                    const supabase = createClient()
+                    await supabase.from('purchases').insert(data)
+                    refetch()
+                    alert(`${data.length} compras importadas com sucesso! (Atenção: Itens não são importados por esta via)`)
+                  }
+                } catch (err) {
+                  alert('Erro ao importar arquivo.')
+                }
+                e.target.value = ''
+              }} 
+            />
+            <SecondaryButton onClick={handleExportAll}><Download className="w-3.5 h-3.5" /> Exportar</SecondaryButton>
+            <PrimaryButton onClick={() => setShowCreate(true)}><Plus className="w-3.5 h-3.5" /> Nova compra</PrimaryButton>
+          </div>
+        )}
       </div>
       {loading ? (
         <div className="bg-white rounded-2xl border border-[#e6e6e6] p-10 text-center text-[#999] text-[13px]">Carregando...</div>
       ) : (
         <ModuleTable>
-          <TableHead><Th>Data</Th><Th>Fornecedor</Th><Th>Comprador</Th><Th className="text-right">Custo Total</Th><Th className="text-center">Status</Th></TableHead>
+          <TableHead>
+            <Th className="w-10">
+              <input 
+                type="checkbox" 
+                checked={filtered.length > 0 && selectedItems.length === filtered.length}
+                onChange={toggleSelectAll}
+                className="rounded border-[#ccc] text-[#3483fa] focus:ring-[#3483fa]"
+              />
+            </Th>
+            <Th>Data</Th><Th>Fornecedor</Th><Th>Comprador</Th><Th className="text-right">Custo Total</Th><Th className="text-center">Status</Th><Th className="text-right w-12">Ações</Th>
+          </TableHead>
           <tbody className="divide-y divide-[#eeeeee]">
-            {(purchases || []).map((p: Record<string, unknown>) => {
+            {filtered.map((p: Record<string, unknown>) => {
               const supplierName = (p.suppliers as Record<string, unknown>)?.name as string || '—'
               const buyerName = (p.profiles as Record<string, unknown>)?.name as string || '—'
               return (
                 <tr key={p.id as string} className="hover:bg-[#fafafa] transition-colors">
+                  <Td>
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <input 
+                        type="checkbox" 
+                        checked={selectedItems.includes(p.id as string)}
+                        onChange={() => toggleSelect(p.id as string)}
+                        className="rounded border-[#ccc] text-[#3483fa] focus:ring-[#3483fa]"
+                      />
+                    </div>
+                  </Td>
                   <Td>{new Date(p.date as string).toLocaleDateString('pt-BR')}</Td>
                   <Td>
                     <div className="flex items-center gap-4">
@@ -204,7 +505,23 @@ function PurchasesTab() {
                   </Td>
                   <Td className="text-[#666]">{buyerName}</Td>
                   <Td className="text-right font-medium text-[#333]">R$ {Number(p.total_cost).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</Td>
-                  <Td className="text-center"><span className="inline-flex px-2 py-[2px] rounded text-[10px] font-medium bg-[#f0fff4] text-[#38a169]">Concluída</span></Td>
+                  <Td className="text-center">
+                    <span className={`inline-flex px-2 py-[2px] rounded text-[10px] font-medium ${p.status === 'CANCELED' ? 'bg-[#fff5f5] text-[#e74c3c]' : 'bg-[#f0fff4] text-[#38a169]'}`}>
+                      {p.status === 'CANCELED' ? 'Cancelada' : 'Concluída'}
+                    </span>
+                  </Td>
+                  <Td className="text-right">
+                    <div className="flex items-center justify-end gap-0.5" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+                      <button onClick={() => router.push(`/purchases/${p.id}/nota`)} className="p-1.5 rounded hover:bg-[#f5f5f5] text-[#ccc] hover:text-[#666] transition-colors" title="Imprimir Comprovante">
+                        <Printer className="w-3.5 h-3.5" />
+                      </button>
+                      {p.status !== 'CANCELED' && (
+                        <button onClick={() => setCancelModalId(p.id as string)} className="p-1.5 rounded hover:bg-[#fff5f5] text-[#ccc] hover:text-[#e74c3c] transition-colors" title="Cancelar Compra">
+                          <Ban className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  </Td>
                 </tr>
               )
             })}
@@ -212,6 +529,18 @@ function PurchasesTab() {
         </ModuleTable>
       )}
       {showCreate && <PurchaseCreateModal open={showCreate} onClose={() => setShowCreate(false)} onCreated={() => { refetch() }} />}
+      {cancelModalId && (
+        <DeleteConfirmationModal
+          isOpen={!!cancelModalId}
+          onClose={() => setCancelModalId(null)}
+          onConfirm={confirmCancelPurchase}
+          itemName="esta compra"
+          description="O status será alterado para Cancelada e a nota refletirá essa alteração. O item não será excluído do sistema."
+          actionWord="CANCELAR"
+          actionTitle="Cancelamento"
+          buttonText="Sim, Cancelar"
+        />
+      )}
     </div>
   )
 }

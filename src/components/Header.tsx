@@ -2,12 +2,14 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
+import { TeknixLogo } from './TeknixLogo'
 import { usePathname, useRouter } from 'next/navigation'
-import { Bell, ChevronDown, LogOut, User, Settings, Calculator, Menu, X } from 'lucide-react'
+import { Bell, ChevronDown, LogOut, User, Settings, Calculator, BadgeDollarSign, Menu, X } from 'lucide-react'
 import Image from 'next/image'
 import { createClient } from '@/utils/supabase/client'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
 import MarginCalculator from '@/components/MarginCalculator'
+import BasicCalculatorPopup from '@/components/BasicCalculatorPopup'
 
 const ROUTE_LABELS: Record<string, string> = {
   dashboard: 'Início',
@@ -59,10 +61,6 @@ function HeaderActions({
   userEmail,
   userId,
   userAvatarUrl,
-  userOpen,
-  setUserOpen,
-  notifOpen,
-  setNotifOpen,
   onCalcOpen,
 }: {
   userName: string
@@ -70,16 +68,15 @@ function HeaderActions({
   userEmail: string
   userId: string
   userAvatarUrl?: string | null
-  userOpen: boolean
-  setUserOpen: (v: boolean) => void
-  notifOpen: boolean
-  setNotifOpen: (v: boolean) => void
   onCalcOpen: () => void
 }) {
+  const [userOpen, setUserOpen] = useState(false)
+  const [notifOpen, setNotifOpen] = useState(false)
   const userRef = useRef<HTMLDivElement>(null)
   const notifRef = useRef<HTMLDivElement>(null)
   const { notifications, unreadCount, markAllAsRead, markAsRead } = useNotification()
   const pathname = usePathname()
+  const router = useRouter()
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -124,12 +121,31 @@ function HeaderActions({
                     key={n.id}
                     onClick={() => {
                       if (!n.is_read) markAsRead(n.id)
+                      
+                      if (n.module && n.entity_id) {
+                        let path = ''
+                        switch(n.module) {
+                          case 'products': path = `/produtos/${n.entity_id}/editar`; break;
+                          case 'suppliers': path = `/fornecedores/${n.entity_id}/editar`; break;
+                          case 'purchases': path = `/compras/${n.entity_id}`; break;
+                          case 'sales': path = `/vendas/${n.entity_id}`; break;
+                          case 'orders': path = `/pedidos`; break;
+                          case 'users': path = `/sistema/colaboradores`; break;
+                        }
+                        if (path) {
+                          setNotifOpen(false)
+                          router.push(path)
+                        }
+                      }
                     }}
                     className={`p-3 rounded-xl mb-1 cursor-pointer transition-colors ${n.is_read ? 'hover:bg-[#f5f5f5]' : 'bg-[#f0f7ff] hover:bg-[#e6f0ff]'}`}
                   >
                     <div className="flex gap-3">
                       <div>
-                        <p className={`text-[13px] ${n.is_read ? 'text-[#666]' : 'text-[#333] font-medium'}`}>{n.title}</p>
+                        <p className={`text-[13px] ${n.is_read ? 'text-[#666]' : 'text-[#333] font-medium'}`}>
+                          {n.actor_name && <span className="font-bold mr-1">{n.actor_name}</span>}
+                          {n.title}
+                        </p>
                         <p className="text-[11px] text-[#666] mt-0.5">{n.message}</p>
                       </div>
                     </div>
@@ -144,9 +160,9 @@ function HeaderActions({
       <button
         onClick={onCalcOpen}
         className="w-10 h-10 rounded-full flex items-center justify-center text-[#333] hover:bg-[#EEFFB3]/60 transition-colors"
-        title="Calculadora"
+        title="Precificação"
       >
-        <Calculator className="w-5 h-5" strokeWidth={1.5} />
+        <BadgeDollarSign className="w-5 h-5" strokeWidth={1.5} />
       </button>
 
       <div ref={userRef} className="relative">
@@ -185,12 +201,24 @@ function HeaderActions({
               <p className="text-xs text-[#999] mt-0.5">{userRole}</p>
             </div>
             <div className="p-1.5">
-              <Link href="/sistema/perfil" className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-[#666] hover:bg-[#f5f5f5] rounded-xl">
+              <button 
+                onClick={() => {
+                  setUserOpen(false)
+                  router.push('/sistema/perfil')
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-[#666] hover:bg-[#f5f5f5] rounded-xl"
+              >
                 <User className="w-4 h-4" strokeWidth={1.5} /> Meu Perfil
-              </Link>
-              <Link href="/sistema" className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-[#666] hover:bg-[#f5f5f5] rounded-xl">
+              </button>
+              <button 
+                onClick={() => {
+                  setUserOpen(false)
+                  router.push('/sistema')
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-[#666] hover:bg-[#f5f5f5] rounded-xl"
+              >
                 <Settings className="w-4 h-4" strokeWidth={1.5} /> Configurações
-              </Link>
+              </button>
             </div>
             <div className="p-1.5 border-t border-[#eeeeee]">
               <button 
@@ -211,158 +239,10 @@ function HeaderActions({
   )
 }
 
-function BasicCalculatorPopup({ onClose }: { onClose: () => void }) {
-  const [display, setDisplay] = useState('0')
-  const [equation, setEquation] = useState('')
-  const popupRef = useRef<HTMLDivElement>(null)
-  
-  const [isMobile, setIsMobile] = useState(false)
-  const [position, setPosition] = useState({ x: 100, y: 100 })
-  const [isDragging, setIsDragging] = useState(false)
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
-
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 1024)
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent | TouchEvent) {
-      if (isMobile) {
-        if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
-          onClose()
-        }
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    document.addEventListener('touchstart', handleClickOutside)
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-      document.removeEventListener('touchstart', handleClickOutside)
-    }
-  }, [isMobile, onClose])
-
-  useEffect(() => {
-    function handlePointerMove(e: PointerEvent) {
-      if (isDragging) {
-        setPosition({
-          x: e.clientX - dragOffset.x,
-          y: e.clientY - dragOffset.y,
-        })
-      }
-    }
-    function handlePointerUp() {
-      setIsDragging(false)
-    }
-    if (isDragging) {
-      document.addEventListener('pointermove', handlePointerMove)
-      document.addEventListener('pointerup', handlePointerUp)
-    }
-    return () => {
-      document.removeEventListener('pointermove', handlePointerMove)
-      document.removeEventListener('pointerup', handlePointerUp)
-    }
-  }, [isDragging, dragOffset])
-
-  const handlePointerDown = (e: React.PointerEvent) => {
-    if (!isMobile) {
-      const target = e.target as HTMLElement
-      if (target.tagName.toLowerCase() !== 'button' && !target.closest('button')) {
-        setIsDragging(true)
-        setDragOffset({
-          x: e.clientX - position.x,
-          y: e.clientY - position.y,
-        })
-        e.currentTarget.setPointerCapture(e.pointerId)
-      }
-    }
-  }
-
-  const handleNum = (num: string) => {
-    setDisplay(prev => prev === '0' ? num : prev + num)
-  }
-
-  const handleOp = (op: string) => {
-    setEquation(display + ' ' + op + ' ')
-    setDisplay('0')
-  }
-
-  const handleCalc = () => {
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-implied-eval
-      const result = new Function('return ' + equation + display)()
-      setDisplay(String(result))
-      setEquation('')
-    } catch {
-      setDisplay('Erro')
-    }
-  }
-
-  const handleClear = () => {
-    setDisplay('0')
-    setEquation('')
-  }
-
-  const handlePct = () => {
-    setDisplay(String(parseFloat(display) / 100))
-  }
-
-  return (
-    <div 
-      ref={popupRef} 
-      onPointerDown={handlePointerDown}
-      className={`fixed z-[100] bg-[#f5f5f5] p-5 pt-6 rounded-2xl w-[280px] sm:w-64 shadow-[0_8px_32px_rgba(0,0,0,0.2)] border border-[#e6e6e6] ${isMobile ? 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2' : 'cursor-move select-none'}`}
-      style={isMobile ? {} : { left: position.x, top: position.y }}
-    >
-      {!isMobile && (
-        <button 
-          onClick={onClose}
-          className="absolute top-2 right-2 w-5 h-5 flex items-center justify-center rounded-full hover:bg-[#e6e6e6] text-[#999] hover:text-[#333] transition-colors"
-          title="Fechar Calculadora"
-        >
-          <X className="w-3 h-3" />
-        </button>
-      )}
-
-      <div className="bg-white p-3 rounded-xl mb-3 text-right border border-[#e6e6e6] shadow-sm">
-        <div className="text-[10px] text-[#999] h-3 mb-1">{equation}</div>
-        <div className="text-2xl font-bold text-[#333] tracking-tight truncate">{display}</div>
-      </div>
-      <div className="grid grid-cols-4 gap-2">
-        <button onClick={handleClear} className="col-span-2 py-2 rounded-xl bg-[#e6e6e6] hover:bg-[#d9d9d9] font-bold text-[#333] transition-colors">AC</button>
-        <button onClick={handlePct} className="py-2 rounded-xl bg-[#e6e6e6] hover:bg-[#d9d9d9] font-bold text-[#333] transition-colors">%</button>
-        <button onClick={() => handleOp('/')} className="py-2 rounded-xl bg-[#3483fa] hover:bg-[#2968c8] font-bold text-white transition-colors">÷</button>
-        
-        <button onClick={() => handleNum('7')} className="py-2 rounded-xl bg-white hover:bg-gray-50 border border-[#e6e6e6] font-bold text-lg text-[#333] shadow-sm transition-colors">7</button>
-        <button onClick={() => handleNum('8')} className="py-2 rounded-xl bg-white hover:bg-gray-50 border border-[#e6e6e6] font-bold text-lg text-[#333] shadow-sm transition-colors">8</button>
-        <button onClick={() => handleNum('9')} className="py-2 rounded-xl bg-white hover:bg-gray-50 border border-[#e6e6e6] font-bold text-lg text-[#333] shadow-sm transition-colors">9</button>
-        <button onClick={() => handleOp('*')} className="py-2 rounded-xl bg-[#3483fa] hover:bg-[#2968c8] font-bold text-white transition-colors">×</button>
-        
-        <button onClick={() => handleNum('4')} className="py-2 rounded-xl bg-white hover:bg-gray-50 border border-[#e6e6e6] font-bold text-lg text-[#333] shadow-sm transition-colors">4</button>
-        <button onClick={() => handleNum('5')} className="py-2 rounded-xl bg-white hover:bg-gray-50 border border-[#e6e6e6] font-bold text-lg text-[#333] shadow-sm transition-colors">5</button>
-        <button onClick={() => handleNum('6')} className="py-2 rounded-xl bg-white hover:bg-gray-50 border border-[#e6e6e6] font-bold text-lg text-[#333] shadow-sm transition-colors">6</button>
-        <button onClick={() => handleOp('-')} className="py-2 rounded-xl bg-[#3483fa] hover:bg-[#2968c8] font-bold text-white transition-colors">-</button>
-        
-        <button onClick={() => handleNum('1')} className="py-2 rounded-xl bg-white hover:bg-gray-50 border border-[#e6e6e6] font-bold text-lg text-[#333] shadow-sm transition-colors">1</button>
-        <button onClick={() => handleNum('2')} className="py-2 rounded-xl bg-white hover:bg-gray-50 border border-[#e6e6e6] font-bold text-lg text-[#333] shadow-sm transition-colors">2</button>
-        <button onClick={() => handleNum('3')} className="py-2 rounded-xl bg-white hover:bg-gray-50 border border-[#e6e6e6] font-bold text-lg text-[#333] shadow-sm transition-colors">3</button>
-        <button onClick={() => handleOp('+')} className="py-2 rounded-xl bg-[#3483fa] hover:bg-[#2968c8] font-bold text-white transition-colors">+</button>
-        
-        <button onClick={() => handleNum('0')} className="col-span-2 py-2 rounded-xl bg-white hover:bg-gray-50 border border-[#e6e6e6] font-bold text-lg text-[#333] shadow-sm transition-colors">0</button>
-        <button onClick={() => handleNum('.')} className="py-2 rounded-xl bg-white hover:bg-gray-50 border border-[#e6e6e6] font-bold text-lg text-[#333] shadow-sm transition-colors">,</button>
-        <button onClick={handleCalc} className="py-2 rounded-xl bg-[#00a650] hover:bg-[#008a42] font-bold text-white transition-colors">=</button>
-      </div>
-    </div>
-  )
-}
 
 export default function Header({ userName, userRole, userEmail, userId, userAvatarUrl, onMenuOpen, collapsed, onToggleCollapse }: HeaderProps) {
   const pathname = usePathname()
   const pageTitle = getPageTitle(pathname)
-  const [userOpen, setUserOpen] = useState(false)
-  const [notifOpen, setNotifOpen] = useState(false)
   const [calcOpen, setCalcOpen] = useState(false)
   const [showBasicCalc, setShowBasicCalc] = useState(false)
 
@@ -378,8 +258,8 @@ export default function Header({ userName, userRole, userEmail, userId, userAvat
           >
             <Menu className="w-5 h-5 text-[#333]" strokeWidth={1.75} />
           </button>
-          <div className="flex items-center gap-1.5 sm:gap-2 text-[#333] font-bold text-sm">
-            TEKNIX
+          <div className="flex items-center text-[#333]">
+            <TeknixLogo className="h-4 w-auto fill-[#333]" />
           </div>
           <div className="flex items-center gap-0.5">
             <HeaderActions
@@ -388,10 +268,6 @@ export default function Header({ userName, userRole, userEmail, userId, userAvat
               userEmail={userEmail}
               userId={userId}
               userAvatarUrl={userAvatarUrl}
-              userOpen={userOpen}
-              setUserOpen={setUserOpen}
-              notifOpen={notifOpen}
-              setNotifOpen={setNotifOpen}
               onCalcOpen={() => setCalcOpen(true)}
             />
           </div>
@@ -432,10 +308,6 @@ export default function Header({ userName, userRole, userEmail, userId, userAvat
             userEmail={userEmail}
             userId={userId}
             userAvatarUrl={userAvatarUrl}
-            userOpen={userOpen}
-            setUserOpen={setUserOpen}
-            notifOpen={notifOpen}
-            setNotifOpen={setNotifOpen}
             onCalcOpen={() => setCalcOpen(true)}
           />
         </div>

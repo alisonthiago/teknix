@@ -245,7 +245,7 @@ export default function SistemaPage() {
   }
 
   return (
-    <div className="mp-stack">
+    <div className="mp-stack max-w-[900px] mx-auto w-full">
       <PageHeader
         title="Configurações"
         description="Gerencie sua conta, empresa, integrações e operação"

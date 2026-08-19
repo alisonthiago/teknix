@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
-import { ArrowLeft, Package, Clock, Loader2, CheckCircle2, Send, Truck } from 'lucide-react'
+import { ArrowLeft, Package, Clock, Loader2, CheckCircle2, Send, Printer } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import type { OrderDetail } from '@/lib/detail-types'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
@@ -168,6 +168,13 @@ function OrderActions({ status, orderId }: { status: string; orderId: string }) 
 
   return (
     <div className="flex flex-wrap gap-2 mt-3">
+      <button
+        onClick={() => router.push(`/pedidos/${orderId}/nota`)}
+        className="inline-flex items-center gap-1.5 bg-white border border-[#e6e6e6] text-[#333] text-[11px] font-medium px-3 py-1.5 rounded-md hover:bg-[#f5f5f5] transition-colors"
+      >
+        <Printer className="w-3 h-3" />
+        Imprimir Comprovante
+      </button>
       {status === 'NOVO' && (
         <button
           onClick={() => handleAction(() => moveOrderToPaid(orderId))}

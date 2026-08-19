@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
+import { getBaseUrl } from '@/utils/url'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -11,7 +12,7 @@ export async function GET(request: Request) {
 
   const clientId = process.env.MERCADOLIVRE_CLIENT_ID
   const clientSecret = process.env.MERCADOLIVRE_CLIENT_SECRET
-  const redirectUri = process.env.MERCADOLIVRE_REDIRECT_URI
+  const redirectUri = `${getBaseUrl()}/api/auth/mercadolivre/callback`
 
   if (!clientId || !clientSecret || !redirectUri) {
     return NextResponse.redirect(new URL('/marketplaces?error=Missing_config', request.url))

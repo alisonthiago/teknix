@@ -10,7 +10,7 @@ export default function ConfigSubLayout({ title, description, backHref = '/siste
   children: React.ReactNode
 }) {
   return (
-    <div className="max-w-[900px]">
+    <div className="max-w-[900px] mx-auto w-full">
       <div className="mb-5">
         <Link href={backHref} className="inline-flex items-center gap-1.5 text-[12px] text-[#999] hover:text-[#333] transition-colors">
           <ArrowLeft className="w-3.5 h-3.5" />

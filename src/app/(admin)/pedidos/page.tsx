@@ -2,11 +2,14 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ClipboardList, Pickaxe, Send, CheckCircle2 } from 'lucide-react'
+import { ClipboardList, Pickaxe, Send, CheckCircle2, Download, Trash2, Printer } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { PageHeader, StatCard, SearchInput, ModuleTable, TableHead, Th, Td } from '@/components/ui/module'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
+import { createClient } from '@/utils/supabase/client'
+import { exportToExcel, importFromExcel } from '@/utils/excel'
+
 
 type StatusConfig = { l: string; c: string }
 const SC: Record<string, StatusConfig> = {
@@ -30,7 +33,8 @@ function getStatus(status: string): StatusConfig {
 function OrdersTab() {
   const router = useRouter()
   const [search, setSearch] = useState('')
-  const { data: orders, loading } = useSupabaseQuery(async (s) => {
+  const [selectedItems, setSelectedItems] = useState<string[]>([])
+  const { data: orders, loading, refetch } = useSupabaseQuery(async (s) => {
     const { data, error } = await s.from('orders').select('*, marketplaces(name, code, logo), marketplace_accounts(account_name), order_items(*)').order('created_at', { ascending: false })
     if (error) throw error
     return data || []
@@ -40,6 +44,41 @@ function OrdersTab() {
     !search || String(o.order_number).toLowerCase().includes(search.toLowerCase()) || String(o.customer_name).toLowerCase().includes(search.toLowerCase())
   )
 
+  const toggleSelectAll = () => {
+    if (selectedItems.length === filtered.length) {
+      setSelectedItems([])
+    } else {
+      setSelectedItems(filtered.map((o: any) => o.id as string))
+    }
+  }
+
+  const toggleSelect = (id: string) => {
+    if (selectedItems.includes(id)) {
+      setSelectedItems(selectedItems.filter(i => i !== id))
+    } else {
+      setSelectedItems([...selectedItems, id])
+    }
+  }
+
+  const handleDeleteSelected = async () => {
+    if (!confirm(`Tem certeza que deseja excluir ${selectedItems.length} pedido(s)?`)) return
+    const supabase = createClient()
+    await supabase.from('orders').delete().in('id', selectedItems)
+    setSelectedItems([])
+    refetch()
+  }
+
+  const handleExportSelected = () => {
+    if (selectedItems.length === 0) return
+    const dataToExport = orders?.filter((o: any) => selectedItems.includes(o.id)) || []
+    exportToExcel(dataToExport, 'pedidos_selecionados')
+    setSelectedItems([])
+  }
+
+  const handleExportAll = () => {
+    exportToExcel(orders || [], 'todos_os_pedidos')
+  }
+
   return (
     <div>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
@@ -48,24 +87,89 @@ function OrdersTab() {
         <StatCard label="Enviados" value={String(orders?.filter((o: Record<string, unknown>) => ['ENVIADO', 'ENTREGUE'].includes(o.status as string)).length || 0)} />
         <StatCard label="Cancelados" value={String(orders?.filter((o: Record<string, unknown>) => o.status === 'CANCELADO').length || 0)} />
       </div>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4"><SearchInput placeholder="Buscar pedido..." value={search} onChange={setSearch} /></div>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+        <SearchInput placeholder="Buscar pedido..." value={search} onChange={setSearch} />
+        {selectedItems.length > 0 ? (
+          <div className="flex items-center gap-2 bg-[#f0f7ff] px-3 py-1.5 rounded-md border border-[#3483fa]/20">
+            <span className="text-[12px] font-medium text-[#3483fa] mr-2">{selectedItems.length} selecionado(s)</span>
+            <button onClick={handleExportSelected} className="flex items-center gap-1.5 text-[12px] font-medium text-[#3483fa] bg-white px-2.5 py-1.5 rounded border border-[#3483fa]/20 hover:bg-[#3483fa] hover:text-white transition-colors"><Download className="w-3.5 h-3.5" /> Exportar</button>
+            <button onClick={handleDeleteSelected} className="flex items-center gap-1.5 text-[12px] font-medium text-[#e74c3c] bg-white px-2.5 py-1.5 rounded border border-[#e74c3c]/20 hover:bg-[#e74c3c] hover:text-white transition-colors"><Trash2 className="w-3.5 h-3.5" /> Excluir</button>
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center gap-2">
+            <button onClick={() => document.getElementById('import-orders')?.click()} className="flex items-center gap-1.5 text-[12px] font-medium text-[#666] bg-white px-2.5 py-1.5 rounded border border-[#ccc] hover:bg-[#f5f5f5] transition-colors"><Download className="w-3.5 h-3.5 rotate-180" /> Importar</button>
+            <input 
+              type="file" 
+              id="import-orders" 
+              className="hidden" 
+              accept=".xlsx,.xls,.csv" 
+              onChange={async (e) => {
+                const file = e.target.files?.[0]
+                if (!file) return
+                try {
+                  const data = await importFromExcel(file, {
+                    order_number: ['pedido', 'número', 'order'],
+                    customer_name: ['cliente', 'comprador', 'nome', 'customer'],
+                    total_amount: ['total', 'valor', 'price', 'preço']
+                  })
+                  if (data.length > 0) {
+                    const supabase = createClient()
+                    await supabase.from('orders').insert(data)
+                    refetch()
+                    alert(`${data.length} pedidos importados com sucesso!`)
+                  }
+                } catch (err) {
+                  alert('Erro ao importar arquivo.')
+                }
+                e.target.value = ''
+              }} 
+            />
+            <button onClick={handleExportAll} className="flex items-center gap-1.5 text-[12px] font-medium text-[#666] bg-white px-2.5 py-1.5 rounded border border-[#ccc] hover:bg-[#f5f5f5] transition-colors"><Download className="w-3.5 h-3.5" /> Exportar</button>
+          </div>
+        )}
+      </div>
       {loading ? (
         <div className="bg-white rounded-2xl border border-[#e6e6e6] p-10 text-center text-[#999] text-[13px]">Carregando...</div>
       ) : (
         <ModuleTable>
-          <TableHead><Th>Pedido</Th><Th>Marketplace</Th><Th>Conta</Th><Th>Cliente</Th><Th className="text-right">Total</Th><Th className="text-center">Status</Th></TableHead>
+          <TableHead>
+            <Th className="w-10">
+              <input 
+                type="checkbox" 
+                checked={filtered.length > 0 && selectedItems.length === filtered.length}
+                onChange={toggleSelectAll}
+                className="rounded border-[#ccc] text-[#3483fa] focus:ring-[#3483fa]"
+              />
+            </Th>
+            <Th>Pedido</Th><Th>Marketplace</Th><Th>Conta</Th><Th>Cliente</Th><Th className="text-right">Total</Th><Th className="text-center">Status</Th><Th className="text-right w-12">Ações</Th>
+          </TableHead>
           <tbody className="divide-y divide-[#eeeeee]">
             {filtered.map((o: Record<string, unknown>) => {
               const mp = o.marketplaces as Record<string, unknown> | null
               const acc = o.marketplace_accounts as Record<string, unknown> | null
               return (
                 <tr key={o.id as string} onClick={() => router.push(`/pedidos/${o.id}`)} className="hover:bg-[#fafafa] transition-colors cursor-pointer">
+                  <Td>
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <input 
+                        type="checkbox" 
+                        checked={selectedItems.includes(o.id as string)}
+                        onChange={() => toggleSelect(o.id as string)}
+                        className="rounded border-[#ccc] text-[#3483fa] focus:ring-[#3483fa]"
+                      />
+                    </div>
+                  </Td>
                   <Td className="font-mono font-medium text-[#333]">{o.order_number as string}</Td>
                   <Td className="text-[#999]"><div className="flex items-center gap-1.5">{typeof mp?.logo === 'string' && <MarketplaceLogo name={mp.name as string} className="w-4 h-4" />}{(mp?.name as string) || '—'}</div></Td>
                   <Td className="text-[11px] text-[#999]">{(acc?.account_name as string) || '—'}</Td>
                   <Td className="font-medium text-[#333]">{(o.customer_name as string) || '—'}</Td>
                   <Td className="text-right font-medium text-[#333]">R$ {Number(o.total_amount || 0).toFixed(2)}</Td>
                   <Td className="text-center"><span className={`inline-flex px-2 py-[2px] rounded text-[10px] font-medium ${getStatus(o.status as string).c}`}>{getStatus(o.status as string).l}</span></Td>
+                  <Td className="text-right">
+                    <button onClick={(e) => { e.stopPropagation(); router.push(`/pedidos/${o.id}/nota`); }} className="p-1.5 text-[#999] hover:text-[#333] hover:bg-[#f5f5f5] rounded-md transition-colors" title="Imprimir Comprovante">
+                      <Printer className="w-4 h-4" />
+                    </button>
+                  </Td>
                 </tr>
               )
             })}

@@ -2,8 +2,11 @@
 
 import { useState } from 'react'
 import ConfigSubLayout, { ConfigSection } from '@/components/ConfigSubLayout'
-import { Plus } from 'lucide-react'
+import { Plus, Edit2, Trash2 } from 'lucide-react'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
+import ColaboradorModal from '@/components/ColaboradorModal'
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal'
+import { deleteColaborador } from '@/app/actions/colaboradores'
 
 interface Profile {
   id: string
@@ -27,12 +30,39 @@ const ROLE_COLORS: Record<string, string> = {
 }
 
 export default function ColaboradoresPage() {
-  const [showInvite, setShowInvite] = useState(false)
-  const { data: users, loading, error } = useSupabaseQuery<Profile[]>(async (s) => {
+  const [showModal, setShowModal] = useState(false)
+  const [colabToEdit, setColabToEdit] = useState<Profile | null>(null)
+  const [colabToDelete, setColabToDelete] = useState<Profile | null>(null)
+  
+  const { data: users, loading, error, refetch } = useSupabaseQuery<Profile[]>(async (s) => {
     const { data, error } = await s.from('profiles').select('*').order('name')
     if (error) throw error
     return (data || []) as Profile[]
   })
+
+  const handleEdit = (user: Profile) => {
+    setColabToEdit(user)
+    setShowModal(true)
+  }
+
+  const handleDelete = (user: Profile) => {
+    if (user.email === 'alison@tektou.com') {
+      alert('O usuário Master não pode ser excluído.')
+      return
+    }
+    setColabToDelete(user)
+  }
+
+  const confirmDelete = async () => {
+    if (!colabToDelete) return
+    const res = await deleteColaborador(colabToDelete.id)
+    if (res.success) {
+      refetch()
+    } else {
+      alert(res.error || 'Erro ao excluir colaborador.')
+    }
+    setColabToDelete(null)
+  }
 
   return (
     <ConfigSubLayout title="Colaboradores" description="Pessoas que operam o TEKNIX">
@@ -49,29 +79,17 @@ export default function ColaboradoresPage() {
             </>
           )}
         </div>
-        <button onClick={() => setShowInvite(true)} className="w-full sm:w-auto min-h-[44px] px-3 py-1.5 bg-[#3483fa] text-white text-[11px] font-medium rounded-md hover:bg-[#2968c8] transition-colors flex items-center gap-1 justify-center">
+        <button onClick={() => { setColabToEdit(null); setShowModal(true); }} className="w-full sm:w-auto min-h-[44px] px-3 py-1.5 bg-[#3483fa] text-white text-[11px] font-medium rounded-md hover:bg-[#2968c8] transition-colors flex items-center gap-1 justify-center">
           <Plus className="w-3.5 h-3.5" /> Adicionar colaborador
         </button>
       </div>
 
-      {showInvite && (
-        <ConfigSection title="Novo colaborador">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div><label className="block text-[11px] text-[#999] mb-1">Nome</label><input className="w-full px-3 py-2 border border-[#e6e6e6] rounded-md text-[13px] outline-none focus:border-[#3483fa]" /></div>
-            <div><label className="block text-[11px] text-[#999] mb-1">E-mail</label><input className="w-full px-3 py-2 border border-[#e6e6e6] rounded-md text-[13px] outline-none focus:border-[#3483fa]" /></div>
-            <div><label className="block text-[11px] text-[#999] mb-1">Telefone</label><input className="w-full px-3 py-2 border border-[#e6e6e6] rounded-md text-[13px] outline-none focus:border-[#3483fa]" /></div>
-            <div><label className="block text-[11px] text-[#999] mb-1">Função</label>
-              <select className="w-full px-3 py-2 border border-[#e6e6e6] rounded-md text-[13px] outline-none focus:border-[#3483fa] bg-white">
-                {Object.entries(ROLE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-              </select>
-            </div>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-2 mt-3">
-            <button onClick={() => setShowInvite(false)} className="w-full sm:w-auto min-h-[44px] px-4 py-2 border border-[#e6e6e6] text-[#666] text-[12px] font-medium rounded-md hover:bg-[#f5f5f5]">Cancelar</button>
-            <button className="w-full sm:w-auto min-h-[44px] px-4 py-2 bg-[#3483fa] text-white text-[12px] font-medium rounded-md hover:bg-[#2968c8]">Enviar convite</button>
-          </div>
-        </ConfigSection>
-      )}
+      <ColaboradorModal 
+        open={showModal} 
+        onClose={() => setShowModal(false)} 
+        onSuccess={() => refetch()} 
+        colaborador={colabToEdit} 
+      />
 
       <ConfigSection title="Colaboradores">
         {loading ? (
@@ -90,16 +108,29 @@ export default function ColaboradoresPage() {
                   <th className="text-left py-2 px-3 text-[10px] font-medium text-[#999] uppercase">Função</th>
                   <th className="text-left py-2 px-3 text-[10px] font-medium text-[#999] uppercase">Último acesso</th>
                   <th className="text-center py-2 px-3 text-[10px] font-medium text-[#999] uppercase">Status</th>
+                  <th className="text-right py-2 px-3 text-[10px] font-medium text-[#999] uppercase w-20">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#eeeeee]">
                 {users.map(u => (
                   <tr key={u.id} className="hover:bg-[#fafafa]">
-                    <td className="py-2.5 px-3 font-medium text-[#333]">{u.name}</td>
+                    <td className="py-2.5 px-3 font-medium text-[#333]">{u.name} {u.email === 'alison@tektou.com' && <span className="ml-2 text-[10px] bg-[#333] text-white px-1.5 py-0.5 rounded">MASTER</span>}</td>
                     <td className="py-2.5 px-3 text-[#999]">{u.email}</td>
                     <td className="py-2.5 px-3"><span className={`inline-flex px-2 py-[2px] rounded text-[10px] font-medium ${ROLE_COLORS[u.role] || 'bg-[#f5f5f5] text-[#666]'}`}>{ROLE_LABELS[u.role] || u.role}</span></td>
                     <td className="py-2.5 px-3 text-[#999]">{u.last_login ? new Date(u.last_login).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—'}</td>
                     <td className="py-2.5 px-3 text-center"><span className={`inline-flex px-2 py-[2px] rounded text-[10px] font-medium ${u.status === 'ACTIVE' ? 'bg-[#f0fff4] text-[#38a169]' : 'bg-[#f5f5f5] text-[#999]'}`}>{u.status === 'ACTIVE' ? 'Ativo' : u.status}</span></td>
+                    <td className="py-2.5 px-3 text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <button onClick={() => handleEdit(u)} className="p-1.5 rounded hover:bg-[#e6e6e6] text-[#666] transition-colors" title="Editar">
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        {u.email !== 'alison@tektou.com' && (
+                          <button onClick={() => handleDelete(u)} className="p-1.5 rounded hover:bg-[#fff5f5] text-[#e74c3c] transition-colors" title="Excluir">
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -107,6 +138,14 @@ export default function ColaboradoresPage() {
           </div>
         )}
       </ConfigSection>
+
+      <DeleteConfirmationModal
+        isOpen={!!colabToDelete}
+        onClose={() => setColabToDelete(null)}
+        onConfirm={confirmDelete}
+        itemName={colabToDelete?.name}
+        description={`Esta ação removerá o acesso do colaborador ${colabToDelete?.name} ao sistema.`}
+      />
     </ConfigSubLayout>
   )
 }

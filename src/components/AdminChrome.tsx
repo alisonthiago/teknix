@@ -27,26 +27,30 @@ export default function AdminChrome({
   const [collapsed, setCollapsed] = useState(true)
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] flex">
-      <Sidebar
-        permissions={permissions}
-        mobileOpen={mobileOpen}
-        setMobileOpen={setMobileOpen}
-        collapsed={collapsed}
-        setCollapsed={setCollapsed}
-      />
-      <div className={`flex-1 flex flex-col transition-all duration-300 ${collapsed ? 'lg:ml-[72px]' : 'lg:ml-[260px]'} min-w-0 max-w-full`}>
-        <Header
-          userName={userName}
-          userRole={userRole}
-          userEmail={userEmail}
-          userId={userId}
-          userAvatarUrl={userAvatarUrl}
-          onMenuOpen={() => setMobileOpen(true)}
+    <div className="min-h-screen bg-[#f5f5f5] flex print:bg-white">
+      <div className="print:hidden">
+        <Sidebar
+          permissions={permissions}
+          mobileOpen={mobileOpen}
+          setMobileOpen={setMobileOpen}
           collapsed={collapsed}
-          onToggleCollapse={() => setCollapsed(!collapsed)}
+          setCollapsed={setCollapsed}
         />
-        <main className="flex-1 w-full max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16 py-4 lg:py-8">
+      </div>
+      <div className={`flex-1 flex flex-col transition-all duration-300 ${collapsed ? 'lg:ml-[72px]' : 'lg:ml-[260px]'} min-w-0 max-w-full print:ml-0`}>
+        <div className="print:hidden">
+          <Header
+            userName={userName}
+            userRole={userRole}
+            userEmail={userEmail}
+            userId={userId}
+            userAvatarUrl={userAvatarUrl}
+            onMenuOpen={() => setMobileOpen(true)}
+            collapsed={collapsed}
+            onToggleCollapse={() => setCollapsed(!collapsed)}
+          />
+        </div>
+        <main className="flex-1 w-full max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16 py-4 lg:py-8 print:p-0 print:max-w-none print:w-full">
           {children}
         </main>
       </div>

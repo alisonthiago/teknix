@@ -19,6 +19,7 @@ import {
   Store,
 } from 'lucide-react'
 import { logout } from '@/app/login/actions'
+import { TeknixLogo } from './TeknixLogo'
 
 interface NavItem {
   href: string
@@ -142,13 +143,8 @@ export default function Sidebar({ permissions, mobileOpen, setMobileOpen, collap
       <aside className={`hidden lg:flex fixed top-0 left-0 h-full bg-white z-50 flex-col transition-all duration-300 ${collapsed ? 'w-[72px]' : 'w-[260px]'}`}>
         <div className={`h-[72px] flex items-center shrink-0 ${collapsed ? 'justify-center px-0' : 'justify-between px-5'}`}>
           {!collapsed && (
-            <Link href="/dashboard" className="flex items-center gap-3">
-              <div className="h-9 w-9 bg-[#B5F500] rounded-full flex items-center justify-center shrink-0">
-                <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none">
-                  <circle cx="12" cy="12" r="10" fill="#333" />
-                  <path d="M8 12h8M12 8v8" stroke="#B5F500" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-              </div>
+            <Link href="/dashboard" className="flex items-center">
+              <TeknixLogo className="h-6 w-auto fill-[#333]" />
             </Link>
           )}
           <button
@@ -189,11 +185,8 @@ export default function Sidebar({ permissions, mobileOpen, setMobileOpen, collap
         }`}
       >
         <div className="flex items-center justify-between h-16 px-4 shrink-0">
-          <Link href="/dashboard" className="flex items-center gap-2.5" onClick={() => setMobileOpen(false)}>
-            <div className="h-8 w-8 bg-[#B5F500] rounded-full flex items-center justify-center shrink-0">
-              <div className="h-4 w-4 bg-[#333] rounded-sm rotate-45" />
-            </div>
-            <span className="font-bold text-base text-[#333]">TEKNIX</span>
+          <Link href="/dashboard" className="flex items-center" onClick={() => setMobileOpen(false)}>
+            <TeknixLogo className="h-6 w-auto fill-[#333]" />
           </Link>
           <button
             onClick={() => setMobileOpen(false)}

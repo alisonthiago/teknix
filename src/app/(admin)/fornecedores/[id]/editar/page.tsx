@@ -8,6 +8,8 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import SupplierLogoEditor from '@/components/SupplierLogoEditor'
 import SupplierCatalogsEditor from '@/components/SupplierCatalogsEditor'
+import SupplierContactsEditor from '@/components/SupplierContactsEditor'
+import CnpjAutoFillInput from '@/components/CnpjAutoFillInput'
 
 export default async function EditSupplierPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -52,32 +54,49 @@ export default async function EditSupplierPage({ params }: { params: Promise<{ i
               </div>
               <div className="space-y-2">
                 <Label htmlFor="cnpj">CNPJ *</Label>
-                <Input id="cnpj" name="cnpj" required defaultValue={supplier.cnpj || ''} />
+                <CnpjAutoFillInput defaultValue={supplier.cnpj || ''} required />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="contact">Pessoa de Contato</Label>
-                <Input id="contact" name="contact" defaultValue={supplier.contact || ''} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone">Telefone *</Label>
-                <Input id="phone" name="phone" required defaultValue={supplier.phone || ''} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="whatsapp">WhatsApp</Label>
-                <Input id="whatsapp" name="whatsapp" defaultValue={supplier.whatsapp || ''} />
-              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="email">E-mail</Label>
                 <Input id="email" name="email" type="email" defaultValue={supplier.email || ''} placeholder="exemplo@dominio.com" />
               </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="city">Cidade (Receita)</Label>
+                  <Input id="city" name="city" defaultValue={supplier.city || ''} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="state">Estado (UF)</Label>
+                  <Input id="state" name="state" defaultValue={supplier.state || ''} />
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Localização & Logística</CardTitle>
+            <CardDescription>Informações sobre o distribuidor e retirada de mercadorias.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="city">Cidade</Label>
-                <Input id="city" name="city" defaultValue={supplier.city || ''} />
+                <Label htmlFor="distributor_city">Cidade (Distribuidor)</Label>
+                <Input id="distributor_city" name="distributor_city" defaultValue={supplier.distributor_city || ''} placeholder="Ex: São Paulo" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="state">Estado (UF)</Label>
-                <Input id="state" name="state" maxLength={2} defaultValue={supplier.state || ''} />
+                <Label htmlFor="distributor_state">Estado (Distribuidor)</Label>
+                <Input id="distributor_state" name="distributor_state" defaultValue={supplier.distributor_state || ''} placeholder="Ex: SP" />
               </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="pickup_address">Endereço de Retirada / Coleta</Label>
+              <Input id="pickup_address" name="pickup_address" defaultValue={supplier.pickup_address || ''} placeholder="Ex: Rua das Flores, 123 - Galpão 2" />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 pt-4 border-t border-[#f0f0f0]">
               <div className="space-y-2">
                 <Label htmlFor="delivery_time">Prazo Médio de Entrega (dias)</Label>
                 <Input id="delivery_time" name="delivery_time" type="number" min="0" defaultValue={supplier.delivery_time || 0} />
@@ -92,15 +111,31 @@ export default async function EditSupplierPage({ params }: { params: Promise<{ i
               </div>
             </div>
 
-            <div className="space-y-2 pt-2">
-              <Label htmlFor="payment_terms">Condições de Pagamento</Label>
-              <Input id="payment_terms" name="payment_terms" defaultValue={supplier.payment_terms || ''} placeholder="Ex: 30 dias, PIX, etc." />
+            <div className="grid grid-cols-2 gap-4 pt-2">
+              <div className="space-y-2">
+                <Label htmlFor="payment_terms">Condições de Pagamento</Label>
+                <Input id="payment_terms" name="payment_terms" defaultValue={supplier.payment_terms || ''} placeholder="Ex: 30 dias, PIX, etc." />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="pix_key">Chave PIX (Pagamento)</Label>
+                <Input id="pix_key" name="pix_key" defaultValue={supplier.pix_key || ''} placeholder="Ex: CNPJ, Email ou Celular" className="text-[#38a169]" />
+              </div>
             </div>
 
             <div className="space-y-2 pt-2">
               <Label htmlFor="notes">Observações</Label>
               <Input id="notes" name="notes" placeholder="Restrições, observações, etc." defaultValue={supplier.notes || ''} />
             </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Contatos</CardTitle>
+            <CardDescription>Gerencie telefones e contatos de WhatsApp deste fornecedor.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SupplierContactsEditor supplierId={id} />
           </CardContent>
         </Card>
 
