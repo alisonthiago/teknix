@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Plus, Store, ArrowRight, Wifi, WifiOff, AlertTriangle, RefreshCw, ExternalLink } from 'lucide-react'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
+import ConnectMarketplaceModal from '@/components/ConnectMarketplaceModal'
 
 interface AccountSummary {
   id: string
@@ -31,7 +32,7 @@ export default function MarketplacesPage() {
   const router = useRouter()
   const [filter, setFilter] = useState<'ALL' | 'CONNECTED' | 'DISCONNECTED'>('ALL')
 
-  const { data: marketplaces, loading, error } = useSupabaseQuery<MarketplaceWithAccounts[]>(async (s) => {
+  const { data: marketplaces, loading, error, refetch } = useSupabaseQuery<MarketplaceWithAccounts[]>(async (s) => {
     const { data: mps, error: mpError } = await s
       .from('marketplaces')
       .select('*')
@@ -73,6 +74,8 @@ export default function MarketplacesPage() {
     return results
   })
 
+  const [showConnectModal, setShowConnectModal] = useState(false)
+
   const filtered = (marketplaces || []).filter(mp => {
     if (filter === 'CONNECTED') return mp.connected_accounts > 0
     if (filter === 'DISCONNECTED') return mp.connected_accounts === 0
@@ -90,13 +93,19 @@ export default function MarketplacesPage() {
           <h1 className="text-lg font-semibold text-[#333]">Marketplaces</h1>
           <p className="text-sm text-[#999]">Gerencie seus canais de venda e múltiplas contas</p>
         </div>
-        <Link
-          href="/marketplaces/new"
-          className="inline-flex items-center gap-2 bg-[#3483fa] text-white text-sm font-semibold px-4 py-2.5 rounded-lg hover:bg-[#2968c8] transition-colors"
+        <button
+          onClick={() => setShowConnectModal(true)}
+          className="inline-flex items-center gap-2 bg-[#3483fa] text-white text-sm font-semibold px-4 py-2.5 rounded-lg hover:bg-[#2968c8] transition-colors shadow-sm cursor-pointer"
         >
           <Plus className="w-4 h-4" /> Novo Marketplace
-        </Link>
+        </button>
       </div>
+
+      <ConnectMarketplaceModal
+        open={showConnectModal}
+        onClose={() => setShowConnectModal(false)}
+        onSuccess={() => refetch()}
+      />
 
       {/* Stats bar */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

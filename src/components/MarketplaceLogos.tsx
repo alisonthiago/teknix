@@ -2,9 +2,12 @@ const logoFiles: Record<string, string> = {
   'Mercado Livre': '/logos/mercado-livre.svg',
   'Shopee': '/logos/shopee.svg',
   'TikTok Shop': '/logos/tiktok.svg',
+  'TikTok': '/logos/tiktok.svg',
   'Amazon': '/logos/amazon.svg',
+  'Shopify': '/logos/shopify.svg',
   'Extra': '/logos/extra.svg',
   'Magalu': '/logos/magalu.svg',
+  'Magazine Luiza': '/logos/magalu.svg',
 }
 
 export function MarketplaceLogo({ name, className = 'w-5 h-5' }: { name: string; className?: string }) {
