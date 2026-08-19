@@ -57,13 +57,6 @@ const NAV_GROUPS: NavGroup[] = [
       { href: '/analises', label: 'Análises', icon: BarChart3, permission: 'reports.view' },
     ],
   },
-  {
-    label: 'Sistema',
-    items: [
-      { href: '/sistema', label: 'Sistema', icon: Settings, permission: 'users.view' },
-      { href: '/sistema/perfil', label: 'Meu Perfil', icon: User, permission: null },
-    ],
-  },
 ]
 
 interface SidebarProps {
