@@ -248,7 +248,7 @@ export default function PerfilPage() {
             <label className="block text-[11px] text-[#999] mb-1.5">Nome completo</label>
             <input
               type="text"
-              value={user.name}
+              value={user.name || ''}
               onChange={e => setForm({ ...form, name: e.target.value })}
               disabled={!editing}
               className={`w-full px-3 py-2 border rounded-md text-[13px] text-[#333] outline-none transition-colors ${
@@ -260,7 +260,7 @@ export default function PerfilPage() {
             <label className="block text-[11px] text-[#999] mb-1.5">Apelido</label>
             <input
               type="text"
-              value={user.nickname}
+              value={user.nickname || ''}
               onChange={e => setForm({ ...form, nickname: e.target.value })}
               disabled={!editing}
               className={`w-full px-3 py-2 border rounded-md text-[13px] text-[#333] outline-none transition-colors ${
@@ -272,7 +272,7 @@ export default function PerfilPage() {
             <label className="block text-[11px] text-[#999] mb-1.5">E-mail</label>
             <input
               type="email"
-              value={user.email}
+              value={user.email || ''}
               onChange={e => setForm({ ...form, email: e.target.value })}
               disabled={!editing}
               className={`w-full px-3 py-2 border rounded-md text-[13px] text-[#333] outline-none transition-colors ${
