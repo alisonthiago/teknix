@@ -127,7 +127,7 @@ export default function ColaboradorModal({ open, onClose, onSuccess, colaborador
                 onChange={e => setForm({ ...form, email: e.target.value })}
                 placeholder="Ex: joao@empresa.com"
                 className="text-[13px]"
-                disabled={!!colaborador && colaborador.email === 'alison@tektou.com'}
+                disabled={!!colaborador?.is_master}
               />
             </div>
             <div>
@@ -150,7 +150,7 @@ export default function ColaboradorModal({ open, onClose, onSuccess, colaborador
                 value={form.role}
                 onChange={e => setForm({ ...form, role: e.target.value })}
                 className="w-full h-10 px-3 rounded-md border border-input bg-transparent text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                disabled={!!colaborador && colaborador.email === 'alison@tektou.com'}
+                disabled={!!colaborador?.is_master}
               >
                 {Object.entries(ROLE_LABELS).map(([k, v]) => (
                   <option key={k} value={k}>{v}</option>

@@ -1,15 +1,18 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import ConfigSubLayout, { ConfigSection } from '@/components/ConfigSubLayout'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
-import { Plus } from 'lucide-react'
-import CreateCollaboratorModal from '@/components/CreateCollaboratorModal'
+import { createClient } from '@/utils/supabase/client'
+import { Loader2, ShieldCheck, ShieldOff, Users, Plus } from 'lucide-react'
+import ColaboradorModal from '@/components/ColaboradorModal'
 
 interface Profile {
   id: string
   name: string
   role: string
+  email: string
+  is_master?: boolean
 }
 
 interface Permission {
@@ -18,159 +21,240 @@ interface Permission {
   description: string
 }
 
-interface RolePermission {
-  role: string
+interface UserPermission {
+  user_id: string
   permission_code: string
+  granted: boolean
 }
 
-const PAGE_LABELS: Record<string, string> = {
+const MODULE_LABELS: Record<string, string> = {
   products: 'Produtos', sales: 'Vendas', orders: 'Pedidos',
   picking: 'Separação', shipping: 'Expedição', inventory: 'Estoque',
   finance: 'Financeiro', revenue: 'Faturamento', cost: 'Custos',
   profit: 'Lucro', margin: 'Margem', reports: 'Relatórios',
   marketplaces: 'Marketplaces', settings: 'Configurações', users: 'Usuários',
   permissions: 'Permissões', imports: 'Importação', exports: 'Exportação',
-  notifications: 'Notificações', dashboard: 'Dashboard'
+  notifications: 'Notificações', pricing: 'Precificação', chat: 'Chat',
+  customers: 'Clientes',
 }
 
 const ACTION_LABELS: Record<string, string> = {
   view: 'Ver', create: 'Criar', edit: 'Editar', delete: 'Excluir',
   manage: 'Gerenciar', execute: 'Executar', adjust: 'Ajustar',
-  export: 'Exportar', connect: 'Conectar', use: 'Usar'
+  export: 'Exportar', connect: 'Conectar', use: 'Usar',
+  financial_view: 'Financeiro', print_label: 'Etiqueta', cost_view: 'Custos',
+  sales: 'Vendas', inventory: 'Estoque', sync: 'Sincronizar', financial: 'Financeiro',
 }
 
 export default function PermissoesPage() {
-  const { data: profiles, loading: profilesLoading } = useSupabaseQuery<Profile[]>(async (s) => {
-    const { data, error } = await s.from('profiles').select('id, name, role').order('name')
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [toggling, setToggling] = useState<string | null>(null)
+  const [showModal, setShowModal] = useState(false)
+
+  const { data: profiles, loading: profilesLoading, refetch: refetchProfiles } = useSupabaseQuery<Profile[]>(async (s) => {
+    const { data, error } = await s.from('profiles').select('id, name, role, email, is_master').order('name')
     if (error) throw error
     return (data || []) as Profile[]
   })
 
-  const { data: permissions, loading: permissionsLoading } = useSupabaseQuery<Permission[]>(async (s) => {
-    const { data, error } = await s.from('permissions').select('*')
+  const { data: permissions, loading: permsLoading } = useSupabaseQuery<Permission[]>(async (s) => {
+    const { data, error } = await s.from('permissions').select('*').order('module, code')
     if (error) throw error
     return (data || []) as Permission[]
   })
 
-  const { data: rolePermissions, loading: rpLoading } = useSupabaseQuery<RolePermission[]>(async (s) => {
-    const { data, error } = await s.from('role_permissions').select('*')
-    if (error) throw error
-    return (data || []) as RolePermission[]
-  })
-
-  const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [isModalOpen, setIsModalOpen] = useState(false)
-
-  const loading = profilesLoading || permissionsLoading || rpLoading
-
-  const selectedProfile = profiles?.find(p => p.id === selectedId) || profiles?.[0]
-  const userRole = selectedProfile?.role
-
-  const refreshProfiles = () => {
-    window.location.reload()
-  }
-
-  const allowedPerms = new Set(
-    rolePermissions?.filter(rp => rp.role === userRole).map(rp => rp.permission_code) || []
+  const { data: userPerms, loading: upLoading, refetch: refetchPerms } = useSupabaseQuery<UserPermission[]>(
+    async (s) => {
+      if (!selectedId) return []
+      const { data, error } = await s.from('user_permissions').select('*').eq('user_id', selectedId)
+      if (error) throw error
+      return (data || []) as UserPermission[]
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [selectedId ?? '']
   )
 
-  const parsedPermissions = (permissions || []).map(p => {
-    const [key, action] = p.code.split('.')
-    return { code: p.code, key: key || p.code, action: action || 'view', module: p.module }
-  })
+  const loading = profilesLoading || permsLoading || upLoading
+  const selectedProfile = profiles?.find(p => p.id === selectedId) || null
 
-  const allPermissionKeys = [...new Set(parsedPermissions.map(p => p.key))]
-  const allActions = [...new Set(parsedPermissions.map(p => p.action))]
+  const grantedSet = new Set(
+    (userPerms || []).filter(up => up.granted).map(up => up.permission_code)
+  )
+
+  const togglePermission = useCallback(async (code: string) => {
+    if (!selectedId || !selectedProfile) return
+    if (selectedProfile.is_master) return // Não editar MASTER
+
+    setToggling(code as string)
+    const supabase = createClient()
+    const isGranted = grantedSet.has(code)
+
+    const { error } = await supabase
+      .from('user_permissions')
+      .upsert(
+        { user_id: selectedId, permission_code: code, granted: !isGranted },
+        { onConflict: 'user_id,permission_code' }
+      )
+
+    if (!error) {
+      refetchPerms()
+    }
+    setToggling(null)
+  }, [selectedId, selectedProfile, grantedSet, refetchPerms])
+
+  const grantAll = useCallback(async () => {
+    if (!selectedId || !selectedProfile || selectedProfile.is_master || !permissions) return
+    setToggling('all')
+    const supabase = createClient()
+    const rows = permissions.map(p => ({ user_id: selectedId, permission_code: p.code, granted: true }))
+    await supabase.from('user_permissions').upsert(rows, { onConflict: 'user_id,permission_code' })
+    refetchPerms()
+    setToggling(null)
+  }, [selectedId, selectedProfile, permissions, refetchPerms])
+
+  const revokeAll = useCallback(async () => {
+    if (!selectedId || !selectedProfile || selectedProfile.is_master || !permissions) return
+    setToggling('none')
+    const supabase = createClient()
+    const rows = permissions.map(p => ({ user_id: selectedId, permission_code: p.code, granted: false }))
+    await supabase.from('user_permissions').upsert(rows, { onConflict: 'user_id,permission_code' })
+    refetchPerms()
+    setToggling(null)
+  }, [selectedId, selectedProfile, permissions, refetchPerms])
+
+  // Agrupar permissões por módulo
+  const grouped = (permissions || []).reduce<Record<string, Permission[]>>((acc, p) => {
+    const mod = p.code.split('.')[0] || p.module
+    if (!acc[mod]) acc[mod] = []
+    acc[mod].push(p)
+    return acc
+  }, {})
 
   return (
     <ConfigSubLayout title="Permissões" description="Controle o que cada colaborador pode ver e fazer">
       <ConfigSection title="Colaboradores">
         <div className="flex justify-between items-center mb-3">
-          <p className="text-[11px] text-[#999]">Selecione um colaborador para ver suas permissões</p>
-          <button 
-            onClick={() => setIsModalOpen(true)}
+          <p className="text-[11px] text-[#999]">Selecione um colaborador para editar suas permissões</p>
+          <button
+            onClick={() => setShowModal(true)}
             className="px-3 py-1.5 bg-[#3483fa] text-white text-[11px] font-medium rounded-md hover:bg-[#2968c8] flex items-center gap-1"
           >
-            <Plus className="w-3.5 h-3.5" /> Adicionar Colaborador
+            <Plus className="w-3.5 h-3.5" /> Novo Colaborador
           </button>
         </div>
-        {loading ? (
-          <div className="text-[13px] text-[#999]">Carregando...</div>
+
+        {profilesLoading ? (
+          <div className="flex items-center gap-2 text-[13px] text-[#999]"><Loader2 className="w-4 h-4 animate-spin" /> Carregando...</div>
         ) : !profiles?.length ? (
           <div className="text-[13px] text-[#999]">Nenhum colaborador encontrado.</div>
         ) : (
-          <>
-            <div className="flex flex-wrap gap-2">
-              {profiles.map(p => (
-                <button
-                  key={p.id}
-                  onClick={() => setSelectedId(p.id)}
-                  className={`px-3 py-1.5 rounded-md text-[12px] font-medium transition-colors ${
-                    (selectedProfile?.id === p.id) ? 'bg-[#3483fa] text-white' : 'bg-[#f5f5f5] text-[#666] hover:bg-[#eee]'
-                  }`}
-                >
-                  {p.name}
-                </button>
-              ))}
-            </div>
-            {selectedProfile && (
-              <p className="text-[11px] text-[#999] mt-2">Função: <strong className="text-[#333]">{selectedProfile.role}</strong></p>
-            )}
-            <CreateCollaboratorModal 
-              isOpen={isModalOpen} 
-              onClose={() => setIsModalOpen(false)} 
-              onSuccess={refreshProfiles} 
-            />
-          </>
+          <div className="flex flex-wrap gap-2">
+            {profiles.map(p => (
+              <button
+                key={p.id}
+                onClick={() => setSelectedId(p.id)}
+                className={`px-3 py-1.5 rounded-md text-[12px] font-medium transition-colors flex items-center gap-1.5 ${
+                  selectedId === p.id ? 'bg-[#3483fa] text-white' : 'bg-[#f5f5f5] text-[#666] hover:bg-[#eee]'
+                }`}
+              >
+                <Users className="w-3 h-3" />
+                {p.name}
+                {p.is_master && <span className="text-[9px] bg-white/20 px-1 rounded">MASTER</span>}
+              </button>
+            ))}
+          </div>
         )}
       </ConfigSection>
 
       {selectedProfile && (
-        <ConfigSection title={`Permissões de ${selectedProfile.name}`}>
-          {loading ? (
-            <div className="text-[13px] text-[#999] py-4 text-center">Carregando permissões...</div>
-          ) : !allPermissionKeys.length ? (
-            <div className="text-[13px] text-[#999] py-4 text-center">Nenhuma permissão configurada.</div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-[12px]">
-                <thead>
-                  <tr className="border-b border-[#f5f5f5]">
-                    <th className="text-left py-2 px-3 text-[10px] font-medium text-[#999] uppercase">Módulo / Página</th>
-                    {allActions.map((action, idx) => (
-                      <th key={`th-${action}-${idx}`} className="text-center py-2 px-2 text-[10px] font-medium text-[#999] uppercase">{ACTION_LABELS[action] || action}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#f5f5f5]">
-                  {allPermissionKeys.map((key, rowIdx) => (
-                    <tr key={`tr-${key}-${rowIdx}`} className="hover:bg-[#fafafa]">
-                      <td className="py-2 px-3 font-medium text-[#333]">{PAGE_LABELS[key] || key}</td>
-                      {allActions.map((action, colIdx) => {
-                        const code = `${key}.${action}`
-                        const hasPermissionObject = parsedPermissions.some(p => p.code === code)
-                        const hasPermissionGranted = allowedPerms.has(code)
-                        
-                        return (
-                          <td key={`td-${action}-${colIdx}`} className="text-center py-2 px-2">
-                            {hasPermissionObject ? (
-                              <span className={`inline-flex w-5 h-5 rounded items-center justify-center text-[10px] cursor-pointer transition-colors ${hasPermissionGranted ? 'bg-[#f0fff4] text-[#38a169]' : 'bg-[#f5f5f5] text-[#ccc]'}`}>
-                                {hasPermissionGranted ? '✓' : '—'}
-                              </span>
-                            ) : (
-                              <span className="text-[#eee]">—</span>
-                            )}
-                          </td>
-                        )
-                      })}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        <ConfigSection title={`Permissões — ${selectedProfile.name}`}>
+          {selectedProfile.is_master ? (
+            <div className="flex items-center gap-3 p-4 bg-[#f0fff4] rounded-lg border border-[#c6f6d5]">
+              <ShieldCheck className="w-5 h-5 text-[#38a169]" />
+              <div>
+                <p className="text-[13px] font-semibold text-[#38a169]">MASTER — Acesso Total</p>
+                <p className="text-[12px] text-[#666]">O usuário MASTER tem todas as permissões e não pode ser editado.</p>
+              </div>
             </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-[11px] text-[#999]">
+                  Clique em qualquer permissão para ativar ou desativar.
+                  {' '}<strong className="text-[#333]">{grantedSet.size}</strong> permissões ativas.
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={grantAll}
+                    disabled={!!toggling}
+                    className="flex items-center gap-1 px-3 py-1.5 text-[11px] font-medium bg-[#f0fff4] text-[#38a169] rounded-md hover:bg-[#c6f6d5] transition-colors disabled:opacity-50"
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5" /> Liberar tudo
+                  </button>
+                  <button
+                    onClick={revokeAll}
+                    disabled={!!toggling}
+                    className="flex items-center gap-1 px-3 py-1.5 text-[11px] font-medium bg-[#fff5f5] text-[#e74c3c] rounded-md hover:bg-[#fed7d7] transition-colors disabled:opacity-50"
+                  >
+                    <ShieldOff className="w-3.5 h-3.5" /> Revogar tudo
+                  </button>
+                </div>
+              </div>
+
+              {upLoading ? (
+                <div className="flex items-center gap-2 text-[13px] text-[#999] py-4">
+                  <Loader2 className="w-4 h-4 animate-spin" /> Carregando permissões...
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {Object.entries(grouped).map(([mod, perms]) => (
+                    <div key={mod}>
+                      <p className="text-[11px] font-semibold text-[#999] uppercase mb-2 tracking-wider">
+                        {MODULE_LABELS[mod] || mod}
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {perms.map(p => {
+                          const action = p.code.split('.')[1] || 'view'
+                          const granted = grantedSet.has(p.code)
+                          const isToggling = toggling === p.code
+
+                          return (
+                            <button
+                              key={p.code}
+                              onClick={() => togglePermission(p.code)}
+                              disabled={!!toggling}
+                              title={p.description}
+                              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-medium transition-all border ${
+                                granted
+                                  ? 'bg-[#f0fff4] border-[#9ae6b4] text-[#276749] hover:bg-[#c6f6d5]'
+                                  : 'bg-[#f5f5f5] border-[#e6e6e6] text-[#999] hover:bg-[#eee] hover:text-[#666]'
+                              } disabled:opacity-50 disabled:cursor-wait`}
+                            >
+                              {isToggling
+                                ? <Loader2 className="w-3 h-3 animate-spin" />
+                                : granted
+                                  ? <span className="text-[10px]">✓</span>
+                                  : <span className="text-[10px]">○</span>
+                              }
+                              {ACTION_LABELS[action] || action}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </ConfigSection>
       )}
+
+      <ColaboradorModal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        onSuccess={() => { refetchProfiles(); setShowModal(false) }}
+      />
     </ConfigSubLayout>
   )
 }
