@@ -29,8 +29,8 @@ export async function createSupplier(formData: FormData) {
   const { error } = await supabase.from('suppliers').insert([data])
   if (error) throw new Error(error.message)
 
-  revalidatePath('/suppliers')
-  redirect('/suppliers')
+  revalidatePath('/operacao')
+  redirect('/operacao')
 }
 
 export async function updateSupplier(id: string, formData: FormData) {
@@ -56,13 +56,16 @@ export async function updateSupplier(id: string, formData: FormData) {
   const { error } = await supabase.from('suppliers').update(data).eq('id', id)
   if (error) throw new Error(error.message)
 
-  revalidatePath('/suppliers')
-  redirect('/suppliers')
+  revalidatePath('/operacao')
+  revalidatePath(`/fornecedores/${id}`)
+  revalidatePath(`/fornecedores/${id}/editar`)
+  redirect(`/fornecedores/${id}`)
 }
 
 export async function deleteSupplier(id: string) {
   const supabase = await createClient()
   const { error } = await supabase.from('suppliers').delete().eq('id', id)
   if (error) throw new Error(error.message)
-  revalidatePath('/suppliers')
+  revalidatePath('/operacao')
+  revalidatePath(`/fornecedores/${id}`)
 }

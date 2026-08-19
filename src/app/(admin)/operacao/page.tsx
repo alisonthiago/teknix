@@ -135,7 +135,11 @@ function SuppliersTab() {
                 <Td>
                   <div className="flex items-center gap-4">
                     <div className="w-11 h-11 rounded-full bg-[#f5f5f5] border-2 border-[#e6e6e6] overflow-hidden flex items-center justify-center flex-shrink-0">
-                      <Building2 className="w-5 h-5 text-[#ccc]" />
+                      {s.logo_url ? (
+                        <img src={s.logo_url as string} alt={s.name as string} className="w-full h-full object-cover" />
+                      ) : (
+                        <Building2 className="w-5 h-5 text-[#ccc]" />
+                      )}
                     </div>
                     <div className="flex flex-col justify-center">
                       <p className="font-semibold text-[#1f2328] text-[14px] leading-tight mb-0.5">{s.name as string}</p>
