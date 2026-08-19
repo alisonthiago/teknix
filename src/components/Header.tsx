@@ -174,44 +174,48 @@ function HeaderActions({
           onClick={() => setUserOpen(!userOpen)}
           className="flex items-center gap-1.5 pl-1 pr-2 py-1 rounded-full hover:bg-[#EEFFB3]/60 transition-colors"
         >
-       <div className="relative group">
-             <div className="h-9 w-9 rounded-full overflow-hidden bg-[#f5f5f5]">
-               {userAvatarUrl ? (
-                 <Image
-                   src={userAvatarUrl}
-                   alt={userName}
-                   width={36}
-                   height={36}
-                   className="h-full w-full object-cover"
-                 />
-               ) : (
-                 <Image
-                   src={`https://api.dicebear.com/7.x/notionists/svg?seed=${userEmail || 'user'}`}
-                   alt="Avatar"
-                   width={36}
-                   height={36}
-                   className="h-full w-full object-cover"
-                 />
-               )}
-             </div>
-             <input
-               type="file"
-               ref={fileInputRef}
-               accept="image/*"
-               className="hidden"
-               onChange={handleAvatarUpload}
-             />
-             <button
-               onClick={() => fileInputRef.current?.click()}
-               className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-               title="Alterar foto"
-             >
-               <Camera className="w-5 h-5 text-white" />
-             </button>
-           </div>
+          <div className="relative group">
+            <div className="h-9 w-9 rounded-full overflow-hidden bg-[#f5f5f5]">
+              {userAvatarUrl ? (
+                <Image
+                  src={userAvatarUrl}
+                  alt={userName}
+                  width={36}
+                  height={36}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <Image
+                  src={`https://api.dicebear.com/7.x/notionists/svg?seed=${userEmail || 'user'}`}
+                  alt="Avatar"
+                  width={36}
+                  height={36}
+                  className="h-full w-full object-cover"
+                />
+              )}
+            </div>
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept="image/*"
+              className="hidden"
+              onChange={handleAvatarUpload}
+            />
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                fileInputRef.current?.click()
+              }}
+              className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+              title="Alterar foto"
+            >
+              <Camera className="w-5 h-5 text-white" />
+            </button>
+          </div>
           <span className="hidden sm:block text-sm font-medium text-[#333] max-w-[90px] truncate">{userName}</span>
           <ChevronDown className="w-4 h-4 text-[#666] hidden sm:block" strokeWidth={2} />
-        </button>
+          </button>
         {userOpen && (
           <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl border border-[#e6e6e6] shadow-[0_8px_24px_rgba(0,0,0,0.1)] overflow-hidden z-50">
             <div className="p-4 border-b border-[#eeeeee]">
