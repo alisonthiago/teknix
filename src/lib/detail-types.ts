@@ -66,6 +66,7 @@ export interface SaleDetail {
 export interface SupplierDetail {
   id: string
   name: string
+  logo_url: string | null
   cnpj: string
   contact: string
   phone: string

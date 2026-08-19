@@ -247,6 +247,7 @@ export async function getSupplierDetail(id: string) {
 
   return {
     id: supplier.id as string, name: supplier.name as string,
+    logo_url: supplier.logo_url as string || null,
     cnpj: supplier.cnpj as string || '—', contact: supplier.contact as string || '—',
     phone: supplier.phone as string || '—', whatsapp: supplier.whatsapp as string || '—',
     email: supplier.email as string || '—', city: supplier.city as string || '—',

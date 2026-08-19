@@ -1,8 +1,10 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Truck, Clock, Phone, Mail, MessageCircle, MoreVertical, Plus } from 'lucide-react'
+import { ArrowLeft, Truck, Clock, Phone, Mail, MessageCircle, MoreVertical, Plus, FileText, Link as LinkIcon, Loader2 } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { createClient } from '@/utils/supabase/client'
 import type { SupplierDetail } from '@/lib/detail-types'
 
 function formatBRL(value: number) {
@@ -28,6 +30,59 @@ function StatBox({ label, value, sub }: { label: string; value: string; sub?: st
       <div className="text-[11px] text-[#999] mb-1">{label}</div>
       <div className="text-[16px] font-semibold text-[#333]">{value}</div>
       {sub && <div className="text-[10px] text-[#ccc] mt-0.5">{sub}</div>}
+    </div>
+  )
+}
+
+function SupplierCatalogsDisplay({ supplierId }: { supplierId: string }) {
+  const [catalogs, setCatalogs] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchCatalogs() {
+      const supabase = createClient()
+      const { data } = await supabase
+        .from('supplier_catalogs')
+        .select('*')
+        .eq('supplier_id', supplierId)
+        .order('created_at', { ascending: false })
+      setCatalogs(data || [])
+      setLoading(false)
+    }
+    fetchCatalogs()
+  }, [supplierId])
+
+  if (loading) return (
+    <div className="bg-white border border-[#e6e6e6] rounded-md p-4 flex justify-center py-6">
+      <Loader2 className="w-5 h-5 animate-spin text-[#999]" />
+    </div>
+  )
+
+  if (catalogs.length === 0) return null
+
+  return (
+    <div className="bg-white border border-[#e6e6e6] rounded-md p-4">
+      <SectionTitle>Catálogos</SectionTitle>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {catalogs.map(cat => (
+          <a 
+            key={cat.id} 
+            href={cat.url} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="border border-[#e6e6e6] rounded-lg p-3 flex flex-col items-center justify-center bg-[#fcfcfc] hover:bg-[#f5f5f5] transition-colors cursor-pointer"
+          >
+            {cat.type === 'PDF' ? (
+              <FileText className="w-8 h-8 text-[#e74c3c] mb-2" />
+            ) : (
+              <LinkIcon className="w-8 h-8 text-[#3483fa] mb-2" />
+            )}
+            <span className="text-[11px] text-center font-medium text-[#333] line-clamp-2 w-full" title={cat.title}>
+              {cat.title}
+            </span>
+          </a>
+        ))}
+      </div>
     </div>
   )
 }
@@ -94,6 +149,8 @@ function VisaoGeralTab({ supplier }: { supplier: SupplierDetail }) {
       </div>
 
       <div className="space-y-4">
+        <SupplierCatalogsDisplay supplierId={supplier.id} />
+        
         <div className="bg-white border border-[#e6e6e6] rounded-md p-4">
           <SectionTitle>Contato</SectionTitle>
           <div className="space-y-1">
@@ -181,10 +238,14 @@ export default function FornecedorDetailClient({ supplier }: { supplier: Supplie
 
       <div className="bg-white border border-[#e6e6e6] rounded-md p-5 mb-4">
         <div className="flex flex-col sm:flex-row items-start gap-5">
-          <div className="w-full sm:w-14 h-14 rounded-md bg-[#f5f5f5] border border-[#e6e6e6] flex items-center justify-center flex-shrink-0">
-            <Truck className="w-7 h-7 text-[#ccc]" />
+          <div className="w-full sm:w-16 sm:h-16 h-16 rounded-md bg-[#f5f5f5] border border-[#e6e6e6] flex items-center justify-center flex-shrink-0 overflow-hidden">
+            {supplier.logo_url ? (
+              <img src={supplier.logo_url} alt={supplier.name} className="w-full h-full object-cover" />
+            ) : (
+              <Truck className="w-8 h-8 text-[#ccc]" />
+            )}
           </div>
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 pt-0.5">
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                <div>
                  <h1 className="text-[18px] font-semibold text-[#333]">{supplier.name}</h1>

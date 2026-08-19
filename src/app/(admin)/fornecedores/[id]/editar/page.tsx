@@ -6,6 +6,8 @@ import { updateSupplier } from '@/app/(admin)/suppliers/actions'
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import SupplierLogoEditor from '@/components/SupplierLogoEditor'
+import SupplierCatalogsEditor from '@/components/SupplierCatalogsEditor'
 
 export default async function EditSupplierPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -36,6 +38,9 @@ export default async function EditSupplierPage({ params }: { params: Promise<{ i
             <CardDescription>Preencha as informações básicas para contato e faturamento.</CardDescription>
           </CardHeader>
           <CardContent>
+            <div className="mb-6 pb-6 border-b border-[#f0f0f0]">
+              <SupplierLogoEditor supplierId={id} currentLogoUrl={supplier.logo_url || null} />
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Nome Fantasia *</Label>
@@ -46,16 +51,16 @@ export default async function EditSupplierPage({ params }: { params: Promise<{ i
                 <Input id="legal_name" name="legal_name" defaultValue={supplier.legal_name || ''} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="cnpj">CNPJ</Label>
-                <Input id="cnpj" name="cnpj" defaultValue={supplier.cnpj || ''} />
+                <Label htmlFor="cnpj">CNPJ *</Label>
+                <Input id="cnpj" name="cnpj" required defaultValue={supplier.cnpj || ''} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="contact">Pessoa de Contato</Label>
                 <Input id="contact" name="contact" defaultValue={supplier.contact || ''} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phone">Telefone</Label>
-                <Input id="phone" name="phone" defaultValue={supplier.phone || ''} />
+                <Label htmlFor="phone">Telefone *</Label>
+                <Input id="phone" name="phone" required defaultValue={supplier.phone || ''} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="whatsapp">WhatsApp</Label>
@@ -96,6 +101,16 @@ export default async function EditSupplierPage({ params }: { params: Promise<{ i
               <Label htmlFor="notes">Observações</Label>
               <Input id="notes" name="notes" placeholder="Restrições, observações, etc." defaultValue={supplier.notes || ''} />
             </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Catálogos</CardTitle>
+            <CardDescription>Gerencie catálogos em PDF ou links externos (Google Drive, Site, etc).</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SupplierCatalogsEditor supplierId={id} />
           </CardContent>
         </Card>
 

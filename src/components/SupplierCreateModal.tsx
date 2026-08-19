@@ -7,6 +7,7 @@ import { useNotification } from '@/contexts/NotificationContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { ImageIcon } from 'lucide-react'
 
 interface SupplierCreateModalProps {
   open: boolean
@@ -24,14 +25,19 @@ const EMPTY_FORM = {
 export default function SupplierCreateModal({ open, onClose, onCreated }: SupplierCreateModalProps) {
   const supabase = createClient()
   const prevOpenRef = useRef(open)
+  const logoInputRef = useRef<HTMLInputElement>(null)
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState(EMPTY_FORM)
+  const [logoFile, setLogoFile] = useState<File | null>(null)
+  const [logoPreview, setLogoPreview] = useState<string | null>(null)
 
   const { notify } = useNotification()
 
   useEffect(() => {
     if (prevOpenRef.current && !open) {
       setForm(EMPTY_FORM)
+      setLogoFile(null)
+      setLogoPreview(null)
     }
     prevOpenRef.current = open
   }, [open])
@@ -41,12 +47,32 @@ export default function SupplierCreateModal({ open, onClose, onCreated }: Suppli
   }
 
   const handleSave = async () => {
-    if (!form.name.trim()) return
+    if (!form.name.trim() || !form.cnpj.trim() || !form.phone.trim()) {
+      notify({ type: 'error', title: 'Erro', message: 'Preencha os campos obrigatórios: Nome, CNPJ e Telefone.' })
+      return
+    }
     setSaving(true)
 
     try {
+      let logoUrl = null
+      
+      if (logoFile) {
+        const ext = logoFile.name.split('.').pop() || 'png'
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`
+        
+        const { error: uploadError } = await supabase.storage
+          .from('supplier-logos')
+          .upload(fileName, logoFile)
+          
+        if (!uploadError) {
+          const { data } = supabase.storage.from('supplier-logos').getPublicUrl(fileName)
+          logoUrl = data.publicUrl
+        }
+      }
+
       const { error } = await supabase.from('suppliers').insert({
         name: form.name.trim(),
+        logo_url: logoUrl,
         legal_name: form.legal_name.trim() || null,
         cnpj: form.cnpj.trim() || null,
         contact: form.contact.trim() || null,
@@ -107,6 +133,37 @@ export default function SupplierCreateModal({ open, onClose, onCreated }: Suppli
             {/* SECTION 1: IDENTIFICAÇÃO */}
             <section className="space-y-4">
               <h3 className="text-[12px] font-semibold text-[#333] uppercase tracking-wide border-b border-[#f0f0f0] pb-2">Identificação</h3>
+              
+              <div className="flex items-center gap-4 mb-4">
+                <div 
+                  className="w-16 h-16 rounded-full border border-dashed border-[#ccc] bg-[#fafafa] flex items-center justify-center overflow-hidden cursor-pointer hover:bg-[#f0f0f0] transition-colors shrink-0"
+                  onClick={() => logoInputRef.current?.click()}
+                >
+                  {logoPreview ? (
+                    <img src={logoPreview} alt="Logo" className="w-full h-full object-cover" />
+                  ) : (
+                    <ImageIcon className="w-5 h-5 text-[#999]" />
+                  )}
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[13px] font-medium text-[#333]">Logomarca</span>
+                  <span className="text-[11px] text-[#999]">Opcional. Clique para enviar.</span>
+                </div>
+                <input 
+                  type="file" 
+                  ref={logoInputRef} 
+                  className="hidden" 
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      setLogoFile(file)
+                      setLogoPreview(URL.createObjectURL(file))
+                    }
+                  }}
+                />
+              </div>
+
               <div>
                 <Label className="text-[11px] text-[#666] mb-1.5">Nome Fantasia *</Label>
                 <Input
@@ -126,7 +183,7 @@ export default function SupplierCreateModal({ open, onClose, onCreated }: Suppli
                 />
               </div>
               <div>
-                <Label className="text-[11px] text-[#666] mb-1.5">CNPJ</Label>
+                <Label className="text-[11px] text-[#666] mb-1.5">CNPJ *</Label>
                 <Input
                   placeholder="00.000.000/0000-00"
                   value={form.cnpj}
@@ -181,7 +238,7 @@ export default function SupplierCreateModal({ open, onClose, onCreated }: Suppli
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-[11px] text-[#666] mb-1.5">Telefone</Label>
+                  <Label className="text-[11px] text-[#666] mb-1.5">Telefone *</Label>
                   <Input
                     placeholder="(00) 0000-0000"
                     value={form.phone}
@@ -286,7 +343,7 @@ export default function SupplierCreateModal({ open, onClose, onCreated }: Suppli
           <Button
             variant="default"
             onClick={handleSave}
-            disabled={saving || !form.name.trim()}
+            disabled={saving || !form.name.trim() || !form.cnpj.trim() || !form.phone.trim()}
             className="h-11 min-h-[44px] w-full sm:w-auto px-5 text-[13px] rounded-md"
           >
             {saving ? (
