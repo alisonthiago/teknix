@@ -6,6 +6,7 @@ import { updateProduct } from '@/app/(admin)/products/actions'
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import ProductPhotosEditor from '@/components/ProductPhotosEditor'
 
 export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -140,6 +141,16 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
                 <Input id="min_stock" name="min_stock" type="number" min="0" defaultValue={product.min_stock || 0} />
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Fotos do Produto</CardTitle>
+            <CardDescription>Gerencie as imagens deste produto. As alterações feitas aqui são salvas automaticamente.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ProductPhotosEditor productId={id} />
           </CardContent>
         </Card>
 
