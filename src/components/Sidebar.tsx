@@ -46,6 +46,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: '/marketplaces', label: 'Marketplaces', icon: Store, permission: 'marketplaces.view' },
       { href: '/operacao', label: 'Operação', icon: Package, permission: 'products.view' },
       { href: '/pedidos', label: 'Pedidos', icon: ShoppingCart, permission: 'orders.view' },
+      { href: '/clientes', label: 'Clientes', icon: User, permission: null },
       { href: '/vendas', label: 'Vendas', icon: DollarSign, permission: 'sales.view' },
     ],
   },

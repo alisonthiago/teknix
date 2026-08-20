@@ -247,47 +247,66 @@ function VendasTab({ product }: { product: ProductDetail }) {
         <StatBox label="Total pedidos" value={String(filteredOrders)} />
       </div>
 
-      <div className="bg-white border border-[#e6e6e6] rounded-md overflow-hidden">
-        <div className="px-4 py-3 border-b border-[#e6e6e6] flex items-center justify-between">
-          <SectionTitle>Últimas vendas</SectionTitle>
+      <div className="bg-white border border-[#e6e6e6] rounded-2xl overflow-hidden shadow-xs">
+        <div className="px-5 py-4 border-b border-[#e6e6e6] flex items-center justify-between">
+          <SectionTitle>Histórico de Vendas & Compradores</SectionTitle>
           {selectedAccount !== 'ALL' && <span className="text-[10px] bg-[#f5f5f5] px-2 py-1 rounded text-[#666]">Filtrado: {selectedAccount}</span>}
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-[12px]">
-            <thead>
-              <tr className="border-b border-[#f5f5f5]">
-                <th className="text-left py-2 px-4 text-[10px] font-medium text-[#999] uppercase">Pedido</th>
-                <th className="text-left py-2 px-4 text-[10px] font-medium text-[#999] uppercase">Marketplace</th>
-                <th className="text-right py-2 px-4 text-[10px] font-medium text-[#999] uppercase">Qtd</th>
-                <th className="text-right py-2 px-4 text-[10px] font-medium text-[#999] uppercase">Preço</th>
-                <th className="text-right py-2 px-4 text-[10px] font-medium text-[#999] uppercase">Faturamento</th>
-                <th className="text-right py-2 px-4 text-[10px] font-medium text-[#999] uppercase">Lucro</th>
-                <th className="text-right py-2 px-4 text-[10px] font-medium text-[#999] uppercase">Margem</th>
-                <th className="text-center py-2 px-4 text-[10px] font-medium text-[#999] uppercase">Status</th>
-                <th className="text-right py-2 px-4 text-[10px] font-medium text-[#999] uppercase">Data</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#eeeeee]">
-              {filteredSales.map(sale => (
-                <tr key={sale.id} className="hover:bg-[#fafafa] transition-colors">
-                  <td className="py-2.5 px-4 font-mono text-[#999]">{sale.order_id}</td>
-                  <td className="py-2.5 px-4 text-[#333]">
-                    <div className="font-medium text-[11px]">{sale.marketplace}</div>
-                    <div className="text-[9px] text-[#999]">{sale.account_name}</div>
-                  </td>
-                  <td className="py-2.5 px-4 text-right text-[#999]">{sale.quantity}</td>
-                  <td className="py-2.5 px-4 text-right text-[#999]">{formatBRL(sale.price)}</td>
-                  <td className="py-2.5 px-4 text-right font-medium text-[#333]">{formatBRL(sale.revenue)}</td>
-                  <td className="py-2.5 px-4 text-right font-medium text-[#333]">{formatBRL(sale.profit)}</td>
-                  <td className="py-2.5 px-4 text-right text-[#999]">{sale.margin}%</td>
-                  <td className="py-2.5 px-4 text-center">
-                    <span className={`inline-flex px-2 py-[2px] rounded text-[10px] font-medium ${sale.status === 'Entregue' ? 'bg-[#f0fff4] text-[#38a169]' : 'bg-[#f0f7ff] text-[#3483fa]'}`}>{sale.status}</span>
-                  </td>
-                  <td className="py-2.5 px-4 text-right text-[#999]">{sale.date}</td>
+          {filteredSales.length === 0 ? (
+            <div className="p-8 text-center text-[#999] text-[13px]">
+              Nenhuma venda registrada para este produto até o momento.
+            </div>
+          ) : (
+            <table className="w-full text-[12px]">
+              <thead>
+                <tr className="border-b border-[#f5f5f5] bg-[#fafafa]">
+                  <th className="text-left py-2.5 px-4 text-[10px] font-bold text-[#64748b] uppercase">Pedido</th>
+                  <th className="text-left py-2.5 px-4 text-[10px] font-bold text-[#64748b] uppercase">Cliente / Comprador</th>
+                  <th className="text-left py-2.5 px-4 text-[10px] font-bold text-[#64748b] uppercase">Marketplace</th>
+                  <th className="text-right py-2.5 px-4 text-[10px] font-bold text-[#64748b] uppercase">Qtd</th>
+                  <th className="text-right py-2.5 px-4 text-[10px] font-bold text-[#64748b] uppercase">Preço</th>
+                  <th className="text-right py-2.5 px-4 text-[10px] font-bold text-[#64748b] uppercase">Faturamento</th>
+                  <th className="text-right py-2.5 px-4 text-[10px] font-bold text-[#64748b] uppercase">Lucro</th>
+                  <th className="text-right py-2.5 px-4 text-[10px] font-bold text-[#64748b] uppercase">Margem</th>
+                  <th className="text-center py-2.5 px-4 text-[10px] font-bold text-[#64748b] uppercase">Status</th>
+                  <th className="text-right py-2.5 px-4 text-[10px] font-bold text-[#64748b] uppercase">Data</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-[#eeeeee]">
+                {filteredSales.map(sale => (
+                  <tr key={sale.id} className="hover:bg-[#fafafa] transition-colors">
+                    <td className="py-3 px-4 font-mono font-bold text-[#3483fa]">
+                      <Link href={`/pedidos/${sale.order_uuid || sale.order_id}`} className="hover:underline">
+                        {sale.order_id}
+                      </Link>
+                    </td>
+                    <td className="py-3 px-4 font-medium text-[#1e293b]">
+                      {sale.customer_name || 'Cliente Mercado Livre'}
+                    </td>
+                    <td className="py-3 px-4 text-[#333]">
+                      <div className="font-semibold text-[11px] flex items-center gap-1.5">
+                        <MarketplaceLogo name={sale.marketplace} className="w-3.5 h-3.5" />
+                        {sale.marketplace}
+                      </div>
+                      <div className="text-[9px] text-[#999]">{sale.account_name || 'TEKNIXBRASIL'}</div>
+                    </td>
+                    <td className="py-3 px-4 text-right text-[#64748b] font-medium">{sale.quantity}</td>
+                    <td className="py-3 px-4 text-right text-[#64748b]">{formatBRL(sale.price)}</td>
+                    <td className="py-3 px-4 text-right font-bold text-[#1e293b]">{formatBRL(sale.revenue)}</td>
+                    <td className="py-3 px-4 text-right font-bold text-[#16a34a]">{formatBRL(sale.profit)}</td>
+                    <td className="py-3 px-4 text-right font-medium text-[#64748b]">{sale.margin}%</td>
+                    <td className="py-3 px-4 text-center">
+                      <span className="inline-flex px-2 py-0.5 rounded text-[10px] font-bold bg-[#f0fdf4] text-[#16a34a] border border-[#bbf7d0]">
+                        {sale.status}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-right text-[#64748b] font-mono text-[11px]">{sale.date}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </div>

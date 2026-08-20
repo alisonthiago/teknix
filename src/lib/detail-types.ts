@@ -22,7 +22,7 @@ export interface ProductDetail {
   stock: { physical: number; reserved: number; available: number; minimum: number; maximum: number; location: string; value: number }
   summary: { total_sales: number; total_orders: number; total_revenue: number; total_profit: number; avg_margin: number; avg_ticket: number }
   marketplaces: Array<{ name: string; account_name?: string; listing_id: string; price: number; stock: number; status: 'ACTIVE' | 'INACTIVE'; last_sync: string }>
-  recent_sales: Array<{ id: string; order_id: string; marketplace: string; account_name?: string; quantity: number; price: number; revenue: number; profit: number; margin: number; status: string; date: string }>
+  recent_sales: Array<{ id: string; order_id: string; order_uuid?: string; customer_name?: string; marketplace: string; account_name?: string; quantity: number; price: number; revenue: number; profit: number; margin: number; status: string; date: string }>
   stock_movements: Array<{ id: string; date: string; type: 'COMPRA' | 'VENDA' | 'CANCELAMENTO' | 'DEVOLUCAO' | 'AJUSTE' | 'PERDA' | 'TRANSFERENCIA'; quantity: number; balance: number; order_ref: string; user: string }>
   purchases_history: Array<{ id: string; purchase_id?: string; order_ref: string; supplier: string; quantity: number; unit_cost: number; total: number; date: string; status: string }>
   history: Array<{ id: string; date: string; time: string; action: string; user: string; details: string }>
