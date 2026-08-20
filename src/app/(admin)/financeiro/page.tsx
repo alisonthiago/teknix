@@ -54,7 +54,7 @@ export default function FinanceiroPage() {
     const { data } = await s
       .from('marketplace_accounts')
       .select('id, account_name, marketplace_id, marketplaces(name, logo)')
-      .eq('status', 'active')
+      .or('status.eq.active,status.eq.ACTIVE')
     return data || []
   })
 
