@@ -11,30 +11,43 @@ function getServiceSupabase(): SupabaseClient<any> {
 export async function getValidTokenBySellerId(sellerId: string): Promise<string> {
   const supabase = getServiceSupabase()
 
-  const { data: conn, error } = await supabase
+  // 1. Try marketplace_connections
+  const { data: conn } = await supabase
     .from('marketplace_connections')
     .select('*')
     .eq('seller_id', sellerId)
     .eq('marketplace_id', 'mercadolivre')
     .single()
 
-  if (error || !conn) {
-    // Fallback: search any connection with mercadolivre
-    const { data: fallbackConn } = await supabase
-      .from('marketplace_connections')
-      .select('*')
-      .eq('marketplace_id', 'mercadolivre')
-      .order('updated_at', { ascending: false })
-      .limit(1)
-      .single()
+  if (conn && (conn.access_token || conn.refresh_token)) {
+    return refreshOrReturnToken(supabase, conn)
+  }
 
-    if (!fallbackConn) {
-      throw new Error(`Conexão do Mercado Livre não encontrada para o vendedor ${sellerId}.`)
-    }
+  // 2. Try marketplace_accounts
+  const { data: acc } = await supabase
+    .from('marketplace_accounts')
+    .select('*')
+    .eq('seller_id', sellerId)
+    .single()
+
+  if (acc && (acc.access_token || acc.refresh_token)) {
+    return refreshOrReturnToken(supabase, acc)
+  }
+
+  // 3. Fallback: search any connection with mercadolivre
+  const { data: fallbackConn } = await supabase
+    .from('marketplace_connections')
+    .select('*')
+    .eq('marketplace_id', 'mercadolivre')
+    .order('updated_at', { ascending: false })
+    .limit(1)
+    .single()
+
+  if (fallbackConn && (fallbackConn.access_token || fallbackConn.refresh_token)) {
     return refreshOrReturnToken(supabase, fallbackConn)
   }
 
-  return refreshOrReturnToken(supabase, conn)
+  throw new Error(`Conexão ativa do Mercado Livre não encontrada para a conta ${sellerId}. Por favor, clique em "Conectar / Autorizar Mercado Livre" na aba Marketplaces.`)
 }
 
 async function refreshOrReturnToken(supabase: SupabaseClient<any>, conn: any): Promise<string> {

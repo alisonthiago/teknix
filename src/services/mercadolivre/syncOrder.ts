@@ -15,22 +15,29 @@ function getSupabase(): SupabaseClient<any> {
 
 export async function syncOrder(resource: string, sellerId: string) {
   const supabase = getSupabase()
-  // 1. Find the user ID that owns this seller account
-  const { data: conn, error: connError } = await supabase
+  
+  // 1. Find user ID
+  let userId = '3af9068a-4b78-4c9c-8657-f83b93c01588'
+  const { data: conn } = await supabase
     .from('marketplace_connections')
     .select('user_id')
     .eq('seller_id', sellerId)
-    .eq('marketplace_id', 'mercadolivre')
     .single()
 
-  if (connError || !conn) {
-    throw new Error(`Conexão não encontrada para seller_id: ${sellerId}`)
+  if (conn?.user_id) {
+    userId = conn.user_id
+  } else {
+    const { data: acc } = await supabase
+      .from('marketplace_accounts')
+      .select('user_id')
+      .eq('seller_id', sellerId)
+      .single()
+    if (acc?.user_id) userId = acc.user_id
   }
 
-  const userId = conn.user_id
-
-  // 2. Get valid token
-  const token = await getValidToken(userId)
+  // 2. Get valid token by sellerId
+  const { getValidTokenBySellerId } = await import('./client')
+  const token = await getValidTokenBySellerId(sellerId)
 
   // 3. Fetch from ML API
   // Resource comes like "/orders/200000000"

@@ -353,25 +353,39 @@ export default function MarketplaceDetailPage() {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center justify-between pt-3 border-t border-[#f5f5f5] gap-2">
-                      <button
-                        type="button"
-                        onClick={() => handleSyncAccount(account)}
-                        disabled={isSyncing}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#f0f7ff] hover:bg-[#e0efff] text-[#3483fa] text-[11px] font-bold rounded-lg transition-colors cursor-pointer disabled:opacity-50"
-                      >
-                        {isSyncing ? (
-                          <>
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                            Sincronizando Anúncios...
-                          </>
-                        ) : (
-                          <>
-                            <RefreshCw className="w-3.5 h-3.5" />
-                            Sincronizar Anúncios e Vendas
-                          </>
-                        )}
-                      </button>
+                    <div className="flex flex-wrap items-center justify-between pt-3 border-t border-[#f5f5f5] gap-2">
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleSyncAccount(account)}
+                          disabled={isSyncing}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#f0f7ff] hover:bg-[#e0efff] text-[#3483fa] text-[11px] font-bold rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+                        >
+                          {isSyncing ? (
+                            <>
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              Buscando Vendas da API...
+                            </>
+                          ) : (
+                            <>
+                              <RefreshCw className="w-3.5 h-3.5" />
+                              Sincronizar Vendas e Anúncios
+                            </>
+                          )}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            window.location.href = '/api/auth/mercadolivre'
+                          }}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#B5F500] hover:bg-[#a3e600] text-[#111] text-[11px] font-bold rounded-lg transition-colors cursor-pointer border border-[#a2e000] shadow-2xs"
+                          title="Autorizar com 1 clique no Mercado Livre"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          Autorizar no Mercado Livre
+                        </button>
+                      </div>
 
                       <button
                         type="button"
