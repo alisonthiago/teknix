@@ -16,20 +16,37 @@ export async function GET(request: Request) {
   const redirectUri = process.env.MERCADOLIVRE_REDIRECT_URI || `${getBaseUrl()}/api/auth/mercadolivre/callback`
 
   try {
-    // 1. Exchange code for access token
+    // 1. Get code_verifier from cookies if PKCE is active
+    let codeVerifier: string | undefined
+    try {
+      const cookieHeader = request.headers.get('cookie') || ''
+      const match = cookieHeader.match(/ml_code_verifier=([^;]+)/)
+      if (match) {
+        codeVerifier = decodeURIComponent(match[1])
+      }
+    } catch {
+      // ignore
+    }
+
+    const tokenParams: Record<string, string> = {
+      grant_type: 'authorization_code',
+      client_id: clientId,
+      client_secret: clientSecret,
+      code,
+      redirect_uri: redirectUri
+    }
+    if (codeVerifier) {
+      tokenParams.code_verifier = codeVerifier
+    }
+
+    // 2. Exchange code for access token
     const tokenRes = await fetch('https://api.mercadolibre.com/oauth/token', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
         'Accept': 'application/json'
       },
-      body: new URLSearchParams({
-        grant_type: 'authorization_code',
-        client_id: clientId,
-        client_secret: clientSecret,
-        code,
-        redirect_uri: redirectUri
-      })
+      body: new URLSearchParams(tokenParams)
     })
 
     const tokenData = await tokenRes.json()
