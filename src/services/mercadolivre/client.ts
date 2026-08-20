@@ -85,7 +85,7 @@ async function refreshOrReturnToken(supabase: SupabaseClient<any>, conn: any): P
         access_token: tokenData.access_token,
         refresh_token: tokenData.refresh_token,
         token_expires_at: expiresAt,
-        status: 'CONNECTED',
+        is_active: true,
         updated_at: new Date().toISOString()
       })
       .eq('id', conn.id)

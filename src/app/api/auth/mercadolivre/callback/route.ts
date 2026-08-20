@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { getBaseUrl } from '@/utils/url'
+import { syncMercadoLivreAccount } from '@/services/mercadolivre/syncCatalog'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -10,7 +11,7 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL('/marketplaces?error=No_code', request.url))
   }
 
-  const clientId = process.env.MERCADOLIVRE_CLIENT_ID || '8874323668438382'
+  const clientId = process.env.MERCADOLIVRE_CLIENT_ID || process.env.MERCADOLIVRE_APP_ID || '8874323668438382'
   const clientSecret = process.env.MERCADOLIVRE_CLIENT_SECRET || 'JQrkHL7X2ieJdxPpevL9b9PX3iffwfFm'
   const redirectUri = process.env.MERCADOLIVRE_REDIRECT_URI || `${getBaseUrl()}/api/auth/mercadolivre/callback`
 
@@ -38,9 +39,9 @@ export async function GET(request: Request) {
       return NextResponse.redirect(new URL(`/marketplaces?error=${encodeURIComponent(tokenData.message || 'Falha na autenticação do Mercado Livre')}`, request.url))
     }
 
-    const { access_token, refresh_token, expires_in, user_id: seller_id, scope } = tokenData
+    const { access_token, refresh_token, expires_in, user_id: seller_id } = tokenData
 
-    // 2. Fetch seller profile information (store nickname, email, etc.)
+    // 2. Fetch seller profile information
     let sellerNickname = `Mercado Livre #${seller_id}`
     try {
       const userRes = await fetch(`https://api.mercadolibre.com/users/${seller_id}`, {
@@ -56,13 +57,12 @@ export async function GET(request: Request) {
       console.warn('Could not fetch seller details:', e)
     }
 
-    // 3. Use Service Role to ensure database writes succeed even on cross-domain redirect
+    // 3. Supabase admin client
     const supabase = createSupabaseClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
 
-    // Master user ID fallback
     const defaultUserId = '3af9068a-4b78-4c9c-8657-f83b93c01588'
     const expiresAt = new Date(Date.now() + (expires_in || 21600) * 1000).toISOString()
 
@@ -76,23 +76,42 @@ export async function GET(request: Request) {
 
     if (mp) marketplaceId = mp.id
 
-    // 5. Upsert marketplace_connections
-    await supabase
+    // 5. Check if connection exists in marketplace_connections
+    const { data: existingConn } = await supabase
       .from('marketplace_connections')
-      .upsert({
-        user_id: defaultUserId,
-        marketplace_id: 'mercadolivre',
-        seller_id: seller_id.toString(),
-        account_name: sellerNickname,
-        access_token,
-        refresh_token,
-        token_expires_at: expiresAt,
-        scope,
-        is_active: true,
-        status: 'CONNECTED',
-        last_sync_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'seller_id' })
+      .select('id')
+      .eq('seller_id', seller_id.toString())
+      .single()
+
+    if (existingConn) {
+      await supabase
+        .from('marketplace_connections')
+        .update({
+          account_name: sellerNickname,
+          access_token,
+          refresh_token,
+          token_expires_at: expiresAt,
+          is_active: true,
+          last_sync_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', existingConn.id)
+    } else {
+      await supabase
+        .from('marketplace_connections')
+        .insert({
+          user_id: defaultUserId,
+          marketplace_id: 'mercadolivre',
+          seller_id: seller_id.toString(),
+          account_name: sellerNickname,
+          access_token,
+          refresh_token,
+          token_expires_at: expiresAt,
+          is_active: true,
+          last_sync_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+    }
 
     // 6. Upsert marketplace_accounts
     await supabase
@@ -121,6 +140,13 @@ export async function GET(request: Request) {
       type: 'SUCCESS',
       user_id: defaultUserId
     })
+
+    // 8. Immediate background catalog & order sync
+    try {
+      await syncMercadoLivreAccount(seller_id.toString())
+    } catch (syncErr) {
+      console.warn('Initial sync in callback warning:', syncErr)
+    }
 
     // Redirect to the marketplace detail page with success param
     return NextResponse.redirect(new URL(`/marketplaces/${marketplaceId}?success=connected`, request.url))
