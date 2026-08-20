@@ -5,13 +5,18 @@ import { useParams, useRouter } from 'next/navigation'
 import { ArrowLeft, Plus, Wifi, WifiOff, AlertTriangle, RefreshCw, ExternalLink, Power, Store } from 'lucide-react'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
+import ConnectMarketplaceModal from '@/components/ConnectMarketplaceModal'
 
 const OAUTH_MARKETPLACES: Record<string, string> = {
   mercadolivre: '/api/auth/mercadolivre',
+  mercado_livre: '/api/auth/mercadolivre',
+  shopify: '/api/auth/shopify',
   shopee: '/api/auth/shopee',
   amazon: '/api/auth/amazon',
   magalu: '/api/auth/magalu',
+  magazine_luiza: '/api/auth/magalu',
   tiktok: '/api/auth/tiktok',
+  tiktok_shop: '/api/auth/tiktok',
 }
 
 interface Account {
@@ -115,13 +120,16 @@ export default function MarketplaceDetailPage() {
     setSyncing(null)
   }
 
+  const [showConnectModal, setShowConnectModal] = useState(false)
+
   const handleConnectAccount = () => {
     if (!marketplace) return
-    const oauthPath = OAUTH_MARKETPLACES[marketplace.code.toLowerCase()]
+    const code = marketplace.code.toLowerCase()
+    const oauthPath = OAUTH_MARKETPLACES[code] || OAUTH_MARKETPLACES[code.replace(/_/g, '')]
     if (oauthPath) {
       window.location.href = oauthPath
     } else {
-      alert(`A integração com ${marketplace.name} via OAuth não está configurada no momento.`)
+      setShowConnectModal(true)
     }
   }
 
@@ -293,6 +301,11 @@ export default function MarketplaceDetailPage() {
         </div>
       )}
 
+      <ConnectMarketplaceModal
+        open={showConnectModal}
+        onClose={() => setShowConnectModal(false)}
+        onSuccess={() => refetch()}
+      />
     </div>
   )
 }
