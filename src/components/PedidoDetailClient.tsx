@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
-import { ArrowLeft, Package, Clock, Loader2, CheckCircle2, Send, Printer, User } from 'lucide-react'
+import { ArrowLeft, Package, Clock, Loader2, CheckCircle2, Send, Printer, User, Calendar } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import type { OrderDetail } from '@/lib/detail-types'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
@@ -318,9 +318,12 @@ export default function PedidoDetailClient({ order }: { order: OrderDetail }) {
                 </div>
                 <OrderActions status={order.status} orderId={order.id} />
               </div>
-              <div className="sm:text-right">
-                <div className="text-[18px] font-semibold text-[#333]">{formatBRL(order.payment.total)}</div>
-                <div className="text-[11px] text-[#999] mt-0.5">{order.date}</div>
+              <div className="sm:text-right bg-[#f8fafc] sm:bg-transparent p-4 sm:p-0 rounded-2xl border sm:border-0 border-[#e2e8f0] shrink-0">
+                <p className="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Total do Pedido</p>
+                <div className="text-2xl sm:text-3xl font-black text-[#0f172a] mt-0.5">{formatBRL(order.payment.total)}</div>
+                <div className="text-xs font-semibold text-[#64748b] mt-1.5 flex sm:justify-end items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5 text-[#94a3b8]" /> {order.date}
+                </div>
               </div>
             </div>
           </div>

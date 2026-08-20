@@ -620,86 +620,88 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
           {/* Right Product Details & Actions */}
           <div className="flex-1 min-w-0 flex flex-col justify-between self-stretch">
             <div>
-              {/* Marketplace Source & Status Badges */}
-              <div className="flex flex-wrap items-center gap-2 mb-2">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#fffde7] text-[#856404] border border-[#ffeeba] text-[11px] font-bold">
-                  <MarketplaceLogo name="Mercado Livre" className="w-3.5 h-3.5" />
-                  Mercado Livre Oficial
-                </span>
-                <span className="inline-flex px-2.5 py-1 rounded-lg bg-[#f0f7ff] text-[#3483fa] text-[11px] font-medium border border-[#3483fa]/20">
-                  {product.category || 'Catálogo Geral'}
-                </span>
-                <StatusBadge status={product.status} />
+              {/* Top Header: Badges (Left) & Actions (Right) */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#fffde7] text-[#856404] border border-[#ffeeba] text-xs font-bold shadow-2xs">
+                    <MarketplaceLogo name="Mercado Livre" className="w-3.5 h-3.5" />
+                    Mercado Livre Oficial
+                  </span>
+                  <span className="inline-flex px-3 py-1 rounded-xl bg-[#f0f7ff] text-[#3483fa] text-xs font-semibold border border-[#3483fa]/20">
+                    {product.category || 'Catálogo Geral'}
+                  </span>
+                  <StatusBadge status={product.status} />
+                </div>
+
+                {/* Action Buttons at Top Right Corner */}
+                <div className="flex items-center gap-2 shrink-0">
+                  <button 
+                    onClick={() => router.push(`/purchases/new?product=${product.id}`)} 
+                    className="px-3.5 py-1.5 bg-[#f0fff4] text-[#16a34a] border border-[#bbf7d0] text-xs font-bold rounded-xl hover:bg-[#dcfce7] transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                  >
+                    <ShoppingCart className="w-3.5 h-3.5" /> Fazer Pedido de Compra
+                  </button>
+                  <button 
+                    onClick={() => router.push(`/produtos/${product.id}/editar`)} 
+                    className="px-3.5 py-1.5 bg-[#3483fa] hover:bg-[#2563eb] text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-2xs"
+                  >
+                    Editar Produto
+                  </button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger className="w-8 h-8 flex items-center justify-center rounded-xl border border-[#e2e8f0] text-[#64748b] hover:bg-[#f8fafc] transition-colors focus:outline-none cursor-pointer">
+                      <MoreHorizontal className="w-4 h-4" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-44">
+                      <DropdownMenuItem 
+                        className="text-[#dc2626] focus:text-[#dc2626] focus:bg-[#fef2f2] cursor-pointer"
+                        onClick={() => setShowDeleteModal(true)}
+                      >
+                        Excluir produto
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </div>
 
               {/* Product Title */}
-              <h1 className="text-[20px] font-bold text-[#1f2328] leading-snug mb-2">
+              <h1 className="text-xl sm:text-2xl font-extrabold text-[#0f172a] leading-snug mb-2">
                 {product.name}
               </h1>
 
               {/* Sub-info */}
-              <div className="flex flex-wrap items-center gap-3 text-[12px] text-[#666] mb-4">
-                <span>Marca: <strong className="text-[#333]">{product.brand}</strong></span>
-                <span className="text-[#ccc]">•</span>
-                <span>SKU: <strong className="font-mono text-[#333]">{product.sku}</strong></span>
+              <div className="flex flex-wrap items-center gap-3 text-xs text-[#64748b] mb-4">
+                <span>Marca: <strong className="text-[#0f172a]">{product.brand}</strong></span>
+                <span className="text-[#cbd5e1]">•</span>
+                <span>SKU: <strong className="font-mono text-[#0f172a]">{product.sku}</strong></span>
                 {product.ean && product.ean !== '—' && (
                   <>
-                    <span className="text-[#ccc]">•</span>
-                    <span>EAN: <strong className="font-mono text-[#333]">{product.ean}</strong></span>
+                    <span className="text-[#cbd5e1]">•</span>
+                    <span>EAN: <strong className="font-mono text-[#0f172a]">{product.ean}</strong></span>
                   </>
                 )}
               </div>
 
               {/* Price & Stock Quick Highlight Cards */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 bg-[#f8fafc] border border-[#e2e8f0] rounded-xl mb-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 bg-[#f8fafc] border border-[#e2e8f0] rounded-2xl mb-2 shadow-2xs">
                 <div>
-                  <span className="text-[10px] uppercase font-bold text-[#64748b]">Preço no Mercado Livre</span>
-                  <div className="text-[18px] font-black text-[#1e293b]">
+                  <span className="text-[10px] uppercase font-bold text-[#64748b] tracking-wider">Preço no Mercado Livre</span>
+                  <div className="text-xl font-black text-[#0f172a] mt-0.5">
                     {formatBRL(product.pricing.current_price || product.costs.real || 0)}
                   </div>
                 </div>
                 <div>
-                  <span className="text-[10px] uppercase font-bold text-[#64748b]">Estoque Disponível</span>
-                  <div className={`text-[18px] font-black ${product.stock.physical > 0 ? 'text-[#16a34a]' : 'text-[#dc2626]'}`}>
+                  <span className="text-[10px] uppercase font-bold text-[#64748b] tracking-wider">Estoque Disponível</span>
+                  <div className={`text-xl font-black mt-0.5 ${product.stock.physical > 0 ? 'text-[#16a34a]' : 'text-[#dc2626]'}`}>
                     {product.stock.physical} unidades
                   </div>
                 </div>
                 <div className="hidden sm:block">
-                  <span className="text-[10px] uppercase font-bold text-[#64748b]">Margem / Lucro</span>
-                  <div className="text-[18px] font-black text-[#3483fa]">
+                  <span className="text-[10px] uppercase font-bold text-[#64748b] tracking-wider">Margem / Lucro</span>
+                  <div className="text-xl font-black text-[#2563eb] mt-0.5">
                     {product.pricing.margin ? `${product.pricing.margin}%` : 'Ativo'}
                   </div>
                 </div>
               </div>
-            </div>
-
-            {/* Action Buttons Row */}
-            <div className="flex flex-wrap items-center gap-2.5 pt-2 border-t border-[#f1f5f9]">
-              <button 
-                onClick={() => router.push(`/purchases/new?product=${product.id}`)} 
-                className="px-4 py-2 bg-[#f0fff4] text-[#38a169] border border-[#38a169]/20 text-[12px] font-semibold rounded-lg hover:bg-[#dcfce7] transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
-              >
-                <ShoppingCart className="w-4 h-4" /> Fazer Pedido de Compra
-              </button>
-              <button 
-                onClick={() => router.push(`/produtos/${product.id}/editar`)} 
-                className="px-4 py-2 bg-[#3483fa] hover:bg-[#2968c8] text-white text-[12px] font-semibold rounded-lg transition-all cursor-pointer shadow-xs"
-              >
-                Editar Produto
-              </button>
-              <DropdownMenu>
-                <DropdownMenuTrigger className="w-10 h-10 flex items-center justify-center rounded-lg border border-[#e6e6e6] text-[#666] hover:bg-[#f5f5f5] transition-colors focus:outline-none cursor-pointer">
-                  <MoreHorizontal className="w-4 h-4" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-44">
-                  <DropdownMenuItem 
-                    className="text-[#e74c3c] focus:text-[#e74c3c] focus:bg-[#fff5f5] cursor-pointer"
-                    onClick={() => setShowDeleteModal(true)}
-                  >
-                    Excluir produto
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
             </div>
           </div>
         </div>
