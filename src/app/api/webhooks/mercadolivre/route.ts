@@ -14,12 +14,14 @@ export async function POST(req: NextRequest) {
 
     console.log(`[ML Webhook] Event received: topic=${topic}, resource=${resource}, seller_id=${sellerId}`)
 
-    // 1. Audit log
-    await supabase.from('marketplace_notifications').insert({
-      topic: topic || 'unknown',
+    // 1. Audit log na tabela real marketplace_webhook_events
+    await supabase.from('marketplace_webhook_events').insert({
+      marketplace_id: 'mercadolivre',
+      event_type: topic || 'orders_v2',
       resource: resource || '',
-      payload: body,
-      processed: false
+      raw_payload: body,
+      processed: true,
+      processed_at: new Date().toISOString()
     })
 
     // 2. Get authenticated seller OAuth token
