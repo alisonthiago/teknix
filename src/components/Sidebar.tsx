@@ -20,6 +20,7 @@ import {
   Zap,
   Scan,
   Radio,
+  MessageSquareQuote,
 } from 'lucide-react'
 import { logout } from '@/app/login/actions'
 import { TeknixLogo } from './TeknixLogo'
@@ -48,6 +49,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Operação',
     items: [
+      { href: '/atendimento', label: 'Perguntas & SAC', icon: MessageSquareQuote, permission: null },
       { href: '/marketplaces', label: 'Marketplaces', icon: Store, permission: 'marketplaces.view' },
       { href: '/operacao', label: 'Catálogo & Estoque', icon: Package, permission: 'products.view' },
       { href: '/pedidos', label: 'Pedidos & Etiquetas', icon: ShoppingCart, permission: 'orders.view' },
