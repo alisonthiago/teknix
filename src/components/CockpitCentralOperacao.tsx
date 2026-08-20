@@ -172,6 +172,7 @@ export function CockpitCentralOperacao({ orders = [], products = [] }: CockpitDa
               Expedidos
             </div>
             <p className="text-2xl font-black text-[#166534] mt-1">{completedOrders.length} concluído{completedOrders.length !== 1 ? 's' : ''}</p>
+          </div>
         </div>
       </div>
     </div>
