@@ -169,9 +169,23 @@ function OrdersTab() {
                   <Td className="text-right font-medium text-[#333]">R$ {Number(o.total_amount || 0).toFixed(2)}</Td>
                   <Td className="text-center"><span className={`inline-flex px-2 py-[2px] rounded text-[10px] font-medium ${getStatus(o.status as string).c}`}>{getStatus(o.status as string).l}</span></Td>
                   <Td className="text-right">
-                    <button onClick={(e) => { e.stopPropagation(); router.push(`/pedidos/${o.id}/nota`); }} className="p-1.5 text-[#999] hover:text-[#333] hover:bg-[#f5f5f5] rounded-md transition-colors" title="Imprimir Comprovante">
-                      <Printer className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        onClick={() => router.push(`/pedidos/${o.id}/etiqueta`)}
+                        className="px-2 py-1 bg-[#f0f7ff] text-[#3483fa] hover:bg-[#3483fa] hover:text-white rounded-md text-[10px] font-bold transition-colors flex items-center gap-1 cursor-pointer"
+                        title="Imprimir Etiqueta de Envio (100x150mm)"
+                      >
+                        <Printer className="w-3 h-3" />
+                        Etiqueta
+                      </button>
+                      <button 
+                        onClick={() => router.push(`/pedidos/${o.id}/nota`)} 
+                        className="p-1 text-[#999] hover:text-[#333] hover:bg-[#f5f5f5] rounded-md transition-colors cursor-pointer" 
+                        title="Imprimir Comprovante / DANFE"
+                      >
+                        <Printer className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </Td>
                 </tr>
               )

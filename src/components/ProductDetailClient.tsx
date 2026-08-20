@@ -78,24 +78,28 @@ function VisaoGeralTab({ product }: { product: ProductDetail }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
       <div className="lg:col-span-2 space-y-4">
-        <div className="bg-white border border-[#e6e6e6] rounded-md p-4">
-          <SectionTitle>Informações do produto</SectionTitle>
+        <div className="bg-white border border-[#e6e6e6] rounded-2xl p-5 shadow-xs">
+          <SectionTitle>Especificações Técnicas & Atributos</SectionTitle>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
-            <InfoRow label="Nome" value={product.name} bold />
-            <InfoRow label="SKU" value={product.sku} mono />
+            <InfoRow label="Nome do Produto" value={product.name} bold />
+            <InfoRow label="SKU / Código" value={product.sku} mono />
             <InfoRow label="Marca" value={product.brand} />
             <InfoRow label="Modelo" value={product.model} />
-            <InfoRow label="EAN/GTIN" value={product.ean} mono />
-            <InfoRow label="Categoria" value={product.category} />
-            <InfoRow label="Fornecedor" value={product.supplier.name} />
-            <InfoRow label="Status" value="" />
-            <InfoRow label="Data de cadastro" value={product.created_at} />
-            <InfoRow label="Última atualização" value={product.updated_at} />
-          </div>
-          <div className="mt-3 pt-3 border-t border-[#f5f5f5]">
-            <p className="text-[12px] text-[#999]">{product.description}</p>
+            <InfoRow label="Código de Barras (EAN)" value={product.ean} mono />
+            <InfoRow label="Categoria Mercado Livre" value={product.category} />
+            <InfoRow label="Fornecedor / Origem" value={product.supplier.name} />
+            <InfoRow label="Data de Sincronização" value={product.created_at} />
           </div>
         </div>
+
+        {product.description && (
+          <div className="bg-white border border-[#e6e6e6] rounded-2xl p-5 shadow-xs">
+            <SectionTitle>Descrição do Anúncio (Mercado Livre)</SectionTitle>
+            <div className="mt-2 text-[13px] text-[#444] leading-relaxed whitespace-pre-line bg-[#fafafa] p-4 rounded-xl border border-[#eeeeee] max-h-96 overflow-y-auto">
+              {product.description}
+            </div>
+          </div>
+        )}
 
         <div className="bg-white border border-[#e6e6e6] rounded-md p-4">
           <SectionTitle>Custo</SectionTitle>
