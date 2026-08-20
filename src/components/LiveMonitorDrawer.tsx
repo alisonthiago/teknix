@@ -100,7 +100,7 @@ export default function LiveMonitorDrawer({ open, onClose }: LiveMonitorDrawerPr
           const sku = it.sku || it.product_name || 'Sem SKU'
           const existing = map.get(sku) || {
             id: it.product_id || sku,
-            name: it.product_name || 'Produto sem título',
+            name: it.products?.name || it.product_name || it.sku || 'Produto Mercado Livre',
             sku,
             quantity: 0,
             revenue: 0,
@@ -109,6 +109,7 @@ export default function LiveMonitorDrawer({ open, onClose }: LiveMonitorDrawerPr
           }
           existing.quantity += Number(it.quantity) || 1
           existing.revenue += Number(it.total_price || (it.unit_price * (it.quantity || 1))) || 0
+          if (it.products?.name) existing.name = it.products.name
           if (it.products?.image_url) existing.imageUrl = it.products.image_url
           if (it.products?.stock !== undefined) existing.stock = it.products.stock
           map.set(sku, existing)
