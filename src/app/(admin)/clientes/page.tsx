@@ -166,67 +166,73 @@ export default function ClientesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#f1f5f9]">
-                {filtered.map((c, idx) => (
-                  <tr key={idx} className="hover:bg-[#f8fafc] transition-colors">
-                    <td className="py-3.5 px-4 font-semibold text-[#0f172a]">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-full bg-[#f1f5f9] border border-[#e2e8f0] flex items-center justify-center text-[#64748b] font-bold uppercase shrink-0">
-                          {c.name.slice(0, 1)}
-                        </div>
-                        <div>
-                          <p className="leading-tight font-bold text-[#0f172a]">{c.name}</p>
-                          {c.phone !== '—' && (
-                            <p className="text-[11px] text-[#64748b] flex items-center gap-1 mt-0.5">
-                              <Phone className="w-3 h-3 text-[#94a3b8]" /> {c.phone}
+                {filtered.map((c, idx) => {
+                  const customerSlug = encodeURIComponent(c.name.trim().toLowerCase().replace(/\s+/g, '-'))
+
+                  return (
+                    <tr key={idx} className="hover:bg-[#f8fafc] transition-colors group">
+                      <td className="py-3.5 px-4 font-semibold text-[#0f172a]">
+                        <Link href={`/clientes/${customerSlug}`} className="flex items-center gap-2.5 group-hover:text-[#2563eb] transition-colors">
+                          <div className="w-9 h-9 rounded-full bg-[#eff6ff] border border-[#bfdbfe] group-hover:border-[#2563eb]/50 flex items-center justify-center text-[#2563eb] font-bold uppercase shrink-0 transition-colors shadow-2xs">
+                            {c.name.slice(0, 1)}
+                          </div>
+                          <div>
+                            <p className="leading-tight font-extrabold text-[#0f172a] group-hover:text-[#2563eb] group-hover:underline underline-offset-2">
+                              {c.name}
                             </p>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-
-                    <td className="py-3.5 px-4">
-                      <div className="flex flex-wrap items-center gap-1">
-                        {Array.from(c.marketplaces).map((mp, i) => (
-                          <span key={i} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#fffde7] text-[#856404] border border-[#ffeeba] text-[10px] font-bold">
-                            <MarketplaceLogo name={mp} className="w-3 h-3" /> {mp}
-                          </span>
-                        ))}
-                      </div>
-                    </td>
-
-                    <td className="py-3.5 px-4 text-center">
-                      <span className="inline-flex px-2.5 py-0.5 rounded-full font-bold bg-[#f0fdf4] text-[#16a34a] border border-[#bbf7d0]">
-                        {c.ordersCount} {c.ordersCount === 1 ? 'pedido' : 'pedidos'}
-                      </span>
-                    </td>
-
-                    <td className="py-3.5 px-4 text-right font-black text-[#0f172a]">
-                      {formatBRL(c.totalSpent)}
-                    </td>
-
-                    <td className="py-3.5 px-4 text-[#64748b]">
-                      <p className="truncate max-w-xs flex items-center gap-1">
-                        <MapPin className="w-3 h-3 text-[#94a3b8] shrink-0" />
-                        {c.address}
-                      </p>
-                    </td>
-
-                    <td className="py-3.5 px-4 text-right text-[#64748b] font-mono text-[11px]">
-                      {c.lastOrderDate}
-                    </td>
-
-                    <td className="py-3.5 px-4 text-right">
-                      {c.ordersList[0]?.id && (
-                        <Link
-                          href={`/pedidos/${c.ordersList[0].id}`}
-                          className="inline-flex items-center gap-1 text-[11px] font-bold text-[#3483fa] hover:underline"
-                        >
-                          Ver Pedido <ArrowUpRight className="w-3 h-3" />
+                            {c.phone !== '—' && (
+                              <p className="text-[11px] text-[#64748b] flex items-center gap-1 mt-0.5 font-normal">
+                                <Phone className="w-3 h-3 text-[#94a3b8]" /> {c.phone}
+                              </p>
+                            )}
+                          </div>
                         </Link>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+
+                      <td className="py-3.5 px-4">
+                        <div className="flex flex-wrap items-center gap-1">
+                          {Array.from(c.marketplaces).map((mp, i) => (
+                            <span key={i} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#fffde7] text-[#856404] border border-[#ffeeba] text-[10px] font-bold">
+                              <MarketplaceLogo name={mp} className="w-3 h-3" /> {mp}
+                            </span>
+                          ))}
+                        </div>
+                      </td>
+
+                      <td className="py-3.5 px-4 text-center">
+                        <Link href={`/clientes/${customerSlug}`}>
+                          <span className="inline-flex px-2.5 py-0.5 rounded-full font-bold bg-[#f0fdf4] text-[#16a34a] border border-[#bbf7d0] hover:bg-[#dcfce7] transition-colors cursor-pointer">
+                            {c.ordersCount} {c.ordersCount === 1 ? 'pedido' : 'pedidos'}
+                          </span>
+                        </Link>
+                      </td>
+
+                      <td className="py-3.5 px-4 text-right font-black text-[#0f172a]">
+                        {formatBRL(c.totalSpent)}
+                      </td>
+
+                      <td className="py-3.5 px-4 text-[#64748b]">
+                        <p className="truncate max-w-xs flex items-center gap-1">
+                          <MapPin className="w-3 h-3 text-[#94a3b8] shrink-0" />
+                          {c.address}
+                        </p>
+                      </td>
+
+                      <td className="py-3.5 px-4 text-right text-[#64748b] font-mono text-[11px]">
+                        {c.lastOrderDate}
+                      </td>
+
+                      <td className="py-3.5 px-4 text-right">
+                        <Link
+                          href={`/clientes/${customerSlug}`}
+                          className="inline-flex items-center gap-1 px-3 py-1 bg-[#eff6ff] hover:bg-[#dbeafe] text-[#2563eb] border border-[#bfdbfe] rounded-xl text-xs font-bold transition-colors"
+                        >
+                          Ver Perfil <ArrowUpRight className="w-3.5 h-3.5" />
+                        </Link>
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>

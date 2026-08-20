@@ -148,7 +148,7 @@ function VisaoGeralTab({ order }: { order: OrderDetail }) {
           </div>
 
           <Link
-            href={`/clientes?search=${encodeURIComponent(order.customer.name)}`}
+            href={`/clientes/${encodeURIComponent(order.customer.name.trim().toLowerCase().replace(/\s+/g, '-'))}`}
             className="mt-3.5 w-full py-2 px-3 bg-[#eff6ff] hover:bg-[#dbeafe] border border-[#bfdbfe] rounded-xl text-xs font-bold text-[#2563eb] flex items-center justify-center gap-1.5 transition-colors"
           >
             Ver Perfil e Histórico do Cliente ➔
