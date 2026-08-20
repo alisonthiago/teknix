@@ -39,8 +39,9 @@ const PLATFORMS: PlatformConfig[] = [
     authType: 'oauth',
     authUrl: '/api/auth/mercadolivre',
     fields: [
-      { key: 'account_name', label: 'Nome / Apelido da Conta', placeholder: 'Ex: Minha Loja Mercado Livre', required: true },
-      { key: 'seller_id', label: 'ID do Vendedor (Opcional se logar via OAuth)', placeholder: 'Ex: 123456789' },
+      { key: 'account_name', label: 'Nome / Apelido da Conta', placeholder: 'Ex: TEKNIXBRASIL', required: true },
+      { key: 'seller_id', label: 'ID do Vendedor (User ID)', placeholder: 'Ex: 470831049', required: true },
+      { key: 'access_token', label: 'Token de Acesso / Access Token (Opcional se clicar no botão acima)', placeholder: 'APP_USR-8874323668438382-...', type: 'password' },
     ]
   },
   {
@@ -176,14 +177,28 @@ export default function ConnectMarketplaceModal({ open, onClose, onSuccess }: Co
             auto_sync_stock: true,
             auto_sync_prices: true,
             auto_import_orders: true,
+            access_token: accessToken !== `token_${Date.now()}` ? accessToken : null,
             last_sync_at: new Date().toISOString()
+          }, { onConflict: 'seller_id' })
+      }
+
+      // 4. Se for Mercado Livre, dispara a sincronização dos anúncios e produtos reais
+      if (selectedPlatform.id === 'mercadolivre') {
+        try {
+          await fetch('/api/sync/mercadolivre', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sellerId })
           })
+        } catch (e) {
+          console.warn('Initial sync warning:', e)
+        }
       }
 
       notify({
         type: 'success',
         title: 'Conexão Estabelecida!',
-        message: `${selectedPlatform.name} foi conectado com sucesso ao TEKNIX. A sincronização de estoque e notificações está ativa!`
+        message: `${selectedPlatform.name} foi conectado com sucesso. Sincronização de catálogo e pedidos iniciada!`
       })
 
       onSuccess()
