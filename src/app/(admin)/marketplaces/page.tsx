@@ -39,34 +39,53 @@ export default function MarketplacesPage() {
       .order('name')
     if (mpError) throw mpError
 
+    // 1. Fetch from marketplace_accounts
+    const { data: accounts } = await s
+      .from('marketplace_accounts')
+      .select('id, marketplace_id, seller_id, status, connection_status, account_name, last_sync_at, updated_at')
+
+    // 2. Fetch from marketplace_connections
     const { data: connections } = await s
       .from('marketplace_connections')
       .select('id, marketplace_id, seller_id, status, account_name, last_sync_at, updated_at')
 
-    const connByMarketplace: Record<string, typeof connections> = {}
-    for (const conn of connections || []) {
-      const mpId = conn.marketplace_id
-      if (!connByMarketplace[mpId]) connByMarketplace[mpId] = []
-      connByMarketplace[mpId].push(conn)
-    }
-
     const results: MarketplaceWithAccounts[] = []
 
     for (const mp of mps || []) {
-      const connList = connByMarketplace[mp.code.toLowerCase()] || connByMarketplace[mp.id] || []
-      const accountsList = connList.map(c => ({
-        id: c.id,
-        account_name: c.account_name || c.seller_id || 'Conta',
-        seller_id: c.seller_id,
-        status: c.status,
-        connection_status: c.status,
-      }))
-      const connected = accountsList.filter(a => a.status === 'CONNECTED' || a.connection_status === 'CONNECTED').length
+      const mpCode = mp.code ? mp.code.toLowerCase().replace(/_/g, '') : ''
+      const mpId = mp.id
+
+      // Combine accounts from both tables
+      const matchedAccs = [
+        ...(accounts || []).filter(a => a.marketplace_id === mpId || (a.marketplace_id && a.marketplace_id.toLowerCase().replace(/_/g, '') === mpCode)),
+        ...(connections || []).filter(c => c.marketplace_id === mpId || (c.marketplace_id && c.marketplace_id.toLowerCase().replace(/_/g, '') === mpCode))
+      ]
+
+      // Deduplicate by seller_id or account_name
+      const seen = new Set<string>()
+      const uniqueAccounts: AccountSummary[] = []
+      for (const a of matchedAccs) {
+        const key = a.seller_id || a.account_name || a.id
+        if (!seen.has(key)) {
+          seen.add(key)
+          uniqueAccounts.push({
+            id: a.id,
+            account_name: a.account_name || a.seller_id || 'Conta Conectada',
+            seller_id: a.seller_id,
+            status: a.status || 'CONNECTED',
+            connection_status: (a as any).connection_status || a.status || 'CONNECTED',
+          })
+        }
+      }
+
+      const connected = uniqueAccounts.filter(a => 
+        a.status === 'CONNECTED' || a.status === 'ACTIVE' || a.connection_status === 'CONNECTED'
+      ).length
 
       results.push({
         ...mp,
-        marketplace_accounts: accountsList,
-        total_accounts: accountsList.length,
+        marketplace_accounts: uniqueAccounts,
+        total_accounts: uniqueAccounts.length,
         connected_accounts: connected,
       })
     }

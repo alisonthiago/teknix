@@ -62,27 +62,47 @@ export default function MarketplaceDetailPage() {
       .single()
     if (mpError) throw mpError
 
-    const { data: connections } = await s
-      .from('marketplace_connections')
-      .select('id, marketplace_id, seller_id, status, account_name, last_sync_at, last_webhook_at, updated_at')
-      .or(`marketplace_id.eq.${mp.code.toLowerCase()},marketplace_id.eq.${marketplaceId}`)
+    const mpCode = mp.code ? mp.code.toLowerCase().replace(/_/g, '') : ''
 
-    const accounts = (connections || []).map(c => ({
-      id: c.id,
-      account_name: c.account_name || c.seller_id || 'Conta',
-      seller_id: c.seller_id,
-      status: c.status,
-      connection_status: c.status,
-      last_sync_at: c.last_sync_at,
-      last_webhook_at: c.last_webhook_at,
-      created_at: c.updated_at,
-    }))
+    // 1. Fetch from marketplace_accounts
+    const { data: accs } = await s
+      .from('marketplace_accounts')
+      .select('id, marketplace_id, seller_id, status, connection_status, account_name, last_sync_at, updated_at, created_at')
+      .or(`marketplace_id.eq.${marketplaceId},marketplace_id.eq.${mp.code}`)
+
+    // 2. Fetch from marketplace_connections
+    const { data: conns } = await s
+      .from('marketplace_connections')
+      .select('id, marketplace_id, seller_id, status, account_name, last_sync_at, last_webhook_at, updated_at, created_at')
+      .or(`marketplace_id.eq.${marketplaceId},marketplace_id.eq.${mp.code?.toLowerCase()},marketplace_id.eq.mercadolivre`)
+
+    // Merge and deduplicate
+    const combined = [...(accs || []), ...(conns || [])]
+    const seen = new Set<string>()
+    const accounts: Account[] = []
+
+    for (const c of combined) {
+      const key = c.seller_id || c.account_name || c.id
+      if (!seen.has(key)) {
+        seen.add(key)
+        accounts.push({
+          id: c.id,
+          account_name: c.account_name || c.seller_id || 'Conta Conectada',
+          seller_id: c.seller_id,
+          status: c.status === 'ACTIVE' ? 'CONNECTED' : c.status || 'CONNECTED',
+          connection_status: (c as any).connection_status || 'CONNECTED',
+          last_sync_at: c.last_sync_at,
+          last_webhook_at: (c as any).last_webhook_at || null,
+          created_at: c.created_at || c.updated_at || new Date().toISOString(),
+        })
+      }
+    }
 
     return { ...mp, marketplace_accounts: accounts }
   }, [marketplaceId])
 
   const accounts = marketplace?.marketplace_accounts || []
-  const connectedCount = accounts.filter(a => a.status === 'CONNECTED').length
+  const connectedCount = accounts.filter(a => a.status === 'CONNECTED' || a.status === 'ACTIVE').length
 
   const getStatusIcon = (status: string) => {
     switch (status) {
