@@ -336,53 +336,60 @@ export default function ConnectMarketplaceModal({ open, onClose, onSuccess }: Co
                 </button>
               </div>
 
-              {selectedPlatform.authType === 'oauth' && (
-                <div className="p-4 rounded-2xl bg-[#f0f7ff] border border-[#d0e4ff] space-y-3">
-                  <div className="flex items-start gap-2.5">
-                    <Zap className="w-4 h-4 text-[#3483fa] shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="text-[12px] font-bold text-[#1f2328]">Autenticação Oficial OAuth 2.0</h4>
-                      <p className="text-[11px] text-[#555] mt-0.5">
-                        Você será redirecionado para a página de login oficial do {selectedPlatform.name} para autorizar a conexão com 1 clique.
-                      </p>
-                    </div>
+              {selectedPlatform.authType === 'oauth' ? (
+                <div className="p-6 rounded-2xl bg-[#f0f7ff] border border-[#d0e4ff] space-y-4 text-center">
+                  <div className="w-14 h-14 rounded-2xl bg-white shadow-xs border border-[#d0e4ff] mx-auto flex items-center justify-center p-2.5">
+                    <MarketplaceLogo name={selectedPlatform.name} className="w-9 h-9" />
                   </div>
+                  <div>
+                    <h4 className="text-[15px] font-bold text-[#1f2328]">Conectar com 1 Clique</h4>
+                    <p className="text-[12px] text-[#555] mt-1 max-w-sm mx-auto leading-relaxed">
+                      Você será redirecionado com segurança para a página oficial do <strong>{selectedPlatform.name}</strong> para autorizar a sincronização de vendas e estoque.
+                    </p>
+                  </div>
+
                   <button
                     type="button"
-                    onClick={() => selectedPlatform.authUrl && handleOAuthRedirect(selectedPlatform.authUrl)}
-                    className="w-full py-2.5 px-4 bg-[#FFE600] hover:bg-[#F5DC00] text-[#333] text-[13px] font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all"
+                    onClick={() => {
+                      if (selectedPlatform.authUrl) {
+                        window.location.href = selectedPlatform.authUrl
+                      }
+                    }}
+                    className="w-full py-3.5 px-5 bg-[#FFE600] hover:bg-[#F5DC00] text-[#111] text-[14px] font-extrabold rounded-xl flex items-center justify-center gap-2.5 shadow-md transition-all cursor-pointer"
                   >
                     <span>Entrar no {selectedPlatform.name} e Autorizar</span>
-                    <ExternalLink className="w-4 h-4" />
+                    <ExternalLink className="w-4 h-4 text-[#111]" />
                   </button>
-                  <div className="text-center text-[10px] text-[#888]">
-                    Ou preencha os dados abaixo para conexão direta via credenciais da API:
+
+                  <div className="p-3 rounded-xl bg-white/80 border border-[#d0e4ff] flex items-center gap-2 text-[11px] text-[#276749] text-left">
+                    <CheckCircle2 className="w-4 h-4 text-[#38a169] shrink-0" />
+                    <span>Ao autorizar, suas vendas de hoje e catálogo de produtos serão sincronizados automaticamente.</span>
                   </div>
                 </div>
+              ) : (
+                <form id="connect-mp-form" onSubmit={handleConnect} className="space-y-3">
+                  {selectedPlatform.fields?.map(f => (
+                    <div key={f.key}>
+                      <label className="block text-[11px] font-semibold text-[#666] mb-1">
+                        {f.label} {f.required && <span className="text-[#e74c3c]">*</span>}
+                      </label>
+                      <input
+                        type={f.type || 'text'}
+                        required={f.required}
+                        placeholder={f.placeholder}
+                        value={formData[f.key] || ''}
+                        onChange={e => setFormData({ ...formData, [f.key]: e.target.value })}
+                        className="w-full h-10 px-3 rounded-xl border border-[#d0d7de] bg-white text-[13px] text-[#333] focus:outline-none focus:ring-2 focus:ring-[#3483fa]/20 focus:border-[#3483fa] transition-all"
+                      />
+                    </div>
+                  ))}
+
+                  <div className="p-3 rounded-xl bg-[#f0fff4] border border-[#c6f6d5] flex items-center gap-2 text-[11px] text-[#276749]">
+                    <CheckCircle2 className="w-4 h-4 text-[#38a169] shrink-0" />
+                    <span>Ao conectar, o TEKNIX sincronizará automaticamente estoque, pedidos e preços.</span>
+                  </div>
+                </form>
               )}
-
-              <form id="connect-mp-form" onSubmit={handleConnect} className="space-y-3">
-                {selectedPlatform.fields?.map(f => (
-                  <div key={f.key}>
-                    <label className="block text-[11px] font-semibold text-[#666] mb-1">
-                      {f.label} {f.required && <span className="text-[#e74c3c]">*</span>}
-                    </label>
-                    <input
-                      type={f.type || 'text'}
-                      required={f.required}
-                      placeholder={f.placeholder}
-                      value={formData[f.key] || ''}
-                      onChange={e => setFormData({ ...formData, [f.key]: e.target.value })}
-                      className="w-full h-10 px-3 rounded-xl border border-[#d0d7de] bg-white text-[13px] text-[#333] focus:outline-none focus:ring-2 focus:ring-[#3483fa]/20 focus:border-[#3483fa] transition-all"
-                    />
-                  </div>
-                ))}
-
-                <div className="p-3 rounded-xl bg-[#f0fff4] border border-[#c6f6d5] flex items-center gap-2 text-[11px] text-[#276749]">
-                  <CheckCircle2 className="w-4 h-4 text-[#38a169] shrink-0" />
-                  <span>Ao conectar, o TEKNIX sincronizará automaticamente estoque, pedidos e preços.</span>
-                </div>
-              </form>
             </div>
           )}
         </div>
@@ -396,30 +403,45 @@ export default function ConnectMarketplaceModal({ open, onClose, onSuccess }: Co
               else onClose()
             }}
             disabled={connecting}
-            className="px-4 py-2 text-[12px] font-semibold text-[#666] hover:bg-[#eee] rounded-xl transition-colors"
+            className="px-4 py-2 text-[12px] font-semibold text-[#666] hover:bg-[#eee] rounded-xl transition-colors cursor-pointer"
           >
             {selectedPlatform ? '← Voltar aos Canais' : 'Cancelar'}
           </button>
 
           {selectedPlatform && (
-            <button
-              type="submit"
-              form="connect-mp-form"
-              disabled={connecting}
-              className="px-5 py-2.5 bg-[#3483fa] hover:bg-[#2968c8] text-white text-[12px] font-bold rounded-xl shadow-sm transition-colors flex items-center gap-2 disabled:opacity-50"
-            >
-              {connecting ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Conectando API...
-                </>
-              ) : (
-                <>
-                  <Zap className="w-4 h-4" />
-                  Conectar {selectedPlatform.name}
-                </>
-              )}
-            </button>
+            selectedPlatform.authType === 'oauth' ? (
+              <button
+                type="button"
+                onClick={() => {
+                  if (selectedPlatform.authUrl) {
+                    window.location.href = selectedPlatform.authUrl
+                  }
+                }}
+                className="px-5 py-2.5 bg-[#FFE600] hover:bg-[#F5DC00] text-[#111] text-[12px] font-extrabold rounded-xl shadow-sm transition-colors flex items-center gap-2 cursor-pointer"
+              >
+                <ExternalLink className="w-4 h-4" />
+                Autorizar no {selectedPlatform.name}
+              </button>
+            ) : (
+              <button
+                type="submit"
+                form="connect-mp-form"
+                disabled={connecting}
+                className="px-5 py-2.5 bg-[#3483fa] hover:bg-[#2968c8] text-white text-[12px] font-bold rounded-xl shadow-sm transition-colors flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+              >
+                {connecting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Conectando API...
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-4 h-4" />
+                    Conectar {selectedPlatform.name}
+                  </>
+                )}
+              </button>
+            )
           )}
         </div>
 
