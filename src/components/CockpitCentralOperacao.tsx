@@ -119,18 +119,18 @@ export function CockpitCentralOperacao({ orders = [], products = [] }: CockpitDa
 
         <div className="flex flex-wrap items-center gap-2">
           <Link
-            href="/expedicao"
+            href="/pedidos"
             className="px-4 py-2 bg-[#3483fa] hover:bg-[#2968c8] text-white text-[12px] font-medium rounded-md transition-colors flex items-center gap-1.5"
           >
             <Package className="w-3.5 h-3.5" />
-            Modo Expedição & Bipagem
+            Ver Pedidos & Etiquetas
           </Link>
 
           <Link
-            href="/central-operacoes"
+            href="/operacao"
             className="px-4 py-2 bg-[#f0f7ff] hover:bg-[#e1effe] text-[#3483fa] text-[12px] font-medium rounded-md transition-colors"
           >
-            Ver Fila Completa
+            Ver Estoque & Catálogo
           </Link>
         </div>
       </div>

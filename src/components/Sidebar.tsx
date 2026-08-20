@@ -45,8 +45,6 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Operação',
     items: [
-      { href: '/central-operacoes', label: 'Cockpit Operação', icon: Zap, permission: null },
-      { href: '/expedicao', label: 'Expedição & Bipagem', icon: Scan, permission: null },
       { href: '/marketplaces', label: 'Marketplaces', icon: Store, permission: 'marketplaces.view' },
       { href: '/operacao', label: 'Catálogo & Estoque', icon: Package, permission: 'products.view' },
       { href: '/pedidos', label: 'Pedidos & Etiquetas', icon: ShoppingCart, permission: 'orders.view' },
