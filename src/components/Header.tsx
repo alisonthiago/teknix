@@ -467,7 +467,7 @@ export default function Header({ userName, userRole, userEmail, userId, userAvat
         </div>
       </div>
 
-      {/* Desktop — título + Botão Monitor ao Vivo + pill amarela */}
+      {/* Desktop — título + Botão Monitor ao Vivo + pill verde */}
       <header className="hidden lg:flex sticky top-0 z-30 bg-[#f5f5f5] items-center justify-between py-5 px-10">
         <h1 className="text-[26px] font-semibold text-[#333] leading-tight">{pageTitle}</h1>
         
@@ -476,7 +476,7 @@ export default function Header({ userName, userRole, userEmail, userId, userAvat
           {/* 🔴 BOTÃO MONITOR AO VIVO DESTACADO NO HEADER */}
           <button
             onClick={() => setLiveDrawerOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#FFE600] hover:bg-[#F5DC00] text-[#111] text-[13px] font-extrabold shadow-sm border border-[#E5CC00] hover:shadow-md transition-all cursor-pointer group"
+            className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#B5F500] hover:bg-[#a3e600] text-[#111] text-[13px] font-extrabold shadow-sm border border-[#a2e000] hover:shadow-md transition-all cursor-pointer group"
             title="Abrir Monitor ao Vivo no canto direito da tela"
           >
             <span className="relative flex h-2.5 w-2.5 shrink-0">
@@ -494,7 +494,7 @@ export default function Header({ userName, userRole, userEmail, userId, userAvat
           <div className="relative">
             <button
               onClick={() => setShowBasicCalc(!showBasicCalc)}
-              className="w-10 h-10 rounded-full hover:bg-[#ecf3fe] text-[#3483fa] flex items-center justify-center transition-colors border border-transparent hover:border-[#3483fa]"
+              className="w-10 h-10 rounded-full hover:bg-[#EEFFB3]/60 text-[#111] flex items-center justify-center transition-colors border border-transparent hover:border-[#B5F500]"
               title="Abrir Calculadora Básica"
             >
               <Calculator className="w-5 h-5" strokeWidth={1.5} />

@@ -133,7 +133,7 @@ export default function LiveMonitorDrawer({ open, onClose }: LiveMonitorDrawerPr
       <div className="relative z-10 w-full max-w-md bg-[#f5f5f7] h-full shadow-2xl flex flex-col overflow-hidden border-l border-[#e6e6e6] animate-in slide-in-from-right duration-300">
         
         {/* Header do Drawer */}
-        <div className="bg-[#FFE600] px-5 py-4 border-b border-[#E5CC00] flex items-center justify-between shrink-0">
+        <div className="bg-[#B5F500] px-5 py-4 border-b border-[#a2e000] flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5">
             <span className="relative flex h-3 w-3">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#e74c3c] opacity-75"></span>
@@ -164,8 +164,8 @@ export default function LiveMonitorDrawer({ open, onClose }: LiveMonitorDrawerPr
         {/* Conteúdo com Scroll */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           
-          {/* Card Amarelo Ouro - Vendas de Hoje */}
-          <div className="bg-[#FFE600] rounded-2xl p-5 shadow-xs border border-[#F5DC00] text-[#111] relative overflow-hidden">
+          {/* Card Verde Lime - Vendas de Hoje */}
+          <div className="bg-[#B5F500] rounded-2xl p-5 shadow-xs border border-[#a2e000] text-[#111] relative overflow-hidden">
             <div className="flex items-center justify-between text-[12px] font-bold text-[#333] uppercase">
               <span>Vendas de hoje</span>
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-black/10 font-bold">

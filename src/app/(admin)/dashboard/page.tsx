@@ -190,7 +190,7 @@ export default function DashboardPage() {
       </div>
 
       {/* 🔴 CARD DESTAQUE VENDAS DE HOJE (MONITOR AO VIVO) */}
-      <div className="bg-[#FFE600] rounded-2xl p-5 sm:p-6 shadow-sm border border-[#F5DC00] text-[#111] flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-[#B5F500] rounded-2xl p-5 sm:p-6 shadow-sm border border-[#a2e000] text-[#111] flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-2xl bg-black/10 flex items-center justify-center shrink-0">
             <span className="relative flex h-3.5 w-3.5">

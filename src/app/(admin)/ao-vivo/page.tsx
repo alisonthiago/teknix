@@ -377,7 +377,7 @@ export default function MonitorAoVivoPage() {
         
         <div className="lg:col-span-8 space-y-6">
           
-          <div className="bg-[#FFE600] rounded-3xl p-6 sm:p-7 shadow-md border border-[#F5DC00] text-[#1f2328] relative overflow-hidden">
+          <div className="bg-[#B5F500] rounded-3xl p-6 sm:p-7 shadow-md border border-[#a2e000] text-[#1f2328] relative overflow-hidden">
             <div className="flex items-center justify-between">
               <span className="text-[14px] font-bold text-[#333] uppercase tracking-wide flex items-center gap-2">
                 <Flame className="w-5 h-5 text-[#e74c3c]" />
