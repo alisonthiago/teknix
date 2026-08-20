@@ -177,6 +177,7 @@ export async function getOrderDetail(id: string) {
       const imageUrl = rawImages[0]?.url || (prod as any)?.image_url || null
 
       return {
+        product_id: (prod?.id as string) || (item.product_id as string) || null,
         sku: (prod?.sku as string) || (item.sku as string) || '—',
         name: (prod?.name as string) || (item.product_name as string) || 'Produto Mercado Livre',
         quantity: Number(item.quantity || 1), 

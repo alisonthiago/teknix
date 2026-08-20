@@ -69,16 +69,35 @@ function VisaoGeralTab({ order }: { order: OrderDetail }) {
                   <tr key={i} className="hover:bg-[#fafafa] transition-colors">
                     <td className="py-2.5 px-3 font-mono text-[#999]">{item.sku}</td>
                     <td className="py-2.5 px-3 text-[#333] font-medium">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-[#f5f5f5] border border-[#e6e6e6] overflow-hidden flex items-center justify-center shrink-0">
-                          {item.image ? (
-                            <img src={item.image} alt="" className="w-full h-full object-cover" />
-                          ) : (
-                            <Package className="w-4 h-4 text-[#ccc]" />
-                          )}
+                      {item.product_id ? (
+                        <Link 
+                          href={`/produtos/${item.product_id}`}
+                          className="flex items-center gap-3 group hover:text-[#3483fa] transition-colors cursor-pointer"
+                          title="Clique para abrir os detalhes deste produto"
+                        >
+                          <div className="w-10 h-10 rounded-lg bg-[#f5f5f5] border border-[#e6e6e6] group-hover:border-[#3483fa]/50 overflow-hidden flex items-center justify-center shrink-0 transition-all shadow-2xs">
+                            {item.image ? (
+                              <img src={item.image} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <Package className="w-4 h-4 text-[#ccc]" />
+                            )}
+                          </div>
+                          <span className="font-semibold text-[13px] group-hover:underline underline-offset-2">
+                            {item.name}
+                          </span>
+                        </Link>
+                      ) : (
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-[#f5f5f5] border border-[#e6e6e6] overflow-hidden flex items-center justify-center shrink-0">
+                            {item.image ? (
+                              <img src={item.image} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <Package className="w-4 h-4 text-[#ccc]" />
+                            )}
+                          </div>
+                          <span className="font-semibold text-[13px]">{item.name}</span>
                         </div>
-                        <span className="font-semibold text-[13px]">{item.name}</span>
-                      </div>
+                      )}
                     </td>
                     <td className="py-2.5 px-3 text-right text-[#999] font-medium">{item.quantity}</td>
                     <td className="py-2.5 px-3 text-right text-[#999]">{formatBRL(item.price)}</td>
