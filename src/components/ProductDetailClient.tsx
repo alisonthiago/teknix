@@ -523,7 +523,8 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   
   const images = product.images && product.images.length > 0 ? product.images : [product.image]
-  const [selectedImage, setSelectedImage] = useState(images[0])
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0)
+  const selectedImage = images[selectedImageIndex] || images[0]
 
   const handleDelete = async () => {
     try {
@@ -546,27 +547,48 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
         </Link>
       </div>
 
-      <div className="bg-white border border-[#e6e6e6] rounded-2xl p-5 mb-4 shadow-xs">
-        <div className="flex flex-col md:flex-row items-start gap-6">
+      {/* Main Product Hero Card */}
+      <div className="bg-white border border-[#e6e6e6] rounded-2xl p-6 mb-5 shadow-xs">
+        <div className="flex flex-col lg:flex-row items-start gap-8">
           {/* Photos Gallery */}
-          <div className="w-full md:w-64 flex flex-col items-center gap-3 shrink-0">
-            <div className="w-full h-56 rounded-xl bg-[#fafafa] border border-[#e6e6e6] overflow-hidden flex items-center justify-center p-2 shadow-xs">
+          <div className="w-full lg:w-80 flex flex-col items-center gap-3 shrink-0">
+            {/* Big Preview Frame */}
+            <div className="relative w-full h-72 rounded-2xl bg-[#fafafa] border border-[#e6e6e6] overflow-hidden flex items-center justify-center p-3 shadow-inner group">
               {selectedImage && selectedImage !== '/placeholder-product.png' ? (
-                <img src={selectedImage} alt={product.name} className="w-full h-full object-contain" />
+                <img 
+                  src={selectedImage} 
+                  alt={product.name} 
+                  className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105" 
+                />
               ) : (
-                <Package className="w-12 h-12 text-[#ccc]" />
+                <Package className="w-16 h-16 text-[#ccc]" />
               )}
+              
+              {/* Badges on main image */}
+              <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
+                {selectedImageIndex === 0 && (
+                  <span className="px-2 py-0.5 rounded-md bg-[#3483fa] text-white text-[10px] font-bold shadow-xs">
+                    Foto Principal (Capa)
+                  </span>
+                )}
+              </div>
+              <div className="absolute bottom-2.5 right-2.5 bg-black/60 backdrop-blur-xs text-white text-[10px] font-medium px-2 py-0.5 rounded-md">
+                {selectedImageIndex + 1} de {images.length} fotos
+              </div>
             </div>
 
+            {/* Thumbnails Row (Clean, no browser scrollbar) */}
             {images.length > 1 && (
-              <div className="flex items-center gap-2 overflow-x-auto w-full py-1">
+              <div className="flex items-center gap-2 overflow-x-auto w-full py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {images.map((img, idx) => (
                   <button
                     key={idx}
                     type="button"
-                    onClick={() => setSelectedImage(img)}
-                    className={`w-12 h-12 rounded-lg border overflow-hidden p-1 shrink-0 transition-all cursor-pointer ${
-                      selectedImage === img ? 'border-[#3483fa] ring-2 ring-[#3483fa]/30 shadow-xs' : 'border-[#e6e6e6] opacity-70 hover:opacity-100'
+                    onClick={() => setSelectedImageIndex(idx)}
+                    className={`relative w-14 h-14 rounded-xl border-2 overflow-hidden p-1 shrink-0 transition-all cursor-pointer bg-white ${
+                      selectedImageIndex === idx 
+                        ? 'border-[#3483fa] ring-2 ring-[#3483fa]/20 shadow-sm scale-105' 
+                        : 'border-[#e6e6e6] opacity-60 hover:opacity-100 hover:border-[#ccc]'
                     }`}
                   >
                     <img src={img} alt="" className="w-full h-full object-contain" />
@@ -576,39 +598,89 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
             )}
           </div>
 
-          <div className="flex-1 min-w-0">
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-              <div>
-                <h1 className="text-[18px] font-bold text-[#333] leading-snug">{product.name}</h1>
-                <div className="flex flex-wrap items-center gap-2 mt-1.5">
-                  <span className="text-[12px] font-medium text-[#666]">{product.brand}</span>
-                  <span className="text-[10px] text-[#ccc]">•</span>
-                  <span className="text-[11px] font-mono text-[#999]">SKU {product.sku}</span>
-                  <span className="text-[10px] text-[#ccc]">•</span>
-                  <StatusBadge status={product.status} />
+          {/* Right Product Details & Actions */}
+          <div className="flex-1 min-w-0 flex flex-col justify-between self-stretch">
+            <div>
+              {/* Marketplace Source & Status Badges */}
+              <div className="flex flex-wrap items-center gap-2 mb-2">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#fffde7] text-[#856404] border border-[#ffeeba] text-[11px] font-bold">
+                  <MarketplaceLogo name="Mercado Livre" className="w-3.5 h-3.5" />
+                  Mercado Livre Oficial
+                </span>
+                <span className="inline-flex px-2.5 py-1 rounded-lg bg-[#f0f7ff] text-[#3483fa] text-[11px] font-medium border border-[#3483fa]/20">
+                  {product.category || 'Catálogo Geral'}
+                </span>
+                <StatusBadge status={product.status} />
+              </div>
+
+              {/* Product Title */}
+              <h1 className="text-[20px] font-bold text-[#1f2328] leading-snug mb-2">
+                {product.name}
+              </h1>
+
+              {/* Sub-info */}
+              <div className="flex flex-wrap items-center gap-3 text-[12px] text-[#666] mb-4">
+                <span>Marca: <strong className="text-[#333]">{product.brand}</strong></span>
+                <span className="text-[#ccc]">•</span>
+                <span>SKU: <strong className="font-mono text-[#333]">{product.sku}</strong></span>
+                {product.ean && product.ean !== '—' && (
+                  <>
+                    <span className="text-[#ccc]">•</span>
+                    <span>EAN: <strong className="font-mono text-[#333]">{product.ean}</strong></span>
+                  </>
+                )}
+              </div>
+
+              {/* Price & Stock Quick Highlight Cards */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 bg-[#f8fafc] border border-[#e2e8f0] rounded-xl mb-4">
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-[#64748b]">Preço no Mercado Livre</span>
+                  <div className="text-[18px] font-black text-[#1e293b]">
+                    {formatBRL(product.pricing.current_price || product.costs.real || 0)}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-[#64748b]">Estoque Disponível</span>
+                  <div className={`text-[18px] font-black ${product.stock.physical > 0 ? 'text-[#16a34a]' : 'text-[#dc2626]'}`}>
+                    {product.stock.physical} unidades
+                  </div>
+                </div>
+                <div className="hidden sm:block">
+                  <span className="text-[10px] uppercase font-bold text-[#64748b]">Margem / Lucro</span>
+                  <div className="text-[18px] font-black text-[#3483fa]">
+                    {product.pricing.margin ? `${product.pricing.margin}%` : 'Ativo'}
+                  </div>
                 </div>
               </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <button onClick={() => router.push(`/purchases/new?product=${product.id}`)} className="px-3 py-1.5 bg-[#f0fff4] text-[#38a169] border border-[#38a169]/20 text-[11px] font-medium rounded-md hover:bg-[#dcfce7] transition-colors flex items-center gap-1 cursor-pointer">
-                  <ShoppingCart className="w-3.5 h-3.5" /> Comprar
-                </button>
-                <button onClick={() => router.push(`/produtos/${product.id}/editar`)} className="px-3 py-1.5 bg-[#3483fa] text-white text-[11px] font-medium rounded-md hover:bg-[#2968c8] transition-colors cursor-pointer">
-                  Editar produto
-                </button>
-                <DropdownMenu>
-                  <DropdownMenuTrigger className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full border border-[#e6e6e6] text-[#666] hover:bg-[#f5f5f5] transition-colors focus:outline-none cursor-pointer">
+            </div>
+
+            {/* Action Buttons Row */}
+            <div className="flex flex-wrap items-center gap-2.5 pt-2 border-t border-[#f1f5f9]">
+              <button 
+                onClick={() => router.push(`/purchases/new?product=${product.id}`)} 
+                className="px-4 py-2 bg-[#f0fff4] text-[#38a169] border border-[#38a169]/20 text-[12px] font-semibold rounded-lg hover:bg-[#dcfce7] transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+              >
+                <ShoppingCart className="w-4 h-4" /> Fazer Pedido de Compra
+              </button>
+              <button 
+                onClick={() => router.push(`/produtos/${product.id}/editar`)} 
+                className="px-4 py-2 bg-[#3483fa] hover:bg-[#2968c8] text-white text-[12px] font-semibold rounded-lg transition-all cursor-pointer shadow-xs"
+              >
+                Editar Produto
+              </button>
+              <DropdownMenu>
+                <DropdownMenuTrigger className="w-10 h-10 flex items-center justify-center rounded-lg border border-[#e6e6e6] text-[#666] hover:bg-[#f5f5f5] transition-colors focus:outline-none cursor-pointer">
                   <MoreHorizontal className="w-4 h-4" />
                 </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-40">
-                    <DropdownMenuItem 
-                      className="text-[#e74c3c] focus:text-[#e74c3c] focus:bg-[#fff5f5] cursor-pointer"
-                      onClick={() => setShowDeleteModal(true)}
-                    >
-                      Excluir produto
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+                <DropdownMenuContent align="end" className="w-44">
+                  <DropdownMenuItem 
+                    className="text-[#e74c3c] focus:text-[#e74c3c] focus:bg-[#fff5f5] cursor-pointer"
+                    onClick={() => setShowDeleteModal(true)}
+                  >
+                    Excluir produto
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>
