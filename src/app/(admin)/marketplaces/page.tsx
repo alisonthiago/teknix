@@ -3,10 +3,12 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Plus, Store, ArrowRight, Wifi, WifiOff, AlertTriangle, RefreshCw, ExternalLink } from 'lucide-react'
+import { Plus, Store, ArrowRight, Wifi, WifiOff, AlertTriangle, RefreshCw, Unlink, CheckCircle2, X, Trash2, Power } from 'lucide-react'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
 import ConnectMarketplaceModal from '@/components/ConnectMarketplaceModal'
+import { createClient } from '@/utils/supabase/client'
+import { useNotification } from '@/contexts/NotificationContext'
 
 interface AccountSummary {
   id: string
@@ -30,7 +32,11 @@ interface MarketplaceWithAccounts {
 
 export default function MarketplacesPage() {
   const router = useRouter()
+  const { notify } = useNotification()
   const [filter, setFilter] = useState<'ALL' | 'CONNECTED' | 'DISCONNECTED'>('ALL')
+  const [showConnectModal, setShowConnectModal] = useState(false)
+  const [disconnectingMp, setDisconnectingMp] = useState<MarketplaceWithAccounts | null>(null)
+  const [isDisconnecting, setIsDisconnecting] = useState(false)
 
   const { data: marketplaces, loading, error, refetch } = useSupabaseQuery<MarketplaceWithAccounts[]>(async (s) => {
     const { data: mps, error: mpError } = await s
@@ -79,7 +85,7 @@ export default function MarketplacesPage() {
       }
 
       const connected = uniqueAccounts.filter(a => 
-        a.status === 'CONNECTED' || a.status === 'ACTIVE' || a.connection_status === 'CONNECTED'
+        a.status === 'CONNECTED' || a.status === 'ACTIVE' || (a as any).connection_status === 'CONNECTED'
       ).length
 
       results.push({
@@ -93,7 +99,38 @@ export default function MarketplacesPage() {
     return results
   })
 
-  const [showConnectModal, setShowConnectModal] = useState(false)
+  const handleDisconnect = async () => {
+    if (!disconnectingMp) return
+    setIsDisconnecting(true)
+    const supabase = createClient()
+
+    try {
+      const mpId = disconnectingMp.id
+      const mpCode = disconnectingMp.code ? disconnectingMp.code.toLowerCase() : ''
+
+      // Delete from connections and accounts
+      await supabase.from('marketplace_connections').delete().or(`marketplace_id.eq.${mpId},marketplace_id.eq.${mpCode},marketplace_id.eq.mercadolivre`)
+      await supabase.from('marketplace_accounts').delete().or(`marketplace_id.eq.${mpId},marketplace_id.eq.${disconnectingMp.code}`)
+
+      notify({
+        type: 'success',
+        title: 'Canal Desconectado',
+        message: `${disconnectingMp.name} foi desconectado com sucesso.`
+      })
+
+      setDisconnectingMp(null)
+      refetch()
+    } catch (err: unknown) {
+      console.error(err)
+      notify({
+        type: 'error',
+        title: 'Erro ao Desconectar',
+        message: err instanceof Error ? err.message : 'Não foi possível desconectar o canal.'
+      })
+    } finally {
+      setIsDisconnecting(false)
+    }
+  }
 
   const filtered = (marketplaces || []).filter(mp => {
     if (filter === 'CONNECTED') return mp.connected_accounts > 0
@@ -110,7 +147,7 @@ export default function MarketplacesPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h1 className="text-lg font-semibold text-[#333]">Marketplaces</h1>
-          <p className="text-sm text-[#999]">Gerencie seus canais de venda e múltiplas contas</p>
+          <p className="text-sm text-[#999]">Gerencie seus canais de venda, login e múltiplas contas</p>
         </div>
         <button
           onClick={() => setShowConnectModal(true)}
@@ -120,11 +157,52 @@ export default function MarketplacesPage() {
         </button>
       </div>
 
+      {/* Connect Modal */}
       <ConnectMarketplaceModal
         open={showConnectModal}
         onClose={() => setShowConnectModal(false)}
         onSuccess={() => refetch()}
       />
+
+      {/* Disconnect Confirmation Popup Modal */}
+      {disconnectingMp && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl p-6 border border-[#e6e6e6]">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-2xl bg-[#fff5f5] flex items-center justify-center shrink-0">
+                <Unlink className="w-5 h-5 text-[#e74c3c]" />
+              </div>
+              <div>
+                <h3 className="text-[15px] font-bold text-[#333]">Desconectar {disconnectingMp.name}</h3>
+                <p className="text-[11px] text-[#999]">Confirmação de desconexão</p>
+              </div>
+            </div>
+
+            <p className="text-[13px] text-[#555] leading-relaxed mb-6">
+              Tem certeza que deseja desconectar o canal <strong>{disconnectingMp.name}</strong>? A sincronização automática de pedidos e estoque com a sua loja será interrompida.
+            </p>
+
+            <div className="flex items-center justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setDisconnectingMp(null)}
+                disabled={isDisconnecting}
+                className="px-4 py-2 text-[12px] font-semibold text-[#666] hover:bg-[#f5f5f5] rounded-xl transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleDisconnect}
+                disabled={isDisconnecting}
+                className="px-4 py-2 bg-[#e74c3c] hover:bg-[#c0392b] text-white text-[12px] font-bold rounded-xl transition-colors shadow-sm disabled:opacity-50 flex items-center gap-1.5"
+              >
+                {isDisconnecting ? 'Desconectando...' : 'Sim, Desconectar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Stats bar */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -179,98 +257,117 @@ export default function MarketplacesPage() {
       {/* Marketplace cards */}
       {!loading && !error && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map(mp => (
-            <div
-              key={mp.id}
-              onClick={() => router.push(`/marketplaces/${mp.id}`)}
-              className="bg-white border border-[#e6e6e6] rounded-lg p-5 cursor-pointer hover:border-[#3483fa]/30 hover:shadow-sm transition-all group"
-            >
-              {/* Header */}
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <MarketplaceLogo name={mp.name} className="w-10 h-10" />
-                  <div>
-                    <h3 className="text-sm font-semibold text-[#333] group-hover:text-[#3483fa] transition-colors">{mp.name}</h3>
-                    <p className="text-xs text-[#999]">{mp.code}</p>
-                  </div>
-                </div>
-                <ArrowRight className="w-4 h-4 text-[#ccc] group-hover:text-[#3483fa] transition-colors" />
-              </div>
-
-              {/* Accounts summary */}
-              <div className="flex items-center gap-4 mb-4">
-                <div className="flex items-center gap-1.5">
-                  <Store className="w-3.5 h-3.5 text-[#999]" />
-                  <span className="text-xs text-[#666]">
-                    <strong className="text-[#333]">{mp.total_accounts}</strong> conta{mp.total_accounts !== 1 ? 's' : ''}
-                  </span>
-                </div>
-                {mp.connected_accounts > 0 && (
-                  <div className="flex items-center gap-1.5">
-                    <Wifi className="w-3.5 h-3.5 text-[#38a169]" />
-                    <span className="text-xs text-[#38a169] font-medium">{mp.connected_accounts} conectada{mp.connected_accounts !== 1 ? 's' : ''}</span>
-                  </div>
-                )}
-                {mp.total_accounts > mp.connected_accounts && (
-                  <div className="flex items-center gap-1.5">
-                    <WifiOff className="w-3.5 h-3.5 text-[#e74c3c]" />
-                    <span className="text-xs text-[#e74c3c]">{mp.total_accounts - mp.connected_accounts} off</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Account chips */}
-              {mp.marketplace_accounts.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mb-4">
-                  {mp.marketplace_accounts.slice(0, 4).map(acc => (
-                    <span
-                      key={acc.id}
-                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium ${
-                        acc.status === 'CONNECTED' || acc.connection_status === 'CONNECTED'
-                          ? 'bg-[#f0fff4] text-[#38a169]'
-                          : acc.status === 'ERROR'
-                          ? 'bg-[#fff5f5] text-[#e74c3c]'
-                          : 'bg-[#f5f5f5] text-[#999]'
-                      }`}
+          {filtered.map(mp => {
+            const isConnected = mp.connected_accounts > 0
+            return (
+              <div
+                key={mp.id}
+                className="bg-white border border-[#e6e6e6] rounded-2xl p-5 hover:border-[#3483fa]/40 hover:shadow-md transition-all flex flex-col justify-between"
+              >
+                {/* Top Section */}
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div 
+                      onClick={() => router.push(`/marketplaces/${mp.id}`)}
+                      className="flex items-center gap-3 cursor-pointer group"
                     >
-                      {(acc.status === 'CONNECTED' || acc.connection_status === 'CONNECTED') ? (
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#38a169]" />
-                      ) : acc.status === 'ERROR' ? (
-                        <AlertTriangle className="w-2.5 h-2.5" />
-                      ) : (
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#ccc]" />
-                      )}
-                      {acc.account_name}
-                    </span>
-                  ))}
-                  {mp.marketplace_accounts.length > 4 && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] text-[#999] bg-[#f5f5f5]">
-                      +{mp.marketplace_accounts.length - 4}
-                    </span>
+                      <div className="w-12 h-12 rounded-xl bg-[#fafafa] border border-[#f0f0f0] p-2 flex items-center justify-center">
+                        <MarketplaceLogo name={mp.name} className="w-8 h-8" />
+                      </div>
+                      <div>
+                        <h3 className="text-[14px] font-bold text-[#333] group-hover:text-[#3483fa] transition-colors">{mp.name}</h3>
+                        <p className="text-[11px] text-[#999]">{mp.code}</p>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => router.push(`/marketplaces/${mp.id}`)}
+                      className="p-1.5 rounded-lg text-[#999] hover:text-[#3483fa] hover:bg-[#f0f7ff] transition-colors"
+                      title="Ver detalhes do canal"
+                    >
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  {/* Accounts summary */}
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="flex items-center gap-1.5">
+                      <Store className="w-3.5 h-3.5 text-[#999]" />
+                      <span className="text-xs text-[#666]">
+                        <strong className="text-[#333]">{mp.total_accounts}</strong> conta{mp.total_accounts !== 1 ? 's' : ''}
+                      </span>
+                    </div>
+                    {isConnected && (
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-[#38a169] animate-pulse" />
+                        <span className="text-xs text-[#38a169] font-semibold">{mp.connected_accounts} Conectada</span>
+                      </div>
+                    )}
+                    {!isConnected && (
+                      <div className="flex items-center gap-1.5">
+                        <WifiOff className="w-3.5 h-3.5 text-[#999]" />
+                        <span className="text-xs text-[#999]">Desconectado</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Account chips */}
+                  {mp.marketplace_accounts.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mb-4">
+                      {mp.marketplace_accounts.slice(0, 3).map(acc => (
+                        <span
+                          key={acc.id}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-[#f0fff4] text-[#276749] border border-[#c6f6d5]"
+                        >
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#38a169]" />
+                          {acc.account_name}
+                        </span>
+                      ))}
+                    </div>
                   )}
                 </div>
-              )}
 
-              {/* Fees */}
-              <div className="flex items-center gap-4 pt-3 border-t border-[#f5f5f5]">
-                <span className="text-[10px] text-[#999]">
-                  Taxa: <strong className="text-[#666]">{Number(mp.default_percentage_fee).toFixed(1)}%</strong>
-                </span>
-                <span className="text-[10px] text-[#999]">
-                  Fixa: <strong className="text-[#666]">R$ {Number(mp.default_fixed_fee).toFixed(2)}</strong>
-                </span>
-                {mp.marketplace_accounts.length === 0 && (
-                  <span className="text-[10px] text-[#3483fa] ml-auto flex items-center gap-1">
-                    <Plus className="w-3 h-3" /> Conectar
-                  </span>
-                )}
+                {/* Footer / Connect / Disconnect Buttons */}
+                <div className="pt-3 border-t border-[#f5f5f5] flex items-center justify-between">
+                  <div className="flex items-center gap-3 text-[10px] text-[#999]">
+                    <span>Taxa: <strong className="text-[#666]">{Number(mp.default_percentage_fee).toFixed(1)}%</strong></span>
+                    <span>Fixa: <strong className="text-[#666]">R$ {Number(mp.default_fixed_fee).toFixed(2)}</strong></span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {isConnected ? (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setDisconnectingMp(mp)
+                        }}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-[#e74c3c] hover:bg-[#fff5f5] rounded-lg transition-colors border border-[#fed7d7]"
+                        title="Desconectar do canal"
+                      >
+                        <Unlink className="w-3 h-3" /> Desconectar
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setShowConnectModal(true)
+                        }}
+                        className="inline-flex items-center gap-1 px-3 py-1 text-[11px] font-semibold text-white bg-[#3483fa] hover:bg-[#2968c8] rounded-lg transition-colors shadow-sm"
+                      >
+                        <Plus className="w-3 h-3" /> Conectar
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
 
           {/* Empty state */}
           {filtered.length === 0 && !loading && (
-            <div className="col-span-full bg-white border border-[#e6e6e6] rounded-lg p-12 text-center">
+            <div className="col-span-full bg-white border border-[#e6e6e6] rounded-2xl p-12 text-center">
               <Store className="w-12 h-12 text-[#ccc] mx-auto mb-3" />
               <p className="text-sm text-[#999]">
                 {filter === 'ALL' ? 'Nenhum marketplace cadastrado.' : 'Nenhum marketplace nesta categoria.'}
