@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { TeknixLogo } from './TeknixLogo'
 import { usePathname, useRouter } from 'next/navigation'
-import { Bell, ChevronDown, LogOut, User, Settings, Calculator, BadgeDollarSign, Menu, X } from 'lucide-react'
+import { Bell, ChevronDown, LogOut, User, Settings, Calculator, BadgeDollarSign, Menu, X, ShoppingCart, AlertCircle, RefreshCw, Package } from 'lucide-react'
 import Image from 'next/image'
 import { createClient } from '@/utils/supabase/client'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
@@ -101,14 +101,46 @@ function HeaderActions({
     return `há ${days}d`
   }
 
-  const getNotificationIcon = (type?: string, module?: string) => {
+  const cleanTitle = (text?: string) => {
+    if (!text) return ''
+    return text.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]/gu, '').trim()
+  }
+
+  const renderNotificationIcon = (type?: string, module?: string) => {
     const t = String(type || module || '').toLowerCase()
-    if (t.includes('sale') || t.includes('venda')) return '🛒'
-    if (t.includes('stock') || t.includes('estoque')) return '⚠️'
-    if (t.includes('order') || t.includes('pedido')) return '📦'
-    if (t.includes('integration') || t.includes('marketplace') || t.includes('sync')) return '🔌'
-    if (t.includes('error') || t.includes('erro')) return '🚨'
-    return '🔔'
+    if (t.includes('sale') || t.includes('venda')) {
+      return (
+        <div className="w-8 h-8 rounded-xl bg-[#ecfdf5] border border-[#a7f3d0] flex items-center justify-center text-[#059669] shrink-0">
+          <ShoppingCart className="w-4 h-4" />
+        </div>
+      )
+    }
+    if (t.includes('stock') || t.includes('estoque')) {
+      return (
+        <div className="w-8 h-8 rounded-xl bg-[#fffbeb] border border-[#fde68a] flex items-center justify-center text-[#d97706] shrink-0">
+          <AlertCircle className="w-4 h-4" />
+        </div>
+      )
+    }
+    if (t.includes('integration') || t.includes('marketplace') || t.includes('sync')) {
+      return (
+        <div className="w-8 h-8 rounded-xl bg-[#f0fdf4] border border-[#bbf7d0] flex items-center justify-center text-[#16a34a] shrink-0">
+          <RefreshCw className="w-4 h-4" />
+        </div>
+      )
+    }
+    if (t.includes('error') || t.includes('erro')) {
+      return (
+        <div className="w-8 h-8 rounded-xl bg-[#fef2f2] border border-[#fecaca] flex items-center justify-center text-[#dc2626] shrink-0">
+          <AlertCircle className="w-4 h-4" />
+        </div>
+      )
+    }
+    return (
+      <div className="w-8 h-8 rounded-xl bg-[#eff6ff] border border-[#bfdbfe] flex items-center justify-center text-[#2563eb] shrink-0">
+        <Package className="w-4 h-4" />
+      </div>
+    )
   }
 
   const filteredNotifications = notifications.filter(n => {
@@ -186,7 +218,9 @@ function HeaderActions({
             <div className="max-h-[360px] overflow-y-auto divide-y divide-[#f5f5f5] p-1.5">
               {filteredNotifications.length === 0 ? (
                 <div className="p-8 text-center">
-                  <span className="text-2xl mb-2 block">🔕</span>
+                  <div className="w-10 h-10 rounded-full bg-[#f8fafc] border border-[#e2e8f0] flex items-center justify-center mx-auto mb-2 text-[#94a3b8]">
+                    <Bell className="w-5 h-5" />
+                  </div>
                   <p className="text-sm font-semibold text-[#333]">Nenhuma notificação</p>
                   <p className="text-[11px] text-[#999] mt-1">Você está atualizado com todos os eventos do sistema.</p>
                 </div>
@@ -218,17 +252,15 @@ function HeaderActions({
                         : 'bg-[#f0f7ff]/70 hover:bg-[#e6f1ff] border border-[#d6e7ff]'
                     }`}
                   >
-                    <div className="w-8 h-8 rounded-xl bg-white border border-[#e6e6e6] shadow-xs flex items-center justify-center text-sm shrink-0 mt-0.5">
-                      {getNotificationIcon(n.type, n.module)}
-                    </div>
+                    {renderNotificationIcon(n.type, n.module)}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-1">
                         <p className={`text-[12px] leading-tight truncate ${n.is_read ? 'text-[#555]' : 'text-[#111] font-bold'}`}>
-                          {n.title}
+                          {cleanTitle(n.title)}
                         </p>
                         <span className="text-[10px] text-[#999] shrink-0">{formatTimeAgo(n.created_at)}</span>
                       </div>
-                      <p className="text-[11px] text-[#666] leading-snug mt-1 line-clamp-2">{n.message}</p>
+                      <p className="text-[11px] text-[#666] leading-snug mt-1 line-clamp-2">{cleanTitle(n.message)}</p>
                     </div>
                     {!n.is_read && (
                       <span className="w-2 h-2 rounded-full bg-[#3483fa] shrink-0 mt-1.5" />

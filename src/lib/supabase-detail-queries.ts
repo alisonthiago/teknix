@@ -218,9 +218,11 @@ export async function getOrderDetail(id: string) {
       net: Number(order.net_amount || 0),
     },
     shipping: {
-      address: order.shipping_address as string || '—', city: order.shipping_city as string || '—',
-      state: order.shipping_state as string || '—', zip: order.shipping_zip as string || '—',
-      method: (order.shipping_method as string) || 'SEDEX',
+      address: (order.shipping_address as string) || (order.notes as string) || 'Endereço fornecido pelo Mercado Livre',
+      city: (order.shipping_city as string) || (typeof order.notes === 'string' && order.notes.includes('-') ? order.notes.split('-')[0]?.split(',')[1]?.trim() : '—') || '—',
+      state: (order.shipping_state as string) || (typeof order.notes === 'string' && order.notes.includes('-') ? order.notes.split('-')[1]?.split('CEP')[0]?.trim() : '—') || '—',
+      zip: (order.shipping_zip as string) || (typeof order.notes === 'string' && order.notes.includes('CEP:') ? order.notes.split('CEP:')[1]?.trim() : '—') || '—',
+      method: (order.shipping_method as string) || 'Mercado Envios',
       cost: Number(order.shipping_cost || 0), tracking: (order.tracking_code as string) || '',
     },
     timeline: (history || []).map((h: Record<string, unknown>) => {

@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
-import { ArrowLeft, Package, Clock, Loader2, CheckCircle2, Send, Printer } from 'lucide-react'
+import { ArrowLeft, Package, Clock, Loader2, CheckCircle2, Send, Printer, User } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import type { OrderDetail } from '@/lib/detail-types'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
@@ -122,36 +122,64 @@ function VisaoGeralTab({ order }: { order: OrderDetail }) {
       </div>
 
       <div className="space-y-4">
-        <div className="bg-white border border-[#e6e6e6] rounded-md p-4">
-          <SectionTitle>Cliente</SectionTitle>
-          <div className="space-y-1">
-            <InfoRow label="Nome" value={order.customer.name} bold />
-            <InfoRow label="E-mail" value={order.customer.email} />
-            <InfoRow label="Telefone" value={order.customer.phone} />
-            <InfoRow label="CPF" value={order.customer.cpf} mono />
+        {/* Card Cliente */}
+        <div className="bg-white border border-[#e6e6e6] rounded-2xl p-5 shadow-xs">
+          <SectionTitle>Dados do Cliente</SectionTitle>
+          <div className="p-3 bg-[#f8fafc] rounded-xl border border-[#e2e8f0] mb-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-full bg-[#eff6ff] border border-[#bfdbfe] flex items-center justify-center text-[#2563eb] font-bold text-sm shrink-0">
+                {order.customer.name.slice(0, 1).toUpperCase()}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-base font-extrabold text-[#0f172a] truncate">{order.customer.name}</p>
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#64748b]">
+                  <MarketplaceLogo name={order.marketplace} className="w-3 h-3" />
+                  Comprador {order.marketplace}
+                </span>
+              </div>
+            </div>
           </div>
+
+          <div className="space-y-1.5">
+            <InfoRow label="Telefone / Contato" value={order.customer.phone || '—'} />
+            <InfoRow label="E-mail" value={order.customer.email || '—'} />
+            <InfoRow label="Total Pago pelo Cliente" value={formatBRL(order.payment.total || order.items.reduce((a, b) => a + b.total, 0))} bold />
+            <InfoRow label="Forma de Pagamento" value={order.payment.method || 'PIX'} />
+          </div>
+
+          <Link
+            href={`/clientes?search=${encodeURIComponent(order.customer.name)}`}
+            className="mt-3.5 w-full py-2 px-3 bg-[#eff6ff] hover:bg-[#dbeafe] border border-[#bfdbfe] rounded-xl text-xs font-bold text-[#2563eb] flex items-center justify-center gap-1.5 transition-colors"
+          >
+            Ver Perfil e Histórico do Cliente ➔
+          </Link>
         </div>
 
-        <div className="bg-white border border-[#e6e6e6] rounded-md p-4">
-          <SectionTitle>Frete & Envio</SectionTitle>
-          <div className="space-y-1">
-            <InfoRow label="Canal" value={order.marketplace} bold />
+        {/* Card Frete & Envio */}
+        <div className="bg-white border border-[#e6e6e6] rounded-2xl p-5 shadow-xs">
+          <SectionTitle>Frete & Entrega</SectionTitle>
+          <div className="space-y-1.5">
+            <InfoRow label="Canal de Envio" value={order.marketplace} bold />
             <InfoRow label="Método" value={order.shipping.method || 'Mercado Envios'} />
-            <InfoRow label="Destino" value={`${order.shipping.city}/${order.shipping.state}`} />
+            <InfoRow label="Destino" value={`${order.shipping.city} / ${order.shipping.state}`} />
             <InfoRow label="CEP" value={order.shipping.zip} mono />
             <InfoRow label="Endereço" value={order.shipping.address} />
-            <InfoRow label="Valor" value={formatBRL(order.shipping.cost)} />
+            <InfoRow label="Valor do Frete" value={order.shipping.cost > 0 ? formatBRL(order.shipping.cost) : 'Frete Grátis'} />
             {order.shipping.tracking && <InfoRow label="Rastreamento" value={order.shipping.tracking} mono bold />}
           </div>
         </div>
 
-        <div className="bg-white border border-[#e6e6e6] rounded-md p-4">
-          <SectionTitle>Resumo</SectionTitle>
-          <div className="space-y-1">
-            <InfoRow label="Subtotal" value={formatBRL(order.items.reduce((a, b) => a + b.total, 0))} />
-            <InfoRow label="Frete" value={formatBRL(order.shipping.cost)} />
-            <InfoRow label="Taxas" value={formatBRL(order.payment.fee)} />
-            <InfoRow label="Total" value={formatBRL(order.payment.total)} bold />
+        {/* Card Resumo Financeiro */}
+        <div className="bg-white border border-[#e6e6e6] rounded-2xl p-5 shadow-xs">
+          <SectionTitle>Resumo da Cobrança</SectionTitle>
+          <div className="space-y-1.5">
+            <InfoRow label="Subtotal dos Itens" value={formatBRL(order.items.reduce((a, b) => a + b.total, 0))} />
+            <InfoRow label="Frete cobrado" value={order.shipping.cost > 0 ? formatBRL(order.shipping.cost) : 'Grátis'} />
+            <InfoRow label="Taxas do Marketplace" value={formatBRL(order.payment.fee)} />
+            <div className="pt-2 mt-2 border-t border-[#e2e8f0] flex justify-between items-center">
+              <span className="text-xs font-bold text-[#0f172a]">Total Cobrado do Cliente:</span>
+              <span className="text-sm font-black text-[#16a34a]">{formatBRL(order.payment.total || order.items.reduce((a, b) => a + b.total, 0))}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -276,15 +304,19 @@ export default function PedidoDetailClient({ order }: { order: OrderDetail }) {
           <div className="flex-1 min-w-0">
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
               <div>
-                <h1 className="text-[18px] font-semibold text-[#333]">{order.order_number}</h1>
-                <div className="flex flex-wrap items-center gap-2 mt-1">
-                  <span className="text-[12px] text-[#999]">{order.marketplace}</span>
-                   <span className="text-[10px] text-[#ccc]">•</span>
-                   <span className="text-[12px] text-[#999]">{order.customer.name}</span>
-                   <span className="text-[10px] text-[#ccc]">•</span>
-                   <span className={`inline-flex px-2 py-[2px] rounded text-[10px] font-medium ${sc.c}`}>{sc.l}</span>
-                 </div>
-                 <OrderActions status={order.status} orderId={order.id} />
+                <h1 className="text-xl font-bold text-[#0f172a]">{order.order_number}</h1>
+                <div className="flex flex-wrap items-center gap-2.5 mt-2">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#eff6ff] text-[#2563eb] border border-[#bfdbfe] font-bold text-xs shadow-2xs">
+                    <User className="w-3.5 h-3.5 text-[#3b82f6]" />
+                    <span className="text-[#64748b] font-medium">Cliente:</span>
+                    <strong className="text-[#0f172a] font-extrabold text-[13px]">{order.customer.name}</strong>
+                  </div>
+                  <span className="text-[12px] font-semibold text-[#64748b] bg-[#f8fafc] px-2.5 py-1 rounded-xl border border-[#e2e8f0]">
+                    {order.marketplace}
+                  </span>
+                  <span className={`inline-flex px-2.5 py-1 rounded-xl text-[11px] font-bold ${sc.c}`}>{sc.l}</span>
+                </div>
+                <OrderActions status={order.status} orderId={order.id} />
               </div>
               <div className="sm:text-right">
                 <div className="text-[18px] font-semibold text-[#333]">{formatBRL(order.payment.total)}</div>
