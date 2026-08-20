@@ -28,7 +28,10 @@ import {
   Box,
   Tag,
   Flame,
-  ArrowRight
+  ArrowRight,
+  Printer,
+  MapPin,
+  FileText
 } from 'lucide-react'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
@@ -53,7 +56,8 @@ interface LiveEvent {
 
 export default function MonitorAoVivoPage() {
   const [selectedChannel, setSelectedChannel] = useState<string>('ALL')
-  const [period, setPeriod] = useState<'NOW' | 'TODAY' | '24H' | '7D' | '30D'>('NOW')
+  const [shippingFilter, setShippingFilter] = useState<string>('ALL')
+  const [period, setPeriod] = useState<'NOW' | 'TODAY' | '24H' | '7D' | '30D'>('TODAY')
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true)
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null)
   const [lastUpdateSeconds, setLastUpdateSeconds] = useState(0)
@@ -71,7 +75,7 @@ export default function MonitorAoVivoPage() {
   const { data: liveData, loading, refetch } = useSupabaseQuery(async (supabase) => {
     setLastUpdateSeconds(0)
 
-    // 1. Buscar Pedidos recentes
+    // 1. Buscar Pedidos recentes com produtos e itens
     const { data: ordersData } = await supabase
       .from('orders')
       .select('*, marketplaces(name, code, logo), order_items(*, products(*)), marketplace_accounts(account_name)')
@@ -91,29 +95,10 @@ export default function MonitorAoVivoPage() {
       .select('id, name, sku, stock, min_stock, cost_purchase, image_url, status, updated_at')
       .order('updated_at', { ascending: false })
 
-    // 4. Buscar Notificações recentes
-    const { data: notifsData } = await supabase
-      .from('notifications')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(30)
-
-    // 5. Buscar Conexões de Marketplace
-    const { data: connectionsData } = await supabase
-      .from('marketplace_connections')
-      .select('*')
-
-    const { data: accountsData } = await supabase
-      .from('marketplace_accounts')
-      .select('*')
-
     return {
       orders: ordersData || [],
       sales: salesData || [],
-      products: productsData || [],
-      notifications: notifsData || [],
-      connections: connectionsData || [],
-      accounts: accountsData || []
+      products: productsData || []
     }
   }, [selectedChannel, period], { intervalMs: 2000 })
 
@@ -129,8 +114,8 @@ export default function MonitorAoVivoPage() {
         osc.connect(gain)
         gain.connect(audioCtx.destination)
         osc.type = 'sine'
-        osc.frequency.setValueAtTime(587.33, audioCtx.currentTime) // D5
-        osc.frequency.setValueAtTime(880.00, audioCtx.currentTime + 0.1) // A5
+        osc.frequency.setValueAtTime(587.33, audioCtx.currentTime)
+        osc.frequency.setValueAtTime(880.00, audioCtx.currentTime + 0.1)
         gain.gain.setValueAtTime(0.15, audioCtx.currentTime)
         gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35)
         osc.start()
@@ -142,7 +127,7 @@ export default function MonitorAoVivoPage() {
     previousSalesCount.current = currentCount
   }, [liveData?.orders, soundEnabled])
 
-  // Filtragem de Pedidos e Vendas com base no canal e período
+  // Filtragem de Pedidos e Vendas
   const filteredOrders = useMemo(() => {
     if (!liveData?.orders) return []
     const now = new Date().getTime()
@@ -157,26 +142,33 @@ export default function MonitorAoVivoPage() {
         }
       }
 
+      // Filtro por Status de Envio
+      if (shippingFilter !== 'ALL') {
+        const st = (order.status || '').toUpperCase()
+        if (shippingFilter === 'TO_SHIP' && !['NOVO', 'PAGO', 'AGUARDANDO_SEPARACAO', 'EM_SEPARACAO', 'SEPARADO'].includes(st)) return false
+        if (shippingFilter === 'SHIPPED' && !['ENVIADO', 'EMBALADO', 'AGUARDANDO_EXPEDICAO'].includes(st)) return false
+        if (shippingFilter === 'DELIVERED' && st !== 'ENTREGUE') return false
+      }
+
       // Filtro por Período
       const orderTime = new Date(order.created_at || order.updated_at).getTime()
       const diffHours = (now - orderTime) / (1000 * 60 * 60)
 
-      if (period === 'NOW') return diffHours <= 12 // Vendas das últimas 12h no modo ao vivo
+      if (period === 'NOW') return diffHours <= 12
       if (period === 'TODAY') return diffHours <= 24
       if (period === '24H') return diffHours <= 24
       if (period === '7D') return diffHours <= 24 * 7
       if (period === '30D') return diffHours <= 24 * 30
       return true
     })
-  }, [liveData?.orders, selectedChannel, period])
+  }, [liveData?.orders, selectedChannel, shippingFilter, period])
 
-  // Métricas Consolidadas em Tempo Real
+  // Métricas Consolidadas
   const metrics = useMemo(() => {
     const orders = filteredOrders
     const totalRevenue = orders.reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0)
     const totalOrders = orders.length
     
-    // Total de unidades vendidas
     let totalUnits = 0
     orders.forEach(o => {
       if (o.order_items?.length) {
@@ -188,28 +180,15 @@ export default function MonitorAoVivoPage() {
       }
     })
 
-    // Total de compradores únicos
     const uniqueBuyers = new Set(orders.map(o => o.customer_name).filter(Boolean)).size || totalOrders
-
-    // Ticket Médio
     const ticketMedio = totalOrders > 0 ? totalRevenue / totalOrders : 0
-
-    // Vendas nos últimos 60 minutos
     const oneHourAgo = Date.now() - 60 * 60 * 1000
     const salesLastHour = orders.filter(o => new Date(o.created_at).getTime() >= oneHourAgo).length
-
-    // Taxa de conversão estimada baseada no fluxo
     const estimatedConversion = totalOrders > 0 ? (totalOrders / (uniqueBuyers * 2.5 + 4)) * 100 : 0
 
-    // Lucro Líquido Estimado
-    let totalCost = 0
-    orders.forEach(o => {
-      o.order_items?.forEach((it: any) => {
-        const cost = Number(it.products?.cost_purchase || it.cost_at_sale || 0)
-        totalCost += cost * (Number(it.quantity) || 1)
-      })
-    })
-    const estimatedProfit = Math.max(0, totalRevenue - totalCost - (totalRevenue * 0.14))
+    // Envios pendentes
+    const pendingShipments = orders.filter(o => ['NOVO', 'PAGO', 'AGUARDANDO_SEPARACAO', 'EM_SEPARACAO'].includes(o.status)).length
+    const readyToShip = orders.filter(o => ['SEPARADO', 'EMBALADO', 'AGUARDANDO_EXPEDICAO'].includes(o.status) || Boolean(o.tracking_code)).length
 
     return {
       totalRevenue,
@@ -219,11 +198,12 @@ export default function MonitorAoVivoPage() {
       ticketMedio,
       salesLastHour,
       estimatedConversion: Math.min(100, Math.max(0, estimatedConversion)),
-      estimatedProfit
+      pendingShipments,
+      readyToShip
     }
   }, [filteredOrders])
 
-  // Ranking de Produtos Mais Vendidos de Hoje
+  // Ranking de Produtos Mais Vendidos
   const topProducts = useMemo(() => {
     const map = new Map<string, {
       id: string
@@ -262,11 +242,10 @@ export default function MonitorAoVivoPage() {
       .slice(0, 5)
   }, [filteredOrders])
 
-  // Timeline / Feed Unificado de Eventos em Tempo Real
+  // Timeline de Eventos ao Vivo
   const liveEvents = useMemo<LiveEvent[]>(() => {
     const events: LiveEvent[] = []
 
-    // Adicionar Pedidos
     filteredOrders.forEach(o => {
       const channel = o.marketplaces?.name || 'Mercado Livre'
       const firstItem = o.order_items?.[0]
@@ -289,13 +268,12 @@ export default function MonitorAoVivoPage() {
         rawOrder: o
       })
 
-      // Se tiver código de rastreamento / etiqueta
       if (o.tracking_code) {
         events.push({
           id: `ship-${o.id}`,
           type: 'SHIPMENT',
           title: 'Etiqueta de Envio Pronta',
-          description: `Rastreio ${o.tracking_code} (${o.shipping_method || 'Mercado Envios'})`,
+          description: `Rastreio ${o.tracking_code} • ${o.shipping_city || 'Destino'}/${o.shipping_state || 'BR'}`,
           channel,
           orderNumber: o.order_number,
           timestamp: o.updated_at || o.created_at,
@@ -304,7 +282,6 @@ export default function MonitorAoVivoPage() {
       }
     })
 
-    // Adicionar Alertas de Estoque Baixo dos Produtos
     liveData?.products?.forEach(p => {
       if (p.stock !== null && p.stock <= (p.min_stock || 3) && p.status === 'ACTIVE') {
         events.push({
@@ -324,52 +301,6 @@ export default function MonitorAoVivoPage() {
     return events.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, 30)
   }, [filteredOrders, liveData?.products])
 
-  // Status de Saúde das Integrações Multicanal
-  const marketplaceStatusList = useMemo(() => {
-    const channels = [
-      { id: 'mercadolivre', name: 'Mercado Livre', active: true, color: '#FFE600', ping: 'Ao vivo agora' },
-      { id: 'shopee', name: 'Shopee', active: true, color: '#EE4D2D', ping: 'Ao vivo agora' },
-      { id: 'tiktok', name: 'TikTok Shop', active: true, color: '#000000', ping: 'Ao vivo agora' },
-      { id: 'magalu', name: 'Magalu', active: true, color: '#0086FF', ping: 'Ao vivo agora' },
-      { id: 'amazon', name: 'Amazon', active: true, color: '#FF9900', ping: 'Verificando' },
-      { id: 'shopify', name: 'Shopify', active: true, color: '#95BF47', ping: 'Ao vivo agora' }
-    ]
-
-    return channels
-  }, [])
-
-  // Recomendações Inteligentes Geradas com Dados Reais
-  const recommendations = useMemo(() => {
-    const recs: { title: string; text: string; type: 'stock' | 'marketing' | 'sales' }[] = []
-
-    if (topProducts.length > 0) {
-      const top = topProducts[0]
-      if (top.stock <= 5) {
-        recs.push({
-          title: `Reponha o estoque de ${top.name.slice(0, 32)}...`,
-          text: `Este produto é o seu campeão de vendas hoje (${top.quantity} unidades vendidas) e restam apenas ${top.stock} unidades. Reponha para não perder faturamento.`,
-          type: 'stock'
-        })
-      }
-    }
-
-    if (metrics.totalOrders > 0) {
-      recs.push({
-        title: 'Mantenha o ritmo de expedição rápido',
-        text: `Você possui ${filteredOrders.filter(o => o.status === 'PAGO' || o.status === 'NOVO').length} pedido(s) aguardando preparação. Imprima as etiquetas agora para garantir envio no mesmo dia.`,
-        type: 'sales'
-      })
-    }
-
-    recs.push({
-      title: 'Oportunidade de Oferta Relâmpago',
-      text: 'Compradores ativos em horário de pico tendem a converter 28% mais com cupons de frete ou pequenos descontos progressivos.',
-      type: 'marketing'
-    })
-
-    return recs
-  }, [topProducts, metrics, filteredOrders])
-
   return (
     <div className="space-y-6 animate-in fade-in duration-300 pb-12">
       
@@ -387,11 +318,11 @@ export default function MonitorAoVivoPage() {
               </h1>
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#ffebee] text-[#e74c3c] border border-[#ffcdd2] flex items-center gap-1 uppercase tracking-wider">
                 <Radio className="w-3 h-3 animate-pulse" />
-                Em Tempo Real
+                Em Tempo Real (2s)
               </span>
             </div>
             <p className="text-[12px] text-[#666] mt-0.5">
-              Acompanhamento instantâneo de vendas, estoque e operação de todos os marketplaces.
+              Monitoramento ao vivo de vendas, faturamento e logística de todos os marketplaces conectados.
             </p>
           </div>
         </div>
@@ -431,7 +362,6 @@ export default function MonitorAoVivoPage() {
             ))}
           </div>
 
-          {/* Botão de Forçar Sincronização */}
           <button
             onClick={() => refetch()}
             className="p-2 rounded-xl border border-[#e6e6e6] bg-white text-[#666] hover:text-[#1f2328] hover:bg-[#fafafa] transition-colors"
@@ -442,56 +372,50 @@ export default function MonitorAoVivoPage() {
         </div>
       </div>
 
-      {/* 🟡 CARD PRINCIPAL INSPIRADO NO MERCADO LIVRE (VENDAS DE HOJE COM DESTAQUE AMARELO/OURO) */}
+      {/* 🟡 CARD PRINCIPAL DESTAQUE AMARELO (VENDAS DE HOJE) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        {/* Coluna Esquerda: Card Destaque e Métricas */}
         <div className="lg:col-span-8 space-y-6">
           
-          {/* Card Amarelo Ouro de Destaque */}
-          <div className="bg-[#FFE600] rounded-3xl p-6 sm:p-7 shadow-lg border border-[#F5DC00] text-[#1f2328] relative overflow-hidden group">
-            <div className="absolute right-0 top-0 translate-x-8 -translate-y-8 w-48 h-48 bg-white/20 rounded-full blur-2xl pointer-events-none" />
-            
-            <div className="relative z-10">
-              <div className="flex items-center justify-between">
-                <span className="text-[14px] sm:text-[15px] font-bold text-[#333] uppercase tracking-wide flex items-center gap-2">
-                  <Flame className="w-5 h-5 text-[#e74c3c]" />
-                  Vendas {period === 'NOW' ? 'ao Vivo' : period === 'TODAY' ? 'de Hoje' : 'do Período'}
-                </span>
-                
-                <span className="flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full bg-black/10 text-[#333]">
-                  <span className="w-2 h-2 rounded-full bg-[#e74c3c] animate-pulse" />
-                  {lastUpdateSeconds <= 3 ? 'Atualizado agora' : `Atualizado há ${lastUpdateSeconds}s`}
-                </span>
+          <div className="bg-[#FFE600] rounded-3xl p-6 sm:p-7 shadow-md border border-[#F5DC00] text-[#1f2328] relative overflow-hidden">
+            <div className="flex items-center justify-between">
+              <span className="text-[14px] font-bold text-[#333] uppercase tracking-wide flex items-center gap-2">
+                <Flame className="w-5 h-5 text-[#e74c3c]" />
+                Vendas {period === 'NOW' ? 'ao Vivo' : period === 'TODAY' ? 'de Hoje' : 'do Período'}
+              </span>
+              
+              <span className="flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full bg-black/10 text-[#333]">
+                <span className="w-2 h-2 rounded-full bg-[#e74c3c] animate-pulse" />
+                {lastUpdateSeconds <= 3 ? 'Atualizado agora' : `Atualizado há ${lastUpdateSeconds}s`}
+              </span>
+            </div>
+
+            <div className="mt-4 mb-3">
+              <div className="text-[34px] sm:text-[46px] font-black tracking-tight text-[#111] font-sans flex items-baseline gap-2">
+                <span className="text-[22px] sm:text-[28px] font-bold">R$</span>
+                {metrics.totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </div>
+              <div className="flex items-center gap-2 text-[12px] font-semibold text-[#444] mt-1">
+                <span>🔴 {new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' })}, {new Date().toLocaleTimeString('pt-BR')}</span>
+                <span>•</span>
+                <span>{metrics.totalOrders} pedidos confirmados</span>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-black/10 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-4 text-[12px] font-bold text-[#333]">
+                <span>📦 {metrics.totalUnits} itens</span>
+                <span>👥 {metrics.uniqueBuyers} compradores</span>
+                <span>🚚 {metrics.pendingShipments} para despachar</span>
               </div>
 
-              <div className="mt-4 mb-3">
-                <div className="text-[34px] sm:text-[46px] font-black tracking-tight text-[#111] font-sans flex items-baseline gap-2">
-                  <span className="text-[22px] sm:text-[28px] font-bold">R$</span>
-                  {metrics.totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </div>
-                <div className="flex items-center gap-2 text-[12px] font-semibold text-[#444] mt-1">
-                  <span>🔴 {new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' })}, {new Date().toLocaleTimeString('pt-BR')}</span>
-                  <span>•</span>
-                  <span>{metrics.totalOrders} {metrics.totalOrders === 1 ? 'pedido confirmado' : 'pedidos confirmados'}</span>
-                </div>
-              </div>
-
-              <div className="pt-4 border-t border-black/10 flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-4 text-[12px] font-bold text-[#333]">
-                  <span>📦 {metrics.totalUnits} itens vendidos</span>
-                  <span>👥 {metrics.uniqueBuyers} compradores</span>
-                  <span>⚡ Ritmo: {metrics.salesLastHour} vendas/hora</span>
-                </div>
-
-                <Link
-                  href="/pedidos"
-                  className="px-4 py-2 rounded-xl bg-black text-white text-[12px] font-bold hover:bg-[#333] transition-all flex items-center gap-1.5 shadow-sm"
-                >
-                  <span>Ver Todos os Pedidos</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-              </div>
+              <Link
+                href="/pedidos"
+                className="px-4 py-2 rounded-xl bg-black text-white text-[12px] font-bold hover:bg-[#333] transition-all flex items-center gap-1.5 shadow-sm"
+              >
+                <span>Painel de Expedição</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
             </div>
           </div>
 
@@ -499,183 +423,237 @@ export default function MonitorAoVivoPage() {
           <div className="bg-white rounded-2xl border border-[#e6e6e6] p-5 shadow-xs">
             <h3 className="text-[13px] font-bold uppercase tracking-wider text-[#999] mb-4 flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-[#3483fa]" />
-              Métricas-Chave de Desempenho
+              Métricas de Vendas & Operação
             </h3>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              
               <div className="p-4 rounded-xl bg-[#fafafa] border border-[#eeeeee]">
-                <span className="text-[11px] font-semibold text-[#888] block">Total de Compradores</span>
-                <span className="text-[20px] font-extrabold text-[#1f2328] mt-1 block">
-                  {metrics.uniqueBuyers}
-                </span>
+                <span className="text-[11px] font-semibold text-[#888] block">Total Compradores</span>
+                <span className="text-[20px] font-extrabold text-[#1f2328] mt-1 block">{metrics.uniqueBuyers}</span>
                 <span className="text-[10px] text-[#38a169] font-medium">Clientes únicos</span>
               </div>
 
               <div className="p-4 rounded-xl bg-[#fafafa] border border-[#eeeeee]">
-                <span className="text-[11px] font-semibold text-[#888] block">Quantidade de Vendas</span>
-                <span className="text-[20px] font-extrabold text-[#1f2328] mt-1 block">
-                  {metrics.totalOrders}
-                </span>
-                <span className="text-[10px] text-[#3483fa] font-medium">Pedidos aprovados</span>
+                <span className="text-[11px] font-semibold text-[#888] block">Qtd. de Vendas</span>
+                <span className="text-[20px] font-extrabold text-[#1f2328] mt-1 block">{metrics.totalOrders}</span>
+                <span className="text-[10px] text-[#3483fa] font-medium">Pedidos faturados</span>
               </div>
 
               <div className="p-4 rounded-xl bg-[#fafafa] border border-[#eeeeee]">
-                <span className="text-[11px] font-semibold text-[#888] block">Unidades Vendidas</span>
-                <span className="text-[20px] font-extrabold text-[#1f2328] mt-1 block">
-                  {metrics.totalUnits} <span className="text-[12px] font-normal text-[#888]">u.</span>
-                </span>
-                <span className="text-[10px] text-[#666] font-medium">Itens faturados</span>
+                <span className="text-[11px] font-semibold text-[#888] block">Itens Vendidos</span>
+                <span className="text-[20px] font-extrabold text-[#1f2328] mt-1 block">{metrics.totalUnits} <span className="text-[12px] font-normal text-[#888]">u.</span></span>
+                <span className="text-[10px] text-[#666] font-medium">Unidades totais</span>
               </div>
 
               <div className="p-4 rounded-xl bg-[#fafafa] border border-[#eeeeee]">
                 <span className="text-[11px] font-semibold text-[#888] block">Ticket Médio</span>
-                <span className="text-[20px] font-extrabold text-[#1f2328] mt-1 block">
-                  R$ {metrics.ticketMedio.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </span>
-                <span className="text-[10px] text-[#888] font-medium">Por pedido</span>
+                <span className="text-[20px] font-extrabold text-[#1f2328] mt-1 block">R$ {Math.round(metrics.ticketMedio)}</span>
+                <span className="text-[10px] text-[#888] font-medium">Valor médio</span>
               </div>
 
               <div className="p-4 rounded-xl bg-[#fafafa] border border-[#eeeeee]">
-                <span className="text-[11px] font-semibold text-[#888] block">Conversão Estimada</span>
-                <span className="text-[20px] font-extrabold text-[#16a34a] mt-1 block">
-                  {metrics.estimatedConversion.toFixed(1)}%
-                </span>
-                <span className="text-[10px] text-[#38a169] font-medium">Conversão de vendas</span>
+                <span className="text-[11px] font-semibold text-[#888] block">Para Despachar</span>
+                <span className="text-[20px] font-extrabold text-[#e67e22] mt-1 block">{metrics.pendingShipments}</span>
+                <span className="text-[10px] text-[#e67e22] font-medium">Aguardando envio</span>
               </div>
 
               <div className="p-4 rounded-xl bg-[#fafafa] border border-[#eeeeee]">
-                <span className="text-[11px] font-semibold text-[#888] block">Lucro Líquido Real</span>
-                <span className="text-[20px] font-extrabold text-[#38a169] mt-1 block">
-                  R$ {metrics.estimatedProfit.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </span>
-                <span className="text-[10px] text-[#38a169] font-medium">Líquido de taxas</span>
+                <span className="text-[11px] font-semibold text-[#888] block">Etiquetas Prontas</span>
+                <span className="text-[20px] font-extrabold text-[#38a169] mt-1 block">{metrics.readyToShip}</span>
+                <span className="text-[10px] text-[#38a169] font-medium">Rastreio gerado</span>
               </div>
-
             </div>
           </div>
 
-          {/* 🏆 PRODUTOS MAIS VENDIDOS */}
-          <div className="bg-white rounded-2xl border border-[#e6e6e6] p-5 shadow-xs">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-[13px] font-bold uppercase tracking-wider text-[#999] flex items-center gap-2">
-                <ShoppingBag className="w-4 h-4 text-[#3483fa]" />
-                Produtos Mais Vendidos
-              </h3>
-              <Link href="/operacao" className="text-[11px] text-[#3483fa] font-bold hover:underline">
-                Ver Catálogo Completo →
-              </Link>
+          {/* 🚚 DETALHES COMPLETOS DE ENVIO E EXPEDIÇÃO AO VIVO */}
+          <div className="bg-white rounded-2xl border border-[#e6e6e6] p-5 shadow-xs space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#f0f0f0] pb-4">
+              <div>
+                <h3 className="text-[15px] font-bold text-[#1f2328] flex items-center gap-2">
+                  <Truck className="w-5 h-5 text-[#3483fa]" />
+                  Logística & Detalhes de Envio ao Vivo
+                </h3>
+                <p className="text-[12px] text-[#666] mt-0.5">
+                  Acompanhe etiquetas, prazos, código de rastreamento e endereço de cada entrega.
+                </p>
+              </div>
+
+              {/* Filtros de Envio */}
+              <div className="flex items-center gap-1.5 bg-[#f5f5f5] p-1 rounded-xl text-[11px] font-semibold text-[#666]">
+                {[
+                  { id: 'ALL', label: 'Todos' },
+                  { id: 'TO_SHIP', label: 'A Enviar' },
+                  { id: 'SHIPPED', label: 'Em Trânsito' },
+                  { id: 'DELIVERED', label: 'Entregues' }
+                ].map(f => (
+                  <button
+                    key={f.id}
+                    onClick={() => setShippingFilter(f.id)}
+                    className={`px-2.5 py-1 rounded-lg transition-all ${
+                      shippingFilter === f.id ? 'bg-white text-[#3483fa] shadow-2xs font-bold' : 'hover:text-[#111]'
+                    }`}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            {topProducts.length === 0 ? (
+            {filteredOrders.length === 0 ? (
               <div className="p-8 text-center bg-[#fafafa] rounded-xl border border-dashed border-[#e0e0e0]">
-                <p className="text-[13px] text-[#888]">Nenhuma venda registrada no período selecionado.</p>
+                <p className="text-[13px] text-[#888]">Nenhum pedido encontrado com os filtros selecionados.</p>
               </div>
             ) : (
-              <div className="divide-y divide-[#f0f0f0]">
-                {topProducts.map((p, idx) => (
-                  <div key={p.id} className="py-3 flex items-center justify-between gap-3 group hover:bg-[#fcfcfc] transition-colors rounded-xl px-2">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-extrabold ${
-                        idx === 0 ? 'bg-[#FFE600] text-[#111]' : idx === 1 ? 'bg-[#f0f0f0] text-[#666]' : 'bg-[#fafafa] text-[#999]'
-                      }`}>
-                        {idx + 1}
-                      </span>
-                      <div className="w-11 h-11 rounded-xl bg-[#fafafa] border border-[#eee] p-1 flex items-center justify-center shrink-0 overflow-hidden relative">
-                        {p.imageUrl && p.imageUrl !== '/placeholder.png' ? (
-                          <img src={p.imageUrl} alt={p.name} className="w-full h-full object-contain" />
-                        ) : (
-                          <Package className="w-5 h-5 text-[#ccc]" />
-                        )}
-                      </div>
-                      <div className="min-w-0">
-                        <h4 className="text-[13px] font-bold text-[#1f2328] truncate group-hover:text-[#3483fa] transition-colors">
-                          {p.name}
-                        </h4>
-                        <p className="text-[11px] text-[#888]">
-                          SKU: {p.sku} • Estoque: <span className={p.stock <= 3 ? 'text-[#e74c3c] font-bold' : 'text-[#38a169]'}>{p.stock} un.</span>
-                        </p>
-                      </div>
-                    </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-[12px]">
+                  <thead>
+                    <tr className="bg-[#fafafa] text-[#888] font-bold uppercase text-[10px] border-b border-[#eee]">
+                      <th className="py-2.5 px-3">Canal & Pedido</th>
+                      <th className="py-2.5 px-3">Cliente / Destino</th>
+                      <th className="py-2.5 px-3">Itens Comprados</th>
+                      <th className="py-2.5 px-3">Modalidade & Rastreio</th>
+                      <th className="py-2.5 px-3 text-right">Valor</th>
+                      <th className="py-2.5 px-3 text-center">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#eee]">
+                    {filteredOrders.map(o => (
+                      <tr
+                        key={o.id}
+                        onClick={() => setSelectedOrder(o)}
+                        className="hover:bg-[#f8faff] cursor-pointer transition-colors"
+                      >
+                        <td className="py-3 px-3">
+                          <div className="flex items-center gap-2">
+                            <MarketplaceLogo name={o.marketplaces?.name || 'Mercado Livre'} className="w-4 h-4 shrink-0" />
+                            <div>
+                              <span className="font-bold text-[#1f2328] block">{o.order_number}</span>
+                              <span className="text-[10px] text-[#888]">
+                                {new Date(o.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                            </div>
+                          </div>
+                        </td>
 
-                    <div className="text-right shrink-0">
-                      <span className="text-[13px] font-extrabold text-[#1f2328] block">
-                        R$ {p.revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </span>
-                      <span className="text-[11px] text-[#3483fa] font-bold">
-                        {p.quantity} {p.quantity === 1 ? 'unidade' : 'unidades'}
-                      </span>
-                    </div>
-                  </div>
-                ))}
+                        <td className="py-3 px-3">
+                          <span className="font-semibold text-[#333] block truncate max-w-[140px]">{o.customer_name || 'Cliente'}</span>
+                          <span className="text-[11px] text-[#777] flex items-center gap-1">
+                            <MapPin className="w-3 h-3 text-[#999]" />
+                            {o.shipping_city || 'São Paulo'} - {o.shipping_state || 'SP'}
+                          </span>
+                        </td>
+
+                        <td className="py-3 px-3">
+                          <span className="font-medium text-[#444] block truncate max-w-[180px]">
+                            {o.order_items?.[0]?.product_name || 'Produto Mercado Livre'}
+                          </span>
+                          <span className="text-[10px] text-[#888]">
+                            SKU: {o.order_items?.[0]?.sku || 'S/ SKU'} {o.order_items?.length > 1 ? `(+${o.order_items.length - 1} itens)` : ''}
+                          </span>
+                        </td>
+
+                        <td className="py-3 px-3">
+                          <span className="font-bold text-[#333] block text-[11px]">{o.shipping_method || 'Mercado Envios'}</span>
+                          <span className="text-[10px] font-mono text-[#3483fa]">
+                            {o.tracking_code || 'Aguardando Etiqueta'}
+                          </span>
+                        </td>
+
+                        <td className="py-3 px-3 text-right">
+                          <span className="font-extrabold text-[#16a34a] text-[13px] block">
+                            R$ {Number(o.total_amount || 0).toFixed(2)}
+                          </span>
+                          <span className="text-[10px] text-[#888]">
+                            Frete: {o.shipping_cost > 0 ? `R$ ${Number(o.shipping_cost).toFixed(2)}` : 'Grátis'}
+                          </span>
+                        </td>
+
+                        <td className="py-3 px-3 text-center">
+                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                            o.status === 'ENTREGUE'
+                              ? 'bg-[#e8f5e9] text-[#2e7d32]'
+                              : o.status === 'ENVIADO'
+                              ? 'bg-[#e3f2fd] text-[#1976d2]'
+                              : o.status === 'CANCELADO'
+                              ? 'bg-[#ffebee] text-[#c62828]'
+                              : 'bg-[#fff8e1] text-[#f57f17]'
+                          }`}>
+                            {o.status || 'PAGO'}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )}
           </div>
 
         </div>
 
-        {/* Coluna Direita: Status de Canais, Feed ao Vivo e Recomendações */}
+        {/* Coluna Direita: Canais e Feed de Eventos */}
         <div className="lg:col-span-4 space-y-6">
 
-          {/* 🟢 SAÚDE DAS INTEGRAÇÕES MULTICANAL */}
+          {/* 🟢 CANAIS CONECTADOS AO VIVO */}
           <div className="bg-white rounded-2xl border border-[#e6e6e6] p-5 shadow-xs">
             <h3 className="text-[12px] font-bold uppercase tracking-wider text-[#999] mb-3 flex items-center justify-between">
-              <span>Status dos Canais ao Vivo</span>
+              <span>Canais ao Vivo</span>
               <span className="flex items-center gap-1 text-[10px] text-[#38a169] font-bold">
                 <span className="w-2 h-2 rounded-full bg-[#38a169] animate-pulse" />
                 Sincronizando
               </span>
             </h3>
 
-            <div className="space-y-2.5">
-              {marketplaceStatusList.map(mp => (
+            <div className="space-y-2">
+              {[
+                { id: 'ALL', name: 'Todos os Canais', count: metrics.totalOrders },
+                { id: 'Mercado Livre', name: 'Mercado Livre', count: filteredOrders.filter(o => o.marketplaces?.name?.includes('Mercado') || !o.marketplaces).length },
+                { id: 'Shopee', name: 'Shopee', count: filteredOrders.filter(o => o.marketplaces?.name?.includes('Shopee')).length },
+                { id: 'TikTok', name: 'TikTok Shop', count: 0 },
+                { id: 'Magalu', name: 'Magalu', count: 0 }
+              ].map(c => (
                 <div
-                  key={mp.id}
-                  onClick={() => setSelectedChannel(selectedChannel === mp.name ? 'ALL' : mp.name)}
+                  key={c.id}
+                  onClick={() => setSelectedChannel(c.id)}
                   className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
-                    selectedChannel === mp.name
+                    selectedChannel === c.id
                       ? 'border-[#3483fa] bg-[#f0f7ff]'
                       : 'border-[#f0f0f0] hover:border-[#ddd] bg-white'
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
-                    <MarketplaceLogo name={mp.name} className="w-5 h-5 shrink-0" />
-                    <span className="text-[12px] font-bold text-[#333]">{mp.name}</span>
+                    {c.id !== 'ALL' && <MarketplaceLogo name={c.name} className="w-5 h-5 shrink-0" />}
+                    <span className="text-[12px] font-bold text-[#333]">{c.name}</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-[#888]">{mp.ping}</span>
-                    <span className="w-2 h-2 rounded-full bg-[#38a169]" />
-                  </div>
+                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#fafafa] border border-[#eee] text-[#555]">
+                    {c.count} pedidos
+                  </span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* 🔴 TIMELINE / FEED DE EVENTOS AO VIVO */}
+          {/* 🔴 TIMELINE / FEED AO VIVO */}
           <div className="bg-white rounded-2xl border border-[#e6e6e6] p-5 shadow-xs flex flex-col h-[460px]">
             <div className="flex items-center justify-between mb-3 shrink-0">
               <h3 className="text-[12px] font-bold uppercase tracking-wider text-[#999] flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#e74c3c] animate-ping" />
-                Feed de Eventos ao Vivo
+                Feed Operacional ao Vivo
               </h3>
-              <span className="text-[11px] text-[#888] font-medium">
-                {liveEvents.length} eventos
-              </span>
+              <span className="text-[11px] text-[#888] font-medium">{liveEvents.length} eventos</span>
             </div>
 
             <div className="flex-1 overflow-y-auto space-y-3 pr-1 divide-y divide-[#f5f5f5]">
               {liveEvents.length === 0 ? (
                 <div className="py-12 text-center text-[12px] text-[#999]">
-                  Aguardando novos eventos dos marketplaces...
+                  Aguardando novas notificações dos marketplaces...
                 </div>
               ) : (
                 liveEvents.map(evt => (
                   <div
                     key={evt.id}
                     onClick={() => evt.rawOrder && setSelectedOrder(evt.rawOrder)}
-                    className={`pt-3 flex items-start gap-3 cursor-pointer group hover:bg-[#fafafa] p-2 rounded-xl transition-all ${
-                      evt.rawOrder ? 'hover:shadow-2xs' : ''
-                    }`}
+                    className="pt-3 flex items-start gap-3 cursor-pointer group hover:bg-[#fafafa] p-2 rounded-xl transition-all"
                   >
                     <div className="mt-0.5">
                       {evt.type === 'SALE' ? (
@@ -718,18 +696,27 @@ export default function MonitorAoVivoPage() {
             </div>
           </div>
 
-          {/* 🧠 RECOMENDAÇÕES INTELIGENTES */}
-          <div className="bg-[#f0f7ff] rounded-2xl border border-[#d0e4ff] p-5 shadow-xs">
-            <h3 className="text-[12px] font-bold uppercase tracking-wider text-[#1976d2] mb-3 flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-[#3483fa]" />
-              Recomendações da Operação
+          {/* 🏆 PRODUTOS CAMPEÕES */}
+          <div className="bg-white rounded-2xl border border-[#e6e6e6] p-5 shadow-xs">
+            <h3 className="text-[12px] font-bold uppercase tracking-wider text-[#999] mb-3">
+              Campeões de Vendas Hoje
             </h3>
 
-            <div className="space-y-3">
-              {recommendations.map((rec, i) => (
-                <div key={i} className="p-3 bg-white rounded-xl border border-[#e1effe] shadow-2xs">
-                  <h4 className="text-[12px] font-bold text-[#1f2328]">{rec.title}</h4>
-                  <p className="text-[11px] text-[#666] mt-1 leading-relaxed">{rec.text}</p>
+            <div className="divide-y divide-[#f0f0f0]">
+              {topProducts.map((p, idx) => (
+                <div key={p.id} className="py-2.5 flex items-center gap-3">
+                  <span className="text-[12px] font-extrabold text-[#888]">{idx + 1}</span>
+                  <div className="w-10 h-10 rounded-xl bg-[#fafafa] border border-[#eee] p-1 flex items-center justify-center shrink-0 overflow-hidden">
+                    {p.imageUrl && p.imageUrl !== '/placeholder.png' ? (
+                      <img src={p.imageUrl} alt={p.name} className="w-full h-full object-contain" />
+                    ) : (
+                      <Package className="w-4 h-4 text-[#ccc]" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[12px] font-bold text-[#222] truncate">{p.name}</p>
+                    <p className="text-[10px] text-[#888]">{p.quantity} un. • R$ {p.revenue.toFixed(2)}</p>
+                  </div>
                 </div>
               ))}
             </div>
@@ -739,14 +726,14 @@ export default function MonitorAoVivoPage() {
 
       </div>
 
-      {/* 📦 MODAL DE DETALHE COMPLETO DO PEDIDO */}
+      {/* 📦 MODAL DETALHE COMPLETO DO PEDIDO */}
       {selectedOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 animate-in fade-in duration-200">
           <div className="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-[#e6e6e6] max-h-[90vh] overflow-y-auto space-y-4">
             
             <div className="flex items-center justify-between border-b border-[#eee] pb-4">
               <div>
-                <span className="text-[11px] font-bold uppercase text-[#999]">Detalhes do Pedido ao Vivo</span>
+                <span className="text-[11px] font-bold uppercase text-[#999]">Detalhes do Pedido & Envio</span>
                 <h3 className="text-[18px] font-black text-[#1f2328]">{selectedOrder.order_number}</h3>
               </div>
               <button
@@ -759,7 +746,7 @@ export default function MonitorAoVivoPage() {
 
             <div className="grid grid-cols-2 gap-3 text-[12px]">
               <div className="p-3 bg-[#fafafa] rounded-xl border border-[#eee]">
-                <span className="text-[10px] text-[#888] font-bold uppercase block">Canal / Marketplace</span>
+                <span className="text-[10px] text-[#888] font-bold uppercase block">Marketplace</span>
                 <span className="font-bold text-[#333]">{selectedOrder.marketplaces?.name || 'Mercado Livre'}</span>
               </div>
               <div className="p-3 bg-[#fafafa] rounded-xl border border-[#eee]">
@@ -771,26 +758,33 @@ export default function MonitorAoVivoPage() {
                 <span className="font-bold text-[#333]">{selectedOrder.customer_name || 'Cliente'}</span>
               </div>
               <div className="p-3 bg-[#fafafa] rounded-xl border border-[#eee]">
-                <span className="text-[10px] text-[#888] font-bold uppercase block">Total do Pedido</span>
+                <span className="text-[10px] text-[#888] font-bold uppercase block">Valor Total</span>
                 <span className="font-bold text-[#16a34a] text-[14px]">R$ {Number(selectedOrder.total_amount || 0).toFixed(2)}</span>
               </div>
             </div>
 
-            {selectedOrder.tracking_code && (
-              <div className="p-3.5 bg-[#f0f7ff] rounded-xl border border-[#b8daff] text-[12px]">
-                <span className="font-bold text-[#1976d2] block">Etiqueta & Envio:</span>
-                <span className="text-[#333]">Rastreamento: <strong>{selectedOrder.tracking_code}</strong> ({selectedOrder.shipping_method || 'Mercado Envios'})</span>
+            {/* Endereço e Logística */}
+            <div className="p-3.5 bg-[#f0f7ff] rounded-xl border border-[#b8daff] text-[12px] space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-[#1976d2] flex items-center gap-1.5">
+                  <Truck className="w-4 h-4" />
+                  Dados de Envio & Rastreamento
+                </span>
+                <span className="text-[11px] font-bold text-[#3483fa]">{selectedOrder.shipping_method || 'Mercado Envios'}</span>
               </div>
-            )}
+              <p className="text-[#333]"><strong>Destinatário / Endereço:</strong> {selectedOrder.shipping_address || 'Endereço registrado no marketplace'}</p>
+              <p className="text-[#333]"><strong>Cidade/UF:</strong> {selectedOrder.shipping_city || 'São Paulo'} - {selectedOrder.shipping_state || 'SP'} (CEP: {selectedOrder.shipping_zip || '00000-000'})</p>
+              <p className="text-[#333]"><strong>Código de Rastreio:</strong> <span className="font-mono font-bold text-[#1976d2]">{selectedOrder.tracking_code || 'Gerando etiqueta...'}</span></p>
+            </div>
 
             <div>
-              <h4 className="text-[12px] font-bold text-[#333] mb-2 uppercase tracking-wide">Itens do Pedido:</h4>
+              <h4 className="text-[12px] font-bold text-[#333] mb-2 uppercase tracking-wide">Produtos no Pedido:</h4>
               <div className="space-y-2">
                 {selectedOrder.order_items?.map((it: any) => (
                   <div key={it.id} className="p-3 bg-[#fafafa] rounded-xl border border-[#eee] flex items-center justify-between text-[12px]">
                     <div>
                       <span className="font-bold text-[#333] block">{it.product_name}</span>
-                      <span className="text-[11px] text-[#888]">SKU: {it.sku} • Qtd: {it.quantity}</span>
+                      <span className="text-[11px] text-[#888]">SKU: {it.sku} • Qtd: {it.quantity} un.</span>
                     </div>
                     <span className="font-bold text-[#1f2328]">R$ {Number(it.total_price || 0).toFixed(2)}</span>
                   </div>

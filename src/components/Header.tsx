@@ -54,6 +54,7 @@ interface HeaderProps {
 }
 
 import { useNotification } from '@/contexts/NotificationContext'
+import LiveMonitorDrawer from '@/components/LiveMonitorDrawer'
 
 function HeaderActions({
   userName,
@@ -72,11 +73,22 @@ function HeaderActions({
 }) {
   const [userOpen, setUserOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
+  const [liveDrawerOpen, setLiveDrawerOpen] = useState(false)
   const userRef = useRef<HTMLDivElement>(null)
   const notifRef = useRef<HTMLDivElement>(null)
   const { notifications, unreadCount, markAllAsRead, markAsRead } = useNotification()
   const pathname = usePathname()
   const router = useRouter()
+
+  // Buscar total de vendas de hoje para o badge do Header
+  const { data: todayRevenue } = useSupabaseQuery<number>(async (supabase) => {
+    const { data } = await supabase
+      .from('orders')
+      .select('total_amount')
+      .order('created_at', { ascending: false })
+      .limit(50)
+    return (data || []).reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0)
+  }, [], { intervalMs: 2000 })
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -284,17 +296,27 @@ function HeaderActions({
         )}
       </div>
 
-      <Link
-        href="/ao-vivo"
-        className="hidden sm:flex px-3.5 py-1.5 rounded-full bg-[#FFE600] hover:bg-[#F5DC00] text-[#111] text-[11px] font-black items-center gap-1.5 shadow-xs border border-[#E5CC00] transition-all tracking-wider uppercase"
-        title="Central de Vendas ao Vivo Multicanal"
+      <button
+        onClick={() => setLiveDrawerOpen(true)}
+        className="flex px-3 sm:px-4 py-1.5 rounded-full bg-[#FFE600] hover:bg-[#F5DC00] text-[#111] text-[11px] sm:text-[12px] font-black items-center gap-1.5 shadow-xs border border-[#E5CC00] transition-all tracking-wider uppercase cursor-pointer"
+        title="Clique para abrir o Monitor ao Vivo no canto direito"
       >
-        <span className="relative flex h-2 w-2">
+        <span className="relative flex h-2.5 w-2.5 shrink-0">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#e74c3c] opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-[#e74c3c]"></span>
+          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#e74c3c]"></span>
         </span>
-        <span>Ao Vivo</span>
-      </Link>
+        <span className="font-extrabold">
+          {todayRevenue && todayRevenue > 0
+            ? `R$ ${todayRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+            : 'Ao Vivo'}
+        </span>
+      </button>
+
+      {/* Drawer Deslizante no Canto Direito */}
+      <LiveMonitorDrawer
+        open={liveDrawerOpen}
+        onClose={() => setLiveDrawerOpen(false)}
+      />
 
       <button
         onClick={onCalcOpen}
