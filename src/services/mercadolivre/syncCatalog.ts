@@ -77,6 +77,8 @@ export async function syncMercadoLivreAccount(sellerId: string) {
             const modelAttr = item.attributes?.find((a: any) => a.id === 'MODEL')?.value_name || null
             const gtinAttr = item.attributes?.find((a: any) => a.id === 'GTIN' || a.id === 'EAN')?.value_name || null
 
+            const primaryPic = (item.pictures?.[0]?.secure_url || item.pictures?.[0]?.url || item.thumbnail || '').replace('http://', 'https://')
+
             // Upsert into products
             const { data: product } = await supabase
               .from('products')
@@ -86,12 +88,28 @@ export async function syncMercadoLivreAccount(sellerId: string) {
                 brand: brandAttr,
                 model: modelAttr,
                 ean: gtinAttr,
+                image_url: primaryPic,
                 cost_purchase: Math.round(price * 0.6 * 100) / 100, // estimated initial cost
                 stock,
                 status: 'ACTIVE'
               }, { onConflict: 'sku' })
               .select('id')
               .single()
+
+            if (product?.id && item.pictures?.length) {
+              await supabase.from('product_images').delete().eq('product_id', product.id)
+              for (let pi = 0; pi < item.pictures.length; pi++) {
+                const picUrl = (item.pictures[pi].secure_url || item.pictures[pi].url || '').replace('http://', 'https://')
+                if (picUrl) {
+                  await supabase.from('product_images').insert({
+                    product_id: product.id,
+                    url: picUrl,
+                    is_primary: pi === 0,
+                    sort_order: pi
+                  })
+                }
+              }
+            }
 
             // Upsert into marketplace_listings
             await supabase
@@ -106,7 +124,7 @@ export async function syncMercadoLivreAccount(sellerId: string) {
                 stock,
                 status: item.status,
                 permalink: item.permalink,
-                thumbnail_url: thumbnail,
+                thumbnail_url: primaryPic,
                 last_synced_at: new Date().toISOString()
               }, { onConflict: 'external_listing_id' })
 

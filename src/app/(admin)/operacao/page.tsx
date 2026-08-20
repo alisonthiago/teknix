@@ -168,8 +168,8 @@ function ProductsTab() {
                   <Td>
                     <div className="flex items-center gap-4">
                       <div className="w-11 h-11 rounded-full bg-[#f5f5f5] border-2 border-[#e6e6e6] overflow-hidden flex items-center justify-center flex-shrink-0">
-                        {(p.product_images as any)?.[0]?.url ? (
-                          <img src={(p.product_images as any)[0].url} alt="" className="w-full h-full object-cover" />
+                        {(p.image_url || (p.product_images as any)?.[0]?.url) ? (
+                          <img src={(p.image_url as string) || (p.product_images as any)[0].url} alt="" className="w-full h-full object-cover" />
                         ) : (
                           <Package className="w-5 h-5 text-[#ccc]" />
                         )}

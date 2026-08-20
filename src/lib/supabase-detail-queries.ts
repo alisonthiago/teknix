@@ -19,17 +19,18 @@ export async function getProductDetail(id: string) {
   const totalCost = (saleItems || []).reduce((a: number, si: Record<string, unknown>) => a + (Number(si.cogs) || 0), 0)
   const totalFees = (saleItems || []).reduce((a: number, si: Record<string, unknown>) => a + Number(si.fees || 0) + Number(si.taxes || 0) + Number(si.other_costs || 0), 0)
 
-  const rawImages = (product.product_images as any[] || []).sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
-  const images = rawImages.map(img => img.url)
-  const primaryImage = images[0] || (product as any).image_url || '/placeholder-product.png'
+  const rawImages = (product.product_images as any[] || []).sort((a, b) => (a.sort_order ?? a.display_order ?? 0) - (b.sort_order ?? b.display_order ?? 0))
+  const images = rawImages.map(img => img.url).filter(Boolean)
+  const primaryImage = (product as any).image_url || images[0] || '/placeholder-product.png'
+  const fullImages = images.length > 0 ? (primaryImage && !images.includes(primaryImage) ? [primaryImage, ...images] : images) : (primaryImage ? [primaryImage] : ['/placeholder-product.png'])
 
   return {
     id: product.id, sku: product.sku, name: product.name,
     brand: (product.brand as string) || '—', model: (product.model as string) || '—',
     ean: (product.ean as string) || '—', category: (product.category as string) || '—',
-    description: (product.description as string) || '', 
+    description: (product.notes as string) || (product.description as string) || '', 
     image: primaryImage,
-    images: images.length > 0 ? images : [primaryImage],
+    images: fullImages,
     status: (product.status as 'ACTIVE' | 'INACTIVE' | 'OUT_OF_STOCK' | 'LOW_STOCK' | 'PAUSED') || 'ACTIVE',
     created_at: product.created_at ? new Date(product.created_at as string).toLocaleDateString('pt-BR') : '—',
     updated_at: product.updated_at ? new Date(product.updated_at as string).toLocaleDateString('pt-BR') : '—',
