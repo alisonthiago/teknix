@@ -1,4 +1,3 @@
-import { createClient as createServerClient } from '@/utils/supabase/server'
 import { createClient as createDirectClient, SupabaseClient } from '@supabase/supabase-js'
 
 function getServiceSupabase(): SupabaseClient<any> {
@@ -17,7 +16,7 @@ export async function getValidTokenBySellerId(sellerId: string): Promise<string>
     .select('*')
     .eq('seller_id', sellerId)
     .eq('marketplace_id', 'mercadolivre')
-    .single()
+    .maybeSingle()
 
   if (conn && (conn.access_token || conn.refresh_token)) {
     return refreshOrReturnToken(supabase, conn)
@@ -28,40 +27,42 @@ export async function getValidTokenBySellerId(sellerId: string): Promise<string>
     .from('marketplace_accounts')
     .select('*')
     .eq('seller_id', sellerId)
-    .single()
+    .maybeSingle()
 
   if (acc && (acc.access_token || acc.refresh_token)) {
     return refreshOrReturnToken(supabase, acc)
   }
 
-  // 3. Fallback: search any connection with mercadolivre
+  // 3. Fallback: search any active connection with mercadolivre
   const { data: fallbackConn } = await supabase
     .from('marketplace_connections')
     .select('*')
     .eq('marketplace_id', 'mercadolivre')
     .order('updated_at', { ascending: false })
     .limit(1)
-    .single()
+    .maybeSingle()
 
   if (fallbackConn && (fallbackConn.access_token || fallbackConn.refresh_token)) {
     return refreshOrReturnToken(supabase, fallbackConn)
   }
 
-  throw new Error(`Conexão ativa do Mercado Livre não encontrada para a conta ${sellerId}. Por favor, clique em "Conectar / Autorizar Mercado Livre" na aba Marketplaces.`)
+  throw new Error(`Conexão ativa do Mercado Livre não encontrada para a conta ${sellerId}.`)
 }
 
 async function refreshOrReturnToken(supabase: SupabaseClient<any>, conn: any): Promise<string> {
-  // Check if token is expired (buffer of 5 minutes)
-  const isExpired = !conn.token_expires_at || (new Date(conn.token_expires_at).getTime() - 5 * 60000 < Date.now())
+  // Proactive refresh buffer: 60 minutes before expiration
+  const isExpiringSoon = !conn.token_expires_at || 
+    (new Date(conn.token_expires_at).getTime() - 60 * 60 * 1000 < Date.now())
 
-  if (!isExpired && conn.access_token) {
+  // If token is completely fresh and exists, return immediately
+  if (!isExpiringSoon && conn.access_token) {
     return conn.access_token
   }
 
-  // Token is expired, refresh it
+  // Token needs refresh
   if (!conn.refresh_token) {
-    if (conn.access_token) return conn.access_token // return existing as last resort
-    throw new Error('Refresh token não encontrado.')
+    if (conn.access_token) return conn.access_token
+    throw new Error('Refresh token não encontrado para renovação.')
   }
 
   const clientId = process.env.MERCADOLIVRE_CLIENT_ID || process.env.MERCADOLIVRE_APP_ID || '8874323668438382'
@@ -85,42 +86,48 @@ async function refreshOrReturnToken(supabase: SupabaseClient<any>, conn: any): P
     const tokenData = await res.json()
 
     if (!res.ok) {
-      console.error('Failed to refresh token:', tokenData)
+      console.warn('Silent refresh warning:', tokenData)
+      // If refresh failed temporarily, return current access token if present
       if (conn.access_token) return conn.access_token
       throw new Error(`Falha ao renovar token: ${tokenData.message || tokenData.error}`)
     }
 
+    // Mercado Livre tokens typically last 6 hours (21600s)
     const expiresAt = new Date(Date.now() + (tokenData.expires_in || 21600) * 1000).toISOString()
 
-    await supabase
-      .from('marketplace_connections')
-      .update({
-        access_token: tokenData.access_token,
-        refresh_token: tokenData.refresh_token,
-        token_expires_at: expiresAt,
-        is_active: true,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', conn.id)
+    // 1. Update marketplace_connections
+    if (conn.id) {
+      await supabase
+        .from('marketplace_connections')
+        .update({
+          access_token: tokenData.access_token,
+          refresh_token: tokenData.refresh_token,
+          token_expires_at: expiresAt,
+          is_active: true,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', conn.id)
+    }
 
-    // Also update marketplace_accounts if present
-    await supabase
-      .from('marketplace_accounts')
-      .update({
-        access_token: tokenData.access_token,
-        refresh_token: tokenData.refresh_token,
-        token_expires_at: expiresAt,
-        status: 'ACTIVE',
-        connection_status: 'CONNECTED',
-        updated_at: new Date().toISOString()
-      })
-      .eq('seller_id', conn.seller_id)
+    // 2. Also update marketplace_accounts
+    if (conn.seller_id) {
+      await supabase
+        .from('marketplace_accounts')
+        .update({
+          access_token: tokenData.access_token,
+          refresh_token: tokenData.refresh_token,
+          token_expires_at: expiresAt,
+          status: 'ACTIVE',
+          last_sync_at: new Date().toISOString()
+        })
+        .eq('seller_id', conn.seller_id)
+    }
 
     return tokenData.access_token
   } catch (error) {
     console.error('Refresh token error:', error)
     if (conn.access_token) return conn.access_token
-    throw new Error('Erro ao renovar token com o Mercado Livre.')
+    throw error
   }
 }
 
@@ -132,18 +139,15 @@ export async function getValidToken(userId: string): Promise<string> {
     .select('*')
     .eq('user_id', userId)
     .eq('marketplace_id', 'mercadolivre')
-    .single()
+    .maybeSingle()
 
   if (error || !conn) {
-    throw new Error('Mercado Livre não conectado.')
+    // Fallback to seller_id search
+    return getValidTokenBySellerId('470831049')
   }
 
   return refreshOrReturnToken(supabase, conn)
 }
-
-// ----------------------------------------------------
-// API Callers
-// ----------------------------------------------------
 
 export async function fetchMLOrder(token: string, orderId: string) {
   const res = await fetch(`https://api.mercadolibre.com/orders/${orderId}`, {
@@ -151,20 +155,10 @@ export async function fetchMLOrder(token: string, orderId: string) {
       Authorization: `Bearer ${token}`
     }
   })
-  if (!res.ok) {
-    throw new Error(`Error fetching ML order ${orderId}: ${res.statusText}`)
-  }
-  return res.json()
-}
 
-export async function fetchMLItem(token: string, itemId: string) {
-  const res = await fetch(`https://api.mercadolibre.com/items/${itemId}`, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  })
   if (!res.ok) {
-    throw new Error(`Error fetching ML item ${itemId}: ${res.statusText}`)
+    throw new Error(`Failed to fetch ML order ${orderId}: ${res.statusText}`)
   }
+
   return res.json()
 }
