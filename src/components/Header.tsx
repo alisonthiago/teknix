@@ -284,6 +284,18 @@ function HeaderActions({
         )}
       </div>
 
+      <Link
+        href="/ao-vivo"
+        className="hidden sm:flex px-3.5 py-1.5 rounded-full bg-[#FFE600] hover:bg-[#F5DC00] text-[#111] text-[11px] font-black items-center gap-1.5 shadow-xs border border-[#E5CC00] transition-all tracking-wider uppercase"
+        title="Central de Vendas ao Vivo Multicanal"
+      >
+        <span className="relative flex h-2 w-2">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#e74c3c] opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-[#e74c3c]"></span>
+        </span>
+        <span>Ao Vivo</span>
+      </Link>
+
       <button
         onClick={onCalcOpen}
         className="w-10 h-10 rounded-full flex items-center justify-center text-[#333] hover:bg-[#EEFFB3]/60 transition-colors cursor-pointer"

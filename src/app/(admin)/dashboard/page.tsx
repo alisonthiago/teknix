@@ -189,6 +189,40 @@ export default function DashboardPage() {
         <span className="text-[10px] text-[#999] hidden sm:block">{getFilterLabel()}</span>
       </div>
 
+      {/* 🔴 CARD DESTAQUE VENDAS DE HOJE (MONITOR AO VIVO) */}
+      <div className="bg-[#FFE600] rounded-2xl p-5 sm:p-6 shadow-sm border border-[#F5DC00] text-[#111] flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-black/10 flex items-center justify-center shrink-0">
+            <span className="relative flex h-3.5 w-3.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#e74c3c] opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-[#e74c3c]"></span>
+            </span>
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-[12px] font-extrabold uppercase tracking-wider text-[#333]">Vendas de Hoje</span>
+              <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-black/10 text-[#222] tracking-wider uppercase">
+                Ao Vivo
+              </span>
+            </div>
+            <div className="text-[26px] sm:text-[32px] font-black tracking-tight text-[#111] mt-0.5">
+              R$ {(stats?.totalRevenue ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </div>
+            <p className="text-[11px] font-medium text-[#444]">
+              🔴 {new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' })}, {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} • Sincronização Contínua Ativa
+            </p>
+          </div>
+        </div>
+
+        <Link
+          href="/ao-vivo"
+          className="px-5 py-3 rounded-xl bg-black hover:bg-[#222] text-white text-[13px] font-bold transition-all flex items-center justify-center gap-2 shadow-sm shrink-0"
+        >
+          <span>Ir para o Monitor ao Vivo</span>
+          <span className="text-[14px]">→</span>
+        </Link>
+      </div>
+
       {/* 🧠 Cockpit Inteligente de Operação */}
       <CockpitCentralOperacao orders={stats?.allOrders || []} products={stats?.allProducts || []} />
 

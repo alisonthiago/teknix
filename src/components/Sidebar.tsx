@@ -19,6 +19,7 @@ import {
   Store,
   Zap,
   Scan,
+  Radio,
 } from 'lucide-react'
 import { logout } from '@/app/login/actions'
 import { TeknixLogo } from './TeknixLogo'
@@ -28,6 +29,7 @@ interface NavItem {
   label: string
   icon: React.ElementType
   permission: string | null
+  isLive?: boolean
 }
 
 interface NavGroup {
@@ -40,6 +42,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: '',
     items: [
       { href: '/dashboard', label: 'Início', icon: LayoutDashboard, permission: null },
+      { href: '/ao-vivo', label: 'Monitor ao Vivo', icon: Radio, permission: null, isLive: true },
     ],
   },
   {
@@ -105,18 +108,27 @@ export default function Sidebar({ permissions, mobileOpen, setMobileOpen, collap
                   onClick={() => setMobileOpen(false)}
                   title={isNavCollapsed ? item.label : undefined}
                   className={`flex items-center transition-colors min-h-[44px] relative ${
-                    isNavCollapsed ? 'justify-center px-0 py-3 mx-2 rounded-lg' : 'gap-3 px-4 py-3'
+                    isNavCollapsed ? 'justify-center px-0 py-3 mx-2 rounded-lg' : 'gap-3 px-4 py-3 justify-between'
                   } ${
                     active
-                      ? 'text-[#3483fa] font-semibold bg-[#ecf3fe]/50'
-                      : 'text-[#333] font-normal hover:bg-[#f5f5f5]'
+                      ? item.isLive ? 'text-[#e74c3c] font-bold bg-[#fff0f0]' : 'text-[#3483fa] font-semibold bg-[#ecf3fe]/50'
+                      : item.isLive ? 'text-[#e74c3c] font-bold hover:bg-[#fff5f5]' : 'text-[#333] font-normal hover:bg-[#f5f5f5]'
                   }`}
                 >
-                  <Icon
-                    className={`w-[22px] h-[22px] shrink-0 ${active ? 'text-[#3483fa]' : 'text-[#666]'}`}
-                    strokeWidth={1.5}
-                  />
-                  {!isNavCollapsed && <span>{item.label}</span>}
+                  <div className="flex items-center gap-3">
+                    <Icon
+                      className={`w-[22px] h-[22px] shrink-0 ${
+                        active ? (item.isLive ? 'text-[#e74c3c]' : 'text-[#3483fa]') : (item.isLive ? 'text-[#e74c3c] animate-pulse' : 'text-[#666]')
+                      }`}
+                      strokeWidth={1.5}
+                    />
+                    {!isNavCollapsed && <span>{item.label}</span>}
+                  </div>
+                  {!isNavCollapsed && item.isLive && (
+                    <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-[#e74c3c] text-white tracking-wider animate-pulse uppercase">
+                      AO VIVO
+                    </span>
+                  )}
                 </Link>
               )
             })}
