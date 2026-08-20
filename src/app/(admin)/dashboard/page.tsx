@@ -56,7 +56,7 @@ export default function DashboardPage() {
 
   const { data: stats } = useSupabaseQuery(async (s) => {
     let salesQuery = s.from('sales').select('total_revenue, status, marketplace_id')
-    let ordersQuery = s.from('orders').select('status, total_amount, customer_name, marketplace_id, created_at, order_number, marketplaces(name, logo)')
+    let ordersQuery = s.from('orders').select('id, status, total_amount, customer_name, marketplace_id, created_at, order_number, marketplaces(name, logo)')
     const purchasesQuery = s.from('purchases').select('total_cost')
     const productsQuery = s.from('products').select('id, stock, min_stock, cost_purchase, status')
 

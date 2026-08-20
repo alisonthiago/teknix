@@ -144,11 +144,14 @@ export async function getProductDetail(id: string) {
 
 export async function getOrderDetail(id: string) {
   const s = await createClient()
-  const { data: order } = await s.from('orders').select('*, marketplaces(*, code, logo), marketplace_accounts(*), order_items(*, products(name, sku))').eq('id', id).single()
+  const { data: order } = await s
+    .from('orders')
+    .select('*, marketplaces(name, code, logo), order_items(*, products(name, sku))')
+    .or(`id.eq.${id.includes('-') && id.length === 36 ? id : '00000000-0000-0000-0000-000000000000'},order_number.eq.${id}`)
+    .single()
   if (!order) return null
 
   const mp = order.marketplaces as Record<string, unknown> | null
-  const acc = order.marketplace_accounts as Record<string, unknown> | null
 
   const { data: history } = await s.from('order_status_history').select('*').eq('order_id', id).order('created_at', { ascending: true })
 

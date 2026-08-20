@@ -87,71 +87,166 @@ function HeaderActions({
     return () => document.removeEventListener('mousedown', handleClick)
   }, [setUserOpen, setNotifOpen])
 
-  useEffect(() => {
-    setUserOpen(false)
-    setNotifOpen(false)
-  }, [pathname, setUserOpen, setNotifOpen])
+  const [selectedCategory, setSelectedCategory] = useState<'all' | 'vendas' | 'estoque' | 'pedidos' | 'integracoes'>('all')
+
+  const formatTimeAgo = (dateStr?: string) => {
+    if (!dateStr) return 'Agora'
+    const diff = Date.now() - new Date(dateStr).getTime()
+    const mins = Math.floor(diff / 60000)
+    if (mins < 1) return 'Agora'
+    if (mins < 60) return `há ${mins} min`
+    const hours = Math.floor(mins / 60)
+    if (hours < 24) return `há ${hours}h`
+    const days = Math.floor(hours / 24)
+    return `há ${days}d`
+  }
+
+  const getNotificationIcon = (type?: string, module?: string) => {
+    const t = String(type || module || '').toLowerCase()
+    if (t.includes('sale') || t.includes('venda')) return '🛒'
+    if (t.includes('stock') || t.includes('estoque')) return '⚠️'
+    if (t.includes('order') || t.includes('pedido')) return '📦'
+    if (t.includes('integration') || t.includes('marketplace') || t.includes('sync')) return '🔌'
+    if (t.includes('error') || t.includes('erro')) return '🚨'
+    return '🔔'
+  }
+
+  const filteredNotifications = notifications.filter(n => {
+    if (selectedCategory === 'all') return true
+    const mod = String(n.module || n.type || (n as any).metadata?.category || '').toLowerCase()
+    if (selectedCategory === 'vendas') return mod.includes('sale') || mod.includes('venda')
+    if (selectedCategory === 'estoque') return mod.includes('stock') || mod.includes('estoque')
+    if (selectedCategory === 'pedidos') return mod.includes('order') || mod.includes('pedido')
+    if (selectedCategory === 'integracoes') return mod.includes('marketplace') || mod.includes('sync') || mod.includes('integration')
+    return true
+  })
 
   return (
     <>
       <div ref={notifRef} className="relative">
         <button
           onClick={() => setNotifOpen(!notifOpen)}
-          className="w-10 h-10 rounded-full flex items-center justify-center text-[#333] hover:bg-[#EEFFB3]/60 transition-colors relative"
+          className="w-10 h-10 rounded-full flex items-center justify-center text-[#333] hover:bg-[#EEFFB3]/60 transition-colors relative cursor-pointer"
+          title="Notificações"
         >
           <Bell className="w-5 h-5" strokeWidth={1.5} />
           {unreadCount > 0 && (
-            <span className="absolute top-2 right-2 w-2 h-2 bg-[#3483fa] rounded-full" />
+            <span className="absolute top-1.5 right-1.5 min-w-[18px] h-[18px] px-1 bg-[#e74c3c] text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white shadow-sm animate-in zoom-in-50 duration-200">
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
           )}
         </button>
+
         {notifOpen && (
-          <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl border border-[#e6e6e6] shadow-[0_8px_24px_rgba(0,0,0,0.1)] overflow-hidden z-50">
-            <div className="p-4 border-b border-[#eeeeee] flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-[#333]">Notificações</h3>
+          <div className="absolute right-0 top-full mt-2 w-96 max-w-[90vw] bg-white rounded-3xl border border-[#e6e6e6] shadow-[0_12px_36px_rgba(0,0,0,0.12)] overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+            {/* Header */}
+            <div className="p-4 border-b border-[#eeeeee] flex items-center justify-between bg-[#fafafa]">
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-bold text-[#333]">Central de Notificações</h3>
+                {unreadCount > 0 && (
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#fff0f0] text-[#e74c3c]">
+                    {unreadCount} nova{unreadCount !== 1 ? 's' : ''}
+                  </span>
+                )}
+              </div>
               {unreadCount > 0 && (
-                <button onClick={markAllAsRead} className="text-[11px] text-[#3483fa] hover:underline">Marcar lidas</button>
+                <button
+                  onClick={markAllAsRead}
+                  className="text-[11px] font-semibold text-[#3483fa] hover:underline cursor-pointer"
+                >
+                  Marcar todas como lidas
+                </button>
               )}
             </div>
-            <div className="max-h-[300px] overflow-y-auto p-2">
-              {notifications.length === 0 ? (
-                <div className="p-4 text-center text-[12px] text-[#999]">Nenhuma notificação</div>
+
+            {/* Category Filter Tabs */}
+            <div className="flex items-center gap-1 p-2 border-b border-[#f0f0f0] bg-white overflow-x-auto text-[11px]">
+              {[
+                { id: 'all', label: 'Todas' },
+                { id: 'vendas', label: 'Vendas' },
+                { id: 'estoque', label: 'Estoque' },
+                { id: 'pedidos', label: 'Pedidos' },
+                { id: 'integracoes', label: 'Canais' },
+              ].map(cat => (
+                <button
+                  key={cat.id}
+                  onClick={() => setSelectedCategory(cat.id as any)}
+                  className={`px-2.5 py-1 rounded-lg font-medium transition-colors whitespace-nowrap cursor-pointer ${
+                    selectedCategory === cat.id
+                      ? 'bg-[#3483fa] text-white shadow-sm'
+                      : 'text-[#666] hover:bg-[#f5f5f5]'
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Notification Items List */}
+            <div className="max-h-[360px] overflow-y-auto divide-y divide-[#f5f5f5] p-1.5">
+              {filteredNotifications.length === 0 ? (
+                <div className="p-8 text-center">
+                  <span className="text-2xl mb-2 block">🔕</span>
+                  <p className="text-sm font-semibold text-[#333]">Nenhuma notificação</p>
+                  <p className="text-[11px] text-[#999] mt-1">Você está atualizado com todos os eventos do sistema.</p>
+                </div>
               ) : (
-                notifications.map(n => (
+                filteredNotifications.map(n => (
                   <div
                     key={n.id}
                     onClick={() => {
                       if (!n.is_read) markAsRead(n.id)
                       
-                      if (n.module && n.entity_id) {
-                        let path = ''
-                        switch(n.module) {
-                          case 'products': path = `/produtos/${n.entity_id}/editar`; break;
-                          case 'suppliers': path = `/fornecedores/${n.entity_id}/editar`; break;
-                          case 'purchases': path = `/compras/${n.entity_id}`; break;
-                          case 'sales': path = `/vendas/${n.entity_id}`; break;
-                          case 'orders': path = `/pedidos`; break;
-                          case 'users': path = `/sistema/colaboradores`; break;
-                        }
-                        if (path) {
-                          setNotifOpen(false)
-                          router.push(path)
-                        }
+                      let path = ''
+                      const mod = String(n.module || n.type || '').toLowerCase()
+                      if (mod.includes('order') || mod.includes('pedido') || mod.includes('sale') || mod.includes('venda')) {
+                        path = n.entity_id ? `/pedidos/${n.entity_id}` : '/pedidos'
+                      } else if (mod.includes('product') || mod.includes('produto') || mod.includes('stock') || mod.includes('estoque')) {
+                        path = '/operacao'
+                      } else if (mod.includes('market') || mod.includes('integr')) {
+                        path = '/marketplaces'
+                      }
+
+                      if (path) {
+                        setNotifOpen(false)
+                        router.push(path)
                       }
                     }}
-                    className={`p-3 rounded-xl mb-1 cursor-pointer transition-colors ${n.is_read ? 'hover:bg-[#f5f5f5]' : 'bg-[#f0f7ff] hover:bg-[#e6f0ff]'}`}
+                    className={`p-3 rounded-2xl transition-all cursor-pointer flex gap-3 items-start my-1 ${
+                      n.is_read
+                        ? 'hover:bg-[#f8f9fa] opacity-80'
+                        : 'bg-[#f0f7ff]/70 hover:bg-[#e6f1ff] border border-[#d6e7ff]'
+                    }`}
                   >
-                    <div className="flex gap-3">
-                      <div>
-                        <p className={`text-[13px] ${n.is_read ? 'text-[#666]' : 'text-[#333] font-medium'}`}>
-                          {n.actor_name && <span className="font-bold mr-1">{n.actor_name}</span>}
+                    <div className="w-8 h-8 rounded-xl bg-white border border-[#e6e6e6] shadow-xs flex items-center justify-center text-sm shrink-0 mt-0.5">
+                      {getNotificationIcon(n.type, n.module)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-1">
+                        <p className={`text-[12px] leading-tight truncate ${n.is_read ? 'text-[#555]' : 'text-[#111] font-bold'}`}>
                           {n.title}
                         </p>
-                        <p className="text-[11px] text-[#666] mt-0.5">{n.message}</p>
+                        <span className="text-[10px] text-[#999] shrink-0">{formatTimeAgo(n.created_at)}</span>
                       </div>
+                      <p className="text-[11px] text-[#666] leading-snug mt-1 line-clamp-2">{n.message}</p>
                     </div>
+                    {!n.is_read && (
+                      <span className="w-2 h-2 rounded-full bg-[#3483fa] shrink-0 mt-1.5" />
+                    )}
                   </div>
                 ))
               )}
+            </div>
+
+            {/* Footer */}
+            <div className="p-2.5 border-t border-[#f0f0f0] bg-[#fafafa] text-center">
+              <Link
+                href="/notifications"
+                onClick={() => setNotifOpen(false)}
+                className="text-[11px] font-semibold text-[#3483fa] hover:underline"
+              >
+                Ver histórico completo de notificações →
+              </Link>
             </div>
           </div>
         )}
@@ -159,7 +254,7 @@ function HeaderActions({
 
       <button
         onClick={onCalcOpen}
-        className="w-10 h-10 rounded-full flex items-center justify-center text-[#333] hover:bg-[#EEFFB3]/60 transition-colors"
+        className="w-10 h-10 rounded-full flex items-center justify-center text-[#333] hover:bg-[#EEFFB3]/60 transition-colors cursor-pointer"
         title="Precificação"
       >
         <BadgeDollarSign className="w-5 h-5" strokeWidth={1.5} />
