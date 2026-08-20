@@ -518,6 +518,9 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
   const router = useRouter()
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   
+  const images = product.images && product.images.length > 0 ? product.images : [product.image]
+  const [selectedImage, setSelectedImage] = useState(images[0])
+
   const handleDelete = async () => {
     try {
       const supabase = createClient()
@@ -539,17 +542,42 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
         </Link>
       </div>
 
-      <div className="bg-white border border-[#e6e6e6] rounded-md p-5 mb-4">
-        <div className="flex flex-col sm:flex-row items-start gap-5">
-          <div className="w-full sm:w-20 h-40 sm:h-20 rounded-md bg-[#f5f5f5] border border-[#e6e6e6] flex items-center justify-center flex-shrink-0 overflow-hidden">
-            <Package className="w-8 h-8 text-[#ccc] object-cover" />
+      <div className="bg-white border border-[#e6e6e6] rounded-2xl p-5 mb-4 shadow-xs">
+        <div className="flex flex-col md:flex-row items-start gap-6">
+          {/* Photos Gallery */}
+          <div className="w-full md:w-64 flex flex-col items-center gap-3 shrink-0">
+            <div className="w-full h-56 rounded-xl bg-[#fafafa] border border-[#e6e6e6] overflow-hidden flex items-center justify-center p-2 shadow-xs">
+              {selectedImage && selectedImage !== '/placeholder-product.png' ? (
+                <img src={selectedImage} alt={product.name} className="w-full h-full object-contain" />
+              ) : (
+                <Package className="w-12 h-12 text-[#ccc]" />
+              )}
+            </div>
+
+            {images.length > 1 && (
+              <div className="flex items-center gap-2 overflow-x-auto w-full py-1">
+                {images.map((img, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setSelectedImage(img)}
+                    className={`w-12 h-12 rounded-lg border overflow-hidden p-1 shrink-0 transition-all cursor-pointer ${
+                      selectedImage === img ? 'border-[#3483fa] ring-2 ring-[#3483fa]/30 shadow-xs' : 'border-[#e6e6e6] opacity-70 hover:opacity-100'
+                    }`}
+                  >
+                    <img src={img} alt="" className="w-full h-full object-contain" />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
+
           <div className="flex-1 min-w-0">
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
               <div>
-                <h1 className="text-[18px] font-semibold text-[#333]">{product.name}</h1>
-                <div className="flex flex-wrap items-center gap-2 mt-1">
-                  <span className="text-[12px] text-[#999]">{product.brand}</span>
+                <h1 className="text-[18px] font-bold text-[#333] leading-snug">{product.name}</h1>
+                <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                  <span className="text-[12px] font-medium text-[#666]">{product.brand}</span>
                   <span className="text-[10px] text-[#ccc]">•</span>
                   <span className="text-[11px] font-mono text-[#999]">SKU {product.sku}</span>
                   <span className="text-[10px] text-[#ccc]">•</span>
@@ -557,14 +585,14 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <button onClick={() => router.push(`/purchases/new?product=${product.id}`)} className="px-3 py-1.5 bg-[#f0fff4] text-[#38a169] border border-[#38a169]/20 text-[11px] font-medium rounded-md hover:bg-[#dcfce7] transition-colors flex items-center gap-1">
+                <button onClick={() => router.push(`/purchases/new?product=${product.id}`)} className="px-3 py-1.5 bg-[#f0fff4] text-[#38a169] border border-[#38a169]/20 text-[11px] font-medium rounded-md hover:bg-[#dcfce7] transition-colors flex items-center gap-1 cursor-pointer">
                   <ShoppingCart className="w-3.5 h-3.5" /> Comprar
                 </button>
-                <button onClick={() => router.push(`/produtos/${product.id}/editar`)} className="px-3 py-1.5 bg-[#3483fa] text-white text-[11px] font-medium rounded-md hover:bg-[#2968c8] transition-colors">
+                <button onClick={() => router.push(`/produtos/${product.id}/editar`)} className="px-3 py-1.5 bg-[#3483fa] text-white text-[11px] font-medium rounded-md hover:bg-[#2968c8] transition-colors cursor-pointer">
                   Editar produto
                 </button>
                 <DropdownMenu>
-                  <DropdownMenuTrigger className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full border border-[#e6e6e6] text-[#666] hover:bg-[#f5f5f5] transition-colors focus:outline-none">
+                  <DropdownMenuTrigger className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full border border-[#e6e6e6] text-[#666] hover:bg-[#f5f5f5] transition-colors focus:outline-none cursor-pointer">
                   <MoreHorizontal className="w-4 h-4" />
                 </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-40">

@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 
 export async function getProductDetail(id: string) {
   const s = await createClient()
-  const { data: product } = await s.from('products').select('*, suppliers(*)').eq('id', id).single()
+  const { data: product } = await s.from('products').select('*, suppliers(*), product_images(*)').eq('id', id).single()
   if (!product) return null
 
   const { data: movements } = await s.from('inventory_movements').select('*').eq('product_id', id).order('created_at', { ascending: false }).limit(20)
@@ -19,11 +19,17 @@ export async function getProductDetail(id: string) {
   const totalCost = (saleItems || []).reduce((a: number, si: Record<string, unknown>) => a + (Number(si.cogs) || 0), 0)
   const totalFees = (saleItems || []).reduce((a: number, si: Record<string, unknown>) => a + Number(si.fees || 0) + Number(si.taxes || 0) + Number(si.other_costs || 0), 0)
 
+  const rawImages = (product.product_images as any[] || []).sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
+  const images = rawImages.map(img => img.url)
+  const primaryImage = images[0] || (product as any).image_url || '/placeholder-product.png'
+
   return {
     id: product.id, sku: product.sku, name: product.name,
     brand: (product.brand as string) || '—', model: (product.model as string) || '—',
     ean: (product.ean as string) || '—', category: (product.category as string) || '—',
-    description: (product.description as string) || '', image: '/placeholder-product.png',
+    description: (product.description as string) || '', 
+    image: primaryImage,
+    images: images.length > 0 ? images : [primaryImage],
     status: (product.status as 'ACTIVE' | 'INACTIVE' | 'OUT_OF_STOCK' | 'LOW_STOCK' | 'PAUSED') || 'ACTIVE',
     created_at: product.created_at ? new Date(product.created_at as string).toLocaleDateString('pt-BR') : '—',
     updated_at: product.updated_at ? new Date(product.updated_at as string).toLocaleDateString('pt-BR') : '—',
@@ -146,7 +152,7 @@ export async function getOrderDetail(id: string) {
   const s = await createClient()
   const { data: order } = await s
     .from('orders')
-    .select('*, marketplaces(name, code, logo), order_items(*, products(name, sku))')
+    .select('*, marketplaces(name, code, logo), order_items(*, products(*, product_images(*)))')
     .or(`id.eq.${id.includes('-') && id.length === 36 ? id : '00000000-0000-0000-0000-000000000000'},order_number.eq.${id}`)
     .single()
   if (!order) return null
@@ -157,19 +163,27 @@ export async function getOrderDetail(id: string) {
 
   return {
     id: order.id as string, order_number: order.order_number as string,
-    marketplace: (mp?.name as string) || '—',
+    marketplace: (mp?.name as string) || order.channel || 'Mercado Livre',
     customer: {
       name: order.customer_name as string || '—', email: order.customer_email as string || '—',
       phone: order.customer_phone as string || '—', cpf: order.customer_cpf as string || '—',
     },
     date: order.created_at ? new Date(order.created_at as string).toLocaleDateString('pt-BR') : '—',
     status: order.status as string,
-    items: (order.order_items as Record<string, unknown>[] || []).map((item: Record<string, unknown>) => ({
-      sku: (item.products as Record<string, unknown>)?.sku as string || '—',
-      name: (item.products as Record<string, unknown>)?.name as string || '—',
-      quantity: Number(item.quantity || 0), price: Number(item.unit_price || 0),
-      total: Number(item.quantity || 0) * Number(item.unit_price || 0),
-    })),
+    items: (order.order_items as Record<string, unknown>[] || []).map((item: Record<string, unknown>) => {
+      const prod = item.products as Record<string, unknown> | null
+      const rawImages = (prod?.product_images as any[] || []).sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
+      const imageUrl = rawImages[0]?.url || (prod as any)?.image_url || null
+
+      return {
+        sku: (prod?.sku as string) || (item.sku as string) || '—',
+        name: (prod?.name as string) || (item.product_name as string) || 'Produto Mercado Livre',
+        quantity: Number(item.quantity || 1), 
+        price: Number(item.unit_price || 0),
+        total: Number(item.total_price || (Number(item.unit_price || 0) * Number(item.quantity || 1))),
+        image: imageUrl
+      }
+    }),
     payment: {
       method: (order.payment_method as string) || 'PIX',
       installments: Number(order.installments || 1),

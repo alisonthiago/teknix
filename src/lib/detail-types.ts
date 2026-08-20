@@ -10,6 +10,7 @@ export interface ProductDetail {
   category: string
   description: string
   image: string
+  images?: string[]
   status: 'ACTIVE' | 'INACTIVE' | 'OUT_OF_STOCK' | 'LOW_STOCK' | 'PAUSED'
   created_at: string
   updated_at: string
@@ -35,7 +36,7 @@ export interface OrderDetail {
   customer: { name: string; email: string; phone: string; cpf: string }
   date: string
   status: string
-  items: Array<{ sku: string; name: string; quantity: number; price: number; total: number }>
+  items: Array<{ sku: string; name: string; quantity: number; price: number; total: number; image?: string | null }>
   payment: { method: string; installments: number; total: number; fee: number; net: number }
   shipping: { address: string; city: string; state: string; zip: string; method: string; cost: number; tracking: string }
   timeline: Array<{ date: string; time: string; status: string; description: string }>

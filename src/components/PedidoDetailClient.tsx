@@ -68,10 +68,21 @@ function VisaoGeralTab({ order }: { order: OrderDetail }) {
                 {order.items.map((item, i) => (
                   <tr key={i} className="hover:bg-[#fafafa] transition-colors">
                     <td className="py-2.5 px-3 font-mono text-[#999]">{item.sku}</td>
-                    <td className="py-2.5 px-3 text-[#333] font-medium">{item.name}</td>
-                    <td className="py-2.5 px-3 text-right text-[#999]">{item.quantity}</td>
+                    <td className="py-2.5 px-3 text-[#333] font-medium">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-[#f5f5f5] border border-[#e6e6e6] overflow-hidden flex items-center justify-center shrink-0">
+                          {item.image ? (
+                            <img src={item.image} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <Package className="w-4 h-4 text-[#ccc]" />
+                          )}
+                        </div>
+                        <span className="font-semibold text-[13px]">{item.name}</span>
+                      </div>
+                    </td>
+                    <td className="py-2.5 px-3 text-right text-[#999] font-medium">{item.quantity}</td>
                     <td className="py-2.5 px-3 text-right text-[#999]">{formatBRL(item.price)}</td>
-                    <td className="py-2.5 px-3 text-right font-medium text-[#333]">{formatBRL(item.total)}</td>
+                    <td className="py-2.5 px-3 text-right font-bold text-[#333]">{formatBRL(item.total)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -103,14 +114,15 @@ function VisaoGeralTab({ order }: { order: OrderDetail }) {
         </div>
 
         <div className="bg-white border border-[#e6e6e6] rounded-md p-4">
-          <SectionTitle>Frete</SectionTitle>
+          <SectionTitle>Frete & Envio</SectionTitle>
           <div className="space-y-1">
-            <InfoRow label="Método" value={order.shipping.method} />
+            <InfoRow label="Canal" value={order.marketplace} bold />
+            <InfoRow label="Método" value={order.shipping.method || 'Mercado Envios'} />
             <InfoRow label="Destino" value={`${order.shipping.city}/${order.shipping.state}`} />
             <InfoRow label="CEP" value={order.shipping.zip} mono />
             <InfoRow label="Endereço" value={order.shipping.address} />
             <InfoRow label="Valor" value={formatBRL(order.shipping.cost)} />
-            {order.shipping.tracking && <InfoRow label="Rastreio" value={order.shipping.tracking} mono />}
+            {order.shipping.tracking && <InfoRow label="Rastreamento" value={order.shipping.tracking} mono bold />}
           </div>
         </div>
 
@@ -169,11 +181,18 @@ function OrderActions({ status, orderId }: { status: string; orderId: string }) 
   return (
     <div className="flex flex-wrap gap-2 mt-3">
       <button
-        onClick={() => router.push(`/pedidos/${orderId}/nota`)}
-        className="inline-flex items-center gap-1.5 bg-white border border-[#e6e6e6] text-[#333] text-[11px] font-medium px-3 py-1.5 rounded-md hover:bg-[#f5f5f5] transition-colors"
+        onClick={() => router.push(`/pedidos/${orderId}/etiqueta`)}
+        className="inline-flex items-center gap-1.5 bg-[#3483fa] hover:bg-[#2968c8] text-white text-[11px] font-bold px-3 py-1.5 rounded-md transition-colors shadow-xs cursor-pointer"
       >
         <Printer className="w-3 h-3" />
-        Imprimir Comprovante
+        Imprimir Etiqueta de Envio (100x150mm)
+      </button>
+      <button
+        onClick={() => router.push(`/pedidos/${orderId}/nota`)}
+        className="inline-flex items-center gap-1.5 bg-white border border-[#e6e6e6] text-[#333] text-[11px] font-medium px-3 py-1.5 rounded-md hover:bg-[#f5f5f5] transition-colors cursor-pointer"
+      >
+        <Printer className="w-3 h-3" />
+        Comprovante / Declaração
       </button>
       {status === 'NOVO' && (
         <button
