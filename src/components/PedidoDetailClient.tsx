@@ -306,11 +306,17 @@ export default function PedidoDetailClient({ order }: { order: OrderDetail }) {
               <div>
                 <h1 className="text-xl font-bold text-[#0f172a]">{order.order_number}</h1>
                 <div className="flex flex-wrap items-center gap-2.5 mt-2">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#eff6ff] text-[#2563eb] border border-[#bfdbfe] font-bold text-xs shadow-2xs">
-                    <User className="w-3.5 h-3.5 text-[#3b82f6]" />
+                  <Link
+                    href={`/clientes/${encodeURIComponent(order.customer.name.trim().toLowerCase().replace(/\s+/g, '-'))}`}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#eff6ff] hover:bg-[#dbeafe] text-[#2563eb] border border-[#bfdbfe] font-bold text-xs shadow-2xs transition-all hover:scale-[1.02] cursor-pointer group"
+                    title="Clique para abrir o perfil deste cliente"
+                  >
+                    <User className="w-3.5 h-3.5 text-[#3b82f6] group-hover:text-[#2563eb]" />
                     <span className="text-[#64748b] font-medium">Cliente:</span>
-                    <strong className="text-[#0f172a] font-extrabold text-[13px]">{order.customer.name}</strong>
-                  </div>
+                    <strong className="text-[#0f172a] group-hover:text-[#2563eb] font-extrabold text-[13px] group-hover:underline underline-offset-2">
+                      {order.customer.name}
+                    </strong>
+                  </Link>
                   <span className="text-[12px] font-semibold text-[#64748b] bg-[#f8fafc] px-2.5 py-1 rounded-xl border border-[#e2e8f0]">
                     {order.marketplace}
                   </span>
