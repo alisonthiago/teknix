@@ -55,10 +55,55 @@ export default function MarketplaceDetailPage() {
   const router = useRouter()
   const marketplaceId = params.id as string
   const { notify } = useNotification()
+  const [tokenModalAccount, setTokenModalAccount] = useState<Account | null>(null)
+  const [tokenInput, setTokenInput] = useState('')
+  const [refreshTokenInput, setRefreshTokenInput] = useState('')
+  const [isSavingToken, setIsSavingToken] = useState(false)
   const [syncingId, setSyncingId] = useState<string | null>(null)
   const [showConnectModal, setShowConnectModal] = useState(false)
   const [disconnectingAccount, setDisconnectingAccount] = useState<Account | null>(null)
   const [isDisconnecting, setIsDisconnecting] = useState(false)
+
+  const handleSaveTokenSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!tokenInput.trim()) return
+
+    setIsSavingToken(true)
+    try {
+      const res = await fetch('/api/auth/mercadolivre/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          access_token: tokenInput.trim(),
+          refresh_token: refreshTokenInput.trim() || undefined,
+          seller_id: tokenModalAccount?.seller_id || undefined,
+          account_name: tokenModalAccount?.account_name || undefined
+        })
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Falha ao salvar token')
+
+      notify({
+        type: 'success',
+        title: 'Token Salvo & Vendas Sincronizadas!',
+        message: data.message || 'Todas as vendas e produtos foram atualizados com sucesso.'
+      })
+
+      setTokenModalAccount(null)
+      setTokenInput('')
+      setRefreshTokenInput('')
+      refetch()
+    } catch (err: any) {
+      console.error(err)
+      notify({
+        type: 'error',
+        title: 'Erro ao Salvar Token',
+        message: err.message || 'Verifique o token informado.'
+      })
+    } finally {
+      setIsSavingToken(false)
+    }
+  }
 
   const { data: marketplace, loading, error, refetch } = useSupabaseQuery<MarketplaceDetail>(async (s) => {
     const { data: mp, error: mpError } = await s
@@ -277,6 +322,98 @@ export default function MarketplaceDetailPage() {
         </div>
       )}
 
+      {/* Modal de Inserção de Token Direto da API */}
+      {tokenModalAccount && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl p-6 border border-[#e6e6e6]">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-[#EEFFB3] border border-[#d9f99d] flex items-center justify-center shrink-0">
+                  <RefreshCw className="w-5 h-5 text-[#111]" />
+                </div>
+                <div>
+                  <h3 className="text-[15px] font-bold text-[#111]">Conectar Token do Mercado Livre</h3>
+                  <p className="text-[11px] text-[#666]">Sincronização em tempo real de vendas e anúncios</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setTokenModalAccount(null)}
+                className="p-1.5 rounded-xl text-[#999] hover:bg-[#f5f5f5] transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-[12px] text-[#555] mb-4 leading-relaxed">
+              Cole o <strong>Access Token</strong> gerado no seu portal de desenvolvedores do Mercado Livre ou via OAuth para sincronizar instantaneamente todas as vendas de hoje (R$ 1.158,00).
+            </p>
+
+            <form onSubmit={handleSaveTokenSubmit} className="space-y-3.5">
+              <div>
+                <label className="block text-[11px] font-bold text-[#333] mb-1">
+                  Access Token (Bearer Token) <span className="text-[#e74c3c]">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ex: APP_USR-8874323668438382-..."
+                  value={tokenInput}
+                  onChange={e => setTokenInput(e.target.value)}
+                  className="w-full h-11 px-3.5 rounded-xl border border-[#d0d7de] font-mono text-[12px] text-[#333] focus:outline-none focus:ring-2 focus:ring-[#3483fa]/20 focus:border-[#3483fa]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-[#666] mb-1">
+                  Refresh Token (Opcional - Para renovação automática)
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ex: TG-64a..."
+                  value={refreshTokenInput}
+                  onChange={e => setRefreshTokenInput(e.target.value)}
+                  className="w-full h-10 px-3.5 rounded-xl border border-[#d0d7de] font-mono text-[12px] text-[#333] focus:outline-none focus:ring-2 focus:ring-[#3483fa]/20 focus:border-[#3483fa]"
+                />
+              </div>
+
+              <div className="p-3 rounded-xl bg-[#f0f7ff] border border-[#d0e4ff] text-[11px] text-[#1c64f2] space-y-1">
+                <p className="font-bold">Onde pegar o token?</p>
+                <p>Acesse <strong>developers.mercadolivre.com.br</strong> → Meus Aplicativos → Detalhes → Testar / Obter Token.</p>
+              </div>
+
+              <div className="flex items-center justify-end gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setTokenModalAccount(null)}
+                  disabled={isSavingToken}
+                  className="px-4 py-2.5 text-[12px] font-semibold text-[#666] hover:bg-[#f5f5f5] rounded-xl transition-colors cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingToken}
+                  className="px-5 py-2.5 bg-[#3483fa] hover:bg-[#2968c8] text-white text-[12px] font-bold rounded-xl transition-colors shadow-sm disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
+                >
+                  {isSavingToken ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Sincronizando Vendas...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="w-4 h-4" />
+                      Salvar & Puxar Vendas de Hoje
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Connect Modal */}
       <ConnectMarketplaceModal
         open={showConnectModal}
@@ -384,6 +521,19 @@ export default function MarketplaceDetailPage() {
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
                           Autorizar no Mercado Livre
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setTokenModalAccount(account)
+                            setTokenInput('')
+                            setRefreshTokenInput('')
+                          }}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#f5f5f5] hover:bg-[#eee] text-[#333] text-[11px] font-bold rounded-lg transition-colors cursor-pointer border border-[#ddd]"
+                          title="Colar Token de Acesso diretamente"
+                        >
+                          Inserir Token da API
                         </button>
                       </div>
 
