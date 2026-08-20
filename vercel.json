@@ -3,11 +3,7 @@
   "crons": [
     {
       "path": "/api/cron/sync-orders",
-      "schedule": "*/5 * * * *"
-    },
-    {
-      "path": "/api/cron/refresh-tokens",
-      "schedule": "0 */4 * * *"
+      "schedule": "0 6 * * *"
     }
   ]
 }
