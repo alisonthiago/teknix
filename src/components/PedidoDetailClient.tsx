@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
-import { ArrowLeft, Package, Clock, Loader2, CheckCircle2, Send, Printer, User, Calendar } from 'lucide-react'
+import { ArrowLeft, Package, Clock, Loader2, CheckCircle2, Send, Printer, User, Calendar, ShoppingCart, RefreshCw, Box, Truck } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import type { OrderDetail } from '@/lib/detail-types'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
@@ -188,27 +188,83 @@ function VisaoGeralTab({ order }: { order: OrderDetail }) {
 }
 
 function TimelineTab({ order }: { order: OrderDetail }) {
+  const isDelivered = order.status === 'DELIVERED' || order.status === 'ENTREGUE'
+  const isShipped = isDelivered || order.status === 'ENVIADO'
+  const isPacked = isShipped || order.status === 'EMBALADO' || order.status === 'SEPARADO'
+  const isLabelGenerated = isPacked || order.shipping.tracking !== '' || ['PAGO', 'NOVO'].includes(order.status)
+
+  const steps = [
+    { title: 'Venda Realizada', desc: `${order.marketplace} (${formatBRL(order.payment.total)})`, done: true, icon: ShoppingCart },
+    { title: 'Pedido Sincronizado', desc: 'Webhook em Tempo Real', done: true, icon: RefreshCw },
+    { title: 'Estoque Baixado', desc: 'Saldo Central Deduzido', done: true, icon: Package },
+    { title: 'Etiqueta Disponível', desc: order.shipping.tracking || 'Mercado Envios', done: isLabelGenerated, icon: Printer },
+    { title: 'Etiqueta Impressa', desc: isPacked ? 'Pronto na Estação' : 'Aguardando Impressão', done: isPacked, icon: CheckCircle2 },
+    { title: 'Pedido Conferido & Embalado', desc: isPacked ? 'Conferência Bipagem OK' : 'Aguardando Bipagem', done: isPacked, icon: Box },
+    { title: 'Enviado & Rastreamento', desc: isShipped ? (isDelivered ? 'Entregue ao Comprador' : 'Em Trânsito p/ Destino') : 'Aguardando Coleta', done: isShipped, icon: Truck },
+  ]
+
   return (
-    <div className="bg-white border border-[#e6e6e6] rounded-md overflow-hidden">
-      <div className="px-4 py-3 border-b border-[#e6e6e6]">
-        <SectionTitle>Histórico do pedido</SectionTitle>
-      </div>
-      <div className="divide-y divide-[#eeeeee]">
-        {order.timeline.map((h, i) => (
-          <div key={i} className="px-4 py-3 flex items-start gap-3">
-            <div className="w-1.5 h-1.5 rounded-full bg-[#3483fa] mt-1.5 flex-shrink-0" />
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <span className="text-[12px] font-medium text-[#333]">{h.description}</span>
-              </div>
-            </div>
-            <div className="text-[10px] text-[#ccc] text-right flex-shrink-0">
-              <div>{h.date}</div>
-              <div>{h.time}</div>
-            </div>
+    <div className="space-y-6">
+      {/* 7-Stage Visual Progress Stepper */}
+      <div className="bg-white border border-[#e6e6e6] rounded-3xl p-6 shadow-sm">
+        <div className="flex items-center justify-between pb-4 mb-6 border-b border-[#f1f5f9]">
+          <div>
+            <h3 className="text-base font-extrabold text-[#0f172a] flex items-center gap-2">
+              <Clock className="w-4 h-4 text-[#2563eb]" />
+              Linha do Tempo da Operação do Pedido
+            </h3>
+            <p className="text-xs text-[#64748b] mt-0.5">Rastreabilidade completa desde a venda até a entrega final.</p>
           </div>
-        ))}
+          <span className="px-3 py-1 rounded-xl text-xs font-bold bg-[#f0fdf4] text-[#16a34a] border border-[#bbf7d0]">
+            {order.status}
+          </span>
+        </div>
+
+        <div className="relative pl-6 space-y-8 before:absolute before:left-8 before:top-3 before:bottom-3 before:w-0.5 before:bg-[#e2e8f0]">
+          {steps.map((st, i) => {
+            const Icon = st.icon
+
+            return (
+              <div key={i} className="relative flex items-start gap-4">
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 z-10 shadow-2xs border ${
+                  st.done ? 'bg-[#2563eb] text-white border-[#1d4ed8]' : 'bg-[#f8fafc] text-[#94a3b8] border-[#e2e8f0]'
+                }`}>
+                  <Icon className="w-4 h-4" />
+                </div>
+
+                <div className="flex-1 min-w-0 pt-0.5">
+                  <p className={`text-sm font-bold leading-tight ${st.done ? 'text-[#0f172a]' : 'text-[#94a3b8]'}`}>
+                    {st.title}
+                  </p>
+                  <p className="text-xs text-[#64748b] mt-0.5">{st.desc}</p>
+                </div>
+              </div>
+            )
+          })}
+        </div>
       </div>
+
+      {/* Historical logs */}
+      {order.timeline && order.timeline.length > 0 && (
+        <div className="bg-white border border-[#e6e6e6] rounded-3xl overflow-hidden shadow-xs">
+          <div className="px-6 py-4 border-b border-[#f1f5f9] bg-[#fafafa]">
+            <SectionTitle>Registro de Eventos do Sistema</SectionTitle>
+          </div>
+          <div className="divide-y divide-[#f1f5f9] p-2">
+            {order.timeline.map((h, i) => (
+              <div key={i} className="p-3 flex items-start gap-3">
+                <div className="w-2 h-2 rounded-full bg-[#2563eb] mt-1.5 shrink-0" />
+                <div className="flex-1">
+                  <span className="text-xs font-semibold text-[#0f172a]">{h.description}</span>
+                </div>
+                <div className="text-[11px] text-[#94a3b8] font-mono text-right shrink-0">
+                  {h.date} {h.time}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

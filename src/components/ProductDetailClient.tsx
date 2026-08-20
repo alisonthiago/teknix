@@ -314,8 +314,39 @@ function VendasTab({ product }: { product: ProductDetail }) {
 }
 
 function EstoqueTab({ product }: { product: ProductDetail }) {
+  const recent7DaysUnits = (product.recent_sales || []).slice(0, 7).reduce((acc, s) => acc + Number(s.quantity || 0), 0)
+  const dailyAverage = recent7DaysUnits > 0 ? (recent7DaysUnits / 7) : (product.summary.total_sales > 0 ? product.summary.total_sales / 30 : 0.3)
+  const daysRemaining = dailyAverage > 0 ? Math.round(product.stock.physical / dailyAverage) : 999
+  const isCritical = product.stock.physical <= (product.stock.minimum || 3) || daysRemaining <= 5
+
   return (
     <div className="space-y-4">
+      {/* 🧠 Inteligência Preditiva de Estoque */}
+      <div className={`p-5 rounded-2xl border ${isCritical ? 'bg-[#fef2f2] border-[#fecaca]' : 'bg-[#f0fdf4] border-[#bbf7d0]'} flex flex-col md:flex-row md:items-center justify-between gap-4`}>
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${isCritical ? 'bg-[#dc2626] text-white' : 'bg-[#16a34a] text-white'}`}>
+              {isCritical ? 'Atenção Necessária' : 'Estoque Saudável'}
+            </span>
+            <h4 className="text-sm font-extrabold text-[#0f172a]">
+              {isCritical ? 'Risco de Ruptura de Estoque' : 'Previsão de Suprimento Normal'}
+            </h4>
+          </div>
+          <p className="text-xs text-[#64748b]">
+            Estoque atual: <strong className="text-[#0f172a]">{product.stock.physical} un</strong> • Média diária: <strong className="text-[#0f172a]">{dailyAverage.toFixed(1)} un/dia</strong> • Previsão de término em aproximadamente <strong className="text-[#0f172a]">{daysRemaining > 365 ? 'Mais de 1 ano' : `${daysRemaining} dias`}</strong>.
+          </p>
+        </div>
+
+        {isCritical && (
+          <Link
+            href={`/purchases/new?product=${product.id}`}
+            className="px-4 py-2 bg-[#dc2626] hover:bg-[#b91c1c] text-white text-xs font-bold rounded-xl transition-all shadow-sm shrink-0 flex items-center gap-1.5"
+          >
+            <ShoppingCart className="w-3.5 h-3.5" /> Fazer Pedido de Compra
+          </Link>
+        )}
+      </div>
+
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
         <StatBox label="Estoque físico" value={String(product.stock.physical)} />
         <StatBox label="Reservado" value={String(product.stock.reserved)} />

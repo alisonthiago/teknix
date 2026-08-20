@@ -17,6 +17,8 @@ import {
   PanelLeftOpen,
   User,
   Store,
+  Zap,
+  Scan,
 } from 'lucide-react'
 import { logout } from '@/app/login/actions'
 import { TeknixLogo } from './TeknixLogo'
@@ -43,10 +45,12 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Operação',
     items: [
+      { href: '/central-operacoes', label: 'Cockpit Operação', icon: Zap, permission: null },
+      { href: '/expedicao', label: 'Expedição & Bipagem', icon: Scan, permission: null },
       { href: '/marketplaces', label: 'Marketplaces', icon: Store, permission: 'marketplaces.view' },
-      { href: '/operacao', label: 'Operação', icon: Package, permission: 'products.view' },
-      { href: '/pedidos', label: 'Pedidos', icon: ShoppingCart, permission: 'orders.view' },
-      { href: '/clientes', label: 'Clientes', icon: User, permission: null },
+      { href: '/operacao', label: 'Catálogo & Estoque', icon: Package, permission: 'products.view' },
+      { href: '/pedidos', label: 'Pedidos & Etiquetas', icon: ShoppingCart, permission: 'orders.view' },
+      { href: '/clientes', label: 'Clientes & CRM', icon: User, permission: null },
       { href: '/vendas', label: 'Vendas', icon: DollarSign, permission: 'sales.view' },
     ],
   },

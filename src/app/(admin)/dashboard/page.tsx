@@ -7,6 +7,7 @@ import Image from 'next/image'
 import { CheckCircle2, ShoppingCart, Eye, EyeOff, Filter, User } from 'lucide-react'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
+import { CockpitCentralOperacao } from '@/components/CockpitCentralOperacao'
 
 interface FilterOption {
   id: string
@@ -80,6 +81,8 @@ export default function DashboardPage() {
       totalRevenue,
       totalOrders,
       orders: (orders.data || []).slice(0, 5),
+      allOrders: orders.data || [],
+      allProducts: products.data || []
     }
   }, [selectedMarketplace, selectedAccount])
 
@@ -185,6 +188,9 @@ export default function DashboardPage() {
 
         <span className="text-[10px] text-[#999] hidden sm:block">{getFilterLabel()}</span>
       </div>
+
+      {/* 🧠 Cockpit Inteligente de Operação */}
+      <CockpitCentralOperacao orders={stats?.allOrders || []} products={stats?.allProducts || []} />
 
       {/* Linha 1 — cards estilo MP */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-4">
