@@ -74,6 +74,13 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   useEffect(() => {
     fetchNotifications()
     
+    // Polling contínuo ultra-rápido de 2 segundos para notificações imediatas
+    const intervalId = setInterval(() => {
+      if (typeof document !== 'undefined' && !document.hidden) {
+        fetchNotifications()
+      }
+    }, 2000)
+
     // Setup realtime subscription
     let channel: ReturnType<typeof supabase.channel> | null = null
     
@@ -106,6 +113,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     setupRealtime()
 
     return () => {
+      clearInterval(intervalId)
       if (channel) supabase.removeChannel(channel)
     }
   }, [fetchNotifications, supabase])
