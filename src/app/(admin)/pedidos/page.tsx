@@ -35,8 +35,11 @@ function OrdersTab() {
   const [search, setSearch] = useState('')
   const [selectedItems, setSelectedItems] = useState<string[]>([])
   const { data: orders, loading, refetch } = useSupabaseQuery(async (s) => {
-    const { data, error } = await s.from('orders').select('*, marketplaces(name, code, logo), marketplace_accounts(account_name), order_items(*)').order('created_at', { ascending: false })
-    if (error) throw error
+    const { data, error } = await s.from('orders').select('*, marketplaces(name, code, logo), order_items(*)').order('created_at', { ascending: false })
+    if (error) {
+      const { data: fbData } = await s.from('orders').select('*, marketplaces(name, code, logo)').order('created_at', { ascending: false })
+      return fbData || []
+    }
     return data || []
   })
 
