@@ -48,12 +48,18 @@ export default function MarketplacesPage() {
     // 1. Fetch from marketplace_accounts
     const { data: accounts } = await s
       .from('marketplace_accounts')
-      .select('id, marketplace_id, seller_id, status, connection_status, account_name, last_sync_at, updated_at')
+      .select('*')
 
     // 2. Fetch from marketplace_connections
-    const { data: connections } = await s
-      .from('marketplace_connections')
-      .select('id, marketplace_id, seller_id, status, account_name, last_sync_at, updated_at')
+    let connections: any[] = []
+    try {
+      const { data: conns } = await s
+        .from('marketplace_connections')
+        .select('*')
+      if (conns) connections = conns
+    } catch {
+      // Ignore if table not present
+    }
 
     const results: MarketplaceWithAccounts[] = []
 

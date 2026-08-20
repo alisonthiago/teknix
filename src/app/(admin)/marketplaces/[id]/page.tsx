@@ -67,14 +67,20 @@ export default function MarketplaceDetailPage() {
     // 1. Fetch from marketplace_accounts
     const { data: accs } = await s
       .from('marketplace_accounts')
-      .select('id, marketplace_id, seller_id, status, connection_status, account_name, last_sync_at, updated_at, created_at')
+      .select('*')
       .or(`marketplace_id.eq.${marketplaceId},marketplace_id.eq.${mp.code}`)
 
     // 2. Fetch from marketplace_connections
-    const { data: conns } = await s
-      .from('marketplace_connections')
-      .select('id, marketplace_id, seller_id, status, account_name, last_sync_at, last_webhook_at, updated_at, created_at')
-      .or(`marketplace_id.eq.${marketplaceId},marketplace_id.eq.${mp.code?.toLowerCase()},marketplace_id.eq.mercadolivre`)
+    let conns: any[] = []
+    try {
+      const { data: cData } = await s
+        .from('marketplace_connections')
+        .select('*')
+        .or(`marketplace_id.eq.${marketplaceId},marketplace_id.eq.${mp.code?.toLowerCase()},marketplace_id.eq.mercadolivre`)
+      if (cData) conns = cData
+    } catch {
+      // ignore
+    }
 
     // Merge and deduplicate
     const combined = [...(accs || []), ...(conns || [])]
