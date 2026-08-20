@@ -68,7 +68,7 @@ export default function MarketplaceDetailPage() {
     const { data: accs } = await s
       .from('marketplace_accounts')
       .select('*')
-      .or(`marketplace_id.eq.${marketplaceId},marketplace_id.eq.${mp.code}`)
+      .eq('marketplace_id', marketplaceId)
 
     // 2. Fetch from marketplace_connections
     let conns: any[] = []
@@ -76,7 +76,7 @@ export default function MarketplaceDetailPage() {
       const { data: cData } = await s
         .from('marketplace_connections')
         .select('*')
-        .or(`marketplace_id.eq.${marketplaceId},marketplace_id.eq.${mp.code?.toLowerCase()},marketplace_id.eq.mercadolivre`)
+        .or(`marketplace_id.eq.${marketplaceId},marketplace_id.eq.${mpCode},marketplace_id.eq.mercadolivre`)
       if (cData) conns = cData
     } catch {
       // ignore
