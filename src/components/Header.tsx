@@ -321,7 +321,7 @@ function HeaderActions({
 
       <button
         onClick={onCalcOpen}
-        className="w-10 h-10 rounded-full flex items-center justify-center text-[#333] hover:bg-[#EEFFB3]/60 transition-colors cursor-pointer"
+        className="hidden lg:flex w-10 h-10 rounded-full items-center justify-center text-[#333] hover:bg-[#EEFFB3]/60 transition-colors cursor-pointer"
         title="Precificação"
       >
         <BadgeDollarSign className="w-5 h-5" strokeWidth={1.5} />
@@ -421,27 +421,23 @@ export default function Header({ userName, userRole, userEmail, userId, userAvat
 
   return (
     <>
-      {/* Mobile — barra amarela MP */}
-      <div className="lg:hidden sticky top-0 z-30 px-3 sm:px-4 pt-2 sm:pt-3 pb-2 bg-[#f5f5f5]">
-        <div className="bg-[#B5F500] rounded-full flex items-center justify-between px-2 py-1.5 shadow-sm">
-          <button
-            onClick={onMenuOpen}
-            className="w-10 h-10 rounded-full bg-white/70 flex items-center justify-center shrink-0"
-            aria-label="Abrir menu"
-          >
-            <Menu className="w-5 h-5 text-[#333]" strokeWidth={1.75} />
-          </button>
-          <div className="flex items-center text-[#333]">
-            <TeknixLogo className="h-4 w-auto fill-[#333]" />
-          </div>
-          <div className="flex items-center gap-1.5">
+      {/* Mobile — barra verde limpa e elegante */}
+      <div className="lg:hidden sticky top-0 z-30 px-3 pt-2 pb-2 bg-[#f5f5f5]">
+        <div className="bg-[#B5F500] rounded-full flex items-center justify-between px-2.5 py-1.5 shadow-sm">
+          <div className="flex items-center gap-2">
             <button
-              onClick={() => setLiveDrawerOpen(true)}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#FFE600] text-[#111] text-[10px] font-black border border-[#E5CC00] shadow-xs"
+              onClick={onMenuOpen}
+              className="w-9 h-9 rounded-full bg-white/80 flex items-center justify-center shrink-0 shadow-2xs"
+              aria-label="Abrir menu"
             >
-              <span className="w-2 h-2 rounded-full bg-[#e74c3c] animate-pulse" />
-              <span>AO VIVO</span>
+              <Menu className="w-5 h-5 text-[#111]" strokeWidth={2} />
             </button>
+            <div className="flex items-center text-[#111]">
+              <TeknixLogo className="h-4 w-auto fill-[#111]" />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1.5">
             <HeaderActions
               userName={userName}
               userRole={userRole}
