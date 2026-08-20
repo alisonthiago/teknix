@@ -406,6 +406,17 @@ export default function Header({ userName, userRole, userEmail, userId, userAvat
   const pageTitle = getPageTitle(pathname)
   const [calcOpen, setCalcOpen] = useState(false)
   const [showBasicCalc, setShowBasicCalc] = useState(false)
+  const [liveDrawerOpen, setLiveDrawerOpen] = useState(false)
+
+  // Buscar faturamento de hoje em tempo real
+  const { data: todayRevenue } = useSupabaseQuery<number>(async (supabase) => {
+    const { data } = await supabase
+      .from('orders')
+      .select('total_amount')
+      .order('created_at', { ascending: false })
+      .limit(50)
+    return (data || []).reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0)
+  }, [], { intervalMs: 2000 })
 
   return (
     <>
@@ -422,7 +433,14 @@ export default function Header({ userName, userRole, userEmail, userId, userAvat
           <div className="flex items-center text-[#333]">
             <TeknixLogo className="h-4 w-auto fill-[#333]" />
           </div>
-          <div className="flex items-center gap-0.5">
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setLiveDrawerOpen(true)}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#FFE600] text-[#111] text-[10px] font-black border border-[#E5CC00] shadow-xs"
+            >
+              <span className="w-2 h-2 rounded-full bg-[#e74c3c] animate-pulse" />
+              <span>AO VIVO</span>
+            </button>
             <HeaderActions
               userName={userName}
               userRole={userRole}
@@ -448,10 +466,30 @@ export default function Header({ userName, userRole, userEmail, userId, userAvat
         </div>
       </div>
 
-      {/* Desktop — título + pill amarela */}
+      {/* Desktop — título + Botão Monitor ao Vivo + pill amarela */}
       <header className="hidden lg:flex sticky top-0 z-30 bg-[#f5f5f5] items-center justify-between py-5 px-10">
         <h1 className="text-[26px] font-semibold text-[#333] leading-tight">{pageTitle}</h1>
+        
         <div className="flex items-center gap-3">
+          
+          {/* 🔴 BOTÃO MONITOR AO VIVO DESTACADO NO HEADER */}
+          <button
+            onClick={() => setLiveDrawerOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#FFE600] hover:bg-[#F5DC00] text-[#111] text-[13px] font-extrabold shadow-sm border border-[#E5CC00] hover:shadow-md transition-all cursor-pointer group"
+            title="Abrir Monitor ao Vivo no canto direito da tela"
+          >
+            <span className="relative flex h-2.5 w-2.5 shrink-0">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#e74c3c] opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#e74c3c]"></span>
+            </span>
+            <span>Monitor ao Vivo</span>
+            <span className="font-mono bg-black/10 px-2 py-0.5 rounded-full text-[11px] font-black text-[#111]">
+              {todayRevenue && todayRevenue > 0
+                ? `R$ ${todayRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+                : 'AO VIVO'}
+            </span>
+          </button>
+
           <div className="relative">
             <button
               onClick={() => setShowBasicCalc(!showBasicCalc)}
@@ -462,18 +500,25 @@ export default function Header({ userName, userRole, userEmail, userId, userAvat
             </button>
             {showBasicCalc && <BasicCalculatorPopup onClose={() => setShowBasicCalc(false)} />}
           </div>
+
           <div className="mp-header-pill gap-0.5 py-1 px-2">
-          <HeaderActions
-            userName={userName}
-            userRole={userRole}
-            userEmail={userEmail}
-            userId={userId}
-            userAvatarUrl={userAvatarUrl}
-            onCalcOpen={() => setCalcOpen(true)}
-          />
+            <HeaderActions
+              userName={userName}
+              userRole={userRole}
+              userEmail={userEmail}
+              userId={userId}
+              userAvatarUrl={userAvatarUrl}
+              onCalcOpen={() => setCalcOpen(true)}
+            />
+          </div>
         </div>
-      </div>
       </header>
+
+      {/* Drawer Deslizante no Canto Direito */}
+      <LiveMonitorDrawer
+        open={liveDrawerOpen}
+        onClose={() => setLiveDrawerOpen(false)}
+      />
 
       {calcOpen && <MarginCalculator open={calcOpen} onClose={() => setCalcOpen(false)} />}
     </>
