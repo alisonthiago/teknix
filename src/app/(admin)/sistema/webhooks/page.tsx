@@ -165,7 +165,7 @@ export default function WebhooksPage() {
                     <h3 className="text-[13px] font-bold text-[#1f2328]">{wh.name}</h3>
                   </div>
                   <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-[#e8f5e9] text-[#2e7d32]">
-                    🟢 {wh.status}
+                    {wh.status}
                   </span>
                 </div>
 

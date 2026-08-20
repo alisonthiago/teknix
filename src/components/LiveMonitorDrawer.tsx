@@ -169,7 +169,7 @@ export default function LiveMonitorDrawer({ open, onClose }: LiveMonitorDrawerPr
             <div className="flex items-center justify-between text-[12px] font-bold text-[#333] uppercase">
               <span>Vendas de hoje</span>
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-black/10 font-bold">
-                {lastUpdateSeconds <= 3 ? '🔴 Ao vivo' : `há ${lastUpdateSeconds}s`}
+                {lastUpdateSeconds <= 3 ? 'Ao vivo' : `há ${lastUpdateSeconds}s`}
               </span>
             </div>
 
@@ -179,7 +179,7 @@ export default function LiveMonitorDrawer({ open, onClose }: LiveMonitorDrawerPr
                 {totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
               <p className="text-[11px] font-semibold text-[#444] mt-0.5">
-                🔴 {new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' })}, {new Date().toLocaleTimeString('pt-BR')}
+                {new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' })}, {new Date().toLocaleTimeString('pt-BR')}
               </p>
             </div>
 

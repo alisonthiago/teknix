@@ -345,7 +345,7 @@ export default function MonitorAoVivoPage() {
           {/* Filtro de Período */}
           <div className="flex bg-[#f5f5f5] p-1 rounded-xl border border-[#e6e6e6] text-[11px] font-semibold text-[#666]">
             {[
-              { id: 'NOW', label: '🔴 Agora' },
+              { id: 'NOW', label: 'Agora' },
               { id: 'TODAY', label: 'Hoje' },
               { id: '24H', label: '24h' },
               { id: '7D', label: '7 Dias' }
@@ -372,7 +372,7 @@ export default function MonitorAoVivoPage() {
         </div>
       </div>
 
-      {/* 🟡 CARD PRINCIPAL DESTAQUE AMARELO (VENDAS DE HOJE) */}
+      {/* CARD PRINCIPAL DESTAQUE (VENDAS DE HOJE) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         <div className="lg:col-span-8 space-y-6">
@@ -396,7 +396,7 @@ export default function MonitorAoVivoPage() {
                 {metrics.totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
               <div className="flex items-center gap-2 text-[12px] font-semibold text-[#444] mt-1">
-                <span>🔴 {new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' })}, {new Date().toLocaleTimeString('pt-BR')}</span>
+                <span>{new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' })}, {new Date().toLocaleTimeString('pt-BR')}</span>
                 <span>•</span>
                 <span>{metrics.totalOrders} pedidos confirmados</span>
               </div>
@@ -404,9 +404,9 @@ export default function MonitorAoVivoPage() {
 
             <div className="pt-4 border-t border-black/10 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-4 text-[12px] font-bold text-[#333]">
-                <span>📦 {metrics.totalUnits} itens</span>
-                <span>👥 {metrics.uniqueBuyers} compradores</span>
-                <span>🚚 {metrics.pendingShipments} para despachar</span>
+                <span>{metrics.totalUnits} itens</span>
+                <span>{metrics.uniqueBuyers} compradores</span>
+                <span>{metrics.pendingShipments} para despachar</span>
               </div>
 
               <Link

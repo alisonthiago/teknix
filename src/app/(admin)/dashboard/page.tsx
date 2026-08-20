@@ -137,7 +137,7 @@ export default function DashboardPage() {
             )}
           </div>
           <div>
-            <h1 className="text-[28px] font-bold text-[#333]">Olá, {userProfile.name} 👋</h1>
+            <h1 className="text-[28px] font-bold text-[#333]">Olá, {userProfile.name}</h1>
             <p className="text-[13px] text-[#666] font-medium">Bem-vindo de volta ao sistema!</p>
           </div>
         </div>
@@ -178,7 +178,7 @@ export default function DashboardPage() {
           <select
             value={period}
             onChange={e => setPeriod(e.target.value)}
-            className="w-full sm:w-auto px-3 py-2.5 sm:py-1.5 border border-[#e6e6e6] rounded-md text-xs text-[#333] bg-white focus:outline-none focus:border-[#84cc16] min-h-[44px]"
+            className="w-full sm:w-auto px-3 py-2.5 sm:py-1.5 border border-[#e6e6e6] rounded-md text-xs text-[#333] bg-white focus:outline-none focus:border-[#3483fa] min-h-[44px]"
           >
             <option value="7">Últimos 7 dias</option>
             <option value="30">Últimos 30 dias</option>
@@ -189,7 +189,7 @@ export default function DashboardPage() {
         <span className="text-[10px] text-[#999] hidden sm:block">{getFilterLabel()}</span>
       </div>
 
-      {/* 🔴 CARD DESTAQUE VENDAS DE HOJE (MONITOR AO VIVO) */}
+      {/* CARD DESTAQUE VENDAS DE HOJE (MONITOR AO VIVO) */}
       <div className="bg-[#B5F500] rounded-2xl p-5 sm:p-6 shadow-sm border border-[#a2e000] text-[#111] flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-2xl bg-black/10 flex items-center justify-center shrink-0">
@@ -209,7 +209,7 @@ export default function DashboardPage() {
               R$ {(stats?.totalRevenue ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
             <p className="text-[11px] font-medium text-[#444]">
-              🔴 {new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' })}, {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} • Sincronização Contínua Ativa
+              {new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' })}, {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} • Sincronização Contínua Ativa
             </p>
           </div>
         </div>

@@ -180,12 +180,12 @@ export default function SimulatorClient({ products, marketplaces }: { products: 
                   <div className="pt-6">
                     {result.profit > 0 ? (
                       result.margin >= targetMargin ? (
-                        <Badge className="bg-green-600 text-sm py-1 px-3">🟢 MARGEM IDEAL ({result.margin.toFixed(2)}%)</Badge>
+                        <Badge className="bg-green-600 text-sm py-1 px-3">MARGEM IDEAL ({result.margin.toFixed(2)}%)</Badge>
                       ) : (
-                         <Badge className="bg-lime-500 text-sm py-1 px-3">MARGEM BAIXA ({result.margin.toFixed(2)}%)</Badge>
+                         <Badge className="bg-amber-600 text-sm py-1 px-3">MARGEM BAIXA ({result.margin.toFixed(2)}%)</Badge>
                       )
                     ) : (
-                      <Badge className="bg-red-600 text-sm py-1 px-3">🔴 PREJUÍZO (R$ {result.profit.toFixed(2)})</Badge>
+                      <Badge className="bg-red-600 text-sm py-1 px-3">PREJUÍZO (R$ {result.profit.toFixed(2)})</Badge>
                     )}
                   </div>
                 </div>
