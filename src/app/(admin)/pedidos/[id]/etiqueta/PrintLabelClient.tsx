@@ -1,114 +1,112 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Printer, CheckCircle2 } from 'lucide-react'
+import { ArrowLeft, Printer, Download, ExternalLink, RefreshCw, AlertCircle } from 'lucide-react'
 import type { OrderDetail } from '@/lib/detail-types'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
 
 export default function PrintLabelClient({ order }: { order: OrderDetail }) {
   const router = useRouter()
-
-  useEffect(() => {
-    // Automatically trigger print on load if requested
-    const timer = setTimeout(() => {
-      window.print()
-    }, 600)
-    return () => clearTimeout(timer)
-  }, [])
+  const [loadError, setLoadError] = useState(false)
+  const pdfUrl = `/api/shipments/mercadolivre/label?orderId=${order.id}`
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] p-4 sm:p-8 flex flex-col items-center">
-      {/* Top Action Bar (hidden on print) */}
-      <div className="w-full max-w-[400px] mb-4 flex items-center justify-between print:hidden">
-        <button
-          onClick={() => router.push(`/pedidos/${order.id}`)}
-          className="inline-flex items-center gap-1.5 text-xs text-[#666] hover:text-[#111] bg-white px-3 py-1.5 rounded-lg border border-[#e6e6e6] shadow-xs cursor-pointer"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" /> Voltar ao Pedido
-        </button>
-        <button
-          onClick={() => window.print()}
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-[#3483fa] hover:bg-[#2968c8] px-4 py-1.5 rounded-lg shadow-sm cursor-pointer"
-        >
-          <Printer className="w-3.5 h-3.5" /> Imprimir Etiqueta
-        </button>
+    <div className="min-h-screen bg-[#f8fafc] flex flex-col">
+      {/* Top Header Bar */}
+      <div className="bg-white border-b border-[#e2e8f0] px-4 py-3 shadow-2xs">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => router.push(`/pedidos/${order.id}`)}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#475569] hover:text-[#0f172a] bg-[#f1f5f9] hover:bg-[#e2e8f0] px-3 py-2 rounded-xl transition-all cursor-pointer"
+            >
+              <ArrowLeft className="w-4 h-4" /> Voltar ao Pedido
+            </button>
+            <div className="flex items-center gap-2 border-l border-[#cbd5e1] pl-3">
+              <MarketplaceLogo name={order.marketplace} className="w-5 h-5" />
+              <div>
+                <h1 className="text-sm font-bold text-[#0f172a] leading-tight">
+                  Etiqueta Oficial • Pedido {order.order_number}
+                </h1>
+                <p className="text-[11px] text-[#64748b] font-medium">
+                  {order.customer.name} • {order.shipping.city}/{order.shipping.state}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <a
+              href={pdfUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#334155] bg-white border border-[#cbd5e1] hover:bg-[#f8fafc] px-3.5 py-2 rounded-xl transition-all cursor-pointer shadow-xs"
+            >
+              <ExternalLink className="w-3.5 h-3.5" /> Abrir em Nova Aba
+            </a>
+            <a
+              href={pdfUrl}
+              download={`etiqueta-${order.order_number}.pdf`}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#334155] bg-white border border-[#cbd5e1] hover:bg-[#f8fafc] px-3.5 py-2 rounded-xl transition-all cursor-pointer shadow-xs"
+            >
+              <Download className="w-3.5 h-3.5" /> Baixar PDF
+            </a>
+            <button
+              onClick={() => {
+                const iframe = document.getElementById('label-pdf-frame') as HTMLIFrameElement
+                if (iframe?.contentWindow) {
+                  iframe.contentWindow.focus()
+                  iframe.contentWindow.print()
+                } else {
+                  window.open(pdfUrl, '_blank')?.print()
+                }
+              }}
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-[#3483fa] hover:bg-[#2968c8] px-4 py-2 rounded-xl transition-all cursor-pointer shadow-xs"
+            >
+              <Printer className="w-4 h-4" /> Imprimir Etiqueta Térmica
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* 100x150mm Standard Thermal Shipping Label */}
-      <div className="w-full max-w-[400px] bg-white border-2 border-black rounded-lg p-4 font-sans text-black shadow-lg print:shadow-none print:border-black print:m-0 print:p-4 print:w-[100mm] print:h-[150mm] print:rounded-none">
-        {/* Header */}
-        <div className="border-b-2 border-black pb-2 mb-2 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-[#ffe600] flex items-center justify-center p-1 border border-black">
-              <MarketplaceLogo name={order.marketplace} className="w-5 h-5" />
+      {/* Main Official PDF Embed Viewer */}
+      <div className="flex-1 max-w-7xl w-full mx-auto p-4 flex flex-col">
+        {!loadError ? (
+          <div className="flex-1 bg-white rounded-2xl border border-[#cbd5e1] overflow-hidden shadow-sm flex flex-col min-h-[82vh]">
+            <iframe
+              id="label-pdf-frame"
+              src={pdfUrl}
+              className="w-full flex-1 border-0 rounded-2xl min-h-[80vh]"
+              title="Etiqueta Oficial Mercado Livre"
+              onError={() => setLoadError(true)}
+            />
+          </div>
+        ) : (
+          <div className="flex-1 bg-white rounded-2xl border border-[#cbd5e1] p-12 text-center flex flex-col items-center justify-center">
+            <AlertCircle className="w-12 h-12 text-[#e67e22] mb-3" />
+            <h3 className="text-base font-bold text-[#0f172a] mb-1">
+              Etiqueta não disponível para reimpressão
+            </h3>
+            <p className="text-xs text-[#64748b] max-w-md mb-4">
+              O Mercado Livre só permite gerar o PDF enquanto o envio estiver pendente ou em trânsito. Pedidos já entregues ou cancelados têm o arquivo arquivado pelo marketplace.
+            </p>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setLoadError(false)}
+                className="px-4 py-2 bg-[#3483fa] text-white text-xs font-semibold rounded-xl hover:bg-[#2968c8] transition-colors flex items-center gap-1.5"
+              >
+                <RefreshCw className="w-3.5 h-3.5" /> Tentar Novamente
+              </button>
+              <button
+                onClick={() => router.push(`/pedidos/${order.id}/nota`)}
+                className="px-4 py-2 bg-white border border-[#cbd5e1] text-xs font-semibold text-[#334155] rounded-xl hover:bg-[#f8fafc] transition-colors"
+              >
+                Ver Comprovante / DANFE
+              </button>
             </div>
-            <div>
-              <p className="text-[13px] font-black tracking-wide uppercase leading-tight">{order.marketplace || 'Mercado Envios'}</p>
-              <p className="text-[9px] font-semibold text-gray-700">ENVIOS • LOGÍSTICA</p>
-            </div>
           </div>
-          <div className="text-right">
-            <span className="text-[11px] font-black border border-black px-1.5 py-0.5 rounded uppercase">
-              {order.shipping.method || 'PADRÃO'}
-            </span>
-          </div>
-        </div>
-
-        {/* Tracking & Barcode Simulation */}
-        <div className="text-center my-3">
-          <p className="text-[10px] uppercase font-bold tracking-widest text-gray-800">Código de Rastreamento</p>
-          <p className="text-[15px] font-mono font-black tracking-wider my-0.5">
-            {order.shipping.tracking || `MEL${order.order_number.replace(/\D/g, '')}`}
-          </p>
-          {/* Visual Barcode */}
-          <div className="h-12 w-full bg-[repeating-linear-gradient(90deg,#000,#000_2px,transparent_2px,transparent_4px,#000_4px,#000_7px,transparent_7px,transparent_8px,#000_8px,#000_12px,transparent_12px,transparent_14px)] my-1 border-t border-b border-black" />
-          <p className="text-[9px] font-mono text-gray-600">*{order.order_number}*</p>
-        </div>
-
-        {/* Recipient Box (Destinatário) */}
-        <div className="border-2 border-black rounded p-2 mb-3 bg-gray-50/50">
-          <div className="flex items-center justify-between border-b border-gray-300 pb-1 mb-1">
-            <span className="text-[10px] font-black uppercase tracking-wider">DESTINATÁRIO</span>
-            <span className="text-[9px] font-bold">CEP: {order.shipping.zip || '06412-270'}</span>
-          </div>
-          <p className="text-[12px] font-black uppercase text-black leading-snug">{order.customer.name}</p>
-          <p className="text-[11px] font-bold text-gray-900 mt-0.5 leading-snug">{order.shipping.address}</p>
-          <p className="text-[11px] font-bold text-gray-900 leading-snug">
-            {order.shipping.city} - {order.shipping.state}
-          </p>
-          {order.customer.phone && (
-            <p className="text-[9px] text-gray-700 mt-1">Tel: {order.customer.phone}</p>
-          )}
-        </div>
-
-        {/* Sender Box (Remetente) */}
-        <div className="border border-black rounded p-2 mb-3 text-[10px]">
-          <div className="flex items-center justify-between border-b border-gray-200 pb-0.5 mb-1">
-            <span className="font-black uppercase tracking-wider text-[9px]">REMETENTE</span>
-            <span className="text-[8px] font-bold">TEKNIXBRASIL</span>
-          </div>
-          <p className="font-bold uppercase">TEKNIX COMERCIO ELETRONICO</p>
-          <p className="text-gray-800">Rua Vitorino Calegare, 141 - Barueri / SP</p>
-          <p className="text-gray-800 font-mono">CEP: 06412-270</p>
-        </div>
-
-        {/* Items Summary (Declaração de Conteúdo) */}
-        <div className="border-t-2 border-dashed border-black pt-2 text-[9px]">
-          <p className="font-black uppercase text-[9px] mb-1">DECLARAÇÃO DE CONTEÚDO</p>
-          <div className="space-y-0.5 max-h-[80px] overflow-hidden">
-            {order.items.map((item, idx) => (
-              <div key={idx} className="flex justify-between items-center text-gray-800">
-                <span className="truncate max-w-[240px]">{item.quantity}x {item.name}</span>
-                <span className="font-mono font-bold shrink-0">R$ {item.total.toFixed(2)}</span>
-              </div>
-            ))}
-          </div>
-          <div className="flex justify-between items-center pt-1 mt-1 border-t border-gray-300 font-black">
-            <span>TOTAL DO PEDIDO</span>
-            <span>R$ {order.payment.total.toFixed(2)}</span>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   )

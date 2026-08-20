@@ -93,10 +93,16 @@ function OrdersTab() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
         <SearchInput placeholder="Buscar pedido..." value={search} onChange={setSearch} />
         {selectedItems.length > 0 ? (
-          <div className="flex items-center gap-2 bg-[#f0f7ff] px-3 py-1.5 rounded-md border border-[#3483fa]/20">
-            <span className="text-[12px] font-medium text-[#3483fa] mr-2">{selectedItems.length} selecionado(s)</span>
-            <button onClick={handleExportSelected} className="flex items-center gap-1.5 text-[12px] font-medium text-[#3483fa] bg-white px-2.5 py-1.5 rounded border border-[#3483fa]/20 hover:bg-[#3483fa] hover:text-white transition-colors"><Download className="w-3.5 h-3.5" /> Exportar</button>
-            <button onClick={handleDeleteSelected} className="flex items-center gap-1.5 text-[12px] font-medium text-[#e74c3c] bg-white px-2.5 py-1.5 rounded border border-[#e74c3c]/20 hover:bg-[#e74c3c] hover:text-white transition-colors"><Trash2 className="w-3.5 h-3.5" /> Excluir</button>
+          <div className="flex flex-wrap items-center gap-2 bg-[#f0f7ff] px-3 py-1.5 rounded-xl border border-[#3483fa]/20 shadow-xs">
+            <span className="text-[12px] font-bold text-[#3483fa] mr-1">{selectedItems.length} selecionado(s)</span>
+            <button 
+              onClick={() => window.open(`/api/shipments/mercadolivre/label?orderIds=${selectedItems.join(',')}`, '_blank')}
+              className="flex items-center gap-1.5 text-[12px] font-bold text-white bg-[#3483fa] px-3 py-1.5 rounded-lg hover:bg-[#2968c8] transition-colors shadow-xs cursor-pointer"
+            >
+              <Printer className="w-3.5 h-3.5" /> Imprimir Etiquetas Selecionadas
+            </button>
+            <button onClick={handleExportSelected} className="flex items-center gap-1.5 text-[12px] font-medium text-[#3483fa] bg-white px-2.5 py-1.5 rounded-lg border border-[#3483fa]/20 hover:bg-[#3483fa] hover:text-white transition-colors cursor-pointer"><Download className="w-3.5 h-3.5" /> Exportar</button>
+            <button onClick={handleDeleteSelected} className="flex items-center gap-1.5 text-[12px] font-medium text-[#e74c3c] bg-white px-2.5 py-1.5 rounded-lg border border-[#e74c3c]/20 hover:bg-[#e74c3c] hover:text-white transition-colors cursor-pointer"><Trash2 className="w-3.5 h-3.5" /> Excluir</button>
           </div>
         ) : (
           <div className="flex flex-wrap items-center gap-2">
