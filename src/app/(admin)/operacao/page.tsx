@@ -9,6 +9,7 @@ import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
 import { createClient } from '@/utils/supabase/client'
 import { exportToExcel, importFromExcel } from '@/utils/excel'
 import dynamic from 'next/dynamic'
+import { MarketplaceLogo } from '@/components/MarketplaceLogos'
 
 const ProductCreateModal = dynamic(() => import('@/components/ProductCreateModal'), { ssr: false })
 const SupplierCreateModal = dynamic(() => import('@/components/SupplierCreateModal'), { ssr: false })
@@ -21,8 +22,12 @@ function ProductsTab() {
   const [showCreate, setShowCreate] = useState(false)
   const [selectedItems, setSelectedItems] = useState<string[]>([])
   const { data: products, loading, refetch } = useSupabaseQuery(async (s) => {
-    const { data, error } = await s.from('products').select('*, suppliers(name), product_images(url)').order('created_at', { ascending: false }).limit(100)
-    if (error) throw error
+    const { data, error } = await s.from('products').select('*, suppliers(name), product_images(url), marketplace_listings(marketplace_id, status)').order('created_at', { ascending: false }).limit(100)
+    if (error) {
+      // Fallback without join if table relationship differs
+      const { data: fallbackData } = await s.from('products').select('*, suppliers(name), product_images(url)').order('created_at', { ascending: false }).limit(100)
+      return fallbackData || []
+    }
     return data || []
   })
 
@@ -170,7 +175,14 @@ function ProductsTab() {
                         )}
                       </div>
                       <div className="flex flex-col justify-center">
-                        <p className="font-semibold text-[#1f2328] text-[14px] leading-tight mb-0.5">{p.name as string}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-semibold text-[#1f2328] text-[14px] leading-tight mb-0.5">{p.name as string}</p>
+                          {((p.marketplace_listings as any)?.length > 0 || String(p.sku || '').startsWith('MLB')) && (
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#fffde7] text-[#856404] border border-[#ffeeba] text-[10px] font-bold shrink-0">
+                              <MarketplaceLogo name="Mercado Livre" className="w-3 h-3" /> ML
+                            </span>
+                          )}
+                        </div>
                         <p className="text-[13px] text-[#656d76] leading-tight">{p.brand as string || 'Sem marca'}</p>
                       </div>
                     </div>
