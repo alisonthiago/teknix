@@ -275,7 +275,7 @@ function HeaderActions({
                       <p className="text-[11px] text-[#666] leading-snug mt-1 line-clamp-2">{cleanTitle(n.message)}</p>
                     </div>
                     {!n.is_read && (
-                      <span className="w-2 h-2 rounded-full bg-[#3483fa] shrink-0 mt-1.5" />
+                      <span className="w-2 h-2 rounded-full bg-[#84cc16] shrink-0 mt-1.5" />
                     )}
                   </div>
                 ))
@@ -287,7 +287,7 @@ function HeaderActions({
               <Link
                 href="/notifications"
                 onClick={() => setNotifOpen(false)}
-                className="text-[11px] font-semibold text-[#3483fa] hover:underline"
+                className="text-[11px] font-bold text-[#5c8a00] hover:underline"
               >
                 Ver histórico completo de notificações →
               </Link>
@@ -296,19 +296,20 @@ function HeaderActions({
         )}
       </div>
 
+      {/* 🔴 BOTÃO AO VIVO DENTRO DA PÍLULA VERDE */}
       <button
         onClick={() => setLiveDrawerOpen(true)}
-        className="flex px-3 sm:px-4 py-1.5 rounded-full bg-[#FFE600] hover:bg-[#F5DC00] text-[#111] text-[11px] sm:text-[12px] font-black items-center gap-1.5 shadow-xs border border-[#E5CC00] transition-all tracking-wider uppercase cursor-pointer"
-        title="Clique para abrir o Monitor ao Vivo no canto direito"
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#111] hover:bg-[#222] text-white text-[11px] font-black shadow-xs transition-all tracking-wider uppercase cursor-pointer"
+        title="Monitor ao Vivo em Tempo Real"
       >
-        <span className="relative flex h-2.5 w-2.5 shrink-0">
+        <span className="relative flex h-2 w-2 shrink-0">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#e74c3c] opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#e74c3c]"></span>
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-[#e74c3c]"></span>
         </span>
-        <span className="font-extrabold">
+        <span className="text-[#B5F500] font-mono">
           {todayRevenue && todayRevenue > 0
             ? `R$ ${todayRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
-            : 'Ao Vivo'}
+            : 'AO VIVO'}
         </span>
       </button>
 

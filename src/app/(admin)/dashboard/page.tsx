@@ -178,7 +178,7 @@ export default function DashboardPage() {
           <select
             value={period}
             onChange={e => setPeriod(e.target.value)}
-            className="w-full sm:w-auto px-3 py-2.5 sm:py-1.5 border border-[#e6e6e6] rounded-md text-xs text-[#333] bg-white focus:outline-none focus:border-[#3483fa] min-h-[44px]"
+            className="w-full sm:w-auto px-3 py-2.5 sm:py-1.5 border border-[#e6e6e6] rounded-md text-xs text-[#333] bg-white focus:outline-none focus:border-[#84cc16] min-h-[44px]"
           >
             <option value="7">Últimos 7 dias</option>
             <option value="30">Últimos 30 dias</option>
@@ -256,7 +256,7 @@ export default function DashboardPage() {
                 )}
                 <p className="text-sm text-[#999] mt-3">{current.subtitle}</p>
               </div>
-              <button onClick={() => setHidden(!hidden)} className="w-10 h-10 rounded-full flex items-center justify-center text-[#3483fa] hover:bg-[#ecf3fe] transition-colors shrink-0">
+              <button onClick={() => setHidden(!hidden)} className="w-10 h-10 rounded-full flex items-center justify-center text-[#111] hover:bg-[#EEFFB3]/60 transition-colors shrink-0">
                 {hidden ? <EyeOff className="w-5 h-5" strokeWidth={1.5} /> : <Eye className="w-5 h-5" strokeWidth={1.5} />}
               </button>
             </div>

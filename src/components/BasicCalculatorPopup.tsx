@@ -130,26 +130,26 @@ export default function BasicCalculatorPopup({ onClose, initialPosition }: Basic
       <div className="grid grid-cols-4 gap-2">
         <button onClick={handleClear} className="col-span-2 py-2 rounded-xl bg-[#e6e6e6] hover:bg-[#d9d9d9] font-bold text-[#333] transition-colors">AC</button>
         <button onClick={handlePct} className="py-2 rounded-xl bg-[#e6e6e6] hover:bg-[#d9d9d9] font-bold text-[#333] transition-colors">%</button>
-        <button onClick={() => handleOp('/')} className="py-2 rounded-xl bg-[#3483fa] hover:bg-[#2968c8] font-bold text-white transition-colors">÷</button>
+        <button onClick={() => handleOp('/')} className="py-2 rounded-xl bg-[#B5F500] hover:bg-[#a3e600] font-black text-[#111] transition-colors border border-[#a2e000]">÷</button>
         
         <button onClick={() => handleNum('7')} className="py-2 rounded-xl bg-white hover:bg-gray-50 border border-[#e6e6e6] font-bold text-lg text-[#333] shadow-sm transition-colors">7</button>
         <button onClick={() => handleNum('8')} className="py-2 rounded-xl bg-white hover:bg-gray-50 border border-[#e6e6e6] font-bold text-lg text-[#333] shadow-sm transition-colors">8</button>
         <button onClick={() => handleNum('9')} className="py-2 rounded-xl bg-white hover:bg-gray-50 border border-[#e6e6e6] font-bold text-lg text-[#333] shadow-sm transition-colors">9</button>
-        <button onClick={() => handleOp('*')} className="py-2 rounded-xl bg-[#3483fa] hover:bg-[#2968c8] font-bold text-white transition-colors">×</button>
+        <button onClick={() => handleOp('*')} className="py-2 rounded-xl bg-[#B5F500] hover:bg-[#a3e600] font-black text-[#111] transition-colors border border-[#a2e000]">×</button>
         
         <button onClick={() => handleNum('4')} className="py-2 rounded-xl bg-white hover:bg-gray-50 border border-[#e6e6e6] font-bold text-lg text-[#333] shadow-sm transition-colors">4</button>
         <button onClick={() => handleNum('5')} className="py-2 rounded-xl bg-white hover:bg-gray-50 border border-[#e6e6e6] font-bold text-lg text-[#333] shadow-sm transition-colors">5</button>
         <button onClick={() => handleNum('6')} className="py-2 rounded-xl bg-white hover:bg-gray-50 border border-[#e6e6e6] font-bold text-lg text-[#333] shadow-sm transition-colors">6</button>
-        <button onClick={() => handleOp('-')} className="py-2 rounded-xl bg-[#3483fa] hover:bg-[#2968c8] font-bold text-white transition-colors">-</button>
+        <button onClick={() => handleOp('-')} className="py-2 rounded-xl bg-[#B5F500] hover:bg-[#a3e600] font-black text-[#111] transition-colors border border-[#a2e000]">-</button>
         
         <button onClick={() => handleNum('1')} className="py-2 rounded-xl bg-white hover:bg-gray-50 border border-[#e6e6e6] font-bold text-lg text-[#333] shadow-sm transition-colors">1</button>
         <button onClick={() => handleNum('2')} className="py-2 rounded-xl bg-white hover:bg-gray-50 border border-[#e6e6e6] font-bold text-lg text-[#333] shadow-sm transition-colors">2</button>
         <button onClick={() => handleNum('3')} className="py-2 rounded-xl bg-white hover:bg-gray-50 border border-[#e6e6e6] font-bold text-lg text-[#333] shadow-sm transition-colors">3</button>
-        <button onClick={() => handleOp('+')} className="py-2 rounded-xl bg-[#3483fa] hover:bg-[#2968c8] font-bold text-white transition-colors">+</button>
+        <button onClick={() => handleOp('+')} className="py-2 rounded-xl bg-[#B5F500] hover:bg-[#a3e600] font-black text-[#111] transition-colors border border-[#a2e000]">+</button>
         
         <button onClick={() => handleNum('0')} className="col-span-2 py-2 rounded-xl bg-white hover:bg-gray-50 border border-[#e6e6e6] font-bold text-lg text-[#333] shadow-sm transition-colors">0</button>
         <button onClick={() => handleNum('.')} className="py-2 rounded-xl bg-white hover:bg-gray-50 border border-[#e6e6e6] font-bold text-lg text-[#333] shadow-sm transition-colors">,</button>
-        <button onClick={handleCalc} className="py-2 rounded-xl bg-[#00a650] hover:bg-[#008a42] font-bold text-white transition-colors">=</button>
+        <button onClick={handleCalc} className="py-2 rounded-xl bg-[#111] hover:bg-[#222] font-black text-[#B5F500] transition-colors shadow-xs">=</button>
       </div>
     </div>
   )

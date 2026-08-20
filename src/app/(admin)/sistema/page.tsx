@@ -23,10 +23,10 @@ function ConfigCard({ icon, title, description, badge, badgeColor, onClick }: Co
   return (
     <button
       onClick={onClick}
-      className="bg-white border border-[#e6e6e6] rounded-lg p-5 text-left hover:border-[#3483fa]/40 hover:shadow-sm transition-all group w-full"
+      className="bg-white border border-[#e6e6e6] rounded-xl p-5 text-left hover:border-[#B5F500] hover:shadow-xs transition-all group w-full"
     >
       <div className="flex items-start gap-4">
-        <div className="w-10 h-10 rounded-lg bg-[#f5f5f5] flex items-center justify-center flex-shrink-0 group-hover:bg-[#f0f7ff] transition-colors">
+        <div className="w-10 h-10 rounded-xl bg-[#f5f5f5] flex items-center justify-center flex-shrink-0 group-hover:bg-[#EEFFB3]/50 transition-colors">
           {icon}
         </div>
         <div className="flex-1 min-w-0">
@@ -52,7 +52,7 @@ function ContaTab({ onNavigate }: { onNavigate: (path: string) => void }) {
         <h3 className="text-[13px] font-semibold text-[#333] mb-3">Conta</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           <ConfigCard
-            icon={<User className="w-5 h-5 text-[#3483fa]" />}
+            icon={<User className="w-5 h-5 text-[#5c8a00]" />}
             title="Informações do perfil"
             description="Dados pessoais, nome, e-mail, telefone, foto e senha."
             onClick={() => onNavigate('/sistema/perfil')}
@@ -102,13 +102,13 @@ function NegocioTab({ onNavigate }: { onNavigate: (path: string) => void }) {
         <h3 className="text-[13px] font-semibold text-[#333] mb-3">Empresa</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           <ConfigCard
-            icon={<Building2 className="w-5 h-5 text-[#3483fa]" />}
+            icon={<Building2 className="w-5 h-5 text-[#5c8a00]" />}
             title="Dados da empresa"
             description="CNPJ, razão social, endereço, telefone, logo."
             onClick={() => onNavigate('/sistema/empresa')}
           />
           <ConfigCard
-            icon={<Users className="w-5 h-5 text-[#3483fa]" />}
+            icon={<Users className="w-5 h-5 text-[#5c8a00]" />}
             title="Colaboradores"
             description="Pessoas que operam o TEKNIX. Convites e gestão."
             badge="3 ativos"
@@ -122,7 +122,7 @@ function NegocioTab({ onNavigate }: { onNavigate: (path: string) => void }) {
             onClick={() => onNavigate('/sistema/permissoes')}
           />
           <ConfigCard
-            icon={<Store className="w-5 h-5 text-[#3483fa]" />}
+            icon={<Store className="w-5 h-5 text-[#5c8a00]" />}
             title="Contas por Colaborador"
             description="Atribua contas de marketplace a cada colaborador."
             onClick={() => onNavigate('/sistema/colaboradores-accounts')}
@@ -148,7 +148,7 @@ function NegocioTab({ onNavigate }: { onNavigate: (path: string) => void }) {
         <h3 className="text-[13px] font-semibold text-[#333] mb-3">Integrações</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           <ConfigCard
-            icon={<Code className="w-5 h-5 text-[#3483fa]" />}
+            icon={<Code className="w-5 h-5 text-[#5c8a00]" />}
             title="API e desenvolvedores"
             description="Chaves de API, acesso programático ao TEKNIX."
             onClick={() => onNavigate('/sistema/api')}
@@ -172,7 +172,7 @@ function NegocioTab({ onNavigate }: { onNavigate: (path: string) => void }) {
             onClick={() => onNavigate('/sistema/sincronizacao')}
           />
           <ConfigCard
-            icon={<Activity className="w-5 h-5 text-[#3483fa]" />}
+            icon={<Activity className="w-5 h-5 text-[#5c8a00]" />}
             title="Logs de Integração"
             description="Chamadas API realizadas com marketplaces."
             onClick={() => onNavigate('/sistema/integracoes-logs')}

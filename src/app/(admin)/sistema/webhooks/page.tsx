@@ -119,7 +119,7 @@ export default function WebhooksPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-[22px] font-black text-[#1f2328] tracking-tight flex items-center gap-2">
-            <Webhook className="w-6 h-6 text-[#3483fa]" />
+            <Webhook className="w-6 h-6 text-[#5c8a00]" />
             Webhooks & Eventos ao Vivo
           </h1>
           <p className="text-[12px] text-[#666] mt-0.5">
@@ -131,7 +131,7 @@ export default function WebhooksPage() {
           onClick={() => refetch()}
           className="px-3.5 py-2 rounded-xl border border-[#e6e6e6] bg-white text-[#333] text-[12px] font-bold hover:bg-[#fafafa] transition-colors flex items-center gap-1.5 self-start sm:self-auto"
         >
-          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#3483fa]' : ''}`} />
+          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#5c8a00]' : ''}`} />
           <span>Atualizar</span>
         </button>
       </div>
@@ -156,7 +156,7 @@ export default function WebhooksPage() {
           {WEBHOOK_ENDPOINTS.map(wh => (
             <div
               key={wh.id}
-              className="p-4 rounded-xl border border-[#eeeeee] bg-[#fafafa] hover:border-[#3483fa] transition-all flex flex-col justify-between group"
+              className="p-4 rounded-xl border border-[#eeeeee] bg-[#fafafa] hover:border-[#B5F500] transition-all flex flex-col justify-between group"
             >
               <div>
                 <div className="flex items-center justify-between mb-2">
@@ -211,7 +211,7 @@ export default function WebhooksPage() {
             <select
               value={filterMp}
               onChange={e => setFilterMp(e.target.value)}
-              className="h-10 px-3 border border-[#e6e6e6] rounded-xl text-[12px] text-[#666] bg-white focus:outline-none focus:border-[#3483fa]"
+              className="h-10 px-3 border border-[#e6e6e6] rounded-xl text-[12px] text-[#666] bg-white focus:outline-none focus:border-[#84cc16]"
             >
               <option value="all">Todos os canais</option>
               <option value="mercadolivre">Mercado Livre</option>
@@ -254,7 +254,7 @@ export default function WebhooksPage() {
                         <span>{e.marketplace_id === 'mercadolivre' ? 'Mercado Livre' : e.marketplace_id}</span>
                       </div>
                     </td>
-                    <td className="py-3 px-3 font-mono text-[11px] text-[#3483fa] font-bold">
+                    <td className="py-3 px-3 font-mono text-[11px] text-[#5c8a00] font-bold">
                       {e.event_type || 'orders_v2'}
                     </td>
                     <td className="py-3 px-3 font-mono text-[11px] text-[#555]">

@@ -333,7 +333,7 @@ export default function MonitorAoVivoPage() {
             onClick={() => setSoundEnabled(!soundEnabled)}
             className={`p-2 sm:px-3 sm:py-2 rounded-xl text-[12px] font-medium border flex items-center gap-1.5 transition-all ${
               soundEnabled
-                ? 'bg-[#f0f7ff] border-[#b8daff] text-[#3483fa] hover:bg-[#e1effe]'
+                ? 'bg-[#EEFFB3]/70 border-[#d9f99d] text-[#111] font-bold hover:bg-[#EEFFB3]'
                 : 'bg-[#f5f5f5] border-[#e6e6e6] text-[#888] hover:bg-[#eee]'
             }`}
             title={soundEnabled ? 'Som de nova venda ativado' : 'Som desativado'}
@@ -367,7 +367,7 @@ export default function MonitorAoVivoPage() {
             className="p-2 rounded-xl border border-[#e6e6e6] bg-white text-[#666] hover:text-[#1f2328] hover:bg-[#fafafa] transition-colors"
             title="Atualizar agora"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-[#3483fa]' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-[#5c8a00]' : ''}`} />
           </button>
         </div>
       </div>
@@ -422,7 +422,7 @@ export default function MonitorAoVivoPage() {
           {/* 📊 GRID DE MÉTRICAS-CHAVE */}
           <div className="bg-white rounded-2xl border border-[#e6e6e6] p-5 shadow-xs">
             <h3 className="text-[13px] font-bold uppercase tracking-wider text-[#999] mb-4 flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-[#3483fa]" />
+              <TrendingUp className="w-4 h-4 text-[#5c8a00]" />
               Métricas de Vendas & Operação
             </h3>
 
@@ -436,7 +436,7 @@ export default function MonitorAoVivoPage() {
               <div className="p-4 rounded-xl bg-[#fafafa] border border-[#eeeeee]">
                 <span className="text-[11px] font-semibold text-[#888] block">Qtd. de Vendas</span>
                 <span className="text-[20px] font-extrabold text-[#1f2328] mt-1 block">{metrics.totalOrders}</span>
-                <span className="text-[10px] text-[#3483fa] font-medium">Pedidos faturados</span>
+                <span className="text-[10px] text-[#5c8a00] font-bold">Pedidos faturados</span>
               </div>
 
               <div className="p-4 rounded-xl bg-[#fafafa] border border-[#eeeeee]">
@@ -470,7 +470,7 @@ export default function MonitorAoVivoPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#f0f0f0] pb-4">
               <div>
                 <h3 className="text-[15px] font-bold text-[#1f2328] flex items-center gap-2">
-                  <Truck className="w-5 h-5 text-[#3483fa]" />
+                  <Truck className="w-5 h-5 text-[#5c8a00]" />
                   Logística & Detalhes de Envio ao Vivo
                 </h3>
                 <p className="text-[12px] text-[#666] mt-0.5">
@@ -490,7 +490,7 @@ export default function MonitorAoVivoPage() {
                     key={f.id}
                     onClick={() => setShippingFilter(f.id)}
                     className={`px-2.5 py-1 rounded-lg transition-all ${
-                      shippingFilter === f.id ? 'bg-white text-[#3483fa] shadow-2xs font-bold' : 'hover:text-[#111]'
+                      shippingFilter === f.id ? 'bg-white text-[#5c8a00] shadow-2xs font-bold' : 'hover:text-[#111]'
                     }`}
                   >
                     {f.label}
@@ -554,7 +554,7 @@ export default function MonitorAoVivoPage() {
 
                         <td className="py-3 px-3">
                           <span className="font-bold text-[#333] block text-[11px]">{o.shipping_method || 'Mercado Envios'}</span>
-                          <span className="text-[10px] font-mono text-[#3483fa]">
+                          <span className="text-[10px] font-mono text-[#5c8a00] font-bold">
                             {o.tracking_code || 'Aguardando Etiqueta'}
                           </span>
                         </td>

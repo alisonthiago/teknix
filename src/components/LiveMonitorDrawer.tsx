@@ -231,7 +231,7 @@ export default function LiveMonitorDrawer({ open, onClose }: LiveMonitorDrawerPr
           <div className="bg-white rounded-2xl border border-[#e6e6e6] p-4 shadow-2xs">
             <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#999] mb-3 flex items-center justify-between">
               <span>Produtos mais vendidos</span>
-              <span className="text-[10px] text-[#3483fa] font-bold">Hoje</span>
+              <span className="text-[10px] text-[#5c8a00] font-bold">Hoje</span>
             </h4>
 
             {topProducts.length === 0 ? (
@@ -262,7 +262,7 @@ export default function LiveMonitorDrawer({ open, onClose }: LiveMonitorDrawerPr
           <div className="bg-white rounded-2xl border border-[#e6e6e6] p-4 shadow-2xs">
             <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#999] mb-3 flex items-center justify-between">
               <span>Últimos Envios & Pedidos</span>
-              <Truck className="w-3.5 h-3.5 text-[#3483fa]" />
+              <Truck className="w-3.5 h-3.5 text-[#5c8a00]" />
             </h4>
 
             <div className="space-y-2.5">
@@ -275,7 +275,7 @@ export default function LiveMonitorDrawer({ open, onClose }: LiveMonitorDrawerPr
                   <p className="text-[#666] truncate mt-0.5">{o.customer_name || 'Cliente'} • {o.shipping_city || 'Destino'}/{o.shipping_state || 'BR'}</p>
                   <div className="mt-1.5 pt-1.5 border-t border-[#eee] flex items-center justify-between text-[10px] text-[#888]">
                     <span>{o.shipping_method || 'Mercado Envios'}</span>
-                    <span className="text-[#3483fa] font-semibold">{o.tracking_code ? `Rastreio: ${o.tracking_code}` : o.status}</span>
+                    <span className="text-[#5c8a00] font-bold">{o.tracking_code ? `Rastreio: ${o.tracking_code}` : o.status}</span>
                   </div>
                 </div>
               ))}
@@ -283,12 +283,12 @@ export default function LiveMonitorDrawer({ open, onClose }: LiveMonitorDrawerPr
           </div>
 
           {/* Recomendações */}
-          <div className="bg-[#f0f7ff] rounded-2xl border border-[#d0e4ff] p-4 text-[12px]">
-            <h4 className="font-bold text-[#1976d2] mb-1 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-[#3483fa]" />
+          <div className="bg-[#f7fee7] rounded-2xl border border-[#d9f99d] p-4 text-[12px]">
+            <h4 className="font-bold text-[#4d7c0f] mb-1 flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-[#65a30d]" />
               Recomendações
             </h4>
-            <p className="text-[#444] text-[11px] leading-relaxed">
+            <p className="text-[#333] text-[11px] leading-relaxed">
               Mantenha os pedidos despachados até o horário limite da transportadora para manter sua reputação alta nos marketplaces.
             </p>
           </div>
