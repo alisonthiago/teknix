@@ -203,18 +203,13 @@ export async function syncMercadoLivreAccount(sellerId: string) {
           .upsert({
             order_number: orderNumber,
             marketplace_id: marketplaceId,
-            marketplace_account_id: marketplaceAccountId,
             customer_name: customerName,
             total_amount: totalAmount,
             status: orderStatus,
-            payment_method: 'Mercado Pago',
-            shipping_address: address,
-            shipping_city: city,
-            shipping_state: state,
-            shipping_zip: zip,
             tracking_code: tracking,
-            shipping_method: shippingMethod,
-            shipping_cost: shippingCost,
+            carrier: shippingMethod,
+            notes: `${address}, ${city} - BR-${state} CEP: ${zip}`,
+            created_at: ord.date_created || new Date().toISOString(),
             updated_at: new Date().toISOString()
           }, { onConflict: 'order_number' })
           .select('id')
@@ -224,12 +219,13 @@ export async function syncMercadoLivreAccount(sellerId: string) {
         const { data: dbSale } = await supabase
           .from('sales')
           .upsert({
-            order_id: `ML-${orderId}`,
+            order_id: orderNumber,
             marketplace_id: marketplaceId,
-            marketplace_account_id: marketplaceAccountId,
             date: dateCreated,
             total_revenue: totalAmount,
-            status: ord.status === 'paid' ? 'COMPLETED' : 'PENDING'
+            status: ord.status === 'paid' ? 'COMPLETED' : 'PENDING',
+            created_at: ord.date_created || new Date().toISOString(),
+            updated_at: new Date().toISOString()
           }, { onConflict: 'order_id' })
           .select('id')
           .single()
