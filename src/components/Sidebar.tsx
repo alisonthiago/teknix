@@ -111,14 +111,14 @@ export default function Sidebar({ permissions, mobileOpen, setMobileOpen, collap
                     isNavCollapsed ? 'justify-center px-0 py-3 mx-2 rounded-lg' : 'gap-3 px-4 py-3 justify-between'
                   } ${
                     active
-                      ? item.isLive ? 'text-[#e74c3c] font-bold bg-[#fff0f0]' : 'text-[#111] font-bold bg-[#EEFFB3]/70 border-r-3 border-[#B5F500]'
-                      : item.isLive ? 'text-[#e74c3c] font-bold hover:bg-[#fff5f5]' : 'text-[#333] font-normal hover:bg-[#f5f5f5]'
+                      ? item.isLive ? 'text-[#e74c3c] font-bold' : 'text-[#3483fa] font-bold'
+                      : item.isLive ? 'text-[#e74c3c] font-bold hover:bg-[#fafafa]' : 'text-[#333] font-normal hover:bg-[#fafafa]'
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     <Icon
                       className={`w-[22px] h-[22px] shrink-0 ${
-                        active ? (item.isLive ? 'text-[#e74c3c]' : 'text-[#111]') : (item.isLive ? 'text-[#e74c3c] animate-pulse' : 'text-[#666]')
+                        active ? (item.isLive ? 'text-[#e74c3c]' : 'text-[#3483fa]') : (item.isLive ? 'text-[#e74c3c] animate-pulse' : 'text-[#666]')
                       }`}
                       strokeWidth={1.5}
                     />

@@ -50,9 +50,9 @@
   /* Brand design tokens */
   --brand-lime: #B5F500;
   --brand-lime-light: #EEFFB3;
-  --color-mp-blue: #70a800;
-  --color-mp-blue-hover: #5c8a00;
-  --color-mp-blue-light: #f7fee7;
+  --color-mp-blue: #3483fa;
+  --color-mp-blue-hover: #2968c8;
+  --color-mp-blue-light: #ecf3fe;
   --color-mp-green: #00a650;
   --color-mp-bg: #f5f5f5;
   --color-mp-border: #e6e6e6;
@@ -69,32 +69,32 @@
   --card-foreground: #333333;
   --popover: #ffffff;
   --popover-foreground: #333333;
-  --primary: #B5F500;
-  --primary-foreground: #111111;
-  --secondary: #EEFFB3;
-  --secondary-foreground: #111111;
+  --primary: #3483fa;
+  --primary-foreground: #ffffff;
+  --secondary: #ecf3fe;
+  --secondary-foreground: #3483fa;
   --muted: #f5f5f5;
   --muted-foreground: #999999;
-  --accent: #EEFFB3;
-  --accent-foreground: #111111;
+  --accent: #ecf3fe;
+  --accent-foreground: #3483fa;
   --destructive: #f23d4f;
   --border: #e6e6e6;
   --input: #e6e6e6;
-  --ring: #B5F500;
-  --chart-1: #B5F500;
+  --ring: #3483fa;
+  --chart-1: #3483fa;
   --chart-2: #00a650;
-  --chart-3: #84cc16;
+  --chart-3: #B5F500;
   --chart-4: #f23d4f;
   --chart-5: #666666;
   --radius: 0.5rem;
   --sidebar: #ffffff;
   --sidebar-foreground: #333333;
-  --sidebar-primary: #B5F500;
-  --sidebar-primary-foreground: #111111;
+  --sidebar-primary: #3483fa;
+  --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #f5f5f5;
   --sidebar-accent-foreground: #333333;
   --sidebar-border: #e6e6e6;
-  --sidebar-ring: #B5F500;
+  --sidebar-ring: #3483fa;
 
   /* Spacing */
   --mp-content-max: 1280px;
@@ -134,22 +134,22 @@
   }
 
   .mp-btn-primary {
-    @apply inline-flex items-center justify-center gap-2 bg-[#B5F500] text-[#111] font-bold rounded-xl px-5 py-3 text-sm hover:bg-[#a3e600] transition-colors border border-[#a2e000] shadow-2xs;
+    @apply inline-flex items-center justify-center gap-2 bg-[#3483fa] text-white font-semibold rounded-xl px-5 py-3 text-sm hover:bg-[#2968c8] transition-colors shadow-2xs;
     min-height: 44px;
   }
 
   .mp-btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 bg-[#EEFFB3]/60 text-[#111] font-semibold rounded-xl px-5 py-3 text-sm hover:bg-[#EEFFB3] transition-colors border border-[#d9f99d];
+    @apply inline-flex items-center justify-center gap-2 bg-[#ecf3fe] text-[#3483fa] font-semibold rounded-xl px-5 py-3 text-sm hover:bg-[#dbeafe] transition-colors;
     min-height: 44px;
   }
 
   .mp-btn-outline {
-    @apply inline-flex items-center justify-center gap-2 bg-white text-[#111] font-semibold rounded-xl px-5 py-3 text-sm border border-[#B5F500] hover:bg-[#EEFFB3]/40 transition-colors;
+    @apply inline-flex items-center justify-center gap-2 bg-white text-[#3483fa] font-semibold rounded-xl px-5 py-3 text-sm border border-[#3483fa] hover:bg-[#ecf3fe] transition-colors;
     min-height: 44px;
   }
 
   .mp-link {
-    @apply text-[#5c8a00] text-sm font-bold hover:text-[#446600] transition-colors inline-flex items-center gap-1;
+    @apply text-[#3483fa] text-sm font-semibold hover:text-[#2968c8] transition-colors inline-flex items-center gap-1;
   }
 
   .mp-status-success {
@@ -157,7 +157,7 @@
   }
 
   .mp-search {
-    @apply w-full border border-[#e6e6e6] rounded-full px-4 sm:px-5 py-3 text-sm text-[#333] placeholder:text-[#999] outline-none focus:border-[#84cc16] focus:ring-1 focus:ring-[#B5F500] transition-colors bg-white;
+    @apply w-full border border-[#e6e6e6] rounded-full px-4 sm:px-5 py-3 text-sm text-[#333] placeholder:text-[#999] outline-none focus:border-[#3483fa] transition-colors bg-white;
     min-height: 44px;
   }
 
