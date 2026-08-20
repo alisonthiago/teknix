@@ -21,6 +21,17 @@ function formatBRL(val: number) {
   return `R$ ${val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }
 
+interface CustomerItem {
+  name: string
+  phone: string
+  address: string
+  totalSpent: number
+  ordersCount: number
+  marketplaces: Set<string>
+  lastOrderDate: string
+  ordersList: Array<{ id: string; order_number: string; total_amount: number; status: string; date: string; marketplace: string }>
+}
+
 export default function ClientesPage() {
   const router = useRouter()
   const [search, setSearch] = useState('')
@@ -39,46 +50,39 @@ export default function ClientesPage() {
   const customers = useMemo(() => {
     if (!orders) return []
 
-    const map = new Map<string, {
-      name: string
-      phone: string
-      address: string
-      totalSpent: number
-      ordersCount: number
-      marketplaces: Set<string>
-      lastOrderDate: string
-      ordersList: Array<{ id: string; order_number: string; total_amount: number; status: string; date: string; marketplace: string }>
-    }>()
+    const map = new Map<string, CustomerItem>()
 
     for (const o of orders) {
-      const name = o.customer_name || 'Comprador Anônimo'
+      const name = (o.customer_name as string) || 'Comprador Anônimo'
       const key = name.trim().toLowerCase()
       const mpName = (o.marketplaces as any)?.name || 'Mercado Livre'
 
-      const existing = map.get(key) || {
-        name,
-        phone: o.customer_phone || '—',
-        address: o.notes || '—',
-        totalSpent: 0,
-        ordersCount: 0,
-        marketplaces: new Set<string>(),
-        lastOrderDate: o.created_at ? new Date(o.created_at).toLocaleDateString('pt-BR') : '—',
-        ordersList: []
+      let existing = map.get(key)
+      if (!existing) {
+        existing = {
+          name,
+          phone: (o.customer_phone as string) || '—',
+          address: (o.notes as string) || '—',
+          totalSpent: 0,
+          ordersCount: 0,
+          marketplaces: new Set<string>(),
+          lastOrderDate: o.created_at ? new Date(o.created_at as string).toLocaleDateString('pt-BR') : '—',
+          ordersList: []
+        }
+        map.set(key, existing)
       }
 
       existing.totalSpent += Number(o.total_amount || 0)
       existing.ordersCount += 1
       existing.marketplaces.add(mpName)
       existing.ordersList.push({
-        id: o.id,
-        order_number: o.order_number,
+        id: o.id as string,
+        order_number: o.order_number as string,
         total_amount: Number(o.total_amount || 0),
-        status: o.status,
-        date: o.created_at ? new Date(o.created_at).toLocaleDateString('pt-BR') : '—',
+        status: o.status as string,
+        date: o.created_at ? new Date(o.created_at as string).toLocaleDateString('pt-BR') : '—',
         marketplace: mpName
       })
-
-      map.set(key, existing)
     }
 
     return Array.from(map.values())
