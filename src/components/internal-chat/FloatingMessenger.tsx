@@ -1,7 +1,12 @@
 'use client'
 
 import React, { useState, useRef, useEffect, useMemo } from 'react'
-import { useInternalChat, getDirectConvId, getConversationDisplayName, getConversationColab } from '@/contexts/InternalChatContext'
+import {
+  useInternalChat,
+  getDirectConvId,
+  getConversationDisplayName,
+  getConversationColab
+} from '@/contexts/InternalChatContext'
 import MessageCardRenderer from './MessageCardRenderer'
 import { TeknixT } from '@/components/TeknixT'
 import {
@@ -14,7 +19,8 @@ import {
   ChevronDown,
   MessageSquarePlus,
   Hash,
-  Search
+  Search,
+  Plus
 } from 'lucide-react'
 
 export default function FloatingMessenger() {
@@ -37,7 +43,6 @@ export default function FloatingMessenger() {
 
   const [input, setInput] = useState('')
   const [showChannelSelect, setShowChannelSelect] = useState(false)
-  const [searchTerm, setSearchTerm] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -45,6 +50,21 @@ export default function FloatingMessenger() {
       setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50)
     }
   }, [messages, isFloatingOpen, isFloatingMinimized])
+
+  // Se abrir o chat e ainda estiver no Geral vazio enquanto há conversas diretas ativas, seleciona a direta
+  useEffect(() => {
+    if (isFloatingOpen && (!activeConversation || activeConversation.id === 'conv-geral')) {
+      const directWithMsgs = conversations.find(c => (c.type === 'DIRECT' || c.id.startsWith('direct-')) && c.last_message)
+      if (directWithMsgs) {
+        setActiveConversation(directWithMsgs)
+      } else {
+        const anyDirect = conversations.find(c => c.type === 'DIRECT' || c.id.startsWith('direct-'))
+        if (anyDirect) {
+          setActiveConversation(anyDirect)
+        }
+      }
+    }
+  }, [isFloatingOpen, conversations, activeConversation, setActiveConversation])
 
   const handleSend = async () => {
     if (!input.trim() || !activeConversation) return
@@ -72,7 +92,7 @@ export default function FloatingMessenger() {
 
   // Identificação dinâmica da conversa ativa atual (para Header)
   const activeDisplayName = useMemo(() => {
-    if (!activeConversation) return 'Geral'
+    if (!activeConversation) return 'Conversas'
     return getConversationDisplayName(activeConversation, currentUser?.id, collaborators)
   }, [activeConversation, currentUser?.id, collaborators])
 
@@ -94,7 +114,6 @@ export default function FloatingMessenger() {
   }, [conversations])
 
   const directChats = useMemo(() => {
-    // Conversas diretas únicas
     const map = new Map<string, typeof conversations[0]>()
     conversations
       .filter(c => c.type === 'DIRECT' || c.id.startsWith('direct-'))
@@ -104,7 +123,6 @@ export default function FloatingMessenger() {
     return Array.from(map.values())
   }, [conversations])
 
-  // Outros colaboradores da equipe (excluindo o usuário logado)
   const otherCollaborators = useMemo(() => {
     return collaborators.filter(c => c.id !== currentUser?.id)
   }, [collaborators, currentUser?.id])
@@ -140,28 +158,36 @@ export default function FloatingMessenger() {
       style={{ width: 'min(420px, 100vw)', height: '100dvh' }}
     >
 
-      {/* ── Header ─────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-[#f0f0f0] shrink-0 bg-white">
+      {/* ── Header Principal ────────────────────────────────────────────── */}
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#f0f0f0] shrink-0 bg-white">
         <div className="relative">
           <button
             onClick={() => setShowChannelSelect(!showChannelSelect)}
-            className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity text-left"
+            className="flex items-center gap-3 cursor-pointer hover:opacity-85 transition-opacity text-left"
           >
-            {/* Avatar / Ícone */}
+            {/* Foto ou Avatar do Contato / Canal */}
             <div className="relative shrink-0">
-              <div className={`w-10 h-10 rounded-full border flex items-center justify-center font-bold shadow-xs ${
-                isOnline 
-                  ? 'bg-[#ecfdf5] border-[#bbf7d0] text-[#16a34a]' 
-                  : 'bg-[#f1f5f9] border-[#e2e8f0] text-[#64748b]'
-              }`}>
-                {activeConversation?.type === 'GROUP' ? (
-                  <Users className="w-5 h-5" />
-                ) : (
+              {activeConversation?.type === 'GROUP' ? (
+                <div className="w-10 h-10 rounded-full bg-[#f1f5f9] border border-[#e2e8f0] flex items-center justify-center text-[#475569] font-bold shadow-xs">
+                  <Users className="w-5 h-5 text-[#64748b]" />
+                </div>
+              ) : activeColab?.photo_url ? (
+                <img
+                  src={activeColab.photo_url}
+                  alt={activeDisplayName}
+                  className="w-10 h-10 rounded-full object-cover border border-[#e2e8f0] shadow-xs"
+                />
+              ) : (
+                <div className={`w-10 h-10 rounded-full border flex items-center justify-center font-bold shadow-xs ${
+                  isOnline 
+                    ? 'bg-[#ecfdf5] border-[#bbf7d0] text-[#16a34a]' 
+                    : 'bg-[#f1f5f9] border-[#e2e8f0] text-[#64748b]'
+                }`}>
                   <span className="text-[15px] font-extrabold">
                     {activeDisplayName.slice(0, 1).toUpperCase()}
                   </span>
-                )}
-              </div>
+                </div>
+              )}
               <span className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full ring-2 ring-white ${
                 isOnline ? 'bg-[#16a34a]' : 'bg-[#94a3b8]'
               }`} />
@@ -178,6 +204,7 @@ export default function FloatingMessenger() {
                 isOnline ? 'text-[#16a34a]' : 'text-[#94a3b8]'
               }`}>
                 {isOnline ? '● Online agora' : '○ Offline'}
+                {activeColab?.role ? ` · ${activeColab.role}` : ''}
               </p>
             </div>
           </button>
@@ -186,8 +213,70 @@ export default function FloatingMessenger() {
           {showChannelSelect && (
             <div className="absolute top-14 left-0 w-80 bg-white rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.14)] border border-[#e2e8f0] py-2 z-50 max-h-[460px] overflow-y-auto">
               
+              {/* Conversas Diretas Ativas com histórico */}
+              {directChats.length > 0 && (
+                <>
+                  <p className="text-[11px] font-black uppercase tracking-wider text-[#94a3b8] px-4 pt-1 pb-1 flex items-center gap-1.5">
+                    <MessageSquarePlus className="w-3.5 h-3.5 text-[#3b82f6]" /> Conversas Diretas
+                  </p>
+                  {directChats.map(c => {
+                    const isCurrent = activeConversation?.id === c.id
+                    const displayName = getConversationDisplayName(c, currentUser?.id, collaborators)
+                    const colab = getConversationColab(c, currentUser?.id, collaborators)
+                    const colabOnline = colab ? colab.online : false
+
+                    return (
+                      <button
+                        key={c.id}
+                        onClick={() => {
+                          setActiveConversation(c)
+                          markAsRead(c.id)
+                          setShowChannelSelect(false)
+                        }}
+                        className={`w-full text-left px-4 py-2.5 hover:bg-[#f8fafc] text-[13px] font-medium flex items-center justify-between cursor-pointer transition-colors ${
+                          isCurrent ? 'bg-[#f0fdf4] text-[#16a34a]' : 'text-[#334155]'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                          <div className="relative shrink-0">
+                            {colab?.photo_url ? (
+                              <img
+                                src={colab.photo_url}
+                                alt={displayName}
+                                className="w-8 h-8 rounded-full object-cover border border-[#e2e8f0]"
+                              />
+                            ) : (
+                              <div className="w-8 h-8 rounded-full bg-[#f1f5f9] flex items-center justify-center text-[12px] font-bold text-[#334155]">
+                                {displayName.slice(0, 1).toUpperCase()}
+                              </div>
+                            )}
+                            <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ring-1 ring-white ${
+                              colabOnline ? 'bg-[#16a34a]' : 'bg-[#cbd5e1]'
+                            }`} />
+                          </div>
+                          <div className="min-w-0 flex-1 pr-2">
+                            <p className="truncate font-semibold text-[#1e293b] leading-tight">{displayName}</p>
+                            {c.last_message && (
+                              <p className="truncate text-[11px] text-[#94a3b8] mt-0.5">
+                                {c.last_message.content}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        {c.unread_count > 0 && (
+                          <span className="min-w-[18px] h-4.5 px-1.5 rounded-full text-[10px] font-black bg-[#16a34a] text-white flex items-center justify-center shrink-0 ml-2">
+                            {c.unread_count}
+                          </span>
+                        )}
+                      </button>
+                    )
+                  })}
+                  <div className="border-t border-[#f1f5f9] my-2" />
+                </>
+              )}
+
               {/* Canais Operacionais da Empresa */}
-              <p className="text-[11px] font-black uppercase tracking-wider text-[#94a3b8] px-4 pt-2 pb-1 flex items-center gap-1.5">
+              <p className="text-[11px] font-black uppercase tracking-wider text-[#94a3b8] px-4 pt-1 pb-1 flex items-center gap-1.5">
                 <Hash className="w-3.5 h-3.5 text-[#16a34a]" /> Canais da Empresa
               </p>
               {systemChannels.map(c => {
@@ -217,64 +306,10 @@ export default function FloatingMessenger() {
                 )
               })}
 
-              {/* Conversas Diretas Ativas */}
-              {directChats.length > 0 && (
-                <>
-                  <div className="border-t border-[#f1f5f9] my-2" />
-                  <p className="text-[11px] font-black uppercase tracking-wider text-[#94a3b8] px-4 pt-1 pb-1 flex items-center gap-1.5">
-                    <MessageSquarePlus className="w-3.5 h-3.5 text-[#3b82f6]" /> Conversas Diretas
-                  </p>
-                  {directChats.map(c => {
-                    const isCurrent = activeConversation?.id === c.id
-                    const displayName = getConversationDisplayName(c, currentUser?.id, collaborators)
-                    const colab = getConversationColab(c, currentUser?.id, collaborators)
-                    const colabOnline = colab ? colab.online : false
-
-                    return (
-                      <button
-                        key={c.id}
-                        onClick={() => {
-                          setActiveConversation(c)
-                          markAsRead(c.id)
-                          setShowChannelSelect(false)
-                        }}
-                        className={`w-full text-left px-4 py-2.5 hover:bg-[#f8fafc] text-[13px] font-medium flex items-center justify-between cursor-pointer transition-colors ${
-                          isCurrent ? 'bg-[#f0fdf4] text-[#16a34a]' : 'text-[#334155]'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                          <div className="relative shrink-0">
-                            <div className="w-8 h-8 rounded-full bg-[#f1f5f9] flex items-center justify-center text-[12px] font-bold text-[#334155]">
-                              {displayName.slice(0, 1).toUpperCase()}
-                            </div>
-                            <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ring-1 ring-white ${
-                              colabOnline ? 'bg-[#16a34a]' : 'bg-[#cbd5e1]'
-                            }`} />
-                          </div>
-                          <div className="min-w-0 flex-1 pr-2">
-                            <p className="truncate font-semibold text-[#1e293b] leading-tight">{displayName}</p>
-                            {c.last_message && (
-                              <p className="truncate text-[11px] text-[#94a3b8] mt-0.5">
-                                {c.last_message.content}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                        {c.unread_count > 0 && (
-                          <span className="min-w-[18px] h-4.5 px-1.5 rounded-full text-[10px] font-black bg-[#16a34a] text-white flex items-center justify-center shrink-0 ml-2">
-                            {c.unread_count}
-                          </span>
-                        )}
-                      </button>
-                    )
-                  })}
-                </>
-              )}
-
-              {/* Equipe / Colaboradores Cadastrados */}
+              {/* Equipe / Iniciar Conversa */}
               <div className="border-t border-[#f1f5f9] my-2" />
               <p className="text-[11px] font-black uppercase tracking-wider text-[#94a3b8] px-4 pt-1 pb-1 flex items-center gap-1.5">
-                <Users className="w-3.5 h-3.5 text-[#64748b]" /> Equipe Online & Offline
+                <Users className="w-3.5 h-3.5 text-[#64748b]" /> Iniciar com Colaborador
               </p>
               {otherCollaborators.map(c => (
                 <button
@@ -284,9 +319,17 @@ export default function FloatingMessenger() {
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     <div className="relative shrink-0">
-                      <div className="w-7 h-7 rounded-full bg-[#f1f5f9] flex items-center justify-center text-[11px] font-bold text-[#334155]">
-                        {c.name.slice(0, 1).toUpperCase()}
-                      </div>
+                      {c.photo_url ? (
+                        <img
+                          src={c.photo_url}
+                          alt={c.name}
+                          className="w-7 h-7 rounded-full object-cover border border-[#e2e8f0]"
+                        />
+                      ) : (
+                        <div className="w-7 h-7 rounded-full bg-[#f1f5f9] flex items-center justify-center text-[11px] font-bold text-[#334155]">
+                          {c.name.slice(0, 1).toUpperCase()}
+                        </div>
+                      )}
                       <span className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full ring-1 ring-white ${
                         c.online ? 'bg-[#16a34a]' : 'bg-[#cbd5e1]'
                       }`} />
@@ -327,6 +370,67 @@ export default function FloatingMessenger() {
         </div>
       </div>
 
+      {/* ── Barra Horizontal Rápida de Contatos e Canais (Quick Switcher) ───── */}
+      <div className="flex items-center gap-2 px-4 py-2.5 bg-[#f8fafc] border-b border-[#f1f5f9] overflow-x-auto shrink-0 scrollbar-none">
+        
+        {/* Outros Colaboradores (Ex: Nádia luz ou Alison) */}
+        {otherCollaborators.map(c => {
+          const directId = currentUser ? getDirectConvId(currentUser.id, c.id) : null
+          const isSelected = activeConversation?.id === directId
+          return (
+            <button
+              key={c.id}
+              onClick={() => handleSelectCollaborator(c.id, c.name)}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[12px] font-bold transition-all shrink-0 cursor-pointer ${
+                isSelected
+                  ? 'bg-white text-[#16a34a] shadow-xs border border-[#16a34a]/30'
+                  : 'bg-white/80 hover:bg-white text-[#475569] border border-[#e2e8f0]'
+              }`}
+            >
+              <div className="relative shrink-0">
+                {c.photo_url ? (
+                  <img
+                    src={c.photo_url}
+                    alt={c.name}
+                    className="w-5 h-5 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-5 h-5 rounded-full bg-[#f1f5f9] text-[#334155] flex items-center justify-center text-[10px] font-black">
+                    {c.name.slice(0, 1).toUpperCase()}
+                  </div>
+                )}
+                <span className={`absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 rounded-full ring-1 ring-white ${
+                  c.online ? 'bg-[#16a34a]' : 'bg-[#cbd5e1]'
+                }`} />
+              </div>
+              <span className="truncate max-w-[90px]">{c.name}</span>
+            </button>
+          )
+        })}
+
+        {/* Canais Principais */}
+        {systemChannels.map(c => {
+          const isSelected = activeConversation?.id === c.id
+          return (
+            <button
+              key={c.id}
+              onClick={() => {
+                setActiveConversation(c)
+                markAsRead(c.id)
+              }}
+              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[12px] font-bold transition-all shrink-0 cursor-pointer ${
+                isSelected
+                  ? 'bg-white text-[#16a34a] shadow-xs border border-[#16a34a]/30'
+                  : 'bg-white/80 hover:bg-white text-[#64748b] border border-[#e2e8f0]'
+              }`}
+            >
+              <Hash className="w-3 h-3" />
+              <span>{c.name}</span>
+            </button>
+          )
+        })}
+      </div>
+
       {/* ── Área de mensagens ────────────────────────────────────────────── */}
       <div className="flex-1 overflow-y-auto bg-[#fafafa]">
         {messages.length === 0 ? (
@@ -336,11 +440,11 @@ export default function FloatingMessenger() {
             </div>
             <p className="text-[16px] font-bold text-[#334155] mb-2">Nenhuma mensagem ainda</p>
             <p className="text-[14px] text-[#94a3b8] leading-relaxed max-w-[260px]">
-              Envie uma mensagem para iniciar a conversa em tempo real.
+              Envie uma mensagem para conversar com <strong>{activeDisplayName}</strong> em tempo real.
             </p>
           </div>
         ) : (
-          <div className="px-5 pt-6 pb-4 space-y-6">
+          <div className="px-4 pt-6 pb-4 space-y-6">
             {messages.map(msg => (
               <MessageCardRenderer
                 key={msg.id}
@@ -359,7 +463,7 @@ export default function FloatingMessenger() {
         <div className="flex items-center gap-3 bg-[#f4f6f8] rounded-2xl px-4 pr-2 py-1.5 border border-transparent focus-within:border-[#16a34a]/30 focus-within:bg-white transition-all">
           <input
             type="text"
-            placeholder={`Conversar em ${activeDisplayName}...`}
+            placeholder={`Conversar com ${activeDisplayName}...`}
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => {
@@ -383,14 +487,14 @@ export default function FloatingMessenger() {
         <div className="flex items-center justify-between mt-2.5 px-1">
           <div className="flex items-center gap-4">
             <button
-              onClick={() => alert('Envio de foto ativado')}
+              onClick={() => alert('Envio de foto')}
               className="flex items-center gap-1.5 text-[12px] font-medium text-[#94a3b8] hover:text-[#16a34a] transition-colors cursor-pointer"
             >
               <ImageIcon className="w-4 h-4 text-[#16a34a]" />
               Foto
             </button>
             <button
-              onClick={() => alert('Envio de arquivo ativado')}
+              onClick={() => alert('Envio de arquivo')}
               className="flex items-center gap-1.5 text-[12px] font-medium text-[#94a3b8] hover:text-[#3483fa] transition-colors cursor-pointer"
             >
               <Paperclip className="w-4 h-4 text-[#3483fa]" />

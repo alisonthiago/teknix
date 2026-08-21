@@ -244,27 +244,61 @@ export default function MessageCardRenderer({ message, isMe }: MessageCardRender
   const isCard = message.message_type !== 'TEXT'
 
   return (
-    <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} gap-1.5 w-full`}>
-      {/* Nome + hora */}
-      <div className="flex items-center gap-2 text-[11px] text-[#94a3b8] px-1">
-        <span className="font-semibold text-[#475569]">{message.sender_name}</span>
-        <span>·</span>
-        <span>{new Date(message.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
+    <div className={`flex ${isMe ? 'justify-end' : 'justify-start'} gap-2.5 w-full items-end`}>
+      {!isMe && (
+        <div className="shrink-0 mb-1">
+          {message.sender_photo ? (
+            <img
+              src={message.sender_photo}
+              alt={message.sender_name}
+              className="w-8 h-8 rounded-full object-cover border border-[#e2e8f0] shadow-xs"
+            />
+          ) : (
+            <div className="w-8 h-8 rounded-full bg-[#ecfdf5] border border-[#bbf7d0] text-[#16a34a] flex items-center justify-center font-bold text-xs shadow-xs">
+              {message.sender_name?.slice(0, 1).toUpperCase() || 'C'}
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} gap-1 max-w-[82%]`}>
+        {/* Nome + hora */}
+        <div className="flex items-center gap-1.5 text-[11px] text-[#94a3b8] px-1">
+          <span className="font-bold text-[#334155]">{message.sender_name}</span>
+          <span>·</span>
+          <span>{new Date(message.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
+        </div>
+
+        {isCard ? (
+          <div className="w-full">
+            {renderContent()}
+          </div>
+        ) : (
+          <div
+            className={`rounded-2xl px-4 py-2.5 text-[14px] leading-relaxed shadow-xs ${
+              isMe
+                ? 'bg-[#16a34a] text-white rounded-br-xs'
+                : 'bg-white border border-[#e2e8f0] text-[#1e293b] rounded-bl-xs'
+            }`}
+          >
+            <p className="whitespace-pre-wrap">{message.content}</p>
+          </div>
+        )}
       </div>
 
-      {isCard ? (
-        <div className="w-full max-w-[340px]">
-          {renderContent()}
-        </div>
-      ) : (
-        <div
-          className={`rounded-2xl px-4 py-3 max-w-[320px] text-[14px] leading-relaxed shadow-sm ${
-            isMe
-              ? 'bg-[#16a34a] text-white rounded-br-sm'
-              : 'bg-white border border-[#e2e8f0] text-[#1e293b] rounded-bl-sm'
-          }`}
-        >
-          <p className="whitespace-pre-wrap">{message.content}</p>
+      {isMe && (
+        <div className="shrink-0 mb-1">
+          {message.sender_photo ? (
+            <img
+              src={message.sender_photo}
+              alt={message.sender_name}
+              className="w-8 h-8 rounded-full object-cover border border-[#e2e8f0] shadow-xs"
+            />
+          ) : (
+            <div className="w-8 h-8 rounded-full bg-[#f1f5f9] border border-[#e2e8f0] text-[#475569] flex items-center justify-center font-bold text-xs shadow-xs">
+              {message.sender_name?.slice(0, 1).toUpperCase() || 'E'}
+            </div>
+          )}
         </div>
       )}
     </div>

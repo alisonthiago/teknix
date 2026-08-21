@@ -19,7 +19,7 @@ interface InternalChatContextData {
   setIsFloatingMinimized: (min: boolean) => void
   collaborators: ChatMember[]
   tasks: InternalTask[]
-  currentUser: { id: string; name: string; email?: string; role?: string } | null
+  currentUser: { id: string; name: string; email?: string; role?: string; photo_url?: string } | null
   sendMessage: (conversationId: string, content: string, messageType?: MessageType, metadata?: any, replyTo?: any) => Promise<void>
   shareToChat: (params: {
     targetType: 'DIRECT' | 'GROUP'
@@ -138,7 +138,7 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
   const [messagesMap, setMessagesMap] = useState<Record<string, InternalMessage[]>>({})
   const [tasks, setTasks] = useState<InternalTask[]>([])
   const [collaborators, setCollaborators] = useState<ChatMember[]>([])
-  const [currentUser, setCurrentUser] = useState<{ id: string; name: string; email?: string; role?: string } | null>(null)
+  const [currentUser, setCurrentUser] = useState<{ id: string; name: string; email?: string; role?: string; photo_url?: string } | null>(null)
   
   const [isFloatingOpen, setIsFloatingOpen] = useState(false)
   const [isFloatingMinimized, setIsFloatingMinimized] = useState(false)
@@ -167,7 +167,7 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
         if (user) {
           const { data: profile } = await supabase
             .from('profiles')
-            .select('id, name, email, role')
+            .select('id, name, email, role, avatar_url, photo_url')
             .eq('id', user.id)
             .single()
 
@@ -176,7 +176,8 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
             id: user.id,
             name: removeEmojis(userName),
             email: user.email || profile?.email,
-            role: profile?.role || 'Operador'
+            role: profile?.role || 'Operador',
+            photo_url: profile?.avatar_url || profile?.photo_url || user.user_metadata?.avatar_url
           })
         }
       } catch (err) {
@@ -511,6 +512,7 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
       conversation_id: conversationId,
       sender_id: senderId,
       sender_name: senderName,
+      sender_photo: currentUser?.photo_url,
       content,
       message_type: messageType,
       metadata,
