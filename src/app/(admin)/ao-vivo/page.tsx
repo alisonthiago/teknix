@@ -168,7 +168,7 @@ export default function MonitorAoVivoPage() {
     const orders = filteredOrders.length > 0 ? filteredOrders : (liveData?.orders || [])
     const totalRevenue = orders.reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0)
     const totalOrders = orders.length
-    
+
     let totalUnits = 0
     orders.forEach(o => {
       if (o.order_items?.length) {
@@ -320,7 +320,7 @@ export default function MonitorAoVivoPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300 pb-12">
-      
+
       {/* 🔴 HEADER SUPERIOR DO MONITOR AO VIVO */}
       <div className="bg-white rounded-2xl border border-[#e6e6e6] p-4 sm:p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
@@ -348,11 +348,10 @@ export default function MonitorAoVivoPage() {
           {/* Som Ativar / Desativar */}
           <button
             onClick={() => setSoundEnabled(!soundEnabled)}
-            className={`p-2 sm:px-3 sm:py-2 rounded-xl text-[12px] font-medium border flex items-center gap-1.5 transition-all ${
-              soundEnabled
+            className={`p-2 sm:px-3 sm:py-2 rounded-xl text-[12px] font-medium border flex items-center gap-1.5 transition-all ${soundEnabled
                 ? 'bg-[#EEFFB3]/70 border-[#d9f99d] text-[#111] font-bold hover:bg-[#EEFFB3]'
                 : 'bg-[#f5f5f5] border-[#e6e6e6] text-[#888] hover:bg-[#eee]'
-            }`}
+              }`}
             title={soundEnabled ? 'Som de nova venda ativado' : 'Som desativado'}
           >
             {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
@@ -370,9 +369,8 @@ export default function MonitorAoVivoPage() {
               <button
                 key={p.id}
                 onClick={() => setPeriod(p.id as any)}
-                className={`px-3 py-1.5 rounded-lg transition-all ${
-                  period === p.id ? 'bg-white text-[#1f2328] shadow-2xs font-bold' : 'hover:text-[#1f2328]'
-                }`}
+                className={`px-3 py-1.5 rounded-lg transition-all ${period === p.id ? 'bg-white text-[#1f2328] shadow-2xs font-bold' : 'hover:text-[#1f2328]'
+                  }`}
               >
                 {p.label}
               </button>
@@ -391,16 +389,16 @@ export default function MonitorAoVivoPage() {
 
       {/* CARD PRINCIPAL DESTAQUE (VENDAS DE HOJE) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
+
         <div className="lg:col-span-8 space-y-6">
-          
+
           <div className="bg-[#B5F500] rounded-3xl p-6 sm:p-7 shadow-md border border-[#a2e000] text-[#1f2328] relative overflow-hidden">
             <div className="flex items-center justify-between">
               <span className="text-[14px] font-bold text-[#333] uppercase tracking-wide flex items-center gap-2">
                 <Flame className="w-5 h-5 text-[#e74c3c]" />
                 Vendas {period === 'NOW' ? 'ao Vivo' : period === 'TODAY' ? 'de Hoje' : 'do Período'}
               </span>
-              
+
               <span className="flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full bg-black/10 text-[#333]">
                 <span className="w-2 h-2 rounded-full bg-[#e74c3c] animate-pulse" />
                 {lastUpdateSeconds <= 3 ? 'Atualizado agora' : `Atualizado há ${lastUpdateSeconds}s`}
@@ -506,9 +504,8 @@ export default function MonitorAoVivoPage() {
                   <button
                     key={f.id}
                     onClick={() => setShippingFilter(f.id)}
-                    className={`px-2.5 py-1 rounded-lg transition-all ${
-                      shippingFilter === f.id ? 'bg-white text-[#5c8a00] shadow-2xs font-bold' : 'hover:text-[#111]'
-                    }`}
+                    className={`px-2.5 py-1 rounded-lg transition-all ${shippingFilter === f.id ? 'bg-white text-[#5c8a00] shadow-2xs font-bold' : 'hover:text-[#111]'
+                      }`}
                   >
                     {f.label}
                   </button>
@@ -586,15 +583,14 @@ export default function MonitorAoVivoPage() {
                         </td>
 
                         <td className="py-3 px-3 text-center">
-                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
-                            o.status === 'ENTREGUE'
+                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${o.status === 'ENTREGUE'
                               ? 'bg-[#e8f5e9] text-[#2e7d32]'
                               : o.status === 'ENVIADO'
-                              ? 'bg-[#e3f2fd] text-[#1976d2]'
-                              : o.status === 'CANCELADO'
-                              ? 'bg-[#ffebee] text-[#c62828]'
-                              : 'bg-[#fff8e1] text-[#f57f17]'
-                          }`}>
+                                ? 'bg-[#e3f2fd] text-[#1976d2]'
+                                : o.status === 'CANCELADO'
+                                  ? 'bg-[#ffebee] text-[#c62828]'
+                                  : 'bg-[#fff8e1] text-[#f57f17]'
+                            }`}>
                             {o.status || 'PAGO'}
                           </span>
                         </td>
@@ -632,11 +628,10 @@ export default function MonitorAoVivoPage() {
                 <div
                   key={c.id}
                   onClick={() => setSelectedChannel(c.id)}
-                  className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
-                    selectedChannel === c.id
+                  className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${selectedChannel === c.id
                       ? 'border-[#3483fa] bg-[#f0f7ff]'
                       : 'border-[#f0f0f0] hover:border-[#ddd] bg-white'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-2.5">
                     {c.id !== 'ALL' && <MarketplaceLogo name={c.name} className="w-5 h-5 shrink-0" />}
@@ -752,7 +747,7 @@ export default function MonitorAoVivoPage() {
       {selectedOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 animate-in fade-in duration-200">
           <div className="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-[#e6e6e6] max-h-[90vh] overflow-y-auto space-y-4">
-            
+
             <div className="flex items-center justify-between border-b border-[#eee] pb-4">
               <div>
                 <span className="text-[11px] font-bold uppercase text-[#999]">Detalhes do Pedido & Envio</span>
