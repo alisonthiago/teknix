@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Download, Upload, Package, Truck, ShoppingCart, Warehouse, Eye, Edit, Trash2, ClipboardCheck, CheckCircle2, AlertTriangle, Building2, Ban, Printer } from 'lucide-react'
+import { Plus, Download, Upload, Package, Truck, ShoppingCart, Warehouse, Eye, Edit, Trash2, ClipboardCheck, CheckCircle2, AlertTriangle, Building2, Ban, Printer, Share2 } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { PageHeader, PrimaryButton, SecondaryButton, StatCard, SearchInput, ModuleTable, TableHead, Th, Td } from '@/components/ui/module'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
@@ -13,6 +13,7 @@ import { MarketplaceLogo } from '@/components/MarketplaceLogos'
 import { useNotification } from '@/contexts/NotificationContext'
 import ProductMarketplaceActionModal from '@/components/ProductMarketplaceActionModal'
 import ProductDiagnosticModal from '@/components/ProductDiagnosticModal'
+import ShareContextModal from '@/components/internal-chat/ShareContextModal'
 import { PauseCircle, PlayCircle, Lock, Unlock, RefreshCw, Info, MoreHorizontal, ShieldAlert, AlertCircle } from 'lucide-react'
 
 const ProductCreateModal = dynamic(() => import('@/components/ProductCreateModal'), { ssr: false })
@@ -27,6 +28,7 @@ function ProductsTab() {
   const [showCreate, setShowCreate] = useState(false)
   const [selectedItems, setSelectedItems] = useState<string[]>([])
   const [situationFilter, setSituationFilter] = useState<'ALL' | 'ACTIVE' | 'PAUSED' | 'BLOCKED' | 'LOCKED' | 'BANNED' | 'OUT_OF_STOCK' | 'ERROR' | 'SYNC_ISSUE'>('ALL')
+  const [shareProduct, setShareProduct] = useState<any | null>(null)
 
   // Modais de Controle e Diagnóstico
   const [actionModal, setActionModal] = useState<{
@@ -193,6 +195,24 @@ function ProductsTab() {
 
   return (
     <div className="space-y-4">
+      {/* Modal de Compartilhamento no Chat Interno */}
+      {shareProduct && (
+        <ShareContextModal
+          isOpen={!!shareProduct}
+          onClose={() => setShareProduct(null)}
+          title={`Produto: ${shareProduct.name}`}
+          messageType="CARD_PRODUCT"
+          metadata={{
+            product_id: shareProduct.id,
+            product_name: shareProduct.name,
+            product_sku: shareProduct.sku,
+            product_image: shareProduct.image_url,
+            total_amount: shareProduct.stock || 8
+          }}
+          defaultNote={`Verificação operacional do produto ${shareProduct.name} (SKU: ${shareProduct.sku}).`}
+        />
+      )}
+
       {/* Modal de Ação no Marketplace */}
       <ProductMarketplaceActionModal
         isOpen={actionModal.isOpen}
@@ -488,6 +508,15 @@ function ProductsTab() {
                         className="p-1.5 rounded-lg border border-[#e6e6e6] hover:bg-[#f5f5f5] text-[#777] hover:text-[#0284c7] transition-colors cursor-pointer shadow-2xs"
                       >
                         <RefreshCw className="w-3.5 h-3.5" />
+                      </button>
+
+                      {/* Botão Compartilhar no Chat */}
+                      <button
+                        onClick={() => setShareProduct(p)}
+                        title="Compartilhar no Chat com Colaborador"
+                        className="p-1.5 rounded-lg border border-[#e6e6e6] hover:bg-[#111] hover:text-[#B5F500] text-[#777] transition-all cursor-pointer shadow-2xs"
+                      >
+                        <Share2 className="w-3.5 h-3.5" />
                       </button>
 
                       {/* Botão Excluir Seguro */}

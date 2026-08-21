@@ -54,6 +54,7 @@ interface HeaderProps {
 }
 
 import { useNotification } from '@/contexts/NotificationContext'
+import { useInternalChat } from '@/contexts/InternalChatContext'
 import LiveMonitorDrawer from '@/components/LiveMonitorDrawer'
 
 function HeaderActions({
@@ -77,6 +78,7 @@ function HeaderActions({
   const userRef = useRef<HTMLDivElement>(null)
   const notifRef = useRef<HTMLDivElement>(null)
   const { notifications, unreadCount, markAllAsRead, markAsRead } = useNotification()
+  const { totalUnreadCount, setIsFloatingOpen, setIsFloatingMinimized } = useInternalChat()
   const pathname = usePathname()
   const router = useRouter()
 
@@ -393,6 +395,24 @@ function HeaderActions({
           </div>
         )}
       </div>
+
+      {/* 💬 BOTÃO CENTRAL DE CONVERSAS & CHAT INTERNO */}
+      <button
+        onClick={() => {
+          setIsFloatingOpen(true)
+          setIsFloatingMinimized(false)
+        }}
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#f8fafc] hover:bg-[#f1f5f9] border border-[#e2e8f0] text-[11px] font-bold text-[#1e293b] shadow-2xs transition-all cursor-pointer"
+        title="Abrir Chat Interno de Colaboradores"
+      >
+        <MessageSquare className="w-3.5 h-3.5 text-[#111]" />
+        <span className="hidden sm:inline">Conversas</span>
+        {totalUnreadCount > 0 && (
+          <span className="px-1.5 py-0.2 rounded-full text-[9px] font-black bg-[#111] text-[#B5F500]">
+            {totalUnreadCount}
+          </span>
+        )}
+      </button>
 
       {/* 🔴 BOTÃO AO VIVO DENTRO DA PÍLULA VERDE */}
       <button

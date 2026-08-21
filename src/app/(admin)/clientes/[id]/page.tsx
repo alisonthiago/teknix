@@ -7,11 +7,12 @@ import {
   ArrowLeft, User, Phone, MapPin, ShoppingCart, DollarSign, 
   Package, ExternalLink, Printer, Calendar, ShieldCheck, 
   MessageSquare, Clock, AlertCircle, HelpCircle, CheckCircle2,
-  XCircle, Truck, FileText, Send, Sparkles
+  XCircle, Truck, FileText, Send, Sparkles, Share2
 } from 'lucide-react'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import ShareContextModal from '@/components/internal-chat/ShareContextModal'
 
 function formatBRL(val: number) {
   return `R$ ${val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -22,6 +23,7 @@ export default function ClienteProfilePage() {
   const router = useRouter()
   const rawId = typeof params?.id === 'string' ? decodeURIComponent(params.id) : ''
   const [activeTab, setActiveTab] = useState<'pedidos' | 'mensagens' | 'perguntas' | 'historico'>('pedidos')
+  const [showShareModal, setShowShareModal] = useState(false)
 
   const { data, loading } = useSupabaseQuery(async (s) => {
     // Buscar pedidos correspondentes ao cliente por id, customer_id ou customer_name
@@ -140,6 +142,19 @@ export default function ClienteProfilePage() {
 
   return (
     <div className="space-y-5 max-w-6xl mx-auto pb-12 animate-in fade-in duration-200">
+      <ShareContextModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        title={`Cliente: ${customerName}`}
+        messageType="CARD_CUSTOMER"
+        metadata={{
+          customer_name: customerName,
+          order_number: firstOrder?.order_number || 'MLB-2000018029918832',
+          total_amount: totalSpent
+        }}
+        defaultNote={`Histórico e dados do cliente ${customerName} para conferência interna.`}
+      />
+
       {/* Botão Voltar */}
       <div>
         <Link
@@ -202,11 +217,21 @@ export default function ClienteProfilePage() {
                 </div>
               </div>
 
-              {/* Total em Compras (LTV) */}
-              <div className="bg-[#fafafa] border border-[#e6e6e6] p-4 rounded-2xl md:text-right shrink-0">
-                <p className="text-[11px] font-bold text-[#888] uppercase tracking-wider">Total em Compras (LTV)</p>
-                <p className="text-2xl font-black text-[#16a34a] mt-0.5">{formatBRL(totalSpent)}</p>
-                <p className="text-[11px] text-[#999] mt-0.5">{orders.length} pedido{orders.length !== 1 ? 's' : ''} realizados</p>
+              {/* Total em Compras (LTV) e Compartilhar */}
+              <div className="flex flex-col items-end gap-2.5 shrink-0">
+                <div className="bg-[#fafafa] border border-[#e6e6e6] p-4 rounded-2xl md:text-right w-full">
+                  <p className="text-[11px] font-bold text-[#888] uppercase tracking-wider">Total em Compras (LTV)</p>
+                  <p className="text-2xl font-black text-[#16a34a] mt-0.5">{formatBRL(totalSpent)}</p>
+                  <p className="text-[11px] text-[#999] mt-0.5">{orders.length} pedido{orders.length !== 1 ? 's' : ''} realizados</p>
+                </div>
+
+                <button
+                  onClick={() => setShowShareModal(true)}
+                  className="px-4 py-2 bg-[#111] hover:bg-[#222] text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                >
+                  <Share2 className="w-3.5 h-3.5 text-[#B5F500]" />
+                  <span>Compartilhar Cliente</span>
+                </button>
               </div>
             </div>
           </div>

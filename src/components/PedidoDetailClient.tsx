@@ -3,11 +3,12 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
-import { ArrowLeft, Package, Clock, Loader2, CheckCircle2, Send, Printer, User, Calendar, ShoppingCart, RefreshCw, Box, Truck } from 'lucide-react'
+import { ArrowLeft, Package, Clock, Loader2, CheckCircle2, Send, Printer, User, Calendar, ShoppingCart, RefreshCw, Box, Truck, MessageSquare, Share2, FileText } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import type { OrderDetail } from '@/lib/detail-types'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
 import { moveOrderToPaid, moveOrderStatus } from '@/app/(admin)/pedidos/actions'
+import ShareContextModal from '@/components/internal-chat/ShareContextModal'
 
 function formatBRL(value: number) {
   return `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -269,8 +270,20 @@ function TimelineTab({ order }: { order: OrderDetail }) {
   )
 }
 
-function OrderActions({ status, orderId }: { status: string; orderId: string }) {
+function OrderActions({ order }: { order: OrderDetail }) {
   const [isPending, startTransition] = useTransition()
+  const [shareModal, setShareModal] = useState<{
+    isOpen: boolean
+    type: 'CARD_ORDER' | 'CARD_INVOICE' | 'CARD_SHIPPING'
+    title: string
+    metadata: any
+    note?: string
+  }>({
+    isOpen: false,
+    type: 'CARD_ORDER',
+    title: '',
+    metadata: {}
+  })
   const router = useRouter()
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -281,62 +294,108 @@ function OrderActions({ status, orderId }: { status: string; orderId: string }) 
     })
   }
 
+  const handleShareOrder = () => {
+    setShareModal({
+      isOpen: true,
+      type: 'CARD_ORDER',
+      title: `Pedido #${order.order_number}`,
+      metadata: {
+        order_id: order.id,
+        order_number: order.order_number,
+        customer_name: order.customer.name,
+        product_name: order.items[0]?.name || 'Produto',
+        product_sku: order.items[0]?.sku || 'SKU',
+        product_image: order.items[0]?.image,
+        total_amount: order.payment.total,
+        marketplace_name: order.marketplace
+      },
+      note: 'Favor verificar os detalhes operacionais deste pedido.'
+    })
+  }
+
+  const handleShareInvoice = () => {
+    setShareModal({
+      isOpen: true,
+      type: 'CARD_INVOICE',
+      title: `Nota Fiscal — Pedido #${order.order_number}`,
+      metadata: {
+        order_number: order.order_number,
+        invoice_number: 'NF-e 000.412.980',
+        customer_name: order.customer.name
+      },
+      note: 'Cliente solicitou a emissão/envio da Nota Fiscal.'
+    })
+  }
+
   return (
-    <div className="flex flex-wrap gap-2 mt-3">
-      <button
-        onClick={() => router.push(`/pedidos/${orderId}/etiqueta`)}
-        className="inline-flex items-center gap-1.5 bg-[#3483fa] hover:bg-[#2968c8] text-white text-[11px] font-bold px-3 py-1.5 rounded-md transition-colors shadow-xs cursor-pointer"
-      >
-        <Printer className="w-3 h-3" />
-        Imprimir Etiqueta de Envio (100x150mm)
-      </button>
-      <button
-        onClick={() => router.push(`/pedidos/${orderId}/nota`)}
-        className="inline-flex items-center gap-1.5 bg-white border border-[#e6e6e6] text-[#333] text-[11px] font-medium px-3 py-1.5 rounded-md hover:bg-[#f5f5f5] transition-colors cursor-pointer"
-      >
-        <Printer className="w-3 h-3" />
-        Comprovante / Declaração
-      </button>
-      {status === 'NOVO' && (
+    <>
+      <ShareContextModal
+        isOpen={shareModal.isOpen}
+        onClose={() => setShareModal(prev => ({ ...prev, isOpen: false }))}
+        title={shareModal.title}
+        messageType={shareModal.type}
+        metadata={shareModal.metadata}
+        defaultNote={shareModal.note}
+      />
+
+      <div className="flex flex-wrap gap-2 mt-3">
+        {/* BOTÕES DE COMPARTILHAMENTO OPERACIONAL 360° */}
         <button
-          onClick={() => handleAction(() => moveOrderToPaid(orderId))}
-          disabled={isPending}
-          className="inline-flex items-center gap-1.5 bg-[#38a169] text-white text-[11px] font-medium px-3 py-1.5 rounded-md hover:bg-[#2d8f55] transition-colors disabled:opacity-50"
+          onClick={handleShareOrder}
+          className="inline-flex items-center gap-1.5 bg-[#111] hover:bg-[#222] text-white text-[11px] font-bold px-3 py-1.5 rounded-xl transition-all shadow-xs cursor-pointer"
+          title="Compartilhar este pedido com outro colaborador no Chat"
         >
-          {isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />}
-          Confirmar Pagamento
+          <Share2 className="w-3 h-3 text-[#B5F500]" />
+          Compartilhar Pedido
         </button>
-      )}
-      {status === 'PAGO' && (
+
         <button
-          onClick={() => handleAction(() => moveOrderStatus(orderId, 'AGUARDANDO_SEPARACAO'))}
-          disabled={isPending}
-          className="inline-flex items-center gap-1.5 bg-[#e67e22] text-white text-[11px] font-medium px-3 py-1.5 rounded-md hover:bg-[#d35400] transition-colors disabled:opacity-50"
+          onClick={handleShareInvoice}
+          className="inline-flex items-center gap-1.5 bg-white border border-[#d0d7de] hover:bg-[#f8fafc] text-[#1e293b] text-[11px] font-bold px-3 py-1.5 rounded-xl transition-all shadow-2xs cursor-pointer"
+          title="Compartilhar solicitação de nota fiscal"
         >
-          {isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Package className="w-3 h-3" />}
-          Enviar para Separação
+          <FileText className="w-3 h-3 text-[#0284c7]" />
+          Pedir Nota Fiscal
         </button>
-      )}
-      {status === 'SEPARADO' && (
+
         <button
-          onClick={() => handleAction(() => moveOrderStatus(orderId, 'ENVIADO'))}
-          disabled={isPending}
-          className="inline-flex items-center gap-1.5 bg-[#3483fa] text-white text-[11px] font-medium px-3 py-1.5 rounded-md hover:bg-[#2968c8] transition-colors disabled:opacity-50"
+          onClick={() => router.push(`/pedidos/${order.id}/etiqueta`)}
+          className="inline-flex items-center gap-1.5 bg-[#3483fa] hover:bg-[#2968c8] text-white text-[11px] font-bold px-3 py-1.5 rounded-xl transition-colors shadow-xs cursor-pointer"
         >
-          {isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
-          Enviar
+          <Printer className="w-3 h-3" />
+          Imprimir Etiqueta (100x150mm)
         </button>
-      )}
-      {['NOVO', 'PAGO', 'AGUARDANDO_SEPARACAO', 'EM_SEPARACAO'].includes(status) && (
+        
         <button
-          onClick={() => handleAction(() => moveOrderStatus(orderId, 'CANCELADO'))}
-          disabled={isPending}
-          className="inline-flex items-center gap-1.5 border border-[#e74c3c]/30 text-[#e74c3c] text-[11px] font-medium px-3 py-1.5 rounded-md hover:bg-[#fff5f5] transition-colors disabled:opacity-50"
+          onClick={() => router.push(`/pedidos/${order.id}/nota`)}
+          className="inline-flex items-center gap-1.5 bg-white border border-[#e6e6e6] text-[#333] text-[11px] font-medium px-3 py-1.5 rounded-xl hover:bg-[#f5f5f5] transition-colors cursor-pointer"
         >
-          Cancelar
+          <Printer className="w-3 h-3" />
+          Declaração
         </button>
-      )}
-    </div>
+
+        {order.status === 'NOVO' && (
+          <button
+            onClick={() => handleAction(() => moveOrderToPaid(order.id))}
+            disabled={isPending}
+            className="inline-flex items-center gap-1.5 bg-[#38a169] text-white text-[11px] font-medium px-3 py-1.5 rounded-xl hover:bg-[#2d8f55] transition-colors disabled:opacity-50"
+          >
+            {isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />}
+            Confirmar Pagamento
+          </button>
+        )}
+        {order.status === 'PAGO' && (
+          <button
+            onClick={() => handleAction(() => moveOrderStatus(order.id, 'AGUARDANDO_SEPARACAO'))}
+            disabled={isPending}
+            className="inline-flex items-center gap-1.5 bg-[#e67e22] text-white text-[11px] font-medium px-3 py-1.5 rounded-xl hover:bg-[#d35400] transition-colors disabled:opacity-50"
+          >
+            {isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Package className="w-3 h-3" />}
+            Enviar para Separação
+          </button>
+        )}
+      </div>
+    </>
   )
 }
 
@@ -378,7 +437,7 @@ export default function PedidoDetailClient({ order }: { order: OrderDetail }) {
                   </span>
                   <span className={`inline-flex px-2.5 py-1 rounded-xl text-[11px] font-bold ${sc.c}`}>{sc.l}</span>
                 </div>
-                <OrderActions status={order.status} orderId={order.id} />
+                <OrderActions order={order} />
               </div>
               <div className="sm:text-right bg-[#f8fafc] sm:bg-transparent p-4 sm:p-0 rounded-2xl border sm:border-0 border-[#e2e8f0] shrink-0">
                 <p className="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Total do Pedido</p>
