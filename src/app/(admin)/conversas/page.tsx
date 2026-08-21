@@ -71,16 +71,16 @@ export default function ConversasPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto h-[calc(100vh-100px)] flex flex-col space-y-3 animate-in fade-in duration-200 pb-4">
-      {/* Top Header */}
+    <div className="max-w-7xl mx-auto h-[calc(100vh-100px)] flex flex-col space-y-3 animate-in fade-in duration-200 pb-2">
+      {/* Top Header Clean */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl sm:text-2xl font-black text-[#111] tracking-tight flex items-center gap-2">
-            <MessageSquare className="w-6 h-6 text-[#111]" />
-            <span>Central de Conversas & Chat Interno</span>
+            <MessageSquare className="w-5 h-5 text-[#111]" />
+            <span>Conversas & Chat Operacional</span>
           </h1>
           <p className="text-xs text-[#666] mt-0.5">
-            Comunicação operacional em tempo real entre equipes, pedidos e departamentos
+            Comunicação interna em tempo real entre equipes, pedidos e notas fiscais
           </p>
         </div>
 
@@ -93,15 +93,15 @@ export default function ConversasPage() {
         </button>
       </div>
 
-      {/* Grid Principal de 3 Colunas */}
-      <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-3 bg-white rounded-2xl border border-[#e6e6e6] overflow-hidden shadow-2xs">
+      {/* Grid Principal Clean (2 Colunas: Sidebar + Chat) */}
+      <div className="flex-1 flex bg-white rounded-2xl border border-[#e6e6e6] overflow-hidden shadow-2xs">
         
         {/* ========================================================================= */}
         {/* 📋 COLUNA 1: LISTA DE CONVERSAS & GRUPOS (LADO ESQUERDO) */}
         {/* ========================================================================= */}
-        <div className="md:col-span-4 lg:col-span-3.5 border-r border-[#f0f0f0] flex flex-col bg-[#fafafa]">
-          {/* Busca */}
-          <div className="p-3 border-b border-[#eee] bg-white">
+        <div className="w-80 sm:w-96 border-r border-[#f0f0f0] flex flex-col bg-[#fafafa] shrink-0">
+          {/* Busca & Filtros */}
+          <div className="p-3 border-b border-[#eee] bg-white space-y-2">
             <div className="relative">
               <Search className="w-3.5 h-3.5 text-[#888] absolute left-3 top-3" />
               <input
@@ -113,8 +113,8 @@ export default function ConversasPage() {
               />
             </div>
 
-            {/* Filtros de Aba */}
-            <div className="flex items-center gap-1 mt-2 overflow-x-auto pb-1 text-[11px] no-scrollbar">
+            {/* Filtros de Aba Clean */}
+            <div className="flex items-center gap-1 overflow-x-auto pb-0.5 text-[11px] no-scrollbar">
               {[
                 { id: 'ALL', label: 'Todas' },
                 { id: 'UNREAD', label: 'Não Lidas' },
@@ -124,10 +124,10 @@ export default function ConversasPage() {
                 <button
                   key={f.id}
                   onClick={() => setFilterType(f.id as any)}
-                  className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer whitespace-nowrap ${
+                  className={`px-3 py-1 rounded-lg font-bold transition-all cursor-pointer whitespace-nowrap ${
                     filterType === f.id
                       ? 'bg-[#111] text-white shadow-2xs'
-                      : 'bg-[#f0f0f0] hover:bg-[#e6e6e6] text-[#666]'
+                      : 'text-[#666] hover:bg-[#f0f0f0] hover:text-[#111]'
                   }`}
                 >
                   {f.label}
@@ -185,12 +185,12 @@ export default function ConversasPage() {
         </div>
 
         {/* ========================================================================= */}
-        {/* 💬 COLUNA 2: CHAT CENTRAL EM TEMPO REAL */}
+        {/* 💬 COLUNA 2: ÁREA DE CHAT EM TEMPO REAL (SPACIOUS & CLEAN) */}
         {/* ========================================================================= */}
-        <div className="md:col-span-8 lg:col-span-6 flex flex-col bg-white">
+        <div className="flex-1 flex flex-col bg-white">
           {activeConversation ? (
             <>
-              {/* Header do Chat */}
+              {/* Header do Chat Clean */}
               <div className="p-3.5 border-b border-[#f0f0f0] flex items-center justify-between bg-white shadow-2xs">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-[#111] text-white flex items-center justify-center text-xs font-extrabold">
@@ -204,18 +204,15 @@ export default function ConversasPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1">
-                  <button 
-                    onClick={() => alert('Informações do Canal')}
-                    className="p-2 rounded-xl hover:bg-[#f5f5f5] text-[#777] transition-colors cursor-pointer"
-                  >
-                    <MoreVertical className="w-4 h-4" />
-                  </button>
+                <div className="flex items-center gap-2">
+                  <div className="hidden sm:flex items-center gap-1 text-xs font-bold text-[#64748b]">
+                    <span>{activeConversation.members.length} participantes</span>
+                  </div>
                 </div>
               </div>
 
-              {/* Linha do Tempo das Mensagens */}
-              <div className="flex-1 p-4 overflow-y-auto space-y-3.5 bg-[#fafafa]">
+              {/* Linha do Tempo das Mensagens Clean */}
+              <div className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4 bg-[#f8fafc]">
                 {messages.map(msg => (
                   <MessageCardRenderer
                     key={msg.id}
@@ -226,8 +223,8 @@ export default function ConversasPage() {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Barra de Digitação */}
-              <div className="p-3 bg-white border-t border-[#f0f0f0] space-y-2">
+              {/* Barra de Digitação Clean */}
+              <div className="p-3.5 bg-white border-t border-[#f0f0f0] space-y-2">
                 <div className="flex items-center gap-2">
                   <input
                     type="text"
@@ -256,13 +253,13 @@ export default function ConversasPage() {
                 <div className="flex items-center justify-between text-[#777] text-xs px-1">
                   <div className="flex items-center gap-2">
                     <button 
-                      onClick={() => alert('Upload de fotos/anexos')}
+                      onClick={() => alert('Selecione uma imagem ou foto de pedido')}
                       className="p-1 rounded-lg hover:bg-[#f0f0f0] hover:text-[#111] flex items-center gap-1 text-[11px] font-bold transition-colors cursor-pointer"
                     >
                       <ImageIcon className="w-3.5 h-3.5 text-[#16a34a]" /> Foto
                     </button>
                     <button 
-                      onClick={() => alert('Upload de PDF/Nota')}
+                      onClick={() => alert('Selecione um PDF ou documento')}
                       className="p-1 rounded-lg hover:bg-[#f0f0f0] hover:text-[#111] flex items-center gap-1 text-[11px] font-bold transition-colors cursor-pointer"
                     >
                       <Paperclip className="w-3.5 h-3.5 text-[#3483fa]" /> Arquivo
@@ -281,46 +278,6 @@ export default function ConversasPage() {
               </p>
             </div>
           )}
-        </div>
-
-        {/* ========================================================================= */}
-        {/* 📌 COLUNA 3: PAINEL DE CONTEXTO & INTEGRANTES (LADO DIREITO) */}
-        {/* ========================================================================= */}
-        <div className="hidden lg:flex lg:col-span-2.5 border-l border-[#f0f0f0] flex-col bg-[#fafafa] p-4 space-y-4 overflow-y-auto">
-          {activeConversation ? (
-            <>
-              <div>
-                <p className="text-[10px] font-black uppercase text-[#94a3b8] tracking-wider">Integrantes</p>
-                <div className="mt-2 space-y-2">
-                  {activeConversation.members.map(m => (
-                    <div key={m.id} className="flex items-center gap-2 p-2 rounded-xl bg-white border border-[#eee]">
-                      <div className="w-7 h-7 rounded-full bg-[#f0f0f0] text-[#111] flex items-center justify-center text-[10px] font-black">
-                        {m.name.slice(0, 1)}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-xs font-bold text-[#111] truncate">{m.name}</p>
-                        <p className="text-[10px] text-[#777] truncate">{m.role || 'Colaborador'}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <p className="text-[10px] font-black uppercase text-[#94a3b8] tracking-wider">Atalhos Operacionais</p>
-                <div className="mt-2 space-y-1.5 text-xs font-bold">
-                  <a href="/pedidos" className="flex items-center gap-2 p-2 rounded-xl bg-white border border-[#eee] hover:bg-[#f5f5f5] text-[#333] transition-colors">
-                    <ShoppingCart className="w-4 h-4 text-[#3483fa]" />
-                    <span>Ver Pedidos Pendentes</span>
-                  </a>
-                  <a href="/atividades" className="flex items-center gap-2 p-2 rounded-xl bg-white border border-[#eee] hover:bg-[#f5f5f5] text-[#333] transition-colors">
-                    <CheckCircle2 className="w-4 h-4 text-[#16a34a]" />
-                    <span>Central de Tarefas</span>
-                  </a>
-                </div>
-              </div>
-            </>
-          ) : null}
         </div>
 
       </div>

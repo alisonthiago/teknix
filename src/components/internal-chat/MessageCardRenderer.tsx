@@ -243,23 +243,31 @@ export default function MessageCardRenderer({ message, isMe }: MessageCardRender
     }
   }
 
+  const isCard = message.message_type !== 'TEXT'
+
   return (
-    <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} space-y-1`}>
-      <div className="flex items-center gap-2 text-[10px] text-[#888] px-1">
-        <span className="font-bold text-[#444]">{message.sender_name}</span>
+    <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} space-y-1 w-full`}>
+      <div className="flex items-center gap-2 text-[10px] text-[#94a3b8] px-1">
+        <span className="font-bold text-[#475569]">{message.sender_name}</span>
         <span>•</span>
         <span>{new Date(message.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
       </div>
 
-      <div
-        className={`rounded-2xl p-3 max-w-md ${
-          isMe
-            ? 'bg-[#111] text-white rounded-br-xs shadow-2xs'
-            : 'bg-[#f1f5f9] text-[#1e293b] rounded-bl-xs'
-        }`}
-      >
-        {renderContent()}
-      </div>
+      {isCard ? (
+        <div className="max-w-md w-full">
+          {renderContent()}
+        </div>
+      ) : (
+        <div
+          className={`rounded-2xl px-4 py-2.5 max-w-md text-[13px] leading-relaxed shadow-2xs ${
+            isMe
+              ? 'bg-[#111] text-white rounded-br-xs'
+              : 'bg-white border border-[#e2e8f0] text-[#1e293b] rounded-bl-xs'
+          }`}
+        >
+          <p className="whitespace-pre-wrap">{message.content}</p>
+        </div>
+      )}
     </div>
   )
 }
