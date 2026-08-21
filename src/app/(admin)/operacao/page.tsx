@@ -270,21 +270,21 @@ function ProductsTab() {
               })}
             </div>
 
-            {/* Dropdown com Todas as Situações */}
+            {/* Dropdown com Todas as Situações Clean */}
             <select
               value={situationFilter}
               onChange={(e) => setSituationFilter(e.target.value as any)}
               className="h-[38px] px-3.5 bg-[#f8f9fa] hover:bg-[#f0f0f0] border border-[#e6e6e6] rounded-xl text-xs font-bold text-[#333] focus:outline-none focus:border-[#111] cursor-pointer shadow-2xs transition-all"
             >
               <option value="ALL">Todas Situações ({counts.ALL})</option>
-              <option value="ACTIVE">✓ Ativos ({counts.ACTIVE})</option>
-              <option value="PAUSED">⏸ Pausados ({counts.PAUSED})</option>
-              <option value="BLOCKED">🚫 Bloqueados ({counts.BLOCKED})</option>
-              <option value="LOCKED">🔒 Travados ({counts.LOCKED})</option>
-              <option value="BANNED">✕ Banidos ({counts.BANNED})</option>
-              <option value="OUT_OF_STOCK">⚠ Sem Estoque ({counts.OUT_OF_STOCK})</option>
-              <option value="ERROR">⚠ Com Erro ({counts.ERROR})</option>
-              <option value="SYNC_ISSUE">🔄 Problema Sync ({counts.SYNC_ISSUE})</option>
+              <option value="ACTIVE">Ativos ({counts.ACTIVE})</option>
+              <option value="PAUSED">Pausados ({counts.PAUSED})</option>
+              <option value="BLOCKED">Bloqueados ({counts.BLOCKED})</option>
+              <option value="LOCKED">Travados ({counts.LOCKED})</option>
+              <option value="BANNED">Banidos ({counts.BANNED})</option>
+              <option value="OUT_OF_STOCK">Sem Estoque ({counts.OUT_OF_STOCK})</option>
+              <option value="ERROR">Com Erro ({counts.ERROR})</option>
+              <option value="SYNC_ISSUE">Problema Sync ({counts.SYNC_ISSUE})</option>
             </select>
 
             {/* Ações em Lote ou Botões de Ação */}
