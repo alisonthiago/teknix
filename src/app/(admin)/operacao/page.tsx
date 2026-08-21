@@ -230,94 +230,109 @@ function ProductsTab() {
         <StatCard label="Sem Estoque" value={String(counts.OUT_OF_STOCK || 0)} />
       </div>
 
-      {/* FILTRO DE PRODUTOS POR SITUAÇÃO MODERNO & RESUMIDO */}
-      <div className="bg-white rounded-2xl border border-[#e6e6e6] p-2 sm:p-2.5 shadow-2xs">
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 text-[12px] no-scrollbar">
-          {[
-            { id: 'ALL', label: 'Todos', count: counts.ALL, icon: Package, activeBg: 'bg-[#111] text-white', badgeBg: 'bg-[#B5F500] text-[#111]', dot: 'bg-white' },
-            { id: 'ACTIVE', label: 'Ativos', count: counts.ACTIVE, icon: CheckCircle2, activeBg: 'bg-[#16a34a] text-white', badgeBg: 'bg-white/25 text-white', dot: 'bg-[#16a34a]' },
-            { id: 'PAUSED', label: 'Pausados', count: counts.PAUSED, icon: PauseCircle, activeBg: 'bg-[#d97706] text-white', badgeBg: 'bg-white/25 text-white', dot: 'bg-[#d97706]' },
-            { id: 'BLOCKED', label: 'Bloqueados', count: counts.BLOCKED, icon: ShieldAlert, activeBg: 'bg-[#dc2626] text-white', badgeBg: 'bg-white/25 text-white', dot: 'bg-[#dc2626]' },
-            { id: 'LOCKED', label: 'Travados', count: counts.LOCKED, icon: Lock, activeBg: 'bg-[#4f46e5] text-white', badgeBg: 'bg-white/25 text-white', dot: 'bg-[#4f46e5]' },
-            { id: 'BANNED', label: 'Banidos', count: counts.BANNED, icon: Ban, activeBg: 'bg-[#1e293b] text-white', badgeBg: 'bg-white/25 text-white', dot: 'bg-[#1e293b]' },
-            { id: 'OUT_OF_STOCK', label: 'Sem Estoque', count: counts.OUT_OF_STOCK, icon: AlertCircle, activeBg: 'bg-[#475569] text-white', badgeBg: 'bg-white/25 text-white', dot: 'bg-[#64748b]' },
-            { id: 'ERROR', label: 'Com Erro', count: counts.ERROR, icon: AlertTriangle, activeBg: 'bg-[#ea580c] text-white', badgeBg: 'bg-white/25 text-white', dot: 'bg-[#ea580c]' },
-            { id: 'SYNC_ISSUE', label: 'Erro Sync', count: counts.SYNC_ISSUE, icon: RefreshCw, activeBg: 'bg-[#e11d48] text-white', badgeBg: 'bg-white/25 text-white', dot: 'bg-[#e11d48]' },
-          ].map(f => {
-            const isActive = situationFilter === f.id
-            const Icon = f.icon
-            return (
-              <button
-                key={f.id}
-                onClick={() => setSituationFilter(f.id as any)}
-                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer shrink-0 ${
-                  isActive
-                    ? `${f.activeBg} shadow-sm scale-[1.02]`
-                    : 'bg-[#f8f9fa] hover:bg-[#eee] text-[#555] border border-transparent hover:border-[#e6e6e6]'
-                }`}
-              >
-                <div className="flex items-center gap-1.5">
-                  {!isActive && <span className={`w-1.5 h-1.5 rounded-full ${f.dot}`} />}
-                  <Icon className="w-3.5 h-3.5" />
-                  <span>{f.label}</span>
-                </div>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black min-w-[20px] text-center ${
-                  isActive ? f.badgeBg : 'bg-[#e8ecef] text-[#444]'
-                }`}>
-                  {f.count}
-                </span>
-              </button>
-            )
-          })}
-        </div>
-      </div>
+      {/* TOOLBAR UNIFICADA: BUSCA + FILTRO DE SITUAÇÃO COMPACTO & CLEAN */}
+      <div className="bg-white rounded-2xl border border-[#e6e6e6] p-3 shadow-2xs space-y-3">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          {/* Campo de Busca */}
+          <div className="flex-1 max-w-md">
+            <SearchInput placeholder="Buscar por título, SKU, marca..." value={search} onChange={setSearch} />
+          </div>
 
-      {/* Barra de Busca e Ações em Lote */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:justify-between">
-        <SearchInput placeholder="Buscar por título, SKU, marca..." value={search} onChange={setSearch} />
-        {selectedItems.length > 0 ? (
-          <div className="flex flex-wrap items-center gap-2 bg-[#f0f7ff] px-3 py-1.5 rounded-xl border border-[#3483fa]/20 shadow-2xs">
-            <span className="text-[12px] font-bold text-[#3483fa] mr-1">{selectedItems.length} selecionado(s)</span>
-            <button onClick={handleExportSelected} className="flex items-center gap-1 text-[11px] font-bold text-[#3483fa] bg-white px-2.5 py-1.5 rounded-lg border border-[#3483fa]/20 hover:bg-[#3483fa] hover:text-white transition-colors cursor-pointer shadow-2xs"><Download className="w-3.5 h-3.5" /> Exportar</button>
-            <button onClick={handleDeleteSelected} className="flex items-center gap-1 text-[11px] font-bold text-[#dc2626] bg-white px-2.5 py-1.5 rounded-lg border border-[#dc2626]/20 hover:bg-[#dc2626] hover:text-white transition-colors cursor-pointer shadow-2xs"><Trash2 className="w-3.5 h-3.5" /> Excluir</button>
+          {/* Filtro de Situação Clean (Estilo Filtro de Período / Data) */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Quick Pills (Mais frequentes) */}
+            <div className="bg-[#f5f5f5] p-1 rounded-xl flex items-center gap-1">
+              {[
+                { id: 'ALL', label: 'Todos', count: counts.ALL },
+                { id: 'ACTIVE', label: 'Ativos', count: counts.ACTIVE },
+                { id: 'PAUSED', label: 'Pausados', count: counts.PAUSED },
+                { id: 'OUT_OF_STOCK', label: 'Sem Estoque', count: counts.OUT_OF_STOCK },
+              ].map(item => {
+                const isActive = situationFilter === item.id
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setSituationFilter(item.id as any)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                      isActive
+                        ? 'bg-white text-[#111] shadow-2xs'
+                        : 'text-[#666] hover:text-[#111]'
+                    }`}
+                  >
+                    <span>{item.label}</span>
+                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
+                      isActive ? 'bg-[#111] text-white' : 'bg-[#e6e6e6] text-[#666]'
+                    }`}>
+                      {item.count}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Dropdown com Todas as Situações */}
+            <select
+              value={situationFilter}
+              onChange={(e) => setSituationFilter(e.target.value as any)}
+              className="h-[38px] px-3.5 bg-[#f8f9fa] hover:bg-[#f0f0f0] border border-[#e6e6e6] rounded-xl text-xs font-bold text-[#333] focus:outline-none focus:border-[#111] cursor-pointer shadow-2xs transition-all"
+            >
+              <option value="ALL">Todas Situações ({counts.ALL})</option>
+              <option value="ACTIVE">✓ Ativos ({counts.ACTIVE})</option>
+              <option value="PAUSED">⏸ Pausados ({counts.PAUSED})</option>
+              <option value="BLOCKED">🚫 Bloqueados ({counts.BLOCKED})</option>
+              <option value="LOCKED">🔒 Travados ({counts.LOCKED})</option>
+              <option value="BANNED">✕ Banidos ({counts.BANNED})</option>
+              <option value="OUT_OF_STOCK">⚠ Sem Estoque ({counts.OUT_OF_STOCK})</option>
+              <option value="ERROR">⚠ Com Erro ({counts.ERROR})</option>
+              <option value="SYNC_ISSUE">🔄 Problema Sync ({counts.SYNC_ISSUE})</option>
+            </select>
+
+            {/* Ações em Lote ou Botões de Ação */}
+            {selectedItems.length > 0 ? (
+              <div className="flex items-center gap-2 bg-[#f0f7ff] px-3 py-1 rounded-xl border border-[#3483fa]/20 shadow-2xs">
+                <span className="text-xs font-bold text-[#3483fa]">{selectedItems.length} sel.</span>
+                <button onClick={handleExportSelected} className="text-xs font-bold text-[#3483fa] hover:underline cursor-pointer">Exportar</button>
+                <button onClick={handleDeleteSelected} className="text-xs font-bold text-[#dc2626] hover:underline cursor-pointer">Excluir</button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <SecondaryButton onClick={() => document.getElementById('import-products')?.click()}><Upload className="w-3.5 h-3.5" /> Importar</SecondaryButton>
+                <input 
+                  type="file" 
+                  id="import-products" 
+                  className="hidden" 
+                  accept=".xlsx,.xls,.csv" 
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0]
+                    if (!file) return
+                    try {
+                      const data = await importFromExcel(file, {
+                        name: ['nome', 'name', 'produto', 'título'],
+                        sku: ['sku', 'código', 'ref'],
+                        ean: ['ean', 'código de barras', 'gtin'],
+                        category: ['categoria', 'category'],
+                        cost_purchase: ['custo', 'preço de custo', 'cost'],
+                        current_price: ['preço', 'price', 'valor'],
+                        stock: ['estoque', 'quantidade', 'stock']
+                      })
+                      if (data.length > 0) {
+                        const supabase = createClient()
+                        await supabase.from('products').insert(data)
+                        refetch()
+                        notify({ type: 'success', title: 'Produtos Importados', message: `${data.length} produtos adicionados com sucesso.` })
+                      }
+                    } catch (err) {
+                      notify({ type: 'error', title: 'Erro de Importação', message: 'Falha ao processar arquivo.' })
+                    }
+                    e.target.value = ''
+                  }} 
+                />
+                <SecondaryButton onClick={handleExportAll}><Download className="w-3.5 h-3.5" /> Exportar</SecondaryButton>
+                <PrimaryButton onClick={() => setShowCreate(true)}><Plus className="w-3.5 h-3.5" /> Novo</PrimaryButton>
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="flex flex-wrap items-center gap-2">
-            <SecondaryButton onClick={() => document.getElementById('import-products')?.click()}><Upload className="w-3.5 h-3.5" /> Importar</SecondaryButton>
-            <input 
-              type="file" 
-              id="import-products" 
-              className="hidden" 
-              accept=".xlsx,.xls,.csv" 
-              onChange={async (e) => {
-                const file = e.target.files?.[0]
-                if (!file) return
-                try {
-                  const data = await importFromExcel(file, {
-                    name: ['nome', 'name', 'produto', 'título'],
-                    sku: ['sku', 'código', 'ref'],
-                    ean: ['ean', 'código de barras', 'gtin'],
-                    category: ['categoria', 'category'],
-                    cost_purchase: ['custo', 'preço de custo', 'cost'],
-                    current_price: ['preço', 'price', 'valor'],
-                    stock: ['estoque', 'quantidade', 'stock']
-                  })
-                  if (data.length > 0) {
-                    const supabase = createClient()
-                    await supabase.from('products').insert(data)
-                    refetch()
-                    notify({ type: 'success', title: 'Produtos Importados', message: `${data.length} produtos adicionados com sucesso.` })
-                  }
-                } catch (err) {
-                  notify({ type: 'error', title: 'Erro de Importação', message: 'Falha ao processar arquivo.' })
-                }
-                e.target.value = ''
-              }} 
-            />
-            <SecondaryButton onClick={handleExportAll}><Download className="w-3.5 h-3.5" /> Exportar</SecondaryButton>
-            <PrimaryButton onClick={() => setShowCreate(true)}><Plus className="w-3.5 h-3.5" /> Novo produto</PrimaryButton>
-          </div>
-        )}
+        </div>
       </div>
 
       {loading ? (
