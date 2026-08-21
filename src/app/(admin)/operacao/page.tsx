@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus, Download, Upload, Package, Truck, ShoppingCart, Warehouse, Eye, Edit, Trash2, ClipboardCheck, CheckCircle2, AlertTriangle, Building2, Ban, Printer, Share2 } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
@@ -14,7 +14,7 @@ import { useNotification } from '@/contexts/NotificationContext'
 import ProductMarketplaceActionModal from '@/components/ProductMarketplaceActionModal'
 import ProductDiagnosticModal from '@/components/ProductDiagnosticModal'
 import ShareContextModal from '@/components/internal-chat/ShareContextModal'
-import { PauseCircle, PlayCircle, Lock, Unlock, RefreshCw, Info, MoreHorizontal, ShieldAlert, AlertCircle } from 'lucide-react'
+import { PauseCircle, PlayCircle, Lock, Unlock, RefreshCw, Info, MoreHorizontal, MoreVertical, ShieldAlert, AlertCircle } from 'lucide-react'
 
 const ProductCreateModal = dynamic(() => import('@/components/ProductCreateModal'), { ssr: false })
 const SupplierCreateModal = dynamic(() => import('@/components/SupplierCreateModal'), { ssr: false })
@@ -29,6 +29,14 @@ function ProductsTab() {
   const [selectedItems, setSelectedItems] = useState<string[]>([])
   const [situationFilter, setSituationFilter] = useState<'ALL' | 'ACTIVE' | 'PAUSED' | 'BLOCKED' | 'LOCKED' | 'BANNED' | 'OUT_OF_STOCK' | 'ERROR' | 'SYNC_ISSUE'>('ALL')
   const [shareProduct, setShareProduct] = useState<any | null>(null)
+  const [activeActionMenuId, setActiveActionMenuId] = useState<string | null>(null)
+
+  // Fecha o menu de ações ao clicar em qualquer lugar fora dele
+  useEffect(() => {
+    const handleClickOutside = () => setActiveActionMenuId(null)
+    window.addEventListener('click', handleClickOutside)
+    return () => window.removeEventListener('click', handleClickOutside)
+  }, [])
 
   // Modais de Controle e Diagnóstico
   const [actionModal, setActionModal] = useState<{
@@ -373,7 +381,7 @@ function ProductsTab() {
               }[status] || { label: 'Ativo', bg: 'bg-[#ecfdf5] text-[#16a34a] border-[#bbf7d0]' }
 
               return (
-                <tr key={p.id as string} onClick={() => router.push(`/produtos/${p.id}`)} className="hover:bg-[#fafafa] transition-colors cursor-pointer group">
+                <tr key={p.id as string} onClick={() => router.push(`/produtos/${p.id}`)} className="hover:bg-[#f8fafc] transition-colors cursor-pointer group">
                   <Td>
                     <div onClick={(e) => e.stopPropagation()}>
                       <input 
@@ -408,94 +416,145 @@ function ProductsTab() {
                     </div>
                   </Td>
                   <Td className="text-[#666] text-xs">{supplierName}</Td>
-                  <Td className="text-right text-xs font-semibold text-[#111]">R$ {cost.toFixed(2)}</Td>
-                  <Td className="text-right">
+                  <Td className="text-right text-xs font-bold text-[#111] whitespace-nowrap">
+                    R$ {cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </Td>
+                  <Td className="text-right whitespace-nowrap">
                     <span className={`font-bold text-xs ${stock === 0 ? 'text-[#dc2626]' : stock <= minStock ? 'text-[#d97706]' : 'text-[#111]'}`}>
                       {stock}
                     </span>
                   </Td>
-                  <Td className="text-center">
+                  <Td className="text-center whitespace-nowrap">
                     <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-black border ${statusBadgeConfig.bg}`}>
                       {stock === 0 && status === 'ACTIVE' ? 'Sem Estoque' : statusBadgeConfig.label}
                     </span>
                   </Td>
                   
-                  {/* CONTROLE CENTRALIZADO DE AÇÕES (CONFORME SOLICITADO) */}
-                  <Td className="text-right">
-                    <div className="flex items-center justify-end gap-1" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
-                      {/* Botão Diagnóstico / Motivo */}
-                      <button 
-                        onClick={() => setDiagnosticModal({ isOpen: true, product: p })}
-                        title="Ver Diagnóstico do Marketplace & Motivo"
-                        className="p-1.5 rounded-lg border border-[#e6e6e6] hover:bg-[#f0f7ff] text-[#555] hover:text-[#3483fa] transition-colors cursor-pointer shadow-2xs"
-                      >
-                        <Info className="w-3.5 h-3.5" />
-                      </button>
-
-                      {/* Botão Pausar / Ativar Direto */}
-                      {isPaused ? (
-                        <button
-                          onClick={() => setActionModal({ isOpen: true, product: p, action: 'activate' })}
-                          title="Ativar Anúncio no Marketplace"
-                          className="p-1.5 rounded-lg border border-[#bbf7d0] bg-[#f0fff4] hover:bg-[#dcfce7] text-[#16a34a] transition-colors cursor-pointer shadow-2xs"
-                        >
-                          <PlayCircle className="w-3.5 h-3.5" />
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => setActionModal({ isOpen: true, product: p, action: 'pause' })}
-                          title="Pausar Anúncio no Marketplace"
-                          className="p-1.5 rounded-lg border border-[#fde68a] bg-[#fffbeb] hover:bg-[#fef3c7] text-[#d97706] transition-colors cursor-pointer shadow-2xs"
-                        >
-                          <PauseCircle className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-
-                      {/* Botão Travar / Destravar */}
-                      {isLocked ? (
-                        <button
-                          onClick={() => setActionModal({ isOpen: true, product: p, action: 'unlock' })}
-                          title="Destravar Produto"
-                          className="p-1.5 rounded-lg border border-[#c7d2fe] bg-[#e0e7ff] text-[#4338ca] hover:bg-[#c7d2fe] transition-colors cursor-pointer shadow-2xs"
-                        >
-                          <Unlock className="w-3.5 h-3.5" />
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => setActionModal({ isOpen: true, product: p, action: 'lock' })}
-                          title="Travar Preço & Estoque"
-                          className="p-1.5 rounded-lg border border-[#e6e6e6] hover:bg-[#f5f5f5] text-[#777] hover:text-[#4338ca] transition-colors cursor-pointer shadow-2xs"
-                        >
-                          <Lock className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-
-                      {/* Botão Sincronizar */}
+                  {/* MENU DE 3 PONTOS (DESIGN CLEAN & POPUP DE AÇÕES) */}
+                  <Td className="text-right relative">
+                    <div className="flex items-center justify-end" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
                       <button
-                        onClick={() => setActionModal({ isOpen: true, product: p, action: 'sync' })}
-                        title="Sincronizar com Marketplace"
-                        className="p-1.5 rounded-lg border border-[#e6e6e6] hover:bg-[#f5f5f5] text-[#777] hover:text-[#0284c7] transition-colors cursor-pointer shadow-2xs"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setActiveActionMenuId(activeActionMenuId === p.id ? null : p.id)
+                        }}
+                        title="Opções do Produto"
+                        className={`p-2 rounded-xl border transition-all cursor-pointer shadow-2xs ${
+                          activeActionMenuId === p.id
+                            ? 'bg-[#111111] text-white border-[#111111]'
+                            : 'border-[#e6e6e6] bg-white hover:bg-[#f8fafc] text-[#64748b] hover:text-[#0f172a]'
+                        }`}
                       >
-                        <RefreshCw className="w-3.5 h-3.5" />
+                        <MoreHorizontal className="w-4 h-4" />
                       </button>
 
-                      {/* Botão Compartilhar no Chat */}
-                      <button
-                        onClick={() => setShareProduct(p)}
-                        title="Compartilhar no Chat com Colaborador"
-                        className="p-1.5 rounded-lg border border-[#e6e6e6] hover:bg-[#16a34a] hover:text-white text-[#777] transition-all cursor-pointer shadow-sm"
-                      >
-                        <Share2 className="w-3.5 h-3.5" />
-                      </button>
+                      {/* POPUP DROPDOWN DE AÇÕES DAS 3 PONTAS (DESIGN ULTRA CLEAN & COMPACTO) */}
+                      {activeActionMenuId === p.id && (
+                        <div 
+                          className="absolute right-0 top-full mt-1.5 z-50 bg-white border border-[#e2e8f0] rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.08)] py-1.5 w-48 animate-in fade-in zoom-in-95 duration-100 text-left"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {/* 1. Diagnóstico */}
+                          <button
+                            onClick={() => {
+                              setActiveActionMenuId(null)
+                              setDiagnosticModal({ isOpen: true, product: p })
+                            }}
+                            className="w-full px-3 py-1.5 text-[12px] font-medium text-[#334155] hover:bg-[#f8fafc] hover:text-[#0f172a] flex items-center gap-2 transition-colors cursor-pointer"
+                          >
+                            <Info className="w-3.5 h-3.5 text-[#64748b]" />
+                            <span>Diagnóstico</span>
+                          </button>
 
-                      {/* Botão Excluir Seguro */}
-                      <button 
-                        onClick={() => setDeleteModal({ isOpen: true, items: [p.id as string], name: p.name as string })}
-                        title="Excluir Produto"
-                        className="p-1.5 rounded-lg border border-[#e6e6e6] hover:bg-[#fee2e2] text-[#777] hover:text-[#dc2626] transition-colors cursor-pointer shadow-2xs"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                          {/* 2. Pausar / Ativar */}
+                          {isPaused ? (
+                            <button
+                              onClick={() => {
+                                setActiveActionMenuId(null)
+                                setActionModal({ isOpen: true, product: p, action: 'activate' })
+                              }}
+                              className="w-full px-3 py-1.5 text-[12px] font-medium text-[#16a34a] hover:bg-[#f0fff4] flex items-center gap-2 transition-colors cursor-pointer"
+                            >
+                              <PlayCircle className="w-3.5 h-3.5 text-[#16a34a]" />
+                              <span>Ativar Anúncio</span>
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => {
+                                setActiveActionMenuId(null)
+                                setActionModal({ isOpen: true, product: p, action: 'pause' })
+                              }}
+                              className="w-full px-3 py-1.5 text-[12px] font-medium text-[#334155] hover:bg-[#f8fafc] hover:text-[#d97706] flex items-center gap-2 transition-colors cursor-pointer"
+                            >
+                              <PauseCircle className="w-3.5 h-3.5 text-[#64748b]" />
+                              <span>Pausar Anúncio</span>
+                            </button>
+                          )}
+
+                          {/* 3. Travar / Destravar */}
+                          {isLocked ? (
+                            <button
+                              onClick={() => {
+                                setActiveActionMenuId(null)
+                                setActionModal({ isOpen: true, product: p, action: 'unlock' })
+                              }}
+                              className="w-full px-3 py-1.5 text-[12px] font-medium text-[#4338ca] hover:bg-[#e0e7ff] flex items-center gap-2 transition-colors cursor-pointer"
+                            >
+                              <Unlock className="w-3.5 h-3.5 text-[#4338ca]" />
+                              <span>Destravar Produto</span>
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => {
+                                setActiveActionMenuId(null)
+                                setActionModal({ isOpen: true, product: p, action: 'lock' })
+                              }}
+                              className="w-full px-3 py-1.5 text-[12px] font-medium text-[#334155] hover:bg-[#f8fafc] flex items-center gap-2 transition-colors cursor-pointer"
+                            >
+                              <Lock className="w-3.5 h-3.5 text-[#64748b]" />
+                              <span>Travar Estoque</span>
+                            </button>
+                          )}
+
+                          {/* 4. Sincronizar */}
+                          <button
+                            onClick={() => {
+                              setActiveActionMenuId(null)
+                              setActionModal({ isOpen: true, product: p, action: 'sync' })
+                            }}
+                            className="w-full px-3 py-1.5 text-[12px] font-medium text-[#334155] hover:bg-[#f8fafc] flex items-center gap-2 transition-colors cursor-pointer"
+                          >
+                            <RefreshCw className="w-3.5 h-3.5 text-[#64748b]" />
+                            <span>Sincronizar</span>
+                          </button>
+
+                          {/* 5. Compartilhar no Chat */}
+                          <button
+                            onClick={() => {
+                              setActiveActionMenuId(null)
+                              setShareProduct(p)
+                            }}
+                            className="w-full px-3 py-1.5 text-[12px] font-medium text-[#334155] hover:bg-[#f8fafc] flex items-center gap-2 transition-colors cursor-pointer"
+                          >
+                            <Share2 className="w-3.5 h-3.5 text-[#64748b]" />
+                            <span>Compartilhar</span>
+                          </button>
+
+                          <div className="border-t border-[#f1f5f9] my-1" />
+
+                          {/* 6. Excluir */}
+                          <button
+                            onClick={() => {
+                              setActiveActionMenuId(null)
+                              setDeleteModal({ isOpen: true, items: [p.id as string], name: p.name as string })
+                            }}
+                            className="w-full px-3 py-1.5 text-[12px] font-medium text-[#dc2626] hover:bg-[#fef2f2] flex items-center gap-2 transition-colors cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5 text-[#dc2626]" />
+                            <span>Excluir</span>
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </Td>
                 </tr>

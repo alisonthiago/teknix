@@ -215,38 +215,38 @@ function SalesTab() {
               {filtered.map(s => (
                 <tr 
                   key={s.id} 
-                  onClick={() => router.push(`/pedidos/${s.id}`)} 
-                  className="hover:bg-[#fafafa] transition-colors cursor-pointer group"
+                  onClick={() => router.push(`/pedidos/${s.orderId || s.id}`)} 
+                  className="hover:bg-[#f8fafc] transition-colors cursor-pointer group"
                 >
-                  <td className="py-3.5 px-4 font-mono font-bold text-[#111]">
+                  <td className="py-4.5 px-5 font-mono font-bold text-[#111] text-[13px]">
                     {s.orderId}
                   </td>
-                  <td className="py-3.5 px-4 font-semibold text-[#333]">
-                    <div className="flex items-center gap-1.5">
-                      <User className="w-3.5 h-3.5 text-[#888]" />
-                      <span>{s.customerName}</span>
+                  <td className="py-4.5 px-5 font-semibold text-[#333]">
+                    <div className="flex items-center gap-2">
+                      <User className="w-4 h-4 text-[#94a3b8]" />
+                      <span className="text-[13px]">{s.customerName}</span>
                     </div>
                   </td>
-                  <td className="py-3.5 px-4 text-[#555]">
+                  <td className="py-4.5 px-5 text-[#555]">
                     <div className="flex items-center gap-2">
                       <MarketplaceLogo name={s.marketplaceName} className="w-4 h-4" />
-                      <span className="font-semibold text-[#222]">{s.marketplaceName}</span>
+                      <span className="font-semibold text-[#222] text-[13px]">{s.marketplaceName}</span>
                     </div>
                   </td>
-                  <td className="py-3.5 px-4 text-[11px] text-[#777] font-medium">
+                  <td className="py-4.5 px-5 text-[12px] text-[#64748b] font-medium">
                     {s.accountName}
                   </td>
-                  <td className="py-3.5 px-4 text-[#666] font-medium">
+                  <td className="py-4.5 px-5 text-[#64748b] font-medium text-[13px]">
                     {s.date}
                   </td>
-                  <td className="py-3.5 px-4 text-right font-bold text-[#111]">
+                  <td className="py-4.5 px-5 text-right font-bold text-[#111] text-[13px]">
                     {s.itemsCount} un
                   </td>
-                  <td className="py-3.5 px-4 text-right font-black text-[#111] text-[13px]">
+                  <td className="py-4.5 px-5 text-right font-black text-[#111] text-[14px]">
                     {formatBRL(s.revenue)}
                   </td>
-                  <td className="py-3.5 px-4 text-center">
-                    <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-black ${
+                  <td className="py-4.5 px-5 text-center">
+                    <span className={`inline-flex px-3 py-1 rounded-full text-[11px] font-bold ${
                       s.status === 'CONCLUIDO' 
                         ? 'bg-[#ecfdf5] text-[#16a34a] border border-[#bbf7d0]' 
                         : 'bg-[#fef2f2] text-[#ef4444] border border-[#fecaca]'
@@ -254,18 +254,19 @@ function SalesTab() {
                       {s.status === 'CONCLUIDO' ? 'Concluída' : 'Cancelada'}
                     </span>
                   </td>
-                  <td className="py-3.5 px-4 text-right">
-                    <div className="flex items-center justify-end gap-1.5" onClick={e => e.stopPropagation()}>
+                  <td className="py-4.5 px-5 text-right">
+                    <div className="flex items-center justify-end gap-2" onClick={e => e.stopPropagation()}>
                       <button
                         onClick={() => setShareSale(s)}
                         title="Compartilhar no Chat com a Equipe"
-                        className="p-1.5 rounded-lg border border-[#e6e6e6] hover:bg-[#16a34a] hover:text-white text-[#777] transition-all cursor-pointer shadow-2xs"
+                        className="p-2 rounded-xl border border-[#e2e8f0] hover:bg-[#16a34a] hover:text-white text-[#64748b] transition-all cursor-pointer shadow-xs"
                       >
-                        <Share2 className="w-3.5 h-3.5" />
+                        <Share2 className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => router.push(`/pedidos/${s.id}`)}
-                        className="p-1.5 rounded-lg bg-[#f0f0f0] hover:bg-[#16a34a] hover:text-white transition-all text-[#666] cursor-pointer shadow-2xs"
+                        onClick={() => router.push(`/pedidos/${s.orderId || s.id}`)}
+                        className="p-2 rounded-xl bg-[#f1f5f9] hover:bg-[#16a34a] hover:text-white transition-all text-[#475569] cursor-pointer shadow-xs"
+                        title="Abrir Detalhes do Pedido"
                       >
                         <ChevronRight className="w-4 h-4" />
                       </button>

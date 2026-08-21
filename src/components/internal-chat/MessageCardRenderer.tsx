@@ -21,9 +21,11 @@ import { MarketplaceLogo } from '@/components/MarketplaceLogos'
 interface MessageCardRendererProps {
   message: InternalMessage
   isMe: boolean
+  showChannel?: boolean
+  channelName?: string
 }
 
-export default function MessageCardRenderer({ message, isMe }: MessageCardRendererProps) {
+export default function MessageCardRenderer({ message, isMe, showChannel, channelName }: MessageCardRendererProps) {
   const meta = message.metadata || {}
 
   const renderContent = () => {
@@ -262,6 +264,12 @@ export default function MessageCardRenderer({ message, isMe }: MessageCardRender
       )}
 
       <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} gap-1 max-w-[82%]`}>
+        {/* Canal de origem (no feed Geral) */}
+        {showChannel && channelName && (
+          <div className="flex items-center gap-1 text-[10px] text-[#94a3b8] px-1 mb-0.5">
+            <span className="px-1.5 py-0.5 rounded bg-[#f1f5f9] text-[#64748b] font-semibold">#{channelName}</span>
+          </div>
+        )}
         {/* Nome + hora */}
         <div className="flex items-center gap-1.5 text-[11px] text-[#94a3b8] px-1">
           <span className="font-bold text-[#334155]">{message.sender_name}</span>

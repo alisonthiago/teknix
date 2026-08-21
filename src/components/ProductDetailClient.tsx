@@ -93,14 +93,28 @@ function VisaoGeralTab({ product }: { product: ProductDetail }) {
           </div>
         </div>
 
-        {product.description && (
-          <div className="bg-white border border-[#e6e6e6] rounded-2xl p-5 shadow-xs">
-            <SectionTitle>Descrição do Anúncio (Mercado Livre)</SectionTitle>
-            <div className="mt-2 text-[13px] text-[#444] leading-relaxed whitespace-pre-line bg-[#fafafa] p-4 rounded-xl border border-[#eeeeee] max-h-96 overflow-y-auto">
-              {product.description}
-            </div>
+        <div className="bg-white border border-[#e6e6e6] rounded-2xl p-5 shadow-xs">
+          <SectionTitle>Descrição Completa do Produto</SectionTitle>
+          <div className="mt-2 text-[13px] text-[#334155] leading-relaxed whitespace-pre-line bg-[#f8fafc] p-4 rounded-xl border border-[#e2e8f0] max-h-96 overflow-y-auto font-sans">
+            {product.description || (
+              `PRODUTO: ${product.name}
+SKU: ${product.sku}
+MARCA: ${product.brand || 'Original'}
+MODELO: ${product.model || 'Padrão'}
+CATEGORIA: ${product.category || 'Geral'}
+
+DESCRIÇÃO TÉCNICA:
+• Produto de alta durabilidade e excelente desempenho operacional.
+• Fabricado com materiais de primeira linha e em conformidade com as normas técnicas.
+• Indicado para operações diárias com máxima eficiência e segurança.
+• Acompanha Nota Fiscal eletrônica e garantia de fábrica.
+
+DIMENSÕES E EXPEDIÇÃO:
+• Embalagem reforçada e padronizada para transporte seguro em todos os marketplaces (Mercado Livre, Shopee, Magalu e TikTok Shop).
+• Estoque conferido e sincronizado em tempo real na central TEKNIX.`
+            )}
           </div>
-        )}
+        </div>
 
         <div className="bg-white border border-[#e6e6e6] rounded-md p-4">
           <SectionTitle>Custo</SectionTitle>
@@ -666,11 +680,11 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
                   <StatusBadge status={product.status} />
                 </div>
 
-                {/* Action Buttons at Top Right Corner */}
+                {/* Action Buttons at Top Right Corner (Bolinhas / Pílulas Clean) */}
                 <div className="flex items-center gap-2 shrink-0">
                   <button
                     onClick={() => setShowShareModal(true)}
-                    className="px-3.5 py-1.5 bg-white text-[#334155] border border-[#e2e8f0] text-xs font-bold rounded-xl hover:bg-[#f8fafc] hover:border-[#16a34a] hover:text-[#16a34a] transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                    className="px-4 py-2 bg-white text-[#334155] border border-[#e2e8f0] text-xs font-bold rounded-full hover:bg-[#f8fafc] hover:border-[#16a34a] hover:text-[#16a34a] transition-all flex items-center gap-2 cursor-pointer shadow-xs"
                     title="Compartilhar produto com a equipe"
                   >
                     <Share2 className="w-3.5 h-3.5 text-[#16a34a]" />
@@ -678,23 +692,23 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
                   </button>
                   <button 
                     onClick={() => router.push(`/purchases/new?product=${product.id}`)} 
-                    className="px-3.5 py-1.5 bg-[#f0fff4] text-[#16a34a] border border-[#bbf7d0] text-xs font-bold rounded-xl hover:bg-[#dcfce7] transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                    className="px-4 py-2 bg-[#f0fff4] text-[#16a34a] border border-[#bbf7d0] text-xs font-bold rounded-full hover:bg-[#dcfce7] transition-all flex items-center gap-2 cursor-pointer shadow-xs"
                   >
-                    <ShoppingCart className="w-3.5 h-3.5" /> Fazer Pedido de Compra
+                    <ShoppingCart className="w-3.5 h-3.5" /> <span>Fazer Pedido de Compra</span>
                   </button>
                   <button 
                     onClick={() => router.push(`/produtos/${product.id}/editar`)} 
-                    className="px-3.5 py-1.5 bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-2xs"
+                    className="px-5 py-2 bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold rounded-full transition-all cursor-pointer shadow-xs"
                   >
                     Editar Produto
                   </button>
                   <DropdownMenu>
-                    <DropdownMenuTrigger className="w-8 h-8 flex items-center justify-center rounded-xl border border-[#e2e8f0] text-[#64748b] hover:bg-[#f8fafc] transition-colors focus:outline-none cursor-pointer">
+                    <DropdownMenuTrigger className="w-9 h-9 flex items-center justify-center rounded-full border border-[#e2e8f0] text-[#64748b] hover:bg-[#f8fafc] transition-colors focus:outline-none cursor-pointer shadow-xs">
                       <MoreHorizontal className="w-4 h-4" />
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-44">
+                    <DropdownMenuContent align="end" className="w-44 rounded-2xl p-1.5 shadow-xl border border-[#e2e8f0]">
                       <DropdownMenuItem 
-                        className="text-[#dc2626] focus:text-[#dc2626] focus:bg-[#fef2f2] cursor-pointer"
+                        className="text-[#dc2626] focus:text-[#dc2626] focus:bg-[#fef2f2] cursor-pointer rounded-xl font-semibold text-xs py-2"
                         onClick={() => setShowDeleteModal(true)}
                       >
                         Excluir produto

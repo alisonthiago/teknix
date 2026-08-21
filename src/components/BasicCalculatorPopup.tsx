@@ -78,7 +78,13 @@ export default function BasicCalculatorPopup({ onClose, initialPosition }: Basic
   }
 
   const handleNum = (num: string) => {
-    setDisplay(prev => prev === '0' ? num : prev + num)
+    setDisplay(prev => {
+      if (num === '.') {
+        if (prev.includes('.')) return prev
+        return prev + '.'
+      }
+      return prev === '0' ? num : prev + num
+    })
   }
 
   const handleOp = (op: string) => {
@@ -88,9 +94,16 @@ export default function BasicCalculatorPopup({ onClose, initialPosition }: Basic
 
   const handleCalc = () => {
     try {
+      if (!equation) return
       // eslint-disable-next-line @typescript-eslint/no-implied-eval
-      const result = new Function('return ' + equation + display)()
-      setDisplay(String(result))
+      const cleanEq = (equation + display).replace(/,/g, '.')
+      const result = new Function('return ' + cleanEq)()
+      if (isNaN(result) || !isFinite(result)) {
+        setDisplay('Erro')
+      } else {
+        const rounded = Math.round(result * 100000000) / 100000000
+        setDisplay(String(rounded).replace('.', ','))
+      }
       setEquation('')
     } catch {
       setDisplay('Erro')
@@ -102,9 +115,68 @@ export default function BasicCalculatorPopup({ onClose, initialPosition }: Basic
     setEquation('')
   }
 
-  const handlePct = () => {
-    setDisplay(String(parseFloat(display) / 100))
+  const handleBackspace = () => {
+    setDisplay(prev => {
+      if (prev.length <= 1 || prev === 'Erro') return '0'
+      return prev.slice(0, -1)
+    })
   }
+
+  const handlePct = () => {
+    const num = parseFloat(display.replace(',', '.'))
+    if (!isNaN(num)) {
+      setDisplay(String(num / 100).replace('.', ','))
+    }
+  }
+
+  // Suporte completo ao teclado físico do computador & NumPad
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      const target = e.target as HTMLElement
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+        return
+      }
+
+      const key = e.key
+
+      if (key >= '0' && key <= '9') {
+        e.preventDefault()
+        handleNum(key)
+      } else if (key === ',' || key === '.') {
+        e.preventDefault()
+        handleNum('.')
+      } else if (key === '+') {
+        e.preventDefault()
+        handleOp('+')
+      } else if (key === '-') {
+        e.preventDefault()
+        handleOp('-')
+      } else if (key === '*' || key === 'x' || key === 'X') {
+        e.preventDefault()
+        handleOp('*')
+      } else if (key === '/') {
+        e.preventDefault()
+        handleOp('/')
+      } else if (key === '%') {
+        e.preventDefault()
+        handlePct()
+      } else if (key === 'Enter' || key === '=') {
+        e.preventDefault()
+        handleCalc()
+      } else if (key === 'Backspace') {
+        e.preventDefault()
+        handleBackspace()
+      } else if (key === 'Escape' || key === 'Delete' || key === 'c' || key === 'C') {
+        e.preventDefault()
+        handleClear()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [display, equation])
 
   return (
     <div 

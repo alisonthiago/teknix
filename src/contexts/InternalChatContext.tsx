@@ -288,7 +288,7 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
     refreshConversations()
   }, [refreshConversations])
 
-  // 3. Carregar mensagens da conversa ativa via API Route
+  // 3. Carregar mensagens da conversa ativa via API Route (merge seguro sem apagar otimistas)
   const refreshActiveMessages = useCallback(async () => {
     const activeId = activeConvRef.current?.id
     if (!activeId) return
@@ -298,11 +298,30 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
       if (!res.ok) return
       const data = await res.json()
 
-      if (data.messages) {
-        setMessagesMap(prev => ({
-          ...prev,
-          [activeId]: data.messages
-        }))
+      if (data.messages && Array.isArray(data.messages)) {
+        setMessagesMap(prev => {
+          const currentList = prev[activeId] || []
+          const msgMap = new Map<string, InternalMessage>()
+
+          // 1. Adiciona mensagens vindas do Banco
+          data.messages.forEach((m: InternalMessage) => msgMap.set(m.id, m))
+
+          // 2. Preserva mensagens otimistas locais que ainda não retornaram do Banco
+          currentList.forEach((m: InternalMessage) => {
+            if (!msgMap.has(m.id)) {
+              msgMap.set(m.id, m)
+            }
+          })
+
+          const merged = Array.from(msgMap.values()).sort(
+            (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+          )
+
+          return {
+            ...prev,
+            [activeId]: merged
+          }
+        })
       }
     } catch {}
   }, [])
@@ -368,14 +387,25 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
         playNotificationSound()
       }
 
-      // 1. Atualizar mensagens
+      // 1. Atualizar mensagens no canal específico
       setMessagesMap(prev => {
-        const currentList = prev[msg.conversation_id] || []
-        if (currentList.some(m => m.id === msg.id)) return prev
-        return {
-          ...prev,
-          [msg.conversation_id]: [...currentList, msg]
+        const updated = { ...prev }
+        
+        // Adiciona na conversa específica
+        const currentList = updated[msg.conversation_id] || []
+        if (!currentList.some(m => m.id === msg.id)) {
+          updated[msg.conversation_id] = [...currentList, msg]
         }
+        
+        // Também adiciona no feed Geral (conv-geral) se existir
+        if (msg.conversation_id !== 'conv-geral' && updated['conv-geral']) {
+          const geralList = updated['conv-geral']
+          if (!geralList.some(m => m.id === msg.id)) {
+            updated['conv-geral'] = [...geralList, msg]
+          }
+        }
+        
+        return updated
       })
 
       // 2. Atualizar lista de conversas

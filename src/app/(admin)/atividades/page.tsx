@@ -71,7 +71,7 @@ export default function AtividadesPage() {
 
         <button
           onClick={() => setShowCreateModal(true)}
-          className="px-5 py-2.5 bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold rounded-xl flex items-center gap-2 transition-all cursor-pointer shadow-sm shrink-0"
+          className="px-5 py-2.5 bg-[#111111] hover:bg-[#222222] text-white text-xs font-bold rounded-full flex items-center gap-2 transition-all cursor-pointer shadow-sm shrink-0"
         >
           <Plus className="w-4 h-4" />
           <span>Atribuir Nova Tarefa</span>

@@ -41,11 +41,22 @@ export async function GET(req: NextRequest) {
 
     let ordersData: any[] = []
     if (idsToFetch.length > 0) {
-      const { data: orders } = await supabase
-        .from('orders')
-        .select('*, order_items(*, products(name, sku, image_url))')
-        .in('id', idsToFetch)
-      ordersData = orders || []
+      const isAllUuid = idsToFetch.every(id => id.includes('-') && id.length === 36)
+      if (isAllUuid) {
+        const { data: orders } = await supabase
+          .from('orders')
+          .select('*, order_items(*, products(name, sku, image_url))')
+          .in('id', idsToFetch)
+        ordersData = orders || []
+      } else {
+        const { data: orders } = await supabase
+          .from('orders')
+          .select('*, order_items(*, products(name, sku, image_url))')
+        
+        ordersData = (orders || []).filter(o => 
+          idsToFetch.includes(o.id) || idsToFetch.includes(o.order_number)
+        )
+      }
     }
 
     if (directShipmentId) {

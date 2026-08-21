@@ -486,14 +486,14 @@ export default function CentralEtiquetasPage() {
         </div>
       </div>
 
-      {/* ── BARRA FLUTUANTE DE AÇÃO EM LOTE ───────────────────────────────── */}
+      {/* ── BARRA FLUTUANTE DE AÇÃO EM LOTE (ESTILO BRANCO CLEAN) ────────── */}
       {selectedOrderIds.length > 0 && (
-        <div className="bg-[#0f172a] text-white px-6 py-4 rounded-2xl shadow-xl flex items-center justify-between gap-4 animate-in slide-in-from-bottom-4 duration-200">
+        <div className="bg-white text-[#0f172a] px-6 py-4 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.08)] border border-[#e2e8f0] flex items-center justify-between gap-4 animate-in slide-in-from-bottom-4 duration-200">
           <div className="flex items-center gap-3">
-            <span className="w-7 h-7 rounded-xl bg-[#16a34a] text-white flex items-center justify-center font-bold text-xs">
+            <span className="w-7 h-7 rounded-full bg-[#16a34a] text-white flex items-center justify-center font-bold text-xs shadow-xs">
               {selectedOrderIds.length}
             </span>
-            <p className="font-semibold text-sm">
+            <p className="font-bold text-sm text-[#0f172a]">
               {selectedOrderIds.length} etiqueta{selectedOrderIds.length > 1 ? 's' : ''} selecionada{selectedOrderIds.length > 1 ? 's' : ''}
             </p>
           </div>
@@ -501,7 +501,7 @@ export default function CentralEtiquetasPage() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSelectedOrderIds([])}
-              className="text-xs font-semibold text-[#94a3b8] hover:text-white transition-colors cursor-pointer"
+              className="text-xs font-semibold text-[#64748b] hover:text-[#0f172a] transition-colors cursor-pointer px-2 py-1"
             >
               Desmarcar
             </button>
@@ -909,63 +909,70 @@ export default function CentralEtiquetasPage() {
       )}
 
       {/* ════════════════════════════════════════════════════════════════════ */}
-      {/* MODAL 3: PRÉ-VISUALIZAÇÃO DA ETIQUETA OFICIAL                        */}
+      {/* MODAL 3: PRÉ-VISUALIZAÇÃO DA ETIQUETA OFICIAL DA PLATAFORMA (PDF)    */}
       {/* ════════════════════════════════════════════════════════════════════ */}
       {showPreviewModal && previewOrder && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-150 flex flex-col max-h-[92vh]">
             <div className="flex items-center justify-between pb-3 border-b border-[#f1f5f9]">
-              <h3 className="font-bold text-base text-[#0f172a]">Prévia da Etiqueta</h3>
-              <button onClick={() => setShowPreviewModal(false)} className="text-[#94a3b8] hover:text-[#0f172a]">
-                <X className="w-4 h-4" />
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-[#ecfdf5] border border-[#bbf7d0] flex items-center justify-center text-[#16a34a] font-bold shadow-xs">
+                  <Printer className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-base text-[#0f172a] leading-tight">
+                    Etiqueta Oficial da Plataforma (PDF 100x150mm)
+                  </h3>
+                  <p className="text-xs text-[#64748b] mt-0.5">
+                    {previewOrder.marketplaceName} • Pedido #{previewOrder.orderNumber} • {previewOrder.customerName}
+                  </p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setShowPreviewModal(false)} 
+                className="w-8 h-8 rounded-xl flex items-center justify-center text-[#94a3b8] hover:text-[#0f172a] hover:bg-[#f1f5f9] transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="p-4 bg-white border border-[#cbd5e1] rounded-2xl space-y-3 font-mono text-xs">
-              <div className="flex items-center justify-between pb-2 border-b border-black">
-                <span className="font-bold text-sm">MERCADO ENVIOS</span>
-                <span className="text-[10px] font-bold bg-black text-white px-2 py-0.5">XD_DROP_OFF</span>
-              </div>
-
-              <div>
-                <p className="text-[10px] text-gray-500">RASTREAMENTO:</p>
-                <p className="font-bold text-sm">{previewOrder.trackingCode}</p>
-                <p className="text-[11px]">PEDIDO: #{previewOrder.orderNumber}</p>
-              </div>
-
-              <div className="p-2.5 bg-gray-50 rounded-xl">
-                <p className="text-[10px] font-bold text-gray-500">DESTINATÁRIO:</p>
-                <p className="font-bold text-xs">{previewOrder.customerName}</p>
-                <p className="text-[10px] text-gray-700">{previewOrder.shippingAddress}</p>
-              </div>
-
-              <div className="pt-2 border-t border-black">
-                <p className="text-[10px] truncate">ITEM: {previewOrder.productName}</p>
-                <p className="text-[10px]">SKU: {previewOrder.productSku} | QTD: {previewOrder.itemQuantity}</p>
-              </div>
-
-              <div className="h-16 bg-gray-100 rounded-xl flex flex-col items-center justify-center text-center">
-                <p className="text-[10px] font-bold text-gray-600">||||||||||||||||||||||||||||||||||||||||||||||||||||||||||</p>
-                <p className="text-[10px] font-bold text-gray-600">*{previewOrder.trackingCode}*</p>
-              </div>
+            {/* Visualizador do PDF Real da Plataforma */}
+            <div className="flex-1 bg-[#f8fafc] border border-[#e2e8f0] rounded-2xl overflow-hidden min-h-[480px] flex items-center justify-center relative shadow-inner">
+              <iframe
+                src={`/api/shipments/mercadolivre/label?orderId=${encodeURIComponent(previewOrder.id)}&cropPackagingOnly=true#toolbar=0&navpanes=0`}
+                className="w-full h-[480px] rounded-2xl bg-white border-0"
+                title={`Etiqueta ${previewOrder.orderNumber}`}
+              />
             </div>
 
-            <div className="pt-2 flex justify-end gap-2">
-              <button
-                onClick={() => setShowPreviewModal(false)}
-                className="px-4 py-2 text-xs font-semibold text-[#64748b]"
-              >
-                Fechar
-              </button>
-              <button
-                onClick={() => {
-                  setShowPreviewModal(false)
-                  handleBatchPrint([previewOrder.id])
-                }}
-                className="px-4 py-2 bg-[#16a34a] hover:bg-[#15803d] text-white rounded-xl text-xs font-bold"
-              >
-                Imprimir Agora
-              </button>
+            {/* Barra de Ações */}
+            <div className="pt-2 flex items-center justify-between gap-3 border-t border-[#f1f5f9]">
+              <span className="text-[11px] text-[#94a3b8] font-medium hidden sm:inline">
+                Formato térmico padrão 100x150mm pronto para expedição
+              </span>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    const printUrl = `/api/shipments/mercadolivre/label?orderId=${encodeURIComponent(previewOrder.id)}&cropPackagingOnly=true`
+                    window.open(printUrl, '_blank')
+                  }}
+                  className="px-4 py-2.5 text-xs font-semibold text-[#475569] hover:text-[#0f172a] hover:bg-[#f1f5f9] rounded-xl border border-[#e2e8f0] transition-colors cursor-pointer"
+                >
+                  Abrir PDF em Nova Aba
+                </button>
+
+                <button
+                  onClick={() => {
+                    setShowPreviewModal(false)
+                    handleBatchPrint([previewOrder.id])
+                  }}
+                  className="px-5 py-2.5 bg-[#16a34a] hover:bg-[#15803d] text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-2"
+                >
+                  <Printer className="w-4 h-4" />
+                  <span>Imprimir Agora</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>

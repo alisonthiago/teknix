@@ -364,14 +364,14 @@ export default function PedidosPage() {
         )}
       </div>
 
-      {/* ── BARRA FLUTUANTE DE SELEÇÃO EM LOTE ─────────────────────────────── */}
+      {/* ── BARRA FLUTUANTE DE SELEÇÃO EM LOTE (BRANCO CLEAN) ─────────────── */}
       {selectedItems.length > 0 && (
-        <div className="bg-[#0f172a] text-white px-6 py-4 rounded-2xl shadow-xl flex items-center justify-between gap-4 animate-in slide-in-from-bottom-4 duration-200">
+        <div className="bg-white text-[#0f172a] px-6 py-4 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.08)] border border-[#e2e8f0] flex items-center justify-between gap-4 animate-in slide-in-from-bottom-4 duration-200">
           <div className="flex items-center gap-3">
-            <span className="w-7 h-7 rounded-xl bg-[#16a34a] text-white flex items-center justify-center font-bold text-xs">
+            <span className="w-7 h-7 rounded-full bg-[#16a34a] text-white flex items-center justify-center font-bold text-xs shadow-xs">
               {selectedItems.length}
             </span>
-            <p className="font-semibold text-sm">
+            <p className="font-bold text-sm text-[#0f172a]">
               {selectedItems.length} pedido(s) selecionado(s)
             </p>
           </div>
@@ -379,20 +379,20 @@ export default function PedidosPage() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSelectedItems([])}
-              className="text-xs font-semibold text-[#94a3b8] hover:text-white transition-colors cursor-pointer"
+              className="text-xs font-semibold text-[#64748b] hover:text-[#0f172a] transition-colors cursor-pointer px-2 py-1"
             >
               Desmarcar
             </button>
             <button 
               onClick={() => window.open(`/api/shipments/mercadolivre/label?orderIds=${selectedItems.join(',')}&cropPackagingOnly=true`, '_blank')}
-              className="px-4 py-2 bg-[#16a34a] hover:bg-[#15803d] text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
+              className="px-4 py-2.5 bg-[#16a34a] hover:bg-[#15803d] text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
             >
               <Printer className="w-4 h-4" /> Imprimir Etiquetas
             </button>
-            <button onClick={handleExportSelected} className="px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-medium cursor-pointer">
-              <Download className="w-3.5 h-3.5 inline mr-1" /> Exportar
+            <button onClick={handleExportSelected} className="px-3.5 py-2.5 bg-[#f8fafc] hover:bg-[#f1f5f9] text-[#475569] hover:text-[#0f172a] rounded-xl text-xs font-medium border border-[#e2e8f0] cursor-pointer">
+              <Download className="w-3.5 h-3.5 inline mr-1 text-[#64748b]" /> Exportar
             </button>
-            <button onClick={() => setShowDeleteModal(true)} className="px-3 py-2 bg-[#ef4444]/20 hover:bg-[#ef4444] text-[#fca5a5] hover:text-white rounded-xl text-xs font-medium cursor-pointer">
+            <button onClick={() => setShowDeleteModal(true)} className="px-3.5 py-2.5 bg-[#fef2f2] hover:bg-[#fee2e2] text-[#dc2626] rounded-xl text-xs font-medium border border-[#fecaca] cursor-pointer">
               <Trash2 className="w-3.5 h-3.5 inline mr-1" /> Excluir
             </button>
           </div>
@@ -430,7 +430,7 @@ export default function PedidosPage() {
             <div className="divide-y divide-[#f1f5f9]">
               {/* Header da Tabela */}
               <div className="flex items-center justify-between px-6 py-4 bg-[#f8fafc] text-xs font-semibold text-[#64748b]">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 min-w-0 flex-1">
                   <button onClick={toggleSelectAll} className="cursor-pointer text-[#64748b]">
                     {selectedItems.length === filteredOrders.length && filteredOrders.length > 0 ? (
                       <CheckSquare className="w-4 h-4 text-[#16a34a]" />
@@ -438,14 +438,14 @@ export default function PedidosPage() {
                       <Square className="w-4 h-4 text-[#cbd5e1]" />
                     )}
                   </button>
-                  <span>Produto / Pedido</span>
+                  <span className="uppercase tracking-wider text-[11px] font-bold">Produto / Pedido</span>
                 </div>
-                <div className="flex items-center gap-12 pr-6">
-                  <span className="hidden md:inline">Canal</span>
-                  <span className="hidden sm:inline">Destinatário & Rastreio</span>
-                  <span>Total</span>
-                  <span>Status</span>
-                  <span>Ações</span>
+                <div className="flex items-center gap-8 lg:gap-12 shrink-0 pr-4">
+                  <span className="hidden md:inline uppercase tracking-wider text-[11px] font-bold min-w-[120px]">Canal</span>
+                  <span className="hidden sm:inline uppercase tracking-wider text-[11px] font-bold min-w-[170px]">Destinatário & Rastreio</span>
+                  <span className="uppercase tracking-wider text-[11px] font-bold min-w-[90px] text-right">Total</span>
+                  <span className="uppercase tracking-wider text-[11px] font-bold min-w-[110px] text-center">Status</span>
+                  <span className="uppercase tracking-wider text-[11px] font-bold min-w-[90px] text-right">Ações</span>
                 </div>
               </div>
 
@@ -466,18 +466,18 @@ export default function PedidosPage() {
                   <div
                     key={order.id}
                     onClick={() => router.push(`/pedidos/${order.id}`)}
-                    className={`flex items-center justify-between px-6 py-4.5 hover:bg-[#fafafa] transition-colors cursor-pointer ${
-                      isSelected ? 'bg-[#f0fdf4]/50' : ''
+                    className={`flex items-center justify-between px-6 py-5 hover:bg-[#f8fafc] transition-colors cursor-pointer ${
+                      isSelected ? 'bg-[#f0fdf4]/60' : ''
                     }`}
                   >
                     {/* Checkbox e Produto */}
-                    <div className="flex items-center gap-4 min-w-0 flex-1 pr-4">
+                    <div className="flex items-center gap-4 min-w-0 flex-1 pr-6">
                       <div onClick={e => e.stopPropagation()}>
                         <button onClick={() => toggleSelect(order.id)} className="cursor-pointer shrink-0">
                           {isSelected ? (
-                            <CheckSquare className="w-4 h-4 text-[#16a34a]" />
+                            <CheckSquare className="w-4.5 h-4.5 text-[#16a34a]" />
                           ) : (
-                            <Square className="w-4 h-4 text-[#cbd5e1] hover:text-[#64748b]" />
+                            <Square className="w-4.5 h-4.5 text-[#cbd5e1] hover:text-[#64748b]" />
                           )}
                         </button>
                       </div>
@@ -485,47 +485,50 @@ export default function PedidosPage() {
                       <img
                         src={productImage}
                         alt={productName}
-                        className="w-11 h-11 rounded-xl object-contain border border-[#e2e8f0] bg-[#f8fafc] p-0.5 shrink-0"
+                        className="w-13 h-13 rounded-2xl object-contain border border-[#e2e8f0] bg-[#f8fafc] p-1 shrink-0 shadow-2xs"
                       />
 
-                      <div className="min-w-0 space-y-0.5">
-                        <p className="font-bold text-sm text-[#0f172a] truncate max-w-[320px]">
+                      <div className="min-w-0 space-y-1.5 flex-1">
+                        <p className="font-bold text-[14px] text-[#0f172a] truncate max-w-md leading-snug">
                           {productName}
                         </p>
-                        <div className="flex items-center gap-2 text-xs text-[#64748b]">
-                          <span className="font-mono">SKU: {productSku}</span>
-                          <span>·</span>
-                          <span className="font-medium text-[#0f172a]">#{order.order_number}</span>
+                        <div className="flex items-center gap-2 text-xs flex-wrap">
+                          <span className="px-2 py-0.5 rounded-md bg-[#f1f5f9] text-[11px] font-mono font-bold text-[#475569]">
+                            SKU: {productSku}
+                          </span>
+                          <span className="px-2 py-0.5 rounded-md bg-[#f8fafc] border border-[#e2e8f0] text-[11px] font-mono font-bold text-[#0f172a]">
+                            #{order.order_number}
+                          </span>
                         </div>
                       </div>
                     </div>
 
                     {/* Canal, Rastreio, Valor, Status, Ações */}
-                    <div className="flex items-center gap-8 shrink-0">
-                      <div className="hidden md:flex items-center gap-2 min-w-[110px]">
+                    <div className="flex items-center gap-8 lg:gap-12 shrink-0 pr-4">
+                      <div className="hidden md:flex items-center gap-2 min-w-[120px]">
                         <MarketplaceLogo name={mp?.name || 'Mercado Livre'} className="w-4 h-4" />
-                        <span className="text-xs font-semibold text-[#334155]">{mp?.name || 'Mercado Livre'}</span>
+                        <span className="text-[13px] font-semibold text-[#334155]">{mp?.name || 'Mercado Livre'}</span>
                       </div>
 
-                      <div className="hidden sm:block min-w-[150px] space-y-0.5">
-                        <p className="text-xs font-semibold text-[#0f172a] truncate max-w-[140px]">{customerName}</p>
-                        <p className="font-mono text-[11px] font-bold text-[#16a34a]">{order.tracking_code || 'Envio Padrão'}</p>
+                      <div className="hidden sm:block min-w-[170px] space-y-1">
+                        <p className="text-[13px] font-semibold text-[#0f172a] truncate max-w-[160px]">{customerName}</p>
+                        <p className="font-mono text-[11px] font-bold text-[#16a34a] truncate max-w-[160px]">{order.tracking_code || 'Envio Padrão'}</p>
                       </div>
 
-                      <div className="min-w-[80px] text-right font-bold text-xs text-[#16a34a]">
+                      <div className="min-w-[90px] text-right font-black text-[14px] text-[#0f172a]">
                         R$ {totalAmount.toFixed(2).replace('.', ',')}
                       </div>
 
-                      <div className="min-w-[90px] text-center">
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatus(order.status).c}`}>
+                      <div className="min-w-[110px] text-center">
+                        <span className={`inline-flex px-3 py-1 rounded-full text-[11px] font-bold ${getStatus(order.status).c}`}>
                           {getStatus(order.status).l}
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
+                      <div className="min-w-[90px] flex items-center justify-end gap-2" onClick={e => e.stopPropagation()}>
                         <button
                           onClick={() => window.open(`/api/shipments/mercadolivre/label?orderId=${order.id}&cropPackagingOnly=true`, '_blank')}
-                          className="px-3.5 py-1.5 bg-[#ecfdf5] text-[#16a34a] hover:bg-[#16a34a] hover:text-white rounded-xl text-xs font-semibold transition-all cursor-pointer"
+                          className="px-3.5 py-1.5 bg-[#ecfdf5] hover:bg-[#16a34a] text-[#16a34a] hover:text-white rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs"
                         >
                           Etiqueta
                         </button>

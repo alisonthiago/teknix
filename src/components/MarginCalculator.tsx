@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { X, Calculator, TrendingUp, Search, Package, Info } from 'lucide-react'
+import { X, Calculator, TrendingUp, Search, Package, Info, Share2, Send, CheckCircle2, ChevronDown, ChevronUp, Sparkles, DollarSign, Check } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 import { MarketplaceLogo } from './MarketplaceLogos'
 import BasicCalculatorPopup from './BasicCalculatorPopup'
+import { useInternalChat, getDirectConvId } from '@/contexts/InternalChatContext'
 
 interface MarginCalculatorProps {
   open: boolean
@@ -122,7 +123,7 @@ function TabButton({ active, onClick, icon: Icon, label }: { active: boolean; on
 
 
 
-function SimulatorTab({ initialProduct }: { initialProduct?: Product | null }) {
+function SimulatorTab({ initialProduct, onShare }: { initialProduct?: Product | null; onShare: (summary: string) => void }) {
   const [custo, setCusto] = useState(40)
   const [freteLogistica, setFreteLogistica] = useState(0)
   const [embalagem, setEmbalagem] = useState(0)
@@ -131,6 +132,7 @@ function SimulatorTab({ initialProduct }: { initialProduct?: Product | null }) {
   const [imposto, setImposto] = useState(6)
   const [publicidade, setPublicidade] = useState(0)
   const [reserva, setReserva] = useState(0)
+  const [showDetails, setShowDetails] = useState(false)
   
   // Marketplaces auto configurations
   const [selectedMktId, setSelectedMktId] = useState<string | null>(null)
@@ -161,12 +163,10 @@ function SimulatorTab({ initialProduct }: { initialProduct?: Product | null }) {
         const firstMod = mpConf.modalities[0]
         setSelectedModalityId(firstMod?.id || null)
         
-        // Preset values once, allowing user to overwrite later
         if (firstMod) {
           setComissaoMkt(firstMod.comissao)
           setJuros(firstMod.juros)
         }
-        // Preset freight/fee based on current price (assuming zero initially)
         const extras = mpConf.getFreightAndFee(custo + freteLogistica + embalagem)
         setFreteMarketplace(extras.frete)
         setTarifaFixa(extras.tarifa)
@@ -190,9 +190,6 @@ function SimulatorTab({ initialProduct }: { initialProduct?: Product | null }) {
   const sumPct = (margemLiquida + imposto + publicidade + juros + reserva + comissaoMkt) / 100
   const sumPctSemMargem = (imposto + publicidade + juros + reserva + comissaoMkt) / 100
 
-  // Sincroniza dinamicamente as tarifas SE o usuário não tiver alterado manualmente recentemente,
-  // mas para simplificar e garantir 100% de controle sem divergência: usaremos os valores do input diretamente!
-  // Os botões de marketplace apenas pré-preenchem os inputs.
   let precoMinimo = 0
   let precoSugerido = 0
   const finalFrete = freteMarketplace
@@ -205,9 +202,11 @@ function SimulatorTab({ initialProduct }: { initialProduct?: Product | null }) {
     precoSugerido = (custoBaseFixo + finalFrete + finalTarifa) / (1 - sumPct)
   }
 
-  // Dynamic Freight check (like ML crossing R$ 79) to alert user or auto-update if they want
-  // However, the user specifically requested exact match with their input, so we use finalFrete as typed.
-
+  // Cenário de Maior Margem (ex: +15% de margem ou 45%)
+  const margemAltaPct = Math.min(margemLiquida + 15, 60)
+  const sumPctAlta = (margemAltaPct + imposto + publicidade + juros + reserva + comissaoMkt) / 100
+  const precoAlto = sumPctAlta < 1 ? (custoBaseFixo + finalFrete + finalTarifa) / (1 - sumPctAlta) : 0
+  const lucroAlto = precoAlto > 0 ? precoAlto * (margemAltaPct / 100) : 0
 
   const custoFixo = custoBaseFixo + finalFrete + finalTarifa
   const valImposto = precoSugerido * (imposto / 100)
@@ -215,12 +214,17 @@ function SimulatorTab({ initialProduct }: { initialProduct?: Product | null }) {
   const valPublicidade = precoSugerido * (publicidade / 100)
   const valReserva = precoSugerido * (reserva / 100)
   const valJuros = precoSugerido * (juros / 100)
-  const lucroLiq = precoSugerido - custoFixo - valImposto - valComissao - valPublicidade - valReserva - valJuros
+  
+  const outrosCustosVal = freteLogistica + embalagem + finalFrete + finalTarifa + valPublicidade + valReserva + valJuros
+  const custoTotal = custoFixo + valImposto + valComissao + valPublicidade + valReserva + valJuros
+  const lucroLiq = precoSugerido - custoTotal
+  const repasseMkt = precoSugerido - finalTarifa - valComissao - finalFrete
 
   const activeMpConfig = MARKETPLACE_CONFIG.find(m => m.id === selectedMktId)
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      {/* Coluna Esquerda: Entradas de Dados */}
       <div className="space-y-4">
         {initialProduct && (
           <div className="bg-[#ecf3fe] border border-[#c1d9fd] rounded-xl px-3 py-2 flex items-center justify-between">
@@ -242,7 +246,7 @@ function SimulatorTab({ initialProduct }: { initialProduct?: Product | null }) {
                 key={mp.id}
                 title={mp.name}
                 onClick={() => handleSelectMkt(mp.id)}
-                className={`flex-shrink-0 flex items-center justify-center w-12 h-10 rounded-xl border transition-all ${
+                className={`flex-shrink-0 flex items-center justify-center w-12 h-10 rounded-xl border transition-all cursor-pointer ${
                   selectedMktId === mp.id 
                     ? 'border-[#3483fa] bg-[#ecf3fe] text-[#3483fa]' 
                     : 'border-[#e6e6e6] hover:border-[#3483fa] text-[#666]'
@@ -260,7 +264,7 @@ function SimulatorTab({ initialProduct }: { initialProduct?: Product | null }) {
                 <button
                   key={mod.id}
                   onClick={() => handleSelectModality(mod.id)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border cursor-pointer ${
                     selectedModalityId === mod.id
                       ? 'bg-white border-[#3483fa] text-[#3483fa] shadow-sm'
                       : 'bg-transparent border-transparent text-[#666] hover:bg-[#e6e6e6]'
@@ -330,36 +334,161 @@ function SimulatorTab({ initialProduct }: { initialProduct?: Product | null }) {
         </div>
       </div>
 
-      <div className="bg-[#f5f5f5] rounded-xl p-4 flex flex-col h-full">
+      {/* Coluna Direita: Painel de Decisão Super Simples */}
+      <div className="bg-[#f8fafc] rounded-2xl p-3.5 sm:p-4 border border-[#e2e8f0] flex flex-col justify-between space-y-2.5">
         {sumPct >= 1 ? (
-          <div className="p-4 text-center text-[#f23d4f] font-medium text-sm flex-1 flex items-center justify-center">Margem inatingível (&gt;=100%)</div>
+          <div className="p-4 text-center text-[#f23d4f] font-medium text-sm flex-1 flex items-center justify-center">
+            Margem inatingível (&gt;=100%)
+          </div>
         ) : (
-          <div className="space-y-0.5 flex-1 flex flex-col justify-center">
-            <h4 className="text-[11px] font-bold text-[#333] uppercase tracking-wider mb-2">Detalhamento da Venda</h4>
-            <ResultCard label="Custo do Produto" value={formatCurrency(custo)} />
-            <ResultCard label="Comissão MKT" value={formatCurrency(valComissao)} />
-            <ResultCard label="Tarifa Fixa" value={formatCurrency(finalTarifa)} />
-            <ResultCard label="Imposto" value={formatCurrency(valImposto)} />
-            <ResultCard label="Publicidade" value={formatCurrency(valPublicidade)} />
-            <ResultCard label="Reserva devolução" value={formatCurrency(valReserva)} />
-            <ResultCard label="Juros" value={formatCurrency(valJuros)} />
-            <ResultCard label="Embalagem" value={formatCurrency(embalagem)} />
-            <ResultCard label="Frete Fornecedor" value={formatCurrency(freteLogistica)} />
-            <ResultCard label="Frete Marketplace" value={formatCurrency(finalFrete)} />
-            <div className="border-t border-[#e6e6e6] my-1.5" />
-            
-            <div className="bg-[#e6fce5] px-3 py-2 rounded-lg border border-[#c3f5c8] my-2">
-              <ResultCard label="VOCÊ RECEBE (REPASSE)" value={formatCurrency(precoSugerido - finalTarifa - valComissao - finalFrete)} color="text-[#00a650]" large tooltip="Valor que entra na sua conta (Preço - Tarifas - Frete Marketplace)" />
-              <ResultCard label="MARGEM OPERACIONAL (ML)" value={precoSugerido > 0 ? `${(((precoSugerido - finalTarifa - valComissao - finalFrete) / precoSugerido) * 100).toFixed(2)}%` : '0%'} color="text-[#00a650]" tooltip="Igual a margem mostrada no painel do Mercado Livre (Repasse / Preço de Venda)" />
+          <div className="space-y-2.5 flex-1 flex flex-col justify-between">
+            {/* 1. Frase Explicativa Clara */}
+            <div className="bg-[#f0fdf4] border border-[#bbf7d0] rounded-xl p-2.5 flex items-center gap-2">
+              <div className="w-6 h-6 rounded-full bg-[#16a34a] text-white flex items-center justify-center shrink-0">
+                <Check className="w-3.5 h-3.5" />
+              </div>
+              <p className="text-[11px] sm:text-xs font-bold text-[#15803d] leading-snug">
+                Vendendo por <span className="underline decoration-2">{formatCurrency(precoSugerido)}</span>, você ganha <span className="underline decoration-2">{formatCurrency(lucroLiq)}</span> por venda.
+              </p>
             </div>
 
-            <div className="border-t border-[#e6e6e6] my-1.5" />
-            <ResultCard label="CUSTO TOTAL DA VENDA" value={formatCurrency(custoFixo + valImposto + valComissao + valPublicidade + valReserva + valJuros)} />
-            <ResultCard label="LUCRO LÍQUIDO" value={formatCurrency(lucroLiq)} color={lucroLiq >= 0 ? 'text-[#333]' : 'text-[#f23d4f]'} />
-            <ResultCard label="MARGEM LÍQUIDA (LUCRO)" value={precoSugerido > 0 ? `${((lucroLiq / precoSugerido) * 100).toFixed(1)}%` : '0%'} />
-            <div className="border-t border-[#e6e6e6] my-1.5" />
-            <ResultCard label="PREÇO MÍNIMO (0% Margem)" value={formatCurrency(precoMinimo)} color="text-[#666]" large tooltip="Preço onde a operação não gera nem lucro nem prejuízo." />
-            <ResultCard label="PREÇO SUGERIDO DE VENDA" value={formatCurrency(precoSugerido)} color="text-[#3483fa]" large tooltip="Preço necessário para alcançar a margem desejada." />
+            {/* 2. Destaques das 3 Perguntas (Preço, Lucro e Custos) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {/* Preço de Venda */}
+              <div className="bg-white border border-[#e2e8f0] rounded-xl p-3 shadow-2xs">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#64748b]">Preço de Venda</span>
+                <p className="text-xl font-black text-[#1e293b] mt-0.5">{formatCurrency(precoSugerido)}</p>
+              </div>
+
+              {/* Seu Lucro */}
+              <div className="bg-[#16a34a] text-white rounded-xl p-3 shadow-2xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-100">Seu Lucro Real</span>
+                  <span className="text-[10px] font-extrabold bg-white/20 px-1.5 py-0.5 rounded-full">{margemLiquida}% margem</span>
+                </div>
+                <p className="text-xl font-black mt-0.5">{formatCurrency(lucroLiq)}</p>
+              </div>
+            </div>
+
+            {/* Resumo dos Custos */}
+            <div className="bg-white rounded-xl border border-[#e2e8f0] p-3 shadow-2xs space-y-1.5">
+              <div className="flex items-center justify-between pb-1.5 border-b border-[#f1f5f9]">
+                <span className="text-[11px] font-bold text-[#334155] uppercase tracking-wider">Custos Totais</span>
+                <span className="text-xs font-black text-[#0f172a]">{formatCurrency(custoTotal)}</span>
+              </div>
+              <div className="space-y-1 text-[11px] text-[#64748b]">
+                <div className="flex justify-between">
+                  <span>Produto (Investimento)</span>
+                  <span className="font-medium text-[#334155]">{formatCurrency(custo)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Comissão MKT ({comissaoMkt}%)</span>
+                  <span className="font-medium text-[#334155]">{formatCurrency(valComissao)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Imposto ({imposto}%)</span>
+                  <span className="font-medium text-[#334155]">{formatCurrency(valImposto)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Outros custos (Fretes/Embalagem/Tarifas)</span>
+                  <span className="font-medium text-[#334155]">{formatCurrency(outrosCustosVal)}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* 3. Simulação Visual de Cenários (3 Cards) */}
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[#94a3b8] mb-1.5 flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-[#3483fa]" /> Cenários Recomendados de Preço
+              </p>
+              <div className="grid grid-cols-3 gap-1.5">
+                {/* Preço Mínimo */}
+                <div className="bg-white border border-[#e2e8f0] rounded-xl p-2 text-center shadow-2xs">
+                  <span className="text-[9px] font-bold text-[#94a3b8] block">Mínimo</span>
+                  <span className="text-xs font-bold text-[#475569] block mt-0.5">{formatCurrency(precoMinimo)}</span>
+                  <span className="text-[9px] text-[#94a3b8] block">Lucro: R$ 0</span>
+                </div>
+
+                {/* Preço Recomendado (Alvo) */}
+                <div className="bg-[#f0f7ff] border-2 border-[#3483fa] rounded-xl p-2 text-center shadow-2xs relative">
+                  <span className="text-[8px] font-black text-white bg-[#3483fa] px-1 py-0.2 rounded-full absolute -top-2 left-1/2 -translate-x-1/2 whitespace-nowrap">Ideal</span>
+                  <span className="text-[9px] font-bold text-[#3483fa] block">Recomendado</span>
+                  <span className="text-xs font-black text-[#1e293b] block mt-0.5">{formatCurrency(precoSugerido)}</span>
+                  <span className="text-[9px] font-bold text-[#16a34a] block">Lucro: {formatCurrency(lucroLiq)}</span>
+                </div>
+
+                {/* Maior Margem */}
+                <div className="bg-white border border-[#e2e8f0] rounded-xl p-2 text-center shadow-2xs">
+                  <span className="text-[9px] font-bold text-[#94a3b8] block">Maior Margem</span>
+                  <span className="text-xs font-bold text-[#475569] block mt-0.5">{formatCurrency(precoAlto)}</span>
+                  <span className="text-[9px] font-bold text-[#16a34a] block">Lucro: {formatCurrency(lucroAlto)}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* 4. Acordeão: Detalhamento Avançado */}
+            <div className="border-t border-[#e2e8f0] pt-1.5">
+              <button
+                onClick={() => setShowDetails(!showDetails)}
+                className="w-full flex items-center justify-between py-1 text-[11px] font-bold text-[#64748b] hover:text-[#1e293b] transition-colors cursor-pointer"
+              >
+                <span>Ver detalhamento dos custos</span>
+                {showDetails ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+              </button>
+
+              {showDetails && (
+                <div className="mt-1.5 p-2.5 bg-white rounded-xl border border-[#e2e8f0] space-y-1 text-[11px] animate-in fade-in duration-150 max-h-48 overflow-y-auto">
+                  <ResultCard label="Custo do Produto" value={formatCurrency(custo)} />
+                  <ResultCard label="Comissão MKT" value={formatCurrency(valComissao)} />
+                  <ResultCard label="Tarifa Fixa" value={formatCurrency(finalTarifa)} />
+                  <ResultCard label="Imposto" value={formatCurrency(valImposto)} />
+                  <ResultCard label="Publicidade (Ads)" value={formatCurrency(valPublicidade)} />
+                  <ResultCard label="Reserva Devolução" value={formatCurrency(valReserva)} />
+                  <ResultCard label="Juros" value={formatCurrency(valJuros)} />
+                  <ResultCard label="Embalagem" value={formatCurrency(embalagem)} />
+                  <ResultCard label="Frete Fornecedor" value={formatCurrency(freteLogistica)} />
+                  <ResultCard label="Frete Marketplace" value={formatCurrency(finalFrete)} />
+                  <div className="border-t border-[#f1f5f9] my-1" />
+                  <div className="bg-[#f8fafc] p-2 rounded-lg border border-[#e2e8f0]">
+                    <div className="flex justify-between items-center text-[11px] font-semibold text-[#0f172a]">
+                      <span>Repasse do Marketplace</span>
+                      <span className="text-[#16a34a] font-bold">{formatCurrency(repasseMkt)}</span>
+                    </div>
+                    <p className="text-[10px] text-[#94a3b8] mt-0.5">
+                      Valor depositado na conta (Preço - Tarifas/Frete MKT). Repasse não é o lucro líquido final.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 5. Botão Compartilhar Precificação */}
+            <div className="pt-1">
+              <button
+                onClick={() => {
+                  const summary =
+                    `*PRECIFICAÇÃO INTELIGENTE — SIMULAÇÃO*
+
+PREÇO DE VENDA: ${formatCurrency(precoSugerido)}
+
+CUSTOS TOTAIS: ${formatCurrency(custoTotal)}
+- Produto: ${formatCurrency(custo)}
+- Comissão MKT (${comissaoMkt}%): ${formatCurrency(valComissao)}
+- Imposto (${imposto}%): ${formatCurrency(valImposto)}
+- Outros Custos: ${formatCurrency(outrosCustosVal)}
+
+━━━━━━━━━━━━━━━━━━━━
+MEU LUCRO REAL: ${formatCurrency(lucroLiq)} (Margem: ${margemLiquida}%)
+━━━━━━━━━━━━━━━━━━━━
+Vendendo por ${formatCurrency(precoSugerido)}, você ganha ${formatCurrency(lucroLiq)} por venda.`
+                  onShare(summary)
+                }}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#111111] hover:bg-[#222222] text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-xs"
+              >
+                <Share2 className="w-3.5 h-3.5" />
+                Compartilhar Precificação
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -544,11 +673,172 @@ function CompareTab() {
   )
 }
 
+// Share Modal Component
+function SharePricingModal({ summary, onClose }: { summary: string; onClose: () => void }) {
+  const { collaborators, conversations, sendMessage, createConversation, currentUser, setIsFloatingOpen, setIsFloatingMinimized, setActiveConversation } = useInternalChat()
+  const [selectedTarget, setSelectedTarget] = useState<string | null>(null)
+  const [sending, setSending] = useState(false)
+  const [sent, setSent] = useState(false)
+  const [note, setNote] = useState('')
+
+  // Show only direct collaborators (not self) + groups
+  const targets = [
+    ...collaborators
+      .filter(c => c.id !== currentUser?.id)
+      .map(c => ({ id: `colab:${c.id}`, label: c.name, sublabel: c.role || 'Colaborador', type: 'DIRECT' as const, colabId: c.id, online: c.online })),
+    ...conversations
+      .filter(c => c.type === 'GROUP')
+      .map(c => ({ id: `conv:${c.id}`, label: c.name, sublabel: 'Grupo', type: 'GROUP' as const, convId: c.id, online: false }))
+  ]
+
+  const handleSend = async () => {
+    if (!selectedTarget) return
+    setSending(true)
+    try {
+      const fullMessage = note
+        ? `${note}\n\n${summary}`
+        : summary
+
+      const target = targets.find(t => t.id === selectedTarget)
+      if (!target) return
+
+      let convId: string
+      let activeTargetConv: any = null
+
+      if (target.type === 'DIRECT' && 'colabId' in target) {
+        convId = currentUser
+          ? getDirectConvId(currentUser.id, target.colabId)
+          : `direct-${target.colabId}`
+
+        activeTargetConv = conversations.find(c => c.id === convId || c.id.includes(target.colabId))
+        if (!activeTargetConv) {
+          const colab = collaborators.find(c => c.id === target.colabId)
+          activeTargetConv = await createConversation(colab?.name || target.label, 'DIRECT', [target.colabId], convId)
+        }
+        if (activeTargetConv) convId = activeTargetConv.id
+      } else if ('convId' in target) {
+        convId = target.convId
+        activeTargetConv = conversations.find(c => c.id === convId)
+      } else return
+
+      if (activeTargetConv) {
+        setActiveConversation(activeTargetConv)
+      }
+
+      setIsFloatingOpen(true)
+      setIsFloatingMinimized(false)
+
+      await sendMessage(convId, fullMessage)
+
+      setSent(true)
+      setTimeout(onClose, 1200)
+    } catch (err) {
+      console.error('Erro ao enviar precificação:', err)
+    } finally {
+      setSending(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]" onClick={onClose} />
+      <div className="relative bg-white rounded-2xl w-full max-w-md shadow-[0_16px_64px_rgba(0,0,0,0.16)] overflow-hidden animate-in zoom-in-95 duration-150">
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#f1f5f9]">
+          <div className="flex items-center gap-2.5">
+            <span className="w-8 h-8 rounded-full bg-[#f0f7ff] flex items-center justify-center">
+              <Share2 className="w-4 h-4 text-[#3483fa]" />
+            </span>
+            <div>
+              <h3 className="font-bold text-[14px] text-[#0f172a]">Compartilhar Precificação</h3>
+              <p className="text-[11px] text-[#64748b]">Envie o resultado para um colaborador ou grupo</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 rounded-full hover:bg-[#f8fafc] flex items-center justify-center text-[#94a3b8] hover:text-[#475569] transition-colors cursor-pointer">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Target selection */}
+        <div className="px-5 py-4 space-y-3 max-h-64 overflow-y-auto">
+          <p className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider">Enviar para:</p>
+          {targets.length === 0 && (
+            <p className="text-sm text-[#94a3b8] text-center py-4">Nenhum colaborador disponível</p>
+          )}
+          {targets.map(t => (
+            <button
+              key={t.id}
+              onClick={() => setSelectedTarget(t.id)}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition-all cursor-pointer text-left ${
+                selectedTarget === t.id
+                  ? 'border-[#3483fa] bg-[#f0f7ff] shadow-xs'
+                  : 'border-[#f1f5f9] hover:border-[#e2e8f0] hover:bg-[#f8fafc]'
+              }`}
+            >
+              <div className="relative shrink-0">
+                <div className="w-9 h-9 rounded-full bg-[#f1f5f9] flex items-center justify-center text-[13px] font-bold text-[#334155]">
+                  {t.label.slice(0, 1).toUpperCase()}
+                </div>
+                {t.type === 'DIRECT' && (
+                  <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ring-2 ring-white ${'online' in t && t.online ? 'bg-[#16a34a]' : 'bg-[#cbd5e1]'}`} />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-[13px] text-[#0f172a] truncate">{t.label}</p>
+                <p className="text-[11px] text-[#64748b]">{t.sublabel}</p>
+              </div>
+              {selectedTarget === t.id && <CheckCircle2 className="w-4 h-4 text-[#3483fa] shrink-0" />}
+            </button>
+          ))}
+        </div>
+
+        {/* Optional note */}
+        <div className="px-5 pb-4">
+          <label className="block text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider mb-1.5">Mensagem adicional (opcional)</label>
+          <textarea
+            value={note}
+            onChange={e => setNote(e.target.value)}
+            placeholder="Ex: Segue a simulação que fizemos para esse produto..."
+            rows={2}
+            className="w-full border border-[#e2e8f0] rounded-xl px-3 py-2 text-sm text-[#0f172a] placeholder:text-[#94a3b8] resize-none focus:outline-none focus:border-[#3483fa] transition-colors"
+          />
+        </div>
+
+        {/* Actions */}
+        <div className="px-5 pb-5 flex items-center gap-3">
+          <button
+            onClick={onClose}
+            className="flex-1 py-2.5 text-sm font-bold text-[#64748b] border border-[#e2e8f0] rounded-xl hover:bg-[#f8fafc] transition-colors cursor-pointer"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={handleSend}
+            disabled={!selectedTarget || sending || sent}
+            className={`flex-1 py-2.5 text-sm font-bold text-white rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer ${
+              sent ? 'bg-[#16a34a]' : 'bg-[#111111] hover:bg-[#222222]'
+            } disabled:opacity-50 disabled:cursor-not-allowed`}
+          >
+            {sent ? (
+              <><CheckCircle2 className="w-4 h-4" /> Enviado!</>
+            ) : sending ? (
+              <span className="animate-pulse">Enviando...</span>
+            ) : (
+              <><Send className="w-4 h-4" /> Enviar no Chat</>  
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function MarginCalculator({ open, onClose }: MarginCalculatorProps) {
   const overlayRef = useRef<HTMLDivElement>(null)
   const [activeTab, setActiveTab] = useState<'simulador' | 'produtos' | 'comparar'>('simulador')
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [calcOpen, setCalcOpen] = useState(false)
+  const [shareSummary, setShareSummary] = useState<string | null>(null)
 
   if (!open) return null
 
@@ -561,8 +851,7 @@ export default function MarginCalculator({ open, onClose }: MarginCalculatorProp
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" ref={overlayRef}>
       <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" onClick={onClose} />
 
-      <div className="relative bg-white rounded-2xl w-[calc(100%-24px)] md:w-[90vw] md:max-w-4xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] flex flex-col overflow-hidden max-h-[90vh]">
-        
+      <div className="relative bg-white rounded-2xl w-[calc(100%-24px)] md:w-[90vw] md:max-w-4xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] flex flex-col overflow-hidden max-h-[85vh]">
         
         {/* Header */}
         <div className="sticky top-0 bg-white z-10 px-4 py-3 border-b border-[#e6e6e6] flex items-center justify-between">
@@ -591,20 +880,21 @@ export default function MarginCalculator({ open, onClose }: MarginCalculatorProp
         </div>
 
         {/* Tabs */}
-        <div className="border-b border-[#e6e6e6] px-4 flex gap-0 overflow-x-auto">
+        <div className="border-b border-[#e6e6e6] px-4 flex gap-0 overflow-x-auto shrink-0">
           <TabButton active={activeTab === 'simulador'} onClick={() => setActiveTab('simulador')} icon={TrendingUp} label="Simulador Avançado" />
           <TabButton active={activeTab === 'produtos'} onClick={() => setActiveTab('produtos')} icon={Package} label="Meus Produtos" />
           <TabButton active={activeTab === 'comparar'} onClick={() => setActiveTab('comparar')} icon={Search} label="Comparar APIs" />
         </div>
 
         {/* Tab Content */}
-        <div className="p-4 overflow-y-auto">
-          {activeTab === 'simulador' && <SimulatorTab initialProduct={selectedProduct} />}
+        <div className="p-3.5 sm:p-4 overflow-y-auto max-h-[calc(85vh-100px)] flex-1">
+          {activeTab === 'simulador' && <SimulatorTab initialProduct={selectedProduct} onShare={setShareSummary} />}
           {activeTab === 'produtos' && <ProductsTab onSelectProduct={handleSelectProduct} />}
           {activeTab === 'comparar' && <CompareTab />}
         </div>
       </div>
       {calcOpen && <BasicCalculatorPopup onClose={() => setCalcOpen(false)} initialPosition={{ x: typeof window !== 'undefined' ? window.innerWidth - 300 : 800, y: 150 }} />}
+      {shareSummary && <SharePricingModal summary={shareSummary} onClose={() => setShareSummary(null)} />}
     </div>
   )
 }

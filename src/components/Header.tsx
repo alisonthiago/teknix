@@ -398,17 +398,17 @@ function HeaderActions({
 
       {/* 💬 BOTÃO CENTRAL DE CONVERSAS & CHAT INTERNO - removido do header (agora no dropdown do perfil) */}
 
-      {/* 🔴 BOTÃO AO VIVO DENTRO DA PÍLULA VERDE */}
+      {/* 🔴 BOTÃO AO VIVO DENTRO DA PÍLULA VERDE (AGORA PRETO CLEAN CONFORME PEDIDO) */}
       <button
         onClick={() => setLiveDrawerOpen(true)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#16a34a] hover:bg-[#15803d] text-white text-[11px] font-black shadow-sm transition-all tracking-wider uppercase cursor-pointer"
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#111111] hover:bg-[#222222] text-white text-[11px] font-black shadow-sm transition-all tracking-wider uppercase cursor-pointer"
         title="Monitor ao Vivo em Tempo Real"
       >
         <span className="relative flex h-2 w-2 shrink-0">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#e74c3c] opacity-75"></span>
           <span className="relative inline-flex rounded-full h-2 w-2 bg-[#e74c3c]"></span>
         </span>
-        <span className="font-mono font-bold">
+        <span className="font-mono font-bold whitespace-nowrap">
           {todayRevenue && todayRevenue > 0
             ? `R$ ${todayRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
             : 'R$ 0,00'}

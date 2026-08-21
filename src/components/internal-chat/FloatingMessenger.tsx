@@ -267,9 +267,14 @@ export default function FloatingMessenger() {
                               {displayName.slice(0, 1).toUpperCase()}
                             </div>
                           )}
-                          <span className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full ring-2 ring-white ${
-                            colabOnline ? 'bg-[#16a34a]' : 'bg-[#cbd5e1]'
-                          }`} />
+                          {colabOnline ? (
+                            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full ring-2 ring-white" title="Online agora">
+                              <span className="absolute inset-0 rounded-full bg-[#16a34a] animate-ping opacity-60" />
+                              <span className="relative block w-3 h-3 rounded-full bg-[#16a34a]" />
+                            </span>
+                          ) : (
+                            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full ring-2 ring-white bg-[#cbd5e1]" title="Offline" />
+                          )}
                         </div>
                         <div className="min-w-0 flex-1 pr-2">
                           <div className="flex items-center justify-between">
@@ -467,13 +472,30 @@ export default function FloatingMessenger() {
               </div>
             ) : (
               <div className="px-4 pt-6 pb-4 space-y-6">
-                {messages.map(msg => (
-                  <MessageCardRenderer
-                    key={msg.id}
-                    message={msg}
-                    isMe={msg.sender_id === currentUser?.id || (!currentUser?.id && msg.sender_name === currentUser?.name)}
-                  />
-                ))}
+                {messages.map(msg => {
+                  const isGeral = activeConversation?.id === 'conv-geral'
+                  const convId = (msg as any).conversation_id || ''
+                  let channelLabel = ''
+                  if (isGeral && convId && convId !== 'conv-geral') {
+                    // Map conversation_id to a human label
+                    if (convId === 'conv-expedicao') channelLabel = 'Expedição'
+                    else if (convId === 'conv-financeiro') channelLabel = 'Financeiro'
+                    else if (convId.startsWith('direct-')) channelLabel = 'Direto'
+                    else {
+                      const found = conversations.find(c => c.id === convId)
+                      channelLabel = found?.name || convId
+                    }
+                  }
+                  return (
+                    <MessageCardRenderer
+                      key={msg.id}
+                      message={msg}
+                      isMe={msg.sender_id === currentUser?.id || (!currentUser?.id && msg.sender_name === currentUser?.name)}
+                      showChannel={isGeral && !!channelLabel}
+                      channelName={channelLabel}
+                    />
+                  )
+                })}
                 <div ref={messagesEndRef} />
               </div>
             )}
