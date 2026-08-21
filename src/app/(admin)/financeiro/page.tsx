@@ -32,14 +32,14 @@ function FilterBar({ mp, setMp, acc, setAcc, accounts }: {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 mb-5">
       <select value={mp} onChange={e => { setMp(e.target.value); setAcc('all') }}
-        className="w-full sm:w-auto min-h-[40px] px-3.5 border border-[#e6e6e6] rounded-xl text-[12px] font-medium text-[#333] focus:outline-none focus:border-[#111] bg-white shadow-2xs">
+        className="w-full sm:w-auto min-h-[40px] px-3.5 border border-[#e6e6e6] rounded-xl text-[12px] font-medium text-[#333] focus:outline-none focus:border-[#16a34a] bg-white shadow-2xs">
         <option value="all">Todos marketplaces</option>
         {(marketplaces || []).map((m: Record<string, unknown>) => (
           <option key={m.id as string} value={m.id as string}>{m.name as string}</option>
         ))}
       </select>
       <select value={acc} onChange={e => setAcc(e.target.value)}
-        className="w-full sm:w-auto min-h-[40px] px-3.5 border border-[#e6e6e6] rounded-xl text-[12px] font-medium text-[#333] focus:outline-none focus:border-[#111] bg-white shadow-2xs">
+        className="w-full sm:w-auto min-h-[40px] px-3.5 border border-[#e6e6e6] rounded-xl text-[12px] font-medium text-[#333] focus:outline-none focus:border-[#16a34a] bg-white shadow-2xs">
         <option value="all">Todas contas</option>
         {filteredAccounts.map((a: Record<string, unknown>) => (
           <option key={a.id as string} value={a.id as string}>{a.account_name as string}</option>
@@ -605,7 +605,7 @@ export default function FinanceiroPage() {
 
                       <div className="text-right">
                         <p className="text-base font-black text-[#111]">{formatBRL(m.revenue)}</p>
-                        <span className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-black bg-[#111] text-[#B5F500] mt-1">
+                        <span className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-black bg-[#16a34a] text-white mt-1">
                           {share}% do total
                         </span>
                       </div>

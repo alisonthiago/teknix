@@ -63,7 +63,7 @@ export default function ProductMarketplaceActionModal({
           title: `Desbloquear Produto`,
           icon: Unlock,
           iconColor: 'text-[#16a34a]',
-          btnColor: 'bg-[#111] hover:bg-[#222] text-white',
+          btnColor: 'bg-[#16a34a] hover:bg-[#15803d] text-white',
           confirmQuestion: `Deseja desbloquear este produto?`,
           detail: `O produto voltará ao status ativo normal de operação.`,
           btnText: 'Sim, Desbloquear'
@@ -83,7 +83,7 @@ export default function ProductMarketplaceActionModal({
           title: `Destravar Produto`,
           icon: Unlock,
           iconColor: 'text-[#111]',
-          btnColor: 'bg-[#111] hover:bg-[#222] text-white',
+          btnColor: 'bg-[#16a34a] hover:bg-[#15803d] text-white',
           confirmQuestion: `Deseja destravar este produto?`,
           detail: `O produto voltará a aceitar atualizações normais automáticas.`,
           btnText: 'Sim, Destravar'

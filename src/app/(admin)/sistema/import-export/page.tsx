@@ -85,9 +85,9 @@ export default function ImportExportPage() {
               </div>
               <button 
                 onClick={() => handleImportClick(item)}
-                className="px-3.5 py-1.5 bg-[#111] text-white text-[11px] font-bold rounded-xl hover:bg-[#222] flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+                className="px-3.5 py-1.5 bg-[#16a34a] text-white text-[11px] font-bold rounded-xl hover:bg-[#222] flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
               >
-                <Upload className="w-3.5 h-3.5 text-[#B5F500]" /> Importar
+                <Upload className="w-3.5 h-3.5 text-white" /> Importar
               </button>
             </div>
           ))}

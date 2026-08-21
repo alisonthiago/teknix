@@ -342,10 +342,10 @@ function OrderActions({ order }: { order: OrderDetail }) {
         {/* BOTÕES DE COMPARTILHAMENTO OPERACIONAL 360° */}
         <button
           onClick={handleShareOrder}
-          className="inline-flex items-center gap-1.5 bg-[#111] hover:bg-[#222] text-white text-[11px] font-bold px-3 py-1.5 rounded-xl transition-all shadow-xs cursor-pointer"
+          className="inline-flex items-center gap-1.5 bg-[#16a34a] hover:bg-[#15803d] text-white text-[11px] font-bold px-3 py-1.5 rounded-xl transition-all shadow-xs cursor-pointer"
           title="Compartilhar este pedido com outro colaborador no Chat"
         >
-          <Share2 className="w-3 h-3 text-[#B5F500]" />
+          <Share2 className="w-3 h-3 text-white" />
           Compartilhar Pedido
         </button>
 

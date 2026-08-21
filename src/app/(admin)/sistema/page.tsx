@@ -23,7 +23,7 @@ function ConfigCard({ icon, title, description, badge, badgeColor, onClick }: Co
   return (
     <button
       onClick={onClick}
-      className="bg-white border border-[#e6e6e6] rounded-xl p-5 text-left hover:border-[#B5F500] hover:shadow-xs transition-all group w-full"
+      className="bg-white border border-[#e6e6e6] rounded-xl p-5 text-left hover:border-[#16a34a] hover:shadow-xs transition-all group w-full"
     >
       <div className="flex items-start gap-4">
         <div className="w-10 h-10 rounded-xl bg-[#f5f5f5] flex items-center justify-center flex-shrink-0 group-hover:bg-[#EEFFB3]/50 transition-colors">

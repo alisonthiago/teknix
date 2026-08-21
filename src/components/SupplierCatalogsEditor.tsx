@@ -253,7 +253,7 @@ export default function SupplierCatalogsEditor({ supplierId }: { supplierId: str
             variant="default" 
             onClick={handleAddLink} 
             disabled={uploading || !linkTitle || !linkUrl} 
-            className="h-9 text-xs px-4 bg-[#111] hover:bg-[#222] text-white font-bold rounded-xl shadow-2xs"
+            className="h-9 text-xs px-4 bg-[#16a34a] hover:bg-[#15803d] text-white font-bold rounded-xl shadow-2xs"
           >
             Salvar Link
           </Button>

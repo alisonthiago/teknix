@@ -65,10 +65,10 @@ export default function MessageCardRenderer({ message, isMe }: MessageCardRender
               </span>
               <Link
                 href={`/pedidos`}
-                className="px-3 py-1 bg-[#111] hover:bg-[#222] text-white text-[11px] font-bold rounded-lg flex items-center gap-1 transition-all shadow-2xs"
+                className="px-3 py-1 bg-[#16a34a] hover:bg-[#15803d] text-white text-[11px] font-bold rounded-lg flex items-center gap-1 transition-all shadow-2xs"
               >
                 <span>Abrir Pedido</span>
-                <ExternalLink className="w-3 h-3 text-[#B5F500]" />
+                <ExternalLink className="w-3 h-3 text-white" />
               </Link>
             </div>
           </div>
@@ -100,10 +100,10 @@ export default function MessageCardRenderer({ message, isMe }: MessageCardRender
             <div className="flex justify-end pt-1">
               <Link
                 href={`/operacao`}
-                className="px-3 py-1 bg-[#111] hover:bg-[#222] text-white text-[11px] font-bold rounded-lg flex items-center gap-1 transition-all shadow-2xs"
+                className="px-3 py-1 bg-[#16a34a] hover:bg-[#15803d] text-white text-[11px] font-bold rounded-lg flex items-center gap-1 transition-all shadow-2xs"
               >
                 <span>Abrir Produto</span>
-                <ExternalLink className="w-3 h-3 text-[#B5F500]" />
+                <ExternalLink className="w-3 h-3 text-white" />
               </Link>
             </div>
           </div>
@@ -125,10 +125,10 @@ export default function MessageCardRenderer({ message, isMe }: MessageCardRender
             <div className="flex items-center justify-end gap-2 pt-1">
               <Link
                 href={`/clientes`}
-                className="px-3 py-1 bg-[#111] hover:bg-[#222] text-white text-[11px] font-bold rounded-lg flex items-center gap-1 transition-all shadow-2xs"
+                className="px-3 py-1 bg-[#16a34a] hover:bg-[#15803d] text-white text-[11px] font-bold rounded-lg flex items-center gap-1 transition-all shadow-2xs"
               >
                 <span>Ver Cliente</span>
-                <ExternalLink className="w-3 h-3 text-[#B5F500]" />
+                <ExternalLink className="w-3 h-3 text-white" />
               </Link>
             </div>
           </div>
@@ -181,10 +181,10 @@ export default function MessageCardRenderer({ message, isMe }: MessageCardRender
             <div className="flex items-center justify-end gap-2 pt-1">
               <Link
                 href="/pedidos"
-                className="px-3 py-1 bg-[#111] hover:bg-[#222] text-white text-[11px] font-bold rounded-lg flex items-center gap-1 transition-all shadow-2xs"
+                className="px-3 py-1 bg-[#16a34a] hover:bg-[#15803d] text-white text-[11px] font-bold rounded-lg flex items-center gap-1 transition-all shadow-2xs"
               >
                 <span>Acompanhar Pedido</span>
-                <ExternalLink className="w-3 h-3 text-[#B5F500]" />
+                <ExternalLink className="w-3 h-3 text-white" />
               </Link>
             </div>
           </div>
@@ -212,10 +212,10 @@ export default function MessageCardRenderer({ message, isMe }: MessageCardRender
             <div className="flex justify-end pt-1">
               <Link
                 href="/atividades"
-                className="px-3 py-1 bg-[#111] hover:bg-[#222] text-white text-[11px] font-bold rounded-lg flex items-center gap-1 transition-all shadow-2xs"
+                className="px-3 py-1 bg-[#16a34a] hover:bg-[#15803d] text-white text-[11px] font-bold rounded-lg flex items-center gap-1 transition-all shadow-2xs"
               >
                 <span>Ver na Central</span>
-                <ExternalLink className="w-3 h-3 text-[#B5F500]" />
+                <ExternalLink className="w-3 h-3 text-white" />
               </Link>
             </div>
           </div>
@@ -261,7 +261,7 @@ export default function MessageCardRenderer({ message, isMe }: MessageCardRender
         <div
           className={`rounded-2xl px-4 py-2.5 max-w-md text-[13px] leading-relaxed shadow-2xs ${
             isMe
-              ? 'bg-[#111] text-white rounded-br-xs'
+              ? 'bg-[#16a34a] text-white rounded-br-xs'
               : 'bg-white border border-[#e2e8f0] text-[#1e293b] rounded-bl-xs'
           }`}
         >

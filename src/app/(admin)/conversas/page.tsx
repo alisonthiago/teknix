@@ -86,9 +86,9 @@ export default function ConversasPage() {
 
         <button
           onClick={() => setShowNewModal(true)}
-          className="px-4 py-2 bg-[#111] hover:bg-[#222] text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+          className="px-4 py-2 bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
         >
-          <Plus className="w-4 h-4 text-[#B5F500]" />
+          <Plus className="w-4 h-4" />
           <span>Nova Conversa</span>
         </button>
       </div>
@@ -109,7 +109,7 @@ export default function ConversasPage() {
                 placeholder="Buscar conversa ou grupo..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="w-full h-9 pl-8 pr-3 bg-[#f8fafc] border border-[#d0d7de] rounded-xl text-xs text-[#333] focus:outline-none focus:bg-white focus:border-[#111] transition-all"
+                className="w-full h-9 pl-8 pr-3 bg-[#f8fafc] border border-[#d0d7de] rounded-xl text-xs text-[#333] focus:outline-none focus:bg-white focus:border-[#16a34a] transition-all"
               />
             </div>
 
@@ -125,9 +125,9 @@ export default function ConversasPage() {
                   key={f.id}
                   onClick={() => setFilterType(f.id as any)}
                   className={`px-3 py-1 rounded-lg font-bold transition-all cursor-pointer whitespace-nowrap ${
-                    filterType === f.id
-                      ? 'bg-[#111] text-white shadow-2xs'
-                      : 'text-[#666] hover:bg-[#f0f0f0] hover:text-[#111]'
+                     filterType === f.id
+                       ? 'bg-[#16a34a] text-white shadow-sm'
+                       : 'text-[#666] hover:bg-[#f0f0f0] hover:text-[#111]'
                   }`}
                 >
                   {f.label}
@@ -148,12 +148,12 @@ export default function ConversasPage() {
                     markAsRead(conv.id)
                   }}
                   className={`w-full text-left p-3.5 flex items-start gap-3 transition-all cursor-pointer ${
-                    isActive ? 'bg-white border-l-4 border-l-[#111] shadow-2xs' : 'hover:bg-[#f5f5f5]'
+                    isActive ? 'bg-white border-l-4 border-l-[#16a34a] shadow-sm' : 'hover:bg-[#f5f5f5]'
                   }`}
                 >
                   <div className="relative shrink-0">
-                    <div className="w-10 h-10 rounded-2xl bg-[#111] text-white flex items-center justify-center text-xs font-black">
-                      {conv.type === 'GROUP' ? <Users className="w-4 h-4 text-[#B5F500]" /> : conv.name.slice(0, 1)}
+                    <div className="w-10 h-10 rounded-2xl bg-[#f1f5f9] text-[#334155] border border-[#e2e8f0] flex items-center justify-center text-xs font-black">
+                      {conv.type === 'GROUP' ? <Users className="w-4 h-4 text-[#16a34a]" /> : conv.name.slice(0, 1)}
                     </div>
                     <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#16a34a] rounded-full ring-2 ring-white" />
                   </div>
@@ -174,7 +174,7 @@ export default function ConversasPage() {
                   </div>
 
                   {conv.unread_count > 0 && (
-                    <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-[#111] text-[#B5F500] shrink-0">
+                    <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-[#16a34a] text-white shrink-0">
                       {conv.unread_count}
                     </span>
                   )}
@@ -193,8 +193,8 @@ export default function ConversasPage() {
               {/* Header do Chat Clean */}
               <div className="p-3.5 border-b border-[#f0f0f0] flex items-center justify-between bg-white shadow-2xs">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-[#111] text-white flex items-center justify-center text-xs font-extrabold">
-                    {activeConversation.type === 'GROUP' ? <Users className="w-4 h-4 text-[#B5F500]" /> : activeConversation.name.slice(0, 1)}
+                  <div className="w-9 h-9 rounded-xl bg-[#f1f5f9] text-[#334155] border border-[#e2e8f0] flex items-center justify-center text-xs font-extrabold">
+                    {activeConversation.type === 'GROUP' ? <Users className="w-4 h-4 text-[#16a34a]" /> : activeConversation.name.slice(0, 1)}
                   </div>
                   <div>
                     <h3 className="text-xs sm:text-sm font-black text-[#111]">{activeConversation.name}</h3>
@@ -237,16 +237,16 @@ export default function ConversasPage() {
                         handleSend()
                       }
                     }}
-                    className="flex-1 h-11 px-4 bg-[#f8fafc] border border-[#d0d7de] rounded-xl text-xs text-[#1e293b] focus:outline-none focus:bg-white focus:border-[#111] transition-all"
+                    className="flex-1 h-11 px-4 bg-[#f8fafc] border border-[#d0d7de] rounded-xl text-xs text-[#1e293b] focus:outline-none focus:bg-white focus:border-[#16a34a] transition-all"
                   />
 
                   <button
                     onClick={handleSend}
                     disabled={!input.trim()}
-                    className="h-11 px-5 bg-[#111] hover:bg-[#222] text-white text-xs font-bold rounded-xl flex items-center gap-2 transition-all cursor-pointer shadow-2xs disabled:opacity-40"
+                    className="h-11 px-5 bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold rounded-xl flex items-center gap-2 transition-all cursor-pointer shadow-sm disabled:opacity-40"
                   >
                     <span>Enviar</span>
-                    <Send className="w-3.5 h-3.5 text-[#B5F500]" />
+                    <Send className="w-3.5 h-3.5" />
                   </button>
                 </div>
 
@@ -294,7 +294,7 @@ export default function ConversasPage() {
                 placeholder="Ex: 📦 Conferência e Triagem"
                 value={newConvName}
                 onChange={e => setNewConvName(e.target.value)}
-                className="w-full h-10 px-3 border border-[#d0d7de] rounded-xl text-xs focus:outline-none focus:border-[#111]"
+                className="w-full h-10 px-3 border border-[#d0d7de] rounded-xl text-xs focus:outline-none focus:border-[#16a34a]"
               />
             </div>
             <div>
@@ -309,7 +309,7 @@ export default function ConversasPage() {
                         if (e.target.checked) setSelectedMembers([...selectedMembers, c.id])
                         else setSelectedMembers(selectedMembers.filter(id => id !== c.id))
                       }}
-                      className="accent-[#111]"
+                      className="accent-[#16a34a]"
                     />
                     <span className="font-bold">{c.name}</span>
                     <span className="text-[#888]">({c.role})</span>
@@ -319,7 +319,7 @@ export default function ConversasPage() {
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <button onClick={() => setShowNewModal(false)} className="px-4 py-2 border rounded-xl text-xs font-bold text-[#666]">Cancelar</button>
-              <button onClick={handleCreateNew} disabled={!newConvName.trim() || selectedMembers.length === 0} className="px-4 py-2 bg-[#111] text-white rounded-xl text-xs font-bold disabled:opacity-50">Criar Conversa</button>
+              <button onClick={handleCreateNew} disabled={!newConvName.trim() || selectedMembers.length === 0} className="px-4 py-2 bg-[#16a34a] hover:bg-[#15803d] text-white rounded-xl text-xs font-bold disabled:opacity-50">Criar Conversa</button>
             </div>
           </div>
         </div>

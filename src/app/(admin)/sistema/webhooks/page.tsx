@@ -156,7 +156,7 @@ export default function WebhooksPage() {
           {WEBHOOK_ENDPOINTS.map(wh => (
             <div
               key={wh.id}
-              className="p-4 rounded-xl border border-[#eeeeee] bg-[#fafafa] hover:border-[#B5F500] transition-all flex flex-col justify-between group"
+              className="p-4 rounded-xl border border-[#eeeeee] bg-[#fafafa] hover:border-[#16a34a] transition-all flex flex-col justify-between group"
             >
               <div>
                 <div className="flex items-center justify-between mb-2">

@@ -71,9 +71,9 @@ export default function AtividadesPage() {
 
         <button
           onClick={() => setShowCreateModal(true)}
-          className="px-5 py-2.5 bg-[#111] hover:bg-[#222] text-white text-xs font-bold rounded-xl flex items-center gap-2 transition-all cursor-pointer shadow-2xs shrink-0"
+          className="px-5 py-2.5 bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold rounded-xl flex items-center gap-2 transition-all cursor-pointer shadow-sm shrink-0"
         >
-          <Plus className="w-4 h-4 text-[#B5F500]" />
+          <Plus className="w-4 h-4" />
           <span>Atribuir Nova Tarefa</span>
         </button>
       </div>
@@ -93,7 +93,7 @@ export default function AtividadesPage() {
               onClick={() => setFilterTab(tab.id as any)}
               className={`px-3.5 py-2 rounded-xl transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap ${
                 isActive
-                  ? 'bg-[#111] text-white shadow-xs'
+                  ? 'bg-[#16a34a] text-white shadow-sm'
                   : 'bg-[#f8f9fa] hover:bg-[#eee] text-[#555]'
               }`}
             >
@@ -195,7 +195,7 @@ export default function AtividadesPage() {
                     className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                       isDone
                         ? 'bg-[#f1f5f9] text-[#64748b] hover:bg-[#e2e8f0]'
-                        : 'bg-[#111] hover:bg-[#222] text-white shadow-2xs'
+                        : 'bg-[#16a34a] hover:bg-[#15803d] text-white shadow-sm'
                     }`}
                   >
                     {isDone ? 'Reabrir' : 'Concluir ✓'}
@@ -226,7 +226,7 @@ export default function AtividadesPage() {
                   placeholder="Ex: Emitir NF-e do Pedido #MLB-2000008741"
                   value={title}
                   onChange={e => setTitle(e.target.value)}
-                  className="w-full h-10 px-3 border border-[#d0d7de] rounded-xl text-xs focus:outline-none focus:border-[#111]"
+                  className="w-full h-10 px-3 border border-[#d0d7de] rounded-xl text-xs focus:outline-none focus:border-[#16a34a]"
                 />
               </div>
 
@@ -237,7 +237,7 @@ export default function AtividadesPage() {
                   value={description}
                   onChange={e => setDescription(e.target.value)}
                   rows={2}
-                  className="w-full p-3 border border-[#d0d7de] rounded-xl text-xs focus:outline-none focus:border-[#111] resize-none"
+                  className="w-full p-3 border border-[#d0d7de] rounded-xl text-xs focus:outline-none focus:border-[#16a34a] resize-none"
                 />
               </div>
 
@@ -247,7 +247,7 @@ export default function AtividadesPage() {
                   <select
                     value={assignedId}
                     onChange={e => setAssignedId(e.target.value)}
-                    className="w-full h-10 px-3 border border-[#d0d7de] rounded-xl text-xs focus:outline-none focus:border-[#111] bg-white"
+                    className="w-full h-10 px-3 border border-[#d0d7de] rounded-xl text-xs focus:outline-none focus:border-[#16a34a] bg-white"
                   >
                     {collaborators.map(c => (
                       <option key={c.id} value={c.id}>{c.name} ({c.role})</option>
@@ -260,7 +260,7 @@ export default function AtividadesPage() {
                   <select
                     value={priority}
                     onChange={e => setPriority(e.target.value as any)}
-                    className="w-full h-10 px-3 border border-[#d0d7de] rounded-xl text-xs focus:outline-none focus:border-[#111] bg-white"
+                    className="w-full h-10 px-3 border border-[#d0d7de] rounded-xl text-xs focus:outline-none focus:border-[#16a34a] bg-white"
                   >
                     <option value="LOW">Baixa</option>
                     <option value="MEDIUM">Média</option>
@@ -278,7 +278,7 @@ export default function AtividadesPage() {
                     placeholder="Ex: MLB-2000008741"
                     value={relatedOrder}
                     onChange={e => setRelatedOrder(e.target.value)}
-                    className="w-full h-10 px-3 border border-[#d0d7de] rounded-xl text-xs focus:outline-none focus:border-[#111]"
+                    className="w-full h-10 px-3 border border-[#d0d7de] rounded-xl text-xs focus:outline-none focus:border-[#16a34a]"
                   />
                 </div>
 
@@ -287,7 +287,7 @@ export default function AtividadesPage() {
                   <select
                     value={channelId}
                     onChange={e => setChannelId(e.target.value)}
-                    className="w-full h-10 px-3 border border-[#d0d7de] rounded-xl text-xs focus:outline-none focus:border-[#111] bg-white"
+                    className="w-full h-10 px-3 border border-[#d0d7de] rounded-xl text-xs focus:outline-none focus:border-[#16a34a] bg-white"
                   >
                     {conversations.map(c => (
                       <option key={c.id} value={c.id}>{c.name}</option>
@@ -299,7 +299,7 @@ export default function AtividadesPage() {
 
             <div className="flex justify-end gap-2 pt-3 border-t border-[#f0f0f0]">
               <button onClick={() => setShowCreateModal(false)} className="px-4 py-2 border rounded-xl text-xs font-bold text-[#666]">Cancelar</button>
-              <button onClick={handleCreate} disabled={!title.trim()} className="px-5 py-2 bg-[#111] text-white rounded-xl text-xs font-bold disabled:opacity-50">Atribuir Tarefa</button>
+              <button onClick={handleCreate} disabled={!title.trim()} className="px-5 py-2 bg-[#16a34a] hover:bg-[#15803d] text-white rounded-xl text-xs font-bold disabled:opacity-50">Atribuir Tarefa</button>
             </div>
           </div>
         </div>

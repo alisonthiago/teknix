@@ -261,8 +261,8 @@ export default function CentralEtiquetasPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white p-5 rounded-2xl border border-[#e6e6e6] shadow-2xs">
         <div>
           <div className="flex items-center gap-2">
-            <div className="p-2 bg-[#111] text-white rounded-xl">
-              <Tag className="w-5 h-5 text-[#B5F500]" />
+            <div className="p-2 bg-[#16a34a] text-white rounded-xl">
+              <Tag className="w-5 h-5 text-white" />
             </div>
             <div>
               <h1 className="text-xl font-black text-[#111] tracking-tight">Central de Etiquetas & Expedição</h1>
@@ -288,9 +288,9 @@ export default function CentralEtiquetasPage() {
               handleBatchPrint(allAvailableIds)
             }}
             disabled={stats.available === 0}
-            className="px-4 py-2 bg-[#111] hover:bg-[#222] text-white rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-2xs disabled:opacity-40"
+            className="px-4 py-2 bg-[#16a34a] hover:bg-[#15803d] text-white rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-2xs disabled:opacity-40"
           >
-            <Printer className="w-4 h-4 text-[#B5F500]" />
+            <Printer className="w-4 h-4 text-white" />
             <span>Imprimir Todas as {stats.available} Pendentes</span>
           </button>
         </div>
@@ -369,7 +369,7 @@ export default function CentralEtiquetasPage() {
                 key={f.id}
                 onClick={() => setStatusFilter(f.id)}
                 className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                  statusFilter === f.id ? 'bg-[#111] text-white shadow-2xs' : 'text-[#64748b] hover:bg-[#f1f5f9]'
+                  statusFilter === f.id ? 'bg-[#16a34a] text-white shadow-sm' : 'text-[#64748b] hover:bg-[#f1f5f9]'
                 }`}
               >
                 {f.label}
@@ -387,7 +387,7 @@ export default function CentralEtiquetasPage() {
               placeholder="Buscar por número do pedido, SKU, produto, rastreamento ou comprador..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-[#f8fafc] border border-[#e2e8f0] rounded-xl text-xs text-[#1e293b] focus:outline-none focus:bg-white focus:border-[#111] transition-all"
+              className="w-full pl-9 pr-4 py-2 bg-[#f8fafc] border border-[#e2e8f0] rounded-xl text-xs text-[#1e293b] focus:outline-none focus:bg-white focus:border-[#16a34a] transition-all"
             />
           </div>
 
@@ -422,7 +422,7 @@ export default function CentralEtiquetasPage() {
                       type="checkbox"
                       checked={filteredOrders.length > 0 && selectedOrderIds.length === filteredOrders.length}
                       onChange={selectAll}
-                      className="rounded border-[#cbd5e1] text-[#111] focus:ring-[#111] cursor-pointer"
+                      className="rounded border-[#cbd5e1] text-[#111] focus:ring-[#16a34a] cursor-pointer"
                     />
                   </th>
                   <th className="py-3 px-4">Produto & Pedido</th>
@@ -462,7 +462,7 @@ export default function CentralEtiquetasPage() {
                             checked={isSelected}
                             onChange={() => toggleSelectOrder(o.id)}
                             onClick={e => e.stopPropagation()}
-                            className="rounded border-[#cbd5e1] text-[#111] focus:ring-[#111] cursor-pointer"
+                            className="rounded border-[#cbd5e1] text-[#111] focus:ring-[#16a34a] cursor-pointer"
                           />
                         </td>
 
@@ -534,10 +534,10 @@ export default function CentralEtiquetasPage() {
                           <div className="flex items-center justify-end gap-1.5">
                             <button
                               onClick={() => handleBatchPrint([o.id])}
-                              className="px-2.5 py-1.5 bg-[#111] hover:bg-[#222] text-white rounded-lg text-[11px] font-bold flex items-center gap-1 transition-all cursor-pointer shadow-2xs"
+                              className="px-2.5 py-1.5 bg-[#16a34a] hover:bg-[#15803d] text-white rounded-lg text-[11px] font-bold flex items-center gap-1 transition-all cursor-pointer shadow-2xs"
                               title="Imprimir Etiqueta Térmica Oficial (100x150mm)"
                             >
-                              <Printer className="w-3.5 h-3.5 text-[#B5F500]" />
+                              <Printer className="w-3.5 h-3.5 text-white" />
                               <span>Imprimir</span>
                             </button>
 
@@ -603,9 +603,9 @@ export default function CentralEtiquetasPage() {
 
                     <button
                       onClick={() => handleBatchPrint(groupOrderIds)}
-                      className="px-3.5 py-1.5 bg-[#111] hover:bg-[#222] text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+                      className="px-3.5 py-1.5 bg-[#16a34a] hover:bg-[#15803d] text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
                     >
-                      <Printer className="w-3.5 h-3.5 text-[#B5F500]" />
+                      <Printer className="w-3.5 h-3.5 text-white" />
                       <span>Imprimir {group.orders.length} Etiquetas</span>
                     </button>
                   </div>
@@ -633,7 +633,7 @@ export default function CentralEtiquetasPage() {
                           type="checkbox"
                           checked={selectedOrderIds.includes(ord.id)}
                           onChange={() => toggleSelectOrder(ord.id)}
-                          className="rounded border-[#cbd5e1] text-[#111] focus:ring-[#111]"
+                          className="rounded border-[#cbd5e1] text-[#111] focus:ring-[#16a34a]"
                         />
                       </div>
                     </div>
@@ -696,7 +696,7 @@ export default function CentralEtiquetasPage() {
       {/* 📌 BARRA FLUTUANTE DE AÇÕES EM LOTE */}
       {/* ========================================================================= */}
       {selectedOrderIds.length > 0 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#111] text-white px-5 py-3 rounded-full shadow-2xl border border-[#333] flex items-center gap-4 animate-in slide-in-from-bottom-5 duration-200">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#16a34a] text-white px-5 py-3 rounded-full shadow-2xl border border-[#15803d] flex items-center gap-4 animate-in slide-in-from-bottom-5 duration-200">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[#B5F500] animate-pulse" />
             <span className="text-xs font-black">
@@ -745,7 +745,7 @@ export default function CentralEtiquetasPage() {
                 <select
                   value={printerConfig.paperSize}
                   onChange={e => setPrinterConfig({ ...printerConfig, paperSize: e.target.value })}
-                  className="w-full h-10 px-3 border border-[#d0d7de] rounded-xl font-medium focus:outline-none focus:border-[#111]"
+                  className="w-full h-10 px-3 border border-[#d0d7de] rounded-xl font-medium focus:outline-none focus:border-[#16a34a]"
                 >
                   <option value="100x150">100mm x 150mm (Padrão Mercado Livre / Correios / Shopee)</option>
                   <option value="100x200">100mm x 200mm (Com canhoto adicional)</option>
@@ -809,7 +809,7 @@ export default function CentralEtiquetasPage() {
 
               <button
                 onClick={() => setShowConfigModal(false)}
-                className="px-4 py-2 bg-[#111] text-white rounded-xl text-xs font-bold hover:bg-[#222] transition-all cursor-pointer"
+                className="px-4 py-2 bg-[#16a34a] text-white rounded-xl text-xs font-bold hover:bg-[#222] transition-all cursor-pointer"
               >
                 Salvar Configuração
               </button>
@@ -841,7 +841,7 @@ export default function CentralEtiquetasPage() {
               {/* Barra de Progresso */}
               <div className="w-full h-2.5 bg-[#f1f5f9] rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-[#111] transition-all duration-300 rounded-full"
+                  className="h-full bg-[#16a34a] transition-all duration-300 rounded-full"
                   style={{ width: `${(queueProgress.current / Math.max(1, queueProgress.total)) * 100}%` }}
                 />
               </div>
@@ -863,7 +863,7 @@ export default function CentralEtiquetasPage() {
             <div className="flex justify-end gap-2 pt-2 border-t border-[#f1f5f9]">
               <button
                 onClick={() => setShowQueueModal(false)}
-                className="px-4 py-2 bg-[#111] text-white rounded-xl text-xs font-bold hover:bg-[#222] transition-all cursor-pointer"
+                className="px-4 py-2 bg-[#16a34a] text-white rounded-xl text-xs font-bold hover:bg-[#222] transition-all cursor-pointer"
               >
                 Concluir
               </button>

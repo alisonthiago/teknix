@@ -258,43 +258,12 @@ function ProductsTab() {
             <SearchInput placeholder="Buscar por título, SKU, marca..." value={search} onChange={setSearch} />
           </div>
 
-          {/* Filtro de Situação Clean (Estilo Filtro de Período / Data) */}
+          {/* Filtro de Situação — somente dropdown limpo */}
           <div className="flex items-center gap-2 flex-wrap">
-            {/* Quick Pills (Mais frequentes) */}
-            <div className="bg-[#f5f5f5] p-1 rounded-xl flex items-center gap-1">
-              {[
-                { id: 'ALL', label: 'Todos', count: counts.ALL },
-                { id: 'ACTIVE', label: 'Ativos', count: counts.ACTIVE },
-                { id: 'PAUSED', label: 'Pausados', count: counts.PAUSED },
-                { id: 'OUT_OF_STOCK', label: 'Sem Estoque', count: counts.OUT_OF_STOCK },
-              ].map(item => {
-                const isActive = situationFilter === item.id
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => setSituationFilter(item.id as any)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
-                      isActive
-                        ? 'bg-white text-[#111] shadow-2xs'
-                        : 'text-[#666] hover:text-[#111]'
-                    }`}
-                  >
-                    <span>{item.label}</span>
-                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
-                      isActive ? 'bg-[#111] text-white' : 'bg-[#e6e6e6] text-[#666]'
-                    }`}>
-                      {item.count}
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
-
-            {/* Dropdown com Todas as Situações Clean */}
             <select
               value={situationFilter}
               onChange={(e) => setSituationFilter(e.target.value as any)}
-              className="h-[38px] px-3.5 bg-[#f8f9fa] hover:bg-[#f0f0f0] border border-[#e6e6e6] rounded-xl text-xs font-bold text-[#333] focus:outline-none focus:border-[#111] cursor-pointer shadow-2xs transition-all"
+              className="h-[38px] px-3.5 bg-[#f8f9fa] hover:bg-[#f0f0f0] border border-[#e6e6e6] rounded-xl text-xs font-bold text-[#333] focus:outline-none focus:border-[#16a34a] cursor-pointer shadow-sm transition-all"
             >
               <option value="ALL">Todas Situações ({counts.ALL})</option>
               <option value="ACTIVE">Ativos ({counts.ACTIVE})</option>
@@ -371,7 +340,7 @@ function ProductsTab() {
                 type="checkbox" 
                 checked={filtered.length > 0 && selectedItems.length === filtered.length}
                 onChange={toggleSelectAll}
-                className="rounded border-[#ccc] text-[#111] focus:ring-[#111]"
+                className="rounded border-[#ccc] text-[#111] focus:ring-[#16a34a]"
               />
             </Th>
             <Th>SKU</Th>
@@ -398,7 +367,7 @@ function ProductsTab() {
                 PAUSED: { label: 'Pausado', bg: 'bg-[#fef3c7] text-[#b45309] border-[#fde68a]' },
                 BLOCKED: { label: 'Bloqueado', bg: 'bg-[#fee2e2] text-[#dc2626] border-[#fecaca]' },
                 LOCKED: { label: 'Travado', bg: 'bg-[#e0e7ff] text-[#4338ca] border-[#c7d2fe]' },
-                BANNED: { label: 'Banido', bg: 'bg-[#111] text-white border-[#333]' },
+                BANNED: { label: 'Banido', bg: 'bg-[#fee2e2] text-[#dc2626] border-[#fecaca]' },
                 ERROR: { label: 'Com Erro', bg: 'bg-[#ffedd5] text-[#ea580c] border-[#fed7aa]' },
                 SYNC_ISSUE: { label: 'Erro Sync', bg: 'bg-[#fee2e2] text-[#dc2626] border-[#fecaca]' },
               }[status] || { label: 'Ativo', bg: 'bg-[#ecfdf5] text-[#16a34a] border-[#bbf7d0]' }
@@ -411,7 +380,7 @@ function ProductsTab() {
                         type="checkbox" 
                         checked={selectedItems.includes(p.id as string)}
                         onChange={() => toggleSelect(p.id as string)}
-                        className="rounded border-[#ccc] text-[#111] focus:ring-[#111]"
+                        className="rounded border-[#ccc] text-[#111] focus:ring-[#16a34a]"
                       />
                     </div>
                   </Td>
@@ -514,7 +483,7 @@ function ProductsTab() {
                       <button
                         onClick={() => setShareProduct(p)}
                         title="Compartilhar no Chat com Colaborador"
-                        className="p-1.5 rounded-lg border border-[#e6e6e6] hover:bg-[#111] hover:text-[#B5F500] text-[#777] transition-all cursor-pointer shadow-2xs"
+                        className="p-1.5 rounded-lg border border-[#e6e6e6] hover:bg-[#16a34a] hover:text-white text-[#777] transition-all cursor-pointer shadow-sm"
                       >
                         <Share2 className="w-3.5 h-3.5" />
                       </button>

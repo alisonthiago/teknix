@@ -408,7 +408,7 @@ function HeaderActions({
         <MessageSquare className="w-3.5 h-3.5 text-[#111]" />
         <span className="hidden sm:inline">Conversas</span>
         {totalUnreadCount > 0 && (
-          <span className="px-1.5 py-0.2 rounded-full text-[9px] font-black bg-[#111] text-[#B5F500]">
+          <span className="px-1.5 py-0.2 rounded-full text-[9px] font-black bg-[#16a34a] text-white">
             {totalUnreadCount}
           </span>
         )}
@@ -417,14 +417,14 @@ function HeaderActions({
       {/* 🔴 BOTÃO AO VIVO DENTRO DA PÍLULA VERDE */}
       <button
         onClick={() => setLiveDrawerOpen(true)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#111] hover:bg-[#222] text-white text-[11px] font-black shadow-xs transition-all tracking-wider uppercase cursor-pointer"
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#16a34a] hover:bg-[#15803d] text-white text-[11px] font-black shadow-sm transition-all tracking-wider uppercase cursor-pointer"
         title="Monitor ao Vivo em Tempo Real"
       >
         <span className="relative flex h-2 w-2 shrink-0">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#e74c3c] opacity-75"></span>
           <span className="relative inline-flex rounded-full h-2 w-2 bg-[#e74c3c]"></span>
         </span>
-        <span className="text-[#B5F500] font-mono font-bold">
+        <span className="font-mono font-bold">
           {todayRevenue && todayRevenue > 0
             ? `R$ ${todayRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
             : 'R$ 219,90'}
@@ -589,7 +589,7 @@ export default function Header({ userName, userRole, userEmail, userId, userAvat
           <div className="relative">
             <button
               onClick={() => setShowBasicCalc(!showBasicCalc)}
-              className="w-10 h-10 rounded-full hover:bg-[#EEFFB3]/60 text-[#111] flex items-center justify-center transition-colors border border-transparent hover:border-[#B5F500]"
+              className="w-10 h-10 rounded-full hover:bg-[#EEFFB3]/60 text-[#111] flex items-center justify-center transition-colors border border-transparent hover:border-[#16a34a]"
               title="Abrir Calculadora Básica"
             >
               <Calculator className="w-5 h-5" strokeWidth={1.5} />

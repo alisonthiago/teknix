@@ -357,7 +357,7 @@ export default function LiveMonitorDrawer({ open, onClose }: LiveMonitorDrawerPr
           <Link
             href="/ao-vivo"
             onClick={onClose}
-            className="w-full py-3 bg-[#111] hover:bg-[#222] text-white text-[13px] font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all text-center"
+            className="w-full py-3 bg-[#16a34a] hover:bg-[#15803d] text-white text-[13px] font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all text-center"
           >
             <span>Ver Painel Completo ao Vivo</span>
             <ArrowRight className="w-4 h-4" />

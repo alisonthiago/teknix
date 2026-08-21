@@ -116,7 +116,7 @@ export default function ProductDiagnosticModal({
           <div className="flex justify-end pt-1">
             <button
               onClick={onClose}
-              className="px-5 py-2.5 bg-[#111] hover:bg-[#222] text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-2xs"
+              className="px-5 py-2.5 bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-2xs"
             >
               Fechar Diagnóstico
             </button>

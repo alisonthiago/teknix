@@ -482,7 +482,7 @@ function ShippingTab() {
                 {o.status === 'EMBALADO' && (
                   <button 
                     onClick={(e) => { e.stopPropagation(); updateOrderStatus(o.id as string, 'ENVIADO') }} 
-                    className="w-full bg-[#111] hover:bg-[#222] text-white py-2 rounded-xl text-[11px] font-bold transition-all shadow-2xs cursor-pointer"
+                    className="w-full bg-[#16a34a] hover:bg-[#15803d] text-white py-2 rounded-xl text-[11px] font-bold transition-all shadow-2xs cursor-pointer"
                   >
                     Despachar Pedido
                   </button>

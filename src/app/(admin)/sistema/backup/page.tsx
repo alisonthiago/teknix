@@ -90,9 +90,9 @@ export default function BackupPage() {
           <button
             onClick={handleExportBackup}
             disabled={downloading}
-            className="px-5 py-2.5 bg-[#111] hover:bg-[#222] text-white text-xs font-bold rounded-xl flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50 shadow-2xs shrink-0"
+            className="px-5 py-2.5 bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold rounded-xl flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50 shadow-2xs shrink-0"
           >
-            {downloading ? <Loader2 className="w-4 h-4 animate-spin text-[#B5F500]" /> : <Download className="w-4 h-4 text-[#B5F500]" />}
+            {downloading ? <Loader2 className="w-4 h-4 animate-spin text-white" /> : <Download className="w-4 h-4 text-white" />}
             <span>{downloading ? 'Gerando Backup...' : 'Baixar Backup Agora'}</span>
           </button>
         </div>

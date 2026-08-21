@@ -150,7 +150,7 @@ export default function ShareContextModal({
               onChange={e => setNote(e.target.value)}
               placeholder="Ex: Favor emitir a nota fiscal ou priorizar separação..."
               rows={2}
-              className="w-full p-3 bg-[#f8fafc] border border-[#d0d7de] rounded-xl text-xs text-[#333] focus:outline-none focus:bg-white focus:border-[#111] transition-all resize-none"
+              className="w-full p-3 bg-[#f8fafc] border border-[#d0d7de] rounded-xl text-xs text-[#333] focus:outline-none focus:bg-white focus:border-[#16a34a] transition-all resize-none"
             />
           </div>
 
@@ -166,9 +166,9 @@ export default function ShareContextModal({
             <button
               onClick={handleShare}
               disabled={loading || !selectedTarget}
-              className="px-5 py-2 rounded-xl text-xs font-bold bg-[#111] hover:bg-[#222] text-white flex items-center gap-2 transition-all cursor-pointer shadow-2xs disabled:opacity-50"
+              className="px-5 py-2 rounded-xl text-xs font-bold bg-[#16a34a] hover:bg-[#15803d] text-white flex items-center gap-2 transition-all cursor-pointer shadow-2xs disabled:opacity-50"
             >
-              {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin text-[#B5F500]" /> : <Send className="w-3.5 h-3.5 text-[#B5F500]" />}
+              {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin text-white" /> : <Send className="w-3.5 h-3.5 text-white" />}
               <span>{loading ? 'Enviando...' : 'Compartilhar no Chat'}</span>
             </button>
           </div>

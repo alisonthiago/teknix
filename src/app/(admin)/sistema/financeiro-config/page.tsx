@@ -41,7 +41,7 @@ export default function FinanceiroConfigPage() {
             <select 
               value={currency} 
               onChange={e => setCurrency(e.target.value)}
-              className="w-full px-3.5 py-2.5 border border-[#e6e6e6] rounded-xl text-[13px] outline-none focus:border-[#111] bg-white"
+              className="w-full px-3.5 py-2.5 border border-[#e6e6e6] rounded-xl text-[13px] outline-none focus:border-[#16a34a] bg-white"
             >
               <option value="BRL">R$ Real Brasileiro (BRL)</option>
               <option value="USD">$ Dólar Americano (USD)</option>
@@ -52,7 +52,7 @@ export default function FinanceiroConfigPage() {
             <select 
               value={format} 
               onChange={e => setFormat(e.target.value)}
-              className="w-full px-3.5 py-2.5 border border-[#e6e6e6] rounded-xl text-[13px] outline-none focus:border-[#111] bg-white"
+              className="w-full px-3.5 py-2.5 border border-[#e6e6e6] rounded-xl text-[13px] outline-none focus:border-[#16a34a] bg-white"
             >
               <option value="pt-BR">1.234,56 (Padrão Brasil)</option>
               <option value="en-US">1,234.56 (Padrão Internacional)</option>
@@ -84,9 +84,9 @@ export default function FinanceiroConfigPage() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="px-6 py-2.5 bg-[#111] hover:bg-[#222] text-white text-[12px] font-bold rounded-xl flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50 shadow-2xs"
+          className="px-6 py-2.5 bg-[#16a34a] hover:bg-[#15803d] text-white text-[12px] font-bold rounded-xl flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50 shadow-2xs"
         >
-          {saving ? <Loader2 className="w-4 h-4 animate-spin text-[#B5F500]" /> : <Save className="w-4 h-4 text-[#B5F500]" />}
+          {saving ? <Loader2 className="w-4 h-4 animate-spin text-white" /> : <Save className="w-4 h-4 text-white" />}
           <span>{saving ? 'Salvando...' : 'Salvar Alterações'}</span>
         </button>
       </div>

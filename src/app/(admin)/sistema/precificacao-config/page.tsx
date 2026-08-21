@@ -51,7 +51,7 @@ export default function PrecificacaoConfigPage() {
               type="number" 
               value={params.min_margin} 
               onChange={e => setParams({ ...params, min_margin: +e.target.value })}
-              className="w-full px-3.5 py-2.5 border border-[#e6e6e6] rounded-xl text-[13px] outline-none focus:border-[#111] bg-white" 
+              className="w-full px-3.5 py-2.5 border border-[#e6e6e6] rounded-xl text-[13px] outline-none focus:border-[#16a34a] bg-white" 
             />
           </div>
           <div>
@@ -60,7 +60,7 @@ export default function PrecificacaoConfigPage() {
               type="number" 
               value={params.target_margin} 
               onChange={e => setParams({ ...params, target_margin: +e.target.value })}
-              className="w-full px-3.5 py-2.5 border border-[#e6e6e6] rounded-xl text-[13px] outline-none focus:border-[#111] bg-white" 
+              className="w-full px-3.5 py-2.5 border border-[#e6e6e6] rounded-xl text-[13px] outline-none focus:border-[#16a34a] bg-white" 
             />
           </div>
           <div>
@@ -70,7 +70,7 @@ export default function PrecificacaoConfigPage() {
               value={params.markup} 
               step="0.1" 
               onChange={e => setParams({ ...params, markup: +e.target.value })}
-              className="w-full px-3.5 py-2.5 border border-[#e6e6e6] rounded-xl text-[13px] outline-none focus:border-[#111] bg-white" 
+              className="w-full px-3.5 py-2.5 border border-[#e6e6e6] rounded-xl text-[13px] outline-none focus:border-[#16a34a] bg-white" 
             />
           </div>
         </div>
@@ -83,7 +83,7 @@ export default function PrecificacaoConfigPage() {
               type="number" 
               value={params.avg_freight} 
               onChange={e => setParams({ ...params, avg_freight: +e.target.value })}
-              className="w-full px-3.5 py-2.5 border border-[#e6e6e6] rounded-xl text-[13px] outline-none focus:border-[#111] bg-white" 
+              className="w-full px-3.5 py-2.5 border border-[#e6e6e6] rounded-xl text-[13px] outline-none focus:border-[#16a34a] bg-white" 
             />
           </div>
           <div>
@@ -92,7 +92,7 @@ export default function PrecificacaoConfigPage() {
               type="number" 
               value={params.packaging} 
               onChange={e => setParams({ ...params, packaging: +e.target.value })}
-              className="w-full px-3.5 py-2.5 border border-[#e6e6e6] rounded-xl text-[13px] outline-none focus:border-[#111] bg-white" 
+              className="w-full px-3.5 py-2.5 border border-[#e6e6e6] rounded-xl text-[13px] outline-none focus:border-[#16a34a] bg-white" 
             />
           </div>
           <div>
@@ -101,7 +101,7 @@ export default function PrecificacaoConfigPage() {
               type="number" 
               value={params.marketplace_fee} 
               onChange={e => setParams({ ...params, marketplace_fee: +e.target.value })}
-              className="w-full px-3.5 py-2.5 border border-[#e6e6e6] rounded-xl text-[13px] outline-none focus:border-[#111] bg-white" 
+              className="w-full px-3.5 py-2.5 border border-[#e6e6e6] rounded-xl text-[13px] outline-none focus:border-[#16a34a] bg-white" 
             />
           </div>
         </div>
@@ -114,7 +114,7 @@ export default function PrecificacaoConfigPage() {
               type="number" 
               value={params.icms} 
               onChange={e => setParams({ ...params, icms: +e.target.value })}
-              className="w-full px-3.5 py-2.5 border border-[#e6e6e6] rounded-xl text-[13px] outline-none focus:border-[#111] bg-white" 
+              className="w-full px-3.5 py-2.5 border border-[#e6e6e6] rounded-xl text-[13px] outline-none focus:border-[#16a34a] bg-white" 
             />
           </div>
           <div>
@@ -123,7 +123,7 @@ export default function PrecificacaoConfigPage() {
               type="number" 
               value={params.pis} 
               onChange={e => setParams({ ...params, pis: +e.target.value })}
-              className="w-full px-3.5 py-2.5 border border-[#e6e6e6] rounded-xl text-[13px] outline-none focus:border-[#111] bg-white" 
+              className="w-full px-3.5 py-2.5 border border-[#e6e6e6] rounded-xl text-[13px] outline-none focus:border-[#16a34a] bg-white" 
             />
           </div>
           <div>
@@ -132,7 +132,7 @@ export default function PrecificacaoConfigPage() {
               type="number" 
               value={params.cofins} 
               onChange={e => setParams({ ...params, cofins: +e.target.value })}
-              className="w-full px-3.5 py-2.5 border border-[#e6e6e6] rounded-xl text-[13px] outline-none focus:border-[#111] bg-white" 
+              className="w-full px-3.5 py-2.5 border border-[#e6e6e6] rounded-xl text-[13px] outline-none focus:border-[#16a34a] bg-white" 
             />
           </div>
         </div>
@@ -141,9 +141,9 @@ export default function PrecificacaoConfigPage() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="px-6 py-2.5 bg-[#111] hover:bg-[#222] text-white text-[12px] font-bold rounded-xl flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50 shadow-2xs"
+          className="px-6 py-2.5 bg-[#16a34a] hover:bg-[#15803d] text-white text-[12px] font-bold rounded-xl flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50 shadow-2xs"
         >
-          {saving ? <Loader2 className="w-4 h-4 animate-spin text-[#B5F500]" /> : <Save className="w-4 h-4 text-[#B5F500]" />}
+          {saving ? <Loader2 className="w-4 h-4 animate-spin text-white" /> : <Save className="w-4 h-4 text-white" />}
           <span>{saving ? 'Salvando...' : 'Salvar Alterações'}</span>
         </button>
       </div>

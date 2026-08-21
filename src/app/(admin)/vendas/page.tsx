@@ -162,13 +162,13 @@ function SalesTab() {
             placeholder="Buscar por pedido, comprador ou canal..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3.5 py-2.5 border border-[#e6e6e6] rounded-xl text-[12px] font-medium text-[#333] focus:outline-none focus:border-[#111] bg-white shadow-2xs"
+            className="w-full pl-9 pr-3.5 py-2.5 border border-[#e6e6e6] rounded-xl text-[12px] font-medium text-[#333] focus:outline-none focus:border-[#16a34a] bg-white shadow-2xs"
           />
         </div>
         <select 
           value={filterMp} 
           onChange={e => { setFilterMp(e.target.value); setFilterAcc('all') }} 
-          className="min-h-[40px] px-3.5 border border-[#e6e6e6] rounded-xl text-[12px] font-medium text-[#333] focus:outline-none focus:border-[#111] bg-white shadow-2xs"
+          className="min-h-[40px] px-3.5 border border-[#e6e6e6] rounded-xl text-[12px] font-medium text-[#333] focus:outline-none focus:border-[#16a34a] bg-white shadow-2xs"
         >
           <option value="all">Todos marketplaces</option>
           <option value="Mercado Livre">Mercado Livre</option>
@@ -179,7 +179,7 @@ function SalesTab() {
         <select 
           value={filterAcc} 
           onChange={e => setFilterAcc(e.target.value)} 
-          className="min-h-[40px] px-3.5 border border-[#e6e6e6] rounded-xl text-[12px] font-medium text-[#333] focus:outline-none focus:border-[#111] bg-white shadow-2xs"
+          className="min-h-[40px] px-3.5 border border-[#e6e6e6] rounded-xl text-[12px] font-medium text-[#333] focus:outline-none focus:border-[#16a34a] bg-white shadow-2xs"
         >
           <option value="all">Todas contas</option>
           {(accounts || []).map((a: Record<string, unknown>) => (
@@ -253,7 +253,7 @@ function SalesTab() {
                     </span>
                   </td>
                   <td className="py-3.5 px-4 text-right">
-                    <button className="p-1 rounded-lg bg-[#f0f0f0] group-hover:bg-[#111] group-hover:text-white transition-all text-[#666]">
+                    <button className="p-1 rounded-lg bg-[#f0f0f0] group-hover:bg-[#16a34a] group-hover:text-white transition-all text-[#666]">
                       <ChevronRight className="w-4 h-4" />
                     </button>
                   </td>

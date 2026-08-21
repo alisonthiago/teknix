@@ -69,7 +69,7 @@ export default function EmpresaPage() {
                 type="text"
                 value={field.value}
                 onChange={e => setFormData({ ...formData, [field.key]: e.target.value })}
-                className={`w-full px-3.5 py-2.5 border border-[#e6e6e6] rounded-xl text-[13px] text-[#333] outline-none focus:border-[#111] transition-colors bg-white ${field.mono ? 'font-mono' : ''}`}
+                className={`w-full px-3.5 py-2.5 border border-[#e6e6e6] rounded-xl text-[13px] text-[#333] outline-none focus:border-[#16a34a] transition-colors bg-white ${field.mono ? 'font-mono' : ''}`}
               />
             </div>
           ))}
@@ -79,9 +79,9 @@ export default function EmpresaPage() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="px-6 py-2.5 bg-[#111] hover:bg-[#222] text-white text-[12px] font-bold rounded-xl flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50 shadow-2xs"
+          className="px-6 py-2.5 bg-[#16a34a] hover:bg-[#15803d] text-white text-[12px] font-bold rounded-xl flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50 shadow-2xs"
         >
-          {saving ? <Loader2 className="w-4 h-4 animate-spin text-[#B5F500]" /> : <Save className="w-4 h-4 text-[#B5F500]" />}
+          {saving ? <Loader2 className="w-4 h-4 animate-spin text-white" /> : <Save className="w-4 h-4 text-white" />}
           <span>{saving ? 'Salvando...' : 'Salvar Alterações'}</span>
         </button>
       </div>
