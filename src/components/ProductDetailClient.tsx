@@ -680,32 +680,32 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
                   <StatusBadge status={product.status} />
                 </div>
 
-                {/* Action Buttons at Top Right Corner (Somente Ícones Clean) */}
+                {/* Action Buttons at Top Right Corner (Estilo Minimalista Preto/Grafite Unificado) */}
                 <div className="flex items-center gap-2 shrink-0">
                   <button
                     onClick={() => setShowShareModal(true)}
-                    className="w-9 h-9 flex items-center justify-center bg-white text-[#334155] border border-[#e2e8f0] rounded-full hover:bg-[#f8fafc] hover:border-[#16a34a] hover:text-[#16a34a] transition-all cursor-pointer shadow-xs"
+                    className="w-9 h-9 flex items-center justify-center bg-white text-[#374151] border border-[#e5e7eb] rounded-full hover:bg-[#f9fafb] hover:border-[#111111] hover:text-[#111111] transition-all cursor-pointer shadow-xs"
                     title="Compartilhar produto com a equipe"
                   >
-                    <Share2 className="w-4 h-4 text-[#16a34a]" />
+                    <Share2 className="w-4 h-4 text-[#374151]" />
                   </button>
                   <button 
                     onClick={() => router.push(`/purchases/new?product=${product.id}`)} 
-                    className="w-9 h-9 flex items-center justify-center bg-white text-[#16a34a] border border-[#bbf7d0] rounded-full hover:bg-[#dcfce7] transition-all cursor-pointer shadow-xs"
+                    className="w-9 h-9 flex items-center justify-center bg-white text-[#374151] border border-[#e5e7eb] rounded-full hover:bg-[#f9fafb] hover:border-[#111111] hover:text-[#111111] transition-all cursor-pointer shadow-xs"
                     title="Fazer Pedido de Compra"
                   >
-                    <ShoppingCart className="w-4 h-4" />
+                    <ShoppingCart className="w-4 h-4 text-[#374151]" />
                   </button>
                   <button 
                     onClick={() => router.push(`/produtos/${product.id}/editar`)} 
-                    className="w-9 h-9 flex items-center justify-center bg-[#16a34a] hover:bg-[#15803d] text-white rounded-full transition-all cursor-pointer shadow-xs"
+                    className="w-9 h-9 flex items-center justify-center bg-white text-[#374151] border border-[#e5e7eb] rounded-full hover:bg-[#f9fafb] hover:border-[#111111] hover:text-[#111111] transition-all cursor-pointer shadow-xs"
                     title="Editar Produto"
                   >
-                    <Pencil className="w-4 h-4" />
+                    <Pencil className="w-4 h-4 text-[#374151]" />
                   </button>
                   <DropdownMenu>
-                    <DropdownMenuTrigger className="w-9 h-9 flex items-center justify-center rounded-full border border-[#e2e8f0] text-[#64748b] hover:bg-[#f8fafc] transition-colors focus:outline-none cursor-pointer shadow-xs" title="Mais opções">
-                      <MoreHorizontal className="w-4 h-4" />
+                    <DropdownMenuTrigger className="w-9 h-9 flex items-center justify-center bg-white text-[#374151] border border-[#e5e7eb] rounded-full hover:bg-[#f9fafb] hover:border-[#111111] hover:text-[#111111] transition-colors focus:outline-none cursor-pointer shadow-xs" title="Mais opções">
+                      <MoreHorizontal className="w-4 h-4 text-[#374151]" />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-44 rounded-2xl p-1.5 shadow-xl border border-[#e2e8f0]">
                       <DropdownMenuItem 

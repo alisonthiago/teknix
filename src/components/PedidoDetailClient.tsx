@@ -339,13 +339,13 @@ function OrderActions({ order }: { order: OrderDetail }) {
       />
 
       <div className="flex items-center gap-2 mt-3">
-        {/* BOTÕES DE AÇÃO OPERACIONAIS (SOMENTE ÍCONES CLEAN) */}
+        {/* BOTÕES DE AÇÃO OPERACIONAIS (SOMENTE ÍCONES CLEAN NEUTROS) */}
         <button
           onClick={handleShareOrder}
-          className="w-9 h-9 flex items-center justify-center bg-[#16a34a] hover:bg-[#15803d] text-white rounded-xl transition-all shadow-xs cursor-pointer"
+          className="w-9 h-9 flex items-center justify-center bg-white border border-[#e5e7eb] text-[#374151] hover:bg-[#f9fafb] hover:border-[#111111] hover:text-[#111111] rounded-xl transition-all shadow-xs cursor-pointer"
           title="Compartilhar Pedido no Chat"
         >
-          <Share2 className="w-4 h-4" />
+          <Share2 className="w-4 h-4 text-[#374151]" />
         </button>
 
         <button
