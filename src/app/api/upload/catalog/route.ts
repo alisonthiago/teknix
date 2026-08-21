@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     }
 
     // Limit check: 50MB
-    const MAX_SIZE = 50 * 1024 * 1024 // 50MB
+    const MAX_SIZE = 50 * 1024 * 1024
     if (file.size > MAX_SIZE) {
       return NextResponse.json({ error: 'O arquivo excede o limite máximo permitido de 50MB.' }, { status: 400 })
     }
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     const supabase = getSupabase()
     const buffer = Buffer.from(await file.arrayBuffer())
 
-    // Determine type & extension
+    // Determine extension and mime type
     const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
     const fileExt = file.name.split('.').pop() || (isPdf ? 'pdf' : 'jpg')
     const fileName = `${supplierId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
@@ -55,14 +55,16 @@ export async function POST(request: Request) {
 
     const title = (customTitle || file.name.replace(/\.[^/.]+$/, '')).trim()
 
-    // Insert record in supplier_catalogs
+    // Insert record in supplier_catalogs with the exact schema columns
     const { data: catalogRecord, error: dbError } = await supabase
       .from('supplier_catalogs')
       .insert({
         supplier_id: supplierId,
         title,
-        url: urlData.publicUrl,
-        type: isPdf ? 'PDF' : 'IMAGEM'
+        file_url: urlData.publicUrl,
+        file_name: file.name,
+        file_size_bytes: file.size,
+        file_type: isPdf ? 'PDF' : 'IMAGEM'
       })
       .select()
       .single()

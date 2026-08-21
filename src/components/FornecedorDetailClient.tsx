@@ -64,24 +64,28 @@ function SupplierCatalogsDisplay({ supplierId }: { supplierId: string }) {
     <div className="bg-white border border-[#e6e6e6] rounded-md p-4">
       <SectionTitle>Catálogos</SectionTitle>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        {catalogs.map(cat => (
-          <a 
-            key={cat.id} 
-            href={cat.url} 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="border border-[#e6e6e6] rounded-lg p-3 flex flex-col items-center justify-center bg-[#fcfcfc] hover:bg-[#f5f5f5] transition-colors cursor-pointer"
-          >
-            {cat.type === 'PDF' ? (
-              <FileText className="w-8 h-8 text-[#e74c3c] mb-2" />
-            ) : (
-              <LinkIcon className="w-8 h-8 text-[#3483fa] mb-2" />
-            )}
-            <span className="text-[11px] text-center font-medium text-[#333] line-clamp-2 w-full" title={cat.title}>
-              {cat.title}
-            </span>
-          </a>
-        ))}
+        {catalogs.map(cat => {
+          const url = cat.file_url || cat.url || ''
+          const isPdf = (cat.file_type || '').toUpperCase() === 'PDF' || url.toLowerCase().includes('.pdf')
+          return (
+            <a 
+              key={cat.id} 
+              href={url} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="border border-[#e6e6e6] rounded-xl p-3 flex flex-col items-center justify-center bg-[#fcfcfc] hover:bg-[#f5f5f5] transition-colors cursor-pointer"
+            >
+              {isPdf ? (
+                <FileText className="w-8 h-8 text-[#e74c3c] mb-2" />
+              ) : (
+                <LinkIcon className="w-8 h-8 text-[#3483fa] mb-2" />
+              )}
+              <span className="text-[11px] text-center font-bold text-[#333] line-clamp-2 w-full" title={cat.title}>
+                {cat.title}
+              </span>
+            </a>
+          )
+        })}
       </div>
     </div>
   )

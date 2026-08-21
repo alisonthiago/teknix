@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { FileText, Link as LinkIcon, Trash2, Loader2, UploadCloud, Plus } from 'lucide-react'
+import { FileText, Link as LinkIcon, Trash2, Loader2, UploadCloud, Plus, Image as ImageIcon } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 import { useNotification } from '@/contexts/NotificationContext'
 import { Button } from '@/components/ui/button'
@@ -10,9 +10,13 @@ import { Label } from '@/components/ui/label'
 
 interface Catalog {
   id: string
+  supplier_id: string
   title: string
-  url: string
-  type: 'PDF' | 'LINK'
+  file_url: string
+  file_type?: string
+  file_name?: string
+  file_size_bytes?: number
+  created_at?: string
 }
 
 export default function SupplierCatalogsEditor({ supplierId }: { supplierId: string }) {
@@ -74,8 +78,8 @@ export default function SupplierCatalogsEditor({ supplierId }: { supplierId: str
         }
       }
 
-      notify({ type: 'success', title: 'Sucesso', message: 'Catálogo(s) enviado(s) com sucesso!' })
-      fetchCatalogs()
+      notify({ type: 'success', title: 'Sucesso', message: 'Catálogo enviado com sucesso!' })
+      await fetchCatalogs()
     } catch (err: any) {
       console.error(err)
       notify({ type: 'error', title: 'Erro', message: err.message || 'Falha ao enviar arquivo.' })
@@ -107,8 +111,8 @@ export default function SupplierCatalogsEditor({ supplierId }: { supplierId: str
         .insert({
           supplier_id: supplierId,
           title: linkTitle.trim(),
-          url: linkUrl.trim(),
-          type: 'LINK',
+          file_url: linkUrl.trim(),
+          file_type: 'LINK',
         })
 
       if (error) throw error
@@ -117,28 +121,28 @@ export default function SupplierCatalogsEditor({ supplierId }: { supplierId: str
       setShowLinkForm(false)
       setLinkTitle('')
       setLinkUrl('')
-      fetchCatalogs()
-    } catch (err) {
+      await fetchCatalogs()
+    } catch (err: any) {
       console.error(err)
-      notify({ type: 'error', title: 'Erro', message: 'Falha ao adicionar link.' })
+      notify({ type: 'error', title: 'Erro', message: err.message || 'Falha ao adicionar link.' })
     } finally {
       setUploading(false)
     }
   }
 
-  const handleDelete = async (id: string, url: string, type: string) => {
+  const handleDelete = async (id: string, fileUrl: string, fileType?: string) => {
     try {
       await supabase.from('supplier_catalogs').delete().eq('id', id)
       
-      if (type === 'PDF') {
-        const urlParts = url.split('/')
+      if (fileType === 'PDF' || fileType === 'IMAGEM') {
+        const urlParts = (fileUrl || '').split('/')
         const fileName = urlParts.slice(-2).join('/')
         await supabase.storage.from('supplier-catalogs').remove([fileName])
       }
       
       notify({ type: 'success', title: 'Sucesso', message: 'Catálogo removido.' })
-      fetchCatalogs()
-    } catch (err) {
+      await fetchCatalogs()
+    } catch (err: any) {
       console.error(err)
       notify({ type: 'error', title: 'Erro', message: 'Não foi possível remover.' })
     }
@@ -147,9 +151,9 @@ export default function SupplierCatalogsEditor({ supplierId }: { supplierId: str
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Dropzone PDF */}
+        {/* Dropzone PDF / Imagem */}
         <div
-          className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer flex flex-col justify-center items-center h-40 ${
+          className={`relative border-2 border-dashed rounded-xl p-6 text-center transition-colors cursor-pointer flex flex-col justify-center items-center h-40 ${
             dragActive ? 'border-[#3483fa] bg-[#f0f7ff]' : 'border-[#d0d0d0] hover:border-[#bbb] hover:bg-[#fafafa]'
           }`}
           onDragEnter={handleDrag}
@@ -172,8 +176,8 @@ export default function SupplierCatalogsEditor({ supplierId }: { supplierId: str
           {uploading && !showLinkForm ? (
             <>
               <Loader2 className="w-8 h-8 text-[#3483fa] animate-spin mb-2" />
-              <p className="text-[13px] text-[#666] font-bold">Enviando catálogo...</p>
-              <p className="text-[11px] text-[#999] mt-0.5">Salvando com segurança no Supabase</p>
+              <p className="text-[13px] text-[#333] font-bold">Enviando catálogo...</p>
+              <p className="text-[11px] text-[#999] mt-0.5">Salvando no Supabase Storage</p>
             </>
           ) : (
             <>
@@ -185,19 +189,19 @@ export default function SupplierCatalogsEditor({ supplierId }: { supplierId: str
         </div>
 
         {/* Link Form */}
-        <div className="border border-[#e6e6e6] rounded-lg p-5 flex flex-col justify-center bg-[#fafafa]">
+        <div className="border border-[#e6e6e6] rounded-xl p-5 flex flex-col justify-center bg-[#fafafa]">
           {showLinkForm ? (
             <div className="space-y-3">
               <div>
-                <Label className="text-[11px] text-[#666] mb-1">Título do Catálogo</Label>
-                <Input value={linkTitle} onChange={e=>setLinkTitle(e.target.value)} placeholder="Ex: Catálogo Verão 2026" className="h-8 text-xs" />
+                <Label className="text-[11px] text-[#666] mb-1 font-bold">Título do Catálogo</Label>
+                <Input value={linkTitle} onChange={e=>setLinkTitle(e.target.value)} placeholder="Ex: Catálogo Verão 2026" className="h-8 text-xs bg-white" />
               </div>
               <div>
-                <Label className="text-[11px] text-[#666] mb-1">Link (URL)</Label>
-                <Input value={linkUrl} onChange={e=>setLinkUrl(e.target.value)} placeholder="https://..." className="h-8 text-xs" />
+                <Label className="text-[11px] text-[#666] mb-1 font-bold">Link (URL)</Label>
+                <Input value={linkUrl} onChange={e=>setLinkUrl(e.target.value)} placeholder="https://..." className="h-8 text-xs bg-white" />
               </div>
               <div className="flex gap-2 pt-1">
-                <Button size="sm" variant="default" onClick={handleAddLink} disabled={uploading || !linkTitle || !linkUrl} className="h-8 text-xs px-3">
+                <Button size="sm" variant="default" onClick={handleAddLink} disabled={uploading || !linkTitle || !linkUrl} className="h-8 text-xs px-3 bg-[#3483fa] hover:bg-[#2968c8]">
                   Salvar Link
                 </Button>
                 <Button size="sm" variant="outline" onClick={() => setShowLinkForm(false)} disabled={uploading} className="h-8 text-xs px-3">
@@ -207,10 +211,10 @@ export default function SupplierCatalogsEditor({ supplierId }: { supplierId: str
             </div>
           ) : (
             <div className="text-center">
-              <LinkIcon className="w-8 h-8 text-[#ccc] mx-auto mb-2" />
-              <p className="text-[13px] text-[#666] font-medium">Cadastrar Link</p>
-              <p className="text-[11px] text-[#999] mt-1 mb-3">Google Drive, Site, etc.</p>
-              <Button variant="outline" size="sm" onClick={() => setShowLinkForm(true)} className="h-8 text-xs px-4">
+              <LinkIcon className="w-8 h-8 text-[#999] mx-auto mb-2" />
+              <p className="text-[13px] text-[#333] font-bold">Cadastrar Link</p>
+              <p className="text-[11px] text-[#999] mt-1 mb-3">Google Drive, Site, OneDrive, etc.</p>
+              <Button variant="outline" size="sm" onClick={() => setShowLinkForm(true)} className="h-8 text-xs px-4 border-[#ddd]">
                 <Plus className="w-3.5 h-3.5 mr-1" /> Adicionar Link
               </Button>
             </div>
@@ -224,32 +228,43 @@ export default function SupplierCatalogsEditor({ supplierId }: { supplierId: str
         </div>
       ) : catalogs.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {catalogs.map(cat => (
-            <div key={cat.id} className="relative group border border-[#e6e6e6] rounded-lg bg-white overflow-hidden flex flex-col">
-              <a href={cat.url} target="_blank" rel="noopener noreferrer" className="flex-1 p-4 flex flex-col items-center justify-center bg-[#fcfcfc] hover:bg-[#f5f5f5] transition-colors cursor-pointer">
-                {cat.type === 'PDF' ? (
-                  <FileText className="w-10 h-10 text-[#e74c3c] mb-2" />
-                ) : (
-                  <LinkIcon className="w-10 h-10 text-[#3483fa] mb-2" />
-                )}
-                <span className="text-[11px] text-center font-medium text-[#333] line-clamp-2 w-full" title={cat.title}>
-                  {cat.title}
-                </span>
-                <span className="text-[9px] text-[#999] uppercase mt-1">{cat.type}</span>
-              </a>
-              <button
-                type="button"
-                onClick={(e) => { e.preventDefault(); handleDelete(cat.id, cat.url, cat.type) }}
-                className="absolute top-1.5 right-1.5 p-1.5 rounded-full bg-white/90 text-[#e74c3c] shadow-sm hover:bg-[#e74c3c] hover:text-white opacity-0 group-hover:opacity-100 transition-all"
-                title="Remover"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          ))}
+          {catalogs.map(cat => {
+            const url = cat.file_url || (cat as any).url || ''
+            const type = (cat.file_type || (cat as any).type || '').toUpperCase()
+            const isPdf = type === 'PDF' || url.toLowerCase().includes('.pdf')
+            const isImage = type === 'IMAGEM' || url.match(/\.(jpeg|jpg|png|webp|gif)/i)
+
+            return (
+              <div key={cat.id} className="relative group border border-[#e6e6e6] rounded-xl bg-white overflow-hidden flex flex-col shadow-2xs hover:shadow-sm transition-all">
+                <a href={url} target="_blank" rel="noopener noreferrer" className="flex-1 p-4 flex flex-col items-center justify-center bg-[#fcfcfc] hover:bg-[#f5f5f5] transition-colors cursor-pointer">
+                  {isPdf ? (
+                    <FileText className="w-10 h-10 text-[#e74c3c] mb-2" />
+                  ) : isImage ? (
+                    <ImageIcon className="w-10 h-10 text-[#16a34a] mb-2" />
+                  ) : (
+                    <LinkIcon className="w-10 h-10 text-[#3483fa] mb-2" />
+                  )}
+                  <span className="text-[11px] text-center font-bold text-[#333] line-clamp-2 w-full" title={cat.title}>
+                    {cat.title}
+                  </span>
+                  <span className="text-[9px] font-extrabold text-[#999] uppercase mt-1.5 px-2 py-0.5 rounded-full bg-[#eee]">
+                    {type || (isPdf ? 'PDF' : isImage ? 'IMAGEM' : 'LINK')}
+                  </span>
+                </a>
+                <button
+                  type="button"
+                  onClick={(e) => { e.preventDefault(); handleDelete(cat.id, url, type) }}
+                  className="absolute top-1.5 right-1.5 p-1.5 rounded-full bg-white/95 text-[#e74c3c] shadow-sm hover:bg-[#e74c3c] hover:text-white opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
+                  title="Remover"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )
+          })}
         </div>
       ) : (
-        <p className="text-[13px] text-[#999] text-center py-4 border border-dashed border-[#e6e6e6] rounded-lg">
+        <p className="text-[13px] text-[#999] text-center py-4 border border-dashed border-[#e6e6e6] rounded-xl">
           Nenhum catálogo cadastrado.
         </p>
       )}
