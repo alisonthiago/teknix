@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
-import { useInternalChat } from '@/contexts/InternalChatContext'
+import { useInternalChat, getDirectConvId } from '@/contexts/InternalChatContext'
 import MessageCardRenderer from './MessageCardRenderer'
 import { TeknixT } from '@/components/TeknixT'
 import {
@@ -49,7 +49,8 @@ export default function FloatingMessenger() {
   }
 
   const handleSelectCollaborator = async (colabId: string, colabName: string) => {
-    let conv = conversations.find(c => c.members.some(m => m.id === colabId))
+    const directId = getDirectConvId(currentUser?.id || 'me', colabId)
+    let conv = conversations.find(c => c.id === directId)
     if (!conv) {
       const created = await createConversation(colabName, 'DIRECT', [colabId])
       if (created) conv = created
@@ -89,34 +90,52 @@ export default function FloatingMessenger() {
       {/* ── Header ─────────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between px-6 py-5 border-b border-[#f0f0f0] shrink-0 bg-white">
         <div className="relative">
-          <button
-            onClick={() => setShowChannelSelect(!showChannelSelect)}
-            className="flex items-center gap-3 cursor-pointer hover:opacity-75 transition-opacity"
-          >
-            {/* Avatar */}
-            <div className="relative shrink-0">
-              <div className="w-10 h-10 rounded-full bg-[#ecfdf5] border border-[#bbf7d0] flex items-center justify-center font-bold text-[#16a34a]">
-                {activeConversation?.type === 'GROUP'
-                  ? <Users className="w-5 h-5" />
-                  : <span className="text-[15px]">{activeConversation?.name?.slice(0, 1) || 'C'}</span>}
-              </div>
-              <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-[#16a34a] rounded-full ring-2 ring-white" />
-            </div>
+          {(() => {
+            const isDirect = activeConversation?.type === 'DIRECT'
+            const targetColab = isDirect ? collaborators.find(c => activeConversation?.name.includes(c.name) || activeConversation?.members?.some(m => m.id === c.id)) : null
+            const isOnline = isDirect ? (targetColab ? targetColab.online : false) : collaborators.some(c => c.online)
 
-            <div className="text-left">
-              <div className="flex items-center gap-1.5">
-                <span className="text-[16px] font-bold text-[#111] leading-tight">
-                  {activeConversation?.name || 'Chat'}
-                </span>
-                <ChevronDown className="w-4 h-4 text-[#94a3b8]" />
-              </div>
-              <p className="text-[13px] text-[#16a34a] font-medium mt-0.5">● Online agora</p>
-            </div>
-          </button>
+            return (
+              <button
+                onClick={() => setShowChannelSelect(!showChannelSelect)}
+                className="flex items-center gap-3 cursor-pointer hover:opacity-75 transition-opacity"
+              >
+                {/* Avatar */}
+                <div className="relative shrink-0">
+                  <div className={`w-10 h-10 rounded-full border flex items-center justify-center font-bold ${
+                    isOnline 
+                      ? 'bg-[#ecfdf5] border-[#bbf7d0] text-[#16a34a]' 
+                      : 'bg-[#f1f5f9] border-[#e2e8f0] text-[#64748b]'
+                  }`}>
+                    {activeConversation?.type === 'GROUP'
+                      ? <Users className="w-5 h-5" />
+                      : <span className="text-[15px]">{activeConversation?.name?.slice(0, 1) || 'C'}</span>}
+                  </div>
+                  <span className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full ring-2 ring-white ${
+                    isOnline ? 'bg-[#16a34a]' : 'bg-[#94a3b8]'
+                  }`} />
+                </div>
+
+                <div className="text-left">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[16px] font-bold text-[#111] leading-tight">
+                      {activeConversation?.name || 'Chat'}
+                    </span>
+                    <ChevronDown className="w-4 h-4 text-[#94a3b8]" />
+                  </div>
+                  <p className={`text-[13px] font-medium mt-0.5 ${
+                    isOnline ? 'text-[#16a34a]' : 'text-[#94a3b8]'
+                  }`}>
+                    {isOnline ? '● Online agora' : '○ Offline'}
+                  </p>
+                </div>
+              </button>
+            )
+          })()}
 
           {/* Dropdown de canais */}
           {showChannelSelect && (
-            <div className="absolute top-16 left-0 w-72 bg-white rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-[#e2e8f0] py-2 z-50">
+            <div className="absolute top-16 left-0 w-72 bg-white rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-[#e2e8f0] py-2 z-50 max-h-[400px] overflow-y-auto">
               <p className="text-[11px] font-extrabold uppercase tracking-wider text-[#94a3b8] px-4 py-2">
                 Conversas
               </p>
@@ -131,20 +150,32 @@ export default function FloatingMessenger() {
                 </button>
               ))}
               <div className="border-t border-[#f0f0f0] mt-2 pt-2 px-2">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-[#94a3b8] px-2 py-1.5">Equipe online</p>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-[#94a3b8] px-2 py-1.5">Equipe</p>
                 {collaborators.map(c => (
                   <button
                     key={c.id}
                     onClick={() => { handleSelectCollaborator(c.id, c.name); setShowChannelSelect(false) }}
-                    className="w-full text-left px-2 py-2.5 hover:bg-[#f8fafc] text-[13px] font-medium text-[#475569] flex items-center gap-2.5 cursor-pointer rounded-xl transition-colors"
+                    className="w-full text-left px-2 py-2.5 hover:bg-[#f8fafc] text-[13px] font-medium text-[#475569] flex items-center justify-between cursor-pointer rounded-xl transition-colors"
                   >
-                    <div className="w-7 h-7 rounded-full bg-[#f1f5f9] flex items-center justify-center text-[11px] font-bold text-[#334155]">
-                      {c.name.slice(0, 1)}
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="relative shrink-0">
+                        <div className="w-7 h-7 rounded-full bg-[#f1f5f9] flex items-center justify-center text-[11px] font-bold text-[#334155]">
+                          {c.name.slice(0, 1)}
+                        </div>
+                        <span className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full ring-1 ring-white ${
+                          c.online ? 'bg-[#16a34a]' : 'bg-[#cbd5e1]'
+                        }`} />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[13px] font-semibold text-[#1e293b] truncate">{c.name}</p>
+                        <p className="text-[11px] text-[#94a3b8] truncate">{c.role}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-[13px] font-semibold text-[#1e293b]">{c.name}</p>
-                      <p className="text-[11px] text-[#94a3b8]">{c.role}</p>
-                    </div>
+                    <span className={`text-[11px] font-medium shrink-0 ml-2 ${
+                      c.online ? 'text-[#16a34a]' : 'text-[#94a3b8]'
+                    }`}>
+                      {c.online ? 'Online' : 'Offline'}
+                    </span>
                   </button>
                 ))}
               </div>

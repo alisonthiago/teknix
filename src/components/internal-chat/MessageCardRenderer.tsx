@@ -99,7 +99,7 @@ export default function MessageCardRenderer({ message, isMe }: MessageCardRender
 
             <div className="flex justify-end pt-1">
               <Link
-                href={`/operacao`}
+                href={meta.product_id ? `/produtos/${meta.product_id}` : `/operacao`}
                 className="px-4 py-2 bg-[#16a34a] hover:bg-[#15803d] text-white text-[13px] font-bold rounded-xl flex items-center gap-1.5 transition-all shadow-sm"
               >
                 <span>Abrir Produto</span>

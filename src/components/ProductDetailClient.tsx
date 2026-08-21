@@ -4,11 +4,12 @@ import { useState } from 'react'
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, MoreHorizontal, Package, TrendingUp, ShoppingCart, Store, Clock, FileText } from 'lucide-react'
+import { ArrowLeft, MoreHorizontal, Package, TrendingUp, ShoppingCart, Store, Clock, FileText, Share2 } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import type { ProductDetail } from '@/lib/detail-types'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal'
+import ShareContextModal from '@/components/internal-chat/ShareContextModal'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -571,6 +572,7 @@ function HistoricoTab({ product }: { product: ProductDetail }) {
 export default function ProductDetailClient({ product }: { product: ProductDetail }) {
   const router = useRouter()
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showShareModal, setShowShareModal] = useState(false)
   
   const images = product.images && product.images.length > 0 ? product.images : [product.image]
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
@@ -666,6 +668,14 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
 
                 {/* Action Buttons at Top Right Corner */}
                 <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={() => setShowShareModal(true)}
+                    className="px-3.5 py-1.5 bg-white text-[#334155] border border-[#e2e8f0] text-xs font-bold rounded-xl hover:bg-[#f8fafc] hover:border-[#16a34a] hover:text-[#16a34a] transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                    title="Compartilhar produto com a equipe"
+                  >
+                    <Share2 className="w-3.5 h-3.5 text-[#16a34a]" />
+                    <span>Compartilhar</span>
+                  </button>
                   <button 
                     onClick={() => router.push(`/purchases/new?product=${product.id}`)} 
                     className="px-3.5 py-1.5 bg-[#f0fff4] text-[#16a34a] border border-[#bbf7d0] text-xs font-bold rounded-xl hover:bg-[#dcfce7] transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
@@ -674,7 +684,7 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
                   </button>
                   <button 
                     onClick={() => router.push(`/produtos/${product.id}/editar`)} 
-                    className="px-3.5 py-1.5 bg-[#3483fa] hover:bg-[#2563eb] text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-2xs"
+                    className="px-3.5 py-1.5 bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-2xs"
                   >
                     Editar Produto
                   </button>
@@ -770,6 +780,21 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
         onConfirm={handleDelete}
         itemName={product.name}
         description="Esta ação excluirá o produto apenas do sistema TEKNIX. Ele não será excluído dos Marketplaces conectados."
+      />
+
+      <ShareContextModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        title="Produto"
+        messageType="CARD_PRODUCT"
+        metadata={{
+          product_id: product.id,
+          product_name: product.name,
+          product_sku: product.sku,
+          product_image: product.image,
+          total_amount: product.pricing.current_price || product.costs.real || 0,
+          stock: product.stock.physical
+        }}
       />
     </div>
   )

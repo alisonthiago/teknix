@@ -411,7 +411,7 @@ function HeaderActions({
         <span className="font-mono font-bold">
           {todayRevenue && todayRevenue > 0
             ? `R$ ${todayRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-            : 'R$ 219,90'}
+            : 'R$ 0,00'}
         </span>
       </button>
 

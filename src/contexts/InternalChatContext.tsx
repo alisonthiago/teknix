@@ -45,6 +45,12 @@ function removeEmojis(str: string): string {
     .trim()
 }
 
+// Gera um ID determinístico para conversas DIRETAS entre 2 usuários,
+// garantindo que ambos os lados (A→B e B→A) caiam na MESMA conversa.
+export function getDirectConvId(a: string, b: string): string {
+  return 'direct-' + [a, b].sort().join('__')
+}
+
 // Canais operacionais padrão reais (sem emojis)
 const DEFAULT_SYSTEM_CONVERSATIONS: InternalConversation[] = [
   {
@@ -212,10 +218,37 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
     loadMessages()
   }, [activeConversation?.id])
 
-  // 5. Supabase Realtime Listener (para mensagens em tempo real entre usuários reais)
+  // 5. Supabase Realtime Presence & Broadcast (mensagens e status online/offline real)
   useEffect(() => {
     const supabase = createClient()
-    const channel = supabase.channel('internal-chat-realtime')
+    const channel = supabase.channel('internal-chat-realtime', {
+      config: {
+        presence: {
+          key: currentUser?.id || 'anon-' + Math.random().toString(36).substring(2, 7)
+        }
+      }
+    })
+
+    channel
+      .on('presence', { event: 'sync' }, () => {
+        const state = channel.presenceState()
+        const onlineIds = new Set<string>()
+        Object.values(state).forEach((presences: any) => {
+          presences.forEach((p: any) => {
+            if (p.user_id) onlineIds.add(p.user_id)
+          })
+        })
+
+        // Atualiza o status online/offline dos colaboradores reais
+        setCollaborators(prev => prev.map(c => {
+          const isOnline = onlineIds.has(c.id) || (currentUser && c.id === currentUser.id)
+          return {
+            ...c,
+            online: !!isOnline,
+            last_activity: isOnline ? 'Online agora' : 'Offline'
+          }
+        }))
+      })
       .on('broadcast', { event: 'new_message' }, ({ payload }) => {
         if (payload && payload.conversation_id) {
           playNotificationSound()
@@ -246,12 +279,20 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
           }))
         }
       })
-      .subscribe()
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED' && currentUser) {
+          await channel.track({
+            user_id: currentUser.id,
+            user_name: currentUser.name,
+            online_at: new Date().toISOString()
+          })
+        }
+      })
 
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [])
+  }, [currentUser?.id])
 
   const markAsRead = useCallback((convId: string) => {
     setConversations(prev => prev.map(c => c.id === convId ? { ...c, unread_count: 0 } : c))
@@ -338,12 +379,17 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
     messageType: MessageType
     metadata: any
   }) => {
-    let conv = conversations.find(c => c.id === params.targetId || c.members.some(m => m.id === params.targetId))
+    // Para DIRECT, usa ID determinístico (mesmo par de usuários = mesma conversa)
+    const directId = (params.targetType === 'DIRECT' && currentUser)
+      ? getDirectConvId(currentUser.id, params.targetId)
+      : params.targetId
+
+    let conv = conversations.find(c => c.id === directId || c.members.some(m => m.id === params.targetId))
 
     if (!conv) {
       const colab = collaborators.find(c => c.id === params.targetId)
       conv = {
-        id: `conv-${params.targetId}`,
+        id: directId,
         type: params.targetType,
         name: removeEmojis(colab?.name || 'Nova Conversa'),
         members: colab ? [colab] : [],
@@ -385,11 +431,15 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
   const createConversation = async (name: string, type: 'DIRECT' | 'GROUP', memberIds: string[]) => {
     const selectedMembers = collaborators.filter(c => memberIds.includes(c.id))
     const cleanName = removeEmojis(name)
+    // DIRECT: ID determinístico para o par de usuários (evita conversas duplicadas)
+    const newConvId = (type === 'DIRECT' && currentUser && memberIds.length > 0)
+      ? getDirectConvId(currentUser.id, memberIds[0])
+      : `conv-${Date.now()}`
     const newConv: InternalConversation = {
-      id: `conv-${Date.now()}`,
+      id: newConvId,
       type,
       name: cleanName,
-      members: selectedMembers,
+      members: type === 'DIRECT' ? [currentUser, ...selectedMembers].filter(Boolean) : selectedMembers,
       unread_count: 0,
       created_at: new Date().toISOString()
     }

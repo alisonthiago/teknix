@@ -82,10 +82,10 @@ export default function DashboardPage() {
     })
     const todayRevenue = todayOrders.length > 0
       ? todayOrders.reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0)
-      : 219.90
+      : 0
 
     const activeProducts = products.data?.filter(p => p.status === 'ACTIVE').length ?? 0
-    const totalRevenue = sales.data?.reduce((sum, s) => sum + (Number(s.total_revenue) || 0), 0) ?? 1157.96
+    const totalRevenue = sales.data?.reduce((sum, s) => sum + (Number(s.total_revenue) || 0), 0) ?? 0
     const totalOrders = orders.data?.length ?? 0
     return {
       activeProducts,
@@ -107,12 +107,12 @@ export default function DashboardPage() {
 
   const tabValues: Record<string, { value: string; subtitle: string }> = {
     faturamento: {
-      value: `R$ ${(stats?.totalRevenue || 1157.96).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      value: `R$ ${(stats?.totalRevenue || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       subtitle: 'Receita bruta acumulada',
     },
     vendas: {
-      value: String(stats?.totalOrders || 13),
-      subtitle: `${stats?.totalOrders || 13} pedidos recebidos`,
+      value: String(stats?.totalOrders || 0),
+      subtitle: `${stats?.totalOrders || 0} pedidos recebidos`,
     },
     lucro: {
       value: 'R$ —',

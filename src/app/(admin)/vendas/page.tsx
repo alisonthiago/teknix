@@ -1,12 +1,11 @@
-'use client'
-
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { DollarSign, Store, ShoppingBag, ArrowUpRight, Search, Layers, CheckCircle2, ChevronRight, Package, User } from 'lucide-react'
+import { DollarSign, Store, ShoppingBag, ArrowUpRight, Search, Layers, CheckCircle2, ChevronRight, Package, User, Share2 } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { PageHeader, StatCard, SearchInput, ModuleTable, TableHead, Th, Td } from '@/components/ui/module'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
+import ShareContextModal from '@/components/internal-chat/ShareContextModal'
 
 function formatBRL(val: number) {
   return `R$ ${val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -17,6 +16,7 @@ function SalesTab() {
   const [search, setSearch] = useState('')
   const [filterMp, setFilterMp] = useState('all')
   const [filterAcc, setFilterAcc] = useState('all')
+  const [shareSale, setShareSale] = useState<any | null>(null)
 
   const { data: sales, loading: loadingSales } = useSupabaseQuery(async (s) => {
     const { data } = await s
@@ -253,15 +253,44 @@ function SalesTab() {
                     </span>
                   </td>
                   <td className="py-3.5 px-4 text-right">
-                    <button className="p-1 rounded-lg bg-[#f0f0f0] group-hover:bg-[#16a34a] group-hover:text-white transition-all text-[#666]">
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center justify-end gap-1.5" onClick={e => e.stopPropagation()}>
+                      <button
+                        onClick={() => setShareSale(s)}
+                        title="Compartilhar no Chat com a Equipe"
+                        className="p-1.5 rounded-lg border border-[#e6e6e6] hover:bg-[#16a34a] hover:text-white text-[#777] transition-all cursor-pointer shadow-2xs"
+                      >
+                        <Share2 className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => router.push(`/pedidos/${s.id}`)}
+                        className="p-1.5 rounded-lg bg-[#f0f0f0] hover:bg-[#16a34a] hover:text-white transition-all text-[#666] cursor-pointer shadow-2xs"
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+      )}
+
+      {shareSale && (
+        <ShareContextModal
+          isOpen={!!shareSale}
+          onClose={() => setShareSale(null)}
+          title={`Venda: ${shareSale.orderId}`}
+          messageType="CARD_ORDER"
+          metadata={{
+            order_id: shareSale.id,
+            order_number: shareSale.orderId,
+            customer_name: shareSale.customerName,
+            total_amount: shareSale.revenue,
+            marketplace_name: shareSale.marketplaceName
+          }}
+          defaultNote={`Compartilhando venda ${shareSale.orderId} (${shareSale.customerName} - ${formatBRL(shareSale.revenue)}).`}
+        />
       )}
     </div>
   )
