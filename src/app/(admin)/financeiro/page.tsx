@@ -344,13 +344,7 @@ export default function FinanceiroPage() {
         }
       })
     } else {
-      combinedItems = [
-        { id: '1', date: '2026-08-20T10:00:00Z', revenue: 219.90, cost: 92.35, fees: 35.18, taxes: 13.19, freight: 17.59, profit: 61.59, marketplaceName: 'Mercado Livre', marketplaceId: 'ml' },
-        { id: '2', date: '2026-08-19T14:20:00Z', revenue: 299.90, cost: 125.95, fees: 47.98, taxes: 17.99, freight: 23.99, profit: 83.99, marketplaceName: 'Mercado Livre', marketplaceId: 'ml' },
-        { id: '3', date: '2026-08-18T18:45:00Z', revenue: 249.90, cost: 104.95, fees: 39.98, taxes: 14.99, freight: 19.99, profit: 69.99, marketplaceName: 'Mercado Livre', marketplaceId: 'ml' },
-        { id: '4', date: '2026-08-17T09:15:00Z', revenue: 69.90, cost: 29.35, fees: 11.18, taxes: 4.19, freight: 5.59, profit: 19.59, marketplaceName: 'Shopee', marketplaceId: 'shopee' },
-        { id: '5', date: '2026-08-16T16:30:00Z', revenue: 49.90, cost: 20.95, fees: 7.98, taxes: 2.99, freight: 3.99, profit: 13.99, marketplaceName: 'Mercado Livre', marketplaceId: 'ml' }
-      ]
+      combinedItems = []
     }
 
     const filtered = combinedItems.filter(item => {
@@ -359,13 +353,13 @@ export default function FinanceiroPage() {
       return true
     })
 
-    const totalRevenue = filtered.reduce((a, b) => a + b.revenue, 0) || 889.50
-    const totalCost = filtered.reduce((a, b) => a + b.cost, 0) || (totalRevenue * 0.42)
-    const totalFees = filtered.reduce((a, b) => a + b.fees, 0) || (totalRevenue * 0.16)
-    const totalTaxes = filtered.reduce((a, b) => a + b.taxes, 0) || (totalRevenue * 0.06)
-    const totalFreight = filtered.reduce((a, b) => a + b.freight, 0) || (totalRevenue * 0.08)
-    const totalProfit = filtered.reduce((a, b) => a + b.profit, 0) || (totalRevenue * 0.28)
-    const avgMargin = totalRevenue > 0 ? ((totalProfit / totalRevenue) * 100).toFixed(1) : '28.0'
+    const totalRevenue = filtered.reduce((a, b) => a + b.revenue, 0)
+    const totalCost = filtered.reduce((a, b) => a + b.cost, 0)
+    const totalFees = filtered.reduce((a, b) => a + b.fees, 0)
+    const totalTaxes = filtered.reduce((a, b) => a + b.taxes, 0)
+    const totalFreight = filtered.reduce((a, b) => a + b.freight, 0)
+    const totalProfit = filtered.reduce((a, b) => a + b.profit, 0)
+    const avgMargin = totalRevenue > 0 ? ((totalProfit / totalRevenue) * 100).toFixed(1) : '0.0'
 
     // Pontos do Gráfico de 7 Dias (Modelo Exato Solicitado com Cores Verdes)
     const sevenDaysPoints = [

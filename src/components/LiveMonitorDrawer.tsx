@@ -74,14 +74,9 @@ export default function LiveMonitorDrawer({ open, onClose }: LiveMonitorDrawerPr
 
   const todayActiveOrders = todayOrders.filter(o => String(o.status || '').toUpperCase() !== 'CANCELADO')
 
-  // Se houver pedidos hoje no banco, calcula real; senão usa as métricas ativas sincronizadas com o Dashboard
-  const todayRevenue = todayActiveOrders.length > 0
-    ? todayActiveOrders.reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0)
-    : 219.90
-
-  const todayOrdersCount = todayActiveOrders.length > 0
-    ? todayActiveOrders.length
-    : 2
+  // Se houver pedidos hoje no banco, calcula real; senão 0
+  const todayRevenue = todayActiveOrders.reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0)
+  const todayOrdersCount = todayActiveOrders.length
 
   let calculatedUnits = 0
   todayActiveOrders.forEach(o => {
@@ -91,18 +86,16 @@ export default function LiveMonitorDrawer({ open, onClose }: LiveMonitorDrawerPr
       calculatedUnits += 1
     }
   })
-  const todayUnits = todayActiveOrders.length > 0 ? calculatedUnits : 2
+  const todayUnits = calculatedUnits
 
   // Vendas Brutas Acumuladas
   const grossRevenue = allOrders
     .filter(o => String(o.status || '').toUpperCase() !== 'CANCELADO')
-    .reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0) || 1157.96
-  const grossOrdersCount = allOrders.length || 13
+    .reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0)
+  const grossOrdersCount = allOrders.length
 
-  const uniqueBuyers = todayActiveOrders.length > 0
-    ? new Set(todayActiveOrders.map(o => o.customer_name).filter(Boolean)).size || todayOrdersCount
-    : 2
-  const ticketMedio = todayOrdersCount > 0 ? todayRevenue / todayOrdersCount : 109.95
+  const uniqueBuyers = new Set(todayActiveOrders.map(o => o.customer_name).filter(Boolean)).size || todayOrdersCount
+  const ticketMedio = todayOrdersCount > 0 ? todayRevenue / todayOrdersCount : 0
   const estimatedConversion = 5.0
   const visits = 24
 

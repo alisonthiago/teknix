@@ -239,67 +239,9 @@ export async function getOrderDetail(id: string) {
     }
   }
 
-  // 3. Fallback inteligente para dados de demonstração (ex: MLB-2000008741, 1, 2, etc.)
+  // 3. Se o pedido não foi encontrado no banco, retorna null
   if (!order) {
-    const demoOrdersMap: Record<string, any> = {
-      '1': { order_number: 'MLB-2000008741', customer: 'João Silva', mp: 'Mercado Livre', total: 219.90, product: 'Lava Jato Lavadora Portátil De Alta Pressão 21v', sku: 'LAVA-JATO-21V', image: 'https://http2.mlstatic.com/D_NQ_NP_2X_789396-MLB78028328731_072024-F.webp', date: '21/08/2026' },
-      '2': { order_number: 'MLB-2000008740', customer: 'Maria Oliveira', mp: 'Mercado Livre', total: 299.90, product: 'Chave Impacto 21v Bomvink Bom-9926 Bateria Extra', sku: 'MLB7441647214', image: 'https://http2.mlstatic.com/D_NQ_NP_2X_789396-MLB78028328731_072024-F.webp', date: '20/08/2026' },
-      '3': { order_number: 'MLB-2000008739', customer: 'Carlos Eduardo', mp: 'Mercado Livre', total: 249.90, product: 'Pistola Da Água Lavadora Alta Pressão Sem Fio Bateria 48v', sku: 'MLB5090396689', image: 'https://http2.mlstatic.com/D_NQ_NP_2X_789396-MLB78028328731_072024-F.webp', date: '19/08/2026' },
-      '4': { order_number: 'SHP-9921002931', customer: 'Ana Paula Santos', mp: 'Shopee', total: 69.90, product: 'Parafusadeira E Furadeira Sem Fio 12v Bivolt', sku: 'MLB5083113087', image: 'https://http2.mlstatic.com/D_NQ_NP_2X_789396-MLB78028328731_072024-F.webp', date: '18/08/2026' },
-      '5': { order_number: 'MLB-2000008738', customer: 'Lucas Ferreira', mp: 'Mercado Livre', total: 49.90, product: 'Mini Serra Elétrica Portátil 21v Bateria', sku: 'SERRA-21V', image: 'https://http2.mlstatic.com/D_NQ_NP_2X_789396-MLB78028328731_072024-F.webp', date: '17/08/2026' },
-      'MLB-2000008741': { order_number: 'MLB-2000008741', customer: 'João Silva', mp: 'Mercado Livre', total: 219.90, product: 'Lava Jato Lavadora Portátil De Alta Pressão 21v', sku: 'LAVA-JATO-21V', image: 'https://http2.mlstatic.com/D_NQ_NP_2X_789396-MLB78028328731_072024-F.webp', date: '21/08/2026' },
-      'MLB-2000008740': { order_number: 'MLB-2000008740', customer: 'Maria Oliveira', mp: 'Mercado Livre', total: 299.90, product: 'Chave Impacto 21v Bomvink Bom-9926 Bateria Extra', sku: 'MLB7441647214', image: 'https://http2.mlstatic.com/D_NQ_NP_2X_789396-MLB78028328731_072024-F.webp', date: '20/08/2026' },
-      'MLB-2000008739': { order_number: 'MLB-2000008739', customer: 'Carlos Eduardo', mp: 'Mercado Livre', total: 249.90, product: 'Pistola Da Água Lavadora Alta Pressão Sem Fio Bateria 48v', sku: 'MLB5090396689', image: 'https://http2.mlstatic.com/D_NQ_NP_2X_789396-MLB78028328731_072024-F.webp', date: '19/08/2026' },
-      'SHP-9921002931': { order_number: 'SHP-9921002931', customer: 'Ana Paula Santos', mp: 'Shopee', total: 69.90, product: 'Parafusadeira E Furadeira Sem Fio 12v Bivolt', sku: 'MLB5083113087', image: 'https://http2.mlstatic.com/D_NQ_NP_2X_789396-MLB78028328731_072024-F.webp', date: '18/08/2026' },
-      'MLB-2000008738': { order_number: 'MLB-2000008738', customer: 'Lucas Ferreira', mp: 'Mercado Livre', total: 49.90, product: 'Mini Serra Elétrica Portátil 21v Bateria', sku: 'SERRA-21V', image: 'https://http2.mlstatic.com/D_NQ_NP_2X_789396-MLB78028328731_072024-F.webp', date: '17/08/2026' },
-    }
-
-    const demo = demoOrdersMap[id] || {
-      order_number: id.startsWith('MLB-') || id.startsWith('SHP-') ? id : `PED-${id}`,
-      customer: 'Comprador Mercado Livre',
-      mp: 'Mercado Livre',
-      total: 219.90,
-      product: 'Produto da Operação TEKNIX',
-      sku: 'SKU-TEKNIX',
-      image: 'https://http2.mlstatic.com/D_NQ_NP_2X_789396-MLB78028328731_072024-F.webp',
-      date: new Date().toLocaleDateString('pt-BR')
-    }
-
-    order = {
-      id: id,
-      order_number: demo.order_number,
-      marketplaces: { name: demo.mp, logo: demo.mp === 'Shopee' ? '/logos/shopee.svg' : '/logos/mercado-livre.svg' },
-      channel: demo.mp,
-      customer_name: demo.customer,
-      customer_email: `${demo.customer.toLowerCase().replace(/\s+/g, '.')}@email.com`,
-      customer_phone: '(11) 98765-4321',
-      customer_cpf: '123.456.789-00',
-      created_at: new Date().toISOString(),
-      status: 'PAGO',
-      total_amount: demo.total,
-      payment_method: 'PIX',
-      installments: 1,
-      marketplace_fees: demo.total * 0.16,
-      net_amount: demo.total * 0.84,
-      shipping_address: 'Av. Paulista, 1000 - Bela Vista, São Paulo - SP, CEP: 01310-100',
-      shipping_method: demo.mp === 'Shopee' ? 'Shopee Xpress' : 'Mercado Envios',
-      shipping_cost: 0,
-      tracking_code: `MEL${Math.floor(10000000000 + Math.random() * 90000000000)}BR`,
-      order_items: [{
-        product_id: 'prod-demo',
-        sku: demo.sku,
-        product_name: demo.product,
-        quantity: 1,
-        unit_price: demo.total,
-        total_price: demo.total,
-        products: {
-          id: 'prod-demo',
-          name: demo.product,
-          sku: demo.sku,
-          image_url: demo.image
-        }
-      }]
-    }
+    return null
   }
 
   const mp = order.marketplaces as Record<string, unknown> | null

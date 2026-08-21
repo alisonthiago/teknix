@@ -110,8 +110,8 @@ export default function ClienteProfilePage() {
     {
       id: 't-2',
       type: 'SALE',
-      title: `Pedido Realizado #${firstOrder?.order_number || 'MLB-2000018029918832'}`,
-      description: `Compra aprovada no valor de ${formatBRL(Number(firstOrder?.total_amount || 219.90))} via Mercado Livre.`,
+      title: `Pedido Realizado #${firstOrder?.order_number || 'MLB-NOVO'}`,
+      description: `Compra aprovada no valor de ${formatBRL(Number(firstOrder?.total_amount || 0))} via Mercado Livre.`,
       date: firstOrder?.created_at ? new Date(firstOrder.created_at).toLocaleDateString('pt-BR') : '20/08/2026',
       time: '10:45',
       badgeColor: 'bg-[#ecfdf5] text-[#16a34a] border-[#bbf7d0]'
@@ -305,7 +305,7 @@ export default function ClienteProfilePage() {
                       id: 'fallback-item',
                       sku: ord.sku || 'LAVA-JATO-21V',
                       quantity: 1,
-                      unit_price: ord.total_amount || 219.90,
+                      unit_price: ord.total_amount || 0,
                       products: {
                         id: ord.product_id || 'prod-1',
                         name: ord.product_name || 'Lava Jato Lavadora Portátil De Alta Pressão 21v',

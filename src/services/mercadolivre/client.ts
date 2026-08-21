@@ -49,86 +49,103 @@ export async function getValidTokenBySellerId(sellerId: string): Promise<string>
   throw new Error(`Conexão ativa do Mercado Livre não encontrada para a conta ${sellerId}.`)
 }
 
-async function refreshOrReturnToken(supabase: SupabaseClient<any>, conn: any): Promise<string> {
-  // Proactive refresh buffer: 60 minutes before expiration
-  const isExpiringSoon = !conn.token_expires_at || 
-    (new Date(conn.token_expires_at).getTime() - 60 * 60 * 1000 < Date.now())
+// In-flight refresh promises map to prevent concurrent refresh race conditions
+const refreshLocks = new Map<string, Promise<string>>()
 
-  // If token is completely fresh and exists, return immediately
+async function refreshOrReturnToken(supabase: SupabaseClient<any>, conn: any): Promise<string> {
+  const lockKey = String(conn.id || conn.seller_id || 'default')
+
+  // Se já houver um refresh em andamento para esta conta, aguarda o término do mesmo
+  if (refreshLocks.has(lockKey)) {
+    return refreshLocks.get(lockKey)!
+  }
+
+  // Buffer de renovação proativa: 45 minutos antes de expirar
+  const isExpiringSoon = !conn.token_expires_at || 
+    (new Date(conn.token_expires_at).getTime() - 45 * 60 * 1000 < Date.now())
+
+  // Se o token estiver perfeitamente válido, retorna imediatamente
   if (!isExpiringSoon && conn.access_token) {
     return conn.access_token
   }
 
-  // Token needs refresh
+  // Token necessita renovação
   if (!conn.refresh_token) {
     if (conn.access_token) return conn.access_token
-    throw new Error('Refresh token não encontrado para renovação.')
+    throw new Error('Refresh token não encontrado para renovação do Mercado Livre.')
   }
 
   const clientId = process.env.MERCADOLIVRE_CLIENT_ID || process.env.MERCADOLIVRE_APP_ID || '8874323668438382'
   const clientSecret = process.env.MERCADOLIVRE_CLIENT_SECRET || 'JQrkHL7X2ieJdxPpevL9b9PX3iffwfFm'
 
-  try {
-    const res = await fetch('https://api.mercadolibre.com/oauth/token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Accept': 'application/json'
-      },
-      body: new URLSearchParams({
-        grant_type: 'refresh_token',
-        client_id: clientId,
-        client_secret: clientSecret,
-        refresh_token: conn.refresh_token
+  // Single-flight Promise para garantir 1 único refresh simultâneo
+  const refreshPromise = (async () => {
+    try {
+      const res = await fetch('https://api.mercadolibre.com/oauth/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Accept': 'application/json'
+        },
+        body: new URLSearchParams({
+          grant_type: 'refresh_token',
+          client_id: clientId,
+          client_secret: clientSecret,
+          refresh_token: conn.refresh_token
+        })
       })
-    })
 
-    const tokenData = await res.json()
+      const tokenData = await res.json()
 
-    if (!res.ok) {
-      console.warn('Silent refresh warning:', tokenData)
-      // If refresh failed temporarily, return current access token if present
+      if (!res.ok) {
+        console.warn('[ML Token Service] Aviso na renovação silenciosa:', tokenData)
+        if (conn.access_token) return conn.access_token
+        throw new Error(`Falha ao renovar token do Mercado Livre: ${tokenData.message || tokenData.error}`)
+      }
+
+      // Tokens do Mercado Livre duram 6 horas (21600 segundos)
+      const expiresAt = new Date(Date.now() + (tokenData.expires_in || 21600) * 1000).toISOString()
+
+      // 1. Atualiza marketplace_connections
+      if (conn.id) {
+        await supabase
+          .from('marketplace_connections')
+          .update({
+            access_token: tokenData.access_token,
+            refresh_token: tokenData.refresh_token,
+            token_expires_at: expiresAt,
+            is_active: true,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', conn.id)
+      }
+
+      // 2. Atualiza marketplace_accounts se existir
+      if (conn.seller_id) {
+        await supabase
+          .from('marketplace_accounts')
+          .update({
+            access_token: tokenData.access_token,
+            refresh_token: tokenData.refresh_token,
+            token_expires_at: expiresAt,
+            status: 'ACTIVE',
+            last_sync_at: new Date().toISOString()
+          })
+          .eq('seller_id', conn.seller_id)
+      }
+
+      return tokenData.access_token
+    } catch (error) {
+      console.error('[ML Token Service] Erro no refresh de token:', error)
       if (conn.access_token) return conn.access_token
-      throw new Error(`Falha ao renovar token: ${tokenData.message || tokenData.error}`)
+      throw error
+    } finally {
+      refreshLocks.delete(lockKey)
     }
+  })()
 
-    // Mercado Livre tokens typically last 6 hours (21600s)
-    const expiresAt = new Date(Date.now() + (tokenData.expires_in || 21600) * 1000).toISOString()
-
-    // 1. Update marketplace_connections
-    if (conn.id) {
-      await supabase
-        .from('marketplace_connections')
-        .update({
-          access_token: tokenData.access_token,
-          refresh_token: tokenData.refresh_token,
-          token_expires_at: expiresAt,
-          is_active: true,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', conn.id)
-    }
-
-    // 2. Also update marketplace_accounts
-    if (conn.seller_id) {
-      await supabase
-        .from('marketplace_accounts')
-        .update({
-          access_token: tokenData.access_token,
-          refresh_token: tokenData.refresh_token,
-          token_expires_at: expiresAt,
-          status: 'ACTIVE',
-          last_sync_at: new Date().toISOString()
-        })
-        .eq('seller_id', conn.seller_id)
-    }
-
-    return tokenData.access_token
-  } catch (error) {
-    console.error('Refresh token error:', error)
-    if (conn.access_token) return conn.access_token
-    throw error
-  }
+  refreshLocks.set(lockKey, refreshPromise)
+  return refreshPromise
 }
 
 export async function getValidToken(userId: string): Promise<string> {

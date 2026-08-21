@@ -95,14 +95,7 @@ function SalesTab() {
       })
     }
 
-    // Dados de demonstração ativos
-    return [
-      { id: '1', orderId: 'MLB-2000008741', customerName: 'João Silva', marketplaceName: 'Mercado Livre', marketplaceId: 'ml', marketplaceLogo: '/logos/mercado-livre.svg', accountName: 'Teknix Oficial', accountId: 'acc1', revenue: 219.90, itemsCount: 1, status: 'CONCLUIDO', date: '21/08/2026' },
-      { id: '2', orderId: 'MLB-2000008740', customerName: 'Maria Oliveira', marketplaceName: 'Mercado Livre', marketplaceId: 'ml', marketplaceLogo: '/logos/mercado-livre.svg', accountName: 'Teknix Oficial', accountId: 'acc1', revenue: 299.90, itemsCount: 2, status: 'CONCLUIDO', date: '20/08/2026' },
-      { id: '3', orderId: 'MLB-2000008739', customerName: 'Carlos Eduardo', marketplaceName: 'Mercado Livre', marketplaceId: 'ml', marketplaceLogo: '/logos/mercado-livre.svg', accountName: 'Teknix Oficial', accountId: 'acc1', revenue: 249.90, itemsCount: 1, status: 'CONCLUIDO', date: '19/08/2026' },
-      { id: '4', orderId: 'SHP-9921002931', customerName: 'Ana Paula Santos', marketplaceName: 'Shopee', marketplaceId: 'shopee', marketplaceLogo: '/logos/shopee.svg', accountName: 'Teknix Shopee', accountId: 'acc2', revenue: 69.90, itemsCount: 1, status: 'CONCLUIDO', date: '18/08/2026' },
-      { id: '5', orderId: 'MLB-2000008738', customerName: 'Lucas Ferreira', marketplaceName: 'Mercado Livre', marketplaceId: 'ml', marketplaceLogo: '/logos/mercado-livre.svg', accountName: 'Teknix Oficial', accountId: 'acc1', revenue: 49.90, itemsCount: 1, status: 'CONCLUIDO', date: '17/08/2026' },
-    ]
+    return []
   }, [sales, orders])
 
   const filtered = useMemo(() => {

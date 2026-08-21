@@ -211,7 +211,7 @@ export default function DashboardPage() {
             </div>
             <div className="text-[26px] sm:text-[32px] font-black tracking-tight text-[#111] mt-0.5 font-sans flex items-baseline gap-1">
               <span className="text-[20px] font-bold">R$</span>
-              {(stats?.todayRevenue ?? 219.90).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              {(stats?.todayRevenue ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
             <p className="text-[11px] font-medium text-[#444]">
               {new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' })}, {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} • Sincronização Contínua Ativa
@@ -223,7 +223,7 @@ export default function DashboardPage() {
           <div className="hidden sm:block text-right pr-3 border-r border-black/10">
             <span className="text-[10px] font-extrabold uppercase text-[#444] block">Vendas Brutas (30d)</span>
             <span className="text-[15px] font-black text-[#111] font-mono">
-              R$ {(stats?.totalRevenue ?? 1157.96).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              R$ {(stats?.totalRevenue ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </span>
           </div>
           <Link

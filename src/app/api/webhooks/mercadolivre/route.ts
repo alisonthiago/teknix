@@ -215,20 +215,28 @@ export async function POST(req: NextRequest) {
             })
           }
 
-          // Central Stock Sync: Deduct stock across channels
+          // Central Stock Sync: Deduct stock across channels (com proteção rigorosa de idempotência)
           if (product?.id && product.stock !== null && product.stock !== undefined && o.status === 'paid') {
-            const newStock = Math.max(0, product.stock - itemQty)
-            await supabase.from('products').update({ stock: newStock }).eq('id', product.id)
+            const { data: existingMovement } = await supabase
+              .from('inventory_movements')
+              .select('id')
+              .eq('reference_id', dbOrder?.id || orderId)
+              .maybeSingle()
 
-            // Stock movement audit
-            await supabase.from('inventory_movements').insert({
-              product_id: product.id,
-              movement_type: 'OUT',
-              quantity: itemQty,
-              reference_type: 'ORDER',
-              reference_id: dbOrder?.id || orderId,
-              notes: `Venda Mercado Livre (#${orderNumber})`
-            })
+            if (!existingMovement) {
+              const newStock = Math.max(0, product.stock - itemQty)
+              await supabase.from('products').update({ stock: newStock }).eq('id', product.id)
+
+              // Stock movement audit
+              await supabase.from('inventory_movements').insert({
+                product_id: product.id,
+                movement_type: 'OUT',
+                quantity: itemQty,
+                reference_type: 'ORDER',
+                reference_id: dbOrder?.id || orderId,
+                notes: `Venda Mercado Livre (#${orderNumber})`
+              })
+            }
           }
         }
       }

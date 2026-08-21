@@ -99,7 +99,7 @@ function HeaderActions({
     if (todayOrders.length > 0) {
       return todayOrders.reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0)
     }
-    return 219.90
+    return 0
   }, [], { intervalMs: 2000 })
 
   useEffect(() => {
