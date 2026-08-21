@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation'
+import { OperacaoView } from '@/components/OperacaoView'
 
-export default function EstoqueRedirect() {
-  redirect('/operacao?tab=estoque')
+export default function EstoquePage() {
+  return <OperacaoView defaultTab="estoque" />
 }
