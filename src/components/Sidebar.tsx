@@ -23,6 +23,7 @@ import {
   MessageSquareQuote,
   MessageSquare,
   CheckSquare,
+  Tag,
 } from 'lucide-react'
 import { logout } from '@/app/login/actions'
 import { TeknixLogo } from './TeknixLogo'
@@ -53,7 +54,8 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: '/conversas', label: 'Conversas & Chat', icon: MessageSquare, permission: null },
       { href: '/atividades', label: 'Atividades & Tarefas', icon: CheckSquare, permission: null },
-      { href: '/pedidos', label: 'Pedidos & Etiquetas', icon: ShoppingCart, permission: 'orders.view' },
+      { href: '/etiquetas', label: 'Etiquetas', icon: Tag, permission: 'orders.view' },
+      { href: '/pedidos', label: 'Pedidos', icon: ShoppingCart, permission: 'orders.view' },
       { href: '/vendas', label: 'Vendas', icon: DollarSign, permission: 'sales.view' },
       { href: '/operacao', label: 'Catálogo & Estoque', icon: Package, permission: 'products.view' },
       { href: '/atendimento', label: 'Perguntas & SAC', icon: MessageSquareQuote, permission: null },
