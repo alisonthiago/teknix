@@ -9,6 +9,7 @@ import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
 import { createClient } from '@/utils/supabase/client'
 import { exportToExcel, importFromExcel } from '@/utils/excel'
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal'
 
 
 type StatusConfig = { l: string; c: string }
@@ -63,11 +64,17 @@ function OrdersTab() {
     }
   }
 
-  const handleDeleteSelected = async () => {
-    if (!confirm(`Tem certeza que deseja excluir ${selectedItems.length} pedido(s)?`)) return
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+
+  const handleDeleteSelected = () => {
+    setShowDeleteModal(true)
+  }
+
+  const confirmDelete = async () => {
     const supabase = createClient()
     await supabase.from('orders').delete().in('id', selectedItems)
     setSelectedItems([])
+    setShowDeleteModal(false)
     refetch()
   }
 
@@ -84,6 +91,16 @@ function OrdersTab() {
 
   return (
     <div>
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={confirmDelete}
+        itemName={`${selectedItems.length} pedido(s) selecionado(s)`}
+        description="Esta ação removerá permanentemente os pedidos selecionados do banco de dados."
+        actionWord="EXCLUIR"
+        actionTitle="Exclusão de Pedidos"
+      />
+
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
         <StatCard label="Total" value={String(orders?.length || 0)} />
         <StatCard label="Aguardando" value={String(orders?.filter((o: Record<string, unknown>) => ['AGUARDANDO_SEPARACAO', 'PAGO'].includes(o.status as string)).length || 0)} />

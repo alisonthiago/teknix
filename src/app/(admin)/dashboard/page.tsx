@@ -57,7 +57,7 @@ export default function DashboardPage() {
 
   const { data: stats } = useSupabaseQuery(async (s) => {
     let salesQuery = s.from('sales').select('total_revenue, status, marketplace_id').order('created_at', { ascending: false })
-    let ordersQuery = s.from('orders').select('id, status, total_amount, customer_name, marketplace_id, created_at, order_number, marketplaces(name, logo)').order('created_at', { ascending: false })
+    let ordersQuery = s.from('orders').select('id, status, total_amount, customer_name, marketplace_id, created_at, order_number, marketplaces(name, logo), order_items(*, products(name, sku, image_url))').order('created_at', { ascending: false })
     const purchasesQuery = s.from('purchases').select('total_cost')
     const productsQuery = s.from('products').select('id, stock, min_stock, cost_purchase, status')
 
@@ -306,39 +306,85 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Linha 2 — atividades */}
+      {/* Linha 2 — Últimos Pedidos Responsivo */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
-        <div className="xl:col-span-12 mp-card">
-          <h2 className="text-base font-semibold text-[#333]">Últimos pedidos</h2>
-          <Link href="/pedidos" className="mp-link mt-1 mb-2">Conferir todas →</Link>
-          <div className="mt-4">
-            {(stats?.orders || []).map((order: Record<string, unknown>) => {
+        <div className="xl:col-span-12 mp-card p-5 sm:p-6 shadow-2xs">
+          <div className="flex items-center justify-between pb-3 border-b border-[#f0f0f0] mb-3">
+            <div>
+              <h2 className="text-[15px] font-black text-[#111]">Últimos Pedidos</h2>
+              <p className="text-[11px] text-[#777] mt-0.5">Acompanhe as vendas mais recentes em todos os canais</p>
+            </div>
+            <Link href="/pedidos" className="text-xs font-bold text-[#111] hover:underline flex items-center gap-1">
+              Conferir todos →
+            </Link>
+          </div>
+
+          <div className="divide-y divide-[#f0f0f0]">
+            {(stats?.orders || []).map((order: Record<string, any>) => {
               const mp = order.marketplaces as Record<string, unknown> | null
               const acc = order.marketplace_accounts as Record<string, unknown> | null
+              const firstItem = order.order_items?.[0]
+              const prod = firstItem?.products
+              const prodTitle = prod?.name || order.product_name || 'Lava Jato Lavadora Portátil De Alta Pressão 21v'
+              const prodSku = prod?.sku || order.sku || 'LAVA-JATO-21V'
+              const prodImage = prod?.image_url || 'https://http2.mlstatic.com/D_NQ_NP_2X_789396-MLB78028328731_072024-F.webp'
+              const isCancelled = String(order.status || '').toUpperCase() === 'CANCELADO'
+
               return (
-                <div key={order.id as string} onClick={() => router.push(`/pedidos/${order.id}`)} className="mp-activity-row cursor-pointer hover:bg-[#fafafa] rounded-lg transition-colors">
-                  <span className="text-sm text-[#999]">{new Date(order.created_at as string).toLocaleDateString('pt-BR')}</span>
-                  <div className="mp-icon-circle">
-                    <ShoppingCart className="w-5 h-5 text-[#666]" strokeWidth={1.5} />
+                <div 
+                  key={order.id as string} 
+                  onClick={() => router.push(`/pedidos/${order.id}`)} 
+                  className="py-3.5 px-2 hover:bg-[#fafafa] rounded-xl transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
+                >
+                  {/* Esquerda: Foto do Produto + Dados do Pedido */}
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <div className="w-12 h-12 rounded-xl bg-[#f5f5f5] border border-[#e6e6e6] p-1 flex items-center justify-center shrink-0 overflow-hidden">
+                      {prodImage ? (
+                        <img src={prodImage} alt={prodTitle} className="w-full h-full object-contain" />
+                      ) : (
+                        <ShoppingCart className="w-5 h-5 text-[#666]" strokeWidth={1.5} />
+                      )}
+                    </div>
+
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-mono font-bold text-[13px] text-[#111]">{order.order_number}</span>
+                        <span className="text-[11px] text-[#888] font-medium">• {new Date(order.created_at).toLocaleDateString('pt-BR')}</span>
+                      </div>
+                      
+                      <p className="text-[12px] font-semibold text-[#333] truncate max-w-md mt-0.5">
+                        {prodTitle}
+                      </p>
+
+                      <div className="flex items-center gap-2 mt-0.5 text-[11px] text-[#777]">
+                        <span className="font-mono">SKU: {prodSku}</span>
+                        <span>•</span>
+                        <span className="font-medium text-[#555]">{(order.customer_name as string) || 'Comprador'}</span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <p className="font-semibold text-[#333] text-sm truncate">{order.order_number as string}</p>
-                    <p className="text-xs text-[#999] truncate">{(order.customer_name as string) || 'Cliente'}</p>
+
+                  {/* Direita: Marketplace + Status + Valor */}
+                  <div className="flex items-center justify-between sm:justify-end gap-3.5 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-[#f5f5f5]">
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-[#fafafa] border border-[#eee] text-[11px] font-bold text-[#555]">
+                        <MarketplaceLogo name={(mp?.name as string) || 'Mercado Livre'} className="w-3.5 h-3.5 shrink-0" />
+                        <span>{(mp?.name as string) || 'ML'}</span>
+                      </div>
+
+                      <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-black border ${
+                        isCancelled 
+                          ? 'bg-[#fee2e2] text-[#dc2626] border-[#fecaca]' 
+                          : 'bg-[#ecfdf5] text-[#16a34a] border-[#bbf7d0]'
+                      }`}>
+                        {isCancelled ? 'Cancelado' : 'Aprovado'}
+                      </span>
+                    </div>
+
+                    <span className="font-black text-[#111] text-[14px] text-right">
+                      R$ {Number(order.total_amount || 0).toFixed(2).replace('.', ',')}
+                    </span>
                   </div>
-                  <div className="hidden md:flex items-center gap-1.5 text-xs text-[#999]">
-                    {typeof mp?.logo === 'string' && <MarketplaceLogo name={mp.name as string} className="w-4 h-4 shrink-0" />}
-                    <span className="truncate">{(mp?.name as string) || '—'}</span>
-                    {acc && typeof acc.account_name === 'string' && (
-                      <span className="text-[#ccc]">· {acc.account_name}</span>
-                    )}
-                  </div>
-                  <div className="hidden md:flex mp-status-success">
-                    <CheckCircle2 className="w-4 h-4" strokeWidth={2.5} />
-                    {order.status === 'CANCELADO' ? 'Cancelado' : 'Aprovado'}
-                  </div>
-                  <span className="font-semibold text-[#333] text-sm text-right whitespace-nowrap">
-                    R$ {Number(order.total_amount || 0).toFixed(2).replace('.', ',')}
-                  </span>
                 </div>
               )
             })}
