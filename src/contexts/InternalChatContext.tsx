@@ -45,8 +45,7 @@ export function removeEmojis(str: string): string {
     .trim()
 }
 
-// Gera um ID determinístico para conversas DIRETAS entre 2 usuários,
-// garantindo que ambos os lados (A→B e B→A) caiam na MESMA conversa.
+// Gera um ID determinístico para conversas DIRETAS entre 2 usuários
 export function getDirectConvId(a: string, b: string): string {
   return 'direct-' + [a, b].sort().join('__')
 }
@@ -135,6 +134,7 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
       localStorage.setItem('teknix_last_active_conv_id', c.id)
     }
   }, [])
+
   const [messagesMap, setMessagesMap] = useState<Record<string, InternalMessage[]>>({})
   const [tasks, setTasks] = useState<InternalTask[]>([])
   const [collaborators, setCollaborators] = useState<ChatMember[]>([])
@@ -196,56 +196,34 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
     }
   }, [])
 
-  // 2. Carregar colaboradores reais cadastrados no Supabase (tabela profiles)
-  useEffect(() => {
-    const loadRealCollaborators = async () => {
-      try {
-        const supabase = createClient()
-        const { data: profiles, error } = await supabase
-          .from('profiles')
-          .select('id, name, email, role, avatar_url, photo_url, status')
-          .order('name')
-
-        if (error) {
-          console.error('Erro ao buscar profiles:', error)
-          return
-        }
-
-        if (profiles && profiles.length > 0) {
-          const realMembers: ChatMember[] = profiles.map(p => ({
-            id: p.id,
-            name: removeEmojis(p.name || p.email?.split('@')[0] || 'Colaborador'),
-            email: p.email || '',
-            role: p.role || 'Operador',
-            photo_url: p.avatar_url || p.photo_url,
-            online: true,
-            last_activity: 'Online agora'
-          }))
-
-          setCollaborators(realMembers)
-        }
-      } catch (err) {
-        console.error('Erro ao carregar colaboradores reais:', err)
-      }
-    }
-    loadRealCollaborators()
-  }, [])
-
-  // 3. Carregar conversas do Supabase (internal_conversations) e mensagens recentes
+  // 2. Carregar conversas e colaboradores via API Route (100% garantido sem RLS)
   const refreshConversations = useCallback(async () => {
     try {
-      const supabase = createClient()
-      const [convRes, msgRes] = await Promise.all([
-        supabase.from('internal_conversations').select('*').order('created_at', { ascending: false }),
-        supabase.from('internal_messages').select('conversation_id, content, sender_name, created_at').order('created_at', { ascending: false }).limit(200)
-      ])
+      const res = await fetch('/api/chat/conversations')
+      if (!res.ok) return
+      const data = await res.json()
 
-      const dbConversations = convRes.data || []
-      const recentMsgs = msgRes.data || []
+      const dbConversations = data.conversations || []
+      const profiles = data.profiles || []
+      const recentMsgs = data.recentMessages || []
+
+      // Atualiza colaboradores reais
+      if (profiles && profiles.length > 0) {
+        const realMembers: ChatMember[] = profiles.map((p: any) => ({
+          id: p.id,
+          name: removeEmojis(p.name || p.email?.split('@')[0] || 'Colaborador'),
+          email: p.email || '',
+          role: p.role || 'Operador',
+          photo_url: p.avatar_url || p.photo_url,
+          online: true,
+          last_activity: 'Online agora'
+        }))
+        setCollaborators(realMembers)
+      }
 
       // Mapeia a última mensagem de cada conversa
       const lastMsgMap = new Map<string, { content: string; sender_name: string; created_at: string }>()
-      recentMsgs.forEach(m => {
+      recentMsgs.forEach((m: any) => {
         if (m.conversation_id && !lastMsgMap.has(m.conversation_id)) {
           lastMsgMap.set(m.conversation_id, {
             content: m.content || 'Mensagem enviada',
@@ -257,7 +235,7 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
 
       const convMap = new Map<string, InternalConversation>()
       
-      // Adiciona os canais padrão primeiro
+      // Adiciona canais padrão
       DEFAULT_SYSTEM_CONVERSATIONS.forEach(c => {
         const last = lastMsgMap.get(c.id)
         convMap.set(c.id, {
@@ -266,8 +244,8 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
         })
       })
       
-      // Adiciona as conversas registradas no banco
-      dbConversations.forEach(c => {
+      // Adiciona conversas do banco
+      dbConversations.forEach((c: any) => {
         const existing = convMap.get(c.id)
         const last = lastMsgMap.get(c.id)
         convMap.set(c.id, {
@@ -282,21 +260,6 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
         })
       })
 
-      // Se houver conversas com mensagens em internal_messages que não estavam em internal_conversations, inclui também
-      lastMsgMap.forEach((lastMsg, convId) => {
-        if (!convMap.has(convId)) {
-          convMap.set(convId, {
-            id: convId,
-            type: convId.startsWith('direct-') ? 'DIRECT' : 'GROUP',
-            name: convId.startsWith('direct-') ? 'Conversa Direta' : 'Canal',
-            members: [],
-            unread_count: 0,
-            last_message: lastMsg,
-            created_at: lastMsg.created_at
-          })
-        }
-      })
-
       const merged = Array.from(convMap.values())
 
       setConversations(prev => {
@@ -306,31 +269,24 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
         })
       })
 
-      // Se ainda estiver na padrão ou sem conversa ativa, seleciona a última conversa usada ou com mensagem mais recente
-      if (!activeConvRef.current || activeConvRef.current.id === 'conv-geral') {
-        const storedConvId = typeof window !== 'undefined' ? localStorage.getItem('teknix_last_active_conv_id') : null
-        if (storedConvId && convMap.has(storedConvId)) {
-          setActiveConversation(convMap.get(storedConvId)!)
-        } else {
-          // Encontra a conversa com a mensagem mais recente
-          let latestConv: InternalConversation | null = null
-          let latestTime = 0
-          merged.forEach(c => {
-            if (c.last_message?.created_at) {
-              const t = new Date(c.last_message.created_at).getTime()
-              if (t > latestTime) {
-                latestTime = t
-                latestConv = c
-              }
-            }
-          })
-          if (latestConv) {
-            setActiveConversation(latestConv)
-          }
+      // Auto-selecionar conversa direta ativa ou armazenada
+      const storedConvId = typeof window !== 'undefined' ? localStorage.getItem('teknix_last_active_conv_id') : null
+      if (storedConvId && convMap.has(storedConvId)) {
+        if (!activeConvRef.current || activeConvRef.current.id !== storedConvId) {
+          setActiveConversationState(convMap.get(storedConvId)!)
+        }
+      } else {
+        // Encontra a conversa com a mensagem mais recente ou a primeira direta
+        let directWithMsg = merged.find(c => (c.type === 'DIRECT' || c.id.startsWith('direct-')) && c.last_message)
+        if (!directWithMsg) {
+          directWithMsg = merged.find(c => c.type === 'DIRECT' || c.id.startsWith('direct-'))
+        }
+        if (directWithMsg && (!activeConvRef.current || activeConvRef.current.id === 'conv-geral')) {
+          setActiveConversationState(directWithMsg)
         }
       }
     } catch (err) {
-      console.warn('Erro ao carregar conversas:', err)
+      console.warn('Erro ao carregar conversas via API:', err)
     }
   }, [])
 
@@ -338,23 +294,20 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
     refreshConversations()
   }, [refreshConversations])
 
-  // 4. Carregar mensagens da conversa ativa do Supabase (internal_messages)
+  // 3. Carregar mensagens da conversa ativa via API Route
   const refreshActiveMessages = useCallback(async () => {
     const activeId = activeConvRef.current?.id
     if (!activeId) return
 
     try {
-      const supabase = createClient()
-      const { data: dbMessages, error } = await supabase
-        .from('internal_messages')
-        .select('*')
-        .eq('conversation_id', activeId)
-        .order('created_at', { ascending: true })
+      const res = await fetch(`/api/chat/messages?conversation_id=${encodeURIComponent(activeId)}`)
+      if (!res.ok) return
+      const data = await res.json()
 
-      if (!error && dbMessages) {
+      if (data.messages) {
         setMessagesMap(prev => ({
           ...prev,
-          [activeId]: dbMessages
+          [activeId]: data.messages
         }))
       }
     } catch {}
@@ -366,16 +319,16 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
     refreshActiveMessages().finally(() => setLoadingMessages(false))
   }, [activeConversation?.id, refreshActiveMessages])
 
-  // 5. Polling contínuo em segundo plano (garante sincronização mesmo se WebSocket oscilar)
+  // 4. Polling contínuo em segundo plano (2 segundos)
   useEffect(() => {
     const interval = setInterval(() => {
       refreshActiveMessages()
       refreshConversations()
-    }, 2500)
+    }, 2000)
     return () => clearInterval(interval)
   }, [refreshActiveMessages, refreshConversations])
 
-  // 6. Supabase Realtime Presence, Broadcast e Postgres Changes
+  // 5. Supabase Realtime Presence, Broadcast e Postgres Changes
   useEffect(() => {
     const supabase = createClient()
     const channel = supabase.channel('internal-chat-realtime', {
@@ -416,12 +369,11 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
       const currentUserId = currentUserRef.current?.id
       const isOwn = currentUserId && msg.sender_id === currentUserId
 
-      // Tocar som de notificação apenas para mensagens recebidas de outros
       if (!isOwn) {
         playNotificationSound()
       }
 
-      // 1. Atualizar histórico de mensagens
+      // 1. Atualizar mensagens
       setMessagesMap(prev => {
         const currentList = prev[msg.conversation_id] || []
         if (currentList.some(m => m.id === msg.id)) return prev
@@ -431,7 +383,7 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
         }
       })
 
-      // 2. Atualizar lista de conversas e contador de não lidas
+      // 2. Atualizar lista de conversas
       setConversations(prev => {
         const exists = prev.some(c => c.id === msg.conversation_id)
         if (exists) {
@@ -451,7 +403,6 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
             return c
           })
         } else {
-          // Nova conversa iniciada por outro usuário
           const newConv: InternalConversation = {
             id: msg.conversation_id,
             type: msg.conversation_id.startsWith('direct-') ? 'DIRECT' : 'GROUP',
@@ -472,11 +423,6 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
 
     channel
       .on('broadcast', { event: 'new_message' }, ({ payload }) => handleIncoming(payload))
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'internal_messages' },
-        ({ new: row }: any) => handleIncoming(row)
-      )
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED' && currentUser) {
           await channel.track({
@@ -496,7 +442,7 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
     setConversations(prev => prev.map(c => c.id === convId ? { ...c, unread_count: 0 } : c))
   }, [])
 
-  // 7. Enviar mensagem real e persistir no Supabase
+  // 6. Enviar mensagem e persistir via API Route
   const sendMessage = async (
     conversationId: string,
     content: string,
@@ -520,7 +466,7 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
       created_at: new Date().toISOString()
     }
 
-    // 1. Atualização otimista local imediata
+    // 1. Atualização otimista imediata
     setMessagesMap(prev => ({
       ...prev,
       [conversationId]: [...(prev[conversationId] || []), newMessage]
@@ -540,41 +486,18 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
       return c
     }))
 
-    // 2. Persistir no Supabase (internal_messages e upsert de internal_conversations)
+    // 2. Persistir via API Route
     try {
-      const supabase = createClient()
-      
-      // Garante que a conversa existe no banco
-      const currentConv = conversations.find(c => c.id === conversationId)
-      if (currentConv) {
-        await supabase.from('internal_conversations').upsert({
-          id: currentConv.id,
-          type: currentConv.type,
-          name: currentConv.name,
-          description: currentConv.description || null,
-          members: currentConv.members || [],
-          created_at: currentConv.created_at || new Date().toISOString()
-        })
-      }
-
-      // Salva a mensagem no banco
-      const { error: msgErr } = await supabase.from('internal_messages').insert({
-        id: newMessage.id,
-        conversation_id: conversationId,
-        sender_id: senderId,
-        sender_name: senderName,
-        content: newMessage.content,
-        message_type: newMessage.message_type,
-        metadata: newMessage.metadata || {},
-        reply_to: newMessage.reply_to || null,
-        created_at: newMessage.created_at
+      await fetch('/api/chat/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newMessage)
       })
-      if (msgErr) console.warn('Aviso insert message:', msgErr)
     } catch (err) {
-      console.warn('Persistência via banco:', err)
+      console.warn('Erro persistência:', err)
     }
 
-    // 3. Broadcast em tempo real para os outros colaboradores conectados
+    // 3. Broadcast em tempo real
     try {
       if (channelRef.current) {
         await channelRef.current.send({
@@ -614,13 +537,10 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
       setConversations(prev => [conv!, ...prev])
 
       try {
-        const supabase = createClient()
-        await supabase.from('internal_conversations').upsert({
-          id: conv.id,
-          type: conv.type,
-          name: conv.name,
-          members: conv.members,
-          created_at: conv.created_at
+        await fetch('/api/chat/conversations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(conv)
         })
       } catch {}
     }
@@ -672,13 +592,10 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
     setActiveConversation(newConv)
 
     try {
-      const supabase = createClient()
-      await supabase.from('internal_conversations').upsert({
-        id: newConv.id,
-        type: newConv.type,
-        name: newConv.name,
-        members: newConv.members,
-        created_at: newConv.created_at
+      await fetch('/api/chat/conversations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newConv)
       })
     } catch {}
 
