@@ -199,13 +199,15 @@ const INITIAL_TASKS: InternalTask[] = [
   }
 ]
 
+import { playNotificationSound } from '@/utils/audio-chime'
+
 export function InternalChatProvider({ children }: { children: React.ReactNode }) {
   const { notify } = useNotification()
   const [conversations, setConversations] = useState<InternalConversation[]>(INITIAL_CONVERSATIONS)
   const [activeConversation, setActiveConversation] = useState<InternalConversation | null>(INITIAL_CONVERSATIONS[0])
   const [messagesMap, setMessagesMap] = useState<Record<string, InternalMessage[]>>(INITIAL_MESSAGES)
   const [tasks, setTasks] = useState<InternalTask[]>(INITIAL_TASKS)
-  const [collaborators] = useState<ChatMember[]>(INITIAL_COLLABORATORS)
+  const [collaborators, setCollaborators] = useState<ChatMember[]>(INITIAL_COLLABORATORS)
   
   const [isFloatingOpen, setIsFloatingOpen] = useState(false)
   const [isFloatingMinimized, setIsFloatingMinimized] = useState(false)
@@ -214,12 +216,47 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
   const totalUnreadCount = conversations.reduce((sum, c) => sum + (c.unread_count || 0), 0)
   const currentMessages = activeConversation ? (messagesMap[activeConversation.id] || []) : []
 
-  // Supabase Realtime Listener
+  // Carregar todos os colaboradores cadastrados no sistema dinamicamente
+  useEffect(() => {
+    const loadDynamicCollaborators = async () => {
+      try {
+        const supabase = createClient()
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, name, email, role, avatar_url, photo_url')
+          .limit(50)
+
+        if (profiles && profiles.length > 0) {
+          const dbMembers: ChatMember[] = profiles.map(p => ({
+            id: p.id,
+            name: p.name || p.email?.split('@')[0] || 'Colaborador',
+            email: p.email,
+            role: p.role || 'Operador',
+            photo_url: p.avatar_url || p.photo_url,
+            online: true,
+            last_activity: 'Online agora'
+          }))
+
+          setCollaborators(prev => {
+            const dbIds = new Set(dbMembers.map(m => m.id))
+            const combined = [...dbMembers, ...prev.filter(m => !dbIds.has(m.id))]
+            return combined
+          })
+        }
+      } catch {}
+    }
+    loadDynamicCollaborators()
+  }, [])
+
+  // Supabase Realtime Listener com som de notificação
   useEffect(() => {
     const supabase = createClient()
     const channel = supabase.channel('internal-chat-realtime')
       .on('broadcast', { event: 'new_message' }, ({ payload }) => {
         if (payload && payload.conversation_id) {
+          // Tocar barulho / som de nova mensagem
+          playNotificationSound()
+
           setMessagesMap(prev => ({
             ...prev,
             [payload.conversation_id]: [...(prev[payload.conversation_id] || []), payload]

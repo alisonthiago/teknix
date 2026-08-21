@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/utils/supabase/client'
+import { playNotificationSound } from '@/utils/audio-chime'
 
 export type NotificationType = 'success' | 'error' | 'warning' | 'info'
 
@@ -78,9 +79,14 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
           title.includes('arquivo grande') ||
           title.includes('contato') ||
           title.includes('logomarca') ||
+          msg.includes('json válido') ||
+          msg.includes('receita federal') ||
+          msg.includes('enviar pdf') ||
           msg.includes('foram atualizados') ||
           msg.includes('excede o limite') ||
-          mod === 'suppliers'
+          mod === 'suppliers' ||
+          mod === 'auth' ||
+          mod === 'system'
         ) {
           return false
         }
@@ -122,6 +128,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
             const title = String(newNotif.title || '').toLowerCase()
             const mod = String(newNotif.module || '').toLowerCase()
             if (!title.includes('fornecedor') && !title.includes('catálogo') && mod !== 'suppliers') {
+              playNotificationSound()
               setNotifications(prev => [newNotif, ...prev].slice(0, 50))
               setActiveToasts(prev => [...prev, newNotif])
               setTimeout(() => {
@@ -143,6 +150,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
   // notify agora é EXCLUSIVO para exibir Toasts visuais temporários na tela, SEM poluir a Central de Notificações
   const notify = ({ title, message, type }: NotifyOptions) => {
+    playNotificationSound()
     const tempId = crypto.randomUUID()
     const newToast: AppNotification = {
       id: tempId,
