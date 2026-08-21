@@ -48,45 +48,37 @@ export default function SupplierCatalogsEditor({ supplierId }: { supplierId: str
   }, [fetchCatalogs])
 
   const handleFiles = async (files: FileList | File[]) => {
-    const validFiles = Array.from(files).filter(f => f.type === 'application/pdf')
-    if (validFiles.length === 0) {
-      notify({ type: 'error', title: 'Erro', message: 'Por favor, envie apenas arquivos PDF.' })
-      return
-    }
+    const fileList = Array.from(files)
+    if (fileList.length === 0) return
 
     setUploading(true)
     try {
-      for (let i = 0; i < validFiles.length; i++) {
-        const file = validFiles[i]
-        const fileName = `${supplierId}/${Date.now()}-${Math.random().toString(36).substring(7)}.pdf`
+      for (const file of fileList) {
+        if (file.size > 50 * 1024 * 1024) {
+          notify({ type: 'warning', title: 'Arquivo Grande', message: `O arquivo ${file.name} excede o limite de 50MB.` })
+          continue
+        }
 
-        const { error: uploadError } = await supabase.storage
-          .from('supplier-catalogs')
-          .upload(fileName, file)
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('supplierId', supplierId)
 
-        if (uploadError) throw uploadError
+        const res = await fetch('/api/upload/catalog', {
+          method: 'POST',
+          body: formData
+        })
 
-        const { data: urlData } = supabase.storage
-          .from('supplier-catalogs')
-          .getPublicUrl(fileName)
-
-        const { error: dbError } = await supabase
-          .from('supplier_catalogs')
-          .insert({
-            supplier_id: supplierId,
-            title: file.name.replace('.pdf', ''),
-            url: urlData.publicUrl,
-            type: 'PDF',
-          })
-
-        if (dbError) throw dbError
+        const data = await res.json()
+        if (!res.ok) {
+          throw new Error(data.error || 'Erro no upload')
+        }
       }
 
-      notify({ type: 'success', title: 'Sucesso', message: 'Catálogo(s) em PDF adicionado(s) com sucesso!' })
+      notify({ type: 'success', title: 'Sucesso', message: 'Catálogo(s) enviado(s) com sucesso!' })
       fetchCatalogs()
-    } catch (err) {
+    } catch (err: any) {
       console.error(err)
-      notify({ type: 'error', title: 'Erro', message: 'Falha ao enviar PDF.' })
+      notify({ type: 'error', title: 'Erro', message: err.message || 'Falha ao enviar arquivo.' })
     } finally {
       setUploading(false)
     }
@@ -169,7 +161,7 @@ export default function SupplierCatalogsEditor({ supplierId }: { supplierId: str
           <input
             ref={fileInputRef}
             type="file"
-            accept="application/pdf"
+            accept="application/pdf,image/*"
             multiple
             className="hidden"
             onChange={e => {
@@ -180,13 +172,14 @@ export default function SupplierCatalogsEditor({ supplierId }: { supplierId: str
           {uploading && !showLinkForm ? (
             <>
               <Loader2 className="w-8 h-8 text-[#3483fa] animate-spin mb-2" />
-              <p className="text-[13px] text-[#666]">Processando...</p>
+              <p className="text-[13px] text-[#666] font-bold">Enviando catálogo...</p>
+              <p className="text-[11px] text-[#999] mt-0.5">Salvando com segurança no Supabase</p>
             </>
           ) : (
             <>
-              <UploadCloud className="w-8 h-8 text-[#ccc] mb-2" />
-              <p className="text-[13px] text-[#666] font-medium">Enviar PDF</p>
-              <p className="text-[11px] text-[#999] mt-1">Arraste ou clique para selecionar</p>
+              <UploadCloud className="w-8 h-8 text-[#3483fa] mb-2" />
+              <p className="text-[13px] text-[#333] font-bold">Enviar Catálogo (PDF ou Imagem)</p>
+              <p className="text-[11px] text-[#888] mt-1">Arraste ou clique para selecionar (até 50MB)</p>
             </>
           )}
         </div>

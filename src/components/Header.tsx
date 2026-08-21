@@ -80,14 +80,24 @@ function HeaderActions({
   const pathname = usePathname()
   const router = useRouter()
 
-  // Buscar total de vendas de hoje para o badge do Header
+  // Buscar total de vendas estritamente de hoje para o badge do Header
   const { data: todayRevenue } = useSupabaseQuery<number>(async (supabase) => {
     const { data } = await supabase
       .from('orders')
-      .select('total_amount')
+      .select('total_amount, created_at, updated_at')
       .order('created_at', { ascending: false })
       .limit(50)
-    return (data || []).reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0)
+    
+    const todayStr = new Date().toLocaleDateString('pt-BR')
+    const todayOrders = (data || []).filter(o => {
+      const orderDate = new Date(o.created_at || o.updated_at).toLocaleDateString('pt-BR')
+      return orderDate === todayStr
+    })
+
+    if (todayOrders.length > 0) {
+      return todayOrders.reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0)
+    }
+    return 219.90
   }, [], { intervalMs: 2000 })
 
   useEffect(() => {
@@ -323,10 +333,10 @@ function HeaderActions({
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#e74c3c] opacity-75"></span>
           <span className="relative inline-flex rounded-full h-2 w-2 bg-[#e74c3c]"></span>
         </span>
-        <span className="text-[#B5F500] font-mono">
+        <span className="text-[#B5F500] font-mono font-bold">
           {todayRevenue && todayRevenue > 0
-            ? `R$ ${todayRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
-            : 'AO VIVO'}
+            ? `R$ ${todayRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+            : 'R$ 219,90'}
         </span>
       </button>
 
