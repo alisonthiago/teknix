@@ -78,6 +78,7 @@ export interface SupplierDetail {
   address: string
   delivery_time: number
   min_order: number
+  freight?: number | null
   payment_terms: string
   bank: string
   agency: string

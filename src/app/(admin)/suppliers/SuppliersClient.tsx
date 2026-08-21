@@ -93,13 +93,17 @@ export default function SuppliersClient({ suppliers }: { suppliers: { id: string
                 </TableRow>
               )}
               {suppliers?.map((supplier) => (
-                <TableRow key={supplier.id}>
-                  <TableCell className="font-medium">{supplier.name}</TableCell>
-                  <TableCell>{supplier.cnpj || '-'}</TableCell>
+                <TableRow 
+                  key={supplier.id} 
+                  onClick={() => router.push(`/fornecedores/${supplier.id}`)}
+                  className="cursor-pointer hover:bg-[#fafafa] transition-colors"
+                >
+                  <TableCell className="font-medium text-[#1f2328]">{supplier.name}</TableCell>
+                  <TableCell className="font-mono text-[#666]">{supplier.cnpj || '-'}</TableCell>
                   <TableCell>{supplier.contact || '-'}</TableCell>
                   <TableCell>{supplier.whatsapp || '-'}</TableCell>
                   <TableCell>{supplier.city ? `${supplier.city}/${supplier.state}` : '-'}</TableCell>
-                  <TableCell className="text-right flex items-center justify-end gap-2">
+                  <TableCell className="text-right flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
                     <Button variant="outline" size="sm" onClick={() => handleOpenEdit(supplier.id)}>
                       Editar
                     </Button>

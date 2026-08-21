@@ -49,19 +49,19 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Operação',
     items: [
+      { href: '/pedidos', label: 'Pedidos & Etiquetas', icon: ShoppingCart, permission: 'orders.view' },
+      { href: '/vendas', label: 'Vendas', icon: DollarSign, permission: 'sales.view' },
+      { href: '/operacao', label: 'Catálogo & Estoque', icon: Package, permission: 'products.view' },
       { href: '/atendimento', label: 'Perguntas & SAC', icon: MessageSquareQuote, permission: null },
       { href: '/marketplaces', label: 'Marketplaces', icon: Store, permission: 'marketplaces.view' },
-      { href: '/operacao', label: 'Catálogo & Estoque', icon: Package, permission: 'products.view' },
-      { href: '/pedidos', label: 'Pedidos & Etiquetas', icon: ShoppingCart, permission: 'orders.view' },
       { href: '/clientes', label: 'Clientes & CRM', icon: User, permission: null },
-      { href: '/vendas', label: 'Vendas', icon: DollarSign, permission: 'sales.view' },
     ],
   },
   {
     label: 'Gestão',
     items: [
-      { href: '/precificacao', label: 'Precificação', icon: TrendingUp, permission: 'products.view' },
       { href: '/financeiro', label: 'Financeiro', icon: DollarSign, permission: 'finance.view' },
+      { href: '/precificacao', label: 'Precificação', icon: TrendingUp, permission: 'products.view' },
       { href: '/analises', label: 'Análises', icon: BarChart3, permission: 'reports.view' },
     ],
   },
