@@ -102,10 +102,10 @@ export function CockpitCentralOperacao({ orders = [], products = [] }: CockpitDa
     <div className="bg-white border border-[#e6e6e6] rounded-md p-5">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#f0f0f0]">
         <div>
-          <span className="text-[11px] font-bold text-[#3483fa] uppercase tracking-wider">
+          <span className="text-[11px] font-bold text-[#666] uppercase tracking-wider">
             Cockpit de Operação
           </span>
-          <h2 className="text-[18px] font-bold text-[#333] mt-0.5">
+          <h2 className="text-[18px] font-bold text-[#111] mt-0.5">
             {totalActionsCount === 0 ? (
               'Operação 100% em dia'
             ) : (
@@ -120,7 +120,7 @@ export function CockpitCentralOperacao({ orders = [], products = [] }: CockpitDa
         <div className="flex flex-wrap items-center gap-2">
           <Link
             href="/pedidos"
-            className="px-4 py-2.5 bg-[#3483fa] hover:bg-[#2968c8] text-white text-[12px] font-semibold rounded-xl transition-colors flex items-center gap-1.5 shadow-2xs"
+            className="px-4 py-2.5 bg-[#111111] hover:bg-black text-white text-[12px] font-semibold rounded-xl transition-colors flex items-center gap-1.5 shadow-2xs"
           >
             <Package className="w-3.5 h-3.5" />
             Ver Pedidos & Etiquetas
@@ -128,7 +128,7 @@ export function CockpitCentralOperacao({ orders = [], products = [] }: CockpitDa
 
           <Link
             href="/operacao"
-            className="px-4 py-2.5 bg-[#ecf3fe] hover:bg-[#dbeafe] text-[#3483fa] text-[12px] font-semibold rounded-xl transition-colors"
+            className="px-4 py-2.5 bg-white hover:bg-[#f8f8f8] text-[#333] border border-[#e6e6e6] text-[12px] font-semibold rounded-xl transition-colors"
           >
             Ver Estoque & Catálogo
           </Link>

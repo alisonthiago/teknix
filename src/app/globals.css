@@ -134,22 +134,22 @@
   }
 
   .mp-btn-primary {
-    @apply inline-flex items-center justify-center gap-2 bg-[#3483fa] text-white font-semibold rounded-xl px-5 py-3 text-sm hover:bg-[#2968c8] transition-colors shadow-2xs;
+    @apply inline-flex items-center justify-center gap-2 bg-[#111111] text-white font-semibold rounded-xl px-5 py-3 text-sm hover:bg-black transition-colors shadow-2xs;
     min-height: 44px;
   }
 
   .mp-btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 bg-[#ecf3fe] text-[#3483fa] font-semibold rounded-xl px-5 py-3 text-sm hover:bg-[#dbeafe] transition-colors;
+    @apply inline-flex items-center justify-center gap-2 bg-white text-[#333333] border border-[#e6e6e6] font-semibold rounded-xl px-5 py-3 text-sm hover:bg-[#f8f8f8] transition-colors;
     min-height: 44px;
   }
 
   .mp-btn-outline {
-    @apply inline-flex items-center justify-center gap-2 bg-white text-[#3483fa] font-semibold rounded-xl px-5 py-3 text-sm border border-[#3483fa] hover:bg-[#ecf3fe] transition-colors;
+    @apply inline-flex items-center justify-center gap-2 bg-white text-[#333333] font-semibold rounded-xl px-5 py-3 text-sm border border-[#e6e6e6] hover:bg-[#f8f8f8] transition-colors;
     min-height: 44px;
   }
 
   .mp-link {
-    @apply text-[#3483fa] text-sm font-semibold hover:text-[#2968c8] transition-colors inline-flex items-center gap-1;
+    @apply text-[#111111] text-sm font-semibold hover:underline transition-colors inline-flex items-center gap-1;
   }
 
   .mp-status-success {
