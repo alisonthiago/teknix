@@ -48,7 +48,7 @@ function CopyButton({ text, label = 'Copiar' }: { text?: string | null; label?: 
         setCopied(true)
         setTimeout(() => setCopied(false), 2000)
       }}
-      className="text-[11px] font-medium text-[#3483fa] hover:underline flex items-center gap-1 cursor-pointer"
+      className="text-[11px] font-medium text-[#666] hover:text-[#333] hover:underline flex items-center gap-1 cursor-pointer"
       title={`Copiar ${label}`}
     >
       {copied ? (
@@ -58,7 +58,7 @@ function CopyButton({ text, label = 'Copiar' }: { text?: string | null; label?: 
         </>
       ) : (
         <>
-          <Copy className="w-3 h-3" />
+          <Copy className="w-3 h-3 text-[#999]" />
           <span>{label}</span>
         </>
       )}
@@ -110,7 +110,7 @@ function SupplierCatalogsDisplay({ supplierId }: { supplierId: string }) {
               {isPdf ? (
                 <FileText className="w-7 h-7 text-[#e74c3c] mb-2" />
               ) : (
-                <LinkIcon className="w-7 h-7 text-[#3483fa] mb-2" />
+                <LinkIcon className="w-7 h-7 text-[#666] mb-2" />
               )}
               <span className="text-[11px] text-center font-medium text-[#333] line-clamp-2 w-full" title={cat.title}>
                 {cat.title}
@@ -239,11 +239,11 @@ function VisaoGeralTab({ supplier }: { supplier: SupplierDetail }) {
             {(!supplier.contacts || supplier.contacts.length === 0) && (
               <>
                 <InfoRow label="Responsável" value={supplier.contact} bold />
-                <InfoRow label="Telefone" value={supplier.phone} />
-                <InfoRow label="WhatsApp" value={supplier.whatsapp} />
+                {supplier.phone && supplier.phone !== '—' && <InfoRow label="Telefone" value={supplier.phone} />}
+                {supplier.whatsapp && supplier.whatsapp !== '—' && <InfoRow label="WhatsApp" value={supplier.whatsapp} />}
               </>
             )}
-            <InfoRow label="E-mail" value={supplier.email} />
+            {supplier.email && supplier.email !== '—' && <InfoRow label="E-mail" value={supplier.email} />}
           </div>
         </div>
       </div>
@@ -287,7 +287,7 @@ function InformacoesTab({ supplier }: { supplier: SupplierDetail }) {
                 href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(pickupAddr)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-[11px] text-[#3483fa] hover:underline mt-1"
+                className="inline-flex items-center gap-1 text-[11px] text-[#666] hover:text-[#333] hover:underline mt-1"
               >
                 <span>Ver no Google Maps</span>
                 <ExternalLink className="w-3 h-3" />
@@ -354,11 +354,11 @@ function InformacoesTab({ supplier }: { supplier: SupplierDetail }) {
           ) : (
             <div className="space-y-1">
               <InfoRow label="Responsável" value={supplier.contact} bold />
-              <InfoRow label="Telefone" value={supplier.phone} />
-              <InfoRow label="WhatsApp" value={supplier.whatsapp} />
+              {supplier.phone && supplier.phone !== '—' && <InfoRow label="Telefone" value={supplier.phone} />}
+              {supplier.whatsapp && supplier.whatsapp !== '—' && <InfoRow label="WhatsApp" value={supplier.whatsapp} />}
             </div>
           )}
-          {supplier.email && (
+          {supplier.email && supplier.email !== '—' && (
             <div className="pt-2 border-t border-[#f5f5f5]">
               <InfoRow label="E-mail de Pedidos" value={supplier.email} />
             </div>
@@ -464,8 +464,14 @@ export default function FornecedorDetailClient({ supplier }: { supplier: Supplie
     setTimeout(() => setCopiedField(null), 2000)
   }
 
-  const mainWhatsApp = supplier.contacts?.find(c => c.is_whatsapp)?.phone || supplier.whatsapp
-  const mainPhone = supplier.contacts?.find(c => !c.is_whatsapp)?.phone || supplier.phone || mainWhatsApp
+  const rawWhatsApp = supplier.contacts?.find(c => c.is_whatsapp)?.phone || supplier.whatsapp
+  const rawPhone = supplier.contacts?.find(c => !c.is_whatsapp)?.phone || supplier.phone
+
+  const hasWhatsApp = Boolean(rawWhatsApp && rawWhatsApp !== '—' && rawWhatsApp.replace(/\D/g, '').length >= 8)
+  const hasPhone = Boolean(rawPhone && rawPhone !== '—' && rawPhone.replace(/\D/g, '').length >= 8 && rawPhone !== rawWhatsApp)
+  
+  const mainWhatsApp = hasWhatsApp ? rawWhatsApp : null
+  const mainPhone = hasPhone ? rawPhone : null
   const pickupAddr = supplier.pickup_address || supplier.address
 
   return (
@@ -552,8 +558,8 @@ export default function FornecedorDetailClient({ supplier }: { supplier: Supplie
                       WhatsApp
                     </a>
                   )}
-                  {supplier.email && (
-                    <a href={`mailto:${supplier.email}`} className="flex items-center gap-2 px-3 py-2 text-[11px] text-[#3483fa] hover:bg-[#f5f5f5]">
+                  {supplier.email && supplier.email !== '—' && (
+                    <a href={`mailto:${supplier.email}`} className="flex items-center gap-2 px-3 py-2 text-[11px] text-[#666] hover:text-[#333] hover:bg-[#f5f5f5]">
                       <Mail className="w-3 h-3" />
                       E-mail
                     </a>
@@ -577,7 +583,7 @@ export default function FornecedorDetailClient({ supplier }: { supplier: Supplie
                 {supplier.cnpj && supplier.cnpj !== '—' && (
                   <button
                     onClick={() => copyToClipboard(supplier.cnpj, 'cnpj')}
-                    className="text-[11px] font-medium text-[#3483fa] hover:underline flex items-center gap-1 cursor-pointer"
+                    className="text-[11px] font-medium text-[#666] hover:text-[#333] hover:underline flex items-center gap-1 cursor-pointer"
                   >
                     {copiedField === 'cnpj' ? (
                       <>
@@ -586,7 +592,7 @@ export default function FornecedorDetailClient({ supplier }: { supplier: Supplie
                       </>
                     ) : (
                       <>
-                        <Copy className="w-3 h-3" />
+                        <Copy className="w-3 h-3 text-[#999]" />
                         <span>Copiar</span>
                       </>
                     )}
@@ -613,7 +619,7 @@ export default function FornecedorDetailClient({ supplier }: { supplier: Supplie
                 {pickupAddr && pickupAddr !== '—' && (
                   <button
                     onClick={() => copyToClipboard(pickupAddr, 'address')}
-                    className="text-[11px] font-medium text-[#3483fa] hover:underline flex items-center gap-1 cursor-pointer"
+                    className="text-[11px] font-medium text-[#666] hover:text-[#333] hover:underline flex items-center gap-1 cursor-pointer"
                   >
                     {copiedField === 'address' ? (
                       <>
@@ -622,7 +628,7 @@ export default function FornecedorDetailClient({ supplier }: { supplier: Supplie
                       </>
                     ) : (
                       <>
-                        <Copy className="w-3 h-3" />
+                        <Copy className="w-3 h-3 text-[#999]" />
                         <span>Copiar</span>
                       </>
                     )}
@@ -638,7 +644,7 @@ export default function FornecedorDetailClient({ supplier }: { supplier: Supplie
                 href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(pickupAddr)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-1.5 inline-flex items-center gap-1 text-[11px] text-[#3483fa] hover:underline"
+                className="mt-1.5 inline-flex items-center gap-1 text-[11px] text-[#666] hover:text-[#333] hover:underline"
               >
                 <span>Ver no Google Maps</span>
                 <ExternalLink className="w-3 h-3" />
@@ -670,7 +676,7 @@ export default function FornecedorDetailClient({ supplier }: { supplier: Supplie
                     <span>{mainWhatsApp}</span>
                   </a>
                 )}
-                {mainPhone && mainPhone !== mainWhatsApp && (
+                {mainPhone && (
                   <a
                     href={`tel:${mainPhone.replace(/\D/g, '')}`}
                     className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white text-[#666] border border-[#e6e6e6] text-[11px] font-medium hover:bg-[#f5f5f5] transition-colors"
@@ -687,7 +693,7 @@ export default function FornecedorDetailClient({ supplier }: { supplier: Supplie
             {supplier.email && supplier.email !== '—' && (
               <div className="mt-1.5 text-[11px] text-[#999] flex items-center gap-1 truncate">
                 <Mail className="w-3 h-3 shrink-0 text-[#999]" />
-                <a href={`mailto:${supplier.email}`} className="text-[#3483fa] hover:underline truncate" title={supplier.email}>
+                <a href={`mailto:${supplier.email}`} className="text-[#666] hover:text-[#333] hover:underline truncate" title={supplier.email}>
                   {supplier.email}
                 </a>
               </div>

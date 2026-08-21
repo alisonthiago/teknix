@@ -490,30 +490,11 @@ export default function Header({ userName, userRole, userEmail, userId, userAvat
         </div>
       </div>
 
-      {/* Desktop — título + Botão Monitor ao Vivo + pill verde */}
+      {/* Desktop — título + pill verde */}
       <header className="hidden lg:flex sticky top-0 z-30 bg-[#f5f5f5] items-center justify-between py-5 px-10">
         <h1 className="text-[26px] font-semibold text-[#333] leading-tight">{pageTitle}</h1>
         
         <div className="flex items-center gap-3">
-          
-          {/* 🔴 BOTÃO MONITOR AO VIVO DESTACADO NO HEADER */}
-          <button
-            onClick={() => setLiveDrawerOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#B5F500] hover:bg-[#a3e600] text-[#111] text-[13px] font-extrabold shadow-sm border border-[#a2e000] hover:shadow-md transition-all cursor-pointer group"
-            title="Abrir Monitor ao Vivo no canto direito da tela"
-          >
-            <span className="relative flex h-2.5 w-2.5 shrink-0">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#e74c3c] opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#e74c3c]"></span>
-            </span>
-            <span>Monitor ao Vivo</span>
-            <span className="font-mono bg-black/10 px-2 py-0.5 rounded-full text-[11px] font-black text-[#111]">
-              {todayRevenue && todayRevenue > 0
-                ? `R$ ${todayRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
-                : 'AO VIVO'}
-            </span>
-          </button>
-
           <div className="relative">
             <button
               onClick={() => setShowBasicCalc(!showBasicCalc)}

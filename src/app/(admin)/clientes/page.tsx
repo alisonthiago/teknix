@@ -9,10 +9,10 @@ import { MarketplaceLogo } from '@/components/MarketplaceLogos'
 
 function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="bg-white rounded-2xl border border-[#e6e6e6] p-4 shadow-2xs">
-      <p className="text-[11px] font-bold uppercase tracking-wider text-[#64748b] mb-1">{label}</p>
-      <p className="text-xl font-bold text-[#0f172a]">{value}</p>
-      {sub && <p className="text-[11px] text-[#94a3b8] mt-0.5">{sub}</p>}
+    <div className="bg-white rounded-md border border-[#e6e6e6] p-4">
+      <p className="text-[11px] font-medium text-[#999] mb-1">{label}</p>
+      <p className="text-[18px] font-semibold text-[#333]">{value}</p>
+      {sub && <p className="text-[10px] text-[#ccc] mt-0.5">{sub}</p>}
     </div>
   )
 }
@@ -100,15 +100,7 @@ export default function ClientesPage() {
   const avgTicket = customers.length > 0 ? totalSpentAll / customers.length : 0
 
   return (
-    <div className="space-y-5">
-      {/* Header */}
-      <div>
-        <h1 className="text-xl font-bold text-[#0f172a]">Central de Clientes & Compradores</h1>
-        <p className="text-xs text-[#64748b] mt-0.5">
-          Histórico unificado de clientes originados pelo Mercado Livre e outros marketplaces.
-        </p>
-      </div>
-
+    <div className="space-y-4">
       {/* Stats Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <StatCard label="Total de Clientes" value={String(customers.length)} />
@@ -118,24 +110,24 @@ export default function ClientesPage() {
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-[#e2e8f0] shadow-2xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded-md border border-[#e6e6e6]">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-2.5 w-4 h-4 text-[#94a3b8]" />
+          <Search className="absolute left-3 top-2.5 w-4 h-4 text-[#999]" />
           <input
             type="text"
             placeholder="Buscar por nome, telefone ou endereço..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 bg-[#f8fafc] border border-[#e2e8f0] rounded-xl text-xs focus:outline-none focus:border-[#3483fa]"
+            className="w-full pl-9 pr-3 py-1.5 bg-[#fafafa] border border-[#e6e6e6] rounded-md text-[12px] text-[#333] focus:outline-none focus:border-[#ccc]"
           />
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-[#64748b]">Canal:</span>
+          <span className="text-[12px] font-medium text-[#999]">Canal:</span>
           <select
             value={selectedChannel}
             onChange={(e) => setSelectedChannel(e.target.value)}
-            className="bg-[#f8fafc] border border-[#e2e8f0] rounded-xl px-3 py-1.5 text-xs text-[#0f172a] focus:outline-none"
+            className="bg-[#fafafa] border border-[#e6e6e6] rounded-md px-3 py-1.5 text-[12px] text-[#333] focus:outline-none"
           >
             <option value="ALL">Todos os Canais</option>
             <option value="Mercado Livre">Mercado Livre</option>
@@ -146,88 +138,88 @@ export default function ClientesPage() {
       </div>
 
       {/* Customers Table */}
-      <div className="bg-white rounded-2xl border border-[#e2e8f0] overflow-hidden shadow-2xs">
+      <div className="bg-white rounded-md border border-[#e6e6e6] overflow-hidden">
         {loading ? (
-          <div className="p-12 text-center text-xs text-[#94a3b8]">Carregando clientes...</div>
+          <div className="p-12 text-center text-[12px] text-[#999]">Carregando clientes...</div>
         ) : filtered.length === 0 ? (
-          <div className="p-12 text-center text-xs text-[#94a3b8]">Nenhum cliente encontrado.</div>
+          <div className="p-12 text-center text-[12px] text-[#999]">Nenhum cliente encontrado.</div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-[12px]">
               <thead>
-                <tr className="bg-[#f8fafc] border-b border-[#e2e8f0] text-[10px] font-bold text-[#64748b] uppercase">
-                  <th className="py-3 px-4">Cliente / Comprador</th>
-                  <th className="py-3 px-4">Origem / Canal</th>
-                  <th className="py-3 px-4 text-center">Compras</th>
-                  <th className="py-3 px-4 text-right">Total Gasto</th>
-                  <th className="py-3 px-4">Entrega / Localização</th>
-                  <th className="py-3 px-4 text-right">Último Pedido</th>
-                  <th className="py-3 px-4 text-right">Ações</th>
+                <tr className="bg-[#fafafa] border-b border-[#eeeeee] text-[10px] font-medium text-[#999] uppercase">
+                  <th className="py-2.5 px-4">Cliente / Comprador</th>
+                  <th className="py-2.5 px-4">Origem / Canal</th>
+                  <th className="py-2.5 px-4 text-center">Compras</th>
+                  <th className="py-2.5 px-4 text-right">Total Gasto</th>
+                  <th className="py-2.5 px-4">Entrega / Localização</th>
+                  <th className="py-2.5 px-4 text-right">Último Pedido</th>
+                  <th className="py-2.5 px-4 text-right">Ações</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#f1f5f9]">
+              <tbody className="divide-y divide-[#eeeeee]">
                 {filtered.map((c, idx) => {
                   const customerSlug = encodeURIComponent(c.name.trim().toLowerCase().replace(/\s+/g, '-'))
 
                   return (
-                    <tr key={idx} className="hover:bg-[#f8fafc] transition-colors group">
-                      <td className="py-3.5 px-4 font-semibold text-[#0f172a]">
-                        <Link href={`/clientes/${customerSlug}`} className="flex items-center gap-2.5 group-hover:text-[#2563eb] transition-colors">
-                          <div className="w-9 h-9 rounded-full bg-[#eff6ff] border border-[#bfdbfe] group-hover:border-[#2563eb]/50 flex items-center justify-center text-[#2563eb] font-bold uppercase shrink-0 transition-colors shadow-2xs">
+                    <tr key={idx} className="hover:bg-[#fafafa] transition-colors group">
+                      <td className="py-3 px-4 font-medium text-[#333]">
+                        <Link href={`/clientes/${customerSlug}`} className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-full bg-[#f5f5f5] border border-[#e6e6e6] flex items-center justify-center text-[#666] font-medium uppercase shrink-0">
                             {c.name.slice(0, 1)}
                           </div>
                           <div>
-                            <p className="leading-tight font-extrabold text-[#0f172a] group-hover:text-[#2563eb] group-hover:underline underline-offset-2">
+                            <p className="leading-tight font-medium text-[#333] hover:underline">
                               {c.name}
                             </p>
                             {c.phone !== '—' && (
-                              <p className="text-[11px] text-[#64748b] flex items-center gap-1 mt-0.5 font-normal">
-                                <Phone className="w-3 h-3 text-[#94a3b8]" /> {c.phone}
+                              <p className="text-[11px] text-[#999] flex items-center gap-1 mt-0.5 font-normal">
+                                <Phone className="w-3 h-3 text-[#ccc]" /> {c.phone}
                               </p>
                             )}
                           </div>
                         </Link>
                       </td>
 
-                      <td className="py-3.5 px-4">
+                      <td className="py-3 px-4">
                         <div className="flex flex-wrap items-center gap-1">
                           {Array.from(c.marketplaces).map((mp, i) => (
-                            <span key={i} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#fffde7] text-[#856404] border border-[#ffeeba] text-[10px] font-bold">
+                            <span key={i} className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#fffde7] text-[#856404] border border-[#ffeeba] text-[10px] font-medium">
                               <MarketplaceLogo name={mp} className="w-3 h-3" /> {mp}
                             </span>
                           ))}
                         </div>
                       </td>
 
-                      <td className="py-3.5 px-4 text-center">
+                      <td className="py-3 px-4 text-center">
                         <Link href={`/clientes/${customerSlug}`}>
-                          <span className="inline-flex px-2.5 py-0.5 rounded-full font-bold bg-[#f0fdf4] text-[#16a34a] border border-[#bbf7d0] hover:bg-[#dcfce7] transition-colors cursor-pointer">
+                          <span className="inline-flex px-2 py-0.5 rounded text-[10px] font-medium bg-[#f0fff4] text-[#38a169]">
                             {c.ordersCount} {c.ordersCount === 1 ? 'pedido' : 'pedidos'}
                           </span>
                         </Link>
                       </td>
 
-                      <td className="py-3.5 px-4 text-right font-black text-[#0f172a]">
+                      <td className="py-3 px-4 text-right font-medium text-[#333]">
                         {formatBRL(c.totalSpent)}
                       </td>
 
-                      <td className="py-3.5 px-4 text-[#64748b]">
-                        <p className="truncate max-w-xs flex items-center gap-1">
-                          <MapPin className="w-3 h-3 text-[#94a3b8] shrink-0" />
+                      <td className="py-3 px-4 text-[#999]">
+                        <p className="truncate max-w-xs flex items-center gap-1 text-[11px]">
+                          <MapPin className="w-3 h-3 text-[#ccc] shrink-0" />
                           {c.address}
                         </p>
                       </td>
 
-                      <td className="py-3.5 px-4 text-right text-[#64748b] font-mono text-[11px]">
+                      <td className="py-3 px-4 text-right text-[#999] text-[11px]">
                         {c.lastOrderDate}
                       </td>
 
-                      <td className="py-3.5 px-4 text-right">
+                      <td className="py-3 px-4 text-right">
                         <Link
                           href={`/clientes/${customerSlug}`}
-                          className="inline-flex items-center gap-1 px-3 py-1 bg-[#eff6ff] hover:bg-[#dbeafe] text-[#2563eb] border border-[#bfdbfe] rounded-xl text-xs font-bold transition-colors"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-white hover:bg-[#f5f5f5] text-[#666] hover:text-[#333] border border-[#e6e6e6] rounded-md text-[11px] font-medium transition-colors"
                         >
-                          Ver Perfil <ArrowUpRight className="w-3.5 h-3.5" />
+                          Ver Perfil <ArrowUpRight className="w-3 h-3" />
                         </Link>
                       </td>
                     </tr>
