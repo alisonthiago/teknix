@@ -16,11 +16,12 @@ import {
   Paperclip,
   Image as ImageIcon,
   Users,
-  ChevronDown,
   MessageSquarePlus,
   Hash,
   Search,
-  Plus
+  ArrowLeft,
+  MessageCircle,
+  Clock
 } from 'lucide-react'
 
 export default function FloatingMessenger() {
@@ -42,24 +43,30 @@ export default function FloatingMessenger() {
   } = useInternalChat()
 
   const [input, setInput] = useState('')
-  const [showChannelSelect, setShowChannelSelect] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [currentView, setCurrentView] = useState<'list' | 'chat'>('list')
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (isFloatingOpen && !isFloatingMinimized) {
+    if (isFloatingOpen && !isFloatingMinimized && currentView === 'chat') {
       setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50)
     }
-  }, [messages, isFloatingOpen, isFloatingMinimized])
+  }, [messages, isFloatingOpen, isFloatingMinimized, currentView])
 
-  // Abre diretamente no canal Geral ao acionar o messenger
+  // Abre a lista de conversas ao acionar o messenger
   const handleOpenMessenger = () => {
-    const geral = conversations.find(c => c.id === 'conv-geral') || conversations[0]
-    if (geral) {
-      setActiveConversation(geral)
-      markAsRead(geral.id)
-    }
     setIsFloatingOpen(true)
     setIsFloatingMinimized(false)
+  }
+
+  const handleOpenChat = (conv: typeof conversations[0]) => {
+    setActiveConversation(conv)
+    markAsRead(conv.id)
+    setCurrentView('chat')
+  }
+
+  const handleBackToList = () => {
+    setCurrentView('list')
   }
 
   const handleSend = async () => {
@@ -80,10 +87,8 @@ export default function FloatingMessenger() {
     if (conv) {
       setActiveConversation(conv)
       markAsRead(conv.id)
+      setCurrentView('chat')
     }
-    setIsFloatingOpen(true)
-    setIsFloatingMinimized(false)
-    setShowChannelSelect(false)
   }
 
   // Identificação dinâmica da conversa ativa atual (para Header)
@@ -104,7 +109,7 @@ export default function FloatingMessenger() {
     return activeColab ? !!activeColab.online : false
   }, [activeConversation, activeColab])
 
-  // Divisão organizada das conversas para o menu dropdown
+  // Divisão organizada das conversas
   const systemChannels = useMemo(() => {
     return conversations.filter(c => c.type === 'GROUP' || c.id.startsWith('conv-'))
   }, [conversations])
@@ -122,6 +127,29 @@ export default function FloatingMessenger() {
   const otherCollaborators = useMemo(() => {
     return collaborators.filter(c => c.id !== currentUser?.id)
   }, [collaborators, currentUser?.id])
+
+  // Filtragem pela busca
+  const filteredDirectChats = useMemo(() => {
+    if (!searchQuery.trim()) return directChats
+    const q = searchQuery.toLowerCase()
+    return directChats.filter(c => {
+      const name = getConversationDisplayName(c, currentUser?.id, collaborators).toLowerCase()
+      const lastMsg = c.last_message?.content?.toLowerCase() || ''
+      return name.includes(q) || lastMsg.includes(q)
+    })
+  }, [directChats, searchQuery, currentUser?.id, collaborators])
+
+  const filteredChannels = useMemo(() => {
+    if (!searchQuery.trim()) return systemChannels
+    const q = searchQuery.toLowerCase()
+    return systemChannels.filter(c => c.name.toLowerCase().includes(q))
+  }, [systemChannels, searchQuery])
+
+  const filteredCollaborators = useMemo(() => {
+    if (!searchQuery.trim()) return otherCollaborators
+    const q = searchQuery.toLowerCase()
+    return otherCollaborators.filter(c => c.name.toLowerCase().includes(q) || (c.role && c.role.toLowerCase().includes(q)))
+  }, [otherCollaborators, searchQuery])
 
   // ── Botão flutuante (minimizado) ─────────────────────────────────────────
   if (!isFloatingOpen || isFloatingMinimized) {
@@ -147,304 +175,359 @@ export default function FloatingMessenger() {
     )
   }
 
-  // ── Painel lateral de chat — altura total ─────────────────────────────────
+  // ── Painel Lateral do Messenger ──────────────────────────────────────────
   return (
     <div
       className="fixed top-0 right-0 z-[100] flex flex-col bg-white border-l border-[#e8e8e8] shadow-[-8px_0_40px_rgba(0,0,0,0.08)] animate-in slide-in-from-right-4 duration-200"
       style={{ width: 'min(420px, 100vw)', height: '100dvh' }}
     >
-
-      {/* ── Header Principal ────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#f0f0f0] shrink-0 bg-white">
-        <div className="relative">
-          <button
-            onClick={() => setShowChannelSelect(!showChannelSelect)}
-            className="flex items-center gap-3 cursor-pointer hover:opacity-85 transition-opacity text-left"
-          >
-            {/* Foto ou Avatar do Contato / Canal */}
-            <div className="relative shrink-0">
-              {activeConversation?.type === 'GROUP' ? (
-                <div className="w-10 h-10 rounded-full bg-[#f1f5f9] border border-[#e2e8f0] flex items-center justify-center text-[#475569] font-bold shadow-xs">
-                  <Users className="w-5 h-5 text-[#64748b]" />
-                </div>
-              ) : activeColab?.photo_url ? (
-                <img
-                  src={activeColab.photo_url}
-                  alt={activeDisplayName}
-                  className="w-10 h-10 rounded-full object-cover border border-[#e2e8f0] shadow-xs"
-                />
-              ) : (
-                <div className={`w-10 h-10 rounded-full border flex items-center justify-center font-bold shadow-xs ${
-                  isOnline 
-                    ? 'bg-[#ecfdf5] border-[#bbf7d0] text-[#16a34a]' 
-                    : 'bg-[#f1f5f9] border-[#e2e8f0] text-[#64748b]'
-                }`}>
-                  <span className="text-[15px] font-extrabold">
-                    {activeDisplayName.slice(0, 1).toUpperCase()}
-                  </span>
-                </div>
-              )}
-              <span className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full ring-2 ring-white ${
-                isOnline ? 'bg-[#16a34a]' : 'bg-[#94a3b8]'
-              }`} />
-            </div>
-
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-[15px] font-bold text-[#0f172a] leading-tight line-clamp-1 max-w-[200px]">
-                  {activeDisplayName}
-                </span>
-                <ChevronDown className="w-4 h-4 text-[#94a3b8] shrink-0" />
+      {/* ══════════════════════════════════════════════════════════════════════ */}
+      {/* VISTA 1: LISTA DE CONVERSAS (INBOX)                                   */}
+      {/* ══════════════════════════════════════════════════════════════════════ */}
+      {currentView === 'list' ? (
+        <div className="flex flex-col h-full bg-white">
+          {/* Header Inbox */}
+          <div className="flex items-center justify-between px-5 py-4 border-b border-[#f0f0f0] shrink-0 bg-white">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-[#ecfdf5] border border-[#bbf7d0] flex items-center justify-center shadow-2xs">
+                <TeknixT className="w-5 h-5 text-[#16a34a]" />
               </div>
-              <p className={`text-[12px] font-medium mt-0.5 ${
-                activeConversation?.type === 'GROUP'
-                  ? 'text-[#64748b]'
-                  : isOnline
-                    ? 'text-[#16a34a]'
-                    : 'text-[#94a3b8]'
-              }`}>
-                {activeConversation?.type === 'GROUP'
-                  ? (systemChannels.find(s => s.id === activeConversation.id)?.description || 'Canal da Empresa')
-                  : `${isOnline ? '● Online agora' : '○ Offline'}${activeColab?.role ? ` · ${activeColab.role}` : ''}`}
-              </p>
+              <div>
+                <h2 className="text-[16px] font-bold text-[#0f172a] leading-tight">Chat Interno</h2>
+                <p className="text-[11px] text-[#94a3b8] font-medium">Equipe & Operação TEKNIX</p>
+              </div>
             </div>
-          </button>
 
-          {/* ── Dropdown de Seleção de Canal e Contatos ─────────────────── */}
-          {showChannelSelect && (
-            <div className="absolute top-14 left-0 w-80 bg-white rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.14)] border border-[#e2e8f0] py-2 z-50 max-h-[460px] overflow-y-auto">
-              
-              {/* Conversas Diretas Ativas com histórico */}
-              {directChats.length > 0 && (
-                <>
-                  <p className="text-[11px] font-black uppercase tracking-wider text-[#94a3b8] px-4 pt-1 pb-1 flex items-center gap-1.5">
-                    <MessageSquarePlus className="w-3.5 h-3.5 text-[#3b82f6]" /> Conversas Diretas
-                  </p>
-                  {directChats.map(c => {
-                    const isCurrent = activeConversation?.id === c.id
-                    const displayName = getConversationDisplayName(c, currentUser?.id, collaborators)
-                    const colab = getConversationColab(c, currentUser?.id, collaborators)
-                    const colabOnline = colab ? colab.online : false
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setIsFloatingMinimized(true)}
+                className="w-8 h-8 rounded-xl flex items-center justify-center text-[#94a3b8] hover:bg-[#f5f5f5] hover:text-[#475569] transition-colors cursor-pointer"
+                title="Minimizar"
+              >
+                <Minus className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setIsFloatingOpen(false)}
+                className="w-8 h-8 rounded-xl flex items-center justify-center text-[#94a3b8] hover:bg-[#fee2e2] hover:text-[#dc2626] transition-colors cursor-pointer"
+                title="Fechar"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
 
-                    return (
-                      <button
-                        key={c.id}
-                        onClick={() => {
-                          setActiveConversation(c)
-                          markAsRead(c.id)
-                          setShowChannelSelect(false)
-                        }}
-                        className={`w-full text-left px-4 py-2.5 hover:bg-[#f8fafc] text-[13px] font-medium flex items-center justify-between cursor-pointer transition-colors ${
-                          isCurrent ? 'bg-[#f0fdf4] text-[#16a34a]' : 'text-[#334155]'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                          <div className="relative shrink-0">
-                            {colab?.photo_url ? (
-                              <img
-                                src={colab.photo_url}
-                                alt={displayName}
-                                className="w-8 h-8 rounded-full object-cover border border-[#e2e8f0]"
-                              />
-                            ) : (
-                              <div className="w-8 h-8 rounded-full bg-[#f1f5f9] flex items-center justify-center text-[12px] font-bold text-[#334155]">
-                                {displayName.slice(0, 1).toUpperCase()}
-                              </div>
-                            )}
-                            <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ring-1 ring-white ${
-                              colabOnline ? 'bg-[#16a34a]' : 'bg-[#cbd5e1]'
-                            }`} />
-                          </div>
-                          <div className="min-w-0 flex-1 pr-2">
-                            <p className="truncate font-semibold text-[#1e293b] leading-tight">{displayName}</p>
-                            {c.last_message && (
-                              <p className="truncate text-[11px] text-[#94a3b8] mt-0.5">
-                                {c.last_message.content}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                        {c.unread_count > 0 && (
-                          <span className="min-w-[18px] h-4.5 px-1.5 rounded-full text-[10px] font-black bg-[#16a34a] text-white flex items-center justify-center shrink-0 ml-2">
-                            {c.unread_count}
-                          </span>
-                        )}
-                      </button>
-                    )
-                  })}
-                  <div className="border-t border-[#f1f5f9] my-2" />
-                </>
+          {/* Campo de Busca */}
+          <div className="px-4 py-3 border-b border-[#f1f5f9] bg-[#fafafa]">
+            <div className="flex items-center gap-2 px-3 py-2 bg-white rounded-xl border border-[#e2e8f0] focus-within:border-[#16a34a]/40 focus-within:ring-2 focus-within:ring-[#16a34a]/10 transition-all">
+              <Search className="w-4 h-4 text-[#94a3b8] shrink-0" />
+              <input
+                type="text"
+                placeholder="Buscar conversa ou colega..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="w-full bg-transparent text-[13px] text-[#1e293b] placeholder:text-[#94a3b8] focus:outline-none"
+              />
+              {searchQuery && (
+                <button onClick={() => setSearchQuery('')} className="text-[#94a3b8] hover:text-[#475569]">
+                  <X className="w-3.5 h-3.5" />
+                </button>
               )}
+            </div>
+          </div>
 
-              {/* Canais Operacionais da Empresa */}
-              <p className="text-[11px] font-black uppercase tracking-wider text-[#94a3b8] px-4 pt-1 pb-1 flex items-center gap-1.5">
+          {/* Lista de Conversas com Scroll */}
+          <div className="flex-1 overflow-y-auto divide-y divide-[#f8fafc]">
+            {/* Seção 1: Conversas Recentes / Diretas */}
+            {filteredDirectChats.length > 0 && (
+              <div className="py-2">
+                <p className="text-[11px] font-black uppercase tracking-wider text-[#94a3b8] px-5 py-1.5 flex items-center gap-1.5">
+                  <MessageCircle className="w-3.5 h-3.5 text-[#3b82f6]" /> Conversas Diretas
+                </p>
+                {filteredDirectChats.map(c => {
+                  const displayName = getConversationDisplayName(c, currentUser?.id, collaborators)
+                  const colab = getConversationColab(c, currentUser?.id, collaborators)
+                  const colabOnline = colab ? colab.online : false
+
+                  return (
+                    <button
+                      key={c.id}
+                      onClick={() => handleOpenChat(c)}
+                      className="w-full text-left px-5 py-3 hover:bg-[#f8fafc] text-[13px] font-medium flex items-center justify-between cursor-pointer transition-colors border-b border-[#f1f5f9]/60 last:border-0"
+                    >
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <div className="relative shrink-0">
+                          {colab?.photo_url ? (
+                            <img
+                              src={colab.photo_url}
+                              alt={displayName}
+                              className="w-11 h-11 rounded-full object-cover border border-[#e2e8f0] shadow-xs"
+                            />
+                          ) : (
+                            <div className="w-11 h-11 rounded-full bg-[#f1f5f9] border border-[#e2e8f0] flex items-center justify-center text-[14px] font-bold text-[#334155] shadow-xs">
+                              {displayName.slice(0, 1).toUpperCase()}
+                            </div>
+                          )}
+                          <span className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full ring-2 ring-white ${
+                            colabOnline ? 'bg-[#16a34a]' : 'bg-[#cbd5e1]'
+                          }`} />
+                        </div>
+                        <div className="min-w-0 flex-1 pr-2">
+                          <div className="flex items-center justify-between">
+                            <p className="truncate font-bold text-[14px] text-[#1e293b] leading-tight">{displayName}</p>
+                            {c.last_message?.created_at && (
+                              <span className="text-[11px] text-[#94a3b8] shrink-0 font-normal">
+                                {new Date(c.last_message.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                            )}
+                          </div>
+                          <p className="truncate text-[12px] text-[#64748b] mt-1 font-normal">
+                            {c.last_message?.content || 'Nenhuma mensagem ainda'}
+                          </p>
+                        </div>
+                      </div>
+                      {c.unread_count > 0 && (
+                        <span className="min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-black bg-[#16a34a] text-white flex items-center justify-center shrink-0 ml-2 shadow-xs">
+                          {c.unread_count}
+                        </span>
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+
+            {/* Seção 2: Canais da Empresa */}
+            <div className="py-2">
+              <p className="text-[11px] font-black uppercase tracking-wider text-[#94a3b8] px-5 py-1.5 flex items-center gap-1.5">
                 <Hash className="w-3.5 h-3.5 text-[#16a34a]" /> Canais da Empresa
               </p>
-              {systemChannels.map(c => {
-                const isCurrent = activeConversation?.id === c.id
-                return (
-                  <button
-                    key={c.id}
-                    onClick={() => {
-                      setActiveConversation(c)
-                      markAsRead(c.id)
-                      setShowChannelSelect(false)
-                    }}
-                    className={`w-full text-left px-4 py-2.5 hover:bg-[#f8fafc] text-[13px] font-semibold flex items-center justify-between cursor-pointer transition-colors ${
-                      isCurrent ? 'bg-[#f0fdf4] text-[#16a34a]' : 'text-[#334155]'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <span className={`w-2 h-2 rounded-full ${isCurrent ? 'bg-[#16a34a]' : 'bg-[#cbd5e1]'}`} />
-                      <span>{c.name}</span>
+              {filteredChannels.map(c => (
+                <button
+                  key={c.id}
+                  onClick={() => handleOpenChat(c)}
+                  className="w-full text-left px-5 py-3 hover:bg-[#f8fafc] text-[13px] font-semibold flex items-center justify-between cursor-pointer transition-colors border-b border-[#f1f5f9]/60 last:border-0"
+                >
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="w-10 h-10 rounded-2xl bg-[#ecfdf5] border border-[#bbf7d0] flex items-center justify-center text-[#16a34a] font-bold shrink-0 shadow-2xs">
+                      <Hash className="w-5 h-5" />
                     </div>
-                    {c.unread_count > 0 && (
-                      <span className="min-w-[18px] h-4.5 px-1.5 rounded-full text-[10px] font-black bg-[#16a34a] text-white flex items-center justify-center">
-                        {c.unread_count}
-                      </span>
-                    )}
-                  </button>
-                )
-              })}
+                    <div className="min-w-0 flex-1">
+                      <p className="font-bold text-[14px] text-[#1e293b] leading-tight">{c.name}</p>
+                      <p className="text-[12px] text-[#94a3b8] font-normal truncate mt-0.5">
+                        {c.last_message?.content || c.description || 'Canal de comunicação da equipe'}
+                      </p>
+                    </div>
+                  </div>
+                  {c.unread_count > 0 && (
+                    <span className="min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-black bg-[#16a34a] text-white flex items-center justify-center shrink-0 shadow-xs">
+                      {c.unread_count}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
 
-              {/* Equipe / Iniciar Conversa */}
-              <div className="border-t border-[#f1f5f9] my-2" />
-              <p className="text-[11px] font-black uppercase tracking-wider text-[#94a3b8] px-4 pt-1 pb-1 flex items-center gap-1.5">
+            {/* Seção 3: Iniciar com Colaboradores */}
+            <div className="py-2">
+              <p className="text-[11px] font-black uppercase tracking-wider text-[#94a3b8] px-5 py-1.5 flex items-center gap-1.5">
                 <Users className="w-3.5 h-3.5 text-[#64748b]" /> Iniciar com Colaborador
               </p>
-              {otherCollaborators.map(c => (
+              {filteredCollaborators.map(c => (
                 <button
                   key={c.id}
                   onClick={() => handleSelectCollaborator(c.id, c.name)}
-                  className="w-full text-left px-4 py-2 hover:bg-[#f8fafc] text-[13px] font-medium text-[#475569] flex items-center justify-between cursor-pointer transition-colors"
+                  className="w-full text-left px-5 py-2.5 hover:bg-[#f8fafc] text-[13px] font-medium text-[#475569] flex items-center justify-between cursor-pointer transition-colors"
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
                     <div className="relative shrink-0">
                       {c.photo_url ? (
                         <img
                           src={c.photo_url}
                           alt={c.name}
-                          className="w-7 h-7 rounded-full object-cover border border-[#e2e8f0]"
+                          className="w-9 h-9 rounded-full object-cover border border-[#e2e8f0] shadow-xs"
                         />
                       ) : (
-                        <div className="w-7 h-7 rounded-full bg-[#f1f5f9] flex items-center justify-center text-[11px] font-bold text-[#334155]">
+                        <div className="w-9 h-9 rounded-full bg-[#f1f5f9] border border-[#e2e8f0] flex items-center justify-center text-[12px] font-bold text-[#334155] shadow-xs">
                           {c.name.slice(0, 1).toUpperCase()}
                         </div>
                       )}
-                      <span className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full ring-1 ring-white ${
+                      <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ring-1 ring-white ${
                         c.online ? 'bg-[#16a34a]' : 'bg-[#cbd5e1]'
                       }`} />
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-[13px] font-semibold text-[#1e293b] truncate">{c.name}</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[13px] font-bold text-[#1e293b] truncate">{c.name}</p>
                       <p className="text-[11px] text-[#94a3b8] truncate">{c.role || 'Colaborador'}</p>
                     </div>
                   </div>
-                  <span className={`text-[11px] font-medium shrink-0 ml-2 ${
-                    c.online ? 'text-[#16a34a]' : 'text-[#94a3b8]'
+                  <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full shrink-0 ml-2 ${
+                    c.online ? 'bg-[#ecfdf5] text-[#16a34a]' : 'bg-[#f1f5f9] text-[#94a3b8]'
                   }`}>
                     {c.online ? 'Online' : 'Offline'}
                   </span>
                 </button>
               ))}
-
             </div>
-          )}
-        </div>
-
-        {/* Controles de Fechar / Minimizar */}
-        <div className="flex items-center gap-1">
-          <button
-            onClick={() => setIsFloatingMinimized(true)}
-            className="w-8 h-8 rounded-xl flex items-center justify-center text-[#94a3b8] hover:bg-[#f5f5f5] hover:text-[#475569] transition-colors cursor-pointer"
-            title="Minimizar"
-          >
-            <Minus className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => setIsFloatingOpen(false)}
-            className="w-8 h-8 rounded-xl flex items-center justify-center text-[#94a3b8] hover:bg-[#fee2e2] hover:text-[#dc2626] transition-colors cursor-pointer"
-            title="Fechar"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-
-      {/* ── Área de mensagens ────────────────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto bg-[#fafafa]">
-        {messages.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center px-8 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-white border border-[#e2e8f0] flex items-center justify-center mb-5 shadow-xs">
-              <TeknixT className="w-8 h-8 text-[#c8d6e5]" />
-            </div>
-            <p className="text-[16px] font-bold text-[#334155] mb-2">Nenhuma mensagem ainda</p>
-            <p className="text-[14px] text-[#94a3b8] leading-relaxed max-w-[260px]">
-              Envie uma mensagem para conversar com <strong>{activeDisplayName}</strong> em tempo real.
-            </p>
           </div>
-        ) : (
-          <div className="px-4 pt-6 pb-4 space-y-6">
-            {messages.map(msg => (
-              <MessageCardRenderer
-                key={msg.id}
-                message={msg}
-                isMe={msg.sender_id === currentUser?.id || (!currentUser?.id && msg.sender_name === currentUser?.name)}
+        </div>
+      ) : (
+        /* ══════════════════════════════════════════════════════════════════════ */
+        /* VISTA 2: JANELA DE CONVERSA SELECIONADA                               */
+        /* ══════════════════════════════════════════════════════════════════════ */
+        <div className="flex flex-col h-full bg-white">
+          {/* Header da Conversa */}
+          <div className="flex items-center justify-between px-4 py-3.5 border-b border-[#f0f0f0] shrink-0 bg-white shadow-2xs">
+            <div className="flex items-center gap-2 min-w-0">
+              <button
+                onClick={handleBackToList}
+                className="w-8 h-8 rounded-xl flex items-center justify-center text-[#475569] hover:bg-[#f1f5f9] transition-colors cursor-pointer shrink-0"
+                title="Voltar para a lista de conversas"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+
+              {/* Foto ou Avatar do Contato / Canal */}
+              <div className="relative shrink-0">
+                {activeConversation?.type === 'GROUP' ? (
+                  <div className="w-9 h-9 rounded-full bg-[#ecfdf5] border border-[#bbf7d0] flex items-center justify-center text-[#16a34a] font-bold shadow-xs">
+                    <Hash className="w-5 h-5" />
+                  </div>
+                ) : activeColab?.photo_url ? (
+                  <img
+                    src={activeColab.photo_url}
+                    alt={activeDisplayName}
+                    className="w-9 h-9 rounded-full object-cover border border-[#e2e8f0] shadow-xs"
+                  />
+                ) : (
+                  <div className={`w-9 h-9 rounded-full border flex items-center justify-center font-bold shadow-xs ${
+                    isOnline 
+                      ? 'bg-[#ecfdf5] border-[#bbf7d0] text-[#16a34a]' 
+                      : 'bg-[#f1f5f9] border-[#e2e8f0] text-[#64748b]'
+                  }`}>
+                    <span className="text-[14px] font-extrabold">
+                      {activeDisplayName.slice(0, 1).toUpperCase()}
+                    </span>
+                  </div>
+                )}
+                {activeConversation?.type !== 'GROUP' && (
+                  <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ring-2 ring-white ${
+                    isOnline ? 'bg-[#16a34a]' : 'bg-[#94a3b8]'
+                  }`} />
+                )}
+              </div>
+
+              <div className="min-w-0">
+                <p className="text-[15px] font-bold text-[#0f172a] leading-tight truncate max-w-[200px]">
+                  {activeDisplayName}
+                </p>
+                <p className={`text-[11px] font-medium mt-0.5 truncate ${
+                  activeConversation?.type === 'GROUP'
+                    ? 'text-[#64748b]'
+                    : isOnline
+                      ? 'text-[#16a34a]'
+                      : 'text-[#94a3b8]'
+                }`}>
+                  {activeConversation?.type === 'GROUP'
+                    ? (systemChannels.find(s => s.id === activeConversation.id)?.description || 'Canal da Empresa')
+                    : `${isOnline ? '● Online agora' : '○ Offline'}${activeColab?.role ? ` · ${activeColab.role}` : ''}`}
+                </p>
+              </div>
+            </div>
+
+            {/* Controles de Fechar / Minimizar */}
+            <div className="flex items-center gap-1 shrink-0">
+              <button
+                onClick={() => setIsFloatingMinimized(true)}
+                className="w-8 h-8 rounded-xl flex items-center justify-center text-[#94a3b8] hover:bg-[#f5f5f5] hover:text-[#475569] transition-colors cursor-pointer"
+                title="Minimizar"
+              >
+                <Minus className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setIsFloatingOpen(false)}
+                className="w-8 h-8 rounded-xl flex items-center justify-center text-[#94a3b8] hover:bg-[#fee2e2] hover:text-[#dc2626] transition-colors cursor-pointer"
+                title="Fechar"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* ── Área de mensagens ────────────────────────────────────────────── */}
+          <div className="flex-1 overflow-y-auto bg-[#fafafa]">
+            {messages.length === 0 ? (
+              <div className="h-full flex flex-col items-center justify-center px-8 text-center">
+                <div className="w-16 h-16 rounded-2xl bg-white border border-[#e2e8f0] flex items-center justify-center mb-5 shadow-xs">
+                  <TeknixT className="w-8 h-8 text-[#c8d6e5]" />
+                </div>
+                <p className="text-[16px] font-bold text-[#334155] mb-2">Nenhuma mensagem ainda</p>
+                <p className="text-[14px] text-[#94a3b8] leading-relaxed max-w-[260px]">
+                  Envie uma mensagem para conversar com <strong>{activeDisplayName}</strong> em tempo real.
+                </p>
+              </div>
+            ) : (
+              <div className="px-4 pt-6 pb-4 space-y-6">
+                {messages.map(msg => (
+                  <MessageCardRenderer
+                    key={msg.id}
+                    message={msg}
+                    isMe={msg.sender_id === currentUser?.id || (!currentUser?.id && msg.sender_name === currentUser?.name)}
+                  />
+                ))}
+                <div ref={messagesEndRef} />
+              </div>
+            )}
+          </div>
+
+          {/* ── Input ────────────────────────────────────────────────────────── */}
+          <div className="px-5 pt-3.5 pb-4 bg-white border-t border-[#f0f0f0] shrink-0">
+            {/* Campo de texto */}
+            <div className="flex items-center gap-3 bg-[#f4f6f8] rounded-2xl px-4 pr-2 py-1.5 border border-transparent focus-within:border-[#16a34a]/30 focus-within:bg-white transition-all">
+              <input
+                type="text"
+                placeholder={`Conversar com ${activeDisplayName}...`}
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault()
+                    handleSend()
+                  }
+                }}
+                className="flex-1 bg-transparent text-[14px] text-[#1e293b] placeholder:text-[#94a3b8] focus:outline-none py-1.5"
               />
-            ))}
-            <div ref={messagesEndRef} />
+              <button
+                onClick={handleSend}
+                disabled={!input.trim()}
+                className="w-9 h-9 bg-[#16a34a] hover:bg-[#15803d] disabled:opacity-30 text-white rounded-xl flex items-center justify-center transition-all cursor-pointer shrink-0 shadow-xs"
+              >
+                <Send className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Ações secundárias */}
+            <div className="flex items-center justify-between mt-2.5 px-1">
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => alert('Envio de foto')}
+                  className="flex items-center gap-1.5 text-[12px] font-medium text-[#94a3b8] hover:text-[#16a34a] transition-colors cursor-pointer"
+                >
+                  <ImageIcon className="w-4 h-4 text-[#16a34a]" />
+                  Foto
+                </button>
+                <button
+                  onClick={() => alert('Envio de arquivo')}
+                  className="flex items-center gap-1.5 text-[12px] font-medium text-[#94a3b8] hover:text-[#3483fa] transition-colors cursor-pointer"
+                >
+                  <Paperclip className="w-4 h-4 text-[#3483fa]" />
+                  Arquivo
+                </button>
+              </div>
+              <span className="text-[11px] text-[#94a3b8]">Enter para enviar</span>
+            </div>
           </div>
-        )}
-      </div>
-
-      {/* ── Input ────────────────────────────────────────────────────────── */}
-      <div className="px-5 pt-3.5 pb-4 bg-white border-t border-[#f0f0f0] shrink-0">
-        {/* Campo de texto */}
-        <div className="flex items-center gap-3 bg-[#f4f6f8] rounded-2xl px-4 pr-2 py-1.5 border border-transparent focus-within:border-[#16a34a]/30 focus-within:bg-white transition-all">
-          <input
-            type="text"
-            placeholder={`Conversar com ${activeDisplayName}...`}
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={e => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault()
-                handleSend()
-              }
-            }}
-            className="flex-1 bg-transparent text-[14px] text-[#1e293b] placeholder:text-[#94a3b8] focus:outline-none py-1.5"
-          />
-          <button
-            onClick={handleSend}
-            disabled={!input.trim()}
-            className="w-9 h-9 bg-[#16a34a] hover:bg-[#15803d] disabled:opacity-30 text-white rounded-xl flex items-center justify-center transition-all cursor-pointer shrink-0 shadow-xs"
-          >
-            <Send className="w-4 h-4" />
-          </button>
         </div>
-
-        {/* Ações secundárias */}
-        <div className="flex items-center justify-between mt-2.5 px-1">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => alert('Envio de foto')}
-              className="flex items-center gap-1.5 text-[12px] font-medium text-[#94a3b8] hover:text-[#16a34a] transition-colors cursor-pointer"
-            >
-              <ImageIcon className="w-4 h-4 text-[#16a34a]" />
-              Foto
-            </button>
-            <button
-              onClick={() => alert('Envio de arquivo')}
-              className="flex items-center gap-1.5 text-[12px] font-medium text-[#94a3b8] hover:text-[#3483fa] transition-colors cursor-pointer"
-            >
-              <Paperclip className="w-4 h-4 text-[#3483fa]" />
-              Arquivo
-            </button>
-          </div>
-          <span className="text-[11px] text-[#94a3b8]">Enter para enviar</span>
-        </div>
-      </div>
-
+      )}
     </div>
   )
 }
