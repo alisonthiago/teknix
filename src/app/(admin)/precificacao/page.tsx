@@ -210,10 +210,10 @@ export default function PrecificacaoPage() {
       <PageHeader title="Precificação" description="Gerencie custos, preços e margens" />
       <Tabs defaultValue="custo-real">
         <TabsList>
-          <TabsTrigger value="custo-real"><BadgeDollarSign className="w-3.5 h-3.5 mr-1 inline" /> Custo Real</TabsTrigger>
-          <TabsTrigger value="preco-sugerido"><Calculator className="w-3.5 h-3.5 mr-1 inline" /> Preço Sugerido</TabsTrigger>
-          <TabsTrigger value="minha-margem"><Percent className="w-3.5 h-3.5 mr-1 inline" /> Minha Margem</TabsTrigger>
-          <TabsTrigger value="preco-venda"><CircleDollarSign className="w-3.5 h-3.5 mr-1 inline" /> Preço de Venda</TabsTrigger>
+          <TabsTrigger value="custo-real"><BadgeDollarSign className="w-3.5 h-3.5 mr-1 inline" /> Custo</TabsTrigger>
+          <TabsTrigger value="preco-sugerido"><Calculator className="w-3.5 h-3.5 mr-1 inline" /> Sugerido</TabsTrigger>
+          <TabsTrigger value="minha-margem"><Percent className="w-3.5 h-3.5 mr-1 inline" /> Margem</TabsTrigger>
+          <TabsTrigger value="preco-venda"><CircleDollarSign className="w-3.5 h-3.5 mr-1 inline" /> Venda</TabsTrigger>
           <TabsTrigger value="simulador"><Search className="w-3.5 h-3.5 mr-1 inline" /> Simulador</TabsTrigger>
         </TabsList>
         <TabsContent value="custo-real"><CustoRealTab /></TabsContent>

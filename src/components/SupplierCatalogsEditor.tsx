@@ -248,9 +248,15 @@ export default function SupplierCatalogsEditor({ supplierId }: { supplierId: str
                 <Input value={linkUrl} onChange={e=>setLinkUrl(e.target.value)} placeholder="https://..." className="h-8 text-xs bg-white" />
               </div>
               <div className="flex gap-2 pt-1">
-                <Button size="sm" variant="default" onClick={handleAddLink} disabled={uploading || !linkTitle || !linkUrl} className="h-8 text-xs px-3 bg-[#3483fa] hover:bg-[#2968c8]">
-                  Salvar Link
-                </Button>
+                <Button 
+            size="sm" 
+            variant="default" 
+            onClick={handleAddLink} 
+            disabled={uploading || !linkTitle || !linkUrl} 
+            className="h-9 text-xs px-4 bg-[#111] hover:bg-[#222] text-white font-bold rounded-xl shadow-2xs"
+          >
+            Salvar Link
+          </Button>
                 <Button size="sm" variant="outline" onClick={() => setShowLinkForm(false)} disabled={uploading} className="h-8 text-xs px-3">
                   Cancelar
                 </Button>

@@ -74,19 +74,19 @@ export default function AnalisesPage() {
       <Tabs defaultValue="lucro-real">
         <TabsList className="mb-4">
           <TabsTrigger value="lucro-real">
-            <DollarSign className="w-3.5 h-3.5 mr-1.5 inline" /> Lucro Real
+            <DollarSign className="w-3.5 h-3.5 mr-1.5 inline" /> Lucro
           </TabsTrigger>
           <TabsTrigger value="ranking">
-            <Trophy className="w-3.5 h-3.5 mr-1.5 inline" /> Ranking de Produtos
+            <Trophy className="w-3.5 h-3.5 mr-1.5 inline" /> Ranking
           </TabsTrigger>
           <TabsTrigger value="marketplaces">
-            <Layers className="w-3.5 h-3.5 mr-1.5 inline" /> Marketplaces
+            <Layers className="w-3.5 h-3.5 mr-1.5 inline" /> Canais
           </TabsTrigger>
           <TabsTrigger value="sugestao-compras">
-            <ShoppingCart className="w-3.5 h-3.5 mr-1.5 inline" /> Sugestão de Compras
+            <ShoppingCart className="w-3.5 h-3.5 mr-1.5 inline" /> Reposição
           </TabsTrigger>
           <TabsTrigger value="import-export">
-            <FileInput className="w-3.5 h-3.5 mr-1.5 inline" /> Importar / Exportar
+            <FileInput className="w-3.5 h-3.5 mr-1.5 inline" /> Planilhas
           </TabsTrigger>
         </TabsList>
 
