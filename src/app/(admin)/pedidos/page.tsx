@@ -205,45 +205,67 @@ function OrdersTab() {
 
 function PickingTab() {
   const router = useRouter()
-  const { data: orders, loading } = useSupabaseQuery(async (s) => {
+  const { data: orders, loading, refetch } = useSupabaseQuery(async (s) => {
     const { data, error } = await s.from('orders').select('*, marketplaces(name, logo), marketplace_accounts(account_name), order_items(*)').order('created_at', { ascending: false })
     if (error) throw error
     return data || []
   })
 
-  const pending = (orders || []).filter((o: Record<string, unknown>) => ['AGUARDANDO_SEPARACAO', 'EM_SEPARACAO'].includes(o.status as string))
+  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    const supabase = createClient()
+    await supabase.from('orders').update({ status: newStatus }).eq('id', orderId)
+    refetch()
+  }
+
+  const pending = (orders || []).filter((o: Record<string, unknown>) => 
+    ['AGUARDANDO_SEPARACAO', 'EM_SEPARACAO', 'PAGO', 'PAID', 'NOVO', 'approved'].includes(o.status as string)
+  )
 
   return (
-    <div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-        <StatCard label="Aguardando" value={String(orders?.filter((o: Record<string, unknown>) => o.status === 'AGUARDANDO_SEPARACAO').length || 0)} />
-        <StatCard label="Em Separação" value={String(orders?.filter((o: Record<string, unknown>) => o.status === 'EM_SEPARACAO').length || 0)} />
-        <StatCard label="Separados" value={String(orders?.filter((o: Record<string, unknown>) => o.status === 'SEPARADO').length || 0)} />
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <StatCard label="Aguardando Separação" value={String(pending.filter(o => ['AGUARDANDO_SEPARACAO', 'PAGO', 'PAID', 'NOVO', 'approved'].includes(o.status as string)).length)} />
+        <StatCard label="Em Separação" value={String(pending.filter(o => o.status === 'EM_SEPARACAO').length)} />
+        <StatCard label="Separados" value={String((orders || []).filter((o: Record<string, unknown>) => o.status === 'SEPARADO').length)} />
       </div>
       {loading ? (
         <div className="bg-white rounded-2xl border border-[#e6e6e6] p-10 text-center text-[#999] text-[13px]">Carregando...</div>
       ) : pending.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-[#e6e6e6] p-10 text-center">
-          <CheckCircle2 className="w-8 h-8 text-[#38a169] mx-auto mb-2" />
-          <p className="text-[13px] font-medium text-[#333]">Tudo separado!</p>
-          <p className="text-[11px] text-[#999]">Nenhum pedido aguardando</p>
+        <div className="bg-white rounded-2xl border border-[#e6e6e6] p-12 text-center shadow-2xs">
+          <CheckCircle2 className="w-10 h-10 text-[#16a34a] mx-auto mb-2" />
+          <p className="text-[14px] font-black text-[#111]">Tudo separado!</p>
+          <p className="text-[11px] text-[#777] mt-0.5">Nenhum pedido pendente de separação no momento</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {pending.map((o: Record<string, unknown>) => {
             const mp = o.marketplaces as Record<string, unknown> | null
             const acc = o.marketplace_accounts as Record<string, unknown> | null
             return (
-              <div key={o.id as string} onClick={() => router.push(`/pedidos/${o.id}`)} className="bg-white rounded-2xl border border-[#e6e6e6] p-4 cursor-pointer hover:border-[#3483fa]/30 transition-colors">
+              <div key={o.id as string} onClick={() => router.push(`/pedidos/${o.id}`)} className="bg-white rounded-2xl border border-[#e6e6e6] p-5 cursor-pointer hover:border-[#111] transition-all shadow-2xs group">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="font-mono text-[12px] font-bold text-[#333]">{o.order_number as string}</span>
-                  <span className={`inline-flex px-2 py-[2px] rounded text-[10px] font-medium ${getStatus(o.status as string).c}`}>{getStatus(o.status as string).l}</span>
+                  <span className="font-mono text-[13px] font-black text-[#111]">{o.order_number as string}</span>
+                  <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-black ${getStatus(o.status as string).c}`}>{getStatus(o.status as string).l}</span>
                 </div>
-                <p className="text-[11px] text-[#999] mb-1 flex items-center gap-1">{typeof mp?.logo === 'string' && <MarketplaceLogo name={mp.name as string} className="w-3.5 h-3.5" />}{(o.customer_name as string) || '—'}</p>
-                {typeof acc?.account_name === 'string' && acc.account_name && <p className="text-[10px] text-[#ccc] mb-1">{acc.account_name}</p>}
-                <p className="text-[10px] text-[#ccc] mb-3">R$ {Number(o.total_amount || 0).toFixed(2)}</p>
-                {o.status === 'AGUARDANDO_SEPARACAO' && <button onClick={(e) => e.stopPropagation()} className="w-full bg-[#e67e22] text-white py-1.5 rounded-md text-[11px] font-medium hover:bg-[#d35400] transition-colors">Iniciar Separação</button>}
-                {o.status === 'EM_SEPARACAO' && <button onClick={(e) => e.stopPropagation()} className="w-full bg-[#38a169] text-white py-1.5 rounded-md text-[11px] font-medium hover:bg-[#2d8f55] transition-colors">Marcar Separado</button>}
+                <p className="text-[12px] font-bold text-[#333] mb-1 flex items-center gap-1.5">{typeof mp?.logo === 'string' && <MarketplaceLogo name={mp.name as string} className="w-4 h-4" />}{(o.customer_name as string) || 'Comprador'}</p>
+                {typeof acc?.account_name === 'string' && acc.account_name && <p className="text-[11px] text-[#777] mb-1 font-medium">{acc.account_name}</p>}
+                <p className="text-[13px] font-black text-[#111] mb-3">R$ {Number(o.total_amount || 0).toFixed(2)}</p>
+                {['AGUARDANDO_SEPARACAO', 'PAGO', 'PAID', 'NOVO', 'approved'].includes(o.status as string) && (
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); updateOrderStatus(o.id as string, 'EM_SEPARACAO') }} 
+                    className="w-full bg-[#f59e0b] hover:bg-[#d97706] text-white py-2 rounded-xl text-[11px] font-bold transition-all shadow-2xs cursor-pointer"
+                  >
+                    Iniciar Separação
+                  </button>
+                )}
+                {o.status === 'EM_SEPARACAO' && (
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); updateOrderStatus(o.id as string, 'SEPARADO') }} 
+                    className="w-full bg-[#16a34a] hover:bg-[#15803d] text-white py-2 rounded-xl text-[11px] font-bold transition-all shadow-2xs cursor-pointer"
+                  >
+                    Marcar como Separado
+                  </button>
+                )}
               </div>
             )
           })}
@@ -255,45 +277,72 @@ function PickingTab() {
 
 function ShippingTab() {
   const router = useRouter()
-  const { data: orders, loading } = useSupabaseQuery(async (s) => {
+  const { data: orders, loading, refetch } = useSupabaseQuery(async (s) => {
     const { data, error } = await s.from('orders').select('*, marketplaces(name, logo), marketplace_accounts(account_name)').order('created_at', { ascending: false })
     if (error) throw error
     return data || []
   })
 
-  const ready = (orders || []).filter((o: Record<string, unknown>) => ['SEPARADO', 'EMBALADO', 'ENVIADO'].includes(o.status as string))
+  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    const supabase = createClient()
+    await supabase.from('orders').update({ status: newStatus }).eq('id', orderId)
+    refetch()
+  }
+
+  const ready = (orders || []).filter((o: Record<string, unknown>) => 
+    ['SEPARADO', 'EMBALADO', 'ENVIADO', 'AGUARDANDO_EXPEDICAO'].includes(o.status as string)
+  )
 
   return (
-    <div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-        <StatCard label="Prontos" value={String(orders?.filter((o: Record<string, unknown>) => o.status === 'SEPARADO').length || 0)} />
-        <StatCard label="Enviados" value={String(orders?.filter((o: Record<string, unknown>) => o.status === 'ENVIADO').length || 0)} />
-        <StatCard label="Entregues" value={String(orders?.filter((o: Record<string, unknown>) => o.status === 'ENTREGUE').length || 0)} />
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <StatCard label="Prontos para Envio" value={String(ready.filter(o => ['SEPARADO', 'EMBALADO', 'AGUARDANDO_EXPEDICAO'].includes(o.status as string)).length)} />
+        <StatCard label="Enviados / Despachados" value={String(ready.filter(o => o.status === 'ENVIADO').length)} />
+        <StatCard label="Entregues ao Cliente" value={String((orders || []).filter((o: Record<string, unknown>) => o.status === 'ENTREGUE').length)} />
       </div>
       {loading ? (
         <div className="bg-white rounded-2xl border border-[#e6e6e6] p-10 text-center text-[#999] text-[13px]">Carregando...</div>
       ) : ready.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-[#e6e6e6] p-10 text-center">
-          <Send className="w-8 h-8 text-[#ccc] mx-auto mb-2" />
-          <p className="text-[13px] font-medium text-[#333]">Nenhum pedido na expedição</p>
+        <div className="bg-white rounded-2xl border border-[#e6e6e6] p-12 text-center shadow-2xs">
+          <Send className="w-10 h-10 text-[#bbb] mx-auto mb-2" />
+          <p className="text-[14px] font-black text-[#111]">Nenhum pedido na expedição</p>
+          <p className="text-[11px] text-[#777] mt-0.5">Os pedidos separados aparecerão aqui para conferência e despacho</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {ready.map((o: Record<string, unknown>) => {
             const mp = o.marketplaces as Record<string, unknown> | null
             const acc = o.marketplace_accounts as Record<string, unknown> | null
             return (
-              <div key={o.id as string} onClick={() => router.push(`/pedidos/${o.id}`)} className="bg-white rounded-2xl border border-[#e6e6e6] p-4 cursor-pointer hover:border-[#3483fa]/30 transition-colors">
+              <div key={o.id as string} onClick={() => router.push(`/pedidos/${o.id}`)} className="bg-white rounded-2xl border border-[#e6e6e6] p-5 cursor-pointer hover:border-[#111] transition-all shadow-2xs group">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="font-mono text-[12px] font-bold text-[#333]">{o.order_number as string}</span>
-                  <span className="text-[10px] text-[#ccc] flex items-center gap-1">{typeof mp?.logo === 'string' && <MarketplaceLogo name={mp.name as string} className="w-3.5 h-3.5" />}{(mp?.name as string) || '—'}</span>
+                  <span className="font-mono text-[13px] font-black text-[#111]">{o.order_number as string}</span>
+                  <span className="text-[11px] font-bold text-[#555] flex items-center gap-1.5">{typeof mp?.logo === 'string' && <MarketplaceLogo name={mp.name as string} className="w-4 h-4" />}{(mp?.name as string) || '—'}</span>
                 </div>
-                <p className="text-[11px] text-[#999] mb-1">{(o.customer_name as string) || '—'}</p>
-                {typeof acc?.account_name === 'string' && acc.account_name && <p className="text-[10px] text-[#ccc] mb-1">{acc.account_name}</p>}
-                <p className="text-[10px] text-[#ccc] mb-3">R$ {Number(o.total_amount || 0).toFixed(2)}</p>
-                {o.status === 'SEPARADO' && <button onClick={(e) => e.stopPropagation()} className="w-full bg-[#00bcd4] text-white py-1.5 rounded-md text-[11px] font-medium hover:bg-[#0097a7] transition-colors">Embalar</button>}
-                {o.status === 'EMBALADO' && <button onClick={(e) => e.stopPropagation()} className="w-full bg-[#3483fa] text-white py-1.5 rounded-md text-[11px] font-medium hover:bg-[#2968c8] transition-colors">Enviar</button>}
-                {o.status === 'ENVIADO' && <span className="block text-center text-[11px] text-[#38a169] font-medium py-1.5">Enviado</span>}
+                <p className="text-[12px] font-semibold text-[#333] mb-1">{(o.customer_name as string) || 'Comprador'}</p>
+                {typeof acc?.account_name === 'string' && acc.account_name && <p className="text-[11px] text-[#777] mb-1">{acc.account_name}</p>}
+                <p className="text-[13px] font-black text-[#111] mb-3">R$ {Number(o.total_amount || 0).toFixed(2)}</p>
+                {['SEPARADO', 'AGUARDANDO_EXPEDICAO'].includes(o.status as string) && (
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); updateOrderStatus(o.id as string, 'EMBALADO') }} 
+                    className="w-full bg-[#0284c7] hover:bg-[#0369a1] text-white py-2 rounded-xl text-[11px] font-bold transition-all shadow-2xs cursor-pointer"
+                  >
+                    Embalar & Colar Etiqueta
+                  </button>
+                )}
+                {o.status === 'EMBALADO' && (
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); updateOrderStatus(o.id as string, 'ENVIADO') }} 
+                    className="w-full bg-[#111] hover:bg-[#222] text-white py-2 rounded-xl text-[11px] font-bold transition-all shadow-2xs cursor-pointer"
+                  >
+                    Despachar Pedido
+                  </button>
+                )}
+                {o.status === 'ENVIADO' && (
+                  <span className="block text-center text-[11px] text-[#16a34a] font-extrabold py-2 bg-[#ecfdf5] rounded-xl border border-[#bbf7d0]">
+                    ✓ Despachado
+                  </span>
+                )}
               </div>
             )
           })}
