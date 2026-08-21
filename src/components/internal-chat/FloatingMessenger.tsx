@@ -64,34 +64,15 @@ export default function FloatingMessenger() {
       <div className="fixed bottom-6 right-6 z-[100]">
         <button
           onClick={() => { setIsFloatingOpen(true); setIsFloatingMinimized(false) }}
-          className="flex items-center gap-3 px-5 py-3 bg-white rounded-full shadow-xl border border-[#e2e8f0] hover:shadow-2xl hover:scale-[1.02] transition-all cursor-pointer"
+          className="relative w-12 h-12 bg-white rounded-2xl shadow-lg border border-[#e2e8f0] flex items-center justify-center hover:shadow-xl hover:scale-[1.05] transition-all cursor-pointer"
           title="Chat Interno"
         >
-          <div className="relative">
-            {/* Ícone T da TEKNIX */}
-            <TeknixT className="w-5 h-5 text-[#16a34a]" />
-            {totalUnreadCount > 0 ? (
-              <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-black bg-[#16a34a] text-white flex items-center justify-center">
-                {totalUnreadCount}
-              </span>
-            ) : (
-              <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#16a34a] rounded-full ring-2 ring-white" />
-            )}
-          </div>
-          <div className="flex items-center -space-x-2">
-            {collaborators.slice(0, 3).map((c, i) => (
-              <div key={c.id || i} className="w-7 h-7 rounded-full bg-[#f1f5f9] border-2 border-white text-[11px] font-bold flex items-center justify-center text-[#334155]">
-                {c.name.slice(0, 1)}
-              </div>
-            ))}
-          </div>
-          <div>
-            <p className="text-[13px] font-bold text-[#111] leading-none">Chat Interno</p>
-            <p className="text-[11px] text-[#16a34a] font-medium mt-0.5 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#16a34a] animate-pulse" />
-              {collaborators.length} online
-            </p>
-          </div>
+          <TeknixT className="w-6 h-6 text-[#1e293b]" />
+          {totalUnreadCount > 0 && (
+            <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-black bg-[#16a34a] text-white flex items-center justify-center shadow-sm">
+              {totalUnreadCount > 99 ? '99+' : totalUnreadCount}
+            </span>
+          )}
         </button>
       </div>
     )
