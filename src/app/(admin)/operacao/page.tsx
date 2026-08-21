@@ -10,6 +10,10 @@ import { createClient } from '@/utils/supabase/client'
 import { exportToExcel, importFromExcel } from '@/utils/excel'
 import dynamic from 'next/dynamic'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
+import { useNotification } from '@/contexts/NotificationContext'
+import ProductMarketplaceActionModal from '@/components/ProductMarketplaceActionModal'
+import ProductDiagnosticModal from '@/components/ProductDiagnosticModal'
+import { PauseCircle, PlayCircle, Lock, Unlock, RefreshCw, Info, MoreHorizontal, ShieldAlert, AlertCircle } from 'lucide-react'
 
 const ProductCreateModal = dynamic(() => import('@/components/ProductCreateModal'), { ssr: false })
 const SupplierCreateModal = dynamic(() => import('@/components/SupplierCreateModal'), { ssr: false })
@@ -18,24 +22,85 @@ const DeleteConfirmationModal = dynamic(() => import('@/components/DeleteConfirm
 
 function ProductsTab() {
   const router = useRouter()
+  const { notify } = useNotification()
   const [search, setSearch] = useState('')
   const [showCreate, setShowCreate] = useState(false)
   const [selectedItems, setSelectedItems] = useState<string[]>([])
+  const [situationFilter, setSituationFilter] = useState<'ALL' | 'ACTIVE' | 'PAUSED' | 'BLOCKED' | 'LOCKED' | 'BANNED' | 'OUT_OF_STOCK' | 'ERROR' | 'SYNC_ISSUE'>('ALL')
+
+  // Modais de Controle e Diagnóstico
+  const [actionModal, setActionModal] = useState<{
+    isOpen: boolean
+    product: any | null
+    action: 'pause' | 'activate' | 'block' | 'unblock' | 'lock' | 'unlock' | 'sync' | null
+  }>({ isOpen: false, product: null, action: null })
+
+  const [diagnosticModal, setDiagnosticModal] = useState<{
+    isOpen: boolean
+    product: any | null
+  }>({ isOpen: false, product: null })
+
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean
+    items: string[]
+    name: string
+  }>({ isOpen: false, items: [], name: '' })
+
   const { data: products, loading, refetch } = useSupabaseQuery(async (s) => {
-    const { data, error } = await s.from('products').select('*, suppliers(name), product_images(url), marketplace_listings(marketplace_id, status)').order('created_at', { ascending: false }).limit(100)
+    const { data, error } = await s
+      .from('products')
+      .select('*, suppliers(name), product_images(url), marketplace_listings(marketplace_id, status)')
+      .order('created_at', { ascending: false })
+      .limit(100)
+
     if (error) {
-      const { data: fallbackData } = await s.from('products').select('*, suppliers(name), product_images(url)').order('created_at', { ascending: false }).limit(100)
+      const { data: fallbackData } = await s
+        .from('products')
+        .select('*, suppliers(name), product_images(url)')
+        .order('created_at', { ascending: false })
+        .limit(100)
       return fallbackData || []
     }
     return data || []
   })
 
-  const filtered = (products || []).filter((p: Record<string, unknown>) =>
-    !search || 
-    String(p.name).toLowerCase().includes(search.toLowerCase()) || 
-    String(p.sku).toLowerCase().includes(search.toLowerCase()) ||
-    String(p.brand || '').toLowerCase().includes(search.toLowerCase())
-  )
+  // Contadores de Situação
+  const allList = products || []
+  const counts = {
+    ALL: allList.length,
+    ACTIVE: allList.filter((p: any) => (p.status === 'ACTIVE' || !p.status) && Number(p.stock || 0) > 0).length,
+    PAUSED: allList.filter((p: any) => p.status === 'PAUSED').length,
+    BLOCKED: allList.filter((p: any) => p.status === 'BLOCKED').length,
+    LOCKED: allList.filter((p: any) => p.status === 'LOCKED').length,
+    BANNED: allList.filter((p: any) => p.status === 'BANNED').length,
+    OUT_OF_STOCK: allList.filter((p: any) => Number(p.stock || 0) === 0).length,
+    ERROR: allList.filter((p: any) => p.status === 'ERROR' || p.has_error).length,
+    SYNC_ISSUE: allList.filter((p: any) => p.status === 'SYNC_ISSUE' || p.sync_status === 'failed').length,
+  }
+
+  const filtered = allList.filter((p: Record<string, any>) => {
+    if (search) {
+      const q = search.toLowerCase()
+      const matchName = String(p.name || '').toLowerCase().includes(q)
+      const matchSku = String(p.sku || '').toLowerCase().includes(q)
+      const matchBrand = String(p.brand || '').toLowerCase().includes(q)
+      if (!matchName && !matchSku && !matchBrand) return false
+    }
+
+    const stock = Number(p.stock) || 0
+    const status = String(p.status || 'ACTIVE').toUpperCase()
+
+    if (situationFilter === 'ACTIVE') return status === 'ACTIVE' && stock > 0
+    if (situationFilter === 'PAUSED') return status === 'PAUSED'
+    if (situationFilter === 'BLOCKED') return status === 'BLOCKED'
+    if (situationFilter === 'LOCKED') return status === 'LOCKED'
+    if (situationFilter === 'BANNED') return status === 'BANNED'
+    if (situationFilter === 'OUT_OF_STOCK') return stock === 0
+    if (situationFilter === 'ERROR') return status === 'ERROR' || p.has_error
+    if (situationFilter === 'SYNC_ISSUE') return status === 'SYNC_ISSUE' || p.sync_status === 'failed'
+
+    return true
+  })
 
   function calcCost(p: Record<string, unknown>) {
     return (Number(p.cost_purchase) || 0) + (Number(p.freight_purchase) || 0) + (Number(p.packaging_cost) || 0) + (Number(p.other_costs) || 0)
@@ -57,11 +122,25 @@ function ProductsTab() {
     }
   }
 
-  const handleDeleteSelected = async () => {
-    if (!confirm(`Tem certeza que deseja excluir ${selectedItems.length} produto(s)?`)) return
+  const handleDeleteSelected = () => {
+    if (selectedItems.length === 0) return
+    setDeleteModal({
+      isOpen: true,
+      items: selectedItems,
+      name: `${selectedItems.length} produto(s) selecionado(s)`
+    })
+  }
+
+  const confirmDeleteProducts = async () => {
     const supabase = createClient()
-    await supabase.from('products').delete().in('id', selectedItems)
+    await supabase.from('products').delete().in('id', deleteModal.items)
     setSelectedItems([])
+    setDeleteModal({ isOpen: false, items: [], name: '' })
+    notify({
+      type: 'success',
+      title: 'Produtos Excluídos',
+      message: 'Os produtos selecionados foram removidos permanentemente.'
+    })
     refetch()
   }
 
@@ -76,21 +155,126 @@ function ProductsTab() {
     exportToExcel(products || [], 'todos_os_produtos')
   }
 
+  // Executa Ação de Marketplace (Pausar, Ativar, Bloquear, Travar, Sincronizar)
+  const handleExecuteMarketplaceAction = async () => {
+    if (!actionModal.product || !actionModal.action) return
+    try {
+      const res = await fetch(`/api/products/${actionModal.product.id}/marketplace-action`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: actionModal.action })
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Falha ao executar ação')
+
+      let msg = 'Ação executada com sucesso.'
+      if (actionModal.action === 'pause') msg = 'Produto pausado com sucesso no Mercado Livre.'
+      if (actionModal.action === 'activate') msg = 'Produto ativado com sucesso no Mercado Livre.'
+      if (actionModal.action === 'block') msg = 'Produto bloqueado no sistema.'
+      if (actionModal.action === 'unblock') msg = 'Produto desbloqueado com sucesso.'
+      if (actionModal.action === 'lock') msg = 'Trava de preço e estoque ativada.'
+      if (actionModal.action === 'unlock') msg = 'Trava removida com sucesso.'
+      if (actionModal.action === 'sync') msg = 'Produto sincronizado com o Mercado Livre via API oficial.'
+
+      notify({
+        type: 'success',
+        title: 'Status Atualizado!',
+        message: msg
+      })
+      refetch()
+    } catch (err: any) {
+      notify({
+        type: 'error',
+        title: 'Erro na operação',
+        message: err.message || 'Não foi possível atualizar o produto no marketplace.'
+      })
+    }
+  }
+
   return (
-    <div>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-        <StatCard label="Produtos" value={String(products?.length || 0)} />
+    <div className="space-y-4">
+      {/* Modal de Ação no Marketplace */}
+      <ProductMarketplaceActionModal
+        isOpen={actionModal.isOpen}
+        onClose={() => setActionModal({ isOpen: false, product: null, action: null })}
+        onConfirm={handleExecuteMarketplaceAction}
+        productName={actionModal.product?.name || ''}
+        sku={actionModal.product?.sku || ''}
+        action={actionModal.action}
+        marketplaceName="Mercado Livre"
+      />
+
+      {/* Modal de Diagnóstico / Motivo */}
+      <ProductDiagnosticModal
+        isOpen={diagnosticModal.isOpen}
+        onClose={() => setDiagnosticModal({ isOpen: false, product: null })}
+        product={diagnosticModal.product}
+      />
+
+      {/* Modal de Exclusão com Digitação de "EXCLUIR" */}
+      <DeleteConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, items: [], name: '' })}
+        onConfirm={confirmDeleteProducts}
+        itemName={deleteModal.name}
+        description="Esta ação removerá permanentemente os produtos selecionados do catálogo e banco de dados."
+        actionWord="EXCLUIR"
+        actionTitle="Exclusão de Produtos"
+      />
+
+      {/* Cards de Métricas */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+        <StatCard label="Produtos Cadastrados" value={String(products?.length || 0)} />
         <StatCard label="Estoque Total" value={String(products?.reduce((a: number, b: Record<string, unknown>) => a + (Number(b.stock) || 0), 0) || 0)} />
-        <StatCard label="Estoque Baixo" value={String(products?.filter((p: Record<string, unknown>) => (Number(p.stock) || 0) > 0 && (Number(p.stock) || 0) <= (Number(p.min_stock) || 0)).length || 0)} />
-        <StatCard label="Sem Estoque" value={String(products?.filter((p: Record<string, unknown>) => Number(p.stock) === 0).length || 0)} />
+        <StatCard label="Pausados / Bloqueados" value={String((counts.PAUSED + counts.BLOCKED) || 0)} />
+        <StatCard label="Sem Estoque" value={String(counts.OUT_OF_STOCK || 0)} />
       </div>
-      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:justify-between mb-4">
-        <SearchInput placeholder="Buscar produto..." value={search} onChange={setSearch} />
+
+      {/* FILTRO DE PRODUTOS POR SITUAÇÃO (Conforme Solicitado) */}
+      <div className="bg-white rounded-2xl border border-[#e6e6e6] p-3 shadow-2xs">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-[12px] no-scrollbar">
+          {[
+            { id: 'ALL', label: 'Todos', count: counts.ALL },
+            { id: 'ACTIVE', label: 'Ativos', count: counts.ACTIVE, color: 'text-[#16a34a]' },
+            { id: 'PAUSED', label: 'Pausados', count: counts.PAUSED, color: 'text-[#d97706]' },
+            { id: 'BLOCKED', label: 'Bloqueados', count: counts.BLOCKED, color: 'text-[#dc2626]' },
+            { id: 'LOCKED', label: 'Travados', count: counts.LOCKED, color: 'text-[#6366f1]' },
+            { id: 'BANNED', label: 'Banidos', count: counts.BANNED, color: 'text-[#111]' },
+            { id: 'OUT_OF_STOCK', label: 'Sem Estoque', count: counts.OUT_OF_STOCK, color: 'text-[#666]' },
+            { id: 'ERROR', label: 'Com Erro', count: counts.ERROR, color: 'text-[#ea580c]' },
+            { id: 'SYNC_ISSUE', label: 'Problema Sync', count: counts.SYNC_ISSUE, color: 'text-[#dc2626]' },
+          ].map(f => {
+            const isActive = situationFilter === f.id
+            return (
+              <button
+                key={f.id}
+                onClick={() => setSituationFilter(f.id as any)}
+                className={`px-3 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer shrink-0 ${
+                  isActive
+                    ? 'bg-[#111] text-white shadow-xs'
+                    : 'bg-[#f8f9fa] hover:bg-[#eee] text-[#555]'
+                }`}
+              >
+                <span>{f.label}</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
+                  isActive ? 'bg-white/20 text-white' : 'bg-[#e6e6e6] text-[#444]'
+                }`}>
+                  {f.count}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Barra de Busca e Ações em Lote */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:justify-between">
+        <SearchInput placeholder="Buscar por título, SKU, marca..." value={search} onChange={setSearch} />
         {selectedItems.length > 0 ? (
-          <div className="flex items-center gap-2 bg-[#f0f7ff] px-3 py-1.5 rounded-md border border-[#3483fa]/20">
-            <span className="text-[12px] font-medium text-[#3483fa] mr-2">{selectedItems.length} selecionado(s)</span>
-            <button onClick={handleExportSelected} className="flex items-center gap-1.5 text-[12px] font-medium text-[#3483fa] bg-white px-2.5 py-1.5 rounded border border-[#3483fa]/20 hover:bg-[#3483fa] hover:text-white transition-colors cursor-pointer"><Download className="w-3.5 h-3.5" /> Exportar</button>
-            <button onClick={handleDeleteSelected} className="flex items-center gap-1.5 text-[12px] font-medium text-[#e74c3c] bg-white px-2.5 py-1.5 rounded border border-[#e74c3c]/20 hover:bg-[#e74c3c] hover:text-white transition-colors cursor-pointer"><Trash2 className="w-3.5 h-3.5" /> Excluir</button>
+          <div className="flex flex-wrap items-center gap-2 bg-[#f0f7ff] px-3 py-1.5 rounded-xl border border-[#3483fa]/20 shadow-2xs">
+            <span className="text-[12px] font-bold text-[#3483fa] mr-1">{selectedItems.length} selecionado(s)</span>
+            <button onClick={handleExportSelected} className="flex items-center gap-1 text-[11px] font-bold text-[#3483fa] bg-white px-2.5 py-1.5 rounded-lg border border-[#3483fa]/20 hover:bg-[#3483fa] hover:text-white transition-colors cursor-pointer shadow-2xs"><Download className="w-3.5 h-3.5" /> Exportar</button>
+            <button onClick={handleDeleteSelected} className="flex items-center gap-1 text-[11px] font-bold text-[#dc2626] bg-white px-2.5 py-1.5 rounded-lg border border-[#dc2626]/20 hover:bg-[#dc2626] hover:text-white transition-colors cursor-pointer shadow-2xs"><Trash2 className="w-3.5 h-3.5" /> Excluir</button>
           </div>
         ) : (
           <div className="flex flex-wrap items-center gap-2">
@@ -117,10 +301,10 @@ function ProductsTab() {
                     const supabase = createClient()
                     await supabase.from('products').insert(data)
                     refetch()
-                    alert(`${data.length} produtos importados com sucesso!`)
+                    notify({ type: 'success', title: 'Produtos Importados', message: `${data.length} produtos adicionados com sucesso.` })
                   }
                 } catch (err) {
-                  alert('Erro ao importar arquivo.')
+                  notify({ type: 'error', title: 'Erro de Importação', message: 'Falha ao processar arquivo.' })
                 }
                 e.target.value = ''
               }} 
@@ -130,8 +314,15 @@ function ProductsTab() {
           </div>
         )}
       </div>
+
       {loading ? (
-        <div className="bg-white rounded-2xl border border-[#e6e6e6] p-10 text-center text-[#999] text-[13px]">Carregando...</div>
+        <div className="bg-white rounded-2xl border border-[#e6e6e6] p-10 text-center text-[#999] text-[13px]">Carregando catálogo...</div>
+      ) : filtered.length === 0 ? (
+        <div className="bg-white rounded-2xl border border-[#e6e6e6] p-10 text-center space-y-2">
+          <Package className="w-8 h-8 text-[#ccc] mx-auto" />
+          <p className="text-sm font-bold text-[#111]">Nenhum produto encontrado nesta situação</p>
+          <p className="text-xs text-[#777]">Tente selecionar outra situação ou limpar o filtro de busca.</p>
+        </div>
       ) : (
         <ModuleTable>
           <TableHead>
@@ -140,61 +331,155 @@ function ProductsTab() {
                 type="checkbox" 
                 checked={filtered.length > 0 && selectedItems.length === filtered.length}
                 onChange={toggleSelectAll}
-                className="rounded border-[#ccc] text-[#3483fa] focus:ring-[#3483fa]"
+                className="rounded border-[#ccc] text-[#111] focus:ring-[#111]"
               />
             </Th>
-            <Th>SKU</Th><Th>Produto</Th><Th>Fornecedor</Th><Th className="text-right">Custo</Th><Th className="text-right">Estoque</Th><Th className="text-center">Status</Th><Th className="text-right">Ações</Th>
+            <Th>SKU</Th>
+            <Th>Produto & Canal</Th>
+            <Th>Fornecedor</Th>
+            <Th className="text-right">Custo</Th>
+            <Th className="text-right">Estoque</Th>
+            <Th className="text-center">Situação</Th>
+            <Th className="text-right">Controle Central</Th>
           </TableHead>
           <tbody className="divide-y divide-[#eeeeee]">
-            {filtered.map((p: Record<string, unknown>) => {
+            {filtered.map((p: Record<string, any>) => {
               const cost = calcCost(p)
               const stock = Number(p.stock) || 0
               const minStock = Number(p.min_stock) || 0
               const supplierName = (p.suppliers as Record<string, unknown>)?.name as string || '—'
+              const status = String(p.status || 'ACTIVE').toUpperCase()
+              const isPaused = status === 'PAUSED'
+              const isBlocked = status === 'BLOCKED' || status === 'BANNED'
+              const isLocked = status === 'LOCKED'
+
+              const statusBadgeConfig = {
+                ACTIVE: { label: 'Ativo', bg: 'bg-[#ecfdf5] text-[#16a34a] border-[#bbf7d0]' },
+                PAUSED: { label: 'Pausado', bg: 'bg-[#fef3c7] text-[#b45309] border-[#fde68a]' },
+                BLOCKED: { label: 'Bloqueado', bg: 'bg-[#fee2e2] text-[#dc2626] border-[#fecaca]' },
+                LOCKED: { label: 'Travado', bg: 'bg-[#e0e7ff] text-[#4338ca] border-[#c7d2fe]' },
+                BANNED: { label: 'Banido', bg: 'bg-[#111] text-white border-[#333]' },
+                ERROR: { label: 'Com Erro', bg: 'bg-[#ffedd5] text-[#ea580c] border-[#fed7aa]' },
+                SYNC_ISSUE: { label: 'Erro Sync', bg: 'bg-[#fee2e2] text-[#dc2626] border-[#fecaca]' },
+              }[status] || { label: 'Ativo', bg: 'bg-[#ecfdf5] text-[#16a34a] border-[#bbf7d0]' }
+
               return (
-                <tr key={p.id as string} onClick={() => router.push(`/produtos/${p.id}`)} className="hover:bg-[#fafafa] transition-colors cursor-pointer">
+                <tr key={p.id as string} onClick={() => router.push(`/produtos/${p.id}`)} className="hover:bg-[#fafafa] transition-colors cursor-pointer group">
                   <Td>
                     <div onClick={(e) => e.stopPropagation()}>
                       <input 
                         type="checkbox" 
                         checked={selectedItems.includes(p.id as string)}
                         onChange={() => toggleSelect(p.id as string)}
-                        className="rounded border-[#ccc] text-[#3483fa] focus:ring-[#3483fa]"
+                        className="rounded border-[#ccc] text-[#111] focus:ring-[#111]"
                       />
                     </div>
                   </Td>
-                  <Td className="font-mono text-[#999]">{p.sku as string}</Td>
+                  <Td className="font-mono text-[#777] text-xs">{p.sku as string}</Td>
                   <Td>
-                    <div className="flex items-center gap-4">
-                      <div className="w-11 h-11 rounded-full bg-[#f5f5f5] border-2 border-[#e6e6e6] overflow-hidden flex items-center justify-center flex-shrink-0">
+                    <div className="flex items-center gap-3.5">
+                      <div className="w-11 h-11 rounded-xl bg-[#f5f5f5] border border-[#e6e6e6] overflow-hidden flex items-center justify-center shrink-0">
                         {(p.image_url || (p.product_images as any)?.[0]?.url) ? (
-                          <img src={(p.image_url as string) || (p.product_images as any)[0].url} alt="" className="w-full h-full object-cover" />
+                          <img src={(p.image_url as string) || (p.product_images as any)[0].url} alt="" className="w-full h-full object-contain p-0.5" />
                         ) : (
                           <Package className="w-5 h-5 text-[#ccc]" />
                         )}
                       </div>
-                      <div className="flex flex-col justify-center">
-                        <div className="flex items-center gap-2">
-                          <p className="font-semibold text-[#1f2328] text-[14px] leading-tight mb-0.5">{p.name as string}</p>
+                      <div className="flex flex-col justify-center min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="font-bold text-[#111] text-[13px] leading-tight truncate max-w-sm">{p.name as string}</p>
                           {((p.marketplace_listings as any)?.length > 0 || String(p.sku || '').startsWith('MLB')) && (
                             <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#fffde7] text-[#856404] border border-[#ffeeba] text-[10px] font-bold shrink-0">
                               <MarketplaceLogo name="Mercado Livre" className="w-3 h-3" /> ML
                             </span>
                           )}
                         </div>
-                        <p className="text-[13px] text-[#656d76] leading-tight">{p.brand as string || 'Sem marca'}</p>
+                        <p className="text-[11px] text-[#777] leading-tight mt-0.5">{p.brand as string || 'Sem marca'}</p>
                       </div>
                     </div>
                   </Td>
-                  <Td className="text-[#999]">{supplierName}</Td>
-                  <Td className="text-right">R$ {cost.toFixed(2)}</Td>
-                  <Td className="text-right"><span className={`font-medium ${stock === 0 ? 'text-[#e74c3c]' : stock <= minStock ? 'text-[#e67e22]' : 'text-[#333]'}`}>{stock}</span></Td>
-                  <Td className="text-center"><span className={`inline-flex px-2 py-[2px] rounded text-[10px] font-medium ${p.status === 'ACTIVE' ? 'bg-[#f0fff4] text-[#38a169]' : 'bg-[#fff5f5] text-[#e74c3c]'}`}>{p.status === 'ACTIVE' ? 'Ativo' : 'Inativo'}</span></Td>
-                  <Td className="text-right"><div className="flex items-center justify-end gap-0.5" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
-                    <button onClick={() => router.push(`/produtos/${p.id}`)} className="p-1.5 rounded hover:bg-[#f5f5f5] text-[#ccc] hover:text-[#666] transition-colors cursor-pointer"><Eye className="w-3.5 h-3.5" /></button>
-                    <button onClick={(e) => { e.stopPropagation(); router.push(`/produtos/${p.id}/editar`); }} className="p-1.5 rounded hover:bg-[#f5f5f5] text-[#ccc] hover:text-[#666] transition-colors cursor-pointer"><Edit className="w-3.5 h-3.5" /></button>
-                    <button className="p-1.5 rounded hover:bg-[#fff5f5] text-[#ccc] hover:text-[#e74c3c] transition-colors cursor-pointer"><Trash2 className="w-3.5 h-3.5" /></button>
-                  </div></Td>
+                  <Td className="text-[#666] text-xs">{supplierName}</Td>
+                  <Td className="text-right text-xs font-semibold text-[#111]">R$ {cost.toFixed(2)}</Td>
+                  <Td className="text-right">
+                    <span className={`font-bold text-xs ${stock === 0 ? 'text-[#dc2626]' : stock <= minStock ? 'text-[#d97706]' : 'text-[#111]'}`}>
+                      {stock}
+                    </span>
+                  </Td>
+                  <Td className="text-center">
+                    <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-black border ${statusBadgeConfig.bg}`}>
+                      {stock === 0 && status === 'ACTIVE' ? 'Sem Estoque' : statusBadgeConfig.label}
+                    </span>
+                  </Td>
+                  
+                  {/* CONTROLE CENTRALIZADO DE AÇÕES (CONFORME SOLICITADO) */}
+                  <Td className="text-right">
+                    <div className="flex items-center justify-end gap-1" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+                      {/* Botão Diagnóstico / Motivo */}
+                      <button 
+                        onClick={() => setDiagnosticModal({ isOpen: true, product: p })}
+                        title="Ver Diagnóstico do Marketplace & Motivo"
+                        className="p-1.5 rounded-lg border border-[#e6e6e6] hover:bg-[#f0f7ff] text-[#555] hover:text-[#3483fa] transition-colors cursor-pointer shadow-2xs"
+                      >
+                        <Info className="w-3.5 h-3.5" />
+                      </button>
+
+                      {/* Botão Pausar / Ativar Direto */}
+                      {isPaused ? (
+                        <button
+                          onClick={() => setActionModal({ isOpen: true, product: p, action: 'activate' })}
+                          title="Ativar Anúncio no Marketplace"
+                          className="p-1.5 rounded-lg border border-[#bbf7d0] bg-[#f0fff4] hover:bg-[#dcfce7] text-[#16a34a] transition-colors cursor-pointer shadow-2xs"
+                        >
+                          <PlayCircle className="w-3.5 h-3.5" />
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => setActionModal({ isOpen: true, product: p, action: 'pause' })}
+                          title="Pausar Anúncio no Marketplace"
+                          className="p-1.5 rounded-lg border border-[#fde68a] bg-[#fffbeb] hover:bg-[#fef3c7] text-[#d97706] transition-colors cursor-pointer shadow-2xs"
+                        >
+                          <PauseCircle className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+
+                      {/* Botão Travar / Destravar */}
+                      {isLocked ? (
+                        <button
+                          onClick={() => setActionModal({ isOpen: true, product: p, action: 'unlock' })}
+                          title="Destravar Produto"
+                          className="p-1.5 rounded-lg border border-[#c7d2fe] bg-[#e0e7ff] text-[#4338ca] hover:bg-[#c7d2fe] transition-colors cursor-pointer shadow-2xs"
+                        >
+                          <Unlock className="w-3.5 h-3.5" />
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => setActionModal({ isOpen: true, product: p, action: 'lock' })}
+                          title="Travar Preço & Estoque"
+                          className="p-1.5 rounded-lg border border-[#e6e6e6] hover:bg-[#f5f5f5] text-[#777] hover:text-[#4338ca] transition-colors cursor-pointer shadow-2xs"
+                        >
+                          <Lock className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+
+                      {/* Botão Sincronizar */}
+                      <button
+                        onClick={() => setActionModal({ isOpen: true, product: p, action: 'sync' })}
+                        title="Sincronizar com Marketplace"
+                        className="p-1.5 rounded-lg border border-[#e6e6e6] hover:bg-[#f5f5f5] text-[#777] hover:text-[#0284c7] transition-colors cursor-pointer shadow-2xs"
+                      >
+                        <RefreshCw className="w-3.5 h-3.5" />
+                      </button>
+
+                      {/* Botão Excluir Seguro */}
+                      <button 
+                        onClick={() => setDeleteModal({ isOpen: true, items: [p.id as string], name: p.name as string })}
+                        title="Excluir Produto"
+                        className="p-1.5 rounded-lg border border-[#e6e6e6] hover:bg-[#fee2e2] text-[#777] hover:text-[#dc2626] transition-colors cursor-pointer shadow-2xs"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </Td>
                 </tr>
               )
             })}
