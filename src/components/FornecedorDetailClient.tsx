@@ -101,18 +101,61 @@ function SupplierCatalogsDisplay({ supplierId }: { supplierId: string }) {
         return
       }
 
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('supplierId', supplierId)
+      const supabase = createClient()
+      const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
+      const fileExt = file.name.split('.').pop() || (isPdf ? 'pdf' : 'jpg')
+      const fileName = `${supplierId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
 
-      const res = await fetch('/api/upload/catalog', {
-        method: 'POST',
-        body: formData
-      })
+      let publicUrl = ''
 
-      if (!res.ok) {
-        const data = await res.json()
-        throw new Error(data.error || 'Falha ao enviar arquivo.')
+      const { error: uploadError } = await supabase.storage
+        .from('supplier-catalogs')
+        .upload(fileName, file, {
+          contentType: file.type || (isPdf ? 'application/pdf' : 'image/jpeg'),
+          upsert: true
+        })
+
+      if (!uploadError) {
+        const { data: urlData } = supabase.storage
+          .from('supplier-catalogs')
+          .getPublicUrl(fileName)
+        publicUrl = urlData.publicUrl
+      } else {
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('supplierId', supplierId)
+
+        const res = await fetch('/api/upload/catalog', {
+          method: 'POST',
+          body: formData
+        })
+
+        const rawText = await res.text()
+        let data: any = {}
+        try {
+          data = JSON.parse(rawText)
+        } catch {
+          throw new Error(`Erro do servidor (${res.status}): ${rawText.slice(0, 100)}`)
+        }
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Falha ao enviar arquivo.')
+        }
+        publicUrl = data.catalog?.file_url || ''
+      }
+
+      if (publicUrl) {
+        const title = file.name.replace(/\.[^/.]+$/, '').trim()
+        await supabase
+          .from('supplier_catalogs')
+          .insert({
+            supplier_id: supplierId,
+            title,
+            file_url: publicUrl,
+            file_name: file.name,
+            file_size_bytes: file.size,
+            file_type: isPdf ? 'PDF' : 'IMAGEM'
+          })
       }
 
       await fetchCatalogs()

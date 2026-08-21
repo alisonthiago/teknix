@@ -63,18 +63,65 @@ export default function SupplierCatalogsEditor({ supplierId }: { supplierId: str
           continue
         }
 
-        const formData = new FormData()
-        formData.append('file', file)
-        formData.append('supplierId', supplierId)
+        const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
+        const fileExt = file.name.split('.').pop() || (isPdf ? 'pdf' : 'jpg')
+        const fileName = `${supplierId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
 
-        const res = await fetch('/api/upload/catalog', {
-          method: 'POST',
-          body: formData
-        })
+        let publicUrl = ''
 
-        const data = await res.json()
-        if (!res.ok) {
-          throw new Error(data.error || 'Erro no upload')
+        // Tentar upload direto no Supabase Storage do cliente
+        const { error: uploadError } = await supabase.storage
+          .from('supplier-catalogs')
+          .upload(fileName, file, {
+            contentType: file.type || (isPdf ? 'application/pdf' : 'image/jpeg'),
+            upsert: true
+          })
+
+        if (!uploadError) {
+          const { data: urlData } = supabase.storage
+            .from('supplier-catalogs')
+            .getPublicUrl(fileName)
+          publicUrl = urlData.publicUrl
+        } else {
+          // Fallback via rota API com tratamento seguro de JSON
+          const formData = new FormData()
+          formData.append('file', file)
+          formData.append('supplierId', supplierId)
+
+          const res = await fetch('/api/upload/catalog', {
+            method: 'POST',
+            body: formData
+          })
+
+          const rawText = await res.text()
+          let data: any = {}
+          try {
+            data = JSON.parse(rawText)
+          } catch {
+            throw new Error(`Servidor retornou erro (${res.status}): ${rawText.slice(0, 120)}`)
+          }
+
+          if (!res.ok) {
+            throw new Error(data.error || 'Erro no upload do catálogo.')
+          }
+
+          publicUrl = data.catalog?.file_url || ''
+        }
+
+        const title = file.name.replace(/\.[^/.]+$/, '').trim()
+
+        if (publicUrl) {
+          // Grava o registro do catálogo no banco de dados
+          await supabase
+            .from('supplier_catalogs')
+            .insert({
+              supplier_id: supplierId,
+              title,
+              file_url: publicUrl,
+              file_name: file.name,
+              file_size_bytes: file.size,
+              file_type: isPdf ? 'PDF' : 'IMAGEM'
+            })
         }
       }
 
