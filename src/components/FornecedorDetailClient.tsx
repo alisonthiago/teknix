@@ -268,9 +268,18 @@ function VisaoGeralTab({ supplier }: { supplier: SupplierDetail }) {
                   </tr>
                 ) : (
                   supplier.products.map(p => (
-                    <tr key={p.id} className="hover:bg-[#fafafa] transition-colors cursor-pointer">
-                      <td className="py-2.5 px-3 font-mono text-[#999]">{p.sku}</td>
-                      <td className="py-2.5 px-3 text-[#333] font-medium">{p.name}</td>
+                    <tr key={p.id} className="hover:bg-[#f0f7ff]/50 transition-colors">
+                      <td className="py-2.5 px-3 font-mono text-[#999]">
+                        <Link href={`/produtos/${p.id}`} className="hover:text-[#3483fa] hover:underline font-mono">
+                          {p.sku}
+                        </Link>
+                      </td>
+                      <td className="py-2.5 px-3">
+                        <Link href={`/produtos/${p.id}`} className="text-[#333] font-medium hover:text-[#3483fa] hover:underline inline-flex items-center gap-1.5 group">
+                          <span>{p.name}</span>
+                          <ExternalLink className="w-3 h-3 text-[#999] opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                        </Link>
+                      </td>
                       <td className="py-2.5 px-3 text-right text-[#999]">{formatBRL(p.cost)}</td>
                       <td className="py-2.5 px-3 text-right">
                         <span className={`font-medium ${p.stock === 0 ? 'text-[#e74c3c]' : p.stock <= 10 ? 'text-[#e67e22]' : 'text-[#333]'}`}>
