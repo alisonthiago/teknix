@@ -27,7 +27,8 @@ export default function FloatingMessenger() {
     messages,
     sendMessage,
     totalUnreadCount,
-    createConversation
+    createConversation,
+    currentUser
   } = useInternalChat()
 
   const [input, setInput] = useState('')
@@ -188,7 +189,7 @@ export default function FloatingMessenger() {
               <MessageCardRenderer
                 key={msg.id}
                 message={msg}
-                isMe={msg.sender_id === 'user-alison'}
+                isMe={msg.sender_id === currentUser?.id || (!currentUser?.id && msg.sender_id === 'user-alison')}
               />
             ))}
             <div ref={messagesEndRef} />

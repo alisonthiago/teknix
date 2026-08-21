@@ -29,7 +29,8 @@ export default function ConversasPage() {
     sendMessage,
     createConversation,
     collaborators,
-    markAsRead
+    markAsRead,
+    currentUser
   } = useInternalChat()
 
   const [search, setSearch] = useState('')
@@ -217,7 +218,7 @@ export default function ConversasPage() {
                   <MessageCardRenderer
                     key={msg.id}
                     message={msg}
-                    isMe={msg.sender_id === 'user-alison'}
+                    isMe={msg.sender_id === currentUser?.id || (!currentUser?.id && msg.sender_id === 'user-alison')}
                   />
                 ))}
                 <div ref={messagesEndRef} />
