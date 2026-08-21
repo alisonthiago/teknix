@@ -245,7 +245,10 @@ function SupplierCatalogsDisplay({ supplierId }: { supplierId: string }) {
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {catalogs.map(cat => {
-            const url = cat.file_url || cat.url || ''
+            const rawUrl = cat.file_url || cat.url || ''
+            const url = rawUrl.includes('/storage/v1/object/public/')
+              ? `/storage/${rawUrl.split('/storage/v1/object/public/')[1]}`
+              : rawUrl
             const isPdf = (cat.file_type || '').toUpperCase() === 'PDF' || url.toLowerCase().includes('.pdf')
             return (
               <div 
@@ -254,7 +257,7 @@ function SupplierCatalogsDisplay({ supplierId }: { supplierId: string }) {
               >
                 {/* Botão de Excluir / Apagar Catálogo */}
                 <button
-                  onClick={(e) => handleDeleteCatalog(e, cat.id, url, cat.file_type)}
+                  onClick={(e) => handleDeleteCatalog(e, cat.id, rawUrl, cat.file_type)}
                   className="absolute top-2 right-2 p-1 rounded-md bg-white border border-[#e6e6e6] text-[#999] hover:text-[#e74c3c] hover:border-[#ffcdd2] opacity-0 group-hover:opacity-100 transition-all cursor-pointer shadow-xs z-10"
                   title="Apagar este catálogo"
                 >

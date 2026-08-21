@@ -276,7 +276,10 @@ export default function SupplierCatalogsEditor({ supplierId }: { supplierId: str
       ) : catalogs.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {catalogs.map(cat => {
-            const url = cat.file_url || (cat as any).url || ''
+            const rawUrl = cat.file_url || (cat as any).url || ''
+            const url = rawUrl.includes('/storage/v1/object/public/')
+              ? `/storage/${rawUrl.split('/storage/v1/object/public/')[1]}`
+              : rawUrl
             const type = (cat.file_type || (cat as any).type || '').toUpperCase()
             const isPdf = type === 'PDF' || url.toLowerCase().includes('.pdf')
             const isImage = type === 'IMAGEM' || url.match(/\.(jpeg|jpg|png|webp|gif)/i)
