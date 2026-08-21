@@ -127,7 +127,14 @@ const DEFAULT_SYSTEM_CONVERSATIONS: InternalConversation[] = [
 export function InternalChatProvider({ children }: { children: React.ReactNode }) {
   const { notify } = useNotification()
   const [conversations, setConversations] = useState<InternalConversation[]>(DEFAULT_SYSTEM_CONVERSATIONS)
-  const [activeConversation, setActiveConversation] = useState<InternalConversation | null>(DEFAULT_SYSTEM_CONVERSATIONS[0])
+  const [activeConversation, setActiveConversationState] = useState<InternalConversation | null>(DEFAULT_SYSTEM_CONVERSATIONS[0])
+  
+  const setActiveConversation = useCallback((c: InternalConversation | null) => {
+    setActiveConversationState(c)
+    if (c?.id && typeof window !== 'undefined') {
+      localStorage.setItem('teknix_last_active_conv_id', c.id)
+    }
+  }, [])
   const [messagesMap, setMessagesMap] = useState<Record<string, InternalMessage[]>>({})
   const [tasks, setTasks] = useState<InternalTask[]>([])
   const [collaborators, setCollaborators] = useState<ChatMember[]>([])
@@ -223,45 +230,107 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
     loadRealCollaborators()
   }, [])
 
-  // 3. Carregar conversas do Supabase (internal_conversations) e mesclar com canais padrão
+  // 3. Carregar conversas do Supabase (internal_conversations) e mensagens recentes
   const refreshConversations = useCallback(async () => {
     try {
       const supabase = createClient()
-      const { data: dbConversations, error } = await supabase
-        .from('internal_conversations')
-        .select('*')
-        .order('created_at', { ascending: false })
+      const [convRes, msgRes] = await Promise.all([
+        supabase.from('internal_conversations').select('*').order('created_at', { ascending: false }),
+        supabase.from('internal_messages').select('conversation_id, content, sender_name, created_at').order('created_at', { ascending: false }).limit(200)
+      ])
 
-      if (!error && dbConversations) {
-        const convMap = new Map<string, InternalConversation>()
-        
-        // Adiciona os canais padrão primeiro
-        DEFAULT_SYSTEM_CONVERSATIONS.forEach(c => convMap.set(c.id, c))
-        
-        // Adiciona as conversas do banco (mantendo unread_count se já existir)
-        dbConversations.forEach(c => {
-          const existing = convMap.get(c.id)
-          convMap.set(c.id, {
-            id: c.id,
-            type: c.type || (c.id.startsWith('direct-') ? 'DIRECT' : 'GROUP'),
-            name: removeEmojis(c.name),
-            description: removeEmojis(c.description || ''),
-            members: c.members || [],
-            unread_count: existing?.unread_count || 0,
-            created_at: c.created_at
-          })
-        })
+      const dbConversations = convRes.data || []
+      const recentMsgs = msgRes.data || []
 
-        const merged = Array.from(convMap.values())
-        setConversations(prev => {
-          // Preservar unread_count de conversas já carregadas no estado
-          return merged.map(m => {
-            const old = prev.find(p => p.id === m.id)
-            return old ? { ...m, unread_count: old.unread_count } : m
+      // Mapeia a última mensagem de cada conversa
+      const lastMsgMap = new Map<string, { content: string; sender_name: string; created_at: string }>()
+      recentMsgs.forEach(m => {
+        if (m.conversation_id && !lastMsgMap.has(m.conversation_id)) {
+          lastMsgMap.set(m.conversation_id, {
+            content: m.content || 'Mensagem enviada',
+            sender_name: m.sender_name || 'Colaborador',
+            created_at: m.created_at
           })
+        }
+      })
+
+      const convMap = new Map<string, InternalConversation>()
+      
+      // Adiciona os canais padrão primeiro
+      DEFAULT_SYSTEM_CONVERSATIONS.forEach(c => {
+        const last = lastMsgMap.get(c.id)
+        convMap.set(c.id, {
+          ...c,
+          last_message: last || c.last_message
         })
+      })
+      
+      // Adiciona as conversas registradas no banco
+      dbConversations.forEach(c => {
+        const existing = convMap.get(c.id)
+        const last = lastMsgMap.get(c.id)
+        convMap.set(c.id, {
+          id: c.id,
+          type: c.type || (c.id.startsWith('direct-') ? 'DIRECT' : 'GROUP'),
+          name: removeEmojis(c.name),
+          description: removeEmojis(c.description || ''),
+          members: c.members || [],
+          unread_count: existing?.unread_count || 0,
+          last_message: last || existing?.last_message,
+          created_at: c.created_at
+        })
+      })
+
+      // Se houver conversas com mensagens em internal_messages que não estavam em internal_conversations, inclui também
+      lastMsgMap.forEach((lastMsg, convId) => {
+        if (!convMap.has(convId)) {
+          convMap.set(convId, {
+            id: convId,
+            type: convId.startsWith('direct-') ? 'DIRECT' : 'GROUP',
+            name: convId.startsWith('direct-') ? 'Conversa Direta' : 'Canal',
+            members: [],
+            unread_count: 0,
+            last_message: lastMsg,
+            created_at: lastMsg.created_at
+          })
+        }
+      })
+
+      const merged = Array.from(convMap.values())
+
+      setConversations(prev => {
+        return merged.map(m => {
+          const old = prev.find(p => p.id === m.id)
+          return old ? { ...m, unread_count: old.unread_count } : m
+        })
+      })
+
+      // Se ainda estiver na padrão ou sem conversa ativa, seleciona a última conversa usada ou com mensagem mais recente
+      if (!activeConvRef.current || activeConvRef.current.id === 'conv-geral') {
+        const storedConvId = typeof window !== 'undefined' ? localStorage.getItem('teknix_last_active_conv_id') : null
+        if (storedConvId && convMap.has(storedConvId)) {
+          setActiveConversation(convMap.get(storedConvId)!)
+        } else {
+          // Encontra a conversa com a mensagem mais recente
+          let latestConv: InternalConversation | null = null
+          let latestTime = 0
+          merged.forEach(c => {
+            if (c.last_message?.created_at) {
+              const t = new Date(c.last_message.created_at).getTime()
+              if (t > latestTime) {
+                latestTime = t
+                latestConv = c
+              }
+            }
+          })
+          if (latestConv) {
+            setActiveConversation(latestConv)
+          }
+        }
       }
-    } catch {}
+    } catch (err) {
+      console.warn('Erro ao carregar conversas:', err)
+    }
   }, [])
 
   useEffect(() => {

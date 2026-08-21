@@ -242,16 +242,23 @@ export default function FloatingMessenger() {
                           isCurrent ? 'bg-[#f0fdf4] text-[#16a34a]' : 'text-[#334155]'
                         }`}
                       >
-                        <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="flex items-center gap-2.5 min-w-0 flex-1">
                           <div className="relative shrink-0">
-                            <div className="w-6 h-6 rounded-full bg-[#f1f5f9] flex items-center justify-center text-[11px] font-bold text-[#334155]">
+                            <div className="w-8 h-8 rounded-full bg-[#f1f5f9] flex items-center justify-center text-[12px] font-bold text-[#334155]">
                               {displayName.slice(0, 1).toUpperCase()}
                             </div>
-                            <span className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full ring-1 ring-white ${
+                            <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ring-1 ring-white ${
                               colabOnline ? 'bg-[#16a34a]' : 'bg-[#cbd5e1]'
                             }`} />
                           </div>
-                          <span className="truncate font-semibold">{displayName}</span>
+                          <div className="min-w-0 flex-1 pr-2">
+                            <p className="truncate font-semibold text-[#1e293b] leading-tight">{displayName}</p>
+                            {c.last_message && (
+                              <p className="truncate text-[11px] text-[#94a3b8] mt-0.5">
+                                {c.last_message.content}
+                              </p>
+                            )}
+                          </div>
                         </div>
                         {c.unread_count > 0 && (
                           <span className="min-w-[18px] h-4.5 px-1.5 rounded-full text-[10px] font-black bg-[#16a34a] text-white flex items-center justify-center shrink-0 ml-2">
