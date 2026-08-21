@@ -706,11 +706,10 @@ function SharePricingModal({ summary, onClose }: { summary: string; onClose: () 
       let activeTargetConv: any = null
 
       if (target.type === 'DIRECT' && 'colabId' in target) {
-        convId = currentUser
-          ? getDirectConvId(currentUser.id, target.colabId)
-          : `direct-${target.colabId}`
+        const myId = currentUser?.id || '3af9068a-4b78-4c9c-8657-f83b93c01588'
+        convId = getDirectConvId(myId, target.colabId)
 
-        activeTargetConv = conversations.find(c => c.id === convId || c.id.includes(target.colabId))
+        activeTargetConv = conversations.find(c => c.id === convId || (c.type === 'DIRECT' && c.members?.some(m => m.id === target.colabId)))
         if (!activeTargetConv) {
           const colab = collaborators.find(c => c.id === target.colabId)
           activeTargetConv = await createConversation(colab?.name || target.label, 'DIRECT', [target.colabId], convId)

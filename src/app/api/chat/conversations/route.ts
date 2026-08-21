@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
     const [convRes, profRes, msgRes] = await Promise.all([
       supabase.from('internal_conversations').select('*').order('created_at', { ascending: false }),
       supabase.from('profiles').select('id, name, email, role, avatar_url, photo_url, status').order('name'),
-      supabase.from('internal_messages').select('conversation_id, content, sender_name, created_at').order('created_at', { ascending: false }).limit(200)
+      supabase.from('internal_messages').select('conversation_id, sender_id, content, sender_name, created_at').order('created_at', { ascending: false }).limit(200)
     ])
 
     return NextResponse.json({

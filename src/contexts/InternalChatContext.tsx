@@ -123,6 +123,24 @@ const DEFAULT_SYSTEM_CONVERSATIONS: InternalConversation[] = [
   }
 ]
 
+function getLastReadMap(): Record<string, string> {
+  if (typeof window === 'undefined') return {}
+  try {
+    return JSON.parse(localStorage.getItem('chat_last_read_timestamps') || '{}')
+  } catch {
+    return {}
+  }
+}
+
+function setLastReadMap(convId: string) {
+  if (typeof window === 'undefined') return
+  try {
+    const map = getLastReadMap()
+    map[convId] = new Date().toISOString()
+    localStorage.setItem('chat_last_read_timestamps', JSON.stringify(map))
+  } catch {}
+}
+
 export function InternalChatProvider({ children }: { children: React.ReactNode }) {
   const { notify } = useNotification()
   const [conversations, setConversations] = useState<InternalConversation[]>(DEFAULT_SYSTEM_CONVERSATIONS)
@@ -130,8 +148,9 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
   
   const setActiveConversation = useCallback((c: InternalConversation | null) => {
     setActiveConversationState(c)
-    if (c?.id && typeof window !== 'undefined') {
-      localStorage.setItem('teknix_last_active_conv_id', c.id)
+    if (c) {
+      setLastReadMap(c.id)
+      setConversations(prev => prev.map(item => item.id === c.id ? { ...item, unread_count: 0 } : item))
     }
   }, [])
 
@@ -182,7 +201,7 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
           })
         }
       } catch (err) {
-        console.error('Erro ao carregar usuário autenticado:', err)
+        console.warn('Erro ao carregar usuário autenticado:', err)
       }
     }
 
@@ -238,13 +257,24 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
         }
       })
 
+      const lastReadMap = getLastReadMap()
+      const currentUid = currentUserRef.current?.id
       const convMap = new Map<string, InternalConversation>()
       
       // Adiciona canais padrão
       DEFAULT_SYSTEM_CONVERSATIONS.forEach(c => {
         const last = lastMsgMap.get(c.id)
+        const unreadCount = recentMsgs.filter((m: any) => {
+          if (m.conversation_id !== c.id) return false
+          if (currentUid && m.sender_id === currentUid) return false
+          const lastRead = lastReadMap[c.id]
+          if (!lastRead) return false
+          return new Date(m.created_at).getTime() > new Date(lastRead).getTime()
+        }).length
+
         convMap.set(c.id, {
           ...c,
+          unread_count: unreadCount,
           last_message: last || c.last_message
         })
       })
@@ -253,13 +283,24 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
       dbConversations.forEach((c: any) => {
         const existing = convMap.get(c.id)
         const last = lastMsgMap.get(c.id)
+        
+        const unreadCount = recentMsgs.filter((m: any) => {
+          if (m.conversation_id !== c.id) return false
+          if (currentUid && m.sender_id === currentUid) return false
+          const lastRead = lastReadMap[c.id]
+          if (!lastRead) return true
+          return new Date(m.created_at).getTime() > new Date(lastRead).getTime()
+        }).length
+
+        const isViewing = floatingOpenRef.current && !floatingMinRef.current && activeConvRef.current?.id === c.id
+
         convMap.set(c.id, {
           id: c.id,
           type: c.type || (c.id.startsWith('direct-') ? 'DIRECT' : 'GROUP'),
           name: removeEmojis(c.name),
           description: removeEmojis(c.description || ''),
           members: c.members || [],
-          unread_count: existing?.unread_count || 0,
+          unread_count: isViewing ? 0 : Math.max(unreadCount, existing?.unread_count || 0),
           last_message: last || existing?.last_message,
           created_at: c.created_at
         })
@@ -270,7 +311,7 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
       setConversations(prev => {
         return merged.map(m => {
           const old = prev.find(p => p.id === m.id)
-          return old ? { ...m, unread_count: old.unread_count } : m
+          return old ? { ...m, unread_count: m.unread_count } : m
         })
       })
 
