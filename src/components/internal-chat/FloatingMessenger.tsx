@@ -201,10 +201,15 @@ export default function FloatingMessenger() {
                 <ChevronDown className="w-4 h-4 text-[#94a3b8] shrink-0" />
               </div>
               <p className={`text-[12px] font-medium mt-0.5 ${
-                isOnline ? 'text-[#16a34a]' : 'text-[#94a3b8]'
+                activeConversation?.type === 'GROUP'
+                  ? 'text-[#64748b]'
+                  : isOnline
+                    ? 'text-[#16a34a]'
+                    : 'text-[#94a3b8]'
               }`}>
-                {isOnline ? '● Online agora' : '○ Offline'}
-                {activeColab?.role ? ` · ${activeColab.role}` : ''}
+                {activeConversation?.type === 'GROUP'
+                  ? (systemChannels.find(s => s.id === activeConversation.id)?.description || 'Canal da Empresa')
+                  : `${isOnline ? '● Online agora' : '○ Offline'}${activeColab?.role ? ` · ${activeColab.role}` : ''}`}
               </p>
             </div>
           </button>
@@ -368,67 +373,6 @@ export default function FloatingMessenger() {
             <X className="w-4 h-4" />
           </button>
         </div>
-      </div>
-
-      {/* ── Barra Horizontal Rápida de Contatos e Canais (Quick Switcher) ───── */}
-      <div className="flex items-center gap-2 px-4 py-2.5 bg-[#f8fafc] border-b border-[#f1f5f9] overflow-x-auto shrink-0 scrollbar-none">
-        
-        {/* Outros Colaboradores (Ex: Nádia luz ou Alison) */}
-        {otherCollaborators.map(c => {
-          const directId = currentUser ? getDirectConvId(currentUser.id, c.id) : null
-          const isSelected = activeConversation?.id === directId
-          return (
-            <button
-              key={c.id}
-              onClick={() => handleSelectCollaborator(c.id, c.name)}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[12px] font-bold transition-all shrink-0 cursor-pointer ${
-                isSelected
-                  ? 'bg-white text-[#16a34a] shadow-xs border border-[#16a34a]/30'
-                  : 'bg-white/80 hover:bg-white text-[#475569] border border-[#e2e8f0]'
-              }`}
-            >
-              <div className="relative shrink-0">
-                {c.photo_url ? (
-                  <img
-                    src={c.photo_url}
-                    alt={c.name}
-                    className="w-5 h-5 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-5 h-5 rounded-full bg-[#f1f5f9] text-[#334155] flex items-center justify-center text-[10px] font-black">
-                    {c.name.slice(0, 1).toUpperCase()}
-                  </div>
-                )}
-                <span className={`absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 rounded-full ring-1 ring-white ${
-                  c.online ? 'bg-[#16a34a]' : 'bg-[#cbd5e1]'
-                }`} />
-              </div>
-              <span className="truncate max-w-[90px]">{c.name}</span>
-            </button>
-          )
-        })}
-
-        {/* Canais Principais */}
-        {systemChannels.map(c => {
-          const isSelected = activeConversation?.id === c.id
-          return (
-            <button
-              key={c.id}
-              onClick={() => {
-                setActiveConversation(c)
-                markAsRead(c.id)
-              }}
-              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[12px] font-bold transition-all shrink-0 cursor-pointer ${
-                isSelected
-                  ? 'bg-white text-[#16a34a] shadow-xs border border-[#16a34a]/30'
-                  : 'bg-white/80 hover:bg-white text-[#64748b] border border-[#e2e8f0]'
-              }`}
-            >
-              <Hash className="w-3 h-3" />
-              <span>{c.name}</span>
-            </button>
-          )
-        })}
       </div>
 
       {/* ── Área de mensagens ────────────────────────────────────────────── */}

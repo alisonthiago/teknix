@@ -156,6 +156,7 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
   currentUserRef.current = currentUser
 
   const channelRef = useRef<any>(null)
+  const onlineUserIdsRef = useRef<Set<string>>(new Set())
 
   // 1. Carregar usuário logado atual do Supabase Auth + Profile
   useEffect(() => {
@@ -207,17 +208,21 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
       const profiles = data.profiles || []
       const recentMsgs = data.recentMessages || []
 
-      // Atualiza colaboradores reais
+      // Atualiza colaboradores reais respeitando o status online real via Presence
       if (profiles && profiles.length > 0) {
-        const realMembers: ChatMember[] = profiles.map((p: any) => ({
-          id: p.id,
-          name: removeEmojis(p.name || p.email?.split('@')[0] || 'Colaborador'),
-          email: p.email || '',
-          role: p.role || 'Operador',
-          photo_url: p.avatar_url || p.photo_url,
-          online: true,
-          last_activity: 'Online agora'
-        }))
+        const currentUid = currentUserRef.current?.id
+        const realMembers: ChatMember[] = profiles.map((p: any) => {
+          const isOnline = onlineUserIdsRef.current.has(p.id) || (currentUid ? p.id === currentUid : false)
+          return {
+            id: p.id,
+            name: removeEmojis(p.name || p.email?.split('@')[0] || 'Colaborador'),
+            email: p.email || '',
+            role: p.role || 'Operador',
+            photo_url: p.avatar_url || p.photo_url,
+            online: isOnline,
+            last_activity: isOnline ? 'Online agora' : 'Offline'
+          }
+        })
         setCollaborators(realMembers)
       }
 
@@ -352,9 +357,10 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
             if (p.user_id) onlineIds.add(p.user_id)
           })
         })
+        onlineUserIdsRef.current = onlineIds
 
         setCollaborators(prev => prev.map(c => {
-          const isOnline = onlineIds.has(c.id) || (currentUser && c.id === currentUser.id)
+          const isOnline = onlineIds.has(c.id) || (currentUserRef.current?.id ? c.id === currentUserRef.current.id : false)
           return {
             ...c,
             online: !!isOnline,
