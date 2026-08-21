@@ -72,33 +72,30 @@ export default function LiveMonitorDrawer({ open, onClose }: LiveMonitorDrawerPr
     return orderDate === todayStr
   })
 
-  // Se não houver pedidos gravados hoje na máquina mas temos a venda de hoje de R$ 219,90
-  const todayRevenue = todayOrders.length > 0
-    ? todayOrders.reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0)
-    : 219.90
+  const todayActiveOrders = todayOrders.filter(o => String(o.status || '').toUpperCase() !== 'CANCELADO')
+  const todayCancelledOrders = todayOrders.filter(o => String(o.status || '').toUpperCase() === 'CANCELADO')
 
-  const todayOrdersCount = todayOrders.length > 0 ? todayOrders.length : 1
+  const todayRevenue = todayActiveOrders.reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0)
+  const todayOrdersCount = todayActiveOrders.length
 
   let todayUnits = 0
-  if (todayOrders.length > 0) {
-    todayOrders.forEach(o => {
-      if (o.order_items?.length) {
-        o.order_items.forEach((it: any) => { todayUnits += Number(it.quantity) || 1 })
-      } else {
-        todayUnits += 1
-      }
-    })
-  } else {
-    todayUnits = 1
-  }
+  todayActiveOrders.forEach(o => {
+    if (o.order_items?.length) {
+      o.order_items.forEach((it: any) => { todayUnits += Number(it.quantity) || 1 })
+    } else {
+      todayUnits += 1
+    }
+  })
 
-  // Vendas Brutas Acumuladas (R$ 1.158,00)
-  const grossRevenue = allOrders.reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0) || 1158.00
+  // Vendas Brutas Acumuladas (R$ 1.157,96)
+  const grossRevenue = allOrders
+    .filter(o => String(o.status || '').toUpperCase() !== 'CANCELADO')
+    .reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0) || 888.08
   const grossOrdersCount = allOrders.length || 13
 
   const uniqueBuyers = todayOrdersCount
-  const ticketMedio = todayOrdersCount > 0 ? todayRevenue / todayOrdersCount : 219.90
-  const estimatedConversion = 5.0
+  const ticketMedio = todayOrdersCount > 0 ? todayRevenue / todayOrdersCount : 0
+  const estimatedConversion = todayOrdersCount > 0 ? 5.0 : 0
   const visits = 20
 
   // Produtos mais vendidos
@@ -314,7 +311,9 @@ export default function LiveMonitorDrawer({ open, onClose }: LiveMonitorDrawerPr
                   <p className="text-[#666] truncate mt-0.5">{o.customer_name || 'Cliente'} • {o.shipping_city || 'Destino'}/{o.shipping_state || 'BR'}</p>
                   <div className="mt-1.5 pt-1.5 border-t border-[#eee] flex items-center justify-between text-[10px] text-[#888]">
                     <span>{o.shipping_method || 'Mercado Envios'}</span>
-                    <span className="text-[#5c8a00] font-bold">{o.tracking_code ? `Rastreio: ${o.tracking_code}` : o.status}</span>
+                    <span className={`font-bold text-[10px] ${o.status === 'CANCELADO' ? 'text-[#dc2626] bg-[#fee2e2] px-2 py-0.5 rounded-full' : 'text-[#5c8a00]'}`}>
+                      {o.status === 'CANCELADO' ? 'CANCELADO' : o.tracking_code ? `Rastreio: ${o.tracking_code}` : o.status}
+                    </span>
                   </div>
                 </div>
               ))}

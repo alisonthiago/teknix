@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Plus, Download, Upload, Package, Truck, ShoppingCart, Warehouse, Eye, Edit, Trash2, ClipboardCheck, CheckCircle2, AlertTriangle, Building2, Ban, MoreVertical, Printer } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { PageHeader, PrimaryButton, SecondaryButton, StatCard, SearchInput, ModuleTable, TableHead, Th, Td } from '@/components/ui/module'
@@ -765,11 +765,29 @@ function StockCountTab() {
   )
 }
 
-export default function OperacaoPage() {
+function OperacaoContent() {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const rawTab = searchParams.get('tab') || 'produtos'
+  const validTabs = ['produtos', 'fornecedores', 'compras', 'estoque', 'conferencia']
+  const activeTab = validTabs.includes(rawTab.toLowerCase()) ? rawTab.toLowerCase() : 'produtos'
+  const [currentTab, setCurrentTab] = useState(activeTab)
+
+  useEffect(() => {
+    if (activeTab && activeTab !== currentTab) {
+      setCurrentTab(activeTab)
+    }
+  }, [activeTab, currentTab])
+
+  const handleTabChange = (val: string) => {
+    setCurrentTab(val)
+    router.replace(`/operacao?tab=${val}`, { scroll: false })
+  }
+
   return (
     <div className="mp-stack">
       <PageHeader title="Operação" description="Gerencie produtos, fornecedores, compras e estoque" />
-      <Tabs defaultValue="produtos">
+      <Tabs value={currentTab} onValueChange={handleTabChange}>
         <TabsList>
           <TabsTrigger value="produtos"><Package className="w-3.5 h-3.5 mr-1 inline" /> Produtos</TabsTrigger>
           <TabsTrigger value="fornecedores"><Truck className="w-3.5 h-3.5 mr-1 inline" /> Fornecedores</TabsTrigger>
@@ -784,5 +802,13 @@ export default function OperacaoPage() {
         <TabsContent value="conferencia"><StockCountTab /></TabsContent>
       </Tabs>
     </div>
+  )
+}
+
+export default function OperacaoPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-[#999]">Carregando operação...</div>}>
+      <OperacaoContent />
+    </Suspense>
   )
 }

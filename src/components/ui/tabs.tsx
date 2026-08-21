@@ -8,15 +8,26 @@ const TabsContext = createContext<{
 }>({ activeTab: '', setActiveTab: () => {} })
 
 export function Tabs({
-  defaultValue,
+  defaultValue = '',
+  value,
+  onValueChange,
   children,
   className = '',
 }: {
-  defaultValue: string
+  defaultValue?: string
+  value?: string
+  onValueChange?: (val: string) => void
   children: React.ReactNode
   className?: string
 }) {
-  const [activeTab, setActiveTab] = useState(defaultValue)
+  const [internalTab, setInternalTab] = useState(defaultValue || value || '')
+  const activeTab = value !== undefined ? value : internalTab
+
+  const setActiveTab = (tab: string) => {
+    if (value === undefined) setInternalTab(tab)
+    if (onValueChange) onValueChange(tab)
+  }
+
   return (
     <TabsContext.Provider value={{ activeTab, setActiveTab }}>
       <div className={`bg-white rounded-2xl border border-[#e6e6e6] p-6 ${className}`}>{children}</div>
@@ -51,8 +62,9 @@ export function TabsTrigger({
   const isActive = activeTab === value
   return (
     <button
+      type="button"
       onClick={() => setActiveTab(value)}
-      className={`pb-3 text-sm font-semibold transition-colors relative whitespace-nowrap ${
+      className={`pb-3 text-sm font-semibold transition-colors relative whitespace-nowrap cursor-pointer ${
         isActive
           ? 'text-[#3483fa]'
           : 'text-[#333] hover:text-[#666]'
