@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { TeknixLogo } from './TeknixLogo'
 import { usePathname, useRouter } from 'next/navigation'
-import { Bell, ChevronDown, LogOut, User, Settings, Calculator, BadgeDollarSign, Menu, X, ShoppingCart, AlertCircle, RefreshCw, Package, MessageSquare } from 'lucide-react'
+import { Bell, ChevronDown, LogOut, User, Settings, Calculator, BadgeDollarSign, Menu, X, ShoppingCart, AlertCircle, RefreshCw, Package, MessageSquare, CheckSquare } from 'lucide-react'
 import Image from 'next/image'
 import { createClient } from '@/utils/supabase/client'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
@@ -396,23 +396,7 @@ function HeaderActions({
         )}
       </div>
 
-      {/* 💬 BOTÃO CENTRAL DE CONVERSAS & CHAT INTERNO */}
-      <button
-        onClick={() => {
-          setIsFloatingOpen(true)
-          setIsFloatingMinimized(false)
-        }}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#f8fafc] hover:bg-[#f1f5f9] border border-[#e2e8f0] text-[11px] font-bold text-[#1e293b] shadow-2xs transition-all cursor-pointer"
-        title="Abrir Chat Interno de Colaboradores"
-      >
-        <MessageSquare className="w-3.5 h-3.5 text-[#111]" />
-        <span className="hidden sm:inline">Conversas</span>
-        {totalUnreadCount > 0 && (
-          <span className="px-1.5 py-0.2 rounded-full text-[9px] font-black bg-[#16a34a] text-white">
-            {totalUnreadCount}
-          </span>
-        )}
-      </button>
+      {/* 💬 BOTÃO CENTRAL DE CONVERSAS & CHAT INTERNO - removido do header (agora no dropdown do perfil) */}
 
       {/* 🔴 BOTÃO AO VIVO DENTRO DA PÍLULA VERDE */}
       <button
@@ -498,6 +482,22 @@ function HeaderActions({
                 className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-[#666] hover:bg-[#f5f5f5] rounded-xl"
               >
                 <Settings className="w-4 h-4" strokeWidth={1.5} /> Configurações
+              </button>
+              <button 
+                onClick={() => {
+                  setUserOpen(false)
+                  setIsFloatingOpen(true)
+                  setIsFloatingMinimized(false)
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-[#666] hover:bg-[#f5f5f5] rounded-xl"
+              >
+                <MessageSquare className="w-4 h-4" strokeWidth={1.5} />
+                <span>Conversas & Chat</span>
+                {totalUnreadCount > 0 && (
+                  <span className="ml-auto px-1.5 py-0.5 rounded-full text-[10px] font-black bg-[#16a34a] text-white">
+                    {totalUnreadCount}
+                  </span>
+                )}
               </button>
             </div>
             <div className="p-1.5 border-t border-[#eeeeee]">
@@ -586,7 +586,7 @@ export default function Header({ userName, userRole, userEmail, userId, userAvat
         <h1 className="text-[26px] font-semibold text-[#333] leading-tight">{pageTitle}</h1>
         
         <div className="flex items-center gap-3">
-          <div className="relative">
+          <div className="relative flex items-center gap-1">
             <button
               onClick={() => setShowBasicCalc(!showBasicCalc)}
               className="w-10 h-10 rounded-full hover:bg-[#EEFFB3]/60 text-[#111] flex items-center justify-center transition-colors border border-transparent hover:border-[#16a34a]"
@@ -594,6 +594,13 @@ export default function Header({ userName, userRole, userEmail, userId, userAvat
             >
               <Calculator className="w-5 h-5" strokeWidth={1.5} />
             </button>
+            <a
+              href="/atividades"
+              className="w-10 h-10 rounded-full hover:bg-[#EEFFB3]/60 text-[#111] flex items-center justify-center transition-colors border border-transparent hover:border-[#16a34a] relative"
+              title="Atividades & Tarefas"
+            >
+              <CheckSquare className="w-5 h-5" strokeWidth={1.5} />
+            </a>
             {showBasicCalc && <BasicCalculatorPopup onClose={() => setShowBasicCalc(false)} />}
           </div>
 
