@@ -1,5 +1,5 @@
-import { OperacaoView } from '@/components/OperacaoView'
+import { redirect } from 'next/navigation'
 
-export default function ComprasPage() {
-  return <OperacaoView defaultTab="compras" />
+export default function ComprasRedirect() {
+  redirect('/operacao')
 }
