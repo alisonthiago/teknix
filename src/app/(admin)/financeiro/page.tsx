@@ -482,79 +482,82 @@ export default function FinanceiroPage() {
                 />
               </div>
 
-              {/* Gráfico 2: Composição de Custos em Radial / Donut Chart & Cards (5 cols) */}
+              {/* Gráfico 2: Composição de Custos & Margens Moderna (5 cols) */}
               <div className="lg:col-span-5 bg-white rounded-2xl border border-[#e6e6e6] p-6 shadow-2xs flex flex-col justify-between space-y-4">
                 <div>
                   <div className="flex items-center justify-between pb-3 border-b border-[#f0f0f0]">
                     <div>
-                      <h3 className="text-[14px] font-black text-[#111] tracking-tight">Composição da Receita</h3>
-                      <p className="text-[11px] text-[#666] mt-0.5">Distribuição percentual sobre a receita total</p>
+                      <h3 className="text-[15px] font-black text-[#111] tracking-tight">Composição da Receita</h3>
+                      <p className="text-[11px] text-[#666] mt-0.5">Distribuição percentual sobre a receita total de {formatBRL(financialData.revenue)}</p>
                     </div>
                     <span className="px-2.5 py-1 rounded-full text-[10px] font-black bg-[#ecfdf5] text-[#16a34a] border border-[#bbf7d0]">
-                      {financialData.avgMargin}% Margem
+                      {financialData.avgMargin}% Margem Real
                     </span>
                   </div>
 
-                  {/* Donut Chart SVG + Centro */}
-                  <div className="flex items-center justify-center pt-4 pb-2">
-                    <div className="relative w-36 h-36 flex items-center justify-center">
-                      <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-                        {/* Background Circle */}
-                        <circle cx="18" cy="18" r="14" fill="none" stroke="#f0f0f0" strokeWidth="4" />
-                        
-                        {/* Slice 1: COGS (42%) */}
-                        <circle cx="18" cy="18" r="14" fill="none" stroke="#333333" strokeWidth="4"
-                          strokeDasharray="42 100" strokeDashoffset="0" />
-                        {/* Slice 2: Taxas ML (16%) */}
-                        <circle cx="18" cy="18" r="14" fill="none" stroke="#f59e0b" strokeWidth="4"
-                          strokeDasharray="16 100" strokeDashoffset="-42" />
-                        {/* Slice 3: Frete (8%) */}
-                        <circle cx="18" cy="18" r="14" fill="none" stroke="#3b82f6" strokeWidth="4"
-                          strokeDasharray="8 100" strokeDashoffset="-58" />
-                        {/* Slice 4: Impostos (6%) */}
-                        <circle cx="18" cy="18" r="14" fill="none" stroke="#ef4444" strokeWidth="4"
-                          strokeDasharray="6 100" strokeDashoffset="-66" />
-                        {/* Slice 5: Lucro (28%) */}
-                        <circle cx="18" cy="18" r="14" fill="none" stroke="#B5F500" strokeWidth="4.5"
-                          strokeDasharray="28 100" strokeDashoffset="-72" />
-                      </svg>
-
-                      {/* Centro com Total */}
-                      <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                        <span className="text-[9px] font-bold text-[#888] uppercase">Receita</span>
-                        <span className="text-[13px] font-black text-[#111]">{formatBRL(financialData.revenue)}</span>
-                      </div>
+                  {/* Barra Consolidada de Distribuição Segmentada */}
+                  <div className="pt-4 pb-3">
+                    <div className="flex items-center justify-between text-[11px] font-bold text-[#666] mb-1.5">
+                      <span>Distribuição do Faturamento</span>
+                      <span className="text-[#111] font-extrabold">100%</span>
+                    </div>
+                    <div className="h-4 rounded-xl bg-[#f0f0f0] overflow-hidden flex shadow-inner gap-0.5 p-0.5">
+                      <div className="h-full bg-[#222] rounded-l-lg transition-all" style={{ width: '42%' }} title="Custo Produtos: 42%" />
+                      <div className="h-full bg-[#f59e0b] transition-all" style={{ width: '16%' }} title="Taxas ML: 16%" />
+                      <div className="h-full bg-[#3b82f6] transition-all" style={{ width: '8%' }} title="Frete: 8%" />
+                      <div className="h-full bg-[#ef4444] transition-all" style={{ width: '6%' }} title="Impostos: 6%" />
+                      <div className="h-full bg-[#B5F500] rounded-r-lg transition-all" style={{ width: '28%' }} title="Lucro Líquido: 28%" />
                     </div>
                   </div>
 
-                  {/* Lista de Itens com Mini Progress Bars Modernas */}
-                  <div className="space-y-2.5 pt-2">
-                    {costBreakdown.map(item => (
-                      <div key={item.label} className="p-2.5 rounded-xl border border-[#f0f0f0] hover:bg-[#fafafa] transition-colors">
-                        <div className="flex items-center justify-between text-xs mb-1">
-                          <div className="flex items-center gap-2">
-                            <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
-                            <span className="text-[#333] font-semibold text-[11px]">{item.label}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-extrabold px-1.5 py-0.2 rounded-md bg-[#f0f0f0] text-[#555]">{item.pct}%</span>
-                            <span className="font-bold text-[#111] text-[11px]">{formatBRL(item.value)}</span>
-                          </div>
-                        </div>
-                        <div className="h-1.5 rounded-full bg-[#f1f3f5] overflow-hidden">
-                          <div className="h-full rounded-full transition-all duration-500" style={{ width: `${item.pct}%`, backgroundColor: item.color }} />
-                        </div>
+                  {/* Grid de Detalhamento dos Custos */}
+                  <div className="grid grid-cols-2 gap-2.5 pt-1">
+                    <div className="p-3 rounded-xl border border-[#e6e6e6] bg-[#fafafa]">
+                      <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#666] mb-1">
+                        <span className="w-2 h-2 rounded-full bg-[#222]" /> Custo Produtos (COGS)
                       </div>
-                    ))}
+                      <p className="text-sm font-black text-[#111]">{formatBRL(financialData.cost)}</p>
+                      <p className="text-[10px] font-extrabold text-[#777] mt-0.5">42.0% da receita</p>
+                    </div>
+
+                    <div className="p-3 rounded-xl border border-[#fef3c7] bg-[#fffbeb]">
+                      <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#b45309] mb-1">
+                        <span className="w-2 h-2 rounded-full bg-[#f59e0b]" /> Taxas ML / Canais
+                      </div>
+                      <p className="text-sm font-black text-[#92400e]">{formatBRL(financialData.fees)}</p>
+                      <p className="text-[10px] font-extrabold text-[#b45309] mt-0.5">16.0% comissão</p>
+                    </div>
+
+                    <div className="p-3 rounded-xl border border-[#dbeafe] bg-[#eff6ff]">
+                      <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#1d4ed8] mb-1">
+                        <span className="w-2 h-2 rounded-full bg-[#3b82f6]" /> Frete & Envios
+                      </div>
+                      <p className="text-sm font-black text-[#1e40af]">{formatBRL(financialData.freight)}</p>
+                      <p className="text-[10px] font-extrabold text-[#2563eb] mt-0.5">8.0% logística</p>
+                    </div>
+
+                    <div className="p-3 rounded-xl border border-[#fee2e2] bg-[#fef2f2]">
+                      <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#b91c1c] mb-1">
+                        <span className="w-2 h-2 rounded-full bg-[#ef4444]" /> Impostos (Simples/NF)
+                      </div>
+                      <p className="text-sm font-black text-[#991b1b]">{formatBRL(financialData.taxes)}</p>
+                      <p className="text-[10px] font-extrabold text-[#dc2626] mt-0.5">6.0% tributos</p>
+                    </div>
                   </div>
                 </div>
 
-                {/* Sobra Líquida Destaque */}
-                <div className="p-3.5 bg-[#ecfdf5] rounded-xl border border-[#bbf7d0] flex items-center justify-between text-xs">
-                  <span className="text-[#166534] font-extrabold flex items-center gap-1.5">
-                    <ShieldCheck className="w-4 h-4 text-[#16a34a]" /> Lucro Líquido no Bolso:
-                  </span>
-                  <span className="font-black text-[#16a34a] text-[15px]">{formatBRL(financialData.profit)}</span>
+                {/* Card de Destaque no Verde Oficial Teknix */}
+                <div className="p-4 bg-[#B5F500]/25 rounded-2xl border-2 border-[#a2e000] flex items-center justify-between shadow-2xs">
+                  <div>
+                    <span className="text-[#3f6212] font-black text-xs uppercase tracking-wide flex items-center gap-1.5">
+                      <ShieldCheck className="w-4 h-4 text-[#4d7c0f]" /> Lucro Líquido Real:
+                    </span>
+                    <p className="text-[11px] text-[#4d7c0f] font-semibold mt-0.5">Livre de todas as despesas</p>
+                  </div>
+                  <div className="text-right">
+                    <span className="font-black text-[#111] text-lg">{formatBRL(financialData.profit)}</span>
+                    <span className="block text-[10px] font-black text-[#4d7c0f]">{financialData.avgMargin}% da receita</span>
+                  </div>
                 </div>
               </div>
 

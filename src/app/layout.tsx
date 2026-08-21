@@ -11,6 +11,15 @@ const nunitoSans = Nunito_Sans({
 export const metadata: Metadata = {
   title: "TEKNIX — Gestão inteligente de vendas e marketplaces",
   description: "TEKNIX — Gestão inteligente de vendas e marketplaces",
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/icon', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-icon', sizes: '180x180', type: 'image/png' },
+    ],
+  },
 };
 
 import { NotificationProvider } from '@/contexts/NotificationContext';
