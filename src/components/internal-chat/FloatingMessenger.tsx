@@ -3,8 +3,8 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useInternalChat } from '@/contexts/InternalChatContext'
 import MessageCardRenderer from './MessageCardRenderer'
+import { TeknixT } from '@/components/TeknixT'
 import {
-  MessageSquare,
   X,
   Minus,
   Send,
@@ -68,7 +68,8 @@ export default function FloatingMessenger() {
           title="Chat Interno"
         >
           <div className="relative">
-            <MessageSquare className="w-5 h-5 text-[#16a34a]" />
+            {/* Ícone T da TEKNIX */}
+            <TeknixT className="w-5 h-5 text-[#16a34a]" />
             {totalUnreadCount > 0 ? (
               <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-black bg-[#16a34a] text-white flex items-center justify-center">
                 {totalUnreadCount}
@@ -193,7 +194,7 @@ export default function FloatingMessenger() {
         {messages.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center px-8 text-center">
             <div className="w-16 h-16 rounded-2xl bg-white border border-[#e2e8f0] flex items-center justify-center mb-5 shadow-sm">
-              <MessageSquare className="w-8 h-8 text-[#c8d6e5]" />
+              <TeknixT className="w-8 h-8 text-[#c8d6e5]" />
             </div>
             <p className="text-[16px] font-bold text-[#334155] mb-2">Nenhuma mensagem ainda</p>
             <p className="text-[14px] text-[#94a3b8] leading-relaxed max-w-[260px]">
