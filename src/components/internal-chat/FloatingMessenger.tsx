@@ -51,20 +51,16 @@ export default function FloatingMessenger() {
     }
   }, [messages, isFloatingOpen, isFloatingMinimized])
 
-  // Se abrir o chat e ainda estiver no Geral vazio enquanto há conversas diretas ativas, seleciona a direta
-  useEffect(() => {
-    if (isFloatingOpen && (!activeConversation || activeConversation.id === 'conv-geral')) {
-      const directWithMsgs = conversations.find(c => (c.type === 'DIRECT' || c.id.startsWith('direct-')) && c.last_message)
-      if (directWithMsgs) {
-        setActiveConversation(directWithMsgs)
-      } else {
-        const anyDirect = conversations.find(c => c.type === 'DIRECT' || c.id.startsWith('direct-'))
-        if (anyDirect) {
-          setActiveConversation(anyDirect)
-        }
-      }
+  // Abre diretamente no canal Geral ao acionar o messenger
+  const handleOpenMessenger = () => {
+    const geral = conversations.find(c => c.id === 'conv-geral') || conversations[0]
+    if (geral) {
+      setActiveConversation(geral)
+      markAsRead(geral.id)
     }
-  }, [isFloatingOpen, conversations, activeConversation, setActiveConversation])
+    setIsFloatingOpen(true)
+    setIsFloatingMinimized(false)
+  }
 
   const handleSend = async () => {
     if (!input.trim() || !activeConversation) return
@@ -92,7 +88,7 @@ export default function FloatingMessenger() {
 
   // Identificação dinâmica da conversa ativa atual (para Header)
   const activeDisplayName = useMemo(() => {
-    if (!activeConversation) return 'Conversas'
+    if (!activeConversation) return 'Geral'
     return getConversationDisplayName(activeConversation, currentUser?.id, collaborators)
   }, [activeConversation, currentUser?.id, collaborators])
 
@@ -103,10 +99,10 @@ export default function FloatingMessenger() {
 
   const isOnline = useMemo(() => {
     if (!activeConversation || activeConversation.type === 'GROUP') {
-      return collaborators.some(c => c.online)
+      return false
     }
     return activeColab ? !!activeColab.online : false
-  }, [activeConversation, activeColab, collaborators])
+  }, [activeConversation, activeColab])
 
   // Divisão organizada das conversas para o menu dropdown
   const systemChannels = useMemo(() => {
@@ -133,7 +129,7 @@ export default function FloatingMessenger() {
     return (
       <div className="fixed bottom-6 right-6 z-[100]">
         <button
-          onClick={() => { setIsFloatingOpen(true); setIsFloatingMinimized(false) }}
+          onClick={handleOpenMessenger}
           className={`relative w-12 h-12 bg-white rounded-2xl shadow-lg border border-[#e2e8f0] flex items-center justify-center hover:shadow-xl hover:scale-[1.05] transition-all cursor-pointer ${hasUnread ? 'animate-bounce' : ''}`}
           title="Chat Interno TEKNIX"
         >

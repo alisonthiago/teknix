@@ -274,21 +274,10 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
         })
       })
 
-      // Auto-selecionar conversa direta ativa ou armazenada
-      const storedConvId = typeof window !== 'undefined' ? localStorage.getItem('teknix_last_active_conv_id') : null
-      if (storedConvId && convMap.has(storedConvId)) {
-        if (!activeConvRef.current || activeConvRef.current.id !== storedConvId) {
-          setActiveConversationState(convMap.get(storedConvId)!)
-        }
-      } else {
-        // Encontra a conversa com a mensagem mais recente ou a primeira direta
-        let directWithMsg = merged.find(c => (c.type === 'DIRECT' || c.id.startsWith('direct-')) && c.last_message)
-        if (!directWithMsg) {
-          directWithMsg = merged.find(c => c.type === 'DIRECT' || c.id.startsWith('direct-'))
-        }
-        if (directWithMsg && (!activeConvRef.current || activeConvRef.current.id === 'conv-geral')) {
-          setActiveConversationState(directWithMsg)
-        }
+      // Define Geral como padrão caso não haja conversa ativa
+      if (!activeConvRef.current) {
+        const geral = convMap.get('conv-geral') || DEFAULT_SYSTEM_CONVERSATIONS[0]
+        setActiveConversationState(geral)
       }
     } catch (err) {
       console.warn('Erro ao carregar conversas via API:', err)
