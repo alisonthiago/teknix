@@ -4,7 +4,7 @@ import { useState } from 'react'
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, MoreHorizontal, Package, TrendingUp, ShoppingCart, Store, Clock, FileText, Share2 } from 'lucide-react'
+import { ArrowLeft, MoreHorizontal, Package, TrendingUp, ShoppingCart, Store, Clock, FileText, Share2, Pencil } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import type { ProductDetail } from '@/lib/detail-types'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
@@ -95,7 +95,7 @@ function VisaoGeralTab({ product }: { product: ProductDetail }) {
 
         <div className="bg-white border border-[#e6e6e6] rounded-2xl p-5 shadow-xs">
           <SectionTitle>Descrição Completa do Produto</SectionTitle>
-          <div className="mt-2 text-[13px] text-[#334155] leading-relaxed whitespace-pre-line bg-[#f8fafc] p-4 rounded-xl border border-[#e2e8f0] max-h-96 overflow-y-auto font-sans">
+          <div className="mt-2 text-[13px] text-[#334155] leading-relaxed whitespace-pre-line bg-white p-4 rounded-xl border border-[#e6e6e6] max-h-96 overflow-y-auto font-sans">
             {product.description || (
               `PRODUTO: ${product.name}
 SKU: ${product.sku}
@@ -433,7 +433,7 @@ function EstoqueTab({ product }: { product: ProductDetail }) {
                   <td className="py-2.5 px-4">
                     <span className={`inline-flex px-2 py-[2px] rounded text-[10px] font-medium ${
                       m.type === 'COMPRA' ? 'bg-[#f0fff4] text-[#38a169]' :
-                      m.type === 'VENDA' ? 'bg-[#f0f7ff] text-[#3483fa]' :
+                      m.type === 'VENDA' ? 'bg-[#f5f5f5] text-[#333]' :
                       m.type === 'DEVOLUCAO' ? 'bg-[#fffaf0] text-[#e67e22]' :
                       'bg-[#f5f5f5] text-[#999]'
                     }`}>{m.type}</span>
@@ -674,36 +674,37 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
                     <MarketplaceLogo name="Mercado Livre" className="w-3.5 h-3.5" />
                     Mercado Livre Oficial
                   </span>
-                  <span className="inline-flex px-3 py-1 rounded-xl bg-[#f0f7ff] text-[#3483fa] text-xs font-semibold border border-[#3483fa]/20">
+                  <span className="inline-flex px-3 py-1 rounded-xl bg-white text-[#555] text-xs font-semibold border border-[#e6e6e6]">
                     {product.category || 'Catálogo Geral'}
                   </span>
                   <StatusBadge status={product.status} />
                 </div>
 
-                {/* Action Buttons at Top Right Corner (Bolinhas / Pílulas Clean) */}
+                {/* Action Buttons at Top Right Corner (Somente Ícones Clean) */}
                 <div className="flex items-center gap-2 shrink-0">
                   <button
                     onClick={() => setShowShareModal(true)}
-                    className="px-4 py-2 bg-white text-[#334155] border border-[#e2e8f0] text-xs font-bold rounded-full hover:bg-[#f8fafc] hover:border-[#16a34a] hover:text-[#16a34a] transition-all flex items-center gap-2 cursor-pointer shadow-xs"
+                    className="w-9 h-9 flex items-center justify-center bg-white text-[#334155] border border-[#e2e8f0] rounded-full hover:bg-[#f8fafc] hover:border-[#16a34a] hover:text-[#16a34a] transition-all cursor-pointer shadow-xs"
                     title="Compartilhar produto com a equipe"
                   >
-                    <Share2 className="w-3.5 h-3.5 text-[#16a34a]" />
-                    <span>Compartilhar</span>
+                    <Share2 className="w-4 h-4 text-[#16a34a]" />
                   </button>
                   <button 
                     onClick={() => router.push(`/purchases/new?product=${product.id}`)} 
-                    className="px-4 py-2 bg-[#f0fff4] text-[#16a34a] border border-[#bbf7d0] text-xs font-bold rounded-full hover:bg-[#dcfce7] transition-all flex items-center gap-2 cursor-pointer shadow-xs"
+                    className="w-9 h-9 flex items-center justify-center bg-white text-[#16a34a] border border-[#bbf7d0] rounded-full hover:bg-[#dcfce7] transition-all cursor-pointer shadow-xs"
+                    title="Fazer Pedido de Compra"
                   >
-                    <ShoppingCart className="w-3.5 h-3.5" /> <span>Fazer Pedido de Compra</span>
+                    <ShoppingCart className="w-4 h-4" />
                   </button>
                   <button 
                     onClick={() => router.push(`/produtos/${product.id}/editar`)} 
-                    className="px-5 py-2 bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold rounded-full transition-all cursor-pointer shadow-xs"
+                    className="w-9 h-9 flex items-center justify-center bg-[#16a34a] hover:bg-[#15803d] text-white rounded-full transition-all cursor-pointer shadow-xs"
+                    title="Editar Produto"
                   >
-                    Editar Produto
+                    <Pencil className="w-4 h-4" />
                   </button>
                   <DropdownMenu>
-                    <DropdownMenuTrigger className="w-9 h-9 flex items-center justify-center rounded-full border border-[#e2e8f0] text-[#64748b] hover:bg-[#f8fafc] transition-colors focus:outline-none cursor-pointer shadow-xs">
+                    <DropdownMenuTrigger className="w-9 h-9 flex items-center justify-center rounded-full border border-[#e2e8f0] text-[#64748b] hover:bg-[#f8fafc] transition-colors focus:outline-none cursor-pointer shadow-xs" title="Mais opções">
                       <MoreHorizontal className="w-4 h-4" />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-44 rounded-2xl p-1.5 shadow-xl border border-[#e2e8f0]">
@@ -737,7 +738,7 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
               </div>
 
               {/* Price & Stock Quick Highlight Cards */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 bg-[#f8fafc] border border-[#e2e8f0] rounded-2xl mb-2 shadow-2xs">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 bg-white border border-[#e6e6e6] rounded-2xl mb-2 shadow-2xs">
                 <div>
                   <span className="text-[10px] uppercase font-bold text-[#64748b] tracking-wider">Preço no Mercado Livre</span>
                   <div className="text-xl font-black text-[#0f172a] mt-0.5">

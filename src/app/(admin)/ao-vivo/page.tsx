@@ -629,7 +629,7 @@ export default function MonitorAoVivoPage() {
                   key={c.id}
                   onClick={() => setSelectedChannel(c.id)}
                   className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${selectedChannel === c.id
-                      ? 'border-[#3483fa] bg-[#f0f7ff]'
+                      ? 'border-[#111111] bg-[#f8f8f8] shadow-2xs'
                       : 'border-[#f0f0f0] hover:border-[#ddd] bg-white'
                     }`}
                 >
@@ -781,17 +781,17 @@ export default function MonitorAoVivoPage() {
             </div>
 
             {/* Endereço e Logística */}
-            <div className="p-3.5 bg-[#f0f7ff] rounded-xl border border-[#b8daff] text-[12px] space-y-1.5">
+            <div className="p-3.5 bg-white rounded-xl border border-[#e6e6e6] text-[12px] space-y-1.5">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-[#1976d2] flex items-center gap-1.5">
-                  <Truck className="w-4 h-4" />
+                <span className="font-bold text-[#111] flex items-center gap-1.5">
+                  <Truck className="w-4 h-4 text-[#16a34a]" />
                   Dados de Envio & Rastreamento
                 </span>
-                <span className="text-[11px] font-bold text-[#3483fa]">{selectedOrder.shipping_method || 'Mercado Envios'}</span>
+                <span className="text-[11px] font-bold text-[#555]">{selectedOrder.shipping_method || 'Mercado Envios'}</span>
               </div>
               <p className="text-[#333]"><strong>Destinatário / Endereço:</strong> {selectedOrder.shipping_address || 'Endereço registrado no marketplace'}</p>
               <p className="text-[#333]"><strong>Cidade/UF:</strong> {selectedOrder.shipping_city || 'São Paulo'} - {selectedOrder.shipping_state || 'SP'} (CEP: {selectedOrder.shipping_zip || '00000-000'})</p>
-              <p className="text-[#333]"><strong>Código de Rastreio:</strong> <span className="font-mono font-bold text-[#1976d2]">{selectedOrder.tracking_code || 'Gerando etiqueta...'}</span></p>
+              <p className="text-[#333]"><strong>Código de Rastreio:</strong> <span className="font-mono font-bold text-[#111]">{selectedOrder.tracking_code || 'Gerando etiqueta...'}</span></p>
             </div>
 
             <div>

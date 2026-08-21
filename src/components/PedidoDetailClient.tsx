@@ -338,40 +338,38 @@ function OrderActions({ order }: { order: OrderDetail }) {
         defaultNote={shareModal.note}
       />
 
-      <div className="flex flex-wrap gap-2 mt-3">
-        {/* BOTÕES DE COMPARTILHAMENTO OPERACIONAL 360° */}
+      <div className="flex items-center gap-2 mt-3">
+        {/* BOTÕES DE AÇÃO OPERACIONAIS (SOMENTE ÍCONES CLEAN) */}
         <button
           onClick={handleShareOrder}
-          className="inline-flex items-center gap-1.5 bg-[#16a34a] hover:bg-[#15803d] text-white text-[11px] font-bold px-3 py-1.5 rounded-xl transition-all shadow-xs cursor-pointer"
-          title="Compartilhar este pedido com outro colaborador no Chat"
+          className="w-9 h-9 flex items-center justify-center bg-[#16a34a] hover:bg-[#15803d] text-white rounded-xl transition-all shadow-xs cursor-pointer"
+          title="Compartilhar Pedido no Chat"
         >
-          <Share2 className="w-3 h-3 text-white" />
-          Compartilhar Pedido
+          <Share2 className="w-4 h-4" />
         </button>
 
         <button
           onClick={handleShareInvoice}
-          className="inline-flex items-center gap-1.5 bg-white border border-[#d0d7de] hover:bg-[#f8fafc] text-[#1e293b] text-[11px] font-bold px-3 py-1.5 rounded-xl transition-all shadow-2xs cursor-pointer"
-          title="Compartilhar solicitação de nota fiscal"
+          className="w-9 h-9 flex items-center justify-center bg-white border border-[#e6e6e6] hover:bg-[#f5f5f5] text-[#333] rounded-xl transition-all shadow-2xs cursor-pointer"
+          title="Pedir Nota Fiscal"
         >
-          <FileText className="w-3 h-3 text-[#0284c7]" />
-          Pedir Nota Fiscal
+          <FileText className="w-4 h-4 text-[#333]" />
         </button>
 
         <button
           onClick={() => router.push(`/pedidos/${order.id}/etiqueta`)}
-          className="inline-flex items-center gap-1.5 bg-[#3483fa] hover:bg-[#2968c8] text-white text-[11px] font-bold px-3 py-1.5 rounded-xl transition-colors shadow-xs cursor-pointer"
+          className="w-9 h-9 flex items-center justify-center bg-[#111111] hover:bg-black text-white rounded-xl transition-colors shadow-xs cursor-pointer"
+          title="Imprimir Etiqueta (100x150mm)"
         >
-          <Printer className="w-3 h-3" />
-          Imprimir Etiqueta (100x150mm)
+          <Printer className="w-4 h-4" />
         </button>
         
         <button
           onClick={() => router.push(`/pedidos/${order.id}/nota`)}
-          className="inline-flex items-center gap-1.5 bg-white border border-[#e6e6e6] text-[#333] text-[11px] font-medium px-3 py-1.5 rounded-xl hover:bg-[#f5f5f5] transition-colors cursor-pointer"
+          className="w-9 h-9 flex items-center justify-center bg-white border border-[#e6e6e6] text-[#333] hover:bg-[#f5f5f5] rounded-xl transition-colors cursor-pointer"
+          title="Declaração de Conteúdo"
         >
-          <Printer className="w-3 h-3" />
-          Declaração
+          <Printer className="w-4 h-4 text-[#666]" />
         </button>
 
         {order.status === 'NOVO' && (
