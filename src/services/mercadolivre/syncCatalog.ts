@@ -198,37 +198,79 @@ export async function syncMercadoLivreAccount(sellerId: string) {
         const orderStatus = statusMap[ord.status] || 'PAGO'
 
         // A. Upsert into orders
-        const { data: dbOrder } = await supabase
+        const { data: existingOrder } = await supabase
           .from('orders')
-          .upsert({
-            order_number: orderNumber,
-            marketplace_id: marketplaceId,
-            customer_name: customerName,
-            total_amount: totalAmount,
-            status: orderStatus,
-            tracking_code: tracking,
-            carrier: shippingMethod,
-            notes: `${address}, ${city} - BR-${state} CEP: ${zip}`,
-            created_at: ord.date_created || new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          }, { onConflict: 'order_number' })
           .select('id')
-          .single()
+          .eq('order_number', orderNumber)
+          .maybeSingle()
+
+        let dbOrderId: string | null = existingOrder?.id || null
+        if (existingOrder) {
+          await supabase
+            .from('orders')
+            .update({
+              customer_name: customerName,
+              total_amount: totalAmount,
+              status: orderStatus,
+              tracking_code: tracking,
+              carrier: shippingMethod,
+              notes: `${address}, ${city} - BR-${state} CEP: ${zip}`,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', existingOrder.id)
+        } else {
+          const { data: newOrder } = await supabase
+            .from('orders')
+            .insert({
+              order_number: orderNumber,
+              marketplace_id: marketplaceId,
+              customer_name: customerName,
+              total_amount: totalAmount,
+              status: orderStatus,
+              tracking_code: tracking,
+              carrier: shippingMethod,
+              notes: `${address}, ${city} - BR-${state} CEP: ${zip}`,
+              created_at: ord.date_created || new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            })
+            .select('id')
+            .single()
+          dbOrderId = newOrder?.id || null
+        }
 
         // B. Upsert into sales
-        const { data: dbSale } = await supabase
+        const { data: existingSale } = await supabase
           .from('sales')
-          .upsert({
-            order_id: orderNumber,
-            marketplace_id: marketplaceId,
-            date: dateCreated,
-            total_revenue: totalAmount,
-            status: ord.status === 'paid' ? 'COMPLETED' : 'PENDING',
-            created_at: ord.date_created || new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          }, { onConflict: 'order_id' })
           .select('id')
-          .single()
+          .eq('order_id', orderNumber)
+          .maybeSingle()
+
+        let dbSaleId: string | null = existingSale?.id || null
+        if (existingSale) {
+          await supabase
+            .from('sales')
+            .update({
+              total_revenue: totalAmount,
+              status: ord.status === 'paid' ? 'COMPLETED' : 'PENDING',
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', existingSale.id)
+        } else {
+          const { data: newSale } = await supabase
+            .from('sales')
+            .insert({
+              order_id: orderNumber,
+              marketplace_id: marketplaceId,
+              date: dateCreated,
+              total_revenue: totalAmount,
+              status: ord.status === 'paid' ? 'COMPLETED' : 'PENDING',
+              created_at: ord.date_created || new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            })
+            .select('id')
+            .single()
+          dbSaleId = newSale?.id || null
+        }
 
         // C. Upsert into marketplace_orders
         await supabase
@@ -261,9 +303,9 @@ export async function syncMercadoLivreAccount(sellerId: string) {
               .eq('sku', itemSku)
               .single()
 
-            if (dbOrder?.id) {
+            if (dbOrderId) {
               await supabase.from('order_items').upsert({
-                order_id: dbOrder.id,
+                order_id: dbOrderId,
                 product_id: product?.id || null,
                 product_name: itemTitle,
                 sku: itemSku,
@@ -273,13 +315,13 @@ export async function syncMercadoLivreAccount(sellerId: string) {
               })
             }
 
-            if (dbSale?.id) {
+            if (dbSaleId) {
               const cost = Number(product?.cost_purchase || 0)
               const profit = (itemPrice * itemQty) - (cost * itemQty) - itemFee
               const margin = itemPrice > 0 ? (profit / (itemPrice * itemQty)) * 100 : 0
 
               await supabase.from('sale_items').upsert({
-                sale_id: dbSale.id,
+                sale_id: dbSaleId,
                 product_id: product?.id || null,
                 quantity: itemQty,
                 unit_price: itemPrice,

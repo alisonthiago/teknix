@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
+import { getValidTokenBySellerId } from './client'
 import { syncOrder } from './syncOrder'
 
 let _supabase: SupabaseClient<any> | null = null
@@ -13,193 +14,158 @@ function getSupabase(): SupabaseClient<any> {
   return _supabase
 }
 
-const PROCESSED_TOPICS = [
-  'orders_v2',
-  'orders',
-  'items',
-  'items_prices',
-  'questions',
-  'messages',
-  'shipments',
-  'payments',
-  'catalog',
-  'promotions',
-  'user_products_families',
-]
+/**
+ * Enfileira e dispara o processamento assíncrono do webhook com garantia de idempotência.
+ */
+export async function enqueueAndProcessWebhook(payload: Record<string, any>): Promise<{ eventId: string; duplicate: boolean }> {
+  const supabase = getSupabase()
+  const { resource, topic, user_id } = payload
+  const sellerId = String(user_id || '470831049')
+  const eventType = topic || (resource?.startsWith('/orders/') ? 'orders_v2' : resource?.startsWith('/shipments/') ? 'shipments' : 'general')
 
-const LOG_ONLY_TOPICS = [
-  'orders feedback',
-  'insurance messages',
-  'stock-locations',
-  'item competition',
-  'catalog suggestions',
-  'fbm stock operations',
-  'flex-handshakes',
-  'public offers',
-  'public candidates',
-  'Price Suggestion',
-  'vis leads',
-  'whatsapp',
-  'call',
-  'quotations',
-  'Visit Request',
-  'Contact Request',
-  'Reservation',
-  'Post Purchase',
-  'Claims',
-  'Claims Actions',
-  'payments',
-  'invoices',
-  'leads-credits',
-]
+  // 1. Verificação de Idempotência: Checa se o mesmo recurso foi processado recentemente (últimos 3 minutos)
+  const threeMinutesAgo = new Date(Date.now() - 3 * 60 * 1000).toISOString()
+  const { data: recentEvent } = await supabase
+    .from('marketplace_webhook_events')
+    .select('id, processed')
+    .eq('marketplace_id', 'mercadolivre')
+    .eq('resource', resource || '')
+    .eq('event_type', eventType)
+    .gte('created_at', threeMinutesAgo)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
 
-export async function processWebhook(eventId: string, payload: Record<string, unknown>) {
+  if (recentEvent && recentEvent.processed) {
+    console.log(`[ML Webhook Worker] Evento duplicado ignorado (idempotência): ${resource} (${eventType})`)
+    return { eventId: recentEvent.id, duplicate: true }
+  }
+
+  // 2. Registra na Fila de Eventos (marketplace_webhook_events)
+  const { data: event, error: insertErr } = await supabase
+    .from('marketplace_webhook_events')
+    .insert({
+      marketplace_id: 'mercadolivre',
+      event_type: eventType,
+      resource: resource || '',
+      raw_payload: payload,
+      processed: false,
+      error: null
+    })
+    .select('id')
+    .single()
+
+  if (insertErr || !event) {
+    console.error('[ML Webhook Worker] Erro ao enfileirar evento:', insertErr)
+    throw insertErr
+  }
+
+  // 3. Execução Assíncrona desacoplada do ciclo HTTP
+  void processWebhook(event.id, payload, sellerId).catch(err => {
+    console.error(`[ML Webhook Worker] Falha no processamento em background (${event.id}):`, err)
+  })
+
+  return { eventId: event.id, duplicate: false }
+}
+
+/**
+ * Worker assíncrono que consulta a API oficial do Mercado Livre e persiste no banco.
+ */
+export async function processWebhook(eventId: string, payload: Record<string, any>, sellerId: string) {
+  const supabase = getSupabase()
+  const { topic, resource } = payload
+
   try {
-    await updateStatus(eventId, 'PROCESSING')
+    const eventType = topic || (resource?.startsWith('/orders/') ? 'orders_v2' : resource?.startsWith('/shipments/') ? 'shipments' : 'general')
 
-    const { topic, resource, user_id } = payload as { topic: string; resource: string; user_id: string }
-
-    if (topic === 'orders_v2' || topic === 'orders') {
-      await syncOrder(resource, user_id)
-    } else if (topic === 'items') {
-      await syncItem(resource, user_id)
-    } else if (topic === 'items_prices') {
-      console.log(`[ML] Items prices update: ${resource}`)
-    } else if (topic === 'questions') {
-      console.log(`[ML] Question update: ${resource}`)
-    } else if (topic === 'messages') {
-      console.log(`[ML] Message update: ${resource}`)
-    } else if (topic === 'shipments') {
-      await syncShipment(resource, user_id)
-    } else if (topic === 'payments') {
-      console.log(`[ML] Payment update: ${resource}`)
-    } else if (topic === 'catalog') {
-      console.log(`[ML] Catalog update: ${resource}`)
-    } else if (topic === 'promotions') {
-      console.log(`[ML] Promotion update: ${resource}`)
-    } else if (topic === 'user_products_families') {
-      console.log(`[ML] Product families update: ${resource}`)
-    } else if (LOG_ONLY_TOPICS.includes(topic)) {
-      console.log(`[ML] Logged topic (no action): ${topic} - ${resource}`)
+    if (eventType === 'orders_v2' || eventType === 'orders' || resource?.startsWith('/orders/')) {
+      await syncOrder(resource, sellerId)
+    } else if (eventType === 'items' || resource?.startsWith('/items/')) {
+      await syncItem(resource, sellerId)
+    } else if (eventType === 'shipments' || resource?.startsWith('/shipments/')) {
+      await syncShipment(resource, sellerId)
     } else {
-      console.log(`[ML] Unknown topic: ${topic} - ${resource}`)
+      console.log(`[ML Webhook Worker] Tópico recebido para log: ${eventType} - ${resource}`)
     }
 
-    await updateStatus(eventId, 'PROCESSED')
-
-  } catch (error: unknown) {
-    const err = error as Error
-    console.error(`Error processing webhook ${eventId}:`, err)
-    await getSupabase()
+    // Marca como processado com sucesso
+    await supabase
       .from('marketplace_webhook_events')
       .update({
-        status: 'FAILED',
-        error_message: err.message || 'Unknown error',
+        processed: true,
+        processed_at: new Date().toISOString(),
+        error: null
+      })
+      .eq('id', eventId)
+
+    console.log(`[ML Webhook Worker] Evento ${eventId} (${resource}) processado com sucesso.`)
+  } catch (error: any) {
+    console.error(`[ML Webhook Worker] Erro ao processar evento ${eventId}:`, error.message)
+    await supabase
+      .from('marketplace_webhook_events')
+      .update({
+        processed: false,
+        error: error.message || 'Erro no processamento',
         processed_at: new Date().toISOString()
       })
       .eq('id', eventId)
   }
 }
 
-async function syncItem(resource: string, userId: string) {
+async function syncItem(resource: string, sellerId: string) {
+  const supabase = getSupabase()
   try {
-    const connection = await getSupabase()
-      .from('marketplace_connections')
-      .select('access_token')
-      .eq('user_id', userId)
-      .eq('marketplace_id', 'mercadolivre')
-      .single()
+    const token = await getValidTokenBySellerId(sellerId)
+    const itemId = resource.split('/').pop()!
 
-    if (!connection?.data?.access_token) return
-
-    const itemId = resource.split('/').pop()
-    const response = await fetch(`https://api.mercadolibre.com/items/${itemId}`, {
-      headers: { Authorization: `Bearer ${connection.data.access_token}` }
+    const res = await fetch(`https://api.mercadolibre.com/items/${itemId}`, {
+      headers: { Authorization: `Bearer ${token}` }
     })
 
-    if (!response.ok) return
+    if (!res.ok) return
+    const item = await res.json()
+    const sku = item.seller_custom_field || item.id
 
-    const item = await response.json()
-    const listings = await getSupabase()
-      .from('marketplace_listings')
-      .select('id')
-      .eq('external_id', item.id)
-      .single()
-
-    if (listings?.data) {
-      await getSupabase()
-        .from('marketplace_listings')
-        .update({
-          title: item.title,
-          price: item.price,
-          stock_synced: item.available_quantity,
-          status: item.status === 'active' ? 'ACTIVE' : item.status === 'paused' ? 'PAUSED' : 'INACTIVE',
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', listings.data.id)
-    }
-  } catch (err) {
-    console.error('[ML] Error syncing item:', err)
+    await supabase
+      .from('products')
+      .update({
+        name: item.title,
+        stock: Number(item.available_quantity) || 0,
+        status: item.status === 'active' ? 'ACTIVE' : item.status === 'paused' ? 'PAUSED' : 'INACTIVE',
+        updated_at: new Date().toISOString()
+      })
+      .eq('sku', sku)
+  } catch (err: any) {
+    console.error('[ML Webhook Worker] Erro ao sincronizar item:', err.message)
   }
 }
 
-async function syncShipment(resource: string, userId: string) {
+async function syncShipment(resource: string, sellerId: string) {
+  const supabase = getSupabase()
   try {
-    const connection = await getSupabase()
-      .from('marketplace_connections')
-      .select('access_token')
-      .eq('user_id', userId)
-      .eq('marketplace_id', 'mercadolivre')
-      .single()
+    const token = await getValidTokenBySellerId(sellerId)
+    const shipmentId = resource.split('/').pop()!
 
-    if (!connection?.data?.access_token) return
-
-    const shipmentId = resource.split('/').pop()
-    const response = await fetch(`https://api.mercadolibre.com/shipments/${shipmentId}`, {
-      headers: { Authorization: `Bearer ${connection.data.access_token}` }
+    const res = await fetch(`https://api.mercadolibre.com/shipments/${shipmentId}`, {
+      headers: { Authorization: `Bearer ${token}` }
     })
 
-    if (!response.ok) return
+    if (!res.ok) return
+    const ship = await res.json()
+    const tracking = ship.tracking_number || ship.tracking_id || `MEL${shipmentId}`
 
-    const shipment = await response.json()
-
-    const existing = await getSupabase()
-      .from('shipments')
-      .select('id')
-      .eq('external_id', shipment.id)
-      .single()
-
-    if (existing?.data) {
-      const mlStatus = shipment.status
-      const statusMap: Record<string, string> = {
-        'pending': 'PENDING',
-        'ready_to_ship': 'READY_TO_SHIP',
-        'shipped': 'SHIPPED',
-        'delivered': 'DELIVERED',
-        'not_delivered': 'NOT_DELIVERED',
-        'returned': 'RETURNED',
-      }
-      await getSupabase()
-        .from('shipments')
+    if (ship.order_id) {
+      const orderNumber = `MLB-${ship.order_id}`
+      await supabase
+        .from('orders')
         .update({
-          status: statusMap[mlStatus] || 'PENDING',
-          tracking_code: shipment.tracking_number || null,
-          carrier: shipment.tracking_number ? shipment.tracking_company : null,
+          tracking_code: tracking,
+          carrier: ship.logistic_type ? `Mercado Envios (${ship.logistic_type.toUpperCase()})` : 'Mercado Envios',
           updated_at: new Date().toISOString()
         })
-        .eq('id', existing.data.id)
+        .eq('order_number', orderNumber)
     }
-  } catch (err) {
-    console.error('[ML] Error syncing shipment:', err)
+  } catch (err: any) {
+    console.error('[ML Webhook Worker] Erro ao sincronizar envio:', err.message)
   }
-}
-
-async function updateStatus(eventId: string, status: string) {
-  await getSupabase()
-    .from('marketplace_webhook_events')
-    .update({ 
-      status, 
-      processed_at: status === 'PROCESSED' ? new Date().toISOString() : null 
-    })
-    .eq('id', eventId)
 }
