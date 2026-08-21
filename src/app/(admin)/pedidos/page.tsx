@@ -1,27 +1,49 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ClipboardList, Pickaxe, Send, CheckCircle2, Download, Trash2, Printer, Package, User, Store, Share2 } from 'lucide-react'
+import {
+  ClipboardList,
+  Pickaxe,
+  Send,
+  CheckCircle2,
+  Download,
+  Trash2,
+  Printer,
+  Package,
+  User,
+  Store,
+  Share2,
+  Calendar,
+  Filter,
+  CheckSquare,
+  Square,
+  Search,
+  Truck,
+  Sparkles,
+  ArrowRight,
+  Clock
+} from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { PageHeader, StatCard, SearchInput, ModuleTable, TableHead, Th, Td } from '@/components/ui/module'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
 import { createClient } from '@/utils/supabase/client'
-import { exportToExcel, importFromExcel } from '@/utils/excel'
+import { exportToExcel } from '@/utils/excel'
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal'
 import ShareContextModal from '@/components/internal-chat/ShareContextModal'
-
 
 type StatusConfig = { l: string; c: string }
 const SC: Record<string, StatusConfig> = {
   NOVO: { l: 'Novo', c: 'bg-[#f0f7ff] text-[#3483fa]' },
-  PAGO: { l: 'Pago', c: 'bg-[#f0f7ff] text-[#3483fa]' },
+  PAGO: { l: 'Pago', c: 'bg-[#ecfdf5] text-[#16a34a]' },
+  PAID: { l: 'Pago', c: 'bg-[#ecfdf5] text-[#16a34a]' },
   AGUARDANDO_SEPARACAO: { l: 'Aguardando', c: 'bg-[#fffaf0] text-[#e67e22]' },
-  EM_SEPARACAO: { l: 'Separação', c: 'bg-[#fffaf0] text-[#e67e22]' },
+  EM_SEPARACAO: { l: 'Em Separação', c: 'bg-[#fffaf0] text-[#e67e22]' },
   SEPARADO: { l: 'Separado', c: 'bg-[#f0f0ff] text-[#6c5ce7]' },
   AGUARDANDO_EXPEDICAO: { l: 'Expedição', c: 'bg-[#f0f0ff] text-[#6c5ce7]' },
+  ETIQUETA_IMPRESSA: { l: 'Etiqueta Impressa', c: 'bg-[#ecfdf5] text-[#16a34a]' },
   EMBALADO: { l: 'Embalado', c: 'bg-[#f0f7ff] text-[#3483fa]' },
   ENVIADO: { l: 'Enviado', c: 'bg-[#f0f7ff] text-[#3483fa]' },
   ENTREGUE: { l: 'Entregue', c: 'bg-[#f0fff4] text-[#38a169]' },
@@ -30,12 +52,13 @@ const SC: Record<string, StatusConfig> = {
 }
 
 function getStatus(status: string): StatusConfig {
-  return SC[status] || { l: status, c: 'bg-[#f5f5f5] text-[#666]' }
+  return SC[status] || { l: status || 'Processando', c: 'bg-[#f5f5f5] text-[#666]' }
 }
 
 function OrdersTab() {
   const router = useRouter()
   const [search, setSearch] = useState('')
+  const [dateFilter, setDateFilter] = useState<'ALL' | 'TODAY' | '7D' | '30D'>('ALL')
   const [selectedItems, setSelectedItems] = useState<string[]>([])
   const [shareModal, setShareModal] = useState<{
     isOpen: boolean
@@ -44,25 +67,83 @@ function OrdersTab() {
     note?: string
   }>({ isOpen: false, title: '', metadata: {} })
 
-  const { data: orders, loading, refetch } = useSupabaseQuery(async (s) => {
+  const { data: rawOrders, loading, refetch } = useSupabaseQuery(async (s) => {
     const { data, error } = await s
       .from('orders')
-      .select('*, marketplaces(name, code, logo), marketplace_accounts(account_name), order_items(*, products(name, sku, image_url))')
+      .select('*, marketplaces(name, code, logo), order_items(*, products(name, sku, image_url))')
       .order('created_at', { ascending: false })
 
     if (error) {
+      console.warn('Fallback orders query:', error)
       const { data: fbData } = await s
         .from('orders')
-        .select('*, marketplaces(name, code, logo), marketplace_accounts(account_name)')
+        .select('*, marketplaces(name, code, logo)')
         .order('created_at', { ascending: false })
       return fbData || []
     }
     return data || []
   })
 
-  const filtered = (orders || []).filter((o: Record<string, unknown>) =>
-    !search || String(o.order_number).toLowerCase().includes(search.toLowerCase()) || String(o.customer_name).toLowerCase().includes(search.toLowerCase())
-  )
+  const orders = useMemo(() => {
+    return rawOrders || []
+  }, [rawOrders])
+
+  // Filtragem por data e busca
+  const filtered = useMemo(() => {
+    const todayStr = new Date().toISOString().slice(0, 10)
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+
+    return orders.filter((o: Record<string, unknown>) => {
+      // Filtro de Data
+      if (dateFilter === 'TODAY') {
+        const orderDate = String(o.created_at || '').slice(0, 10)
+        if (orderDate !== todayStr) return false
+      } else if (dateFilter === '7D') {
+        if (String(o.created_at) < sevenDaysAgo) return false
+      } else if (dateFilter === '30D') {
+        if (String(o.created_at) < thirtyDaysAgo) return false
+      }
+
+      // Busca Textual
+      if (search.trim()) {
+        const q = search.toLowerCase()
+        const matchNumber = String(o.order_number || '').toLowerCase().includes(q)
+        const matchCustomer = String(o.customer_name || '').toLowerCase().includes(q)
+        const items = (o.order_items as Array<Record<string, unknown>>) || []
+        const matchItem = items.some(item => {
+          const prod = item.products as Record<string, unknown> | null
+          return (
+            String(item.product_name || '').toLowerCase().includes(q) ||
+            String(item.sku || '').toLowerCase().includes(q) ||
+            String(prod?.name || '').toLowerCase().includes(q) ||
+            String(prod?.sku || '').toLowerCase().includes(q)
+          )
+        })
+        return matchNumber || matchCustomer || matchItem
+      }
+
+      return true
+    })
+  }, [orders, dateFilter, search])
+
+  const stats = useMemo(() => {
+    const todayStr = new Date().toISOString().slice(0, 10)
+    const todayOrders = orders.filter((o: any) => String(o.created_at || '').slice(0, 10) === todayStr)
+    const pendingPicking = orders.filter((o: any) => ['PAGO', 'PAID', 'NOVO', 'AGUARDANDO_SEPARACAO', 'EM_SEPARACAO'].includes(o.status))
+    const readyShipping = orders.filter((o: any) => ['SEPARADO', 'EMBALADO', 'ETIQUETA_IMPRESSA', 'AGUARDANDO_EXPEDICAO'].includes(o.status))
+    const sent = orders.filter((o: any) => ['ENVIADO', 'ENTREGUE'].includes(o.status))
+    const canceled = orders.filter((o: any) => o.status === 'CANCELADO')
+
+    return {
+      total: orders.length,
+      today: todayOrders.length,
+      pendingPicking: pendingPicking.length,
+      readyShipping: readyShipping.length,
+      sent: sent.length,
+      canceled: canceled.length
+    }
+  }, [orders])
 
   const toggleSelectAll = () => {
     if (selectedItems.length === filtered.length) {
@@ -106,7 +187,7 @@ function OrdersTab() {
   }
 
   return (
-    <div>
+    <div className="space-y-4">
       <DeleteConfirmationModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
@@ -128,105 +209,180 @@ function OrdersTab() {
         />
       )}
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-        <StatCard label="Total" value={String(orders?.length || 0)} />
-        <StatCard label="Aguardando" value={String(orders?.filter((o: Record<string, unknown>) => ['AGUARDANDO_SEPARACAO', 'PAGO'].includes(o.status as string)).length || 0)} />
-        <StatCard label="Enviados" value={String(orders?.filter((o: Record<string, unknown>) => ['ENVIADO', 'ENTREGUE'].includes(o.status as string)).length || 0)} />
-        <StatCard label="Cancelados" value={String(orders?.filter((o: Record<string, unknown>) => o.status === 'CANCELADO').length || 0)} />
+      {/* ── CARDS DE ESTATÍSTICAS OPERACIONAIS ─────────────────────────────── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+        <div className="bg-white p-5 rounded-2xl border border-[#eef2f6] shadow-xs space-y-1">
+          <p className="text-xs font-semibold text-[#64748b] tracking-wide">Total de Pedidos</p>
+          <p className="text-2xl font-bold text-[#0f172a]">{stats.total}</p>
+        </div>
+
+        <div className="bg-white p-5 rounded-2xl border border-[#eef2f6] shadow-xs space-y-1">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold text-[#e67e22] tracking-wide">Aguardando Separação</p>
+            {stats.pendingPicking > 0 && <span className="w-2 h-2 rounded-full bg-[#e67e22] animate-ping" />}
+          </div>
+          <p className="text-2xl font-bold text-[#e67e22]">{stats.pendingPicking}</p>
+        </div>
+
+        <div className="bg-white p-5 rounded-2xl border border-[#eef2f6] shadow-xs space-y-1">
+          <p className="text-xs font-semibold text-[#16a34a] tracking-wide">Prontos / Enviados</p>
+          <p className="text-2xl font-bold text-[#0f172a]">{stats.readyShipping + stats.sent}</p>
+        </div>
+
+        <div className="bg-white p-5 rounded-2xl border border-[#eef2f6] shadow-xs space-y-1">
+          <p className="text-xs font-semibold text-[#64748b] tracking-wide">Cancelados</p>
+          <p className="text-2xl font-bold text-[#64748b]">{stats.canceled}</p>
+        </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
-        <SearchInput placeholder="Buscar por número do pedido, produto ou comprador..." value={search} onChange={setSearch} />
-        {selectedItems.length > 0 ? (
-          <div className="flex flex-wrap items-center gap-2 bg-[#f0f7ff] px-3 py-1.5 rounded-xl border border-[#3483fa]/20 shadow-xs">
-            <span className="text-[12px] font-bold text-[#3483fa] mr-1">{selectedItems.length} selecionado(s)</span>
-            <button 
-              onClick={() => window.open(`/api/shipments/mercadolivre/label?orderIds=${selectedItems.join(',')}`, '_blank')}
-              className="flex items-center gap-1.5 text-[12px] font-bold text-white bg-[#3483fa] px-3 py-1.5 rounded-lg hover:bg-[#2968c8] transition-colors shadow-xs cursor-pointer"
+      {/* ── FILTROS DE PERÍODO & BARRA DE BUSCA ────────────────────────────── */}
+      <div className="bg-white p-4 rounded-2xl border border-[#eef2f6] shadow-xs space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          
+          {/* Filtros Rápidos de Data */}
+          <div className="flex items-center gap-1.5 text-xs font-semibold">
+            <span className="text-[#94a3b8] pr-1 flex items-center gap-1">
+              <Calendar className="w-3.5 h-3.5" /> Período:
+            </span>
+            {[
+              { key: 'ALL', label: 'Todos os Pedidos' },
+              { key: 'TODAY', label: `Hoje (${stats.today})` },
+              { key: '7D', label: 'Últimos 7 dias' },
+              { key: '30D', label: 'Últimos 30 dias' },
+            ].map(f => (
+              <button
+                key={f.key}
+                onClick={() => setDateFilter(f.key as any)}
+                className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer border ${
+                  dateFilter === f.key
+                    ? 'bg-[#0f172a] text-white border-[#0f172a] shadow-xs'
+                    : 'bg-white text-[#64748b] border-[#e2e8f0] hover:border-[#cbd5e1]'
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Ações de Exportação */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleExportAll}
+              className="px-3.5 py-1.5 bg-white border border-[#e2e8f0] hover:border-[#0f172a] text-[#334155] rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
             >
-              <Printer className="w-3.5 h-3.5" /> Imprimir Etiquetas
+              <Download className="w-3.5 h-3.5 text-[#64748b]" />
+              Exportar Todos
             </button>
-            <button onClick={handleExportSelected} className="flex items-center gap-1.5 text-[12px] font-medium text-[#3483fa] bg-white px-2.5 py-1.5 rounded-lg border border-[#3483fa]/20 hover:bg-[#3483fa] hover:text-white transition-colors cursor-pointer"><Download className="w-3.5 h-3.5" /> Exportar</button>
-            <button onClick={handleDeleteSelected} className="flex items-center gap-1.5 text-[12px] font-medium text-[#e74c3c] bg-white px-2.5 py-1.5 rounded-lg border border-[#e74c3c]/20 hover:bg-[#e74c3c] hover:text-white transition-colors cursor-pointer"><Trash2 className="w-3.5 h-3.5" /> Excluir</button>
           </div>
-        ) : (
-          <div className="flex flex-wrap items-center gap-2">
-            <button onClick={() => document.getElementById('import-orders')?.click()} className="flex items-center gap-1.5 text-[12px] font-medium text-[#666] bg-white px-2.5 py-1.5 rounded-xl border border-[#ccc] hover:bg-[#f5f5f5] transition-colors cursor-pointer"><Download className="w-3.5 h-3.5 rotate-180" /> Importar</button>
-            <input 
-              type="file" 
-              id="import-orders" 
-              className="hidden" 
-              accept=".xlsx,.xls,.csv" 
-              onChange={async (e) => {
-                const file = e.target.files?.[0]
-                if (!file) return
-                try {
-                  const data = await importFromExcel(file, {
-                    order_number: ['pedido', 'número', 'order'],
-                    customer_name: ['cliente', 'comprador', 'nome', 'customer'],
-                    total_amount: ['total', 'valor', 'price', 'preço']
-                  })
-                  if (data.length > 0) {
-                    const supabase = createClient()
-                    await supabase.from('orders').insert(data)
-                    refetch()
-                    alert(`${data.length} pedidos importados com sucesso!`)
-                  }
-                } catch (err) {
-                  alert('Erro ao importar arquivo.')
-                }
-                e.target.value = ''
-              }} 
+        </div>
+
+        {/* Campo de Busca */}
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94a3b8]" />
+            <input
+              type="text"
+              placeholder="Buscar por número do pedido, SKU, produto ou comprador..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 bg-[#f8fafc] border border-[#e2e8f0] focus:bg-white focus:border-[#0f172a] rounded-xl text-xs text-[#0f172a] placeholder:text-[#94a3b8] focus:outline-none transition-all"
             />
-            <button onClick={handleExportAll} className="flex items-center gap-1.5 text-[12px] font-medium text-[#666] bg-white px-2.5 py-1.5 rounded-xl border border-[#ccc] hover:bg-[#f5f5f5] transition-colors cursor-pointer"><Download className="w-3.5 h-3.5" /> Exportar</button>
           </div>
-        )}
+        </div>
       </div>
 
+      {/* ── BARRA FLUTUANTE DE SELEÇÃO EM LOTE ─────────────────────────────── */}
+      {selectedItems.length > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-2 bg-[#0f172a] text-white px-5 py-3 rounded-2xl shadow-lg animate-in slide-in-from-bottom-2 duration-150">
+          <div className="flex items-center gap-2">
+            <span className="w-6 h-6 rounded-lg bg-[#16a34a] text-white flex items-center justify-center font-bold text-xs">
+              {selectedItems.length}
+            </span>
+            <span className="text-xs font-semibold">pedido(s) selecionado(s)</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => window.open(`/api/shipments/mercadolivre/label?orderIds=${selectedItems.join(',')}&cropPackagingOnly=true`, '_blank')}
+              className="flex items-center gap-1.5 text-xs font-bold text-white bg-[#16a34a] px-3 py-1.5 rounded-xl hover:bg-[#15803d] transition-all shadow-xs cursor-pointer"
+            >
+              <Printer className="w-3.5 h-3.5" /> Imprimir Etiquetas ({selectedItems.length})
+            </button>
+            <button onClick={handleExportSelected} className="flex items-center gap-1 text-xs font-medium text-[#cbd5e1] hover:text-white px-2.5 py-1.5 rounded-lg cursor-pointer">
+              <Download className="w-3.5 h-3.5" /> Exportar
+            </button>
+            <button onClick={handleDeleteSelected} className="flex items-center gap-1 text-xs font-medium text-[#fca5a5] hover:text-white px-2.5 py-1.5 rounded-lg cursor-pointer">
+              <Trash2 className="w-3.5 h-3.5" /> Excluir
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── TABELA DE PEDIDOS ──────────────────────────────────────────────── */}
       {loading ? (
-        <div className="bg-white rounded-2xl border border-[#e6e6e6] p-10 text-center text-[#999] text-[13px]">Carregando...</div>
+        <div className="bg-white rounded-2xl border border-[#eef2f6] p-12 text-center text-xs text-[#94a3b8]">
+          Carregando pedidos...
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="bg-white rounded-2xl border border-[#eef2f6] p-16 text-center space-y-2">
+          <div className="w-12 h-12 rounded-2xl bg-[#f8fafc] flex items-center justify-center mx-auto text-[#94a3b8] mb-2">
+            <Package className="w-6 h-6" />
+          </div>
+          <p className="text-sm font-bold text-[#0f172a]">Nenhum pedido encontrado</p>
+          <p className="text-xs text-[#64748b] max-w-sm mx-auto">
+            {dateFilter === 'TODAY' 
+              ? 'Nenhum pedido novo recebido hoje até o momento. Selecione "Todos os Pedidos" para ver os anteriores.'
+              : 'Nenhum pedido corresponde aos critérios de busca selecionados.'}
+          </p>
+          {dateFilter === 'TODAY' && (
+            <button
+              onClick={() => setDateFilter('ALL')}
+              className="mt-3 px-4 py-2 bg-[#0f172a] text-white rounded-xl text-xs font-semibold cursor-pointer"
+            >
+              Ver Todos os Pedidos ({stats.total})
+            </button>
+          )}
+        </div>
       ) : (
         <ModuleTable>
           <TableHead>
-            <Th className="w-10">
+            <Th className="w-10 text-center">
               <input 
                 type="checkbox" 
-                checked={filtered.length > 0 && selectedItems.length === filtered.length}
+                checked={selectedItems.length === filtered.length && filtered.length > 0}
                 onChange={toggleSelectAll}
-                className="rounded border-[#ccc] text-[#3483fa] focus:ring-[#3483fa]"
+                className="rounded border-[#cbd5e1] text-[#16a34a] focus:ring-[#16a34a]"
               />
             </Th>
             <Th>Produto & Pedido</Th>
-            <Th>Marketplace & Conta</Th>
+            <Th>Marketplace</Th>
             <Th>Cliente</Th>
             <Th className="text-right">Total</Th>
             <Th className="text-center">Status</Th>
-            <Th className="text-right w-24">Ações</Th>
+            <Th className="text-right w-28">Ações</Th>
           </TableHead>
-          <tbody className="divide-y divide-[#eeeeee]">
+          <tbody className="divide-y divide-[#f1f5f9]">
             {filtered.map((o: Record<string, unknown>) => {
               const mp = o.marketplaces as Record<string, unknown> | null
-              const acc = o.marketplace_accounts as Record<string, unknown> | null
               const items = (o.order_items as Array<Record<string, unknown>>) || []
               const firstItem = items[0]
               const product = (firstItem?.products as Record<string, unknown>) || null
               
               const productImage = (product?.image_url as string) || (firstItem?.image_url as string) || 'https://http2.mlstatic.com/D_NQ_NP_2X_789396-MLB78028328731_072024-F.webp'
-              const productName = (product?.name as string) || (firstItem?.product_name as string) || 'Lava Jato Lavadora Portátil De Alta Pressão 21v Bateria'
-              const productSku = (product?.sku as string) || (firstItem?.sku as string) || 'LAVA-JATO-21V'
-              const customerName = (o.customer_name as string) || 'João Silva'
-              const accountName = (acc?.account_name as string) || 'FARMOTECNOMED'
-              const totalAmount = Number(o.total_amount || 219.90)
+              const productName = (product?.name as string) || (firstItem?.product_name as string) || 'Produto'
+              const productSku = (product?.sku as string) || (firstItem?.sku as string) || 'SKU-PADRAO'
+              const customerName = (o.customer_name as string) || 'Comprador'
+              const totalAmount = Number(o.total_amount || 0)
 
               return (
                 <tr key={o.id as string} onClick={() => router.push(`/pedidos/${o.id}`)} className="hover:bg-[#fafafa] transition-colors cursor-pointer group">
-                  <Td>
+                  <Td className="text-center">
                     <div onClick={(e) => e.stopPropagation()}>
                       <input 
                         type="checkbox" 
                         checked={selectedItems.includes(o.id as string)}
                         onChange={() => toggleSelect(o.id as string)}
-                        className="rounded border-[#ccc] text-[#3483fa] focus:ring-[#3483fa]"
+                        className="rounded border-[#cbd5e1] text-[#16a34a] focus:ring-[#16a34a]"
                       />
                     </div>
                   </Td>
@@ -234,7 +390,7 @@ function OrdersTab() {
                   {/* FOTO DO PRODUTO + TÍTULO + SKU + CÓDIGO DO PEDIDO */}
                   <Td>
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-xl bg-[#f8fafc] border border-[#e6e6e6] p-0.5 overflow-hidden flex items-center justify-center shrink-0 shadow-2xs group-hover:border-[#111] transition-all">
+                      <div className="w-11 h-11 rounded-xl bg-[#f8fafc] border border-[#e2e8f0] p-0.5 overflow-hidden flex items-center justify-center shrink-0">
                         {productImage ? (
                           <img src={productImage} alt="" className="w-full h-full object-contain" />
                         ) : (
@@ -242,11 +398,11 @@ function OrdersTab() {
                         )}
                       </div>
                       <div className="min-w-0 max-w-xs sm:max-w-sm">
-                        <p className="font-bold text-[13px] text-[#1e293b] line-clamp-1 group-hover:text-[#3483fa] transition-colors leading-tight">
+                        <p className="font-bold text-xs text-[#0f172a] line-clamp-1 group-hover:text-[#16a34a] transition-colors leading-tight">
                           {productName}
                         </p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="font-mono text-[11px] font-bold text-[#64748b]">
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="font-mono text-[11px] font-semibold text-[#64748b]">
                             {o.order_number as string}
                           </span>
                           <span className="font-mono text-[10px] px-1.5 py-0.2 rounded bg-[#f1f5f9] text-[#475569] font-bold">
@@ -257,32 +413,18 @@ function OrdersTab() {
                     </div>
                   </Td>
 
-                  {/* MARKETPLACE & CONTA QUE VENDEU */}
+                  {/* MARKETPLACE */}
                   <Td>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-1.5">
-                        <MarketplaceLogo name={(mp?.name as string) || 'Mercado Livre'} className="w-4 h-4" />
-                        <span className="text-xs font-bold text-[#1e293b]">{(mp?.name as string) || 'Mercado Livre'}</span>
-                      </div>
-                      <div className="flex items-center gap-1 text-[11px] text-[#64748b] font-medium">
-                        <Store className="w-3 h-3 text-[#94a3b8]" />
-                        <span>{accountName}</span>
-                      </div>
+                    <div className="flex items-center gap-1.5">
+                      <MarketplaceLogo name={(mp?.name as string) || 'Mercado Livre'} className="w-4 h-4" />
+                      <span className="text-xs font-semibold text-[#0f172a]">{(mp?.name as string) || 'Mercado Livre'}</span>
                     </div>
                   </Td>
 
-                  {/* CLIENTE COM LINK */}
+                  {/* CLIENTE */}
                   <Td>
-                    <div 
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        router.push(`/clientes/${encodeURIComponent(customerName.trim().toLowerCase().replace(/\s+/g, '-'))}`)
-                      }}
-                      className="hover:underline cursor-pointer group/client"
-                    >
-                      <p className="font-bold text-xs text-[#1e293b] group-hover/client:text-[#3483fa]">{customerName}</p>
-                      <p className="text-[10px] text-[#94a3b8]">Ver Perfil 360° →</p>
-                    </div>
+                    <p className="font-semibold text-xs text-[#0f172a]">{customerName}</p>
+                    <p className="text-[10px] text-[#94a3b8] font-mono">{o.tracking_code as string || 'Envio Padrão'}</p>
                   </Td>
 
                   {/* VALOR TOTAL */}
@@ -294,7 +436,7 @@ function OrdersTab() {
 
                   {/* STATUS */}
                   <Td className="text-center">
-                    <span className={`inline-flex px-2.5 py-1 rounded-full text-[10px] font-extrabold ${getStatus(o.status as string).c}`}>
+                    <span className={`inline-flex px-2.5 py-1 rounded-full text-[10px] font-bold ${getStatus(o.status as string).c}`}>
                       {getStatus(o.status as string).l}
                     </span>
                   </Td>
@@ -303,9 +445,9 @@ function OrdersTab() {
                   <Td className="text-right">
                     <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
                       <button
-                        onClick={() => router.push(`/pedidos/${o.id}/etiqueta`)}
-                        className="px-2.5 py-1 bg-[#f0f7ff] text-[#3483fa] hover:bg-[#3483fa] hover:text-white rounded-lg text-[10px] font-bold transition-all flex items-center gap-1 cursor-pointer shadow-2xs"
-                        title="Imprimir Etiqueta de Envio (100x150mm)"
+                        onClick={() => window.open(`/api/shipments/mercadolivre/label?orderId=${o.id}&cropPackagingOnly=true`, '_blank')}
+                        className="px-2.5 py-1 bg-[#ecfdf5] text-[#16a34a] hover:bg-[#16a34a] hover:text-white rounded-lg text-[10px] font-bold transition-all flex items-center gap-1 cursor-pointer"
+                        title="Imprimir Etiqueta Térmica"
                       >
                         <Printer className="w-3 h-3" />
                         Etiqueta
@@ -327,18 +469,10 @@ function OrdersTab() {
                           },
                           note: 'Conferência operacional deste pedido.'
                         })}
-                        className="p-1.5 text-[#64748b] hover:text-[#111] hover:bg-[#f1f5f9] rounded-lg transition-all cursor-pointer shadow-2xs"
-                        title="Compartilhar no Chat com Colaborador"
+                        className="p-1.5 text-[#64748b] hover:text-[#0f172a] hover:bg-[#f1f5f9] rounded-lg transition-all cursor-pointer"
+                        title="Compartilhar no Chat"
                       >
-                        <Share2 className="w-3.5 h-3.5 text-[#3483fa]" />
-                      </button>
-
-                      <button 
-                        onClick={() => router.push(`/pedidos/${o.id}/nota`)} 
-                        className="p-1.5 text-[#64748b] hover:text-[#111] hover:bg-[#f1f5f9] rounded-lg transition-all cursor-pointer shadow-2xs" 
-                        title="Imprimir Comprovante / DANFE"
-                      >
-                        <Printer className="w-3.5 h-3.5" />
+                        <Share2 className="w-3.5 h-3.5 text-[#3b82f6]" />
                       </button>
                     </div>
                   </Td>
@@ -354,11 +488,20 @@ function OrdersTab() {
 
 function PickingTab() {
   const router = useRouter()
-  const { data: orders, loading, refetch } = useSupabaseQuery(async (s) => {
-    const { data, error } = await s.from('orders').select('*, marketplaces(name, logo), marketplace_accounts(account_name), order_items(*)').order('created_at', { ascending: false })
-    if (error) throw error
+  const { data: rawOrders, loading, refetch } = useSupabaseQuery(async (s) => {
+    const { data, error } = await s
+      .from('orders')
+      .select('*, marketplaces(name, code, logo), order_items(*, products(name, sku, image_url, stock))')
+      .order('created_at', { ascending: false })
+    
+    if (error) {
+      const { data: fbData } = await s.from('orders').select('*, marketplaces(name, code, logo), order_items(*)').order('created_at', { ascending: false })
+      return fbData || []
+    }
     return data || []
   })
+
+  const orders = rawOrders || []
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     const supabase = createClient()
@@ -366,43 +509,86 @@ function PickingTab() {
     refetch()
   }
 
-  const pending = (orders || []).filter((o: Record<string, unknown>) => 
-    ['AGUARDANDO_SEPARACAO', 'EM_SEPARACAO', 'PAGO', 'PAID', 'NOVO', 'approved'].includes(o.status as string)
-  )
+  const pending = useMemo(() => {
+    return orders.filter((o: Record<string, unknown>) => 
+      ['AGUARDANDO_SEPARACAO', 'EM_SEPARACAO', 'PAGO', 'PAID', 'NOVO', 'approved', 'ETIQUETA_IMPRESSA'].includes(o.status as string)
+    )
+  }, [orders])
+
+  const stats = useMemo(() => {
+    return {
+      waiting: pending.filter((o: any) => ['AGUARDANDO_SEPARACAO', 'PAGO', 'PAID', 'NOVO', 'approved', 'ETIQUETA_IMPRESSA'].includes(o.status)).length,
+      inPicking: pending.filter((o: any) => o.status === 'EM_SEPARACAO').length,
+      separated: orders.filter((o: any) => ['SEPARADO', 'EMBALADO'].includes(o.status)).length
+    }
+  }, [pending, orders])
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <StatCard label="Aguardando Separação" value={String(pending.filter(o => ['AGUARDANDO_SEPARACAO', 'PAGO', 'PAID', 'NOVO', 'approved'].includes(o.status as string)).length)} />
-        <StatCard label="Em Separação" value={String(pending.filter(o => o.status === 'EM_SEPARACAO').length)} />
-        <StatCard label="Separados" value={String((orders || []).filter((o: Record<string, unknown>) => o.status === 'SEPARADO').length)} />
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+        <div className="bg-white p-5 rounded-2xl border border-[#eef2f6] shadow-xs space-y-1">
+          <p className="text-xs font-semibold text-[#e67e22] tracking-wide">Aguardando Separação</p>
+          <p className="text-2xl font-bold text-[#e67e22]">{stats.waiting}</p>
+        </div>
+        <div className="bg-white p-5 rounded-2xl border border-[#eef2f6] shadow-xs space-y-1">
+          <p className="text-xs font-semibold text-[#3b82f6] tracking-wide">Em Separação</p>
+          <p className="text-2xl font-bold text-[#3b82f6]">{stats.inPicking}</p>
+        </div>
+        <div className="bg-white p-5 rounded-2xl border border-[#eef2f6] shadow-xs space-y-1">
+          <p className="text-xs font-semibold text-[#16a34a] tracking-wide">Separados / Prontos</p>
+          <p className="text-2xl font-bold text-[#16a34a]">{stats.separated}</p>
+        </div>
       </div>
+
       {loading ? (
-        <div className="bg-white rounded-2xl border border-[#e6e6e6] p-10 text-center text-[#999] text-[13px]">Carregando...</div>
+        <div className="bg-white rounded-2xl border border-[#eef2f6] p-12 text-center text-xs text-[#94a3b8]">Carregando pedidos de separação...</div>
       ) : pending.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-[#e6e6e6] p-12 text-center shadow-2xs">
+        <div className="bg-white rounded-2xl border border-[#eef2f6] p-16 text-center shadow-xs space-y-2">
           <CheckCircle2 className="w-10 h-10 text-[#16a34a] mx-auto mb-2" />
-          <p className="text-[14px] font-black text-[#111]">Tudo separado!</p>
-          <p className="text-[11px] text-[#777] mt-0.5">Nenhum pedido pendente de separação no momento</p>
+          <p className="text-base font-bold text-[#0f172a]">Tudo separado!</p>
+          <p className="text-xs text-[#64748b]">Nenhum pedido pendente de separação no momento</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {pending.map((o: Record<string, unknown>) => {
             const mp = o.marketplaces as Record<string, unknown> | null
-            const acc = o.marketplace_accounts as Record<string, unknown> | null
+            const items = (o.order_items as Array<Record<string, unknown>>) || []
+            const firstItem = items[0]
+            const product = firstItem?.products as Record<string, unknown> | null
+
             return (
-              <div key={o.id as string} onClick={() => router.push(`/pedidos/${o.id}`)} className="bg-white rounded-2xl border border-[#e6e6e6] p-5 cursor-pointer hover:border-[#111] transition-all shadow-2xs group">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-mono text-[13px] font-black text-[#111]">{o.order_number as string}</span>
-                  <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-black ${getStatus(o.status as string).c}`}>{getStatus(o.status as string).l}</span>
+              <div key={o.id as string} onClick={() => router.push(`/pedidos/${o.id}`)} className="bg-white rounded-2xl border border-[#eef2f6] p-5 cursor-pointer hover:border-[#0f172a] transition-all shadow-xs group space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-sm font-bold text-[#0f172a]">#{o.order_number as string}</span>
+                  <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-bold ${getStatus(o.status as string).c}`}>{getStatus(o.status as string).l}</span>
                 </div>
-                <p className="text-[12px] font-bold text-[#333] mb-1 flex items-center gap-1.5">{typeof mp?.logo === 'string' && <MarketplaceLogo name={mp.name as string} className="w-4 h-4" />}{(o.customer_name as string) || 'Comprador'}</p>
-                {typeof acc?.account_name === 'string' && acc.account_name && <p className="text-[11px] text-[#777] mb-1 font-medium">{acc.account_name}</p>}
-                <p className="text-[13px] font-black text-[#111] mb-3">R$ {Number(o.total_amount || 0).toFixed(2)}</p>
-                {['AGUARDANDO_SEPARACAO', 'PAGO', 'PAID', 'NOVO', 'approved'].includes(o.status as string) && (
+
+                <div className="flex items-center gap-3">
+                  {product?.image_url ? (
+                    <img src={product.image_url as string} alt="" className="w-10 h-10 rounded-xl object-contain border border-[#e2e8f0] bg-[#f8fafc] p-0.5 shrink-0" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-xl bg-[#f1f5f9] flex items-center justify-center text-[#94a3b8] shrink-0">
+                      <Package className="w-5 h-5" />
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-bold text-[#0f172a] truncate">{String(product?.name || firstItem?.product_name || 'Produto')}</p>
+                    <p className="text-[11px] text-[#64748b] font-mono">SKU: {String(product?.sku || firstItem?.sku || 'SKU')}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between text-xs pt-2 border-t border-[#f1f5f9]">
+                  <span className="font-bold text-[#16a34a]">R$ {Number(o.total_amount || 0).toFixed(2).replace('.', ',')}</span>
+                  <div className="flex items-center gap-1.5 text-[#64748b] font-medium">
+                    <MarketplaceLogo name={(mp?.name as string) || 'Mercado Livre'} className="w-3.5 h-3.5" />
+                    <span>{(mp?.name as string) || 'Mercado Livre'}</span>
+                  </div>
+                </div>
+
+                {['AGUARDANDO_SEPARACAO', 'PAGO', 'PAID', 'NOVO', 'approved', 'ETIQUETA_IMPRESSA'].includes(o.status as string) && (
                   <button 
                     onClick={(e) => { e.stopPropagation(); updateOrderStatus(o.id as string, 'EM_SEPARACAO') }} 
-                    className="w-full bg-[#f59e0b] hover:bg-[#d97706] text-white py-2 rounded-xl text-[11px] font-bold transition-all shadow-2xs cursor-pointer"
+                    className="w-full bg-[#f59e0b] hover:bg-[#d97706] text-white py-2 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
                   >
                     Iniciar Separação
                   </button>
@@ -410,9 +596,9 @@ function PickingTab() {
                 {o.status === 'EM_SEPARACAO' && (
                   <button 
                     onClick={(e) => { e.stopPropagation(); updateOrderStatus(o.id as string, 'SEPARADO') }} 
-                    className="w-full bg-[#16a34a] hover:bg-[#15803d] text-white py-2 rounded-xl text-[11px] font-bold transition-all shadow-2xs cursor-pointer"
+                    className="w-full bg-[#16a34a] hover:bg-[#15803d] text-white py-2 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
                   >
-                    Marcar como Separado
+                    Marcar como Separado ✓
                   </button>
                 )}
               </div>
@@ -426,11 +612,16 @@ function PickingTab() {
 
 function ShippingTab() {
   const router = useRouter()
-  const { data: orders, loading, refetch } = useSupabaseQuery(async (s) => {
-    const { data, error } = await s.from('orders').select('*, marketplaces(name, logo), marketplace_accounts(account_name)').order('created_at', { ascending: false })
+  const { data: rawOrders, loading, refetch } = useSupabaseQuery(async (s) => {
+    const { data, error } = await s
+      .from('orders')
+      .select('*, marketplaces(name, code, logo), order_items(*, products(name, sku, image_url))')
+      .order('created_at', { ascending: false })
     if (error) throw error
     return data || []
   })
+
+  const orders = rawOrders || []
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     const supabase = createClient()
@@ -438,60 +629,87 @@ function ShippingTab() {
     refetch()
   }
 
-  const ready = (orders || []).filter((o: Record<string, unknown>) => 
-    ['SEPARADO', 'EMBALADO', 'ENVIADO', 'AGUARDANDO_EXPEDICAO'].includes(o.status as string)
-  )
+  const ready = useMemo(() => {
+    return orders.filter((o: Record<string, unknown>) => 
+      ['SEPARADO', 'EMBALADO', 'ENVIADO', 'AGUARDANDO_EXPEDICAO'].includes(o.status as string)
+    )
+  }, [orders])
+
+  const stats = useMemo(() => {
+    return {
+      readyToPack: ready.filter((o: any) => ['SEPARADO', 'AGUARDANDO_EXPEDICAO'].includes(o.status)).length,
+      packed: ready.filter((o: any) => o.status === 'EMBALADO').length,
+      shipped: orders.filter((o: any) => ['ENVIADO', 'ENTREGUE'].includes(o.status)).length
+    }
+  }, [ready, orders])
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <StatCard label="Prontos para Envio" value={String(ready.filter(o => ['SEPARADO', 'EMBALADO', 'AGUARDANDO_EXPEDICAO'].includes(o.status as string)).length)} />
-        <StatCard label="Enviados / Despachados" value={String(ready.filter(o => o.status === 'ENVIADO').length)} />
-        <StatCard label="Entregues ao Cliente" value={String((orders || []).filter((o: Record<string, unknown>) => o.status === 'ENTREGUE').length)} />
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+        <div className="bg-white p-5 rounded-2xl border border-[#eef2f6] shadow-xs space-y-1">
+          <p className="text-xs font-semibold text-[#0284c7] tracking-wide">Prontos para Embalagem</p>
+          <p className="text-2xl font-bold text-[#0284c7]">{stats.readyToPack}</p>
+        </div>
+        <div className="bg-white p-5 rounded-2xl border border-[#eef2f6] shadow-xs space-y-1">
+          <p className="text-xs font-semibold text-[#16a34a] tracking-wide">Embalados (Aguardando Coleta)</p>
+          <p className="text-2xl font-bold text-[#16a34a]">{stats.packed}</p>
+        </div>
+        <div className="bg-white p-5 rounded-2xl border border-[#eef2f6] shadow-xs space-y-1">
+          <p className="text-xs font-semibold text-[#64748b] tracking-wide">Despachados / Enviados</p>
+          <p className="text-2xl font-bold text-[#0f172a]">{stats.shipped}</p>
+        </div>
       </div>
+
       {loading ? (
-        <div className="bg-white rounded-2xl border border-[#e6e6e6] p-10 text-center text-[#999] text-[13px]">Carregando...</div>
+        <div className="bg-white rounded-2xl border border-[#eef2f6] p-12 text-center text-xs text-[#94a3b8]">Carregando expedição...</div>
       ) : ready.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-[#e6e6e6] p-12 text-center shadow-2xs">
-          <Send className="w-10 h-10 text-[#bbb] mx-auto mb-2" />
-          <p className="text-[14px] font-black text-[#111]">Nenhum pedido na expedição</p>
-          <p className="text-[11px] text-[#777] mt-0.5">Os pedidos separados aparecerão aqui para conferência e despacho</p>
+        <div className="bg-white rounded-2xl border border-[#eef2f6] p-16 text-center shadow-xs space-y-2">
+          <Send className="w-10 h-10 text-[#cbd5e1] mx-auto mb-2" />
+          <p className="text-base font-bold text-[#0f172a]">Nenhum pedido na expedição</p>
+          <p className="text-xs text-[#64748b]">Os pedidos separados aparecerão aqui para conferência e despacho</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {ready.map((o: Record<string, unknown>) => {
             const mp = o.marketplaces as Record<string, unknown> | null
-            const acc = o.marketplace_accounts as Record<string, unknown> | null
             return (
-              <div key={o.id as string} onClick={() => router.push(`/pedidos/${o.id}`)} className="bg-white rounded-2xl border border-[#e6e6e6] p-5 cursor-pointer hover:border-[#111] transition-all shadow-2xs group">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-mono text-[13px] font-black text-[#111]">{o.order_number as string}</span>
-                  <span className="text-[11px] font-bold text-[#555] flex items-center gap-1.5">{typeof mp?.logo === 'string' && <MarketplaceLogo name={mp.name as string} className="w-4 h-4" />}{(mp?.name as string) || '—'}</span>
-                </div>
-                <p className="text-[12px] font-semibold text-[#333] mb-1">{(o.customer_name as string) || 'Comprador'}</p>
-                {typeof acc?.account_name === 'string' && acc.account_name && <p className="text-[11px] text-[#777] mb-1">{acc.account_name}</p>}
-                <p className="text-[13px] font-black text-[#111] mb-3">R$ {Number(o.total_amount || 0).toFixed(2)}</p>
-                {['SEPARADO', 'AGUARDANDO_EXPEDICAO'].includes(o.status as string) && (
-                  <button 
-                    onClick={(e) => { e.stopPropagation(); updateOrderStatus(o.id as string, 'EMBALADO') }} 
-                    className="w-full bg-[#0284c7] hover:bg-[#0369a1] text-white py-2 rounded-xl text-[11px] font-bold transition-all shadow-2xs cursor-pointer"
-                  >
-                    Embalar & Colar Etiqueta
-                  </button>
-                )}
-                {o.status === 'EMBALADO' && (
-                  <button 
-                    onClick={(e) => { e.stopPropagation(); updateOrderStatus(o.id as string, 'ENVIADO') }} 
-                    className="w-full bg-[#16a34a] hover:bg-[#15803d] text-white py-2 rounded-xl text-[11px] font-bold transition-all shadow-2xs cursor-pointer"
-                  >
-                    Despachar Pedido
-                  </button>
-                )}
-                {o.status === 'ENVIADO' && (
-                  <span className="block text-center text-[11px] text-[#16a34a] font-extrabold py-2 bg-[#ecfdf5] rounded-xl border border-[#bbf7d0]">
-                    ✓ Despachado
+              <div key={o.id as string} onClick={() => router.push(`/pedidos/${o.id}`)} className="bg-white rounded-2xl border border-[#eef2f6] p-5 cursor-pointer hover:border-[#0f172a] transition-all shadow-xs group space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-sm font-bold text-[#0f172a]">#{o.order_number as string}</span>
+                  <span className="text-xs font-semibold text-[#64748b] flex items-center gap-1.5">
+                    <MarketplaceLogo name={(mp?.name as string) || 'Mercado Livre'} className="w-3.5 h-3.5" />
+                    {(mp?.name as string) || 'Mercado Livre'}
                   </span>
-                )}
+                </div>
+
+                <div>
+                  <p className="text-xs font-bold text-[#0f172a]">{(o.customer_name as string) || 'Comprador'}</p>
+                  <p className="font-mono text-[11px] text-[#16a34a] font-bold mt-0.5">{o.tracking_code as string || 'Envio Padrão'}</p>
+                </div>
+
+                <div className="pt-2 border-t border-[#f1f5f9]">
+                  {['SEPARADO', 'AGUARDANDO_EXPEDICAO'].includes(o.status as string) && (
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); updateOrderStatus(o.id as string, 'EMBALADO') }} 
+                      className="w-full bg-[#0284c7] hover:bg-[#0369a1] text-white py-2 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
+                    >
+                      Embalar & Colar Etiqueta
+                    </button>
+                  )}
+                  {o.status === 'EMBALADO' && (
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); updateOrderStatus(o.id as string, 'ENVIADO') }} 
+                      className="w-full bg-[#16a34a] hover:bg-[#15803d] text-white py-2 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
+                    >
+                      Despachar Pedido ✓
+                    </button>
+                  )}
+                  {o.status === 'ENVIADO' && (
+                    <span className="block text-center text-xs text-[#16a34a] font-bold py-2 bg-[#ecfdf5] rounded-xl border border-[#bbf7d0]">
+                      ✓ Despachado
+                    </span>
+                  )}
+                </div>
               </div>
             )
           })}
@@ -503,13 +721,19 @@ function ShippingTab() {
 
 export default function PedidosPage() {
   return (
-    <div className="mp-stack">
-      <PageHeader title="Pedidos" description="Gerencie pedidos, separação e expedição" />
-      <Tabs defaultValue="pedidos">
-        <TabsList>
-          <TabsTrigger value="pedidos"><ClipboardList className="w-3.5 h-3.5 mr-1 inline" /> Pedidos</TabsTrigger>
-          <TabsTrigger value="separacao"><Pickaxe className="w-3.5 h-3.5 mr-1 inline" /> Separação</TabsTrigger>
-          <TabsTrigger value="expedicao"><Send className="w-3.5 h-3.5 mr-1 inline" /> Expedição</TabsTrigger>
+    <div className="space-y-6">
+      <PageHeader title="Pedidos" description="Gerencie pedidos, separação e expedição da equipe" />
+      <Tabs defaultValue="pedidos" className="space-y-4">
+        <TabsList className="bg-[#f1f5f9] p-1 rounded-2xl w-fit">
+          <TabsTrigger value="pedidos" className="rounded-xl font-bold text-xs data-[state=active]:bg-white data-[state=active]:text-[#0f172a] data-[state=active]:shadow-xs">
+            <ClipboardList className="w-3.5 h-3.5 mr-1.5 inline" /> Pedidos
+          </TabsTrigger>
+          <TabsTrigger value="separacao" className="rounded-xl font-bold text-xs data-[state=active]:bg-white data-[state=active]:text-[#0f172a] data-[state=active]:shadow-xs">
+            <Pickaxe className="w-3.5 h-3.5 mr-1.5 inline" /> Separação
+          </TabsTrigger>
+          <TabsTrigger value="expedicao" className="rounded-xl font-bold text-xs data-[state=active]:bg-white data-[state=active]:text-[#0f172a] data-[state=active]:shadow-xs">
+            <Send className="w-3.5 h-3.5 mr-1.5 inline" /> Expedição
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="pedidos"><OrdersTab /></TabsContent>
         <TabsContent value="separacao"><PickingTab /></TabsContent>
