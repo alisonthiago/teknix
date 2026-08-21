@@ -283,9 +283,14 @@ export default function LiveMonitorDrawer({ open, onClose }: LiveMonitorDrawerPr
             ) : (
               <div className="divide-y divide-[#f0f0f0]">
                 {topProducts.map((p, idx) => (
-                  <div key={p.id} className="py-2.5 flex items-center gap-3">
+                  <Link
+                    key={p.id}
+                    href={`/produtos/${p.id}`}
+                    onClick={onClose}
+                    className="py-2.5 flex items-center gap-3 hover:bg-[#fafafa] -mx-2 px-2 rounded-xl transition-colors group cursor-pointer"
+                  >
                     <span className="text-[12px] font-bold text-[#888] w-4">{idx + 1}</span>
-                    <div className="w-10 h-10 rounded-xl bg-[#fafafa] border border-[#eee] p-1 flex items-center justify-center shrink-0 overflow-hidden">
+                    <div className="w-10 h-10 rounded-xl bg-[#fafafa] border border-[#eee] p-1 flex items-center justify-center shrink-0 overflow-hidden group-hover:border-[#3483fa] transition-colors">
                       {p.imageUrl && p.imageUrl !== '/placeholder.png' ? (
                         <img src={p.imageUrl} alt={p.name} className="w-full h-full object-contain" />
                       ) : (
@@ -293,10 +298,11 @@ export default function LiveMonitorDrawer({ open, onClose }: LiveMonitorDrawerPr
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[12px] font-bold text-[#222] truncate">{p.name}</p>
+                      <p className="text-[12px] font-bold text-[#222] group-hover:text-[#3483fa] transition-colors truncate">{p.name}</p>
                       <p className="text-[10px] text-[#888]">R$ {Math.round(p.revenue / (p.quantity || 1))} | {p.quantity} u. | Estoque: {p.stock}</p>
                     </div>
-                  </div>
+                    <ArrowRight className="w-3.5 h-3.5 text-[#ccc] group-hover:text-[#3483fa] group-hover:translate-x-0.5 transition-all shrink-0" />
+                  </Link>
                 ))}
               </div>
             )}
@@ -311,9 +317,14 @@ export default function LiveMonitorDrawer({ open, onClose }: LiveMonitorDrawerPr
 
             <div className="space-y-2.5">
               {(allOrders as any[]).slice(0, 4).map((o: any) => (
-                <div key={o.id} className="p-2.5 rounded-xl bg-[#fafafa] border border-[#eee] text-[11px]">
+                <Link
+                  key={o.id}
+                  href={`/pedidos/${o.id || o.order_number}`}
+                  onClick={onClose}
+                  className="block p-2.5 rounded-xl bg-[#fafafa] hover:bg-[#f0f7ff] border border-[#eee] hover:border-[#bfdbfe] text-[11px] transition-all group cursor-pointer"
+                >
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-[#111]">{o.order_number}</span>
+                    <span className="font-bold text-[#111] group-hover:text-[#3483fa] transition-colors">{o.order_number}</span>
                     <span className="font-extrabold text-[#16a34a]">R$ {Number(o.total_amount || 0).toFixed(2)}</span>
                   </div>
                   <p className="text-[#666] truncate mt-0.5">{o.customer_name || 'Cliente'} • {o.shipping_city || 'Destino'}/{o.shipping_state || 'BR'}</p>
@@ -323,7 +334,7 @@ export default function LiveMonitorDrawer({ open, onClose }: LiveMonitorDrawerPr
                       {o.status === 'CANCELADO' ? 'CANCELADO' : o.tracking_code ? `Rastreio: ${o.tracking_code}` : o.status}
                     </span>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           </div>

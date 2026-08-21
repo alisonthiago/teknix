@@ -705,9 +705,13 @@ export default function MonitorAoVivoPage() {
 
             <div className="divide-y divide-[#f0f0f0]">
               {topProducts.map((p, idx) => (
-                <div key={p.id} className="py-2.5 flex items-center gap-3">
+                <Link
+                  key={p.id}
+                  href={`/produtos/${p.id}`}
+                  className="py-2.5 flex items-center gap-3 hover:bg-[#fafafa] -mx-2 px-2 rounded-xl transition-colors group cursor-pointer"
+                >
                   <span className="text-[12px] font-extrabold text-[#888]">{idx + 1}</span>
-                  <div className="w-10 h-10 rounded-xl bg-[#fafafa] border border-[#eee] p-1 flex items-center justify-center shrink-0 overflow-hidden">
+                  <div className="w-10 h-10 rounded-xl bg-[#fafafa] border border-[#eee] p-1 flex items-center justify-center shrink-0 overflow-hidden group-hover:border-[#3483fa] transition-colors">
                     {p.imageUrl && p.imageUrl !== '/placeholder.png' ? (
                       <img src={p.imageUrl} alt={p.name} className="w-full h-full object-contain" />
                     ) : (
@@ -715,10 +719,11 @@ export default function MonitorAoVivoPage() {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[12px] font-bold text-[#222] truncate">{p.name}</p>
+                    <p className="text-[12px] font-bold text-[#222] group-hover:text-[#3483fa] transition-colors truncate">{p.name}</p>
                     <p className="text-[10px] text-[#888]">{p.quantity} un. • R$ {p.revenue.toFixed(2)}</p>
                   </div>
-                </div>
+                  <ArrowRight className="w-3.5 h-3.5 text-[#ccc] group-hover:text-[#3483fa] group-hover:translate-x-0.5 transition-all shrink-0" />
+                </Link>
               ))}
             </div>
           </div>

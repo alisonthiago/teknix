@@ -1,14 +1,16 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import { 
   ArrowLeft, Truck, Clock, Phone, Mail, MessageCircle, 
   MoreVertical, Plus, FileText, Link as LinkIcon, Loader2, 
-  Copy, Check, MapPin, Building2, ExternalLink, Edit3, CreditCard
+  Copy, Check, MapPin, Building2, ExternalLink, Edit3, CreditCard,
+  Trash2, Upload
 } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { createClient } from '@/utils/supabase/client'
+import SupplierCatalogsEditor from '@/components/SupplierCatalogsEditor'
 import type { SupplierDetail } from '@/lib/detail-types'
 
 function formatBRL(value: number) {
@@ -69,20 +71,82 @@ function CopyButton({ text, label = 'Copiar' }: { text?: string | null; label?: 
 function SupplierCatalogsDisplay({ supplierId }: { supplierId: string }) {
   const [catalogs, setCatalogs] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const fetchCatalogs = async () => {
+    const supabase = createClient()
+    const { data } = await supabase
+      .from('supplier_catalogs')
+      .select('*')
+      .eq('supplier_id', supplierId)
+      .order('created_at', { ascending: false })
+    setCatalogs(data || [])
+    setLoading(false)
+  }
 
   useEffect(() => {
-    async function fetchCatalogs() {
-      const supabase = createClient()
-      const { data } = await supabase
-        .from('supplier_catalogs')
-        .select('*')
-        .eq('supplier_id', supplierId)
-        .order('created_at', { ascending: false })
-      setCatalogs(data || [])
-      setLoading(false)
-    }
     fetchCatalogs()
   }, [supplierId])
+
+  const handleUploadFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+
+    setUploading(true)
+    try {
+      const file = files[0]
+      if (file.size > 50 * 1024 * 1024) {
+        alert('O arquivo excede o limite máximo de 50MB.')
+        return
+      }
+
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('supplierId', supplierId)
+
+      const res = await fetch('/api/upload/catalog', {
+        method: 'POST',
+        body: formData
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Falha ao enviar arquivo.')
+      }
+
+      await fetchCatalogs()
+    } catch (err: any) {
+      console.error(err)
+      alert(err.message || 'Erro no upload do catálogo.')
+    } finally {
+      setUploading(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
+
+  const handleDeleteCatalog = async (e: React.MouseEvent, id: string, fileUrl: string, fileType?: string) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    if (!confirm('Deseja realmente apagar este catálogo?')) return
+
+    try {
+      const supabase = createClient()
+      await supabase.from('supplier_catalogs').delete().eq('id', id)
+
+      if (fileType === 'PDF' || fileType === 'IMAGEM' || (fileUrl && fileUrl.includes('supplier-catalogs'))) {
+        const urlParts = (fileUrl || '').split('/')
+        const fileName = urlParts.slice(-2).join('/')
+        await supabase.storage.from('supplier-catalogs').remove([fileName])
+      }
+
+      setCatalogs(prev => prev.filter(c => c.id !== id))
+    } catch (err) {
+      console.error(err)
+      alert('Não foi possível excluir o catálogo.')
+    }
+  }
 
   if (loading) return (
     <div className="bg-white border border-[#e6e6e6] rounded-md p-4 flex justify-center py-6">
@@ -90,35 +154,93 @@ function SupplierCatalogsDisplay({ supplierId }: { supplierId: string }) {
     </div>
   )
 
-  if (catalogs.length === 0) return null
-
   return (
     <div className="bg-white border border-[#e6e6e6] rounded-md p-4">
-      <SectionTitle>Catálogos</SectionTitle>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        {catalogs.map(cat => {
-          const url = cat.file_url || cat.url || ''
-          const isPdf = (cat.file_type || '').toUpperCase() === 'PDF' || url.toLowerCase().includes('.pdf')
-          return (
-            <a 
-              key={cat.id} 
-              href={url} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="border border-[#e6e6e6] rounded-md p-3 flex flex-col items-center justify-center bg-[#fafafa] hover:bg-[#f5f5f5] transition-colors cursor-pointer"
-            >
-              {isPdf ? (
-                <FileText className="w-7 h-7 text-[#e74c3c] mb-2" />
-              ) : (
-                <LinkIcon className="w-7 h-7 text-[#666] mb-2" />
-              )}
-              <span className="text-[11px] text-center font-medium text-[#333] line-clamp-2 w-full" title={cat.title}>
-                {cat.title}
-              </span>
-            </a>
-          )
-        })}
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-[13px] font-semibold text-[#333]">Catálogos</h3>
+        <div>
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleUploadFile}
+            accept=".pdf,.png,.jpg,.jpeg,.webp"
+            className="hidden"
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="h-[28px] px-2.5 bg-[#f5f5f5] hover:bg-[#ebebeb] text-[#333] border border-[#e0e0e0] rounded-md text-[11px] font-medium flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
+          >
+            {uploading ? (
+              <>
+                <Loader2 className="w-3 h-3 animate-spin text-[#333]" />
+                <span>Enviando...</span>
+              </>
+            ) : (
+              <>
+                <Upload className="w-3 h-3 text-[#666]" />
+                <span>+ Enviar Catálogo</span>
+              </>
+            )}
+          </button>
+        </div>
       </div>
+
+      {catalogs.length === 0 ? (
+        <div className="py-6 text-center border border-dashed border-[#e6e6e6] rounded-md bg-[#fafafa]">
+          <FileText className="w-7 h-7 text-[#ccc] mx-auto mb-1.5" />
+          <p className="text-[12px] text-[#666] font-medium">Nenhum catálogo cadastrado</p>
+          <p className="text-[11px] text-[#999] mt-0.5">Faça upload de tabelas de preços ou PDFs</p>
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="mt-2 text-[11px] text-[#3483fa] hover:underline font-semibold"
+          >
+            + Enviar arquivo PDF / Imagem
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {catalogs.map(cat => {
+            const url = cat.file_url || cat.url || ''
+            const isPdf = (cat.file_type || '').toUpperCase() === 'PDF' || url.toLowerCase().includes('.pdf')
+            return (
+              <div 
+                key={cat.id} 
+                className="group relative border border-[#e6e6e6] rounded-md p-3 flex flex-col items-center justify-center bg-[#fafafa] hover:bg-[#f5f5f5] transition-colors"
+              >
+                {/* Botão de Excluir / Apagar Catálogo */}
+                <button
+                  onClick={(e) => handleDeleteCatalog(e, cat.id, url, cat.file_type)}
+                  className="absolute top-2 right-2 p-1 rounded-md bg-white border border-[#e6e6e6] text-[#999] hover:text-[#e74c3c] hover:border-[#ffcdd2] opacity-0 group-hover:opacity-100 transition-all cursor-pointer shadow-xs z-10"
+                  title="Apagar este catálogo"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center justify-center w-full text-center cursor-pointer"
+                >
+                  {isPdf ? (
+                    <FileText className="w-7 h-7 text-[#e74c3c] mb-2" />
+                  ) : (
+                    <LinkIcon className="w-7 h-7 text-[#666] mb-2" />
+                  )}
+                  <span className="text-[11px] text-center font-medium text-[#333] line-clamp-2 w-full" title={cat.title}>
+                    {cat.title}
+                  </span>
+                  <span className="text-[10px] text-[#3483fa] mt-1 group-hover:underline">
+                    Abrir / Baixar ↗
+                  </span>
+                </a>
+              </div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
@@ -417,8 +539,12 @@ function DadosBancariosTab({ supplier }: { supplier: SupplierDetail }) {
 
 function CatalogosTab({ supplier }: { supplier: SupplierDetail }) {
   return (
-    <div className="space-y-4">
-      <SupplierCatalogsDisplay supplierId={supplier.id} />
+    <div className="bg-white border border-[#e6e6e6] rounded-md p-5">
+      <SectionTitle>Gerenciar Catálogos do Fornecedor</SectionTitle>
+      <p className="text-[12px] text-[#666] mb-4">
+        Faça upload de arquivos PDF ou imagens de catálogos (até 50MB), adicione links externos ou exclua catálogos antigos.
+      </p>
+      <SupplierCatalogsEditor supplierId={supplier.id} />
     </div>
   )
 }
