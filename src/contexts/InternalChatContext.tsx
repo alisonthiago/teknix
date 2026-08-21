@@ -28,7 +28,7 @@ interface InternalChatContextData {
     messageType: MessageType
     metadata: any
   }) => Promise<void>
-  createConversation: (name: string, type: 'DIRECT' | 'GROUP', memberIds: string[]) => Promise<InternalConversation | null>
+  createConversation: (name: string, type: 'DIRECT' | 'GROUP', memberIds: string[], explicitId?: string) => Promise<InternalConversation | null>
   createTask: (task: Partial<InternalTask>) => Promise<void>
   updateTaskStatus: (taskId: string, status: InternalTask['status']) => Promise<void>
   markAsRead: (conversationId: string) => void
@@ -37,7 +37,7 @@ interface InternalChatContextData {
 const InternalChatContext = createContext<InternalChatContextData>({} as InternalChatContextData)
 
 // Função utilitária para remover qualquer emoji de strings
-function removeEmojis(str: string): string {
+export function removeEmojis(str: string): string {
   if (!str) return ''
   return str
     .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{2300}-\u{23FF}]/gu, '')
@@ -51,7 +51,49 @@ export function getDirectConvId(a: string, b: string): string {
   return 'direct-' + [a, b].sort().join('__')
 }
 
-// Canais operacionais padrão reais (sem emojis)
+// Retorna o nome dinâmico da conversa (para DIRECT mostra o nome do OUTRO interlocutor)
+export function getConversationDisplayName(
+  conv: InternalConversation,
+  currentUserId?: string,
+  collaborators: ChatMember[] = []
+): string {
+  if (conv.type === 'GROUP') {
+    return conv.name
+  }
+  if (conv.id.startsWith('direct-')) {
+    const ids = conv.id.replace('direct-', '').split('__')
+    const otherId = ids.find(id => id !== currentUserId) || ids[0]
+    const otherColab = collaborators.find(c => c.id === otherId)
+    if (otherColab) return otherColab.name
+  }
+  const otherMember = conv.members?.find(m => m.id !== currentUserId)
+  if (otherMember) {
+    const colab = collaborators.find(c => c.id === otherMember.id)
+    return colab?.name || otherMember.name
+  }
+  return conv.name
+}
+
+// Retorna o colaborador associado a uma conversa direta (para avatar e status)
+export function getConversationColab(
+  conv: InternalConversation,
+  currentUserId?: string,
+  collaborators: ChatMember[] = []
+): ChatMember | undefined {
+  if (conv.type === 'GROUP') return undefined
+  if (conv.id.startsWith('direct-')) {
+    const ids = conv.id.replace('direct-', '').split('__')
+    const otherId = ids.find(id => id !== currentUserId) || ids[0]
+    return collaborators.find(c => c.id === otherId)
+  }
+  const otherMember = conv.members?.find(m => m.id !== currentUserId)
+  if (otherMember) {
+    return collaborators.find(c => c.id === otherMember.id) || otherMember
+  }
+  return undefined
+}
+
+// Canais operacionais padrão da empresa
 const DEFAULT_SYSTEM_CONVERSATIONS: InternalConversation[] = [
   {
     id: 'conv-geral',
@@ -98,11 +140,22 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
   const activeConvRef = useRef<InternalConversation | null>(activeConversation)
   activeConvRef.current = activeConversation
 
-  // 1. Carregar o usuário logado atual do Supabase Auth + Profile
+  const floatingOpenRef = useRef(isFloatingOpen)
+  floatingOpenRef.current = isFloatingOpen
+  const floatingMinRef = useRef(isFloatingMinimized)
+  floatingMinRef.current = isFloatingMinimized
+  
+  const currentUserRef = useRef(currentUser)
+  currentUserRef.current = currentUser
+
+  const channelRef = useRef<any>(null)
+
+  // 1. Carregar usuário logado atual do Supabase Auth + Profile
   useEffect(() => {
-    const loadCurrentUser = async () => {
+    const supabase = createClient()
+
+    const fetchUser = async () => {
       try {
-        const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
         if (user) {
           const { data: profile } = await supabase
@@ -114,7 +167,7 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
           const userName = profile?.name || user.user_metadata?.name || user.email?.split('@')[0] || 'Colaborador'
           setCurrentUser({
             id: user.id,
-            name: userName,
+            name: removeEmojis(userName),
             email: user.email || profile?.email,
             role: profile?.role || 'Operador'
           })
@@ -123,10 +176,19 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
         console.error('Erro ao carregar usuário autenticado:', err)
       }
     }
-    loadCurrentUser()
+
+    fetchUser()
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      fetchUser()
+    })
+
+    return () => {
+      subscription.unsubscribe()
+    }
   }, [])
 
-  // 2. Carregar SOMENTE os colaboradores reais cadastrados no Supabase (tabela profiles)
+  // 2. Carregar colaboradores reais cadastrados no Supabase (tabela profiles)
   useEffect(() => {
     const loadRealCollaborators = async () => {
       try {
@@ -161,73 +223,102 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
     loadRealCollaborators()
   }, [])
 
-  // 3. Carregar conversas do Supabase (internal_conversations)
-  useEffect(() => {
-    const loadConversations = async () => {
-      try {
-        const supabase = createClient()
-        const { data: dbConversations, error } = await supabase
-          .from('internal_conversations')
-          .select('*')
-          .order('created_at', { ascending: false })
+  // 3. Carregar conversas do Supabase (internal_conversations) e mesclar com canais padrão
+  const refreshConversations = useCallback(async () => {
+    try {
+      const supabase = createClient()
+      const { data: dbConversations, error } = await supabase
+        .from('internal_conversations')
+        .select('*')
+        .order('created_at', { ascending: false })
 
-        if (!error && dbConversations && dbConversations.length > 0) {
-          const cleanConvs: InternalConversation[] = dbConversations.map(c => ({
+      if (!error && dbConversations) {
+        const convMap = new Map<string, InternalConversation>()
+        
+        // Adiciona os canais padrão primeiro
+        DEFAULT_SYSTEM_CONVERSATIONS.forEach(c => convMap.set(c.id, c))
+        
+        // Adiciona as conversas do banco (mantendo unread_count se já existir)
+        dbConversations.forEach(c => {
+          const existing = convMap.get(c.id)
+          convMap.set(c.id, {
             id: c.id,
-            type: c.type || 'GROUP',
+            type: c.type || (c.id.startsWith('direct-') ? 'DIRECT' : 'GROUP'),
             name: removeEmojis(c.name),
             description: removeEmojis(c.description || ''),
             members: c.members || [],
-            unread_count: 0,
+            unread_count: existing?.unread_count || 0,
             created_at: c.created_at
-          }))
-          setConversations(cleanConvs)
-          if (!activeConversation) {
-            setActiveConversation(cleanConvs[0])
-          }
-        }
-      } catch {}
-    }
-    loadConversations()
+          })
+        })
+
+        const merged = Array.from(convMap.values())
+        setConversations(prev => {
+          // Preservar unread_count de conversas já carregadas no estado
+          return merged.map(m => {
+            const old = prev.find(p => p.id === m.id)
+            return old ? { ...m, unread_count: old.unread_count } : m
+          })
+        })
+      }
+    } catch {}
   }, [])
 
-  // 4. Carregar mensagens da conversa ativa do Supabase (internal_messages)
   useEffect(() => {
-    if (!activeConversation) return
+    refreshConversations()
+  }, [refreshConversations])
 
-    const loadMessages = async () => {
-      setLoadingMessages(true)
-      try {
-        const supabase = createClient()
-        const { data: dbMessages, error } = await supabase
-          .from('internal_messages')
-          .select('*')
-          .eq('conversation_id', activeConversation.id)
-          .order('created_at', { ascending: true })
+  // 4. Carregar mensagens da conversa ativa do Supabase (internal_messages)
+  const refreshActiveMessages = useCallback(async () => {
+    const activeId = activeConvRef.current?.id
+    if (!activeId) return
 
-        if (!error && dbMessages) {
-          setMessagesMap(prev => ({
-            ...prev,
-            [activeConversation.id]: dbMessages
-          }))
-        }
-      } catch {}
-      setLoadingMessages(false)
-    }
+    try {
+      const supabase = createClient()
+      const { data: dbMessages, error } = await supabase
+        .from('internal_messages')
+        .select('*')
+        .eq('conversation_id', activeId)
+        .order('created_at', { ascending: true })
 
-    loadMessages()
-  }, [activeConversation?.id])
+      if (!error && dbMessages) {
+        setMessagesMap(prev => ({
+          ...prev,
+          [activeId]: dbMessages
+        }))
+      }
+    } catch {}
+  }, [])
 
-  // 5. Supabase Realtime Presence & Broadcast (mensagens e status online/offline real)
+  useEffect(() => {
+    if (!activeConversation?.id) return
+    setLoadingMessages(true)
+    refreshActiveMessages().finally(() => setLoadingMessages(false))
+  }, [activeConversation?.id, refreshActiveMessages])
+
+  // 5. Polling contínuo em segundo plano (garante sincronização mesmo se WebSocket oscilar)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refreshActiveMessages()
+      refreshConversations()
+    }, 2500)
+    return () => clearInterval(interval)
+  }, [refreshActiveMessages, refreshConversations])
+
+  // 6. Supabase Realtime Presence, Broadcast e Postgres Changes
   useEffect(() => {
     const supabase = createClient()
     const channel = supabase.channel('internal-chat-realtime', {
       config: {
         presence: {
           key: currentUser?.id || 'anon-' + Math.random().toString(36).substring(2, 7)
+        },
+        broadcast: {
+          self: true
         }
       }
     })
+    channelRef.current = channel
 
     channel
       .on('presence', { event: 'sync' }, () => {
@@ -239,7 +330,6 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
           })
         })
 
-        // Atualiza o status online/offline dos colaboradores reais
         setCollaborators(prev => prev.map(c => {
           const isOnline = onlineIds.has(c.id) || (currentUser && c.id === currentUser.id)
           return {
@@ -249,36 +339,74 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
           }
         }))
       })
-      .on('broadcast', { event: 'new_message' }, ({ payload }) => {
-        if (payload && payload.conversation_id) {
-          playNotificationSound()
 
-          setMessagesMap(prev => {
-            const currentList = prev[payload.conversation_id] || []
-            if (currentList.some(m => m.id === payload.id)) return prev
-            return {
-              ...prev,
-              [payload.conversation_id]: [...currentList, payload]
-            }
-          })
+    // Handler central para qualquer mensagem recebida em tempo real
+    const handleIncoming = (msg: any) => {
+      if (!msg || !msg.conversation_id) return
+      const currentUserId = currentUserRef.current?.id
+      const isOwn = currentUserId && msg.sender_id === currentUserId
 
-          setConversations(prev => prev.map(c => {
-            if (c.id === payload.conversation_id) {
-              const isCurrent = activeConvRef.current?.id === c.id
+      // Tocar som de notificação apenas para mensagens recebidas de outros
+      if (!isOwn) {
+        playNotificationSound()
+      }
+
+      // 1. Atualizar histórico de mensagens
+      setMessagesMap(prev => {
+        const currentList = prev[msg.conversation_id] || []
+        if (currentList.some(m => m.id === msg.id)) return prev
+        return {
+          ...prev,
+          [msg.conversation_id]: [...currentList, msg]
+        }
+      })
+
+      // 2. Atualizar lista de conversas e contador de não lidas
+      setConversations(prev => {
+        const exists = prev.some(c => c.id === msg.conversation_id)
+        if (exists) {
+          return prev.map(c => {
+            if (c.id === msg.conversation_id) {
+              const isViewing = floatingOpenRef.current && !floatingMinRef.current && activeConvRef.current?.id === c.id
               return {
                 ...c,
                 last_message: {
-                  content: payload.content || 'Mensagem recebida',
-                  sender_name: payload.sender_name,
-                  created_at: payload.created_at
+                  content: msg.content || 'Mensagem recebida',
+                  sender_name: msg.sender_name,
+                  created_at: msg.created_at
                 },
-                unread_count: isCurrent ? 0 : (c.unread_count + 1)
+                unread_count: (isViewing || isOwn) ? 0 : (c.unread_count + 1)
               }
             }
             return c
-          }))
+          })
+        } else {
+          // Nova conversa iniciada por outro usuário
+          const newConv: InternalConversation = {
+            id: msg.conversation_id,
+            type: msg.conversation_id.startsWith('direct-') ? 'DIRECT' : 'GROUP',
+            name: msg.sender_name || 'Conversa',
+            members: [{ id: msg.sender_id, name: msg.sender_name }],
+            unread_count: isOwn ? 0 : 1,
+            last_message: {
+              content: msg.content || 'Mensagem recebida',
+              sender_name: msg.sender_name,
+              created_at: msg.created_at
+            },
+            created_at: msg.created_at || new Date().toISOString()
+          }
+          return [newConv, ...prev]
         }
       })
+    }
+
+    channel
+      .on('broadcast', { event: 'new_message' }, ({ payload }) => handleIncoming(payload))
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'internal_messages' },
+        ({ new: row }: any) => handleIncoming(row)
+      )
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED' && currentUser) {
           await channel.track({
@@ -298,7 +426,7 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
     setConversations(prev => prev.map(c => c.id === convId ? { ...c, unread_count: 0 } : c))
   }, [])
 
-  // 6. Enviar mensagem real e persistir no Supabase
+  // 7. Enviar mensagem real e persistir no Supabase
   const sendMessage = async (
     conversationId: string,
     content: string,
@@ -321,7 +449,7 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
       created_at: new Date().toISOString()
     }
 
-    // Atualização otimista local
+    // 1. Atualização otimista local imediata
     setMessagesMap(prev => ({
       ...prev,
       [conversationId]: [...(prev[conversationId] || []), newMessage]
@@ -341,10 +469,25 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
       return c
     }))
 
-    // Persistir no Supabase
+    // 2. Persistir no Supabase (internal_messages e upsert de internal_conversations)
     try {
       const supabase = createClient()
-      await supabase.from('internal_messages').insert({
+      
+      // Garante que a conversa existe no banco
+      const currentConv = conversations.find(c => c.id === conversationId)
+      if (currentConv) {
+        await supabase.from('internal_conversations').upsert({
+          id: currentConv.id,
+          type: currentConv.type,
+          name: currentConv.name,
+          description: currentConv.description || null,
+          members: currentConv.members || [],
+          created_at: currentConv.created_at || new Date().toISOString()
+        })
+      }
+
+      // Salva a mensagem no banco
+      const { error: msgErr } = await supabase.from('internal_messages').insert({
         id: newMessage.id,
         conversation_id: conversationId,
         sender_id: senderId,
@@ -355,18 +498,20 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
         reply_to: newMessage.reply_to || null,
         created_at: newMessage.created_at
       })
+      if (msgErr) console.warn('Aviso insert message:', msgErr)
     } catch (err) {
       console.warn('Persistência via banco:', err)
     }
 
-    // Broadcast em tempo real para os outros colaboradores conectados
+    // 3. Broadcast em tempo real para os outros colaboradores conectados
     try {
-      const supabase = createClient()
-      await supabase.channel('internal-chat-realtime').send({
-        type: 'broadcast',
-        event: 'new_message',
-        payload: newMessage
-      })
+      if (channelRef.current) {
+        await channelRef.current.send({
+          type: 'broadcast',
+          event: 'new_message',
+          payload: newMessage
+        })
+      }
     } catch (err) {
       console.warn('Realtime broadcast:', err)
     }
@@ -379,7 +524,6 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
     messageType: MessageType
     metadata: any
   }) => {
-    // Para DIRECT, usa ID determinístico (mesmo par de usuários = mesma conversa)
     const directId = (params.targetType === 'DIRECT' && currentUser)
       ? getDirectConvId(currentUser.id, params.targetId)
       : params.targetId
@@ -400,7 +544,7 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
 
       try {
         const supabase = createClient()
-        await supabase.from('internal_conversations').insert({
+        await supabase.from('internal_conversations').upsert({
           id: conv.id,
           type: conv.type,
           name: conv.name,
@@ -428,18 +572,27 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
     })
   }
 
-  const createConversation = async (name: string, type: 'DIRECT' | 'GROUP', memberIds: string[]) => {
+  const createConversation = async (name: string, type: 'DIRECT' | 'GROUP', memberIds: string[], explicitId?: string) => {
     const selectedMembers = collaborators.filter(c => memberIds.includes(c.id))
     const cleanName = removeEmojis(name)
-    // DIRECT: ID determinístico para o par de usuários (evita conversas duplicadas)
-    const newConvId = (type === 'DIRECT' && currentUser && memberIds.length > 0)
-      ? getDirectConvId(currentUser.id, memberIds[0])
-      : `conv-${Date.now()}`
+    const newConvId = explicitId
+      || ((type === 'DIRECT' && currentUser && memberIds.length > 0)
+        ? getDirectConvId(currentUser.id, memberIds[0])
+        : `conv-${Date.now()}`)
+
+    const existingConv = conversations.find(c => c.id === newConvId)
+    if (existingConv) {
+      setActiveConversation(existingConv)
+      return existingConv
+    }
+
     const newConv: InternalConversation = {
       id: newConvId,
       type,
       name: cleanName,
-      members: type === 'DIRECT' ? [currentUser, ...selectedMembers].filter(Boolean) : selectedMembers,
+      members: type === 'DIRECT'
+        ? (currentUser ? [currentUser, ...selectedMembers] : selectedMembers)
+        : selectedMembers,
       unread_count: 0,
       created_at: new Date().toISOString()
     }
@@ -449,7 +602,7 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
 
     try {
       const supabase = createClient()
-      await supabase.from('internal_conversations').insert({
+      await supabase.from('internal_conversations').upsert({
         id: newConv.id,
         type: newConv.type,
         name: newConv.name,

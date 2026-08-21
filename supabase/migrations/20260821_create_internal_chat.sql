@@ -23,28 +23,40 @@ CREATE TABLE IF NOT EXISTS public.internal_messages (
 -- Índices para performance
 CREATE INDEX IF NOT EXISTS idx_internal_messages_conv ON public.internal_messages(conversation_id, created_at DESC);
 
--- Habilitar RLS e permitir acesso a usuários autenticados
+-- Habilitar RLS
 ALTER TABLE public.internal_conversations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.internal_messages ENABLE ROW LEVEL SECURITY;
 
 DO $$ 
 BEGIN
-    IF NOT EXISTS (
-        SELECT 1 FROM pg_policies WHERE tablename = 'internal_conversations' AND policyname = 'Allow authenticated read/write internal_conversations'
-    ) THEN
-        CREATE POLICY "Allow authenticated read/write internal_conversations" 
-        ON public.internal_conversations FOR ALL TO authenticated USING (true) WITH CHECK (true);
-    END IF;
+    DROP POLICY IF EXISTS "Allow authenticated read/write internal_conversations" ON public.internal_conversations;
+    DROP POLICY IF EXISTS "Allow authenticated read/write internal_messages" ON public.internal_messages;
+    DROP POLICY IF EXISTS "Allow all read/write internal_conversations" ON public.internal_conversations;
+    DROP POLICY IF EXISTS "Allow all read/write internal_messages" ON public.internal_messages;
 
-    IF NOT EXISTS (
-        SELECT 1 FROM pg_policies WHERE tablename = 'internal_messages' AND policyname = 'Allow authenticated read/write internal_messages'
-    ) THEN
-        CREATE POLICY "Allow authenticated read/write internal_messages" 
-        ON public.internal_messages FOR ALL TO authenticated USING (true) WITH CHECK (true);
-    END IF;
+    CREATE POLICY "Allow all read/write internal_conversations" 
+    ON public.internal_conversations FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
+
+    CREATE POLICY "Allow all read/write internal_messages" 
+    ON public.internal_messages FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
 END $$;
 
--- Canais operacionais padrão (SEM EMOJIS)
+-- Habilitar Realtime para as tabelas de chat
+DO $$
+BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.internal_conversations;
+EXCEPTION WHEN OTHERS THEN
+    NULL;
+END $$;
+
+DO $$
+BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.internal_messages;
+EXCEPTION WHEN OTHERS THEN
+    NULL;
+END $$;
+
+-- Canais operacionais padrão
 INSERT INTO public.internal_conversations (id, type, name, description)
 VALUES 
   ('conv-geral', 'GROUP', 'Geral', 'Canal principal de comunicação da equipe'),

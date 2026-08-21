@@ -1,3 +1,5 @@
+'use client'
+
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { DollarSign, Store, ShoppingBag, ArrowUpRight, Search, Layers, CheckCircle2, ChevronRight, Package, User, Share2 } from 'lucide-react'
