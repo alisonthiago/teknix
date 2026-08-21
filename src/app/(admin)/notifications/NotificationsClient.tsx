@@ -20,18 +20,32 @@ export default function NotificationsClient({ initialNotifications }: { initialN
   const validInitial = (initialNotifications || []).filter(n => {
     const title = String(n.title || '').toLowerCase()
     const msg = String(n.message || '').toLowerCase()
-    if (
+    const mod = String((n as any).module || n.type || '').toLowerCase()
+
+    const isInternalAction = 
+      title.includes('erro') ||
+      title.includes('falha') ||
+      title.includes('cnpj') ||
+      title.includes('colaborador') ||
+      title.includes('automaç') ||
       title.includes('fornecedor') ||
-      title.includes('sucesso') ||
+      title.includes('catálogo') ||
       title.includes('arquivo grande') ||
+      title.includes('conexão') ||
+      title.includes('token') ||
+      title.includes('sucesso') ||
       title.includes('contato') ||
       title.includes('logomarca') ||
+      msg.includes('json válido') ||
+      msg.includes('receita federal') ||
+      msg.includes('enviar pdf') ||
       msg.includes('foram atualizados') ||
-      msg.includes('excede o limite')
-    ) {
-      return false
-    }
-    return true
+      msg.includes('excede o limite') ||
+      mod === 'suppliers' ||
+      mod === 'auth' ||
+      mod === 'system'
+
+    return !isInternalAction
   })
 
   const [notifications, setNotifications] = useState(validInitial)

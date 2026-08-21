@@ -223,25 +223,38 @@ function HeaderActions({
   const activeUnreadCount = activeNotifs.filter(n => !n.is_read).length
 
   const filteredNotifications = activeNotifs.filter(n => {
-    // Filtrar fora qualquer ação CRUD interna
     const title = String(n.title || '').toLowerCase()
     const msg = String(n.message || '').toLowerCase()
     const mod = String(n.module || n.type || '').toLowerCase()
-    if (
+
+    // Bloqueio rigoroso de qualquer ação ou erro interno do sistema
+    const isInternalAction = 
+      title.includes('erro') ||
+      title.includes('falha') ||
+      title.includes('cnpj') ||
+      title.includes('colaborador') ||
+      title.includes('automaç') ||
       title.includes('fornecedor') ||
-      title.includes('sucesso') ||
+      title.includes('catálogo') ||
       title.includes('arquivo grande') ||
+      title.includes('conexão') ||
+      title.includes('token') ||
+      title.includes('sucesso') ||
       title.includes('contato') ||
       title.includes('logomarca') ||
+      msg.includes('json válido') ||
+      msg.includes('receita federal') ||
+      msg.includes('enviar pdf') ||
       msg.includes('foram atualizados') ||
       msg.includes('excede o limite') ||
-      mod === 'suppliers'
-    ) {
-      return false
-    }
+      mod === 'suppliers' ||
+      mod === 'auth' ||
+      mod === 'system'
+
+    if (isInternalAction) return false
 
     if (selectedCategory === 'all') return true
-    if (selectedCategory === 'vendas') return mod.includes('sale') || mod.includes('venda') || mod.includes('vendeu') || title.includes('venda')
+    if (selectedCategory === 'vendas') return mod.includes('sale') || mod.includes('venda') || mod.includes('vendeu') || title.includes('venda') || title.includes('vendeu')
     if (selectedCategory === 'mensagens') return mod.includes('message') || mod.includes('mensagem') || mod.includes('chat') || title.includes('mensagem')
     if (selectedCategory === 'perguntas') return mod.includes('question') || mod.includes('pergunta') || title.includes('pergunta')
     if (selectedCategory === 'estoque') return mod.includes('stock') || mod.includes('estoque') || title.includes('estoque')
