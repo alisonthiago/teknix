@@ -298,30 +298,30 @@ export default function AtendimentoChatPage() {
           </div>
         </div>
 
-        {/* Alternador de Visão: Chat vs Automações */}
+        {/* Toggle de Abas Resumido */}
         <div className="flex items-center gap-2">
-          <div className="bg-[#f0f0f0] p-1 rounded-xl flex items-center gap-1">
+          <div className="bg-[#f0f0f0] p-1 rounded-xl flex items-center gap-1 shrink-0">
             <button
               onClick={() => setMainView('CHAT')}
-              className={`px-3 py-1.5 rounded-lg text-[11px] font-extrabold flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg text-[11px] font-extrabold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
                 mainView === 'CHAT' ? 'bg-white text-[#111] shadow-2xs' : 'text-[#666] hover:text-[#111]'
               }`}
             >
               <MessageSquare className="w-3.5 h-3.5 text-[#3483fa]" />
-              <span>Chat ao Vivo</span>
+              <span>Chat</span>
               <span className="px-1.5 py-0.2 rounded-full text-[9px] bg-[#3483fa] text-white">
-                {conversations.length}
+                {conversations.length || 1}
               </span>
             </button>
 
             <button
               onClick={() => setMainView('AUTOMATIONS')}
-              className={`px-3 py-1.5 rounded-lg text-[11px] font-extrabold flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg text-[11px] font-extrabold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
                 mainView === 'AUTOMATIONS' ? 'bg-white text-[#111] shadow-2xs' : 'text-[#666] hover:text-[#111]'
               }`}
             >
               <Bot className="w-3.5 h-3.5 text-[#e67e22]" />
-              <span>Mensagens Automáticas</span>
+              <span>Automações</span>
               <span className="px-1.5 py-0.2 rounded-full text-[9px] bg-[#B5F500] text-[#111]">
                 Auto
               </span>
@@ -332,10 +332,10 @@ export default function AtendimentoChatPage() {
             <button
               onClick={() => fetchConversations(false)}
               disabled={refreshing}
-              className="px-3 py-1.5 rounded-xl text-[11px] font-bold border border-[#e6e6e6] bg-[#f8f9fa] hover:bg-[#f0f0f0] text-[#333] flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
+              className="px-3 py-1.5 rounded-xl text-[11px] font-bold border border-[#e6e6e6] bg-[#f8f9fa] hover:bg-[#f0f0f0] text-[#333] flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50 shrink-0 whitespace-nowrap"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin text-[#3483fa]' : ''}`} />
-              <span>Atualizar</span>
+              <span className="hidden sm:inline">Atualizar</span>
             </button>
           )}
         </div>
@@ -695,8 +695,8 @@ export default function AtendimentoChatPage() {
                   </div>
                 )}
 
-                {/* Barra de Digitação e Envio */}
-                <div className="p-3.5 bg-white border-t border-[#e6e6e6] space-y-2">
+                {/* Barra de Digitação e Envio Fixa no Rodapé */}
+                <div className="sticky bottom-0 z-30 p-3.5 bg-white border-t border-[#e6e6e6] space-y-2 shadow-sm">
                   <div className="flex items-center gap-2">
                     <button
                       type="button"

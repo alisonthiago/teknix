@@ -238,10 +238,10 @@ export default function ClienteProfilePage() {
             {/* Header das Abas */}
             <div className="flex items-center gap-2 p-3 border-b border-[#eee] bg-[#fafafa] overflow-x-auto text-[12px]">
               {[
-                { id: 'pedidos', label: 'Pedidos & Compras', icon: ShoppingCart, count: orders.length },
-                { id: 'mensagens', label: 'Mensagens & Chat', icon: MessageSquare, count: customerMessages.length },
-                { id: 'perguntas', label: 'Perguntas nos Anúncios', icon: HelpCircle, count: customerQuestions.length },
-                { id: 'historico', label: 'Linha do Tempo 360°', icon: Clock, count: customerTimeline.length },
+                { id: 'pedidos', label: 'Pedidos', icon: ShoppingCart, count: orders.length },
+                { id: 'mensagens', label: 'Chat', icon: MessageSquare, count: customerMessages.length },
+                { id: 'perguntas', label: 'Perguntas', icon: HelpCircle, count: customerQuestions.length },
+                { id: 'historico', label: 'Histórico', icon: Clock, count: customerTimeline.length },
               ].map(tab => {
                 const Icon = tab.icon
                 const isActive = activeTab === tab.id
