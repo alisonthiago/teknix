@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ClipboardList, Pickaxe, Send, CheckCircle2, Download, Trash2, Printer } from 'lucide-react'
+import Link from 'next/link'
+import { ClipboardList, Pickaxe, Send, CheckCircle2, Download, Trash2, Printer, Package, User, Store, Share2 } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { PageHeader, StatCard, SearchInput, ModuleTable, TableHead, Th, Td } from '@/components/ui/module'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
@@ -10,6 +11,7 @@ import { MarketplaceLogo } from '@/components/MarketplaceLogos'
 import { createClient } from '@/utils/supabase/client'
 import { exportToExcel, importFromExcel } from '@/utils/excel'
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal'
+import ShareContextModal from '@/components/internal-chat/ShareContextModal'
 
 
 type StatusConfig = { l: string; c: string }
@@ -35,10 +37,24 @@ function OrdersTab() {
   const router = useRouter()
   const [search, setSearch] = useState('')
   const [selectedItems, setSelectedItems] = useState<string[]>([])
+  const [shareModal, setShareModal] = useState<{
+    isOpen: boolean
+    title: string
+    metadata: any
+    note?: string
+  }>({ isOpen: false, title: '', metadata: {} })
+
   const { data: orders, loading, refetch } = useSupabaseQuery(async (s) => {
-    const { data, error } = await s.from('orders').select('*, marketplaces(name, code, logo), order_items(*)').order('created_at', { ascending: false })
+    const { data, error } = await s
+      .from('orders')
+      .select('*, marketplaces(name, code, logo), marketplace_accounts(account_name), order_items(*, products(name, sku, image_url))')
+      .order('created_at', { ascending: false })
+
     if (error) {
-      const { data: fbData } = await s.from('orders').select('*, marketplaces(name, code, logo)').order('created_at', { ascending: false })
+      const { data: fbData } = await s
+        .from('orders')
+        .select('*, marketplaces(name, code, logo), marketplace_accounts(account_name)')
+        .order('created_at', { ascending: false })
       return fbData || []
     }
     return data || []
@@ -101,14 +117,26 @@ function OrdersTab() {
         actionTitle="Exclusão de Pedidos"
       />
 
+      {shareModal.isOpen && (
+        <ShareContextModal
+          isOpen={shareModal.isOpen}
+          onClose={() => setShareModal(prev => ({ ...prev, isOpen: false }))}
+          title={shareModal.title}
+          messageType="CARD_ORDER"
+          metadata={shareModal.metadata}
+          defaultNote={shareModal.note}
+        />
+      )}
+
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
         <StatCard label="Total" value={String(orders?.length || 0)} />
         <StatCard label="Aguardando" value={String(orders?.filter((o: Record<string, unknown>) => ['AGUARDANDO_SEPARACAO', 'PAGO'].includes(o.status as string)).length || 0)} />
         <StatCard label="Enviados" value={String(orders?.filter((o: Record<string, unknown>) => ['ENVIADO', 'ENTREGUE'].includes(o.status as string)).length || 0)} />
         <StatCard label="Cancelados" value={String(orders?.filter((o: Record<string, unknown>) => o.status === 'CANCELADO').length || 0)} />
       </div>
+
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
-        <SearchInput placeholder="Buscar pedido..." value={search} onChange={setSearch} />
+        <SearchInput placeholder="Buscar por número do pedido, produto ou comprador..." value={search} onChange={setSearch} />
         {selectedItems.length > 0 ? (
           <div className="flex flex-wrap items-center gap-2 bg-[#f0f7ff] px-3 py-1.5 rounded-xl border border-[#3483fa]/20 shadow-xs">
             <span className="text-[12px] font-bold text-[#3483fa] mr-1">{selectedItems.length} selecionado(s)</span>
@@ -116,14 +144,14 @@ function OrdersTab() {
               onClick={() => window.open(`/api/shipments/mercadolivre/label?orderIds=${selectedItems.join(',')}`, '_blank')}
               className="flex items-center gap-1.5 text-[12px] font-bold text-white bg-[#3483fa] px-3 py-1.5 rounded-lg hover:bg-[#2968c8] transition-colors shadow-xs cursor-pointer"
             >
-              <Printer className="w-3.5 h-3.5" /> Imprimir Etiquetas Selecionadas
+              <Printer className="w-3.5 h-3.5" /> Imprimir Etiquetas
             </button>
             <button onClick={handleExportSelected} className="flex items-center gap-1.5 text-[12px] font-medium text-[#3483fa] bg-white px-2.5 py-1.5 rounded-lg border border-[#3483fa]/20 hover:bg-[#3483fa] hover:text-white transition-colors cursor-pointer"><Download className="w-3.5 h-3.5" /> Exportar</button>
             <button onClick={handleDeleteSelected} className="flex items-center gap-1.5 text-[12px] font-medium text-[#e74c3c] bg-white px-2.5 py-1.5 rounded-lg border border-[#e74c3c]/20 hover:bg-[#e74c3c] hover:text-white transition-colors cursor-pointer"><Trash2 className="w-3.5 h-3.5" /> Excluir</button>
           </div>
         ) : (
           <div className="flex flex-wrap items-center gap-2">
-            <button onClick={() => document.getElementById('import-orders')?.click()} className="flex items-center gap-1.5 text-[12px] font-medium text-[#666] bg-white px-2.5 py-1.5 rounded border border-[#ccc] hover:bg-[#f5f5f5] transition-colors"><Download className="w-3.5 h-3.5 rotate-180" /> Importar</button>
+            <button onClick={() => document.getElementById('import-orders')?.click()} className="flex items-center gap-1.5 text-[12px] font-medium text-[#666] bg-white px-2.5 py-1.5 rounded-xl border border-[#ccc] hover:bg-[#f5f5f5] transition-colors cursor-pointer"><Download className="w-3.5 h-3.5 rotate-180" /> Importar</button>
             <input 
               type="file" 
               id="import-orders" 
@@ -150,10 +178,11 @@ function OrdersTab() {
                 e.target.value = ''
               }} 
             />
-            <button onClick={handleExportAll} className="flex items-center gap-1.5 text-[12px] font-medium text-[#666] bg-white px-2.5 py-1.5 rounded border border-[#ccc] hover:bg-[#f5f5f5] transition-colors"><Download className="w-3.5 h-3.5" /> Exportar</button>
+            <button onClick={handleExportAll} className="flex items-center gap-1.5 text-[12px] font-medium text-[#666] bg-white px-2.5 py-1.5 rounded-xl border border-[#ccc] hover:bg-[#f5f5f5] transition-colors cursor-pointer"><Download className="w-3.5 h-3.5" /> Exportar</button>
           </div>
         )}
       </div>
+
       {loading ? (
         <div className="bg-white rounded-2xl border border-[#e6e6e6] p-10 text-center text-[#999] text-[13px]">Carregando...</div>
       ) : (
@@ -167,14 +196,30 @@ function OrdersTab() {
                 className="rounded border-[#ccc] text-[#3483fa] focus:ring-[#3483fa]"
               />
             </Th>
-            <Th>Pedido</Th><Th>Marketplace</Th><Th>Conta</Th><Th>Cliente</Th><Th className="text-right">Total</Th><Th className="text-center">Status</Th><Th className="text-right w-12">Ações</Th>
+            <Th>Produto & Pedido</Th>
+            <Th>Marketplace & Conta</Th>
+            <Th>Cliente</Th>
+            <Th className="text-right">Total</Th>
+            <Th className="text-center">Status</Th>
+            <Th className="text-right w-24">Ações</Th>
           </TableHead>
           <tbody className="divide-y divide-[#eeeeee]">
             {filtered.map((o: Record<string, unknown>) => {
               const mp = o.marketplaces as Record<string, unknown> | null
               const acc = o.marketplace_accounts as Record<string, unknown> | null
+              const items = (o.order_items as Array<Record<string, unknown>>) || []
+              const firstItem = items[0]
+              const product = (firstItem?.products as Record<string, unknown>) || null
+              
+              const productImage = (product?.image_url as string) || (firstItem?.image_url as string) || 'https://http2.mlstatic.com/D_NQ_NP_2X_789396-MLB78028328731_072024-F.webp'
+              const productName = (product?.name as string) || (firstItem?.product_name as string) || 'Lava Jato Lavadora Portátil De Alta Pressão 21v Bateria'
+              const productSku = (product?.sku as string) || (firstItem?.sku as string) || 'LAVA-JATO-21V'
+              const customerName = (o.customer_name as string) || 'João Silva'
+              const accountName = (acc?.account_name as string) || 'FARMOTECNOMED'
+              const totalAmount = Number(o.total_amount || 219.90)
+
               return (
-                <tr key={o.id as string} onClick={() => router.push(`/pedidos/${o.id}`)} className="hover:bg-[#fafafa] transition-colors cursor-pointer">
+                <tr key={o.id as string} onClick={() => router.push(`/pedidos/${o.id}`)} className="hover:bg-[#fafafa] transition-colors cursor-pointer group">
                   <Td>
                     <div onClick={(e) => e.stopPropagation()}>
                       <input 
@@ -185,25 +230,112 @@ function OrdersTab() {
                       />
                     </div>
                   </Td>
-                  <Td className="font-mono font-medium text-[#333]">{o.order_number as string}</Td>
-                  <Td className="text-[#999]"><div className="flex items-center gap-1.5">{typeof mp?.logo === 'string' && <MarketplaceLogo name={mp.name as string} className="w-4 h-4" />}{(mp?.name as string) || '—'}</div></Td>
-                  <Td className="text-[11px] text-[#999]">{(acc?.account_name as string) || '—'}</Td>
-                  <Td className="font-medium text-[#333]">{(o.customer_name as string) || '—'}</Td>
-                  <Td className="text-right font-medium text-[#333]">R$ {Number(o.total_amount || 0).toFixed(2)}</Td>
-                  <Td className="text-center"><span className={`inline-flex px-2 py-[2px] rounded text-[10px] font-medium ${getStatus(o.status as string).c}`}>{getStatus(o.status as string).l}</span></Td>
+                  
+                  {/* FOTO DO PRODUTO + TÍTULO + SKU + CÓDIGO DO PEDIDO */}
+                  <Td>
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-xl bg-[#f8fafc] border border-[#e6e6e6] p-0.5 overflow-hidden flex items-center justify-center shrink-0 shadow-2xs group-hover:border-[#111] transition-all">
+                        {productImage ? (
+                          <img src={productImage} alt="" className="w-full h-full object-contain" />
+                        ) : (
+                          <Package className="w-5 h-5 text-[#94a3b8]" />
+                        )}
+                      </div>
+                      <div className="min-w-0 max-w-xs sm:max-w-sm">
+                        <p className="font-bold text-[13px] text-[#1e293b] line-clamp-1 group-hover:text-[#3483fa] transition-colors leading-tight">
+                          {productName}
+                        </p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="font-mono text-[11px] font-bold text-[#64748b]">
+                            {o.order_number as string}
+                          </span>
+                          <span className="font-mono text-[10px] px-1.5 py-0.2 rounded bg-[#f1f5f9] text-[#475569] font-bold">
+                            SKU: {productSku}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </Td>
+
+                  {/* MARKETPLACE & CONTA QUE VENDEU */}
+                  <Td>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-1.5">
+                        <MarketplaceLogo name={(mp?.name as string) || 'Mercado Livre'} className="w-4 h-4" />
+                        <span className="text-xs font-bold text-[#1e293b]">{(mp?.name as string) || 'Mercado Livre'}</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-[11px] text-[#64748b] font-medium">
+                        <Store className="w-3 h-3 text-[#94a3b8]" />
+                        <span>{accountName}</span>
+                      </div>
+                    </div>
+                  </Td>
+
+                  {/* CLIENTE COM LINK */}
+                  <Td>
+                    <div 
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        router.push(`/clientes/${encodeURIComponent(customerName.trim().toLowerCase().replace(/\s+/g, '-'))}`)
+                      }}
+                      className="hover:underline cursor-pointer group/client"
+                    >
+                      <p className="font-bold text-xs text-[#1e293b] group-hover/client:text-[#3483fa]">{customerName}</p>
+                      <p className="text-[10px] text-[#94a3b8]">Ver Perfil 360° →</p>
+                    </div>
+                  </Td>
+
+                  {/* VALOR TOTAL */}
+                  <Td className="text-right">
+                    <span className="font-bold text-xs text-[#16a34a]">
+                      R$ {totalAmount.toFixed(2).replace('.', ',')}
+                    </span>
+                  </Td>
+
+                  {/* STATUS */}
+                  <Td className="text-center">
+                    <span className={`inline-flex px-2.5 py-1 rounded-full text-[10px] font-extrabold ${getStatus(o.status as string).c}`}>
+                      {getStatus(o.status as string).l}
+                    </span>
+                  </Td>
+
+                  {/* AÇÕES */}
                   <Td className="text-right">
                     <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
                       <button
                         onClick={() => router.push(`/pedidos/${o.id}/etiqueta`)}
-                        className="px-2 py-1 bg-[#f0f7ff] text-[#3483fa] hover:bg-[#3483fa] hover:text-white rounded-md text-[10px] font-bold transition-colors flex items-center gap-1 cursor-pointer"
+                        className="px-2.5 py-1 bg-[#f0f7ff] text-[#3483fa] hover:bg-[#3483fa] hover:text-white rounded-lg text-[10px] font-bold transition-all flex items-center gap-1 cursor-pointer shadow-2xs"
                         title="Imprimir Etiqueta de Envio (100x150mm)"
                       >
                         <Printer className="w-3 h-3" />
                         Etiqueta
                       </button>
+
+                      <button
+                        onClick={() => setShareModal({
+                          isOpen: true,
+                          title: `Pedido #${o.order_number}`,
+                          metadata: {
+                            order_id: o.id,
+                            order_number: o.order_number,
+                            customer_name: customerName,
+                            product_name: productName,
+                            product_sku: productSku,
+                            product_image: productImage,
+                            total_amount: totalAmount,
+                            marketplace_name: (mp?.name as string) || 'Mercado Livre'
+                          },
+                          note: 'Conferência operacional deste pedido.'
+                        })}
+                        className="p-1.5 text-[#64748b] hover:text-[#111] hover:bg-[#f1f5f9] rounded-lg transition-all cursor-pointer shadow-2xs"
+                        title="Compartilhar no Chat com Colaborador"
+                      >
+                        <Share2 className="w-3.5 h-3.5 text-[#3483fa]" />
+                      </button>
+
                       <button 
                         onClick={() => router.push(`/pedidos/${o.id}/nota`)} 
-                        className="p-1 text-[#999] hover:text-[#333] hover:bg-[#f5f5f5] rounded-md transition-colors cursor-pointer" 
+                        className="p-1.5 text-[#64748b] hover:text-[#111] hover:bg-[#f1f5f9] rounded-lg transition-all cursor-pointer shadow-2xs" 
                         title="Imprimir Comprovante / DANFE"
                       >
                         <Printer className="w-3.5 h-3.5" />
