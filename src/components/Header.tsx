@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { TeknixLogo } from './TeknixLogo'
 import { usePathname, useRouter } from 'next/navigation'
-import { Bell, ChevronDown, LogOut, User, Settings, Calculator, BadgeDollarSign, Menu, X, ShoppingCart, AlertCircle, RefreshCw, Package } from 'lucide-react'
+import { Bell, ChevronDown, LogOut, User, Settings, Calculator, BadgeDollarSign, Menu, X, ShoppingCart, AlertCircle, RefreshCw, Package, MessageSquare } from 'lucide-react'
 import Image from 'next/image'
 import { createClient } from '@/utils/supabase/client'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
@@ -99,7 +99,7 @@ function HeaderActions({
     return () => document.removeEventListener('mousedown', handleClick)
   }, [setUserOpen, setNotifOpen])
 
-  const [selectedCategory, setSelectedCategory] = useState<'all' | 'vendas' | 'estoque' | 'pedidos' | 'integracoes'>('all')
+  const [selectedCategory, setSelectedCategory] = useState<'all' | 'mensagens' | 'vendas' | 'perguntas' | 'estoque'>('all')
 
   const formatTimeAgo = (dateStr?: string) => {
     if (!dateStr) return 'Agora'
@@ -118,50 +118,65 @@ function HeaderActions({
     return text.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]/gu, '').trim()
   }
 
-  const renderNotificationIcon = (type?: string, module?: string) => {
-    const t = String(type || module || '').toLowerCase()
-    if (t.includes('sale') || t.includes('venda')) {
+  const renderNotificationIcon = (type?: string, module?: string, title?: string) => {
+    const t = String(type || module || title || '').toLowerCase()
+
+    if (t.includes('lava jato') || t.includes('lavadora') || t.includes('pressão') || t.includes('mlb5090385757') || t.includes('2000018029918832')) {
       return (
-        <div className="w-8 h-8 rounded-xl bg-[#ecfdf5] border border-[#a7f3d0] flex items-center justify-center text-[#059669] shrink-0">
-          <ShoppingCart className="w-4 h-4" />
+        <div className="w-11 h-11 rounded-xl bg-white border border-[#e6e6e6] p-1 flex items-center justify-center shrink-0 overflow-hidden shadow-2xs">
+          <img src="https://http2.mlstatic.com/D_NQ_NP_2X_789396-MLB78028328731_072024-F.webp" alt="Produto" className="w-full h-full object-contain" />
         </div>
       )
     }
-    if (t.includes('stock') || t.includes('estoque')) {
+    if (t.includes('parafusadeira') || t.includes('chave fenda') || t.includes('2000018014218344')) {
       return (
-        <div className="w-8 h-8 rounded-xl bg-[#fffbeb] border border-[#fde68a] flex items-center justify-center text-[#d97706] shrink-0">
-          <AlertCircle className="w-4 h-4" />
+        <div className="w-11 h-11 rounded-xl bg-white border border-[#e6e6e6] p-1 flex items-center justify-center shrink-0 overflow-hidden shadow-2xs">
+          <img src="https://http2.mlstatic.com/D_985226-MLA115019108190_082026-O.jpg" alt="Produto" className="w-full h-full object-contain" />
         </div>
       )
     }
-    if (t.includes('integration') || t.includes('marketplace') || t.includes('sync')) {
+    if (t.includes('laser') || t.includes('nivel') || t.includes('2000018011773470')) {
       return (
-        <div className="w-8 h-8 rounded-xl bg-[#f0fdf4] border border-[#bbf7d0] flex items-center justify-center text-[#16a34a] shrink-0">
-          <RefreshCw className="w-4 h-4" />
+        <div className="w-11 h-11 rounded-xl bg-white border border-[#e6e6e6] p-1 flex items-center justify-center shrink-0 overflow-hidden shadow-2xs">
+          <img src="https://http2.mlstatic.com/D_843763-MLA99938277957_112025-O.jpg" alt="Produto" className="w-full h-full object-contain" />
         </div>
       )
     }
-    if (t.includes('error') || t.includes('erro')) {
+    if (t.includes('message') || t.includes('mensagem')) {
       return (
-        <div className="w-8 h-8 rounded-xl bg-[#fef2f2] border border-[#fecaca] flex items-center justify-center text-[#dc2626] shrink-0">
-          <AlertCircle className="w-4 h-4" />
+        <div className="w-11 h-11 rounded-xl bg-[#f0f7ff] border border-[#bfdbfe] flex items-center justify-center text-[#2563eb] shrink-0 font-bold text-xs">
+          <MessageSquare className="w-5 h-5 text-[#3483fa]" />
+        </div>
+      )
+    }
+    if (t.includes('sale') || t.includes('venda') || t.includes('vendeu')) {
+      return (
+        <div className="w-11 h-11 rounded-xl bg-[#ecfdf5] border border-[#a7f3d0] flex items-center justify-center text-[#059669] shrink-0">
+          <ShoppingCart className="w-5 h-5 text-[#16a34a]" />
+        </div>
+      )
+    }
+    if (t.includes('question') || t.includes('pergunta')) {
+      return (
+        <div className="w-11 h-11 rounded-xl bg-[#fffbeb] border border-[#fde68a] flex items-center justify-center text-[#d97706] shrink-0">
+          <MessageSquare className="w-5 h-5 text-[#d97706]" />
         </div>
       )
     }
     return (
-      <div className="w-8 h-8 rounded-xl bg-[#eff6ff] border border-[#bfdbfe] flex items-center justify-center text-[#2563eb] shrink-0">
-        <Package className="w-4 h-4" />
+      <div className="w-11 h-11 rounded-xl bg-[#eff6ff] border border-[#bfdbfe] flex items-center justify-center text-[#2563eb] shrink-0">
+        <Package className="w-5 h-5" />
       </div>
     )
   }
 
   const filteredNotifications = notifications.filter(n => {
     if (selectedCategory === 'all') return true
-    const mod = String(n.module || n.type || (n as any).metadata?.category || '').toLowerCase()
-    if (selectedCategory === 'vendas') return mod.includes('sale') || mod.includes('venda')
+    const mod = String(n.module || n.type || n.title || '').toLowerCase()
+    if (selectedCategory === 'vendas') return mod.includes('sale') || mod.includes('venda') || mod.includes('vendeu')
+    if (selectedCategory === 'mensagens') return mod.includes('message') || mod.includes('mensagem') || mod.includes('chat')
+    if (selectedCategory === 'perguntas') return mod.includes('question') || mod.includes('pergunta')
     if (selectedCategory === 'estoque') return mod.includes('stock') || mod.includes('estoque')
-    if (selectedCategory === 'pedidos') return mod.includes('order') || mod.includes('pedido')
-    if (selectedCategory === 'integracoes') return mod.includes('marketplace') || mod.includes('sync') || mod.includes('integration')
     return true
   })
 
@@ -182,13 +197,13 @@ function HeaderActions({
         </button>
 
         {notifOpen && (
-          <div className="absolute right-0 top-full mt-2 w-96 max-w-[90vw] bg-white rounded-3xl border border-[#e6e6e6] shadow-[0_12px_36px_rgba(0,0,0,0.12)] overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-            {/* Header */}
-            <div className="p-4 border-b border-[#eeeeee] flex items-center justify-between bg-[#fafafa]">
+          <div className="absolute right-0 top-full mt-2 w-[420px] max-w-[94vw] bg-white rounded-3xl border border-[#e6e6e6] shadow-[0_12px_40px_rgba(0,0,0,0.14)] overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+            {/* Header Estilo Mercado Livre */}
+            <div className="p-4 border-b border-[#eeeeee] flex items-center justify-between bg-white">
               <div className="flex items-center gap-2">
-                <h3 className="text-sm font-bold text-[#333]">Central de Notificações</h3>
+                <h3 className="text-[15px] font-black text-[#1f2328]">Vendas e Gestão</h3>
                 {unreadCount > 0 && (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#fff0f0] text-[#e74c3c]">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#fff0f0] text-[#e74c3c] border border-[#ffcdd2]">
                     {unreadCount} nova{unreadCount !== 1 ? 's' : ''}
                   </span>
                 )}
@@ -196,7 +211,7 @@ function HeaderActions({
               {unreadCount > 0 && (
                 <button
                   onClick={markAllAsRead}
-                  className="text-[11px] font-semibold text-[#3483fa] hover:underline cursor-pointer"
+                  className="text-[11px] font-bold text-[#3483fa] hover:underline cursor-pointer"
                 >
                   Marcar todas como lidas
                 </button>
@@ -204,21 +219,21 @@ function HeaderActions({
             </div>
 
             {/* Category Filter Tabs */}
-            <div className="flex items-center gap-1 p-2 border-b border-[#f0f0f0] bg-white overflow-x-auto text-[11px]">
+            <div className="flex items-center gap-1.5 p-2.5 border-b border-[#f0f0f0] bg-[#fafafa] overflow-x-auto text-[11px]">
               {[
                 { id: 'all', label: 'Todas' },
+                { id: 'mensagens', label: 'Mensagens' },
                 { id: 'vendas', label: 'Vendas' },
+                { id: 'perguntas', label: 'Perguntas' },
                 { id: 'estoque', label: 'Estoque' },
-                { id: 'pedidos', label: 'Pedidos' },
-                { id: 'integracoes', label: 'Canais' },
               ].map(cat => (
                 <button
                   key={cat.id}
                   onClick={() => setSelectedCategory(cat.id as any)}
-                  className={`px-2.5 py-1 rounded-lg font-medium transition-colors whitespace-nowrap cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-xl font-bold transition-all whitespace-nowrap cursor-pointer ${
                     selectedCategory === cat.id
-                      ? 'bg-[#3483fa] text-white shadow-sm'
-                      : 'text-[#666] hover:bg-[#f5f5f5]'
+                      ? 'bg-[#1f2328] text-white shadow-2xs'
+                      : 'text-[#666] hover:bg-white hover:text-[#111]'
                   }`}
                 >
                   {cat.label}
@@ -226,15 +241,15 @@ function HeaderActions({
               ))}
             </div>
 
-            {/* Notification Items List */}
-            <div className="max-h-[360px] overflow-y-auto divide-y divide-[#f5f5f5] p-1.5">
+            {/* Notification Items List Estilo Mercado Livre */}
+            <div className="max-h-[380px] overflow-y-auto divide-y divide-[#f0f0f0] p-2 space-y-1">
               {filteredNotifications.length === 0 ? (
                 <div className="p-8 text-center">
                   <div className="w-10 h-10 rounded-full bg-[#f8fafc] border border-[#e2e8f0] flex items-center justify-center mx-auto mb-2 text-[#94a3b8]">
                     <Bell className="w-5 h-5" />
                   </div>
                   <p className="text-sm font-semibold text-[#333]">Nenhuma notificação</p>
-                  <p className="text-[11px] text-[#999] mt-1">Você está atualizado com todos os eventos do sistema.</p>
+                  <p className="text-[11px] text-[#999] mt-1">Você está atualizado com todos os eventos do Mercado Livre.</p>
                 </div>
               ) : (
                 filteredNotifications.map(n => (
@@ -244,43 +259,45 @@ function HeaderActions({
                       if (!n.is_read) markAsRead(n.id)
                       
                       let path = ''
-                      const mod = String(n.module || n.type || '').toLowerCase()
-                      if (mod.includes('order') || mod.includes('pedido') || mod.includes('sale') || mod.includes('venda')) {
-                        path = n.entity_id ? `/pedidos/${n.entity_id}` : '/pedidos'
+                      const mod = String(n.module || n.type || n.title || '').toLowerCase()
+                      if (mod.includes('message') || mod.includes('mensagem') || mod.includes('question') || mod.includes('pergunta')) {
+                        path = '/atendimento'
+                      } else if (mod.includes('sale') || mod.includes('venda') || mod.includes('vendeu') || mod.includes('order') || mod.includes('pedido')) {
+                        path = '/pedidos'
                       } else if (mod.includes('product') || mod.includes('produto') || mod.includes('stock') || mod.includes('estoque')) {
                         path = '/operacao'
-                      } else if (mod.includes('market') || mod.includes('integr')) {
-                        path = '/marketplaces'
+                      } else {
+                        path = '/atendimento'
                       }
 
-                      if (path) {
-                        setNotifOpen(false)
-                        router.push(path)
-                      }
+                      setNotifOpen(false)
+                      router.push(path)
                     }}
-                    className={`p-3 rounded-2xl transition-all cursor-pointer flex gap-3 items-start my-1 ${
+                    className={`p-3 rounded-2xl transition-all cursor-pointer flex gap-3 items-center ${
                       n.is_read
-                        ? 'hover:bg-[#f8f9fa] opacity-80'
-                        : 'bg-[#f0f7ff]/70 hover:bg-[#e6f1ff] border border-[#d6e7ff]'
+                        ? 'bg-white hover:bg-[#fafafa]'
+                        : 'bg-[#f0f7ff]/60 hover:bg-[#e6f1ff] border border-[#d6e7ff]'
                     }`}
                   >
-                    {renderNotificationIcon(n.type, n.module)}
+                    {renderNotificationIcon(n.type, n.module, n.title)}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-1">
-                        <p className={`text-[12px] leading-tight truncate ${n.is_read ? 'text-[#555]' : 'text-[#111] font-bold'}`}>
+                        <p className={`text-[12px] leading-snug line-clamp-1 ${n.is_read ? 'text-[#333]' : 'text-[#111] font-extrabold'}`}>
                           {cleanTitle(n.title)}
                         </p>
-                        <span className="text-[10px] text-[#999] shrink-0">{formatTimeAgo(n.created_at)}</span>
+                        <span className="text-[10px] text-[#999] shrink-0 font-medium">{formatTimeAgo(n.created_at)}</span>
                       </div>
-                      <p className="text-[11px] text-[#666] leading-snug mt-1 line-clamp-2">{cleanTitle(n.message)}</p>
+                      <p className="text-[11px] text-[#666] leading-tight mt-1 line-clamp-1">{cleanTitle(n.message)}</p>
                     </div>
                     {!n.is_read && (
-                      <span className="w-2 h-2 rounded-full bg-[#84cc16] shrink-0 mt-1.5" />
+                      <span className="w-2 h-2 rounded-full bg-[#3483fa] shrink-0" />
                     )}
                   </div>
                 ))
               )}
             </div>
+
+            {/* Footer */}
 
             {/* Footer */}
             <div className="p-2.5 border-t border-[#f0f0f0] bg-[#fafafa] text-center">
