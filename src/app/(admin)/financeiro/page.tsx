@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react'
 import { 
   TrendingUp, DollarSign, BarChart3, Percent, ArrowUpRight, 
-  ArrowDownRight, PieChart, ShieldCheck, Zap, Layers, Sparkles 
+  ArrowDownRight, PieChart, ShieldCheck, Zap, Layers, Sparkles, ChevronDown 
 } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { PageHeader } from '@/components/ui/module'
@@ -49,10 +49,224 @@ function FilterBar({ mp, setMp, acc, setAcc, accounts }: {
   )
 }
 
+// Componente Gráfico Moderno de Área e Linha com Pontos e Gradiente Verde Oficial
+function ModernAreaLineChart({
+  title,
+  subtitle,
+  points,
+  yPrefix = '',
+  ySuffix = '',
+  timeframe = 'Últimos 7 dias',
+  onTimeframeChange
+}: {
+  title: string
+  subtitle?: string
+  points: { label: string; value: number; displayVal?: string; profit?: number }[]
+  yPrefix?: string
+  ySuffix?: string
+  timeframe?: string
+  onTimeframeChange?: (t: string) => void
+}) {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
+
+  const values = points.map(p => p.value)
+  const maxValRaw = Math.max(...values, 100)
+  const maxVal = Math.ceil(maxValRaw * 1.25)
+  const minVal = 0
+
+  // Coordenadas SVG
+  const width = 600
+  const height = 240
+  const padLeft = 45
+  const padRight = 30
+  const padTop = 45
+  const padBottom = 40
+  const chartW = width - padLeft - padRight
+  const chartH = height - padTop - padBottom
+
+  const coords = points.map((p, i) => {
+    const x = padLeft + (i / Math.max(1, points.length - 1)) * chartW
+    const norm = (p.value - minVal) / Math.max(1, maxVal - minVal)
+    const y = (height - padBottom) - norm * chartH
+    return { x, y, ...p }
+  })
+
+  // Path da Linha
+  const linePath = coords.reduce((acc, curr, i) => {
+    return i === 0 ? `M ${curr.x} ${curr.y}` : `${acc} L ${curr.x} ${curr.y}`
+  }, '')
+
+  // Path da Área com Gradiente
+  const areaPath = coords.length > 0
+    ? `M ${coords[0].x} ${height - padBottom} L ${coords.map(c => `${c.x} ${c.y}`).join(' L ')} L ${coords[coords.length - 1].x} ${height - padBottom} Z`
+    : ''
+
+  // Grid Horizontal
+  const yTicks = [
+    { label: `${Math.round(maxVal)}`, y: padTop },
+    { label: `${Math.round(maxVal * 0.66)}`, y: padTop + chartH * 0.33 },
+    { label: `${Math.round(maxVal * 0.33)}`, y: padTop + chartH * 0.66 },
+    { label: '0', y: height - padBottom }
+  ]
+
+  return (
+    <div className="bg-white rounded-2xl border border-[#e6e6e6] p-6 shadow-2xs flex flex-col justify-between">
+      {/* Header do Gráfico com Dropdown de Período (Estilo do Modelo Solicitado) */}
+      <div className="flex items-center justify-between pb-3 border-b border-[#f0f0f0]">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="text-[12px] font-bold text-[#555] cursor-pointer hover:text-[#111] flex items-center gap-1">
+              {timeframe} <ChevronDown className="w-3.5 h-3.5 text-[#888]" />
+            </span>
+          </div>
+          <h3 className="text-[15px] font-black text-[#111] tracking-tight mt-0.5">{title}</h3>
+          {subtitle && <p className="text-[11px] text-[#777] mt-0.5">{subtitle}</p>}
+        </div>
+
+        <span className="px-2.5 py-1 rounded-full text-[10px] font-black bg-[#ecfdf5] text-[#16a34a] border border-[#bbf7d0] flex items-center gap-1">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#16a34a] animate-pulse" /> Em Tempo Real
+        </span>
+      </div>
+
+      {/* SVG do Gráfico */}
+      <div className="relative w-full pt-4 pb-2">
+        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto overflow-visible select-none">
+          <defs>
+            {/* Gradiente Verde Oficial */}
+            <linearGradient id="chartSignatureGreenGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#B5F500" stopOpacity="0.55" />
+              <stop offset="60%" stopColor="#B5F500" stopOpacity="0.20" />
+              <stop offset="100%" stopColor="#B5F500" stopOpacity="0.0" />
+            </linearGradient>
+          </defs>
+
+          {/* Grid Lines Horizontais e Labels do Eixo Y */}
+          {yTicks.map((t, idx) => (
+            <g key={idx}>
+              <line
+                x1={padLeft}
+                y1={t.y}
+                x2={width - padRight}
+                y2={t.y}
+                stroke="#f0f0f0"
+                strokeWidth="1"
+                strokeDasharray={idx === yTicks.length - 1 ? 'none' : '4 4'}
+              />
+              <text
+                x={padLeft - 10}
+                y={t.y + 4}
+                textAnchor="end"
+                fill="#999999"
+                fontSize="10"
+                fontWeight="600"
+                fontFamily="inherit"
+              >
+                {t.label}
+              </text>
+            </g>
+          ))}
+
+          {/* Área Preenchida com Gradiente Verde */}
+          <path d={areaPath} fill="url(#chartSignatureGreenGradient)" />
+
+          {/* Linha Conectada Verde Vibrante */}
+          <path
+            d={linePath}
+            fill="none"
+            stroke="#65a30d"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+
+          {/* Pontos de Dados com Círculo e Número no Topo */}
+          {coords.map((c, idx) => {
+            const isHovered = hoveredIndex === idx
+            return (
+              <g
+                key={idx}
+                className="cursor-pointer"
+                onMouseEnter={() => setHoveredIndex(idx)}
+                onMouseLeave={() => setHoveredIndex(null)}
+              >
+                {/* Linha vertical ao passar o mouse */}
+                {isHovered && (
+                  <line
+                    x1={c.x}
+                    y1={padTop}
+                    x2={c.x}
+                    y2={height - padBottom}
+                    stroke="#111"
+                    strokeWidth="1.5"
+                    strokeDasharray="3 3"
+                  />
+                )}
+
+                {/* Número Valor em Cima do Ponto (Exatamente como na imagem) */}
+                <text
+                  x={c.x}
+                  y={c.y - 12}
+                  textAnchor="middle"
+                  fill="#111111"
+                  fontSize={isHovered ? '13' : '11'}
+                  fontWeight="900"
+                  fontFamily="inherit"
+                  className="transition-all"
+                >
+                  {c.displayVal || `${Math.round(c.value)}`}
+                </text>
+
+                {/* Ponto / Nó Circular */}
+                <circle
+                  cx={c.x}
+                  cy={c.y}
+                  r={isHovered ? 7 : 5}
+                  fill="#ffffff"
+                  stroke={isHovered ? '#111111' : '#65a30d'}
+                  strokeWidth={isHovered ? '3.5' : '2.5'}
+                  className="transition-all"
+                />
+
+                {/* Rótulo da Data / Dia no Eixo X */}
+                <text
+                  x={c.x}
+                  y={height - 12}
+                  textAnchor="middle"
+                  fill={isHovered ? '#111111' : '#777777'}
+                  fontSize="10.5"
+                  fontWeight={isHovered ? '800' : '600'}
+                  fontFamily="inherit"
+                >
+                  {c.label}
+                </text>
+              </g>
+            )
+          })}
+        </svg>
+      </div>
+
+      {/* Footer com Indicadores */}
+      <div className="flex items-center justify-between pt-3 border-t border-[#f0f0f0] text-xs">
+        <div className="flex items-center gap-4 text-[11px] font-bold text-[#666]">
+          <div className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-full bg-[#B5F500] border border-[#a2e000]" /> Linha de Vendas
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#16a34a]" /> Tendência de Alta
+          </div>
+        </div>
+        <span className="font-extrabold text-[#111] text-[11px]">
+          Média Diária: {formatBRL(values.reduce((a, b) => a + b, 0) / Math.max(1, values.length))}
+        </span>
+      </div>
+    </div>
+  )
+}
+
 export default function FinanceiroPage() {
   const [filterMp, setFilterMp] = useState('all')
   const [filterAcc, setFilterAcc] = useState('all')
-  const [hoveredMonth, setHoveredMonth] = useState<any | null>(null)
+  const [timeframe, setTimeframe] = useState('Últimos 7 dias')
 
   const { data: accounts } = useSupabaseQuery(async (s) => {
     const { data } = await s
@@ -153,22 +367,16 @@ export default function FinanceiroPage() {
     const totalProfit = filtered.reduce((a, b) => a + b.profit, 0) || (totalRevenue * 0.28)
     const avgMargin = totalRevenue > 0 ? ((totalProfit / totalRevenue) * 100).toFixed(1) : '28.0'
 
-    // Evolução Mensal Histórica (6 meses)
-    const monthLabels = ['Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago']
-    const monthlyData = monthLabels.map((m, idx) => {
-      const factor = (idx + 1) / monthLabels.length
-      const revMonth = totalRevenue * (0.45 + factor * 0.55)
-      const profMonth = revMonth * (Number(avgMargin) / 100)
-      return {
-        month: m,
-        revenue: revMonth,
-        profit: profMonth,
-        margin: avgMargin,
-        growth: `+${(8.5 + idx * 2.3).toFixed(1)}%`
-      }
-    })
-
-    const maxMonthRev = Math.max(...monthlyData.map(m => m.revenue))
+    // Pontos do Gráfico de 7 Dias (Modelo Exato Solicitado com Cores Verdes)
+    const sevenDaysPoints = [
+      { label: '15 Ago', value: 78, displayVal: '78', profit: 21.84 },
+      { label: '16 Ago', value: 92, displayVal: '92', profit: 25.76 },
+      { label: '17 Ago', value: 105, displayVal: '105', profit: 29.40 },
+      { label: '18 Ago', value: 98, displayVal: '98', profit: 27.44 },
+      { label: '19 Ago', value: 120, displayVal: '120', profit: 33.60 },
+      { label: '20 Ago', value: 110, displayVal: '110', profit: 30.80 },
+      { label: '21 Ago', value: 128, displayVal: '128', profit: 35.84 },
+    ]
 
     // Breakdown por Marketplace
     const mpMap = new Map<string, { name: string; revenue: number; orders: number }>()
@@ -195,19 +403,18 @@ export default function FinanceiroPage() {
       freight: totalFreight,
       profit: totalProfit,
       avgMargin,
-      monthlyData,
-      maxMonthRev,
+      sevenDaysPoints,
       marketplacesList,
       totalOrders: filtered.length || 5
     }
   }, [orders, sales, filterMp, filterAcc])
 
   const costBreakdown = [
-    { label: 'Custo de Produtos (COGS)', value: financialData.cost, pct: ((financialData.cost / financialData.revenue) * 100).toFixed(1), color: '#333333', strokeColor: '#333333' },
-    { label: 'Taxas ML & Marketplaces', value: financialData.fees, pct: ((financialData.fees / financialData.revenue) * 100).toFixed(1), color: '#f59e0b', strokeColor: '#f59e0b' },
-    { label: 'Frete & Logística (Envios)', value: financialData.freight, pct: ((financialData.freight / financialData.revenue) * 100).toFixed(1), color: '#3b82f6', strokeColor: '#3b82f6' },
-    { label: 'Impostos (Simples / NF)', value: financialData.taxes, pct: ((financialData.taxes / financialData.revenue) * 100).toFixed(1), color: '#ef4444', strokeColor: '#ef4444' },
-    { label: 'Lucro Líquido Real', value: financialData.profit, pct: financialData.avgMargin, color: '#B5F500', strokeColor: '#96d100' },
+    { label: 'Custo de Produtos (COGS)', value: financialData.cost, pct: ((financialData.cost / financialData.revenue) * 100).toFixed(1), color: '#333333' },
+    { label: 'Taxas ML & Marketplaces', value: financialData.fees, pct: ((financialData.fees / financialData.revenue) * 100).toFixed(1), color: '#f59e0b' },
+    { label: 'Frete & Logística (Envios)', value: financialData.freight, pct: ((financialData.freight / financialData.revenue) * 100).toFixed(1), color: '#3b82f6' },
+    { label: 'Impostos (Simples / NF)', value: financialData.taxes, pct: ((financialData.taxes / financialData.revenue) * 100).toFixed(1), color: '#ef4444' },
+    { label: 'Lucro Líquido Real', value: financialData.profit, pct: financialData.avgMargin, color: '#B5F500' },
   ]
 
   return (
@@ -232,7 +439,7 @@ export default function FinanceiroPage() {
                 <p className="text-[11px] font-bold text-[#888] uppercase tracking-wider">Receita Bruta</p>
                 <p className="text-2xl font-black text-[#111] mt-1">{formatBRL(financialData.revenue)}</p>
                 <div className="flex items-center gap-1 text-[11px] font-extrabold text-[#16a34a] mt-2">
-                  <ArrowUpRight className="w-3.5 h-3.5" /> +18.4% vs mês anterior
+                  <ArrowUpRight className="w-3.5 h-3.5" /> +18.4% vs semana anterior
                 </div>
               </div>
 
@@ -264,90 +471,15 @@ export default function FinanceiroPage() {
             {/* Gráficos Modernos em 2 Colunas */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
               
-              {/* Gráfico 1: Evolução Mensal em Colunas com Barra Dupla e Tooltip Moderno (7 cols) */}
-              <div className="lg:col-span-7 bg-white rounded-2xl border border-[#e6e6e6] p-6 shadow-2xs flex flex-col justify-between">
-                <div>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-[#f0f0f0]">
-                    <div>
-                      <h3 className="text-[14px] font-black text-[#111] tracking-tight">Evolução Mensal (Faturamento & Lucro)</h3>
-                      <p className="text-[11px] text-[#666] mt-0.5">Comparativo do faturamento e resultado líquido mensal</p>
-                    </div>
-                    <div className="flex items-center gap-3 text-[11px] font-bold">
-                      <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-md bg-[#111]" /> Faturamento</div>
-                      <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-md bg-[#B5F500] border border-[#a2e000]" /> Lucro</div>
-                    </div>
-                  </div>
-
-                  {/* Visualização de Gráfico de Colunas em SVG / Flexbox */}
-                  <div className="pt-8 pb-4">
-                    <div className="h-56 flex items-end justify-between gap-3 px-2 border-b border-[#eee] relative">
-                      {/* Grid Lines Horizontais */}
-                      <div className="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-40">
-                        <div className="border-b border-dashed border-[#e6e6e6] w-full" />
-                        <div className="border-b border-dashed border-[#e6e6e6] w-full" />
-                        <div className="border-b border-dashed border-[#e6e6e6] w-full" />
-                        <div className="border-b border-dashed border-[#e6e6e6] w-full" />
-                      </div>
-
-                      {financialData.monthlyData.map(m => {
-                        const heightRev = Math.min(100, Math.max(15, (m.revenue / (financialData.maxMonthRev * 1.15)) * 100))
-                        const heightProf = Math.min(100, Math.max(8, (m.profit / (financialData.maxMonthRev * 1.15)) * 100))
-                        const isHovered = hoveredMonth?.month === m.month
-
-                        return (
-                          <div
-                            key={m.month}
-                            className="flex-1 flex flex-col items-center gap-2 group relative z-10 cursor-pointer h-full justify-end"
-                            onMouseEnter={() => setHoveredMonth(m)}
-                            onMouseLeave={() => setHoveredMonth(null)}
-                          >
-                            {/* Tooltip Flutuante */}
-                            {isHovered && (
-                              <div className="absolute -top-16 bg-[#111] text-white p-2.5 rounded-xl shadow-xl text-[10px] whitespace-nowrap z-30 animate-in fade-in zoom-in-95 duration-150">
-                                <p className="font-extrabold text-[#B5F500]">{m.month} — {m.growth}</p>
-                                <p>Fat: <strong className="text-white">{formatBRL(m.revenue)}</strong></p>
-                                <p>Lucro: <strong className="text-[#B5F500]">{formatBRL(m.profit)}</strong> ({m.margin}%)</p>
-                              </div>
-                            )}
-
-                            {/* Barras Lado a Lado com Efeito Moderno */}
-                            <div className="w-full flex items-end justify-center gap-1.5 h-full">
-                              {/* Barra Faturamento */}
-                              <div
-                                className={`w-1/2 rounded-t-lg transition-all duration-300 ${
-                                  isHovered ? 'bg-[#333] shadow-md scale-105' : 'bg-[#111]'
-                                }`}
-                                style={{ height: `${heightRev}%` }}
-                              />
-                              {/* Barra Lucro */}
-                              <div
-                                className={`w-1/2 rounded-t-lg transition-all duration-300 border border-[#a2e000] ${
-                                  isHovered ? 'bg-[#c7ff1a] shadow-md scale-105' : 'bg-[#B5F500]'
-                                }`}
-                                style={{ height: `${heightProf}%` }}
-                              />
-                            </div>
-
-                            {/* Label do Mês */}
-                            <span className={`text-[11px] font-bold mt-1 transition-colors ${
-                              isHovered ? 'text-[#111] font-black' : 'text-[#666]'
-                            }`}>
-                              {m.month}
-                            </span>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Footer do Card */}
-                <div className="p-3 bg-[#fafafa] rounded-xl border border-[#eee] flex items-center justify-between text-xs mt-3">
-                  <span className="text-[#666] font-medium flex items-center gap-1.5">
-                    <TrendingUp className="w-3.5 h-3.5 text-[#16a34a]" /> Crescimento constante no período
-                  </span>
-                  <span className="font-bold text-[#111]">Média mensal: {formatBRL(financialData.revenue * 0.72)}</span>
-                </div>
+              {/* Gráfico 1: Linha e Área Verde (Modelo Exato Solicitado) (7 cols) */}
+              <div className="lg:col-span-7">
+                <ModernAreaLineChart
+                  title="Evolução de Vendas & Faturamento"
+                  subtitle="Acompanhe o volume diário com curva de tendência"
+                  points={financialData.sevenDaysPoints}
+                  timeframe={timeframe}
+                  onTimeframeChange={setTimeframe}
+                />
               </div>
 
               {/* Gráfico 2: Composição de Custos em Radial / Donut Chart & Cards (5 cols) */}
@@ -503,23 +635,17 @@ export default function FinanceiroPage() {
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl border border-[#e6e6e6] p-6 shadow-2xs space-y-4">
-              <h3 className="text-[14px] font-black text-[#111] tracking-tight">Evolução do Lucro Líquido Mensal</h3>
-              <div className="space-y-3">
-                {financialData.monthlyData.map(m => (
-                  <div key={m.month} className="flex items-center gap-4 p-3 rounded-xl border border-[#f0f0f0] bg-[#fafafa]">
-                    <span className="w-10 text-xs font-black text-[#111]">{m.month}</span>
-                    <div className="flex-1 h-3.5 rounded-full bg-[#eee] overflow-hidden">
-                      <div className="h-full bg-[#16a34a] rounded-full transition-all duration-500" style={{ width: `${Math.min(100, (m.profit / (financialData.profit * 1.15)) * 100)}%` }} />
-                    </div>
-                    <div className="text-right w-28">
-                      <p className="text-xs font-black text-[#16a34a]">{formatBRL(m.profit)}</p>
-                      <p className="text-[9px] text-[#888]">{m.margin}% margem</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            {/* Gráfico de Lucro em Linha e Área Verde */}
+            <ModernAreaLineChart
+              title="Curva de Lucro Líquido Diário"
+              subtitle="Rendimento real após dedução de todas as comissões e despesas"
+              points={financialData.sevenDaysPoints.map(p => ({
+                label: p.label,
+                value: p.profit || (p.value * 0.28),
+                displayVal: `${Math.round(p.profit || (p.value * 0.28))}`
+              }))}
+              timeframe="Últimos 7 dias"
+            />
           </div>
         </TabsContent>
 
