@@ -511,15 +511,24 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
       return c
     }))
 
-    // 2. Persistir via API Route
+    // 2. Persistir Conversa e Mensagem via API Route no Supabase
     try {
+      const conv = conversations.find(c => c.id === conversationId)
+      if (conv) {
+        await fetch('/api/chat/conversations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(conv)
+        })
+      }
+
       await fetch('/api/chat/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newMessage)
       })
     } catch (err) {
-      console.warn('Erro persistência:', err)
+      console.warn('Erro persistência Supabase:', err)
     }
 
     // 3. Broadcast em tempo real

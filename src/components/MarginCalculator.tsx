@@ -881,9 +881,9 @@ export default function MarginCalculator({ open, onClose }: MarginCalculatorProp
 
         {/* Tabs */}
         <div className="border-b border-[#e6e6e6] px-4 flex gap-0 overflow-x-auto shrink-0">
-          <TabButton active={activeTab === 'simulador'} onClick={() => setActiveTab('simulador')} icon={TrendingUp} label="Simulador Avançado" />
-          <TabButton active={activeTab === 'produtos'} onClick={() => setActiveTab('produtos')} icon={Package} label="Meus Produtos" />
-          <TabButton active={activeTab === 'comparar'} onClick={() => setActiveTab('comparar')} icon={Search} label="Comparar APIs" />
+          <TabButton active={activeTab === 'simulador'} onClick={() => setActiveTab('simulador')} icon={TrendingUp} label="Simulador" />
+          <TabButton active={activeTab === 'produtos'} onClick={() => setActiveTab('produtos')} icon={Package} label="Produtos" />
+          <TabButton active={activeTab === 'comparar'} onClick={() => setActiveTab('comparar')} icon={Search} label="Comparar" />
         </div>
 
         {/* Tab Content */}
