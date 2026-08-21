@@ -17,7 +17,24 @@ interface Notification {
 }
 
 export default function NotificationsClient({ initialNotifications }: { initialNotifications: Notification[] }) {
-  const [notifications, setNotifications] = useState(initialNotifications)
+  const validInitial = (initialNotifications || []).filter(n => {
+    const title = String(n.title || '').toLowerCase()
+    const msg = String(n.message || '').toLowerCase()
+    if (
+      title.includes('fornecedor') ||
+      title.includes('sucesso') ||
+      title.includes('arquivo grande') ||
+      title.includes('contato') ||
+      title.includes('logomarca') ||
+      msg.includes('foram atualizados') ||
+      msg.includes('excede o limite')
+    ) {
+      return false
+    }
+    return true
+  })
+
+  const [notifications, setNotifications] = useState(validInitial)
   const unreadCount = notifications.filter(n => !n.is_read).length
 
   const handleMarkAllRead = async () => {

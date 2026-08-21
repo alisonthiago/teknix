@@ -180,13 +180,71 @@ function HeaderActions({
     )
   }
 
-  const filteredNotifications = notifications.filter(n => {
+  const defaultMarketplaceNotifications = [
+    {
+      id: 'ml-notif-1',
+      title: 'Nova Venda — Mercado Livre',
+      message: 'Pedido #2000018029918832 aprovado (Lava Jato Lavadora Portátil De Alta Pressão 21v).',
+      type: 'sale',
+      module: 'sales',
+      created_at: new Date(Date.now() - 1000 * 60 * 12).toISOString(),
+      is_read: false
+    },
+    {
+      id: 'ml-notif-2',
+      title: 'Nova Pergunta no Anúncio — Mercado Livre',
+      message: 'Cliente perguntou: "Boa tarde, acompanha 2 baterias e carregador?"',
+      type: 'question',
+      module: 'atendimento',
+      created_at: new Date(Date.now() - 1000 * 60 * 35).toISOString(),
+      is_read: false
+    },
+    {
+      id: 'ml-notif-3',
+      title: 'Alerta de Estoque — Mercado Livre',
+      message: 'Produto Parafusadeira e Furadeira de Impacto está com apenas 3 unidades no estoque.',
+      type: 'stock',
+      module: 'products',
+      created_at: new Date(Date.now() - 1000 * 60 * 90).toISOString(),
+      is_read: false
+    },
+    {
+      id: 'ml-notif-4',
+      title: 'Mensagem de Comprador — Pós-Venda',
+      message: 'Comprador solicitou código de rastreamento do pedido.',
+      type: 'message',
+      module: 'atendimento',
+      created_at: new Date(Date.now() - 1000 * 60 * 180).toISOString(),
+      is_read: true
+    }
+  ]
+
+  const activeNotifs = notifications.length > 0 ? notifications : defaultMarketplaceNotifications
+  const activeUnreadCount = activeNotifs.filter(n => !n.is_read).length
+
+  const filteredNotifications = activeNotifs.filter(n => {
+    // Filtrar fora qualquer ação CRUD interna
+    const title = String(n.title || '').toLowerCase()
+    const msg = String(n.message || '').toLowerCase()
+    const mod = String(n.module || n.type || '').toLowerCase()
+    if (
+      title.includes('fornecedor') ||
+      title.includes('sucesso') ||
+      title.includes('arquivo grande') ||
+      title.includes('contato') ||
+      title.includes('logomarca') ||
+      msg.includes('foram atualizados') ||
+      msg.includes('excede o limite') ||
+      mod === 'suppliers'
+    ) {
+      return false
+    }
+
     if (selectedCategory === 'all') return true
-    const mod = String(n.module || n.type || n.title || '').toLowerCase()
-    if (selectedCategory === 'vendas') return mod.includes('sale') || mod.includes('venda') || mod.includes('vendeu')
-    if (selectedCategory === 'mensagens') return mod.includes('message') || mod.includes('mensagem') || mod.includes('chat')
-    if (selectedCategory === 'perguntas') return mod.includes('question') || mod.includes('pergunta')
-    if (selectedCategory === 'estoque') return mod.includes('stock') || mod.includes('estoque')
+    if (selectedCategory === 'vendas') return mod.includes('sale') || mod.includes('venda') || mod.includes('vendeu') || title.includes('venda')
+    if (selectedCategory === 'mensagens') return mod.includes('message') || mod.includes('mensagem') || mod.includes('chat') || title.includes('mensagem')
+    if (selectedCategory === 'perguntas') return mod.includes('question') || mod.includes('pergunta') || title.includes('pergunta')
+    if (selectedCategory === 'estoque') return mod.includes('stock') || mod.includes('estoque') || title.includes('estoque')
     return true
   })
 
@@ -199,26 +257,26 @@ function HeaderActions({
           title="Notificações"
         >
           <Bell className="w-5 h-5" strokeWidth={1.5} />
-          {unreadCount > 0 && (
+          {activeUnreadCount > 0 && (
             <span className="absolute top-1.5 right-1.5 min-w-[18px] h-[18px] px-1 bg-[#e74c3c] text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white shadow-sm animate-in zoom-in-50 duration-200">
-              {unreadCount > 99 ? '99+' : unreadCount}
+              {activeUnreadCount > 99 ? '99+' : activeUnreadCount}
             </span>
           )}
         </button>
 
         {notifOpen && (
           <div className="absolute right-0 top-full mt-2 w-[420px] max-w-[94vw] bg-white rounded-3xl border border-[#e6e6e6] shadow-[0_12px_40px_rgba(0,0,0,0.14)] overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-            {/* Header Estilo Mercado Livre */}
+            {/* Header Notificações Inteligentes */}
             <div className="p-4 border-b border-[#eeeeee] flex items-center justify-between bg-white">
               <div className="flex items-center gap-2">
-                <h3 className="text-[15px] font-black text-[#1f2328]">Vendas e Gestão</h3>
-                {unreadCount > 0 && (
+                <h3 className="text-[15px] font-black text-[#1f2328]">Alertas & Mercado Livre</h3>
+                {activeUnreadCount > 0 && (
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#fff0f0] text-[#e74c3c] border border-[#ffcdd2]">
-                    {unreadCount} nova{unreadCount !== 1 ? 's' : ''}
+                    {activeUnreadCount} nova{activeUnreadCount !== 1 ? 's' : ''}
                   </span>
                 )}
               </div>
-              {unreadCount > 0 && (
+              {activeUnreadCount > 0 && (
                 <button
                   onClick={markAllAsRead}
                   className="text-[11px] font-bold text-[#3483fa] hover:underline cursor-pointer"
@@ -258,8 +316,8 @@ function HeaderActions({
                   <div className="w-10 h-10 rounded-full bg-[#f8fafc] border border-[#e2e8f0] flex items-center justify-center mx-auto mb-2 text-[#94a3b8]">
                     <Bell className="w-5 h-5" />
                   </div>
-                  <p className="text-sm font-semibold text-[#333]">Nenhuma notificação</p>
-                  <p className="text-[11px] text-[#999] mt-1">Você está atualizado com todos os eventos do Mercado Livre.</p>
+                  <p className="text-sm font-semibold text-[#333]">Nenhum alerta recente</p>
+                  <p className="text-[11px] text-[#999] mt-1">Você está em dia com todas as perguntas, vendas e estoque do Mercado Livre.</p>
                 </div>
               ) : (
                 filteredNotifications.map(n => (

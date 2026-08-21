@@ -53,27 +53,19 @@ export async function logActivity(params: LogActivityParams) {
 
     if (!masterProfile) return // Se não achar o master, aborta
 
-    // 3. Inserir a notificação apontando para o MASTER
+    // 3. Inserir em audit_logs para histórico de atividade/auditoria (SEM poluir notificações)
     const { error } = await supabase
-      .from('notifications')
+      .from('audit_logs')
       .insert({
-        user_id: masterProfile.id,
-        title: params.title,
-        message: params.message,
-        type: params.type || 'info',
-        is_read: false,
-        actor_user_id: user.id,
-        actor_name: actorName,
-        actor_role: actorRole,
-        target_user_id: params.target_user_id || null,
-        module: params.module,
-        entity_id: params.entity_id || null,
-        entity_type: params.entity_type || null,
-        metadata: params.metadata || null
+        action: params.title,
+        detail: params.message,
+        device: 'Web App',
+        ip: null
       })
 
     if (error) {
-      console.error('Error logging activity:', error)
+      // Se audit_logs falhar (ex: tabela opcional em dev), apenas loga no console
+      console.warn('Audit log write note:', error.message)
     }
 
   } catch (err) {

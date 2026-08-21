@@ -67,19 +67,38 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       .limit(50)
 
     if (data && !error) {
-      setNotifications(data as AppNotification[])
+      // Filtrar estritamente apenas notificações de Marketplaces, Vendas, Perguntas, Mensagens e Estoque (ignorar CRUD interno)
+      const validNotifs = (data as AppNotification[]).filter(n => {
+        const title = String(n.title || '').toLowerCase()
+        const msg = String(n.message || '').toLowerCase()
+        const mod = String(n.module || '').toLowerCase()
+        if (
+          title.includes('fornecedor') ||
+          title.includes('sucesso') ||
+          title.includes('arquivo grande') ||
+          title.includes('contato') ||
+          title.includes('logomarca') ||
+          msg.includes('foram atualizados') ||
+          msg.includes('excede o limite') ||
+          mod === 'suppliers'
+        ) {
+          return false
+        }
+        return true
+      })
+      setNotifications(validNotifs)
     }
   }, [supabase])
 
   useEffect(() => {
     fetchNotifications()
     
-    // Polling contínuo ultra-rápido de 2 segundos para notificações imediatas
+    // Polling contínuo de 3 segundos para notificações em tempo real
     const intervalId = setInterval(() => {
       if (typeof document !== 'undefined' && !document.hidden) {
         fetchNotifications()
       }
-    }, 2000)
+    }, 3000)
 
     // Setup realtime subscription
     let channel: ReturnType<typeof supabase.channel> | null = null
@@ -100,11 +119,15 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
           },
           (payload) => {
             const newNotif = payload.new as AppNotification
-            setNotifications(prev => [newNotif, ...prev].slice(0, 50))
-            setActiveToasts(prev => [...prev, newNotif])
-            setTimeout(() => {
-              dismissToast(newNotif.id)
-            }, 5000)
+            const title = String(newNotif.title || '').toLowerCase()
+            const mod = String(newNotif.module || '').toLowerCase()
+            if (!title.includes('fornecedor') && !title.includes('catálogo') && mod !== 'suppliers') {
+              setNotifications(prev => [newNotif, ...prev].slice(0, 50))
+              setActiveToasts(prev => [...prev, newNotif])
+              setTimeout(() => {
+                dismissToast(newNotif.id)
+              }, 5000)
+            }
           }
         )
         .subscribe()
@@ -118,9 +141,10 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     }
   }, [fetchNotifications, supabase])
 
-  const notify = async ({ title, message, type }: NotifyOptions) => {
+  // notify agora é EXCLUSIVO para exibir Toasts visuais temporários na tela, SEM poluir a Central de Notificações
+  const notify = ({ title, message, type }: NotifyOptions) => {
     const tempId = crypto.randomUUID()
-    const newNotification: AppNotification = {
+    const newToast: AppNotification = {
       id: tempId,
       title,
       message,
@@ -129,42 +153,13 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       created_at: new Date().toISOString(),
     }
 
-    // Add to toasts immediately
-    setActiveToasts(prev => [...prev, newNotification])
+    // Exibe o toast visual no canto da tela
+    setActiveToasts(prev => [...prev, newToast])
 
-    // Auto dismiss toast after 5s
+    // Auto remove após 4s
     setTimeout(() => {
       dismissToast(tempId)
-    }, 5000)
-
-    // Save to DB
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        const { data, error } = await supabase
-          .from('notifications')
-          .insert({
-            user_id: user.id,
-            title,
-            message,
-            type,
-            is_read: false
-          })
-          .select()
-          .single()
-
-        if (data && !error) {
-          setNotifications(prev => [data as AppNotification, ...prev].slice(0, 50))
-        } else {
-          // If insert fails or no data returned, fallback to temp state for history
-          setNotifications(prev => [newNotification, ...prev].slice(0, 50))
-        }
-      } else {
-        setNotifications(prev => [newNotification, ...prev].slice(0, 50))
-      }
-    } catch (e) {
-      console.error('Failed to save notification', e)
-    }
+    }, 4000)
   }
 
   const dismissToast = (id: string) => {
