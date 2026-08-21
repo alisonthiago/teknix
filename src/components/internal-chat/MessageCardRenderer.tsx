@@ -30,45 +30,45 @@ export default function MessageCardRenderer({ message, isMe }: MessageCardRender
     switch (message.message_type) {
       case 'CARD_ORDER':
         return (
-          <div className="p-3.5 bg-white rounded-2xl border border-[#e2e8f0] shadow-2xs space-y-2.5 max-w-sm text-left">
-            <div className="flex items-center justify-between pb-2 border-b border-[#f1f5f9]">
-              <div className="flex items-center gap-1.5">
+          <div className="p-5 bg-white rounded-2xl border border-[#e2e8f0] shadow-sm space-y-4 w-full text-left">
+            <div className="flex items-center justify-between pb-3 border-b border-[#f1f5f9]">
+              <div className="flex items-center gap-2">
                 <ShoppingCart className="w-4 h-4 text-[#3483fa]" />
-                <span className="font-mono font-black text-xs text-[#1e293b]">{meta.order_number || 'Pedido'}</span>
+                <span className="font-mono font-bold text-sm text-[#1e293b]">{meta.order_number || 'Pedido'}</span>
               </div>
               {meta.marketplace_name && (
-                <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#fafafa] border border-[#eee] text-[10px] font-bold text-[#555]">
-                  <MarketplaceLogo name={meta.marketplace_name} className="w-3 h-3" />
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#fafafa] border border-[#eee] text-[12px] font-semibold text-[#555]">
+                  <MarketplaceLogo name={meta.marketplace_name} className="w-3.5 h-3.5" />
                   <span>{meta.marketplace_name}</span>
                 </div>
               )}
             </div>
 
-            <div className="flex items-start gap-2.5">
+            <div className="flex items-start gap-3.5">
               {meta.product_image ? (
-                <img src={meta.product_image} alt="" className="w-12 h-12 object-contain rounded-xl border border-[#eee] bg-[#f8fafc] p-0.5 shrink-0" />
+                <img src={meta.product_image} alt="" className="w-14 h-14 object-contain rounded-xl border border-[#eee] bg-[#f8fafc] p-0.5 shrink-0" />
               ) : (
-                <div className="w-12 h-12 rounded-xl bg-[#f1f5f9] flex items-center justify-center text-[#64748b] shrink-0">
-                  <Package className="w-5 h-5" />
+                <div className="w-14 h-14 rounded-xl bg-[#f1f5f9] flex items-center justify-center text-[#64748b] shrink-0">
+                  <Package className="w-6 h-6" />
                 </div>
               )}
-              <div className="min-w-0">
-                <p className="font-bold text-xs text-[#1e293b] line-clamp-2 leading-tight">{meta.product_name || 'Produto'}</p>
-                {meta.product_sku && <p className="font-mono text-[10px] text-[#64748b] mt-0.5">SKU: {meta.product_sku}</p>}
-                {meta.customer_name && <p className="text-[10px] text-[#475569] mt-0.5 font-medium">Cliente: {meta.customer_name}</p>}
+              <div className="min-w-0 space-y-1">
+                <p className="font-bold text-[14px] text-[#1e293b] line-clamp-2 leading-snug">{meta.product_name || 'Produto'}</p>
+                {meta.product_sku && <p className="font-mono text-[12px] text-[#64748b]">SKU: {meta.product_sku}</p>}
+                {meta.customer_name && <p className="text-[12px] text-[#475569] font-medium">Cliente: {meta.customer_name}</p>}
               </div>
             </div>
 
             <div className="flex items-center justify-between pt-1">
-              <span className="text-xs font-black text-[#16a34a]">
+              <span className="text-[15px] font-black text-[#16a34a]">
                 R$ {Number(meta.total_amount || 0).toFixed(2).replace('.', ',')}
               </span>
               <Link
                 href={`/pedidos`}
-                className="px-3 py-1 bg-[#16a34a] hover:bg-[#15803d] text-white text-[11px] font-bold rounded-lg flex items-center gap-1 transition-all shadow-2xs"
+                className="px-4 py-2 bg-[#16a34a] hover:bg-[#15803d] text-white text-[13px] font-bold rounded-xl flex items-center gap-1.5 transition-all shadow-sm"
               >
                 <span>Abrir Pedido</span>
-                <ExternalLink className="w-3 h-3 text-white" />
+                <ExternalLink className="w-3.5 h-3.5 text-white" />
               </Link>
             </div>
           </div>
@@ -76,34 +76,34 @@ export default function MessageCardRenderer({ message, isMe }: MessageCardRender
 
       case 'CARD_PRODUCT':
         return (
-          <div className="p-3.5 bg-white rounded-2xl border border-[#e2e8f0] shadow-2xs space-y-2.5 max-w-sm text-left">
-            <div className="flex items-center gap-1.5 pb-2 border-b border-[#f1f5f9]">
+          <div className="p-5 bg-white rounded-2xl border border-[#e2e8f0] shadow-sm space-y-4 w-full text-left">
+            <div className="flex items-center gap-2 pb-3 border-b border-[#f1f5f9]">
               <Package className="w-4 h-4 text-[#16a34a]" />
-              <span className="font-bold text-xs text-[#1e293b]">Produto Operacional</span>
+              <span className="font-bold text-[14px] text-[#1e293b]">Produto Operacional</span>
             </div>
 
-            <div className="flex items-start gap-2.5">
+            <div className="flex items-start gap-3.5">
               {meta.product_image ? (
-                <img src={meta.product_image} alt="" className="w-12 h-12 object-contain rounded-xl border border-[#eee] bg-[#f8fafc] p-0.5 shrink-0" />
+                <img src={meta.product_image} alt="" className="w-14 h-14 object-contain rounded-xl border border-[#eee] bg-[#f8fafc] p-0.5 shrink-0" />
               ) : (
-                <div className="w-12 h-12 rounded-xl bg-[#f1f5f9] flex items-center justify-center text-[#64748b] shrink-0">
-                  <Package className="w-5 h-5" />
+                <div className="w-14 h-14 rounded-xl bg-[#f1f5f9] flex items-center justify-center text-[#64748b] shrink-0">
+                  <Package className="w-6 h-6" />
                 </div>
               )}
-              <div className="min-w-0">
-                <p className="font-bold text-xs text-[#1e293b] line-clamp-2 leading-tight">{meta.product_name}</p>
-                <p className="font-mono text-[10px] text-[#64748b] mt-0.5">SKU: {meta.product_sku}</p>
-                <p className="text-[10px] font-bold text-[#d97706] mt-0.5">Estoque: {meta.total_amount || 8} un.</p>
+              <div className="min-w-0 space-y-1">
+                <p className="font-bold text-[14px] text-[#1e293b] line-clamp-2 leading-snug">{meta.product_name}</p>
+                <p className="font-mono text-[12px] text-[#64748b]">SKU: {meta.product_sku}</p>
+                <p className="text-[12px] font-bold text-[#d97706]">Estoque: {meta.total_amount || 8} un.</p>
               </div>
             </div>
 
             <div className="flex justify-end pt-1">
               <Link
                 href={`/operacao`}
-                className="px-3 py-1 bg-[#16a34a] hover:bg-[#15803d] text-white text-[11px] font-bold rounded-lg flex items-center gap-1 transition-all shadow-2xs"
+                className="px-4 py-2 bg-[#16a34a] hover:bg-[#15803d] text-white text-[13px] font-bold rounded-xl flex items-center gap-1.5 transition-all shadow-sm"
               >
                 <span>Abrir Produto</span>
-                <ExternalLink className="w-3 h-3 text-white" />
+                <ExternalLink className="w-3.5 h-3.5 text-white" />
               </Link>
             </div>
           </div>
@@ -165,26 +165,24 @@ export default function MessageCardRenderer({ message, isMe }: MessageCardRender
 
       case 'CARD_SHIPPING':
         return (
-          <div className="p-3.5 bg-white rounded-2xl border border-[#e2e8f0] shadow-2xs space-y-2.5 max-w-sm text-left">
-            <div className="flex items-center justify-between pb-2 border-b border-[#f1f5f9]">
-              <div className="flex items-center gap-1.5">
-                <Truck className="w-4 h-4 text-[#d97706]" />
-                <span className="font-bold text-xs text-[#1e293b]">Rastreamento & Logística</span>
-              </div>
+          <div className="p-5 bg-white rounded-2xl border border-[#e2e8f0] shadow-sm space-y-4 w-full text-left">
+            <div className="flex items-center gap-2 pb-3 border-b border-[#f1f5f9]">
+              <Truck className="w-4 h-4 text-[#d97706]" />
+              <span className="font-bold text-[14px] text-[#1e293b]">Rastreamento & Logística</span>
             </div>
 
-            <div className="space-y-1 text-xs text-[#475569]">
-              <p className="font-medium">Código: <strong className="font-mono text-[#1e293b]">{meta.tracking_code || 'MEL47814652332'}</strong></p>
-              <p className="font-medium">Transportadora: <strong>{meta.carrier || 'Mercado Envios'}</strong></p>
+            <div className="space-y-2 text-[13px] text-[#475569] leading-relaxed">
+              <p className="font-medium">Código: <strong className="font-mono text-[#1e293b] text-[14px]">{meta.tracking_code || 'MEL47814652332'}</strong></p>
+              <p className="font-medium">Transportadora: <strong className="text-[#1e293b]">{meta.carrier || 'Mercado Envios'}</strong></p>
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-1">
+            <div className="flex items-center justify-end pt-1">
               <Link
                 href="/pedidos"
-                className="px-3 py-1 bg-[#16a34a] hover:bg-[#15803d] text-white text-[11px] font-bold rounded-lg flex items-center gap-1 transition-all shadow-2xs"
+                className="px-4 py-2 bg-[#16a34a] hover:bg-[#15803d] text-white text-[13px] font-bold rounded-xl flex items-center gap-1.5 transition-all shadow-sm"
               >
                 <span>Acompanhar Pedido</span>
-                <ExternalLink className="w-3 h-3 text-white" />
+                <ExternalLink className="w-3.5 h-3.5 text-white" />
               </Link>
             </div>
           </div>
@@ -246,23 +244,24 @@ export default function MessageCardRenderer({ message, isMe }: MessageCardRender
   const isCard = message.message_type !== 'TEXT'
 
   return (
-    <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} space-y-1 w-full`}>
-      <div className="flex items-center gap-2 text-[10px] text-[#94a3b8] px-1">
-        <span className="font-bold text-[#475569]">{message.sender_name}</span>
-        <span>•</span>
+    <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} gap-1.5 w-full`}>
+      {/* Nome + hora */}
+      <div className="flex items-center gap-2 text-[11px] text-[#94a3b8] px-1">
+        <span className="font-semibold text-[#475569]">{message.sender_name}</span>
+        <span>·</span>
         <span>{new Date(message.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
       </div>
 
       {isCard ? (
-        <div className="max-w-md w-full">
+        <div className="w-full max-w-[340px]">
           {renderContent()}
         </div>
       ) : (
         <div
-          className={`rounded-2xl px-4 py-2.5 max-w-md text-[13px] leading-relaxed shadow-2xs ${
+          className={`rounded-2xl px-4 py-3 max-w-[320px] text-[14px] leading-relaxed shadow-sm ${
             isMe
-              ? 'bg-[#16a34a] text-white rounded-br-xs'
-              : 'bg-white border border-[#e2e8f0] text-[#1e293b] rounded-bl-xs'
+              ? 'bg-[#16a34a] text-white rounded-br-sm'
+              : 'bg-white border border-[#e2e8f0] text-[#1e293b] rounded-bl-sm'
           }`}
         >
           <p className="whitespace-pre-wrap">{message.content}</p>
