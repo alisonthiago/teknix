@@ -60,15 +60,15 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
+    // Busca notificações operacionais reais da empresa
     const { data, error } = await supabase
       .from('notifications')
       .select('*')
-      .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(50)
 
     if (data && !error) {
-      // Filtrar estritamente apenas notificações de Marketplaces, Vendas, Perguntas, Mensagens e Estoque (ignorar CRUD interno)
+      // Filtrar estritamente apenas notificações de Marketplaces, Vendas, Perguntas, Mensagens e Estoque (ignorar logs internos de CRUD)
       const validNotifs = (data as AppNotification[]).filter(n => {
         const title = String(n.title || '').toLowerCase()
         const msg = String(n.message || '').toLowerCase()
@@ -110,18 +110,14 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     let channel: ReturnType<typeof supabase.channel> | null = null
     
     const setupRealtime = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
       channel = supabase
-        .channel('public:notifications')
+        .channel('public:notifications-realtime')
         .on(
           'postgres_changes',
           {
             event: 'INSERT',
             schema: 'public',
             table: 'notifications',
-            filter: `user_id=eq.${user.id}`,
           },
           (payload) => {
             const newNotif = payload.new as AppNotification
@@ -129,7 +125,10 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
             const mod = String(newNotif.module || '').toLowerCase()
             if (!title.includes('fornecedor') && !title.includes('catálogo') && mod !== 'suppliers') {
               playNotificationSound()
-              setNotifications(prev => [newNotif, ...prev].slice(0, 50))
+              setNotifications(prev => {
+                if (prev.some(p => p.id === newNotif.id)) return prev
+                return [newNotif, ...prev].slice(0, 50)
+              })
               setActiveToasts(prev => [...prev, newNotif])
               setTimeout(() => {
                 dismissToast(newNotif.id)

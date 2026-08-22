@@ -5,6 +5,7 @@ export type MessageType =
   | 'CARD_CUSTOMER'
   | 'CARD_INVOICE'
   | 'CARD_SHIPPING'
+  | 'CARD_LABEL'
   | 'CARD_TASK'
   | 'FILE'
 
@@ -40,6 +41,8 @@ export interface InternalMessage {
     total_amount?: number
     invoice_number?: string
     invoice_url?: string
+    danfe_url?: string
+    label_url?: string
     tracking_code?: string
     carrier?: string
     marketplace_name?: string

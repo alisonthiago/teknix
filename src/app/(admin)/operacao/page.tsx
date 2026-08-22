@@ -381,7 +381,7 @@ function ProductsTab() {
               }[status] || { label: 'Ativo', bg: 'bg-[#ecfdf5] text-[#16a34a] border-[#bbf7d0]' }
 
               return (
-                <tr key={p.id as string} onClick={() => router.push(`/produtos/${p.id}`)} className="hover:bg-[#f8fafc] transition-colors cursor-pointer group">
+                <tr key={p.id as string} onClick={() => router.push(`/produtos/${p.id}`)} className="hover:bg-[#f8f9fa] transition-colors cursor-pointer group">
                   <Td>
                     <div onClick={(e) => e.stopPropagation()}>
                       <input 
@@ -442,7 +442,7 @@ function ProductsTab() {
                         className={`p-2 rounded-xl border transition-all cursor-pointer shadow-2xs ${
                           activeActionMenuId === p.id
                             ? 'bg-[#111111] text-white border-[#111111]'
-                            : 'border-[#e6e6e6] bg-white hover:bg-[#f8fafc] text-[#64748b] hover:text-[#0f172a]'
+                            : 'border-[#e6e6e6] bg-white hover:bg-[#f4f4f5] text-[#64748b] hover:text-[#0f172a]'
                         }`}
                       >
                         <MoreHorizontal className="w-4 h-4" />
@@ -460,7 +460,7 @@ function ProductsTab() {
                               setActiveActionMenuId(null)
                               setDiagnosticModal({ isOpen: true, product: p })
                             }}
-                            className="w-full px-3 py-1.5 text-[12px] font-medium text-[#334155] hover:bg-[#f8fafc] hover:text-[#0f172a] flex items-center gap-2 transition-colors cursor-pointer"
+                            className="w-full px-3 py-1.5 text-[12px] font-medium text-[#334155] hover:bg-[#f4f4f5] hover:text-[#0f172a] flex items-center gap-2 transition-colors cursor-pointer"
                           >
                             <Info className="w-3.5 h-3.5 text-[#64748b]" />
                             <span>Diagnóstico</span>
@@ -484,7 +484,7 @@ function ProductsTab() {
                                 setActiveActionMenuId(null)
                                 setActionModal({ isOpen: true, product: p, action: 'pause' })
                               }}
-                              className="w-full px-3 py-1.5 text-[12px] font-medium text-[#334155] hover:bg-[#f8fafc] hover:text-[#d97706] flex items-center gap-2 transition-colors cursor-pointer"
+                              className="w-full px-3 py-1.5 text-[12px] font-medium text-[#334155] hover:bg-[#f4f4f5] hover:text-[#d97706] flex items-center gap-2 transition-colors cursor-pointer"
                             >
                               <PauseCircle className="w-3.5 h-3.5 text-[#64748b]" />
                               <span>Pausar Anúncio</span>
@@ -509,7 +509,7 @@ function ProductsTab() {
                                 setActiveActionMenuId(null)
                                 setActionModal({ isOpen: true, product: p, action: 'lock' })
                               }}
-                              className="w-full px-3 py-1.5 text-[12px] font-medium text-[#334155] hover:bg-[#f8fafc] flex items-center gap-2 transition-colors cursor-pointer"
+                              className="w-full px-3 py-1.5 text-[12px] font-medium text-[#334155] hover:bg-[#f4f4f5] flex items-center gap-2 transition-colors cursor-pointer"
                             >
                               <Lock className="w-3.5 h-3.5 text-[#64748b]" />
                               <span>Travar Estoque</span>
@@ -522,7 +522,7 @@ function ProductsTab() {
                               setActiveActionMenuId(null)
                               setActionModal({ isOpen: true, product: p, action: 'sync' })
                             }}
-                            className="w-full px-3 py-1.5 text-[12px] font-medium text-[#334155] hover:bg-[#f8fafc] flex items-center gap-2 transition-colors cursor-pointer"
+                            className="w-full px-3 py-1.5 text-[12px] font-medium text-[#334155] hover:bg-[#f4f4f5] flex items-center gap-2 transition-colors cursor-pointer"
                           >
                             <RefreshCw className="w-3.5 h-3.5 text-[#64748b]" />
                             <span>Sincronizar</span>
@@ -534,15 +534,27 @@ function ProductsTab() {
                               setActiveActionMenuId(null)
                               setShareProduct(p)
                             }}
-                            className="w-full px-3 py-1.5 text-[12px] font-medium text-[#334155] hover:bg-[#f8fafc] flex items-center gap-2 transition-colors cursor-pointer"
+                            className="w-full px-3 py-1.5 text-[12px] font-medium text-[#334155] hover:bg-[#f4f4f5] flex items-center gap-2 transition-colors cursor-pointer"
                           >
                             <Share2 className="w-3.5 h-3.5 text-[#64748b]" />
                             <span>Compartilhar</span>
                           </button>
 
-                          <div className="border-t border-[#f1f5f9] my-1" />
+                          {/* 6. Bloquear */}
+                          <button
+                            onClick={() => {
+                              setActiveActionMenuId(null)
+                              setActionModal({ isOpen: true, product: p, action: isBlocked ? 'unblock' : 'block' })
+                            }}
+                            className="w-full px-3 py-1.5 text-[12px] font-medium text-[#dc2626] hover:bg-[#fef2f2] flex items-center gap-2 transition-colors cursor-pointer"
+                          >
+                            <ShieldAlert className="w-3.5 h-3.5 text-[#dc2626]" />
+                            <span>{isBlocked ? 'Desbloquear' : 'Bloquear'}</span>
+                          </button>
 
-                          {/* 6. Excluir */}
+                          <div className="my-1 border-t border-[#f1f5f9]" />
+
+                          {/* 7. Excluir */}
                           <button
                             onClick={() => {
                               setActiveActionMenuId(null)
@@ -551,7 +563,7 @@ function ProductsTab() {
                             className="w-full px-3 py-1.5 text-[12px] font-medium text-[#dc2626] hover:bg-[#fef2f2] flex items-center gap-2 transition-colors cursor-pointer"
                           >
                             <Trash2 className="w-3.5 h-3.5 text-[#dc2626]" />
-                            <span>Excluir</span>
+                            <span>Excluir Produto</span>
                           </button>
                         </div>
                       )}

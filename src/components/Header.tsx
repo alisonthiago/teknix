@@ -156,8 +156,8 @@ function HeaderActions({
     }
     if (t.includes('message') || t.includes('mensagem')) {
       return (
-        <div className="w-11 h-11 rounded-xl bg-[#f0f7ff] border border-[#bfdbfe] flex items-center justify-center text-[#2563eb] shrink-0 font-bold text-xs">
-          <MessageSquare className="w-5 h-5 text-[#3483fa]" />
+        <div className="w-11 h-11 rounded-xl bg-[#f4f4f5] border border-[#e4e4e7] flex items-center justify-center text-[#18181b] shrink-0 font-bold text-xs">
+          <MessageSquare className="w-5 h-5 text-[#0f172a]" />
         </div>
       )
     }
@@ -176,53 +176,14 @@ function HeaderActions({
       )
     }
     return (
-      <div className="w-11 h-11 rounded-xl bg-[#eff6ff] border border-[#bfdbfe] flex items-center justify-center text-[#2563eb] shrink-0">
-        <Package className="w-5 h-5" />
+      <div className="w-11 h-11 rounded-xl bg-[#f4f4f5] border border-[#e4e4e7] flex items-center justify-center text-[#18181b] shrink-0">
+        <Package className="w-5 h-5 text-[#475569]" />
       </div>
     )
   }
 
-  const defaultMarketplaceNotifications = [
-    {
-      id: 'ml-notif-1',
-      title: 'Nova Venda — Mercado Livre',
-      message: 'Pedido #2000018029918832 aprovado (Lava Jato Lavadora Portátil De Alta Pressão 21v).',
-      type: 'sale',
-      module: 'sales',
-      created_at: new Date(Date.now() - 1000 * 60 * 12).toISOString(),
-      is_read: false
-    },
-    {
-      id: 'ml-notif-2',
-      title: 'Nova Pergunta no Anúncio — Mercado Livre',
-      message: 'Cliente perguntou: "Boa tarde, acompanha 2 baterias e carregador?"',
-      type: 'question',
-      module: 'atendimento',
-      created_at: new Date(Date.now() - 1000 * 60 * 35).toISOString(),
-      is_read: false
-    },
-    {
-      id: 'ml-notif-3',
-      title: 'Alerta de Estoque — Mercado Livre',
-      message: 'Produto Parafusadeira e Furadeira de Impacto está com apenas 3 unidades no estoque.',
-      type: 'stock',
-      module: 'products',
-      created_at: new Date(Date.now() - 1000 * 60 * 90).toISOString(),
-      is_read: false
-    },
-    {
-      id: 'ml-notif-4',
-      title: 'Mensagem de Comprador — Pós-Venda',
-      message: 'Comprador solicitou código de rastreamento do pedido.',
-      type: 'message',
-      module: 'atendimento',
-      created_at: new Date(Date.now() - 1000 * 60 * 180).toISOString(),
-      is_read: true
-    }
-  ]
-
-  const activeNotifs = notifications.length > 0 ? notifications : defaultMarketplaceNotifications
-  const activeUnreadCount = activeNotifs.filter(n => !n.is_read).length
+  const activeNotifs = notifications
+  const activeUnreadCount = unreadCount
 
   const filteredNotifications = activeNotifs.filter(n => {
     const title = String(n.title || '').toLowerCase()
@@ -359,7 +320,7 @@ function HeaderActions({
                     className={`p-3 rounded-2xl transition-all cursor-pointer flex gap-3 items-center ${
                       n.is_read
                         ? 'bg-white hover:bg-[#fafafa]'
-                        : 'bg-[#f0f7ff]/60 hover:bg-[#e6f1ff] border border-[#d6e7ff]'
+                        : 'bg-[#fafafa] hover:bg-[#f5f5f5] border border-[#e2e8f0]'
                     }`}
                   >
                     {renderNotificationIcon(n.type, n.module, n.title)}
@@ -373,7 +334,7 @@ function HeaderActions({
                       <p className="text-[11px] text-[#666] leading-tight mt-1 line-clamp-1">{cleanTitle(n.message)}</p>
                     </div>
                     {!n.is_read && (
-                      <span className="w-2 h-2 rounded-full bg-[#3483fa] shrink-0" />
+                      <span className="w-2 h-2 rounded-full bg-[#16a34a] shrink-0" />
                     )}
                   </div>
                 ))

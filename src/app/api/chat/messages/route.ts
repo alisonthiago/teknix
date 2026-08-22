@@ -63,6 +63,14 @@ export async function POST(req: NextRequest) {
       senderId = '00000000-0000-0000-0000-000000000000'
     }
 
+    let senderPhoto = body.sender_photo || null
+    if (!senderPhoto && senderId && senderId !== '00000000-0000-0000-0000-000000000000') {
+      const { data: prof } = await supabase.from('profiles').select('avatar_url, photo_url').eq('id', senderId).maybeSingle()
+      if (prof) {
+        senderPhoto = prof.avatar_url || prof.photo_url || null
+      }
+    }
+
     const { data, error } = await supabase
       .from('internal_messages')
       .insert({
@@ -70,7 +78,7 @@ export async function POST(req: NextRequest) {
         conversation_id: body.conversation_id,
         sender_id: senderId,
         sender_name: body.sender_name || 'Usuário',
-        sender_photo: body.sender_photo || null,
+        sender_photo: senderPhoto,
         content: body.content || '',
         message_type: body.message_type || 'TEXT',
         metadata: body.metadata || {},
@@ -82,6 +90,12 @@ export async function POST(req: NextRequest) {
       console.error('[API /api/chat/messages POST Error]:', error)
       return NextResponse.json({ error: error.message }, { status: 400 })
     }
+
+    // Touch conversation updated_at
+    await supabase
+      .from('internal_conversations')
+      .update({ updated_at: new Date().toISOString() })
+      .eq('id', body.conversation_id)
 
     return NextResponse.json({ success: true, message: data })
   } catch (err: any) {

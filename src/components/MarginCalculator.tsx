@@ -753,7 +753,7 @@ function SharePricingModal({ summary, onClose }: { summary: string; onClose: () 
               <p className="text-[11px] text-[#64748b]">Envie o resultado para um colaborador ou grupo</p>
             </div>
           </div>
-          <button onClick={onClose} className="w-8 h-8 rounded-full hover:bg-[#f8fafc] flex items-center justify-center text-[#94a3b8] hover:text-[#475569] transition-colors cursor-pointer">
+          <button onClick={onClose} className="w-8 h-8 rounded-full hover:bg-[#f5f5f5] flex items-center justify-center text-[#94a3b8] hover:text-[#475569] transition-colors cursor-pointer">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -771,7 +771,7 @@ function SharePricingModal({ summary, onClose }: { summary: string; onClose: () 
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition-all cursor-pointer text-left ${
                 selectedTarget === t.id
                   ? 'border-[#3483fa] bg-[#f0f7ff] shadow-xs'
-                  : 'border-[#f1f5f9] hover:border-[#e2e8f0] hover:bg-[#f8fafc]'
+                  : 'border-[#f1f5f9] hover:border-[#e2e8f0] hover:bg-[#f5f5f5]'
               }`}
             >
               <div className="relative shrink-0">
@@ -807,7 +807,7 @@ function SharePricingModal({ summary, onClose }: { summary: string; onClose: () 
         <div className="px-5 pb-5 flex items-center gap-3">
           <button
             onClick={onClose}
-            className="flex-1 py-2.5 text-sm font-bold text-[#64748b] border border-[#e2e8f0] rounded-xl hover:bg-[#f8fafc] transition-colors cursor-pointer"
+            className="flex-1 py-2.5 text-sm font-bold text-[#64748b] border border-[#e2e8f0] rounded-xl hover:bg-[#f5f5f5] transition-colors cursor-pointer"
           >
             Cancelar
           </button>

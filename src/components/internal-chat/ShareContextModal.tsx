@@ -104,7 +104,7 @@ export default function ShareContextModal({
                   className={`w-full p-2.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer ${
                     selectedTarget === g.id
                       ? 'border-[#111] bg-[#fafafa] shadow-2xs'
-                      : 'border-[#eee] hover:bg-[#f8fafc]'
+                      : 'border-[#eee] hover:bg-[#f5f5f5]'
                   }`}
                 >
                   <div className="flex items-center gap-2">
@@ -124,7 +124,7 @@ export default function ShareContextModal({
                   className={`w-full p-2.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer ${
                     selectedTarget === c.id
                       ? 'border-[#111] bg-[#fafafa] shadow-2xs'
-                      : 'border-[#eee] hover:bg-[#f8fafc]'
+                      : 'border-[#eee] hover:bg-[#f5f5f5]'
                   }`}
                 >
                   <div className="flex items-center gap-2">

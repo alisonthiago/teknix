@@ -41,14 +41,14 @@ export default function PrintLabelClient({ order }: { order: OrderDetail }) {
               href={pdfUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#334155] bg-white border border-[#cbd5e1] hover:bg-[#f8fafc] px-3.5 py-2 rounded-xl transition-all cursor-pointer shadow-xs"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#334155] bg-white border border-[#cbd5e1] hover:bg-[#f5f5f5] px-3.5 py-2 rounded-xl transition-all cursor-pointer shadow-xs"
             >
               <ExternalLink className="w-3.5 h-3.5" /> Abrir em Nova Aba
             </a>
             <a
               href={pdfUrl}
               download={`etiqueta-${order.order_number}.pdf`}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#334155] bg-white border border-[#cbd5e1] hover:bg-[#f8fafc] px-3.5 py-2 rounded-xl transition-all cursor-pointer shadow-xs"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#334155] bg-white border border-[#cbd5e1] hover:bg-[#f5f5f5] px-3.5 py-2 rounded-xl transition-all cursor-pointer shadow-xs"
             >
               <Download className="w-3.5 h-3.5" /> Baixar PDF
             </a>

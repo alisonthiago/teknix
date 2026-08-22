@@ -17,6 +17,7 @@ import {
   Search,
   Share2,
   Sliders,
+  PlayCircle,
   X
 } from 'lucide-react'
 import { PageHeader, ModuleTable, TableHead, Th, Td } from '@/components/ui/module'
@@ -258,10 +259,10 @@ export default function PedidosPage() {
 
         <div className="bg-white p-6 rounded-2xl border border-[#eef2f6] shadow-xs space-y-1">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-semibold text-[#e67e22] tracking-wide">Aguardando Separação</p>
-            {stats.pendingPicking > 0 && <span className="w-2 h-2 rounded-full bg-[#e67e22]" />}
+            <p className="text-xs font-semibold text-[#64748b] tracking-wide">Aguardando Separação</p>
+            {stats.pendingPicking > 0 && <span className="w-2 h-2 rounded-full bg-[#16a34a]" />}
           </div>
-          <p className="text-3xl font-bold text-[#e67e22]">{stats.pendingPicking}</p>
+          <p className="text-3xl font-bold text-[#0f172a]">{stats.pendingPicking}</p>
         </div>
 
         <div className="bg-white p-6 rounded-2xl border border-[#eef2f6] shadow-xs space-y-1">
@@ -466,7 +467,7 @@ export default function PedidosPage() {
                   <div
                     key={order.id}
                     onClick={() => router.push(`/pedidos/${order.id}`)}
-                    className={`flex items-center justify-between px-6 py-5 hover:bg-[#f8fafc] transition-colors cursor-pointer ${
+                    className={`flex items-center justify-between px-6 py-5 hover:bg-[#f8f9fa] transition-colors cursor-pointer ${
                       isSelected ? 'bg-[#f0fdf4]/60' : ''
                     }`}
                   >
@@ -485,7 +486,7 @@ export default function PedidosPage() {
                       <img
                         src={productImage}
                         alt={productName}
-                        className="w-13 h-13 rounded-2xl object-contain border border-[#e2e8f0] bg-[#f8fafc] p-1 shrink-0 shadow-2xs"
+                        className="w-13 h-13 rounded-2xl object-contain border border-[#e2e8f0] bg-[#f5f5f5] p-1 shrink-0 shadow-2xs"
                       />
 
                       <div className="min-w-0 space-y-1.5 flex-1">
@@ -496,7 +497,7 @@ export default function PedidosPage() {
                           <span className="px-2 py-0.5 rounded-md bg-[#f1f5f9] text-[11px] font-mono font-bold text-[#475569]">
                             SKU: {productSku}
                           </span>
-                          <span className="px-2 py-0.5 rounded-md bg-[#f8fafc] border border-[#e2e8f0] text-[11px] font-mono font-bold text-[#0f172a]">
+                          <span className="px-2 py-0.5 rounded-md bg-[#f5f5f5] border border-[#e2e8f0] text-[11px] font-mono font-bold text-[#0f172a]">
                             #{order.order_number}
                           </span>
                         </div>
@@ -565,26 +566,26 @@ export default function PedidosPage() {
                   <div
                     key={order.id}
                     onClick={() => router.push(`/pedidos/${order.id}`)}
-                    className="bg-white rounded-3xl border border-[#eef2f6] p-6 cursor-pointer hover:border-[#0f172a] transition-all shadow-xs space-y-4"
+                    className="bg-white rounded-2xl border border-[#e2e8f0] p-5 cursor-pointer hover:border-[#0f172a] hover:shadow-md transition-all shadow-xs space-y-3.5"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-mono text-sm font-bold text-[#0f172a]">#{order.order_number}</span>
-                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${getStatus(order.status).c}`}>
+                      <span className="font-mono text-xs font-bold text-[#0f172a]">#{order.order_number}</span>
+                      <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${getStatus(order.status).c}`}>
                         {getStatus(order.status).l}
                       </span>
                     </div>
 
                     <div className="flex items-center gap-3.5">
                       {product?.image_url ? (
-                        <img src={product.image_url} alt="" className="w-12 h-12 rounded-xl object-contain border border-[#e2e8f0] bg-[#f8fafc] p-0.5 shrink-0" />
+                        <img src={product.image_url} alt="" className="w-12 h-12 rounded-xl object-contain border border-[#e2e8f0] bg-[#f5f5f5] p-0.5 shrink-0" />
                       ) : (
-                        <div className="w-12 h-12 rounded-xl bg-[#f1f5f9] flex items-center justify-center text-[#94a3b8] shrink-0">
+                        <div className="w-12 h-12 rounded-xl bg-[#f5f5f5] flex items-center justify-center text-[#94a3b8] shrink-0">
                           <Package className="w-6 h-6" />
                         </div>
                       )}
                       <div className="min-w-0 flex-1 space-y-0.5">
-                        <p className="text-sm font-bold text-[#0f172a] truncate">{product?.name || firstItem?.product_name || 'Produto'}</p>
-                        <p className="text-xs text-[#64748b] font-mono">SKU: {product?.sku || firstItem?.sku || 'SKU'}</p>
+                        <p className="text-[13px] font-bold text-[#0f172a] truncate">{product?.name || firstItem?.product_name || 'Produto'}</p>
+                        <p className="text-[11px] text-[#64748b] font-mono">SKU: {product?.sku || firstItem?.sku || 'SKU'}</p>
                       </div>
                     </div>
 
@@ -599,17 +600,17 @@ export default function PedidosPage() {
                     {['AGUARDANDO_SEPARACAO', 'PAGO', 'PAID', 'NOVO', 'approved', 'ETIQUETA_IMPRESSA'].includes(order.status) && (
                       <button 
                         onClick={e => { e.stopPropagation(); updateOrderStatus(order.id, 'EM_SEPARACAO') }} 
-                        className="w-full bg-[#f59e0b] hover:bg-[#d97706] text-white py-2.5 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
+                        className="w-full bg-[#0f172a] hover:bg-[#1e293b] text-white py-2.5 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-2"
                       >
-                        Iniciar Separação
+                        <PlayCircle className="w-3.5 h-3.5" /> Iniciar Separação
                       </button>
                     )}
                     {order.status === 'EM_SEPARACAO' && (
                       <button 
                         onClick={e => { e.stopPropagation(); updateOrderStatus(order.id, 'SEPARADO') }} 
-                        className="w-full bg-[#16a34a] hover:bg-[#15803d] text-white py-2.5 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
+                        className="w-full bg-[#16a34a] hover:bg-[#15803d] text-white py-2.5 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-2"
                       >
-                        Marcar como Separado ✓
+                        <CheckCircle2 className="w-3.5 h-3.5" /> Marcar como Separado ✓
                       </button>
                     )}
                   </div>

@@ -92,18 +92,18 @@ export default function PickingClient({ orders }: { orders: PickingOrder[] }) {
                 <button
                   onClick={() => handleStart(order.id)}
                   disabled={processing === order.id}
-                  className="flex-1 py-2.5 bg-orange-600 text-white text-sm font-medium rounded-lg hover:bg-orange-700 disabled:opacity-50 transition-colors"
+                  className="flex-1 py-2.5 bg-[#0f172a] text-white text-sm font-semibold rounded-xl hover:bg-[#1e293b] disabled:opacity-50 transition-all cursor-pointer shadow-xs"
                 >
-                  {processing === order.id ? '...' : 'Iniciar Separação'}
+                  {processing === order.id ? 'Iniciando...' : 'Iniciar Separação'}
                 </button>
               )}
               {order.status === 'EM_SEPARACAO' && (
                 <button
                   onClick={() => handleComplete(order.id)}
                   disabled={processing === order.id}
-                  className="flex-1 py-2.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
+                  className="flex-1 py-2.5 bg-[#16a34a] text-white text-sm font-semibold rounded-xl hover:bg-[#15803d] disabled:opacity-50 transition-all cursor-pointer shadow-xs"
                 >
-                  {processing === order.id ? '...' : 'Separado'}
+                  {processing === order.id ? 'Salvando...' : 'Marcar como Separado ✓'}
                 </button>
               )}
             </div>

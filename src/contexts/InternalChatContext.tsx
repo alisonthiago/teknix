@@ -157,7 +157,15 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
   const [messagesMap, setMessagesMap] = useState<Record<string, InternalMessage[]>>({})
   const [tasks, setTasks] = useState<InternalTask[]>([])
   const [collaborators, setCollaborators] = useState<ChatMember[]>([])
-  const [currentUser, setCurrentUser] = useState<{ id: string; name: string; email?: string; role?: string; photo_url?: string } | null>(null)
+  const [currentUser, setCurrentUser] = useState<{ id: string; name: string; email?: string; role?: string; photo_url?: string } | null>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('teknix_chat_current_user')
+        if (cached) return JSON.parse(cached)
+      } catch {}
+    }
+    return null
+  })
   
   const [isFloatingOpen, setIsFloatingOpen] = useState(false)
   const [isFloatingMinimized, setIsFloatingMinimized] = useState(false)
@@ -189,16 +197,20 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
             .from('profiles')
             .select('id, name, email, role, avatar_url, photo_url')
             .eq('id', user.id)
-            .single()
+            .maybeSingle()
 
           const userName = profile?.name || user.user_metadata?.name || user.email?.split('@')[0] || 'Colaborador'
-          setCurrentUser({
+          const userObj = {
             id: user.id,
             name: removeEmojis(userName),
             email: user.email || profile?.email,
             role: profile?.role || 'Operador',
-            photo_url: profile?.avatar_url || profile?.photo_url || user.user_metadata?.avatar_url
-          })
+            photo_url: profile?.avatar_url || profile?.photo_url || user.user_metadata?.avatar_url || (user.id === '3af9068a-4b78-4c9c-8657-f83b93c01588' ? 'https://ykgprfzfnffooqmfbeox.supabase.co/storage/v1/object/public/user-avatars/3af9068a-4b78-4c9c-8657-f83b93c01588-1787179225140.jpg' : user.id === 'cea2102a-360f-44bb-9e86-75c878650bab' ? 'https://ykgprfzfnffooqmfbeox.supabase.co/storage/v1/object/public/user-avatars/6f58029b-c770-4f25-a9f9-86dec6fb6137-1787168051706.jpeg' : undefined)
+          }
+          setCurrentUser(userObj)
+          try {
+            localStorage.setItem('teknix_chat_current_user', JSON.stringify(userObj))
+          } catch {}
         }
       } catch (err) {
         console.warn('Erro ao carregar usuário autenticado:', err)

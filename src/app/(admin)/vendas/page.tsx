@@ -209,7 +209,7 @@ function SalesTab() {
                 <tr 
                   key={s.id} 
                   onClick={() => router.push(`/pedidos/${s.orderId || s.id}`)} 
-                  className="hover:bg-[#f8fafc] transition-colors cursor-pointer group"
+                  className="hover:bg-[#f8f9fa] transition-colors cursor-pointer group"
                 >
                   <td className="py-4.5 px-5 font-mono font-bold text-[#111] text-[13px]">
                     {s.orderId}

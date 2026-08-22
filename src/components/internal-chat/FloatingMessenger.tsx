@@ -252,7 +252,7 @@ export default function FloatingMessenger() {
                     <button
                       key={c.id}
                       onClick={() => handleOpenChat(c)}
-                      className="w-full text-left px-5 py-3 hover:bg-[#f8fafc] text-[13px] font-medium flex items-center justify-between cursor-pointer transition-colors border-b border-[#f1f5f9]/60 last:border-0"
+                      className="w-full text-left px-5 py-3 hover:bg-[#f5f5f5] text-[13px] font-medium flex items-center justify-between cursor-pointer transition-colors border-b border-[#f1f5f9]/60 last:border-0"
                     >
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         <div className="relative shrink-0">
@@ -310,7 +310,7 @@ export default function FloatingMessenger() {
                 <button
                   key={c.id}
                   onClick={() => handleOpenChat(c)}
-                  className="w-full text-left px-5 py-3 hover:bg-[#f8fafc] text-[13px] font-semibold flex items-center justify-between cursor-pointer transition-colors border-b border-[#f1f5f9]/60 last:border-0"
+                  className="w-full text-left px-5 py-3 hover:bg-[#f5f5f5] text-[13px] font-semibold flex items-center justify-between cursor-pointer transition-colors border-b border-[#f1f5f9]/60 last:border-0"
                 >
                   <div className="flex items-center gap-3 min-w-0 flex-1">
                     <div className="w-10 h-10 rounded-2xl bg-[#ecfdf5] border border-[#bbf7d0] flex items-center justify-center text-[#16a34a] font-bold shrink-0 shadow-2xs">
@@ -341,7 +341,7 @@ export default function FloatingMessenger() {
                 <button
                   key={c.id}
                   onClick={() => handleSelectCollaborator(c.id, c.name)}
-                  className="w-full text-left px-5 py-2.5 hover:bg-[#f8fafc] text-[13px] font-medium text-[#475569] flex items-center justify-between cursor-pointer transition-colors"
+                  className="w-full text-left px-5 py-2.5 hover:bg-[#f5f5f5] text-[13px] font-medium text-[#475569] flex items-center justify-between cursor-pointer transition-colors"
                 >
                   <div className="flex items-center gap-3 min-w-0 flex-1">
                     <div className="relative shrink-0">

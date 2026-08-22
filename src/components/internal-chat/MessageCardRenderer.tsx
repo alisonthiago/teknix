@@ -17,6 +17,7 @@ import {
   Paperclip
 } from 'lucide-react'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
+import { useInternalChat } from '@/contexts/InternalChatContext'
 
 interface MessageCardRendererProps {
   message: InternalMessage
@@ -26,7 +27,15 @@ interface MessageCardRendererProps {
 }
 
 export default function MessageCardRenderer({ message, isMe, showChannel, channelName }: MessageCardRendererProps) {
+  const { currentUser, collaborators } = useInternalChat()
   const meta = message.metadata || {}
+
+  // Resolve a melhor foto de perfil disponivel (da mensagem, do usuario atual ou da lista de colaboradores)
+  const resolvedPhoto = 
+    message.sender_photo || 
+    (isMe ? currentUser?.photo_url : collaborators.find(c => c.id === message.sender_id || c.name.toLowerCase() === (message.sender_name || '').toLowerCase())?.photo_url) ||
+    (message.sender_name?.toLowerCase().includes('alison') ? 'https://ykgprfzfnffooqmfbeox.supabase.co/storage/v1/object/public/user-avatars/3af9068a-4b78-4c9c-8657-f83b93c01588-1787179225140.jpg' : undefined) ||
+    (message.sender_name?.toLowerCase().includes('nádia') || message.sender_name?.toLowerCase().includes('nadia') ? 'https://ykgprfzfnffooqmfbeox.supabase.co/storage/v1/object/public/user-avatars/6f58029b-c770-4f25-a9f9-86dec6fb6137-1787168051706.jpeg' : undefined)
 
   const renderContent = () => {
     switch (message.message_type) {
@@ -149,18 +158,21 @@ export default function MessageCardRenderer({ message, isMe, showChannel, channe
               </span>
             </div>
 
-            <div className="space-y-1 text-xs text-[#475569]">
-              <p className="font-medium">Pedido: <strong className="font-mono text-[#1e293b]">{meta.order_number}</strong></p>
-              {meta.customer_name && <p className="font-medium">Comprador: <strong>{meta.customer_name}</strong></p>}
-            </div>
+            <p className="font-bold text-xs text-[#1e293b]">{meta.customer_name || 'Comprador'}</p>
 
-            <div className="flex items-center justify-end gap-2 pt-1">
-              <button 
-                onClick={() => alert('Download do XML e PDF da NF-e')}
-                className="px-3 py-1 bg-[#f8fafc] hover:bg-[#f1f5f9] border border-[#e2e8f0] text-[#334155] text-[11px] font-bold rounded-lg flex items-center gap-1 transition-all cursor-pointer"
+            <div className="flex items-center justify-between pt-1">
+              <span className="font-mono font-bold text-xs text-[#1e293b]">
+                R$ {Number(meta.total_amount || 0).toFixed(2).replace('.', ',')}
+              </span>
+              <a
+                href={meta.danfe_url || '#'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3 py-1 bg-[#0284c7] hover:bg-[#0369a1] text-white text-[11px] font-bold rounded-lg flex items-center gap-1 transition-all shadow-2xs"
               >
-                <Download className="w-3 h-3" /> Baixar PDF
-              </button>
+                <Download className="w-3 h-3" />
+                <span>DANFE</span>
+              </a>
             </div>
           </div>
         )
@@ -190,12 +202,44 @@ export default function MessageCardRenderer({ message, isMe, showChannel, channe
           </div>
         )
 
+      case 'CARD_LABEL':
+        return (
+          <div className="p-3.5 bg-white rounded-2xl border border-[#e2e8f0] shadow-2xs space-y-2.5 max-w-sm text-left">
+            <div className="flex items-center justify-between pb-2 border-b border-[#f1f5f9]">
+              <div className="flex items-center gap-1.5">
+                <Tag className="w-4 h-4 text-[#16a34a]" />
+                <span className="font-bold text-xs text-[#1e293b]">Etiqueta de Envio</span>
+              </div>
+              <span className="font-mono text-[10px] bg-[#f1f5f9] px-2 py-0.5 rounded text-[#475569]">
+                {meta.carrier || 'Mercado Envios'}
+              </span>
+            </div>
+
+            <div className="space-y-1">
+              <p className="font-bold text-xs text-[#1e293b]">Pedido #{meta.order_number}</p>
+              <p className="font-mono text-[11px] text-[#16a34a] font-bold">{meta.tracking_code || 'Rastreio Disponível'}</p>
+            </div>
+
+            <div className="flex justify-end pt-1">
+              <a
+                href={meta.label_url || '#'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3 py-1 bg-[#16a34a] hover:bg-[#15803d] text-white text-[11px] font-bold rounded-lg flex items-center gap-1 transition-all shadow-2xs"
+              >
+                <span>Imprimir Etiqueta</span>
+                <ExternalLink className="w-3 h-3 text-white" />
+              </a>
+            </div>
+          </div>
+        )
+
       case 'CARD_TASK':
         return (
           <div className="p-3.5 bg-white rounded-2xl border border-[#e2e8f0] shadow-2xs space-y-2.5 max-w-sm text-left">
             <div className="flex items-center justify-between pb-2 border-b border-[#f1f5f9]">
               <div className="flex items-center gap-1.5">
-                <CheckSquare className="w-4 h-4 text-[#8b5cf6]" />
+                <CheckSquare className="w-4 h-4 text-[#d97706]" />
                 <span className="font-bold text-xs text-[#1e293b]">Atividade Operacional</span>
               </div>
               <span className={`px-2 py-0.5 rounded-full text-[9px] font-black border ${
@@ -249,9 +293,9 @@ export default function MessageCardRenderer({ message, isMe, showChannel, channe
     <div className={`flex ${isMe ? 'justify-end' : 'justify-start'} gap-2.5 w-full items-end`}>
       {!isMe && (
         <div className="shrink-0 mb-1">
-          {message.sender_photo ? (
+          {resolvedPhoto ? (
             <img
-              src={message.sender_photo}
+              src={resolvedPhoto}
               alt={message.sender_name}
               className="w-8 h-8 rounded-full object-cover border border-[#e2e8f0] shadow-xs"
             />
@@ -296,9 +340,9 @@ export default function MessageCardRenderer({ message, isMe, showChannel, channe
 
       {isMe && (
         <div className="shrink-0 mb-1">
-          {message.sender_photo ? (
+          {resolvedPhoto ? (
             <img
-              src={message.sender_photo}
+              src={resolvedPhoto}
               alt={message.sender_name}
               className="w-8 h-8 rounded-full object-cover border border-[#e2e8f0] shadow-xs"
             />
