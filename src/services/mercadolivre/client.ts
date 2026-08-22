@@ -33,19 +33,6 @@ export async function getValidTokenBySellerId(sellerId: string): Promise<string>
     return refreshOrReturnToken(supabase, acc)
   }
 
-  // 3. Fallback: search any active connection with mercadolivre
-  const { data: fallbackConn } = await supabase
-    .from('marketplace_connections')
-    .select('*')
-    .eq('marketplace_id', 'mercadolivre')
-    .order('updated_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
-
-  if (fallbackConn && (fallbackConn.access_token || fallbackConn.refresh_token)) {
-    return refreshOrReturnToken(supabase, fallbackConn)
-  }
-
   throw new Error(`Conexão ativa do Mercado Livre não encontrada para a conta ${sellerId}.`)
 }
 

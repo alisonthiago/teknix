@@ -11,31 +11,31 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'sellerId is required' }, { status: 400 })
     }
 
-    // mode=full -> usa o novo MarketplaceProductSyncService com cascata completa
-    // mode=legacy (default) -> usa o syncCatalog antigo (pedidos + listings)
-    if (mode === 'full') {
-      const report = await syncFullCatalog(sellerId.toString())
+    const seller = sellerId.toString()
+
+    // mode=legacy → apenas pedidos (catálogo legado desativado por padrão)
+    if (mode === 'legacy') {
+      const legacyResults = await syncMercadoLivreAccount(seller, { syncCatalog: false, syncOrders: true })
       return NextResponse.json({
         success: true,
-        message: `Sincronização completa: ${report.fullySynced} OK, ${report.partiallySynced} parcial, ${report.failed} falhas de ${report.totalItems} anúncios.`,
-        report
+        message: `Pedidos sincronizados: ${legacyResults.ordersSynced}.`,
+        ...legacyResults,
       })
     }
 
-    // Modo padrão: sync legado + novo catálogo em cascata
-    const [legacyResults, catalogReport] = await Promise.all([
-      syncMercadoLivreAccount(sellerId.toString()),
-      syncFullCatalog(sellerId.toString()).catch(err => {
-        console.error('[Sync Route] Erro no catálogo completo:', err.message)
-        return null
-      })
+    // Padrão: catálogo completo (ml_listings) + pedidos — sem corrida entre dois syncs de catálogo
+    const [catalogReport, orderResults] = await Promise.all([
+      syncFullCatalog(seller),
+      syncMercadoLivreAccount(seller, { syncCatalog: false, syncOrders: true }),
     ])
 
     return NextResponse.json({
       success: true,
-      message: `Sincronização concluída! ${legacyResults.productsSynced} produto(s) e ${legacyResults.ordersSynced} pedido(s) sincronizados.${catalogReport ? ` Catálogo: ${catalogReport.fullySynced}/${catalogReport.totalItems} completos.` : ''}`,
-      ...legacyResults,
-      catalogReport
+      message: `Sincronização concluída! ${orderResults.ordersSynced} pedido(s). Catálogo: ${catalogReport.fullySynced}/${catalogReport.totalItems} completos.`,
+      ordersSynced: orderResults.ordersSynced,
+      productsSynced: catalogReport.fullySynced,
+      errors: [...(orderResults.errors || []), ...(catalogReport.failed ? [`${catalogReport.failed} anúncio(s) com falha`] : [])],
+      catalogReport,
     })
   } catch (error: any) {
     console.error('Sync error:', error)

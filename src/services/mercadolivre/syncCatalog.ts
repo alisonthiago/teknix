@@ -9,7 +9,18 @@ function getSupabase() {
   )
 }
 
-export async function syncMercadoLivreAccount(sellerId: string) {
+export type MercadoLivreSyncOptions = {
+  /** Sincroniza anúncios em products/marketplace_listings (legado). Desligado por padrão — use productSync. */
+  syncCatalog?: boolean
+  /** Sincroniza pedidos recentes. */
+  syncOrders?: boolean
+}
+
+export async function syncMercadoLivreAccount(
+  sellerId: string,
+  options: MercadoLivreSyncOptions = {}
+) {
+  const { syncCatalog = false, syncOrders = true } = options
   const supabase = getSupabase()
 
   const results = {
@@ -45,9 +56,11 @@ export async function syncMercadoLivreAccount(sellerId: string) {
   const marketplaceAccountId = mpAcc?.id || null
 
   // ----------------------------------------------------
-  // 2. Fetch & Sync Seller's Active Items
+  // 2. Fetch & Sync Seller's Active Items (legado — opt-in)
   // ----------------------------------------------------
-  try {
+  if (!syncCatalog) {
+    // Catálogo fica a cargo do productSync (ml_listings) para evitar corrida de dados
+  } else try {
     const itemsSearchRes = await fetch(`https://api.mercadolibre.com/users/${sellerId}/items/search?status=active&limit=50`, {
       headers: { Authorization: `Bearer ${token}` }
     })
@@ -141,6 +154,10 @@ export async function syncMercadoLivreAccount(sellerId: string) {
   // ----------------------------------------------------
   // 3. Fetch & Reconcile Recent Orders
   // ----------------------------------------------------
+  if (!syncOrders) {
+    return results
+  }
+
   try {
     const ordersRes = await fetch(`https://api.mercadolibre.com/orders/search?seller=${sellerId}&limit=50&sort=date_desc`, {
       headers: { Authorization: `Bearer ${token}` }
