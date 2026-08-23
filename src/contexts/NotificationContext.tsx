@@ -96,22 +96,21 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     }
   }, [supabase])
 
+  const dismissToast = useCallback((id: string) => {
+    setActiveToasts(prev => prev.filter(t => t.id !== id))
+  }, [])
+
   useEffect(() => {
     fetchNotifications()
-    
-    // Polling contínuo de 3 segundos para notificações em tempo real
-    const intervalId = setInterval(() => {
-      if (typeof document !== 'undefined' && !document.hidden) {
-        fetchNotifications()
-      }
-    }, 3000)
 
-    // Setup realtime subscription
-    let channel: ReturnType<typeof supabase.channel> | null = null
-    
+    // 1. Polling de fallback a cada 10 segundos
+    const intervalId = setInterval(fetchNotifications, 10000)
+
+    // 2. Realtime subscription no Supabase
+    let channel: any = null
     const setupRealtime = async () => {
       channel = supabase
-        .channel('public:notifications-realtime')
+        .channel('schema-db-changes')
         .on(
           'postgres_changes',
           {
@@ -145,7 +144,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       clearInterval(intervalId)
       if (channel) supabase.removeChannel(channel)
     }
-  }, [fetchNotifications, supabase])
+  }, [fetchNotifications, supabase, dismissToast])
 
   // notify agora é EXCLUSIVO para exibir Toasts visuais temporários na tela, SEM poluir a Central de Notificações
   const notify = ({ title, message, type }: NotifyOptions) => {
@@ -167,10 +166,6 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     setTimeout(() => {
       dismissToast(tempId)
     }, 4000)
-  }
-
-  const dismissToast = (id: string) => {
-    setActiveToasts(prev => prev.filter(t => t.id !== id))
   }
 
   const markAsRead = async (id: string) => {

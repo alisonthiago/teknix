@@ -56,8 +56,8 @@ export default function NewPurchaseForm({ suppliers, products }: NewPurchaseForm
   const [paymentMethod, setPaymentMethod] = useState('')
   const [notes, setNotes] = useState('')
   
-  const [items, setItems] = useState<PurchaseItem[]>(initialProduct ? [{
-    id: Math.random().toString(36).slice(2),
+  const [items, setItems] = useState<PurchaseItem[]>(() => initialProduct ? [{
+    id: 'item-init-1',
     product_id: initialProduct.id,
     quantity: 1,
     unit_cost: 0,

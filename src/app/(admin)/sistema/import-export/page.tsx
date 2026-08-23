@@ -16,7 +16,7 @@ export default function ImportExportPage() {
     try {
       const supabase = createClient()
       let data: any[] = []
-      let filename = `teknix_${type.toLowerCase()}`
+      const filename = `teknix_${type.toLowerCase()}`
 
       if (type === 'Produtos') {
         const res = await supabase.from('products').select('*')

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import ConfigSubLayout, { ConfigSection } from '@/components/ConfigSubLayout'
 import { Plus, Eye, EyeOff, Copy, Trash2, Loader2 } from 'lucide-react'
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal'
@@ -17,11 +17,7 @@ export default function ApiPage() {
 
   const supabase = createClient()
 
-  useEffect(() => {
-    fetchKeys()
-  }, [])
-
-  const fetchKeys = async () => {
+  const fetchKeys = useCallback(async () => {
     setLoading(true)
     const { data } = await supabase.from('api_keys').select('*').order('created_at', { ascending: false })
     if (data) {
@@ -35,7 +31,11 @@ export default function ApiPage() {
       })))
     }
     setLoading(false)
-  }
+  }, [supabase])
+
+  useEffect(() => {
+    fetchKeys()
+  }, [fetchKeys])
 
   const handleCreateKey = async () => {
     setSaving(true)

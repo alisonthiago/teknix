@@ -357,7 +357,22 @@ function HeaderActions({
         )}
       </div>
 
-      {/* 💬 BOTÃO CENTRAL DE CONVERSAS & CHAT INTERNO - removido do header (agora no dropdown do perfil) */}
+      {/* 💬 BOTÃO DO CHAT INTERNO COM BADGE DE NÃO LIDAS */}
+      <button
+        onClick={() => {
+          setIsFloatingOpen(true)
+          setIsFloatingMinimized(false)
+        }}
+        className="w-10 h-10 rounded-full flex items-center justify-center text-[#333] hover:bg-[#EEFFB3]/60 transition-colors relative cursor-pointer"
+        title="Chat Interno TEKNIX"
+      >
+        <MessageSquare className="w-5 h-5 text-[#1e293b]" strokeWidth={1.5} />
+        {totalUnreadCount > 0 && (
+          <span className="absolute top-1.5 right-1.5 min-w-[18px] h-[18px] px-1 bg-[#16a34a] text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white shadow-sm animate-bounce">
+            {totalUnreadCount > 99 ? '99+' : totalUnreadCount}
+          </span>
+        )}
+      </button>
 
       {/* 🔴 BOTÃO AO VIVO DENTRO DA PÍLULA VERDE (AGORA PRETO CLEAN CONFORME PEDIDO) */}
       <button

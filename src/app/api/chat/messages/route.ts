@@ -30,7 +30,12 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ error: error.message }, { status: 400 })
       }
 
-      return NextResponse.json({ messages: data || [] })
+      const formatted = (data || []).map((m: any) => ({
+        ...m,
+        sender_photo: m.metadata?.sender_photo || undefined
+      }))
+
+      return NextResponse.json({ messages: formatted })
     }
 
     // Outros canais: filtrar por conversation_id
@@ -44,7 +49,12 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 400 })
     }
 
-    return NextResponse.json({ messages: data || [] })
+    const formatted = (data || []).map((m: any) => ({
+      ...m,
+      sender_photo: m.metadata?.sender_photo || undefined
+    }))
+
+    return NextResponse.json({ messages: formatted })
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 })
   }
@@ -63,12 +73,17 @@ export async function POST(req: NextRequest) {
       senderId = '00000000-0000-0000-0000-000000000000'
     }
 
-    let senderPhoto = body.sender_photo || null
+    let senderPhoto = body.sender_photo || body.metadata?.sender_photo || null
     if (!senderPhoto && senderId && senderId !== '00000000-0000-0000-0000-000000000000') {
       const { data: prof } = await supabase.from('profiles').select('avatar_url, photo_url').eq('id', senderId).maybeSingle()
       if (prof) {
         senderPhoto = prof.avatar_url || prof.photo_url || null
       }
+    }
+
+    const mergedMetadata = {
+      ...(body.metadata || {}),
+      ...(senderPhoto ? { sender_photo: senderPhoto } : {})
     }
 
     const { data, error } = await supabase
@@ -78,10 +93,9 @@ export async function POST(req: NextRequest) {
         conversation_id: body.conversation_id,
         sender_id: senderId,
         sender_name: body.sender_name || 'Usuário',
-        sender_photo: senderPhoto,
         content: body.content || '',
         message_type: body.message_type || 'TEXT',
-        metadata: body.metadata || {},
+        metadata: mergedMetadata,
         reply_to: body.reply_to || null,
         created_at: body.created_at || new Date().toISOString()
       })

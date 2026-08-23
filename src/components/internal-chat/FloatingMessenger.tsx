@@ -155,18 +155,27 @@ export default function FloatingMessenger() {
   if (!isFloatingOpen || isFloatingMinimized) {
     const hasUnread = totalUnreadCount > 0
     return (
-      <div className="fixed bottom-6 right-6 z-[100]">
+      <div className="fixed bottom-6 right-6 z-[100] flex items-center">
+        {hasUnread && (
+          <div
+            onClick={handleOpenMessenger}
+            className="mr-3 bg-[#0f172a] hover:bg-[#1e293b] text-white text-[12px] font-bold px-3.5 py-2 rounded-2xl shadow-xl whitespace-nowrap flex items-center gap-2 cursor-pointer transition-all animate-in fade-in slide-in-from-right-3 border border-[#334155]"
+          >
+            <span className="w-2 h-2 rounded-full bg-[#16a34a] animate-ping" />
+            <span>💬 Nova mensagem no Chat</span>
+          </div>
+        )}
         <button
           onClick={handleOpenMessenger}
-          className={`relative w-12 h-12 bg-white rounded-2xl shadow-lg border border-[#e2e8f0] flex items-center justify-center hover:shadow-xl hover:scale-[1.05] transition-all cursor-pointer ${hasUnread ? 'animate-bounce' : ''}`}
+          className={`relative w-12 h-12 bg-white rounded-2xl shadow-lg border border-[#e2e8f0] flex items-center justify-center hover:shadow-xl hover:scale-[1.08] transition-all cursor-pointer ${hasUnread ? 'ring-4 ring-[#16a34a]/30' : ''}`}
           title="Chat Interno TEKNIX"
         >
           {hasUnread && (
-            <span className="absolute inset-0 rounded-2xl ring-4 ring-[#16a34a]/40 animate-ping" />
+            <span className="absolute inset-0 rounded-2xl ring-4 ring-[#16a34a]/40 animate-ping pointer-events-none" />
           )}
           <TeknixT className="w-6 h-6 text-[#1e293b]" />
           {hasUnread && (
-            <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-black bg-[#16a34a] text-white flex items-center justify-center shadow-sm">
+            <span className="absolute -top-2 -right-2 min-w-[22px] h-[22px] px-1.5 rounded-full text-[11px] font-black bg-[#e74c3c] text-white flex items-center justify-center shadow-md ring-2 ring-white animate-bounce">
               {totalUnreadCount > 99 ? '99+' : totalUnreadCount}
             </span>
           )}

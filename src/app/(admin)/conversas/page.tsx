@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
-import { useInternalChat } from '@/contexts/InternalChatContext'
+import { useInternalChat, getConversationDisplayName, getConversationColab } from '@/contexts/InternalChatContext'
 import MessageCardRenderer from '@/components/internal-chat/MessageCardRenderer'
 import {
   MessageSquare,
@@ -153,15 +153,22 @@ export default function ConversasPage() {
                   }`}
                 >
                   <div className="relative shrink-0">
-                    <div className="w-10 h-10 rounded-2xl bg-[#f1f5f9] text-[#334155] border border-[#e2e8f0] flex items-center justify-center text-xs font-black">
-                      {conv.type === 'GROUP' ? <Users className="w-4 h-4 text-[#16a34a]" /> : conv.name.slice(0, 1)}
-                    </div>
+                    {(() => {
+                      const convColab = getConversationColab(conv, currentUser?.id, collaborators)
+                      return convColab?.photo_url ? (
+                        <img src={convColab.photo_url} alt={convColab.name} className="w-10 h-10 rounded-2xl object-cover border border-[#e2e8f0] shadow-xs" />
+                      ) : (
+                        <div className="w-10 h-10 rounded-2xl bg-[#f1f5f9] text-[#334155] border border-[#e2e8f0] flex items-center justify-center text-xs font-black">
+                          {conv.type === 'GROUP' ? <Users className="w-4 h-4 text-[#16a34a]" /> : getConversationDisplayName(conv, currentUser?.id, collaborators).slice(0, 1).toUpperCase()}
+                        </div>
+                      )
+                    })()}
                     <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#16a34a] rounded-full ring-2 ring-white" />
                   </div>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <p className="text-xs font-bold text-[#111] truncate">{conv.name}</p>
+                      <p className="text-xs font-bold text-[#111] truncate">{getConversationDisplayName(conv, currentUser?.id, collaborators)}</p>
                       {conv.last_message && (
                         <span className="text-[10px] text-[#888]">
                           {new Date(conv.last_message.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
@@ -194,11 +201,18 @@ export default function ConversasPage() {
               {/* Header do Chat Clean */}
               <div className="p-3.5 border-b border-[#f0f0f0] flex items-center justify-between bg-white shadow-2xs">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-[#f1f5f9] text-[#334155] border border-[#e2e8f0] flex items-center justify-center text-xs font-extrabold">
-                    {activeConversation.type === 'GROUP' ? <Users className="w-4 h-4 text-[#16a34a]" /> : activeConversation.name.slice(0, 1)}
-                  </div>
+                  {(() => {
+                    const activeColab = getConversationColab(activeConversation, currentUser?.id, collaborators)
+                    return activeColab?.photo_url ? (
+                      <img src={activeColab.photo_url} alt={activeColab.name} className="w-9 h-9 rounded-xl object-cover border border-[#e2e8f0] shadow-xs" />
+                    ) : (
+                      <div className="w-9 h-9 rounded-xl bg-[#f1f5f9] text-[#334155] border border-[#e2e8f0] flex items-center justify-center text-xs font-extrabold">
+                        {activeConversation.type === 'GROUP' ? <Users className="w-4 h-4 text-[#16a34a]" /> : getConversationDisplayName(activeConversation, currentUser?.id, collaborators).slice(0, 1).toUpperCase()}
+                      </div>
+                    )
+                  })()}
                   <div>
-                    <h3 className="text-xs sm:text-sm font-black text-[#111]">{activeConversation.name}</h3>
+                    <h3 className="text-xs sm:text-sm font-black text-[#111]">{getConversationDisplayName(activeConversation, currentUser?.id, collaborators)}</h3>
                     <p className="text-[10px] text-[#16a34a] font-bold flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-[#16a34a]" /> Online e Sincronizado
                     </p>
@@ -218,7 +232,7 @@ export default function ConversasPage() {
                   <MessageCardRenderer
                     key={msg.id}
                     message={msg}
-                    isMe={msg.sender_id === currentUser?.id || (!currentUser?.id && msg.sender_id === 'user-alison')}
+                    isMe={msg.sender_id === currentUser?.id}
                   />
                 ))}
                 <div ref={messagesEndRef} />
@@ -254,14 +268,16 @@ export default function ConversasPage() {
                 <div className="flex items-center justify-between text-[#777] text-xs px-1">
                   <div className="flex items-center gap-2">
                     <button 
-                      onClick={() => alert('Selecione uma imagem ou foto de pedido')}
-                      className="p-1 rounded-lg hover:bg-[#f0f0f0] hover:text-[#111] flex items-center gap-1 text-[11px] font-bold transition-colors cursor-pointer"
+                      onClick={() => sendMessage(activeConversation!.id, '📷 Envio de foto em breve', 'TEXT')}
+                      title="Em breve: envio de fotos"
+                      className="p-1 rounded-lg hover:bg-[#f0f0f0] hover:text-[#111] flex items-center gap-1 text-[11px] font-bold transition-colors cursor-pointer opacity-50"
                     >
                       <ImageIcon className="w-3.5 h-3.5 text-[#16a34a]" /> Foto
                     </button>
                     <button 
-                      onClick={() => alert('Selecione um PDF ou documento')}
-                      className="p-1 rounded-lg hover:bg-[#f0f0f0] hover:text-[#111] flex items-center gap-1 text-[11px] font-bold transition-colors cursor-pointer"
+                      onClick={() => sendMessage(activeConversation!.id, '📎 Envio de arquivo em breve', 'TEXT')}
+                      title="Em breve: envio de arquivos"
+                      className="p-1 rounded-lg hover:bg-[#f0f0f0] hover:text-[#111] flex items-center gap-1 text-[11px] font-bold transition-colors cursor-pointer opacity-50"
                     >
                       <Paperclip className="w-3.5 h-3.5 text-[#3483fa]" /> Arquivo
                     </button>

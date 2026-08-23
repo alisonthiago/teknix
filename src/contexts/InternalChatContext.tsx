@@ -148,7 +148,7 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
   
   const setActiveConversation = useCallback((c: InternalConversation | null) => {
     setActiveConversationState(c)
-    if (c) {
+    if (c && floatingOpenRef.current && !floatingMinRef.current) {
       setLastReadMap(c.id)
       setConversations(prev => prev.map(item => item.id === c.id ? { ...item, unread_count: 0 } : item))
     }
@@ -172,15 +172,16 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
   const [loadingMessages, setLoadingMessages] = useState(false)
 
   const activeConvRef = useRef<InternalConversation | null>(activeConversation)
-  activeConvRef.current = activeConversation
-
   const floatingOpenRef = useRef(isFloatingOpen)
-  floatingOpenRef.current = isFloatingOpen
   const floatingMinRef = useRef(isFloatingMinimized)
-  floatingMinRef.current = isFloatingMinimized
-  
   const currentUserRef = useRef(currentUser)
-  currentUserRef.current = currentUser
+
+  useEffect(() => {
+    activeConvRef.current = activeConversation
+    floatingOpenRef.current = isFloatingOpen
+    floatingMinRef.current = isFloatingMinimized
+    currentUserRef.current = currentUser
+  }, [activeConversation, isFloatingOpen, isFloatingMinimized, currentUser])
 
   const channelRef = useRef<any>(null)
   const onlineUserIdsRef = useRef<Set<string>>(new Set())
@@ -318,12 +319,54 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
         })
       })
 
+      // Mapeia conversas diretas com todos os colaboradores conhecidos
+      if (currentUid && profiles && profiles.length > 0) {
+        profiles.forEach((p: any) => {
+          if (p.id !== currentUid) {
+            const directId = getDirectConvId(currentUid, p.id)
+            if (!convMap.has(directId)) {
+              const last = lastMsgMap.get(directId)
+              const unreadCount = recentMsgs.filter((m: any) => {
+                if (m.conversation_id !== directId) return false
+                if (m.sender_id === currentUid) return false
+                const lastRead = lastReadMap[directId]
+                if (!lastRead) return false
+                return new Date(m.created_at).getTime() > new Date(lastRead).getTime()
+              }).length
+
+              convMap.set(directId, {
+                id: directId,
+                type: 'DIRECT',
+                name: removeEmojis(p.name || 'Colaborador'),
+                description: '',
+                members: [{ id: currentUid, name: currentUserRef.current?.name || 'Eu' }, { id: p.id, name: p.name || 'Colaborador', photo_url: p.photo_url || p.avatar_url }],
+                unread_count: unreadCount,
+                last_message: last,
+                created_at: new Date().toISOString()
+              })
+            }
+          }
+        })
+      }
+
       const merged = Array.from(convMap.values())
 
       setConversations(prev => {
         return merged.map(m => {
           const old = prev.find(p => p.id === m.id)
-          return old ? { ...m, unread_count: m.unread_count } : m
+          const latestLastMessage = (m.last_message && old?.last_message)
+            ? (new Date(m.last_message.created_at).getTime() >= new Date(old.last_message.created_at).getTime() ? m.last_message : old.last_message)
+            : (m.last_message || old?.last_message)
+
+          const isViewing = floatingOpenRef.current && !floatingMinRef.current && activeConvRef.current?.id === m.id
+          // Se o usuário está vendo ativamente a conversa com o painel aberto, zera. Senão, preserva o contador de não lidas até que ele clique.
+          const preservedUnreadCount = isViewing ? 0 : Math.max(m.unread_count || 0, old?.unread_count || 0)
+
+          return {
+            ...m,
+            last_message: latestLastMessage,
+            unread_count: preservedUnreadCount
+          }
         })
       })
 
@@ -436,8 +479,14 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
       const currentUserId = currentUserRef.current?.id
       const isOwn = currentUserId && msg.sender_id === currentUserId
 
+      // Notificação Sonora e Toast visual caso seja mensagem de outro usuário
       if (!isOwn) {
         playNotificationSound()
+        notify({
+          title: `💬 ${msg.sender_name || 'Chat Interno'}`,
+          message: msg.content || 'Enviou uma nova mensagem',
+          type: 'info'
+        })
       }
 
       // 1. Atualizar mensagens no canal específico
@@ -461,7 +510,7 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
         return updated
       })
 
-      // 2. Atualizar lista de conversas
+      // 2. Atualizar lista de conversas em tempo real
       setConversations(prev => {
         const exists = prev.some(c => c.id === msg.conversation_id)
         if (exists) {
@@ -473,7 +522,7 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
                 last_message: {
                   content: msg.content || 'Mensagem recebida',
                   sender_name: msg.sender_name,
-                  created_at: msg.created_at
+                  created_at: msg.created_at || new Date().toISOString()
                 },
                 unread_count: (isViewing || isOwn) ? 0 : (c.unread_count + 1)
               }
@@ -490,7 +539,7 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
             last_message: {
               content: msg.content || 'Mensagem recebida',
               sender_name: msg.sender_name,
-              created_at: msg.created_at
+              created_at: msg.created_at || new Date().toISOString()
             },
             created_at: msg.created_at || new Date().toISOString()
           }
@@ -499,24 +548,39 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
       })
     }
 
-    channel
-      .on('broadcast', { event: 'new_message' }, ({ payload }) => handleIncoming(payload))
-      .subscribe(async (status) => {
-        if (status === 'SUBSCRIBED' && currentUser) {
-          await channel.track({
-            user_id: currentUser.id,
-            user_name: currentUser.name,
-            online_at: new Date().toISOString()
-          })
-        }
-      })
+    // 1. Escuta Broadcast direto
+    channel.on('broadcast', { event: 'new_message' }, ({ payload }) => handleIncoming(payload))
+
+    // 2. Escuta mudanças reais no Postgres (garante que 2 contas abertas sincronizem na hora)
+    channel.on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'internal_messages'
+      },
+      (payload) => {
+        handleIncoming(payload.new)
+      }
+    )
+
+    channel.subscribe(async (status) => {
+      if (status === 'SUBSCRIBED' && currentUser) {
+        await channel.track({
+          user_id: currentUser.id,
+          user_name: currentUser.name,
+          online_at: new Date().toISOString()
+        })
+      }
+    })
 
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [currentUser?.id])
+  }, [currentUser?.id, notify])
 
   const markAsRead = useCallback((convId: string) => {
+    setLastReadMap(convId)
     setConversations(prev => prev.map(c => c.id === convId ? { ...c, unread_count: 0 } : c))
   }, [])
 
@@ -530,16 +594,20 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
   ) => {
     const senderId = currentUser?.id || 'user-current'
     const senderName = currentUser?.name || 'Alison Thiago'
+    const senderPhoto = currentUser?.photo_url
 
     const newMessage: InternalMessage = {
       id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       conversation_id: conversationId,
       sender_id: senderId,
       sender_name: senderName,
-      sender_photo: currentUser?.photo_url,
+      sender_photo: senderPhoto,
       content,
       message_type: messageType,
-      metadata,
+      metadata: {
+        ...(metadata || {}),
+        ...(senderPhoto ? { sender_photo: senderPhoto } : {})
+      },
       reply_to: replyTo,
       created_at: new Date().toISOString()
     }
@@ -564,17 +632,17 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
       return c
     }))
 
-    // 2. Persistir Conversa e Mensagem via API Route no Supabase
-    try {
-      const conv = conversations.find(c => c.id === conversationId)
-      if (conv) {
-        await fetch('/api/chat/conversations', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(conv)
-        })
-      }
+    // 2. Persistir Conversa e Mensagem no Banco em paralelo
+    const conv = conversations.find(c => c.id === conversationId)
+    if (conv) {
+      fetch('/api/chat/conversations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(conv)
+      }).catch(() => {})
+    }
 
+    try {
       await fetch('/api/chat/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
