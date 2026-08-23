@@ -155,16 +155,7 @@ export default function FloatingMessenger() {
   if (!isFloatingOpen || isFloatingMinimized) {
     const hasUnread = totalUnreadCount > 0
     return (
-      <div className="fixed bottom-6 right-6 z-[100] flex items-center">
-        {hasUnread && (
-          <div
-            onClick={handleOpenMessenger}
-            className="mr-3 bg-[#0f172a] hover:bg-[#1e293b] text-white text-[12px] font-bold px-3.5 py-2 rounded-2xl shadow-xl whitespace-nowrap flex items-center gap-2 cursor-pointer transition-all animate-in fade-in slide-in-from-right-3 border border-[#334155]"
-          >
-            <span className="w-2 h-2 rounded-full bg-[#16a34a] animate-ping" />
-            <span>💬 Nova mensagem no Chat</span>
-          </div>
-        )}
+      <div className="fixed bottom-6 right-6 z-[100]">
         <button
           onClick={handleOpenMessenger}
           className={`relative w-12 h-12 bg-white rounded-2xl shadow-lg border border-[#e2e8f0] flex items-center justify-center hover:shadow-xl hover:scale-[1.08] transition-all cursor-pointer ${hasUnread ? 'ring-4 ring-[#16a34a]/30' : ''}`}
