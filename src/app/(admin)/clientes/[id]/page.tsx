@@ -1,18 +1,26 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { 
-  ArrowLeft, User, Phone, MapPin, ShoppingCart, DollarSign, 
-  Package, ExternalLink, Printer, Calendar, ShieldCheck, 
-  MessageSquare, Clock, AlertCircle, HelpCircle, CheckCircle2,
-  XCircle, Truck, FileText, Send, Sparkles, Share2
+  ArrowLeft, Phone, MapPin, ShoppingCart,
+  Package, ExternalLink, ShieldCheck, 
+  MessageSquare, Clock, HelpCircle, CheckCircle2,
+  Truck, FileText, Send, Share2, Zap, Loader2, RefreshCw, CheckCheck,
+  Calendar, Printer
 } from 'lucide-react'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import ShareContextModal from '@/components/internal-chat/ShareContextModal'
+import { useNotification } from '@/contexts/NotificationContext'
+
+const QUICK_TEMPLATES = [
+  'Olá! Seu pedido já está sendo preparado com muito cuidado e será enviado rapidamente.',
+  'Trabalhamos apenas com produtos 100% originais, novos, lacrados e com Nota Fiscal.',
+  'Qualquer dúvida sobre a instalação ou uso do produto, estamos à disposição por aqui!',
+  'Recebemos sua solicitação e já estamos providenciando o suporte para você.'
+]
 
 function formatBRL(val: number) {
   return `R$ ${val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -21,9 +29,20 @@ function formatBRL(val: number) {
 export default function ClienteProfilePage() {
   const params = useParams()
   const router = useRouter()
+  const { notify } = useNotification()
   const rawId = typeof params?.id === 'string' ? decodeURIComponent(params.id) : ''
   const [activeTab, setActiveTab] = useState<'pedidos' | 'mensagens' | 'perguntas' | 'historico'>('pedidos')
   const [showShareModal, setShowShareModal] = useState(false)
+
+  // Chat states
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null)
+  const [chatMessages, setChatMessages] = useState<any[]>([])
+  const [loadingChat, setLoadingChat] = useState(false)
+  const [messageInput, setMessageInput] = useState('')
+  const [sending, setSending] = useState(false)
+  const [showTemplates, setShowTemplates] = useState(false)
+  const chatBottomRef = useRef<HTMLDivElement>(null)
+  const chatLenRef = useRef(0)
 
   const { data, loading } = useSupabaseQuery(async (s) => {
     // Buscar pedidos correspondentes ao cliente por id, customer_id ou customer_name
@@ -53,6 +72,7 @@ export default function ClienteProfilePage() {
 
   const orders = data || []
   const firstOrder = orders[0]
+  const selectedOrder = orders.find(o => (o.order_id || o.id) === selectedOrderId) || firstOrder
   const customerName = firstOrder?.customer_name || rawId || 'Cliente'
   const customerPhone = firstOrder?.customer_phone || '—'
   const customerAddress = firstOrder?.notes || firstOrder?.shipping_address || firstOrder?.shipping_city ? `${firstOrder?.shipping_city || ''} - ${firstOrder?.shipping_state || 'BR'}` : 'Rua Jaime Avelino 105, Guarulhos - SP'
@@ -63,25 +83,76 @@ export default function ClienteProfilePage() {
 
   const channels = Array.from(new Set(orders.map(o => (o.marketplaces as any)?.name || 'Mercado Livre')))
 
-  // Mensagens e Atendimento do Cliente (Chat pós-venda Mercado Livre)
-  const customerMessages = [
-    {
-      id: 'msg-1',
-      sender: customerName,
-      isCustomer: true,
-      text: 'Olá, boa tarde! Gostaria de saber quando o meu pedido será enviado e se acompanha a nota fiscal.',
-      date: firstOrder?.created_at ? new Date(firstOrder.created_at).toLocaleDateString('pt-BR') : '20/08/2026',
-      time: '14:32'
-    },
-    {
-      id: 'msg-2',
-      sender: 'Atendimento Teknix (Você)',
-      isCustomer: false,
-      text: `Olá ${customerName.split(' ')[0]}! Seu pedido #${firstOrder?.order_number || 'MLB-2000018029918832'} foi processado com sucesso e a nota fiscal emitida. O código de rastreamento é ${firstOrder?.tracking_code || 'MEL47814652332'}.`,
-      date: firstOrder?.created_at ? new Date(firstOrder.created_at).toLocaleDateString('pt-BR') : '20/08/2026',
-      time: '14:35'
+  // ── Real chat fetch ────────────────────────────────────────────────────────
+  const fetchChatMessages = useCallback(async (orderId: string) => {
+    setLoadingChat(true)
+    try {
+      const res = await fetch(`/api/mercadolivre/messages?order_id=${orderId}`)
+      if (!res.ok) throw new Error('Erro ao carregar mensagens')
+      const data = await res.json()
+      const msgs = data.conversations?.[0]?.messages || data.messages || []
+      const prevLen = chatLenRef.current
+      chatLenRef.current = msgs.length
+      setChatMessages(msgs)
+      // Só rola p/ o fim quando chega mensagem nova
+      if (msgs.length > prevLen) {
+        setTimeout(() => chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 80)
+      }
+    } catch (e) {
+      setChatMessages([])
+    } finally {
+      setLoadingChat(false)
     }
-  ]
+  }, [])
+
+  // ── Polling em tempo real (2s) enquanto a aba Chat está aberta ─────────────
+  useEffect(() => {
+    if (activeTab === 'mensagens' && selectedOrderId) {
+      const iv = setInterval(() => {
+        if (typeof document !== 'undefined' && !document.hidden) {
+          fetchChatMessages(selectedOrderId)
+        }
+      }, 2000)
+      return () => clearInterval(iv)
+    }
+  }, [activeTab, selectedOrderId, fetchChatMessages])
+
+  // Select first order when tab opens
+  useEffect(() => {
+    if (activeTab === 'mensagens' && orders.length > 0 && !selectedOrderId) {
+      const firstId = orders[0]?.order_id || orders[0]?.id
+      setSelectedOrderId(firstId)
+      fetchChatMessages(firstId)
+    }
+  }, [activeTab, orders.length])
+
+  const handleSelectOrder = (orderId: string) => {
+    setSelectedOrderId(orderId)
+    fetchChatMessages(orderId)
+  }
+
+  const handleSendMessage = async () => {
+    const text = messageInput.trim()
+    if (!selectedOrderId || !text) return
+    setSending(true)
+    try {
+      const res = await fetch('/api/mercadolivre/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: selectedOrderId, text })
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Erro ao enviar')
+      setMessageInput('')
+      setShowTemplates(false)
+      notify({ type: 'success', title: 'Mensagem Enviada!', message: 'Comprador notificado no chat do Mercado Livre.' })
+      fetchChatMessages(selectedOrderId)
+    } catch (err: any) {
+      notify({ type: 'error', title: 'Erro no Envio', message: err.message })
+    } finally {
+      setSending(false)
+    }
+  }
 
   // Perguntas feitas nos anúncios pelo cliente
   const customerQuestions = [
@@ -264,7 +335,7 @@ export default function ClienteProfilePage() {
             <div className="flex items-center gap-2 p-3 border-b border-[#eee] bg-[#fafafa] overflow-x-auto text-[12px]">
               {[
                 { id: 'pedidos', label: 'Pedidos', icon: ShoppingCart, count: orders.length },
-                { id: 'mensagens', label: 'Chat', icon: MessageSquare, count: customerMessages.length },
+                { id: 'mensagens', label: 'Chat ML', icon: MessageSquare, count: chatMessages.length },
                 { id: 'perguntas', label: 'Perguntas', icon: HelpCircle, count: customerQuestions.length },
                 { id: 'historico', label: 'Histórico', icon: Clock, count: customerTimeline.length },
               ].map(tab => {
@@ -422,39 +493,237 @@ export default function ClienteProfilePage() {
               </div>
             )}
 
-            {/* Conteúdo Aba 2: Mensagens & Chat */}
+            {/* Conteúdo Aba 2: Chat Mercado Livre (Experiência completa de Atendimento) */}
             {activeTab === 'mensagens' && (
-              <div className="p-5 sm:p-6 space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-[#eee]">
-                  <div>
-                    <h3 className="text-[14px] font-bold text-[#111]">Histórico de Mensagens no Chat do Mercado Livre</h3>
-                    <p className="text-[11px] text-[#666]">Mensagens diretas trocadas no pós-venda deste comprador.</p>
+              <div className="flex flex-col">
+                {/* Seletor de pedido */}
+                {orders.length > 1 && (
+                  <div className="px-5 pt-4 pb-3 border-b border-[#eee] flex items-center gap-3 flex-wrap">
+                    <span className="text-[11px] font-bold text-[#888]">Pedido:</span>
+                    {orders.map(ord => (
+                      <button
+                        key={ord.id}
+                        onClick={() => handleSelectOrder(ord.order_id || ord.id)}
+                        className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                          selectedOrderId === (ord.order_id || ord.id)
+                            ? 'bg-[#16a34a] text-white'
+                            : 'bg-[#f1f5f9] text-[#333] hover:bg-[#e2e8f0]'
+                        }`}
+                      >
+                        #{ord.order_number || ord.id}
+                      </button>
+                    ))}
                   </div>
-                  <Link
-                    href="/atendimento"
-                    className="px-3 py-1.5 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white text-[11px] font-bold transition-all"
-                  >
-                    Abrir no Atendimento Central
-                  </Link>
-                </div>
+                )}
 
-                <div className="space-y-3 max-w-3xl">
-                  {customerMessages.map(msg => (
-                    <div
-                      key={msg.id}
-                      className={`p-3.5 rounded-2xl border text-xs ${
-                        msg.isCustomer
-                          ? 'bg-[#fafafa] border-[#e6e6e6] mr-12'
-                          : 'bg-[#ecfdf5]/70 border-[#bbf7d0] ml-12 text-[#111]'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between font-bold mb-1 text-[11px] text-[#555]">
-                        <span>{msg.sender}</span>
-                        <span className="font-normal text-[#888]">{msg.date} às {msg.time}</span>
+                <div className="grid grid-cols-1 lg:grid-cols-12 overflow-hidden" style={{ minHeight: 560 }}>
+                  {/* ── Coluna Chat ─────────────────────────────────────────── */}
+                  <div className="lg:col-span-8 flex flex-col border-r border-[#eee]">
+                    {/* Header do Chat */}
+                    <div className="p-3.5 bg-white border-b border-[#eee] flex items-center justify-between shadow-2xs z-10">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-[#f0f7ff] border border-[#d0e4ff] flex items-center justify-center font-bold text-[#3483fa] text-[13px]">
+                          {customerName.substring(0, 2).toUpperCase()}
+                        </div>
+                        <div>
+                          <h3 className="text-[14px] font-bold text-[#1f2328] flex items-center gap-2">
+                            <span>{customerName}</span>
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#FFE600] text-[#111]">Mercado Livre</span>
+                          </h3>
+                          <div className="flex items-center gap-2 text-[11px] text-[#666]">
+                            <span className="text-[#38a169] font-semibold flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#38a169] animate-pulse" /> Online no Chat
+                            </span>
+                            <span>•</span>
+                            <span>Venda #{selectedOrder?.order_number || selectedOrderId}</span>
+                          </div>
+                        </div>
                       </div>
-                      <p className="text-[12px] leading-relaxed text-[#222]">{msg.text}</p>
+                      {selectedOrderId && (
+                        <div className="flex items-center gap-2">
+                          <a
+                            href={`https://vendedores.mercadolivre.com.br/vendas/nova/mensagens/${selectedOrderId}?source=notification`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="px-3 py-1.5 rounded-xl text-[11px] font-bold border border-[#e6e6e6] bg-[#f8f9fa] hover:bg-[#f0f0f0] text-[#333] flex items-center gap-1.5 transition-colors"
+                          >
+                            <span>Abrir no ML</span>
+                            <ExternalLink className="w-3.5 h-3.5 text-[#666]" />
+                          </a>
+                        </div>
+                      )}
                     </div>
-                  ))}
+
+                    {/* Mensagens */}
+                    <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3 bg-[#f8f9fa]" style={{ minHeight: 320 }}>
+                      <div className="text-center mb-2">
+                        <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-[#e6e6e6] text-[#666] shadow-2xs">Hoje</span>
+                      </div>
+                      {loadingChat ? (
+                        <div className="flex items-center justify-center h-40">
+                          <Loader2 className="w-6 h-6 animate-spin text-[#3483fa]" />
+                        </div>
+                      ) : chatMessages.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center h-40 text-center">
+                          <MessageSquare className="w-10 h-10 text-[#ddd] mb-2" />
+                          <p className="text-[12px] font-bold text-[#999]">Nenhuma mensagem encontrada</p>
+                          <p className="text-[11px] text-[#bbb] mt-0.5">As mensagens do Mercado Livre aparecerão aqui.</p>
+                        </div>
+                      ) : (
+                        chatMessages.map((m: any, idx: number) => {
+                          const isMe = m.from?.user_id === 470831049
+                          const time = m.message_date?.created
+                            ? new Date(m.message_date.created).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+                            : ''
+                          return (
+                            <div key={m.id || idx} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                              <div className={`max-w-[82%] p-3.5 rounded-2xl text-[13px] leading-relaxed shadow-xs relative ${
+                                isMe
+                                  ? 'bg-[#3483fa] text-white rounded-tr-none'
+                                  : 'bg-white border border-[#e6e6e6] text-[#222] rounded-tl-none'
+                              }`}>
+                                <p className="whitespace-pre-wrap">{m.text}</p>
+                                <div className={`flex items-center justify-end gap-1 mt-1 text-[10px] ${isMe ? 'text-white/80' : 'text-[#999]'}`}>
+                                  <span>{time}</span>
+                                  {isMe && <CheckCheck className="w-3.5 h-3.5 text-white" />}
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        })
+                      )}
+                      <div ref={chatBottomRef} />
+                    </div>
+
+                    {/* Templates rápidos */}
+                    {showTemplates && (
+                      <div className="px-4 py-3 border-t border-[#eee] bg-white space-y-1.5">
+                        <div className="flex items-center justify-between text-[11px] font-bold text-[#666] mb-1">
+                          <span className="flex items-center gap-1"><Zap className="w-3.5 h-3.5 text-[#f59e0b]" /> Respostas Rápidas:</span>
+                          <button onClick={() => setShowTemplates(false)} className="text-[#999] hover:text-[#333]">✕</button>
+                        </div>
+                        {QUICK_TEMPLATES.map((tmpl, i) => (
+                          <button
+                            key={i}
+                            onClick={() => { setMessageInput(tmpl); setShowTemplates(false) }}
+                            className="w-full text-left p-2 rounded-xl text-[11px] text-[#333] hover:bg-[#f0f7ff] border border-[#eee] transition-colors"
+                          >
+                            "{tmpl}"
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Input de resposta */}
+                    <div className="px-4 pb-4 pt-3 border-t border-[#eee] bg-white space-y-2 shadow-sm">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setShowTemplates(!showTemplates)}
+                          className="p-2 rounded-xl border border-[#e6e6e6] hover:bg-[#f5f5f5] text-[#666] transition-colors"
+                          title="Respostas Rápidas"
+                        >
+                          <Zap className="w-4 h-4 text-[#f59e0b]" />
+                        </button>
+                        <input
+                          type="text"
+                          placeholder="Escreva ao comprador..."
+                          value={messageInput}
+                          onChange={e => setMessageInput(e.target.value)}
+                          onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage() } }}
+                          maxLength={350}
+                          className="flex-1 h-11 px-4 rounded-xl border border-[#d0d7de] bg-[#f8f9fa] text-[13px] text-[#333] focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#3483fa]/20 focus:border-[#3483fa] transition-all"
+                        />
+                        <button
+                          onClick={handleSendMessage}
+                          disabled={sending || !messageInput.trim()}
+                          className="w-11 h-11 bg-[#3483fa] hover:bg-[#2968c8] text-white rounded-xl flex items-center justify-center transition-colors disabled:opacity-50 cursor-pointer shadow-sm"
+                        >
+                          {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                        </button>
+                      </div>
+                      <div className="flex items-center justify-between text-[10px] text-[#999] px-1">
+                        <span className="flex items-center gap-1">
+                          <ShieldCheck className="w-3 h-3 text-[#38a169]" /> Não inclua dados pessoais, linguagem ofensiva ou links externos.
+                        </span>
+                        <span>{messageInput.length}/350</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ── Coluna Detalhe do Pedido ──────────────────────────── */}
+                  <div className="hidden lg:flex lg:col-span-4 flex-col bg-white p-4 space-y-4 overflow-y-auto">
+                    {selectedOrder ? (
+                      (() => {
+                        const ord = selectedOrder
+                        const rawItems = ord.order_items || []
+                        const it = rawItems.length > 0 ? rawItems[0] : null
+                        const prod = it?.products || null
+                        const pic = prod?.image_url || it?.image_url || 'https://http2.mlstatic.com/D_NQ_NP_2X_789396-MLB78028328731_072024-F.webp'
+                        const prodTitle = prod?.name || it?.product_name || ord.product_name || 'Produto do Pedido'
+                        const sku = it?.sku || prod?.sku || ord.sku || ''
+                        const isCancelled = String(ord.status || '').toUpperCase() === 'CANCELADO'
+                        return (
+                          <>
+                            <div>
+                              <div className="text-[11px] font-extrabold uppercase text-[#999] tracking-wider">Detalhe da Venda</div>
+                              <div className="text-[15px] font-black text-[#1f2328] mt-0.5">Venda #{ord.order_number || ord.id}</div>
+                              <p className="text-[11px] text-[#888]">{ord.created_at ? new Date(ord.created_at).toLocaleString('pt-BR') : ''}</p>
+                            </div>
+
+                            <div className="p-3.5 rounded-xl bg-[#f8f9fa] border border-[#e6e6e6] space-y-2">
+                              <div className="flex items-center justify-between">
+                                <span className="text-[11px] font-bold text-[#666]">Status do Pacote</span>
+                                <span className={`px-2 py-0.5 rounded-md text-[10px] font-extrabold ${
+                                  isCancelled ? 'bg-[#ffebee] text-[#e74c3c]' : 'bg-[#f0fff4] text-[#276749]'
+                                }`}>
+                                  {isCancelled ? 'Envio cancelado' : 'Pronto para envio'}
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-[#555]">
+                                {isCancelled ? 'Esta compra foi cancelada a pedido do comprador.' : 'Pronto para emitir a Declaração de Conteúdo (DC-e) e imprimir etiqueta.'}
+                              </p>
+                            </div>
+
+                            <div className="space-y-2">
+                              <span className="text-[11px] font-extrabold uppercase text-[#999] tracking-wider">Produto do Pacote</span>
+                              <div className="p-3 rounded-xl border border-[#e6e6e6] bg-[#fafafa] space-y-2.5">
+                                <div className="flex items-start gap-2.5">
+                                  <img src={pic} alt={prodTitle} className="w-12 h-12 object-contain rounded-lg border border-[#eee] bg-white p-1 shrink-0" />
+                                  <div className="min-w-0">
+                                    <h5 className="text-[12px] font-bold text-[#222] line-clamp-2 leading-snug">{prodTitle}</h5>
+                                    <p className="text-[10px] text-[#888] mt-0.5">SKU: {sku || '—'}</p>
+                                  </div>
+                                </div>
+                                <div className="flex items-center justify-between pt-2 border-t border-[#eee]">
+                                  <span className="text-[10px] font-semibold text-[#888]">{it?.quantity || 1} unidade(s)</span>
+                                  <span className="text-[13px] font-extrabold text-[#27ae60]">{formatBRL(Number(it?.unit_price || ord.total_amount || 0))}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="space-y-2 pt-2">
+                              <span className="text-[11px] font-extrabold uppercase text-[#999] tracking-wider">Ações Rápidas</span>
+                              <Link href={`/pedidos/${ord.id}`} className="w-full py-2 px-3 rounded-xl border border-[#e6e6e6] bg-[#f8f9fa] hover:bg-[#f0f0f0] text-[11px] font-bold text-[#333] flex items-center justify-between transition-colors">
+                                <span className="flex items-center gap-1.5"><FileText className="w-3.5 h-3.5 text-[#666]" /> Ver Detalhes no Pedidos</span>
+                                <span>→</span>
+                              </Link>
+                              {sku && (
+                                <a href={`https://produto.mercadolivre.com.br/${sku}`} target="_blank" rel="noreferrer" className="w-full py-2 px-3 rounded-xl border border-[#e6e6e6] bg-[#f8f9fa] hover:bg-[#f0f0f0] text-[11px] font-bold text-[#333] flex items-center justify-between transition-colors">
+                                  <span className="flex items-center gap-1.5"><ExternalLink className="w-3.5 h-3.5 text-[#666]" /> Ver Anúncio no Mercado Livre</span>
+                                  <span>↗</span>
+                                </a>
+                              )}
+                            </div>
+                          </>
+                        )
+                      })()
+                    ) : (
+                      <div className="p-8 text-center my-auto">
+                        <Package className="w-8 h-8 text-[#ccc] mx-auto mb-2" />
+                        <p className="text-[11px] text-[#888]">Selecione um pedido para ver os dados da venda.</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             )}

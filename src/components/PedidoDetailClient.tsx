@@ -338,7 +338,7 @@ function OrderActions({ order }: { order: OrderDetail }) {
         defaultNote={shareModal.note}
       />
 
-      <div className="flex items-center gap-2 mt-3">
+      <div className="flex items-center gap-2 mt-3 sm:justify-end">
         {/* BOTÕES DE AÇÃO OPERACIONAIS (SOMENTE ÍCONES CLEAN NEUTROS) */}
         <button
           onClick={handleShareOrder}
@@ -435,7 +435,6 @@ export default function PedidoDetailClient({ order }: { order: OrderDetail }) {
                   </span>
                   <span className={`inline-flex px-2.5 py-1 rounded-xl text-[11px] font-bold ${sc.c}`}>{sc.l}</span>
                 </div>
-                <OrderActions order={order} />
               </div>
               <div className="sm:text-right bg-[#f8fafc] sm:bg-transparent p-4 sm:p-0 rounded-2xl border sm:border-0 border-[#e2e8f0] shrink-0">
                 <p className="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Total do Pedido</p>
@@ -443,6 +442,7 @@ export default function PedidoDetailClient({ order }: { order: OrderDetail }) {
                 <div className="text-xs font-semibold text-[#64748b] mt-1.5 flex sm:justify-end items-center gap-1.5">
                   <Calendar className="w-3.5 h-3.5 text-[#94a3b8]" /> {order.date}
                 </div>
+                <OrderActions order={order} />
               </div>
             </div>
           </div>

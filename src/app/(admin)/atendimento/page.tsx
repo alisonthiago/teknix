@@ -8,26 +8,13 @@ import {
   RefreshCw,
   Search,
   Package,
-  ShoppingBag,
-  Store,
   Check,
   CheckCheck,
-  User,
   Clock,
   Loader2,
-  Paperclip,
-  Smile,
   Zap,
-  Tag,
   ShieldCheck,
-  FileText,
-  Truck,
-  AlertCircle,
-  Bot,
-  Sliders,
-  Sparkles,
-  Save,
-  Plus
+  FileText
 } from 'lucide-react'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
 import { useNotification } from '@/contexts/NotificationContext'
@@ -65,16 +52,6 @@ interface PostSaleConversation {
   }
 }
 
-interface AutomationRule {
-  id: string
-  trigger: string
-  title: string
-  description: string
-  enabled: boolean
-  marketplaces: string[]
-  template: string
-}
-
 const QUICK_TEMPLATES = [
   'Olá! Seu pedido já está sendo preparado com muito cuidado e será enviado rapidamente.',
   'Trabalhamos apenas com produtos 100% originais, novos, lacrados e com Nota Fiscal.',
@@ -84,7 +61,6 @@ const QUICK_TEMPLATES = [
 
 export default function AtendimentoChatPage() {
   const { notify } = useNotification()
-  const [mainView, setMainView] = useState<'CHAT' | 'AUTOMATIONS'>('CHAT')
 
   // Chat State
   const [conversations, setConversations] = useState<PostSaleConversation[]>([])
@@ -97,11 +73,6 @@ export default function AtendimentoChatPage() {
   const [sending, setSending] = useState(false)
   const [showTemplates, setShowTemplates] = useState(false)
   const chatBottomRef = useRef<HTMLDivElement>(null)
-
-  // Automations State
-  const [automations, setAutomations] = useState<AutomationRule[]>([])
-  const [loadingAutomations, setLoadingAutomations] = useState(false)
-  const [savingAutomations, setSavingAutomations] = useState(false)
 
   const scrollToBottom = () => {
     chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -147,25 +118,9 @@ export default function AtendimentoChatPage() {
     }
   }
 
-  const fetchAutomations = async () => {
-    setLoadingAutomations(true)
-    try {
-      const res = await fetch('/api/atendimento/automations')
-      const data = await res.json()
-      if (data.automations) {
-        setAutomations(data.automations)
-      }
-    } catch (e) {
-      console.error(e)
-    } finally {
-      setLoadingAutomations(false)
-    }
-  }
-
   // 2-second background polling for Chat
   useEffect(() => {
     fetchConversations(false)
-    fetchAutomations()
     const interval = setInterval(() => {
       if (typeof document !== 'undefined' && !document.hidden) {
         fetchConversations(true)
@@ -175,10 +130,10 @@ export default function AtendimentoChatPage() {
   }, [])
 
   useEffect(() => {
-    if (selectedConv && mainView === 'CHAT') {
+    if (selectedConv) {
       scrollToBottom()
     }
-  }, [selectedConv?.messages?.length, selectedConv?.order_id, mainView])
+  }, [selectedConv?.messages?.length, selectedConv?.order_id])
 
   const handleSendMessage = async (textToSend?: string) => {
     const text = (textToSend || messageInput).trim()
@@ -235,33 +190,6 @@ export default function AtendimentoChatPage() {
     }
   }
 
-  const handleSaveAutomations = async () => {
-    setSavingAutomations(true)
-    try {
-      const res = await fetch('/api/atendimento/automations', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ automations })
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Erro ao salvar')
-
-      notify({
-        type: 'success',
-        title: 'Automações Salvas!',
-        message: 'As mensagens automáticas serão disparadas aos compradores conforme as regras.'
-      })
-    } catch (err: any) {
-      notify({
-        type: 'error',
-        title: 'Erro ao Salvar',
-        message: err.message || 'Não foi possível salvar as automações.'
-      })
-    } finally {
-      setSavingAutomations(false)
-    }
-  }
-
   const filteredConversations = conversations.filter(c => {
     if (search) {
       const q = search.toLowerCase()
@@ -285,7 +213,7 @@ export default function AtendimentoChatPage() {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-[17px] font-black text-[#1f2328] tracking-tight">
-                Mensagens de Venda & SAC (Chat ao Vivo)
+                Mensagens de Venda &amp; SAC (Chat ao Vivo)
               </h1>
               <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#f0fff4] text-[#276749] border border-[#c6f6d5]">
                 <span className="w-2 h-2 rounded-full bg-[#38a169] animate-pulse" />
@@ -293,179 +221,25 @@ export default function AtendimentoChatPage() {
               </span>
             </div>
             <p className="text-[11px] text-[#666]">
-              Converse diretamente com o cliente em tempo real e automatize mensagens de pós-venda em todos os marketplaces.
+              Converse diretamente com o cliente em tempo real no chat de pós-venda.
             </p>
           </div>
         </div>
 
-        {/* Toggle de Abas Resumido */}
-        <div className="flex items-center gap-2">
-          <div className="bg-[#f0f0f0] p-1 rounded-xl flex items-center gap-1 shrink-0">
-            <button
-              onClick={() => setMainView('CHAT')}
-              className={`px-3 py-1.5 rounded-lg text-[11px] font-extrabold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
-                mainView === 'CHAT' ? 'bg-white text-[#111] shadow-2xs' : 'text-[#666] hover:text-[#111]'
-              }`}
-            >
-              <MessageSquare className="w-3.5 h-3.5 text-[#3483fa]" />
-              <span>Chat</span>
-              <span className="px-1.5 py-0.2 rounded-full text-[9px] bg-[#3483fa] text-white">
-                {conversations.length || 1}
-              </span>
-            </button>
-
-            <button
-              onClick={() => setMainView('AUTOMATIONS')}
-              className={`px-3 py-1.5 rounded-lg text-[11px] font-extrabold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
-                mainView === 'AUTOMATIONS' ? 'bg-white text-[#111] shadow-2xs' : 'text-[#666] hover:text-[#111]'
-              }`}
-            >
-              <Bot className="w-3.5 h-3.5 text-[#e67e22]" />
-              <span>Automações</span>
-              <span className="px-1.5 py-0.2 rounded-full text-[9px] bg-[#B5F500] text-[#111]">
-                Auto
-              </span>
-            </button>
-          </div>
-
-          {mainView === 'CHAT' && (
-            <button
-              onClick={() => fetchConversations(false)}
-              disabled={refreshing}
-              className="px-3 py-1.5 rounded-xl text-[11px] font-bold border border-[#e6e6e6] bg-[#f8f9fa] hover:bg-[#f0f0f0] text-[#333] flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50 shrink-0 whitespace-nowrap"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin text-[#3483fa]' : ''}`} />
-              <span className="hidden sm:inline">Atualizar</span>
-            </button>
-          )}
-        </div>
+        <button
+          onClick={() => fetchConversations(false)}
+          disabled={refreshing}
+          className="px-3 py-1.5 rounded-xl text-[11px] font-bold border border-[#e6e6e6] bg-[#f8f9fa] hover:bg-[#f0f0f0] text-[#333] flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50 shrink-0"
+        >
+          <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin text-[#3483fa]' : ''}`} />
+          <span>Atualizar</span>
+        </button>
       </div>
 
       {/* ========================================================================= */}
-      {/* 🤖 VISÃO 2: AUTOMAÇÃO DE MENSAGENS PÓS-VENDA */}
+      {/* 💬 CHAT AO VIVO ESTILO OMNICHANNEL */}
       {/* ========================================================================= */}
-      {mainView === 'AUTOMATIONS' && (
-        <div className="space-y-4">
-          <div className="bg-white rounded-2xl border border-[#e6e6e6] p-6 shadow-xs space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#eee]">
-              <div>
-                <h2 className="text-[16px] font-black text-[#1f2328] flex items-center gap-2">
-                  <Bot className="w-5 h-5 text-[#3483fa]" />
-                  <span>Mensagens Automáticas Padrão de Pós-Venda</span>
-                </h2>
-                <p className="text-[12px] text-[#666] mt-0.5">
-                  Configure mensagens automáticas que são enviadas no chat privado do comprador em cada etapa da compra.
-                </p>
-              </div>
-
-              <button
-                onClick={handleSaveAutomations}
-                disabled={savingAutomations}
-                className="px-5 py-2.5 bg-[#3483fa] hover:bg-[#2968c8] text-white text-[12px] font-bold rounded-xl flex items-center gap-2 shadow-sm transition-colors cursor-pointer disabled:opacity-50"
-              >
-                {savingAutomations ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                <span>Salvar Mensagens Automáticas</span>
-              </button>
-            </div>
-
-            {/* Variáveis Dinâmicas Disponíveis */}
-            <div className="p-3.5 rounded-xl bg-[#f0f7ff] border border-[#d0e4ff] space-y-2">
-              <span className="text-[11px] font-bold text-[#1f2328] flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-[#3483fa]" />
-                Tags Dinâmicas que você pode usar no texto (são preenchidas automaticamente):
-              </span>
-              <div className="flex flex-wrap gap-2 text-[10px] font-bold">
-                <code className="px-2 py-1 bg-white rounded-md border border-[#d0e4ff] text-[#3483fa]">{'{primeiro_nome}'}</code>
-                <code className="px-2 py-1 bg-white rounded-md border border-[#d0e4ff] text-[#3483fa]">{'{nome_cliente}'}</code>
-                <code className="px-2 py-1 bg-white rounded-md border border-[#d0e4ff] text-[#3483fa]">{'{nome_produto}'}</code>
-                <code className="px-2 py-1 bg-white rounded-md border border-[#d0e4ff] text-[#3483fa]">{'{numero_pedido}'}</code>
-                <code className="px-2 py-1 bg-white rounded-md border border-[#d0e4ff] text-[#3483fa]">{'{codigo_rastreio}'}</code>
-                <code className="px-2 py-1 bg-white rounded-md border border-[#d0e4ff] text-[#3483fa]">{'{marketplace}'}</code>
-              </div>
-            </div>
-
-            {/* Lista de Regras de Automação */}
-            <div className="space-y-4">
-              {automations.map((rule, idx) => (
-                <div
-                  key={rule.id}
-                  className={`p-5 rounded-2xl border transition-all space-y-3.5 ${
-                    rule.enabled ? 'bg-white border-[#d0e4ff] shadow-xs' : 'bg-[#fafafa] border-[#e6e6e6] opacity-75'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="checkbox"
-                        checked={rule.enabled}
-                        onChange={e => {
-                          const updated = [...automations]
-                          updated[idx].enabled = e.target.checked
-                          setAutomations(updated)
-                        }}
-                        className="w-5 h-5 accent-[#3483fa] rounded cursor-pointer"
-                      />
-                      <div>
-                        <h4 className="text-[14px] font-bold text-[#1f2328] flex items-center gap-2">
-                          <span>{rule.title}</span>
-                          <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold ${
-                            rule.enabled ? 'bg-[#f0fff4] text-[#276749]' : 'bg-[#eee] text-[#888]'
-                          }`}>
-                            {rule.enabled ? 'ATIVO' : 'DESATIVADO'}
-                          </span>
-                        </h4>
-                        <p className="text-[11px] text-[#666] mt-0.5">{rule.description}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-1">
-                      <span className="text-[10px] text-[#999] mr-1">Canais:</span>
-                      <span className="px-2 py-0.5 rounded-md text-[9px] font-extrabold bg-[#FFE600] text-[#111]">ML</span>
-                      <span className="px-2 py-0.5 rounded-md text-[9px] font-extrabold bg-[#ee4d2d] text-white">Shopee</span>
-                      <span className="px-2 py-0.5 rounded-md text-[9px] font-extrabold bg-[#232f3e] text-white">Amazon</span>
-                      <span className="px-2 py-0.5 rounded-md text-[9px] font-extrabold bg-[#0086ff] text-white">Magalu</span>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-bold text-[#555] mb-1.5">
-                      Texto da Mensagem no Chat:
-                    </label>
-                    <textarea
-                      rows={3}
-                      value={rule.template}
-                      onChange={e => {
-                        const updated = [...automations]
-                        updated[idx].template = e.target.value
-                        setAutomations(updated)
-                      }}
-                      placeholder="Escreva a mensagem padronizada..."
-                      className="w-full p-3 rounded-xl border border-[#d0d7de] text-[12px] text-[#333] focus:outline-none focus:ring-2 focus:ring-[#3483fa]/20 focus:border-[#3483fa] transition-all bg-white"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex justify-end pt-2">
-              <button
-                onClick={handleSaveAutomations}
-                disabled={savingAutomations}
-                className="px-6 py-2.5 bg-[#3483fa] hover:bg-[#2968c8] text-white text-[12px] font-bold rounded-xl flex items-center gap-2 shadow-sm transition-colors cursor-pointer disabled:opacity-50"
-              >
-                {savingAutomations ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                <span>Salvar Alterações</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* 💬 VISÃO 1: CHAT AO VIVO ESTILO OMNICHANNEL */}
-      {/* ========================================================================= */}
-      {mainView === 'CHAT' && (
-        <div className="bg-white rounded-2xl border border-[#e6e6e6] shadow-xs grid grid-cols-1 md:grid-cols-12 overflow-hidden h-[calc(100vh-210px)] min-h-[600px]">
+      <div className="bg-white rounded-2xl border border-[#e6e6e6] shadow-xs grid grid-cols-1 md:grid-cols-12 overflow-hidden h-[calc(100vh-210px)] min-h-[600px]">
           
           {/* ========================================================================= */}
           {/* 📋 COLUNA 1: LISTA DE CONVERSAS (LADO ESQUERDO) */}
@@ -867,8 +641,6 @@ export default function AtendimentoChatPage() {
           </div>
 
         </div>
-      )}
-
     </div>
   )
 }
