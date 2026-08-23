@@ -17,6 +17,8 @@ interface InternalChatContextData {
   setIsFloatingOpen: (open: boolean) => void
   isFloatingMinimized: boolean
   setIsFloatingMinimized: (min: boolean) => void
+  activeChatRoomId: string | null
+  setActiveChatRoomId: (id: string | null) => void
   collaborators: ChatMember[]
   tasks: InternalTask[]
   currentUser: { id: string; name: string; email?: string; role?: string; photo_url?: string } | null
@@ -169,19 +171,22 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
   
   const [isFloatingOpen, setIsFloatingOpen] = useState(false)
   const [isFloatingMinimized, setIsFloatingMinimized] = useState(false)
+  const [activeChatRoomId, setActiveChatRoomId] = useState<string | null>(null)
   const [loadingMessages, setLoadingMessages] = useState(false)
 
   const activeConvRef = useRef<InternalConversation | null>(activeConversation)
   const floatingOpenRef = useRef(isFloatingOpen)
   const floatingMinRef = useRef(isFloatingMinimized)
+  const activeChatRoomIdRef = useRef<string | null>(activeChatRoomId)
   const currentUserRef = useRef(currentUser)
 
   useEffect(() => {
     activeConvRef.current = activeConversation
     floatingOpenRef.current = isFloatingOpen
     floatingMinRef.current = isFloatingMinimized
+    activeChatRoomIdRef.current = activeChatRoomId
     currentUserRef.current = currentUser
-  }, [activeConversation, isFloatingOpen, isFloatingMinimized, currentUser])
+  }, [activeConversation, isFloatingOpen, isFloatingMinimized, activeChatRoomId, currentUser])
 
   const channelRef = useRef<any>(null)
   const onlineUserIdsRef = useRef<Set<string>>(new Set())
@@ -305,7 +310,7 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
           return new Date(m.created_at).getTime() > new Date(lastRead).getTime()
         }).length
 
-        const isViewing = floatingOpenRef.current && !floatingMinRef.current && activeConvRef.current?.id === c.id
+        const isViewing = activeChatRoomIdRef.current === c.id
 
         convMap.set(c.id, {
           id: c.id,
@@ -330,9 +335,11 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
                 if (m.conversation_id !== directId) return false
                 if (m.sender_id === currentUid) return false
                 const lastRead = lastReadMap[directId]
-                if (!lastRead) return false
+                if (!lastRead) return true
                 return new Date(m.created_at).getTime() > new Date(lastRead).getTime()
               }).length
+
+              const isViewingDirect = activeChatRoomIdRef.current === directId
 
               convMap.set(directId, {
                 id: directId,
@@ -340,7 +347,7 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
                 name: removeEmojis(p.name || 'Colaborador'),
                 description: '',
                 members: [{ id: currentUid, name: currentUserRef.current?.name || 'Eu' }, { id: p.id, name: p.name || 'Colaborador', photo_url: p.photo_url || p.avatar_url }],
-                unread_count: unreadCount,
+                unread_count: isViewingDirect ? 0 : unreadCount,
                 last_message: last,
                 created_at: new Date().toISOString()
               })
@@ -358,7 +365,7 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
             ? (new Date(m.last_message.created_at).getTime() >= new Date(old.last_message.created_at).getTime() ? m.last_message : old.last_message)
             : (m.last_message || old?.last_message)
 
-          const isViewing = floatingOpenRef.current && !floatingMinRef.current && activeConvRef.current?.id === m.id
+          const isViewing = activeChatRoomIdRef.current === m.id
           // Se o usuário está vendo ativamente a conversa com o painel aberto, zera. Senão, preserva o contador de não lidas até que ele clique.
           const preservedUnreadCount = isViewing ? 0 : Math.max(m.unread_count || 0, old?.unread_count || 0)
 
@@ -516,7 +523,7 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
         if (exists) {
           return prev.map(c => {
             if (c.id === msg.conversation_id) {
-              const isViewing = floatingOpenRef.current && !floatingMinRef.current && activeConvRef.current?.id === c.id
+              const isViewing = activeChatRoomIdRef.current === msg.conversation_id
               return {
                 ...c,
                 last_message: {
@@ -837,6 +844,8 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
         setIsFloatingOpen,
         isFloatingMinimized,
         setIsFloatingMinimized,
+        activeChatRoomId,
+        setActiveChatRoomId,
         collaborators,
         tasks,
         currentUser,

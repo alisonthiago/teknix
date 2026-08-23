@@ -39,7 +39,9 @@ export default function FloatingMessenger() {
     totalUnreadCount,
     createConversation,
     markAsRead,
-    currentUser
+    currentUser,
+    activeChatRoomId,
+    setActiveChatRoomId
   } = useInternalChat()
 
   const [input, setInput] = useState('')
@@ -57,16 +59,33 @@ export default function FloatingMessenger() {
   const handleOpenMessenger = () => {
     setIsFloatingOpen(true)
     setIsFloatingMinimized(false)
+    if (currentView === 'chat' && activeConversation) {
+      setActiveChatRoomId(activeConversation.id)
+    } else {
+      setActiveChatRoomId(null)
+    }
   }
 
   const handleOpenChat = (conv: typeof conversations[0]) => {
     setActiveConversation(conv)
+    setActiveChatRoomId(conv.id)
     markAsRead(conv.id)
     setCurrentView('chat')
   }
 
   const handleBackToList = () => {
+    setActiveChatRoomId(null)
     setCurrentView('list')
+  }
+
+  const handleCloseMessenger = () => {
+    setActiveChatRoomId(null)
+    setIsFloatingOpen(false)
+  }
+
+  const handleMinimizeMessenger = () => {
+    setActiveChatRoomId(null)
+    setIsFloatingMinimized(true)
   }
 
   const handleSend = async () => {
@@ -86,6 +105,7 @@ export default function FloatingMessenger() {
     }
     if (conv) {
       setActiveConversation(conv)
+      setActiveChatRoomId(conv.id)
       markAsRead(conv.id)
       setCurrentView('chat')
     }
@@ -200,14 +220,14 @@ export default function FloatingMessenger() {
 
             <div className="flex items-center gap-1">
               <button
-                onClick={() => setIsFloatingMinimized(true)}
+                onClick={handleMinimizeMessenger}
                 className="w-8 h-8 rounded-xl flex items-center justify-center text-[#94a3b8] hover:bg-[#f5f5f5] hover:text-[#475569] transition-colors cursor-pointer"
                 title="Minimizar"
               >
                 <Minus className="w-4 h-4" />
               </button>
               <button
-                onClick={() => setIsFloatingOpen(false)}
+                onClick={handleCloseMessenger}
                 className="w-8 h-8 rounded-xl flex items-center justify-center text-[#94a3b8] hover:bg-[#fee2e2] hover:text-[#dc2626] transition-colors cursor-pointer"
                 title="Fechar"
               >
@@ -278,20 +298,20 @@ export default function FloatingMessenger() {
                         </div>
                         <div className="min-w-0 flex-1 pr-2">
                           <div className="flex items-center justify-between">
-                            <p className="truncate font-bold text-[14px] text-[#1e293b] leading-tight">{displayName}</p>
+                            <p className={`truncate text-[14px] leading-tight ${c.unread_count > 0 ? 'font-black text-[#0f172a]' : 'font-bold text-[#1e293b]'}`}>{displayName}</p>
                             {c.last_message?.created_at && (
-                              <span className="text-[11px] text-[#94a3b8] shrink-0 font-normal">
+                              <span className={`text-[11px] shrink-0 ${c.unread_count > 0 ? 'font-bold text-[#16a34a]' : 'font-normal text-[#94a3b8]'}`}>
                                 {new Date(c.last_message.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                               </span>
                             )}
                           </div>
-                          <p className="truncate text-[12px] text-[#64748b] mt-1 font-normal">
+                          <p className={`truncate text-[12px] mt-1 ${c.unread_count > 0 ? 'font-bold text-[#0f172a]' : 'text-[#64748b] font-normal'}`}>
                             {c.last_message?.content || 'Nenhuma mensagem ainda'}
                           </p>
                         </div>
                       </div>
                       {c.unread_count > 0 && (
-                        <span className="min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-black bg-[#16a34a] text-white flex items-center justify-center shrink-0 ml-2 shadow-xs">
+                        <span className="min-w-[22px] h-[22px] px-1.5 rounded-full text-[11px] font-black bg-[#16a34a] text-white flex items-center justify-center shrink-0 ml-2 shadow-sm ring-2 ring-white animate-bounce">
                           {c.unread_count}
                         </span>
                       )}
@@ -442,14 +462,14 @@ export default function FloatingMessenger() {
             {/* Controles de Fechar / Minimizar */}
             <div className="flex items-center gap-1 shrink-0">
               <button
-                onClick={() => setIsFloatingMinimized(true)}
+                onClick={handleMinimizeMessenger}
                 className="w-8 h-8 rounded-xl flex items-center justify-center text-[#94a3b8] hover:bg-[#f5f5f5] hover:text-[#475569] transition-colors cursor-pointer"
                 title="Minimizar"
               >
                 <Minus className="w-4 h-4" />
               </button>
               <button
-                onClick={() => setIsFloatingOpen(false)}
+                onClick={handleCloseMessenger}
                 className="w-8 h-8 rounded-xl flex items-center justify-center text-[#94a3b8] hover:bg-[#fee2e2] hover:text-[#dc2626] transition-colors cursor-pointer"
                 title="Fechar"
               >
