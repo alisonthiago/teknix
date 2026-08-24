@@ -68,6 +68,9 @@ export async function createOrder(formData: FormData) {
   const marketplaceId = formData.get('marketplace_id') as string || null
   const customerName = formData.get('customer_name') as string || null
   const notes = formData.get('notes') as string || null
+  const productId = formData.get('product_id') as string || null
+  const quantityRaw = formData.get('quantity') as string || '1'
+  const quantity = parseInt(quantityRaw, 10) || 1
 
   const { data: order, error } = await supabase
     .from('orders')
@@ -83,6 +86,16 @@ export async function createOrder(formData: FormData) {
     .single()
 
   if (error) throw new Error(error.message)
+
+  if (productId) {
+    const { error: itemError } = await supabase.from('order_items').insert({
+      order_id: order.id,
+      product_id: productId,
+      quantity,
+    })
+
+    if (itemError) throw new Error(itemError.message)
+  }
 
   await supabase.from('order_status_history').insert({
     order_id: order.id,
