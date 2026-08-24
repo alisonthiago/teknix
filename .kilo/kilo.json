@@ -1,0 +1,12 @@
+{
+  "$schema": "https://app.kilo.ai/config.json",
+  "permission": {
+    "external_directory": {
+      "/Users/alisonthiago/Downloads/TEKTOU/*": "allow"
+    },
+    "bash": "allow",
+    "read": {
+      "*": "allow"
+    }
+  }
+}

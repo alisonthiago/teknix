@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { getValidTokenBySellerId, fetchMLOrder } from './client'
 
@@ -16,8 +16,8 @@ function getSupabase(): SupabaseClient<any> {
 export async function syncOrder(resource: string, sellerId: string) {
   const supabase = getSupabase()
   
-  // 1. Resolve User ID
-  let userId = '3af9068a-4b78-4c9c-8657-f83b93c01588'
+  // 1. Resolve User ID from connection
+  let userId: string | null = null
   const { data: conn } = await supabase
     .from('marketplace_connections')
     .select('user_id')
@@ -29,7 +29,7 @@ export async function syncOrder(resource: string, sellerId: string) {
   }
 
   // 2. Resolve Marketplace ID
-  let marketplaceId = '6ef8f3db-6d35-4701-86f7-8199378ec0c7'
+  let marketplaceId = 'mercadolivre'
   const { data: mp } = await supabase
     .from('marketplaces')
     .select('id')

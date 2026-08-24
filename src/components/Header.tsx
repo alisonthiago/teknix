@@ -286,7 +286,7 @@ function HeaderActions({
             </div>
 
             {/* Notification Items List Estilo Mercado Livre */}
-            <div className="max-h-[380px] overflow-y-auto divide-y divide-[#f0f0f0] p-2 space-y-1">
+            <div className="max-h-[380px] overflow-y-auto divide-y divide-[#f0f0f0] p-3 space-y-2">
               {filteredNotifications.length === 0 ? (
                 <div className="p-8 text-center">
                   <div className="w-10 h-10 rounded-full bg-[#f8fafc] border border-[#e2e8f0] flex items-center justify-center mx-auto mb-2 text-[#94a3b8]">
@@ -304,24 +304,22 @@ function HeaderActions({
                       
                       let path = ''
                       const mod = String(n.module || n.type || n.title || '').toLowerCase()
-                      if (mod.includes('message') || mod.includes('mensagem') || mod.includes('question') || mod.includes('pergunta')) {
-                        path = '/atendimento'
-                      } else if (mod.includes('sale') || mod.includes('venda') || mod.includes('vendeu') || mod.includes('order') || mod.includes('pedido')) {
-                        path = '/pedidos'
-                      } else if (mod.includes('product') || mod.includes('produto') || mod.includes('stock') || mod.includes('estoque')) {
-                        path = '/operacao'
-                      } else {
-                        path = '/atendimento'
-                      }
+                       if (mod.includes('sale') || mod.includes('venda') || mod.includes('vendeu') || mod.includes('order') || mod.includes('pedido')) {
+                         path = '/pedidos'
+                       } else if (mod.includes('product') || mod.includes('produto') || mod.includes('stock') || mod.includes('estoque')) {
+                         path = '/operacao'
+                       } else {
+                         path = '/pedidos'
+                       }
 
                       setNotifOpen(false)
                       router.push(path)
                     }}
-                    className={`p-3 rounded-2xl transition-all cursor-pointer flex gap-3 items-center ${
-                      n.is_read
-                        ? 'bg-white hover:bg-[#fafafa]'
-                        : 'bg-[#fafafa] hover:bg-[#f5f5f5] border border-[#e2e8f0]'
-                    }`}
+                     className={`p-4 rounded-2xl transition-all cursor-pointer flex gap-4 items-center ${
+                       n.is_read
+                         ? 'bg-white hover:bg-[#fafafa]'
+                         : 'bg-[#fafafa] hover:bg-[#f5f5f5] border border-[#e2e8f0]'
+                     }`}
                   >
                     {renderNotificationIcon(n.type, n.module, n.title)}
                     <div className="flex-1 min-w-0">

@@ -51,7 +51,7 @@ export async function GET() {
     const health = {
       mercadolivre: {
         status: isConnected ? (tokenStatus === 'VALID' ? 'HEALTHY' : 'DEGRADED') : 'NOT_CONFIGURED',
-        sellerId: conn?.seller_id || '470831049',
+        sellerId: conn?.seller_id || null,
         isConnected,
         tokenStatus,
         tokenExpiresInHours: hoursRemaining,

@@ -286,7 +286,7 @@ function OrderActions({ order }: { order: OrderDetail }) {
   })
   const router = useRouter()
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const handleAction = (action: () => Promise<any>) => {
     startTransition(async () => {
       await action()

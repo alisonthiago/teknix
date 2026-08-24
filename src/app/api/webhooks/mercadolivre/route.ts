@@ -5,7 +5,13 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const { resource, topic, user_id } = body
-    const sellerId = String(user_id || '470831049')
+
+    if (!user_id) {
+      console.error('[ML Webhook Entrypoint] Payload sem user_id')
+      return NextResponse.json({ received: true, error: 'user_id obrigatório no payload' }, { status: 200 })
+    }
+
+    const sellerId = String(user_id)
 
     console.log(`[ML Webhook Entrypoint] Recebido: topic=${topic}, resource=${resource}, seller=${sellerId}`)
 

@@ -56,10 +56,14 @@ export default function LiveMonitorDrawer({ open, onClose }: LiveMonitorDrawerPr
         .limit(30)
     ])
 
-    return {
+    const result = {
       orders: ordersRes.data || [],
       products: productsRes.data || []
     }
+
+    console.log('[LiveMonitorDrawer] Refetch:', result.orders.length, 'orders,', result.products.length, 'products')
+
+    return result
   }, [], { intervalMs: 2000 })
 
   // Cálculos das métricas separando Hoje vs Acumulado
@@ -99,7 +103,7 @@ export default function LiveMonitorDrawer({ open, onClose }: LiveMonitorDrawerPr
   const estimatedConversion = 5.0
   const visits = 24
 
-  // Produtos mais vendidos
+  // Produtos mais vendidos HOJE
   const topProducts = useMemo(() => {
     const map = new Map<string, {
       id: string
@@ -111,18 +115,18 @@ export default function LiveMonitorDrawer({ open, onClose }: LiveMonitorDrawerPr
       stock: number
     }>()
 
-    allOrders.forEach(o => {
+    todayActiveOrders.forEach(o => {
       if (o.order_items?.length) {
         o.order_items.forEach((it: any) => {
           const sku = it.sku || it.product_name || 'Sem SKU'
           const existing = map.get(sku) || {
             id: it.product_id || sku,
-            name: it.products?.name || it.product_name || it.sku || 'Lava Jato Lavadora Portátil De Alta Pressão 21v',
+            name: it.products?.name || it.product_name || it.sku || 'Produto',
             sku,
             quantity: 0,
             revenue: 0,
             imageUrl: it.products?.image_url || 'https://http2.mlstatic.com/D_NQ_NP_2X_789396-MLB78028328731_072024-F.webp',
-            stock: it.products?.stock ?? 4
+            stock: it.products?.stock ?? 0
           }
           existing.quantity += Number(it.quantity) || 1
           existing.revenue += Number(it.total_price || (it.unit_price * (it.quantity || 1))) || 0
@@ -135,7 +139,7 @@ export default function LiveMonitorDrawer({ open, onClose }: LiveMonitorDrawerPr
     })
 
     return Array.from(map.values()).sort((a, b) => b.quantity - a.quantity).slice(0, 3)
-  }, [allOrders])
+  }, [todayActiveOrders])
 
   if (!open) return null
 

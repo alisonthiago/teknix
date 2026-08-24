@@ -44,15 +44,14 @@ export async function POST(request: Request) {
     }
 
     if (!sellerId) {
-      sellerId = '470831049' // fallback default seller id
+      return NextResponse.json({ error: 'Não foi possível identificar o seller_id do token.' }, { status: 400 })
     }
 
     const supabase = getSupabase()
-    const defaultUserId = '3af9068a-4b78-4c9c-8657-f83b93c01588'
     const expiresAt = new Date(Date.now() + 6 * 3600 * 1000).toISOString() // 6 hours default
 
     // 2. Resolve marketplace record
-    let marketplaceId = '6ef8f3db-6d35-4701-86f7-8199378ec0c7'
+    let marketplaceId = 'mercadolivre'
     const { data: mp } = await supabase
       .from('marketplaces')
       .select('id')
@@ -63,9 +62,11 @@ export async function POST(request: Request) {
     // 3. Upsert marketplace_connections
     const { data: existingConn } = await supabase
       .from('marketplace_connections')
-      .select('id')
+      .select('id, user_id')
       .eq('seller_id', sellerId.toString())
       .single()
+
+    let connectionUserId = existingConn?.user_id || null
 
     if (existingConn) {
       await supabase
@@ -81,10 +82,10 @@ export async function POST(request: Request) {
         })
         .eq('id', existingConn.id)
     } else {
-      await supabase
+      const { data: newConn, error: insertErr } = await supabase
         .from('marketplace_connections')
         .insert({
-          user_id: defaultUserId,
+          user_id: connectionUserId,
           marketplace_id: 'mercadolivre',
           seller_id: sellerId.toString(),
           account_name: sellerNickname,
@@ -95,6 +96,10 @@ export async function POST(request: Request) {
           last_sync_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         })
+        .select('user_id')
+        .single()
+
+      if (newConn) connectionUserId = newConn.user_id
     }
 
     // 4. Upsert marketplace_accounts
@@ -102,7 +107,7 @@ export async function POST(request: Request) {
       .from('marketplace_accounts')
       .upsert({
         marketplace_id: marketplaceId,
-        user_id: defaultUserId,
+        user_id: connectionUserId,
         account_name: sellerNickname,
         seller_id: sellerId.toString(),
         access_token: access_token.trim(),

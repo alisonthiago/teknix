@@ -148,13 +148,13 @@ export default function ClientesPage() {
             <table className="w-full text-left text-[12px]">
               <thead>
                 <tr className="bg-[#fafafa] border-b border-[#eeeeee] text-[10px] font-medium text-[#999] uppercase">
-                  <th className="py-2.5 px-4">Cliente / Comprador</th>
-                  <th className="py-2.5 px-4">Origem / Canal</th>
-                  <th className="py-2.5 px-4 text-center">Compras</th>
-                  <th className="py-2.5 px-4 text-right">Total Gasto</th>
-                  <th className="py-2.5 px-4">Entrega / Localização</th>
-                  <th className="py-2.5 px-4 text-right">Último Pedido</th>
-                  <th className="py-2.5 px-4 text-right">Ações</th>
+                  <th className="py-4 px-4">Cliente / Comprador</th>
+                  <th className="py-4 px-4">Origem / Canal</th>
+                  <th className="py-4 px-4 text-center">Compras</th>
+                  <th className="py-4 px-4 text-right">Total Gasto</th>
+                  <th className="py-4 px-4">Entrega / Localização</th>
+                  <th className="py-4 px-4 text-right">Último Pedido</th>
+                  <th className="py-4 px-4 text-right">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#eeeeee]">
@@ -163,7 +163,7 @@ export default function ClientesPage() {
 
                   return (
                     <tr key={idx} className="hover:bg-[#fafafa] transition-colors group">
-                      <td className="py-3 px-4 font-medium text-[#333]">
+                      <td className="py-4 px-4 font-medium text-[#333]">
                         <Link href={`/clientes/${customerSlug}`} className="flex items-center gap-2.5">
                           <div className="w-8 h-8 rounded-full bg-[#f5f5f5] border border-[#e6e6e6] flex items-center justify-center text-[#666] font-medium uppercase shrink-0">
                             {c.name.slice(0, 1)}
@@ -181,7 +181,7 @@ export default function ClientesPage() {
                         </Link>
                       </td>
 
-                      <td className="py-3 px-4">
+                      <td className="py-4 px-4">
                         <div className="flex flex-wrap items-center gap-1">
                           {Array.from(c.marketplaces).map((mp, i) => (
                             <span key={i} className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#fffde7] text-[#856404] border border-[#ffeeba] text-[10px] font-medium">
@@ -191,7 +191,7 @@ export default function ClientesPage() {
                         </div>
                       </td>
 
-                      <td className="py-3 px-4 text-center">
+                      <td className="py-4 px-4 text-center">
                         <Link href={`/clientes/${customerSlug}`}>
                           <span className="inline-flex px-2 py-0.5 rounded text-[10px] font-medium bg-[#f0fff4] text-[#38a169]">
                             {c.ordersCount} {c.ordersCount === 1 ? 'pedido' : 'pedidos'}
@@ -199,22 +199,22 @@ export default function ClientesPage() {
                         </Link>
                       </td>
 
-                      <td className="py-3 px-4 text-right font-medium text-[#333]">
+                      <td className="py-4 px-4 text-right font-medium text-[#333]">
                         {formatBRL(c.totalSpent)}
                       </td>
 
-                      <td className="py-3 px-4 text-[#999]">
+                      <td className="py-4 px-4 text-[#999]">
                         <p className="truncate max-w-xs flex items-center gap-1 text-[11px]">
                           <MapPin className="w-3 h-3 text-[#ccc] shrink-0" />
                           {c.address}
                         </p>
                       </td>
 
-                      <td className="py-3 px-4 text-right text-[#999] text-[11px]">
+                      <td className="py-4 px-4 text-right text-[#999] text-[11px]">
                         {c.lastOrderDate}
                       </td>
 
-                      <td className="py-3 px-4 text-right">
+                      <td className="py-4 px-4 text-right">
                         <Link
                           href={`/clientes/${customerSlug}`}
                           className="inline-flex items-center gap-1 px-2.5 py-1 bg-white hover:bg-[#f5f5f5] text-[#666] hover:text-[#333] border border-[#e6e6e6] rounded-md text-[11px] font-medium transition-colors"

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 /**
  * MarketplaceProductSyncService
  * 
@@ -253,7 +253,7 @@ export async function syncSingleItem(itemId: string, sellerId: string): Promise<
   if (stock !== null) fields.stock = true
 
   // ── PASSO 6: Determinar Marketplace ID e User ID ────────────────────────
-  let marketplaceId = '6ef8f3db-6d35-4701-86f7-8199378ec0c7'
+  let marketplaceId = 'mercadolivre'
   const { data: mp } = await supabase
     .from('marketplaces')
     .select('id')

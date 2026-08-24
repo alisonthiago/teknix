@@ -141,7 +141,7 @@ export default function DashboardPage() {
             )}
           </div>
           <div>
-            <h1 className="text-[28px] font-bold text-[#333]">Olá, {userProfile.name}</h1>
+              <h1 className="text-[32px] font-bold text-[#333]">Olá, {userProfile.name}</h1>
             <p className="text-[13px] text-[#666] font-medium">Bem-vindo de volta ao sistema!</p>
           </div>
         </div>
@@ -331,11 +331,11 @@ export default function DashboardPage() {
               const isCancelled = String(order.status || '').toUpperCase() === 'CANCELADO'
 
               return (
-                <div 
-                  key={order.id as string} 
-                  onClick={() => router.push(`/pedidos/${order.id}`)} 
-                  className="py-3.5 px-2 hover:bg-[#fafafa] rounded-xl transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
-                >
+                 <div 
+                   key={order.id as string} 
+                   onClick={() => router.push(`/pedidos/${order.id}`)} 
+                   className="py-4 px-4 hover:bg-[#fafafa] rounded-xl transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
+                 >
                   {/* Esquerda: Foto do Produto + Dados do Pedido */}
                   <div className="flex items-center gap-3.5 min-w-0">
                     <div className="w-12 h-12 rounded-xl bg-[#f5f5f5] border border-[#e6e6e6] p-1 flex items-center justify-center shrink-0 overflow-hidden">

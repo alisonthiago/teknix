@@ -130,7 +130,7 @@ export class MercadoLivreIntegration extends BaseMarketplaceIntegration {
   }
 }
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
 let _supabase: SupabaseClient<any> | null = null

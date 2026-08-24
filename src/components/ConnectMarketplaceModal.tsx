@@ -25,6 +25,7 @@ interface PlatformConfig {
   tokenLabel?: string
   tokenPlaceholder?: string
   fields?: { key: string; label: string; placeholder: string; type?: string; required?: boolean }[]
+  disabled?: boolean
 }
 
 const PLATFORMS: PlatformConfig[] = [
@@ -48,46 +49,37 @@ const PLATFORMS: PlatformConfig[] = [
     id: 'shopify',
     name: 'Shopify',
     code: 'SHOPIFY',
-    tagline: 'Sincronização de produtos, pedidos e estoque em tempo real',
+    tagline: 'Integração em desenvolvimento',
     color: '#95BF47',
     bgColor: 'bg-[#F4F9EC]',
     borderColor: 'border-[#95BF47]',
     authType: 'shopify',
-    fields: [
-      { key: 'account_name', label: 'Nome da Loja', placeholder: 'Ex: Minha Loja Shopify', required: true },
-      { key: 'store_domain', label: 'Domínio da Loja (.myshopify.com)', placeholder: 'sua-loja.myshopify.com', required: true },
-      { key: 'access_token', label: 'Access Token / Chave da API', placeholder: 'shpat_xxxxxxxxxxxxxxxxxxxxxxxx', type: 'password', required: true },
-    ]
+    disabled: true,
+    fields: []
   },
   {
     id: 'tiktok',
     name: 'TikTok Shop',
     code: 'TIKTOK_SHOP',
-    tagline: 'Pedidos, produtos e catálogo integrado com TikTok',
+    tagline: 'Integração em desenvolvimento',
     color: '#000000',
     bgColor: 'bg-[#F5F5F5]',
     borderColor: 'border-[#333333]',
     authType: 'token',
-    fields: [
-      { key: 'account_name', label: 'Nome da Conta TikTok Shop', placeholder: 'Ex: Loja Oficial TikTok', required: true },
-      { key: 'seller_id', label: 'Shop ID / Seller ID', placeholder: 'Ex: 7492819283718', required: true },
-      { key: 'access_token', label: 'App Key / Access Token', placeholder: 'Ex: tt_app_token_xxxxxx', type: 'password', required: true },
-    ]
+    disabled: true,
+    fields: []
   },
   {
     id: 'magalu',
     name: 'Magazine Luiza',
     code: 'MAGALU',
-    tagline: 'Integração de pedidos e faturamento via Magalu / IntegraCommerce',
+    tagline: 'Integração em desenvolvimento',
     color: '#0086FF',
     bgColor: 'bg-[#EBF5FF]',
     borderColor: 'border-[#0086FF]',
     authType: 'token',
-    fields: [
-      { key: 'account_name', label: 'Nome da Loja Magalu', placeholder: 'Ex: Magalu Loja Principal', required: true },
-      { key: 'seller_id', label: 'Código do Seller / ID', placeholder: 'Ex: 104928', required: true },
-      { key: 'access_token', label: 'Token de Integração / API Key', placeholder: 'Ex: magalu_token_xxxxxx', type: 'password', required: true },
-    ]
+    disabled: true,
+    fields: []
   },
 ]
 
@@ -101,13 +93,14 @@ export default function ConnectMarketplaceModal({ open, onClose, onSuccess }: Co
   if (!open) return null
 
   const handleSelect = (p: PlatformConfig) => {
+    if (p.disabled) return
     setSelectedPlatform(p)
     setFormData({ account_name: `Minha Loja ${p.name}` })
   }
 
   const handleConnect = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!selectedPlatform) return
+    if (!selectedPlatform || selectedPlatform.disabled) return
 
     setConnecting(true)
     const supabase = createClient()
@@ -132,9 +125,9 @@ export default function ConnectMarketplaceModal({ open, onClose, onSuccess }: Co
             name: selectedPlatform.name,
             code: selectedPlatform.code,
             type: 'MARKETPLACE',
-            api_available: true,
+            api_available: !selectedPlatform.disabled,
             oauth_available: selectedPlatform.authType === 'oauth',
-            webhook_available: true,
+            webhook_available: !selectedPlatform.disabled,
             status: 'ACTIVE',
             logo: `/logos/${selectedPlatform.id === 'mercadolivre' ? 'mercado-livre' : selectedPlatform.id}.svg`
           })
@@ -146,8 +139,12 @@ export default function ConnectMarketplaceModal({ open, onClose, onSuccess }: Co
 
       // 2. Criar ou atualizar a conexão em marketplace_connections
       const accountName = formData.account_name || `Loja ${selectedPlatform.name}`
-      const sellerId = formData.seller_id || formData.store_domain || `seller_${Date.now()}`
-      const accessToken = formData.access_token || `token_${Date.now()}`
+      const sellerId = formData.seller_id || formData.store_domain
+      const accessToken = formData.access_token
+
+      if (!accessToken && selectedPlatform.authType !== 'oauth') {
+        throw new Error('Token de acesso é obrigatório para esta plataforma.')
+      }
 
       const { error: connError } = await supabase
         .from('marketplace_connections')
@@ -156,7 +153,7 @@ export default function ConnectMarketplaceModal({ open, onClose, onSuccess }: Co
           marketplace_id: selectedPlatform.id,
           seller_id: sellerId,
           account_name: accountName,
-          access_token: accessToken,
+          access_token: accessToken || '',
           is_active: true,
           status: 'CONNECTED',
           last_sync_at: new Date().toISOString()
@@ -177,7 +174,7 @@ export default function ConnectMarketplaceModal({ open, onClose, onSuccess }: Co
             auto_sync_stock: true,
             auto_sync_prices: true,
             auto_import_orders: true,
-            access_token: accessToken !== `token_${Date.now()}` ? accessToken : null,
+            access_token: accessToken || null,
             last_sync_at: new Date().toISOString()
           }, { onConflict: 'seller_id' })
       }
@@ -198,7 +195,7 @@ export default function ConnectMarketplaceModal({ open, onClose, onSuccess }: Co
       notify({
         type: 'success',
         title: 'Conexão Estabelecida!',
-        message: `${selectedPlatform.name} foi conectado com sucesso. Sincronização de catálogo e pedidos iniciada!`
+        message: `${selectedPlatform.name} foi conectado com sucesso.`
       })
 
       onSuccess()
@@ -251,70 +248,66 @@ export default function ConnectMarketplaceModal({ open, onClose, onSuccess }: Co
                 Canais Disponíveis para Integração Direta
               </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {PLATFORMS.map(p => (
-                  <div
-                    key={p.id}
-                    onClick={() => handleSelect(p)}
-                    className="p-4 rounded-2xl border border-[#e6e6e6] hover:border-[#3483fa] hover:shadow-md transition-all cursor-pointer bg-white group flex flex-col justify-between"
-                  >
-                    <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="w-12 h-12 rounded-xl bg-[#fafafa] border border-[#f0f0f0] p-2 flex items-center justify-center">
-                          <MarketplaceLogo name={p.name} className="w-8 h-8" />
-                        </div>
-                        <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-[#f0f7ff] text-[#3483fa] group-hover:bg-[#3483fa] group-hover:text-white transition-colors">
-                          Conectar →
-                        </span>
-                      </div>
-                      <h3 className="text-[14px] font-bold text-[#333] group-hover:text-[#3483fa] transition-colors">
-                        {p.name}
-                      </h3>
-                      <p className="text-[11px] text-[#888] mt-1 leading-relaxed line-clamp-2">
-                        {p.tagline}
-                      </p>
-                    </div>
+               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                 {PLATFORMS.map(p => (
+                   <div
+                     key={p.id}
+                     onClick={() => handleSelect(p)}
+                     className={`p-4 rounded-2xl border transition-all flex flex-col justify-between ${
+                       p.disabled
+                         ? 'border-[#e6e6e6] bg-[#fafafa] opacity-70 cursor-not-allowed'
+                         : 'border-[#e6e6e6] hover:border-[#3483fa] hover:shadow-md cursor-pointer bg-white group'
+                     }`}
+                   >
+                     <div>
+                       <div className="flex items-center justify-between mb-3">
+                         <div className="w-12 h-12 rounded-xl bg-[#fafafa] border border-[#f0f0f0] p-2 flex items-center justify-center">
+                           <MarketplaceLogo name={p.name} className="w-8 h-8" />
+                         </div>
+                         {p.disabled ? (
+                           <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-[#f5f5f5] text-[#999]">
+                             Em breve
+                           </span>
+                         ) : (
+                           <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-[#f0f7ff] text-[#3483fa] group-hover:bg-[#3483fa] group-hover:text-white transition-colors">
+                             Conectar →
+                           </span>
+                         )}
+                       </div>
+                       <h3 className="text-[14px] font-bold text-[#333] group-hover:text-[#3483fa] transition-colors">
+                         {p.name}
+                       </h3>
+                       <p className="text-[11px] text-[#888] mt-1 leading-relaxed line-clamp-2">
+                         {p.tagline}
+                       </p>
+                     </div>
 
-                    <div className="mt-4 pt-3 border-t border-[#f5f5f5] flex items-center justify-between text-[10px] text-[#999]">
-                      <span>API & Webhook</span>
-                      <span className="flex items-center gap-1 text-[#38a169]">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#38a169] animate-pulse" />
-                        Disponível
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                     <div className="mt-4 pt-3 border-t border-[#f5f5f5] flex items-center justify-between text-[10px] text-[#999]">
+                       <span>API & Webhook</span>
+                       {p.disabled ? (
+                         <span className="flex items-center gap-1 text-[#999]">
+                           <span className="w-1.5 h-1.5 rounded-full bg-[#ccc]" />
+                           Em desenvolvimento
+                         </span>
+                       ) : (
+                         <span className="flex items-center gap-1 text-[#38a169]">
+                           <span className="w-1.5 h-1.5 rounded-full bg-[#38a169] animate-pulse" />
+                           Disponível
+                         </span>
+                       )}
+                     </div>
+                   </div>
+                 ))}
+               </div>
 
-              {/* Shopee & Amazon Extra Options */}
-              <div className="mt-4 p-4 rounded-2xl bg-[#fafafa] border border-[#eeeeee]">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <Store className="w-4 h-4 text-[#666]" />
-                    <span className="text-[12px] font-semibold text-[#444]">Outros Canais (Shopee, Amazon)</span>
-                  </div>
-                  <button
-                    onClick={() => handleSelect({
-                      id: 'shopee',
-                      name: 'Shopee',
-                      code: 'SHOPEE',
-                      tagline: 'Integração oficial de pedidos e produtos Shopee',
-                      color: '#EE4D2D',
-                      bgColor: 'bg-[#FFF5F2]',
-                      borderColor: 'border-[#EE4D2D]',
-                      authType: 'token',
-                      fields: [
-                        { key: 'account_name', label: 'Nome da Loja Shopee', placeholder: 'Ex: Minha Loja Shopee', required: true },
-                        { key: 'seller_id', label: 'Partner ID / Shop ID', placeholder: 'Ex: 12345678', required: true },
-                        { key: 'access_token', label: 'Partner Key / Token', placeholder: 'Ex: shopee_key_xxxxxx', type: 'password', required: true },
-                      ]
-                    })}
-                    className="text-[11px] text-[#3483fa] font-medium hover:underline"
-                  >
-                    Conectar Shopee / Amazon →
-                  </button>
-                </div>
-              </div>
+               {/* Shopee & Amazon — em desenvolvimento */}
+               <div className="mt-4 p-4 rounded-2xl bg-[#fafafa] border border-[#eeeeee] opacity-70">
+                 <div className="flex items-center gap-2.5">
+                   <Store className="w-4 h-4 text-[#999]" />
+                   <span className="text-[12px] font-semibold text-[#666]">Outros Canais (Shopee, Amazon)</span>
+                   <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#f5f5f5] text-[#999]">Em breve</span>
+                 </div>
+               </div>
             </>
           ) : (
             /* Selected Platform Form */
@@ -336,7 +329,12 @@ export default function ConnectMarketplaceModal({ open, onClose, onSuccess }: Co
                 </button>
               </div>
 
-              {selectedPlatform.authType === 'oauth' ? (
+              {selectedPlatform.disabled ? (
+                <div className="p-6 rounded-2xl bg-[#f5f5f5] border border-[#e6e6e6] text-center">
+                  <p className="text-[13px] text-[#666]">Esta integração ainda não está disponível.</p>
+                  <p className="text-[11px] text-[#999] mt-1">Estamos trabalhando para disponibilizar em breve.</p>
+                </div>
+              ) : selectedPlatform.authType === 'oauth' ? (
                 <div className="p-6 rounded-2xl bg-[#f0f7ff] border border-[#d0e4ff] space-y-4 text-center">
                   <div className="w-14 h-14 rounded-2xl bg-white shadow-xs border border-[#d0e4ff] mx-auto flex items-center justify-center p-2.5">
                     <MarketplaceLogo name={selectedPlatform.name} className="w-9 h-9" />
@@ -409,7 +407,15 @@ export default function ConnectMarketplaceModal({ open, onClose, onSuccess }: Co
           </button>
 
           {selectedPlatform && (
-            selectedPlatform.authType === 'oauth' ? (
+            selectedPlatform.disabled ? (
+              <button
+                type="button"
+                disabled
+                className="px-5 py-2.5 bg-[#e6e6e6] text-[#999] text-[12px] font-bold rounded-xl cursor-not-allowed"
+              >
+                Em breve
+              </button>
+            ) : selectedPlatform.authType === 'oauth' ? (
               <button
                 type="button"
                 onClick={() => {

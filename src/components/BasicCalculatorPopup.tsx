@@ -95,7 +95,7 @@ export default function BasicCalculatorPopup({ onClose, initialPosition }: Basic
   const handleCalc = () => {
     try {
       if (!equation) return
-      // eslint-disable-next-line @typescript-eslint/no-implied-eval
+       
       const cleanEq = (equation + display).replace(/,/g, '.')
       const result = new Function('return ' + cleanEq)()
       if (isNaN(result) || !isFinite(result)) {

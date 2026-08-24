@@ -62,8 +62,8 @@ async function refreshOrReturnToken(supabase: SupabaseClient<any>, conn: any): P
     throw new Error('Refresh token não encontrado para renovação do Mercado Livre.')
   }
 
-  const clientId = process.env.MERCADOLIVRE_CLIENT_ID || process.env.MERCADOLIVRE_APP_ID || '8874323668438382'
-  const clientSecret = process.env.MERCADOLIVRE_CLIENT_SECRET || 'JQrkHL7X2ieJdxPpevL9b9PX3iffwfFm'
+  const clientId = process.env.MERCADOLIVRE_CLIENT_ID!
+  const clientSecret = process.env.MERCADOLIVRE_CLIENT_SECRET!
 
   // Single-flight Promise para garantir 1 único refresh simultâneo
   const refreshPromise = (async () => {
@@ -146,8 +146,7 @@ export async function getValidToken(userId: string): Promise<string> {
     .maybeSingle()
 
   if (error || !conn) {
-    // Fallback to seller_id search
-    return getValidTokenBySellerId('470831049')
+    throw new Error(`Conexão ativa do Mercado Livre não encontrada para o usuário ${userId}.`)
   }
 
   return refreshOrReturnToken(supabase, conn)

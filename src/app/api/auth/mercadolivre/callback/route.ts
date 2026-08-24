@@ -80,11 +80,10 @@ export async function GET(request: Request) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
 
-    const defaultUserId = '3af9068a-4b78-4c9c-8657-f83b93c01588'
     const expiresAt = new Date(Date.now() + (expires_in || 21600) * 1000).toISOString()
 
     // 4. Find or create Mercado Livre marketplace record
-    let marketplaceId = '6ef8f3db-6d35-4701-86f7-8199378ec0c7'
+    let marketplaceId = 'mercadolivre'
     const { data: mp } = await supabase
       .from('marketplaces')
       .select('id')
@@ -96,9 +95,11 @@ export async function GET(request: Request) {
     // 5. Check if connection exists in marketplace_connections
     const { data: existingConn } = await supabase
       .from('marketplace_connections')
-      .select('id')
+      .select('id, user_id')
       .eq('seller_id', seller_id.toString())
       .single()
+
+    const connectionUserId = existingConn?.user_id || null
 
     if (existingConn) {
       await supabase
@@ -117,7 +118,7 @@ export async function GET(request: Request) {
       await supabase
         .from('marketplace_connections')
         .insert({
-          user_id: defaultUserId,
+          user_id: connectionUserId,
           marketplace_id: 'mercadolivre',
           seller_id: seller_id.toString(),
           account_name: sellerNickname,
@@ -135,7 +136,7 @@ export async function GET(request: Request) {
       .from('marketplace_accounts')
       .upsert({
         marketplace_id: marketplaceId,
-        user_id: defaultUserId,
+        user_id: connectionUserId,
         account_name: sellerNickname,
         seller_id: seller_id.toString(),
         access_token,
@@ -151,12 +152,14 @@ export async function GET(request: Request) {
       }, { onConflict: 'seller_id' })
 
     // 7. Notification
-    await supabase.from('notifications').insert({
-      title: 'Mercado Livre Conectado!',
-      message: `A conta "${sellerNickname}" do Mercado Livre foi conectada com sucesso. Sincronização de estoque e pedidos ativa!`,
-      type: 'SUCCESS',
-      user_id: defaultUserId
-    })
+    if (connectionUserId) {
+      await supabase.from('notifications').insert({
+        title: 'Mercado Livre Conectado!',
+        message: `A conta "${sellerNickname}" do Mercado Livre foi conectada com sucesso. Sincronização de estoque e pedidos ativa!`,
+        type: 'SUCCESS',
+        user_id: connectionUserId
+      })
+    }
 
     // 8. Immediate background catalog & order sync
     try {

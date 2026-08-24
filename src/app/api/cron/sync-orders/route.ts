@@ -31,10 +31,10 @@ export async function GET(request: Request) {
       console.error('[Cron Sync] Error loading connections:', mlErr)
     }
 
-    // Default seller fallback if none listed
+    // Default seller fallback se não houver conexões ativas
     const connectionsToSync = (mlConnections && mlConnections.length > 0)
       ? mlConnections
-      : [{ seller_id: '470831049', account_name: 'TEKNIXBRASIL', marketplace_id: 'mercadolivre' }]
+      : []
 
     for (const conn of connectionsToSync) {
       if (!conn.seller_id) continue

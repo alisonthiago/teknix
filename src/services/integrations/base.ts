@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import {
   MarketplaceOrder,

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { getValidTokenBySellerId } from './client'
 import { syncOrder } from './syncOrder'
@@ -20,7 +20,12 @@ function getSupabase(): SupabaseClient<any> {
 export async function enqueueAndProcessWebhook(payload: Record<string, any>): Promise<{ eventId: string; duplicate: boolean }> {
   const supabase = getSupabase()
   const { resource, topic, user_id } = payload
-  const sellerId = String(user_id || '470831049')
+
+  if (!user_id) {
+    throw new Error('Webhook recebido sem user_id. Verifique a configuração do webhook no Mercado Livre.')
+  }
+
+  const sellerId = String(user_id)
   const eventType = topic || (resource?.startsWith('/orders/') ? 'orders_v2' : resource?.startsWith('/shipments/') ? 'shipments' : 'general')
 
   // 1. Verificação de Idempotência: Checa se o mesmo recurso foi processado recentemente (últimos 3 minutos)

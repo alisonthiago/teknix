@@ -70,7 +70,7 @@ export default function PermissoesPage() {
       if (error) throw error
       return (data || []) as UserPermission[]
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
     [selectedId ?? '']
   )
 

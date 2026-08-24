@@ -27,13 +27,12 @@ export interface CreateNotificationParams {
 
 export async function createRealNotification(params: CreateNotificationParams) {
   const supabase = getSupabase()
-  const defaultUserId = '3af9068a-4b78-4c9c-8657-f83b93c01588'
 
   try {
     const { data, error } = await supabase
       .from('notifications')
       .insert({
-        user_id: params.userId || defaultUserId,
+        user_id: params.userId || null,
         type: params.type,
         title: params.title,
         message: params.message,

@@ -67,7 +67,8 @@ function SalesTab() {
           revenue: Number(s.total_revenue || 0),
           itemsCount: qty,
           status: s.status === 'CANCELLED' ? 'CANCELADO' : 'CONCLUIDO',
-          date: s.created_at ? new Date(s.created_at).toLocaleDateString('pt-BR') : 'Hoje'
+          date: s.created_at ? new Date(s.created_at).toLocaleDateString('pt-BR') : 'Hoje',
+          time: s.created_at ? new Date(s.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : ''
         }
       })
     }
@@ -90,7 +91,8 @@ function SalesTab() {
           revenue: Number(o.total_amount || 0),
           itemsCount: qty,
           status: o.status === 'CANCELADO' ? 'CANCELADO' : 'CONCLUIDO',
-          date: o.created_at ? new Date(o.created_at).toLocaleDateString('pt-BR') : 'Hoje'
+          date: o.created_at ? new Date(o.created_at).toLocaleDateString('pt-BR') : 'Hoje',
+          time: o.created_at ? new Date(o.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : ''
         }
       })
     }
@@ -229,8 +231,8 @@ function SalesTab() {
                   <td className="py-4.5 px-5 text-[12px] text-[#64748b] font-medium">
                     {s.accountName}
                   </td>
-                  <td className="py-4.5 px-5 text-[#64748b] font-medium text-[13px]">
-                    {s.date}
+                   <td className="py-4.5 px-5 text-[#64748b] font-medium text-[13px]">
+                    {s.date} <span className="text-[#94a3b8] text-[11px]">{s.time}</span>
                   </td>
                   <td className="py-4.5 px-5 text-right font-bold text-[#111] text-[13px]">
                     {s.itemsCount} un

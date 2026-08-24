@@ -13,7 +13,11 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const orderId = searchParams.get('order_id')
-    const sellerId = searchParams.get('seller_id') || '470831049'
+    const sellerId = searchParams.get('seller_id')
+
+    if (!sellerId) {
+      return NextResponse.json({ error: 'seller_id é obrigatório.' }, { status: 400 })
+    }
 
     const token = await getValidTokenBySellerId(sellerId)
 
@@ -87,10 +91,14 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { order_id, text, seller_id = '470831049', buyer_id } = body
+    const { order_id, text, seller_id, buyer_id } = body
 
     if (!order_id || !text) {
       return NextResponse.json({ error: 'order_id e text são obrigatórios.' }, { status: 400 })
+    }
+
+    if (!seller_id) {
+      return NextResponse.json({ error: 'seller_id é obrigatório.' }, { status: 400 })
     }
 
     const cleanOrderId = order_id.replace('MLB-', '').replace('ML-', '')
@@ -99,7 +107,7 @@ export async function POST(request: Request) {
     // Build payload for post-sale message
     const payload: any = {
       from: {
-        user_id: Number(seller_id) || 470831049
+        user_id: Number(seller_id)
       },
       text: text.trim()
     }

@@ -341,10 +341,13 @@ export default function MonitorAoVivoPage() {
             <p className="text-[12px] text-[#666] mt-0.5">
               Monitoramento ao vivo de vendas, faturamento e logística de todos os marketplaces conectados.
             </p>
+            <p className="text-[11px] text-[#999] mt-0.5">
+              Atualizado há {lastUpdateSeconds}s
+            </p>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           {/* Som Ativar / Desativar */}
           <button
             onClick={() => setSoundEnabled(!soundEnabled)}
@@ -356,6 +359,16 @@ export default function MonitorAoVivoPage() {
           >
             {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
             <span className="hidden sm:inline">{soundEnabled ? 'Alerta Sonoro' : 'Mudo'}</span>
+          </button>
+
+          {/* Refresh Manual */}
+          <button
+            onClick={() => refetch()}
+            className="p-2 sm:px-3 sm:py-2 rounded-xl border border-[#e6e6e6] bg-white hover:bg-[#f5f5f5] text-[#333] text-[12px] font-medium flex items-center gap-1.5 transition-all cursor-pointer"
+            title="Atualizar dados agora"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            <span className="hidden sm:inline">Atualizar</span>
           </button>
 
           {/* Filtro de Período */}

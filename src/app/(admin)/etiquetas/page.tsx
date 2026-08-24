@@ -557,12 +557,12 @@ export default function CentralEtiquetasPage() {
               {filteredOrders.map(order => {
                 const isSelected = selectedOrderIds.includes(order.id)
                 return (
-                  <div
-                    key={order.id}
-                    className={`flex items-center justify-between px-6 py-4.5 hover:bg-[#fafafa] transition-colors ${
-                      isSelected ? 'bg-[#f0fdf4]/50' : ''
-                    }`}
-                  >
+                   <div
+                     key={order.id}
+                     className={`flex items-center justify-between px-6 py-6 hover:bg-[#fafafa] transition-colors ${
+                       isSelected ? 'bg-[#f0fdf4]/50' : ''
+                     }`}
+                   >
                     {/* Checkbox e Produto */}
                     <div className="flex items-center gap-4 min-w-0 flex-1 pr-4">
                       <button onClick={() => toggleSelectOrder(order.id)} className="cursor-pointer shrink-0">
