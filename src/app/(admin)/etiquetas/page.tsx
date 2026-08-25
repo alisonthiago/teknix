@@ -862,7 +862,12 @@ export default function CentralEtiquetasPage() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-xs animate-in fade-in duration-150">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5 animate-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between pb-3 border-b border-[#f1f5f9]">
-              <h3 className="font-bold text-base text-[#0f172a]">Configurações da Impressora</h3>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-[#ecfdf5] border border-[#bbf7d0] flex items-center justify-center text-[#16a34a] shadow-xs">
+                  <Printer className="w-5 h-5" />
+                </div>
+                <h3 className="font-bold text-base text-[#0f172a]">Configurações da Impressora</h3>
+              </div>
               <button onClick={() => setShowConfigModal(false)} className="text-[#94a3b8] hover:text-[#0f172a]">
                 <X className="w-4 h-4" />
               </button>
