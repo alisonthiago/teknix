@@ -204,7 +204,7 @@ export default function DashboardPage() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[12px] font-extrabold uppercase tracking-wider text-[#333]">Vendas de Hoje</span>
+              <span className="text-sm font-extrabold uppercase tracking-wider text-[#333]">Vendas de Hoje</span>
               <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-black/10 text-[#222] tracking-wider uppercase">
                 Ao Vivo
               </span>
@@ -309,12 +309,12 @@ export default function DashboardPage() {
       {/* Linha 2 — Últimos Pedidos Responsivo */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
         <div className="xl:col-span-12 mp-card p-5 sm:p-6 shadow-2xs">
-          <div className="flex items-center justify-between pb-3 border-b border-[#f0f0f0] mb-3">
+          <div className="flex items-center justify-between pb-4 border-b border-[#f0f0f0] mb-4">
             <div>
-              <h2 className="text-[15px] font-black text-[#111]">Últimos Pedidos</h2>
-              <p className="text-[11px] text-[#777] mt-0.5">Acompanhe as vendas mais recentes em todos os canais</p>
+              <h2 className="mp-section-title">Últimos Pedidos</h2>
+              <p className="mp-list-item-sub mt-1">Acompanhe as vendas mais recentes em todos os canais</p>
             </div>
-            <Link href="/pedidos" className="text-xs font-bold text-[#111] hover:underline flex items-center gap-1">
+            <Link href="/pedidos" className="mp-see-all-link">
               Conferir todos →
             </Link>
           </div>
@@ -331,56 +331,49 @@ export default function DashboardPage() {
               const isCancelled = String(order.status || '').toUpperCase() === 'CANCELADO'
 
               return (
-                 <div 
-                   key={order.id as string} 
-                   onClick={() => router.push(`/pedidos/${order.id}`)} 
-                   className="py-4 px-4 hover:bg-[#fafafa] rounded-xl transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
-                 >
-                  {/* Esquerda: Foto do Produto + Dados do Pedido */}
-                  <div className="flex items-center gap-3.5 min-w-0">
-                    <div className="w-12 h-12 rounded-xl bg-[#f5f5f5] border border-[#e6e6e6] p-1 flex items-center justify-center shrink-0 overflow-hidden">
-                      {prodImage ? (
-                        <img src={prodImage} alt={prodTitle} className="w-full h-full object-contain" />
-                      ) : (
-                        <ShoppingCart className="w-5 h-5 text-[#666]" strokeWidth={1.5} />
-                      )}
-                    </div>
-
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-mono font-bold text-[13px] text-[#111]">{order.order_number}</span>
-                        <span className="text-[11px] text-[#888] font-medium">• {new Date(order.created_at).toLocaleDateString('pt-BR')}</span>
-                      </div>
-                      
-                      <p className="text-[12px] font-semibold text-[#333] truncate max-w-md mt-0.5">
-                        {prodTitle}
-                      </p>
-
-                      <div className="flex items-center gap-2 mt-0.5 text-[11px] text-[#777]">
-                        <span className="font-mono">SKU: {prodSku}</span>
-                        <span>•</span>
-                        <span className="font-medium text-[#555]">{(order.customer_name as string) || 'Comprador'}</span>
-                      </div>
-                    </div>
+                <div
+                  key={order.id as string}
+                  onClick={() => router.push(`/pedidos/${order.id}`)}
+                  className="py-3 px-3 sm:py-4 sm:px-4 hover:bg-[#fafafa] rounded-xl transition-all cursor-pointer flex items-center gap-3 sm:gap-3.5 group"
+                >
+                  {/* Foto */}
+                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-[#f5f5f5] border border-[#e6e6e6] p-1 flex items-center justify-center shrink-0 overflow-hidden">
+                    {prodImage ? (
+                      <img src={prodImage} alt={prodTitle} className="w-full h-full object-contain" />
+                    ) : (
+                      <ShoppingCart className="w-5 h-5 text-[#666]" strokeWidth={1.5} />
+                    )}
                   </div>
 
-                  {/* Direita: Marketplace + Status + Valor */}
-                  <div className="flex items-center justify-between sm:justify-end gap-3.5 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-[#f5f5f5]">
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-[#fafafa] border border-[#eee] text-[11px] font-bold text-[#555]">
-                        <MarketplaceLogo name={(mp?.name as string) || 'Mercado Livre'} className="w-3.5 h-3.5 shrink-0" />
-                        <span>{(mp?.name as string) || 'ML'}</span>
-                      </div>
-
-                      <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-black border ${
-                        isCancelled 
-                          ? 'bg-[#fee2e2] text-[#dc2626] border-[#fecaca]' 
+                  {/* Conteúdo: título + cliente + status (limpo no mobile) */}
+                  <div className="flex-1 min-w-0">
+                    <p className="mp-list-item-title truncate">{prodTitle}</p>
+                    <div className="flex items-center gap-1.5 mt-0.5 min-w-0">
+                      <span className="text-[12px] text-[#666] truncate">{(order.customer_name as string) || 'Comprador'}</span>
+                      <span className="hidden sm:inline text-[#bbb]">•</span>
+                      <span className="hidden sm:inline font-mono text-[12px] text-[#999] truncate">SKU: {prodSku}</span>
+                      <span className={`inline-flex px-1.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-black border shrink-0 ${
+                        isCancelled
+                          ? 'bg-[#fee2e2] text-[#dc2626] border-[#fecaca]'
                           : 'bg-[#ecfdf5] text-[#16a34a] border-[#bbf7d0]'
                       }`}>
                         {isCancelled ? 'Cancelado' : 'Aprovado'}
                       </span>
                     </div>
+                  </div>
 
+                  {/* Pedido + data (somente desktop) */}
+                  <div className="hidden sm:block text-right shrink-0">
+                    <div className="font-mono font-bold text-[13px] text-[#111]">{order.order_number}</div>
+                    <div className="text-[12px] text-[#888] font-medium">• {new Date(order.created_at).toLocaleDateString('pt-BR')}</div>
+                  </div>
+
+                  {/* Marketplace (desktop) + Valor */}
+                  <div className="flex items-center gap-3 shrink-0">
+                    <div className="hidden sm:flex items-center gap-1.5 px-2 py-1 rounded-lg bg-[#fafafa] border border-[#eee] text-[11px] font-bold text-[#555]">
+                      <MarketplaceLogo name={(mp?.name as string) || 'Mercado Livre'} className="w-3.5 h-3.5 shrink-0" />
+                      <span>{(mp?.name as string) || 'ML'}</span>
+                    </div>
                     <span className="font-black text-[#111] text-[14px] text-right">
                       R$ {Number(order.total_amount || 0).toFixed(2).replace('.', ',')}
                     </span>
