@@ -112,11 +112,11 @@ export default function DashboardPage() {
     },
     vendas: {
       value: String(stats?.totalOrders || 0),
-      subtitle: `${stats?.totalOrders || 0} pedidos recebidos`,
+      subtitle: `${stats?.totalOrders || 0} pedidos`,
     },
     lucro: {
       value: 'R$ —',
-      subtitle: 'Configure integrações para calcular',
+      subtitle: 'Configure integrações',
     },
   }
 
@@ -142,7 +142,7 @@ export default function DashboardPage() {
           </div>
           <div>
               <h1 className="text-[32px] font-bold text-[#333]">Olá, {userProfile.name}</h1>
-            <p className="text-[13px] text-[#666] font-medium">Bem-vindo de volta ao sistema!</p>
+            <p className="text-[13px] text-[#666] font-medium">Bem-vindo de volta!</p>
           </div>
         </div>
       )}
@@ -214,14 +214,14 @@ export default function DashboardPage() {
               {(stats?.todayRevenue ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
             <p className="text-[11px] font-medium text-[#444]">
-              {new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' })}, {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} • Sincronização Contínua Ativa
+               {new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' })}, {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} • Sincronização ativa
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
           <div className="hidden sm:block text-right pr-3 border-r border-black/10">
-            <span className="text-[10px] font-extrabold uppercase text-[#444] block">Vendas Brutas (30d)</span>
+              <span className="text-[10px] font-extrabold uppercase text-[#444] block">Vendas Brutas</span>
             <span className="text-[15px] font-black text-[#111] font-mono">
               R$ {(stats?.totalRevenue ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </span>
@@ -312,7 +312,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between pb-4 border-b border-[#f0f0f0] mb-4">
             <div>
               <h2 className="mp-section-title">Últimos Pedidos</h2>
-              <p className="mp-list-item-sub mt-1">Acompanhe as vendas mais recentes em todos os canais</p>
+              <p className="mp-list-item-sub mt-1">Vendas recentes</p>
             </div>
             <Link href="/pedidos" className="mp-see-all-link">
               Conferir todos →

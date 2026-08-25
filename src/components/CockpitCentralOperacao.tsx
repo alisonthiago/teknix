@@ -44,7 +44,7 @@ export function CockpitCentralOperacao({ orders = [], products = [] }: CockpitDa
           id: `order-err-${o.id}`,
           type: 'ORDER_ERROR',
           title: `Pedido ${o.order_number} cancelado ou com pendência`,
-          description: `O comprador cancelou ou houve recusa no processamento do envio.`,
+          description: `Cancelado pelo comprador ou falha no envio.`,
           actionLabel: 'Verificar Pedido',
           actionLink: `/pedidos/${o.id}`,
           channel: (o.marketplaces as any)?.name || 'Mercado Livre',
@@ -60,7 +60,7 @@ export function CockpitCentralOperacao({ orders = [], products = [] }: CockpitDa
           id: `prod-stock-${p.id}`,
           type: 'OUT_OF_STOCK',
           title: `Produto ${p.sku} esgotado (Estoque 0)`,
-          description: `${p.name} está com saldo zerado. Risco de pausa nos anúncios.`,
+          description: `Saldo zerado. Risco de pausa nos anúncios.`,
           actionLabel: 'Fazer Pedido de Compra',
           actionLink: `/purchases/new?product=${p.id}`,
           channel: 'Estoque Central',
@@ -109,11 +109,11 @@ export function CockpitCentralOperacao({ orders = [], products = [] }: CockpitDa
             {totalActionsCount === 0 ? (
               'Operação 100% em dia'
             ) : (
-              `Atenção: Existem ${totalActionsCount} ações operacionais prioritárias hoje`
+              `${totalActionsCount} ações prioritárias hoje`
             )}
           </h2>
           <p className="text-[12px] text-[#666] mt-0.5">
-            Monitoramento em tempo real de pedidos, separação, etiquetas e estoque.
+            Pedidos, separação, etiquetas e estoque em tempo real.
           </p>
         </div>
 
