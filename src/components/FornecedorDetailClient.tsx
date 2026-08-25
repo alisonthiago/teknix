@@ -24,8 +24,8 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 function InfoRow({ label, value, mono, bold }: { label: string; value: string; mono?: boolean; bold?: boolean }) {
   return (
     <div className="flex justify-between py-1.5 border-b border-[#f5f5f5] last:border-0">
-      <span className="text-[12px] text-[#999]">{label}</span>
-      <span className={`text-[12px] ${mono ? 'font-mono' : ''} ${bold ? 'font-medium text-[#333]' : 'text-[#666]'}`}>{value}</span>
+      <span className="text-sm text-[#999]">{label}</span>
+      <span className={`text-sm ${mono ? 'font-mono' : ''} ${bold ? 'font-medium text-[#333]' : 'text-[#666]'}`}>{value}</span>
     </div>
   )
 }
@@ -35,7 +35,7 @@ function StatBox({ label, value, sub }: { label: string; value: string; sub?: st
     <div className="bg-white border border-[#e6e6e6] rounded-md p-3">
       <div className="text-[11px] text-[#999] mb-1">{label}</div>
       <div className="text-[16px] font-semibold text-[#333]">{value}</div>
-      {sub && <div className="text-[10px] text-[#ccc] mt-0.5">{sub}</div>}
+      {sub && <div className="text-xs text-[#ccc] mt-0.5">{sub}</div>}
     </div>
   )
 }
@@ -232,7 +232,7 @@ function SupplierCatalogsDisplay({ supplierId }: { supplierId: string }) {
       {catalogs.length === 0 ? (
         <div className="py-6 text-center border border-dashed border-[#e6e6e6] rounded-md bg-[#fafafa]">
           <FileText className="w-7 h-7 text-[#ccc] mx-auto mb-1.5" />
-          <p className="text-[12px] text-[#666] font-medium">Nenhum catálogo cadastrado</p>
+          <p className="text-sm text-[#666] font-medium">Nenhum catálogo cadastrado</p>
           <p className="text-[11px] text-[#999] mt-0.5">Faça upload de tabelas de preços ou PDFs</p>
           <button
             onClick={() => fileInputRef.current?.click()}
@@ -278,7 +278,7 @@ function SupplierCatalogsDisplay({ supplierId }: { supplierId: string }) {
                   <span className="text-[11px] text-center font-medium text-[#333] line-clamp-2 w-full" title={cat.title}>
                     {cat.title}
                   </span>
-                  <span className="text-[10px] text-[#3483fa] mt-1 group-hover:underline">
+                  <span className="text-xs text-[#3483fa] mt-1 group-hover:underline">
                     Abrir / Baixar ↗
                   </span>
                 </a>
@@ -297,14 +297,14 @@ function VisaoGeralTab({ supplier }: { supplier: SupplierDetail }) {
       <div className="lg:col-span-2 space-y-4">
         <div className="bg-white border border-[#e6e6e6] rounded-md p-4">
           <SectionTitle>Produtos fornecidos ({supplier.products.length})</SectionTitle>
-          <div className="overflow-x-auto">
-            <table className="w-full text-[12px]">
+          <div className="table-container">
+             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-[#f5f5f5]">
-                  <th className="text-left py-2 px-3 text-[10px] font-medium text-[#999] uppercase">SKU</th>
-                  <th className="text-left py-2 px-3 text-[10px] font-medium text-[#999] uppercase">Produto</th>
-                  <th className="text-right py-2 px-3 text-[10px] font-medium text-[#999] uppercase">Custo</th>
-                  <th className="text-right py-2 px-3 text-[10px] font-medium text-[#999] uppercase">Estoque</th>
+                  <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">SKU</th>
+                  <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Produto</th>
+                  <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Custo</th>
+                  <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Estoque</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#eeeeee]">
@@ -342,16 +342,16 @@ function VisaoGeralTab({ supplier }: { supplier: SupplierDetail }) {
 
         <div className="bg-white border border-[#e6e6e6] rounded-md p-4">
           <SectionTitle>Histórico de compras</SectionTitle>
-          <div className="overflow-x-auto">
-            <table className="w-full text-[12px]">
+          <div className="table-container">
+             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-[#f5f5f5]">
-                  <th className="text-left py-2 px-3 text-[10px] font-medium text-[#999] uppercase">Data</th>
-                  <th className="text-left py-2 px-3 text-[10px] font-medium text-[#999] uppercase">NF</th>
-                  <th className="text-right py-2 px-3 text-[10px] font-medium text-[#999] uppercase">Itens</th>
-                  <th className="text-right py-2 px-3 text-[10px] font-medium text-[#999] uppercase">Total</th>
-                  <th className="text-center py-2 px-3 text-[10px] font-medium text-[#999] uppercase">Status</th>
-                  <th className="text-right py-2 px-3 text-[10px] font-medium text-[#999] uppercase">Nota</th>
+                  <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Data</th>
+                  <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">NF</th>
+                  <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Itens</th>
+                  <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Total</th>
+                  <th className="text-center py-3.5 px-5 font-medium text-[#999] text-xs">Status</th>
+                  <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Nota</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#eeeeee]">
@@ -367,7 +367,7 @@ function VisaoGeralTab({ supplier }: { supplier: SupplierDetail }) {
                       <td className="py-2.5 px-3 text-right text-[#999]">{p.items}</td>
                       <td className="py-2.5 px-3 text-right font-medium text-[#333]">{formatBRL(p.total)}</td>
                       <td className="py-2.5 px-3 text-center">
-                        <span className="inline-flex px-2 py-[2px] rounded text-[10px] font-medium bg-[#f0fff4] text-[#38a169]">
+                        <span className="inline-flex px-2 py-[2px] rounded text-xs font-medium bg-[#f0fff4] text-[#38a169]">
                           {p.status}
                         </span>
                       </td>
@@ -504,7 +504,7 @@ function InformacoesTab({ supplier }: { supplier: SupplierDetail }) {
             supplier.contacts.map(c => (
               <div key={c.id} className="flex items-center justify-between p-2 rounded-md bg-[#fafafa] border border-[#eeeeee]">
                 <div>
-                  <span className="text-[12px] font-medium text-[#333] block">{c.name || (c.is_whatsapp ? 'WhatsApp' : 'Telefone')}</span>
+                  <span className="text-sm font-medium text-[#333] block">{c.name || (c.is_whatsapp ? 'WhatsApp' : 'Telefone')}</span>
                   <span className="text-[11px] text-[#999] font-mono">{c.phone}</span>
                 </div>
                 {c.is_whatsapp ? (
@@ -560,7 +560,7 @@ function DadosBancariosTab({ supplier }: { supplier: SupplierDetail }) {
           </div>
 
           <div className="bg-[#fafafa] rounded-md p-3 border border-[#eeeeee] mb-3">
-            <span className="text-[10px] font-medium text-[#999] uppercase tracking-wider block mb-1">Chave Cadastrada</span>
+            <span className="text-xs font-medium text-[#999] uppercase tracking-wider block mb-1">Chave Cadastrada</span>
             <div className="text-[14px] font-mono font-medium text-[#333] select-all break-all">
               {supplier.pix_key || 'Chave PIX não cadastrada'}
             </div>
@@ -596,7 +596,7 @@ function CatalogosTab({ supplier }: { supplier: SupplierDetail }) {
   return (
     <div className="bg-white border border-[#e6e6e6] rounded-md p-5">
       <SectionTitle>Gerenciar Catálogos do Fornecedor</SectionTitle>
-      <p className="text-[12px] text-[#666] mb-4">
+      <p className="text-sm text-[#666] mb-4">
         Faça upload de arquivos PDF ou imagens de catálogos (até 50MB), adicione links externos ou exclua catálogos antigos.
       </p>
       <SupplierCatalogsEditor supplierId={supplier.id} />
@@ -612,18 +612,18 @@ function TimelineTab({ supplier }: { supplier: SupplierDetail }) {
       </div>
       <div className="divide-y divide-[#eeeeee]">
         {supplier.timeline.length === 0 ? (
-          <div className="p-8 text-center text-[#999] text-[12px]">Nenhum histórico de atividade registrado.</div>
+          <div className="p-8 text-center text-[#999] text-sm">Nenhum histórico de atividade registrado.</div>
         ) : (
           supplier.timeline.map((h, i) => (
             <div key={i} className="px-4 py-3 flex items-start gap-3 hover:bg-[#fafafa] transition-colors">
               <div className="w-1.5 h-1.5 rounded-full bg-[#3483fa] mt-1.5 shrink-0" />
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-[12px] font-medium text-[#333]">{h.action}</span>
+                  <span className="text-sm font-medium text-[#333]">{h.action}</span>
                 </div>
                 <div className="text-[11px] text-[#666] mt-0.5">{h.details}</div>
               </div>
-              <div className="text-[10px] text-[#ccc] text-right shrink-0">
+              <div className="text-xs text-[#ccc] text-right shrink-0">
                 <div>{h.date}</div>
                 <div>{h.time}</div>
               </div>
@@ -658,7 +658,7 @@ export default function FornecedorDetailClient({ supplier }: { supplier: Supplie
   return (
     <div>
       <div className="mb-4">
-        <Link href="/operacao" className="inline-flex items-center gap-1.5 text-[12px] text-[#999] hover:text-[#333] transition-colors">
+        <Link href="/operacao" className="inline-flex items-center gap-1.5 text-sm text-[#999] hover:text-[#333] transition-colors">
           <ArrowLeft className="w-3.5 h-3.5" />
           Operação / Fornecedores
         </Link>
@@ -680,16 +680,16 @@ export default function FornecedorDetailClient({ supplier }: { supplier: Supplie
                 <h1 className="text-[18px] font-semibold text-[#333]">{supplier.name}</h1>
                 <div className="flex flex-wrap items-center gap-2 mt-1">
                   <span className="text-[11px] font-mono text-[#999]">{supplier.cnpj}</span>
-                  <span className="text-[10px] text-[#ccc]">•</span>
-                  <span className="text-[12px] text-[#999]">{supplier.city}/{supplier.state}</span>
+                  <span className="text-xs text-[#ccc]">•</span>
+                  <span className="text-sm text-[#999]">{supplier.city}/{supplier.state}</span>
                   {supplier.distributor_city && (
                     <>
-                      <span className="text-[10px] text-[#ccc]">•</span>
-                      <span className="text-[12px] text-[#999]">Distr: {supplier.distributor_city}/{supplier.distributor_state}</span>
+                      <span className="text-xs text-[#ccc]">•</span>
+                      <span className="text-sm text-[#999]">Distr: {supplier.distributor_city}/{supplier.distributor_state}</span>
                     </>
                   )}
-                  <span className="text-[10px] text-[#ccc]">•</span>
-                  <span className={`inline-flex px-2 py-[2px] rounded text-[10px] font-medium ${
+                  <span className="text-xs text-[#ccc]">•</span>
+                  <span className={`inline-flex px-2 py-[2px] rounded text-xs font-medium ${
                     supplier.status === 'ACTIVE' || !supplier.status
                       ? 'bg-[#f0fff4] text-[#38a169]'
                       : 'bg-[#fff5f5] text-[#e74c3c]'
@@ -702,14 +702,14 @@ export default function FornecedorDetailClient({ supplier }: { supplier: Supplie
               <div className="flex items-center gap-2 relative">
                 <Link 
                   href={`/purchases/new?supplier=${supplier.id}`}
-                  className="h-[30px] inline-flex items-center gap-1.5 px-3 bg-[#3483fa] hover:bg-[#2968c8] text-white text-[12px] font-medium rounded-md transition-colors"
+                  className="h-[30px] inline-flex items-center gap-1.5 px-3 bg-[#3483fa] hover:bg-[#2968c8] text-white text-sm font-medium rounded-md transition-colors"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   Comprar
                 </Link>
                 <Link
                   href={`/fornecedores/${supplier.id}/editar`}
-                  className="h-[30px] inline-flex items-center gap-1.5 px-3 bg-white hover:bg-[#f5f5f5] text-[#666] text-[12px] font-medium rounded-md border border-[#e6e6e6] transition-colors"
+                  className="h-[30px] inline-flex items-center gap-1.5 px-3 bg-white hover:bg-[#f5f5f5] text-[#666] text-sm font-medium rounded-md border border-[#e6e6e6] transition-colors"
                   title="Editar Fornecedor"
                 >
                   <Edit3 className="w-3.5 h-3.5" />
@@ -816,7 +816,7 @@ export default function FornecedorDetailClient({ supplier }: { supplier: Supplie
                   </button>
                 )}
               </div>
-              <div className="text-[12px] font-medium text-[#333] line-clamp-2" title={pickupAddr || 'Não cadastrado'}>
+              <div className="text-sm font-medium text-[#333] line-clamp-2" title={pickupAddr || 'Não cadastrado'}>
                 {pickupAddr || 'Endereço não informado'}
               </div>
             </div>

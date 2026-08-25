@@ -439,14 +439,14 @@ export default function PedidosPage() {
                       <Square className="w-4 h-4 text-[#cbd5e1]" />
                     )}
                   </button>
-                  <span className="uppercase tracking-wider text-[11px] font-bold">Produto / Pedido</span>
+                  <span className="text-xs font-medium text-[#999]">Produto / Pedido</span>
                 </div>
                 <div className="flex items-center gap-8 lg:gap-12 shrink-0 pr-4">
-                  <span className="hidden md:inline uppercase tracking-wider text-[11px] font-bold min-w-[120px]">Canal</span>
-                  <span className="hidden sm:inline uppercase tracking-wider text-[11px] font-bold min-w-[170px]">Destinatário & Rastreio</span>
-                  <span className="uppercase tracking-wider text-[11px] font-bold min-w-[90px] text-right">Total</span>
-                  <span className="uppercase tracking-wider text-[11px] font-bold min-w-[110px] text-center">Status</span>
-                  <span className="uppercase tracking-wider text-[11px] font-bold min-w-[90px] text-right">Ações</span>
+                  <span className="hidden md:inline text-xs font-medium text-[#999] min-w-[120px]">Canal</span>
+                  <span className="hidden sm:inline text-xs font-medium text-[#999] min-w-[170px]">Destinatário & Rastreio</span>
+                  <span className="text-xs font-medium text-[#999] min-w-[90px] text-right">Total</span>
+                  <span className="text-xs font-medium text-[#999] min-w-[110px] text-center">Status</span>
+                  <span className="text-xs font-medium text-[#999] min-w-[90px] text-right">Ações</span>
                 </div>
               </div>
 

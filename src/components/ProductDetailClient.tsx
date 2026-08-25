@@ -38,7 +38,7 @@ function StatusBadge({ status }: { status: string }) {
     PAUSED: 'Pausado',
   }
   return (
-    <span className={`inline-flex px-2 py-[2px] rounded text-[10px] font-medium ${styles[status] || styles.ACTIVE}`}>
+    <span className={`inline-flex px-2 py-[2px] rounded text-xs font-medium ${styles[status] || styles.ACTIVE}`}>
       {labels[status] || status}
     </span>
   )
@@ -46,7 +46,7 @@ function StatusBadge({ status }: { status: string }) {
 
 function MarketplaceStatusBadge({ status }: { status: string }) {
   return (
-    <span className={`inline-flex px-2 py-[2px] rounded text-[10px] font-medium ${status === 'ACTIVE' ? 'bg-[#f0fff4] text-[#38a169]' : 'bg-[#f5f5f5] text-[#999]'}`}>
+    <span className={`inline-flex px-2 py-[2px] rounded text-xs font-medium ${status === 'ACTIVE' ? 'bg-[#f0fff4] text-[#38a169]' : 'bg-[#f5f5f5] text-[#999]'}`}>
       {status === 'ACTIVE' ? 'Ativo' : 'Inativo'}
     </span>
   )
@@ -59,8 +59,8 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 function InfoRow({ label, value, mono, bold }: { label: string; value: string; mono?: boolean; bold?: boolean }) {
   return (
     <div className="flex justify-between py-1.5 border-b border-[#f5f5f5] last:border-0">
-      <span className="text-[12px] text-[#999]">{label}</span>
-      <span className={`text-[12px] ${mono ? 'font-mono' : ''} ${bold ? 'font-medium text-[#333]' : 'text-[#666]'}`}>{value}</span>
+      <span className="text-sm text-[#999]">{label}</span>
+      <span className={`text-sm ${mono ? 'font-mono' : ''} ${bold ? 'font-medium text-[#333]' : 'text-[#666]'}`}>{value}</span>
     </div>
   )
 }
@@ -70,7 +70,7 @@ function StatBox({ label, value, sub }: { label: string; value: string; sub?: st
     <div className="bg-white border border-[#e6e6e6] rounded-md p-3">
       <div className="text-[11px] text-[#999] mb-1">{label}</div>
       <div className="text-[16px] font-semibold text-[#333]">{value}</div>
-      {sub && <div className="text-[10px] text-[#ccc] mt-0.5">{sub}</div>}
+      {sub && <div className="text-xs text-[#ccc] mt-0.5">{sub}</div>}
     </div>
   )
 }
@@ -184,12 +184,12 @@ DIMENSÕES E EXPEDIÇÃO:
                 <div className="flex items-center gap-2">
                   <MarketplaceLogo name={mp.name} className="w-5 h-5" />
                   <div>
-                    <div className="text-[12px] font-medium text-[#333]">{mp.name}</div>
-                    <div className="text-[10px] font-mono text-[#999]">{mp.listing_id}</div>
+                    <div className="text-sm font-medium text-[#333]">{mp.name}</div>
+                    <div className="text-xs font-mono text-[#999]">{mp.listing_id}</div>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-[12px] text-[#333]">{formatBRL(mp.price)}</div>
+                  <div className="text-sm text-[#333]">{formatBRL(mp.price)}</div>
                   <MarketplaceStatusBadge status={mp.status} />
                 </div>
               </div>
@@ -202,11 +202,11 @@ DIMENSÕES E EXPEDIÇÃO:
           <div className="space-y-1.5">
             {product.sales_chart.slice(-7).map(d => (
               <div key={d.period} className="flex items-center gap-2">
-                <span className="text-[10px] text-[#999] w-8">{d.period}</span>
+                <span className="text-xs text-[#999] w-8">{d.period}</span>
                 <div className="flex-1 h-1.5 bg-[#f5f5f5] rounded-full overflow-hidden">
                   <div className="h-full bg-[#3483fa] rounded-full" style={{ width: `${(d.units / 5) * 100}%` }} />
                 </div>
-                <span className="text-[10px] text-[#666] w-6 text-right">{d.units}</span>
+                <span className="text-xs text-[#666] w-6 text-right">{d.units}</span>
               </div>
             ))}
           </div>
@@ -265,64 +265,64 @@ function VendasTab({ product }: { product: ProductDetail }) {
       <div className="bg-white border border-[#e6e6e6] rounded-2xl overflow-hidden shadow-xs">
         <div className="px-5 py-4 border-b border-[#e6e6e6] flex items-center justify-between">
           <SectionTitle>Histórico de Vendas & Compradores</SectionTitle>
-          {selectedAccount !== 'ALL' && <span className="text-[10px] bg-[#f5f5f5] px-2 py-1 rounded text-[#666]">Filtrado: {selectedAccount}</span>}
+          {selectedAccount !== 'ALL' && <span className="text-xs bg-[#f5f5f5] px-2 py-1 rounded text-[#666]">Filtrado: {selectedAccount}</span>}
         </div>
-        <div className="overflow-x-auto">
           {filteredSales.length === 0 ? (
             <div className="p-8 text-center text-[#999] text-[13px]">
               Nenhuma venda registrada para este produto até o momento.
             </div>
           ) : (
-            <table className="w-full text-[12px]">
-              <thead>
-                <tr className="border-b border-[#f5f5f5] bg-[#fafafa]">
-                  <th className="text-left py-2.5 px-4 text-[10px] font-bold text-[#64748b] uppercase">Pedido</th>
-                  <th className="text-left py-2.5 px-4 text-[10px] font-bold text-[#64748b] uppercase">Cliente / Comprador</th>
-                  <th className="text-left py-2.5 px-4 text-[10px] font-bold text-[#64748b] uppercase">Marketplace</th>
-                  <th className="text-right py-2.5 px-4 text-[10px] font-bold text-[#64748b] uppercase">Qtd</th>
-                  <th className="text-right py-2.5 px-4 text-[10px] font-bold text-[#64748b] uppercase">Preço</th>
-                  <th className="text-right py-2.5 px-4 text-[10px] font-bold text-[#64748b] uppercase">Faturamento</th>
-                  <th className="text-right py-2.5 px-4 text-[10px] font-bold text-[#64748b] uppercase">Lucro</th>
-                  <th className="text-right py-2.5 px-4 text-[10px] font-bold text-[#64748b] uppercase">Margem</th>
-                  <th className="text-center py-2.5 px-4 text-[10px] font-bold text-[#64748b] uppercase">Status</th>
-                  <th className="text-right py-2.5 px-4 text-[10px] font-bold text-[#64748b] uppercase">Data</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#eeeeee]">
-                {filteredSales.map(sale => (
-                  <tr key={sale.id} className="hover:bg-[#fafafa] transition-colors">
-                    <td className="py-3 px-4 font-mono font-bold text-[#3483fa]">
-                      <Link href={`/pedidos/${sale.order_uuid || sale.order_id}`} className="hover:underline">
-                        {sale.order_id}
-                      </Link>
-                    </td>
-                    <td className="py-3 px-4 font-medium text-[#1e293b]">
-                      {sale.customer_name || 'Cliente Mercado Livre'}
-                    </td>
-                    <td className="py-3 px-4 text-[#333]">
-                      <div className="font-semibold text-[11px] flex items-center gap-1.5">
-                        <MarketplaceLogo name={sale.marketplace} className="w-3.5 h-3.5" />
-                        {sale.marketplace}
-                      </div>
-                      <div className="text-[9px] text-[#999]">{sale.account_name || 'TEKNIXBRASIL'}</div>
-                    </td>
-                    <td className="py-3 px-4 text-right text-[#64748b] font-medium">{sale.quantity}</td>
-                    <td className="py-3 px-4 text-right text-[#64748b]">{formatBRL(sale.price)}</td>
-                    <td className="py-3 px-4 text-right font-bold text-[#1e293b]">{formatBRL(sale.revenue)}</td>
-                    <td className="py-3 px-4 text-right font-bold text-[#16a34a]">{formatBRL(sale.profit)}</td>
-                    <td className="py-3 px-4 text-right font-medium text-[#64748b]">{sale.margin}%</td>
-                    <td className="py-3 px-4 text-center">
-                      <span className="inline-flex px-2 py-0.5 rounded text-[10px] font-bold bg-[#f0fdf4] text-[#16a34a] border border-[#bbf7d0]">
-                        {sale.status}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-right text-[#64748b] font-mono text-[11px]">{sale.date}</td>
+            <div className="table-container">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-[#f5f5f5] bg-[#fafafa]">
+                    <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Pedido</th>
+                    <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Cliente / Comprador</th>
+                    <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Marketplace</th>
+                    <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Qtd</th>
+                    <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Preço</th>
+                    <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Faturamento</th>
+                    <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Lucro</th>
+                    <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Margem</th>
+                    <th className="text-center py-3.5 px-5 font-medium text-[#999] text-xs">Status</th>
+                    <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Data</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-[#eeeeee]">
+                  {filteredSales.map(sale => (
+                    <tr key={sale.id} className="hover:bg-[#fafafa] transition-colors">
+                      <td className="py-3 px-4 font-mono font-bold text-[#3483fa]">
+                        <Link href={`/pedidos/${sale.order_uuid || sale.order_id}`} className="hover:underline">
+                          {sale.order_id}
+                        </Link>
+                      </td>
+                      <td className="py-3 px-4 font-medium text-[#1e293b]">
+                        {sale.customer_name || 'Cliente Mercado Livre'}
+                      </td>
+                      <td className="py-3 px-4 text-[#333]">
+                        <div className="font-semibold text-[11px] flex items-center gap-1.5">
+                          <MarketplaceLogo name={sale.marketplace} className="w-3.5 h-3.5" />
+                          {sale.marketplace}
+                        </div>
+                        <div className="text-[9px] text-[#999]">{sale.account_name || 'TEKNIXBRASIL'}</div>
+                      </td>
+                      <td className="py-3 px-4 text-right text-[#64748b] font-medium">{sale.quantity}</td>
+                      <td className="py-3 px-4 text-right text-[#64748b]">{formatBRL(sale.price)}</td>
+                      <td className="py-3 px-4 text-right font-bold text-[#1e293b]">{formatBRL(sale.revenue)}</td>
+                      <td className="py-3 px-4 text-right font-bold text-[#16a34a]">{formatBRL(sale.profit)}</td>
+                      <td className="py-3 px-4 text-right font-medium text-[#64748b]">{sale.margin}%</td>
+                      <td className="py-3 px-4 text-center">
+                        <span className="inline-flex px-2 py-0.5 rounded text-xs font-bold bg-[#f0fdf4] text-[#16a34a] border border-[#bbf7d0]">
+                          {sale.status}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-right text-[#64748b] font-mono text-[11px]">{sale.date}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
-        </div>
       </div>
     </div>
   )
@@ -340,7 +340,7 @@ function EstoqueTab({ product }: { product: ProductDetail }) {
       <div className={`p-5 rounded-2xl border ${isCritical ? 'bg-[#fef2f2] border-[#fecaca]' : 'bg-[#f0fdf4] border-[#bbf7d0]'} flex flex-col md:flex-row md:items-center justify-between gap-4`}>
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${isCritical ? 'bg-[#dc2626] text-white' : 'bg-[#16a34a] text-white'}`}>
+            <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold uppercase ${isCritical ? 'bg-[#dc2626] text-white' : 'bg-[#16a34a] text-white'}`}>
               {isCritical ? 'Atenção Necessária' : 'Estoque Saudável'}
             </span>
             <h4 className="text-sm font-extrabold text-[#0f172a]">
@@ -376,16 +376,16 @@ function EstoqueTab({ product }: { product: ProductDetail }) {
           <div className="px-4 py-3 border-b border-[#e6e6e6]">
             <SectionTitle>Estoque por Conta</SectionTitle>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-[12px]">
+        <div className="table-container">
+             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-[#f5f5f5]">
-                  <th className="text-left py-2 px-4 text-[10px] font-medium text-[#999] uppercase">Marketplace</th>
-                  <th className="text-left py-2 px-4 text-[10px] font-medium text-[#999] uppercase">Conta</th>
-                  <th className="text-right py-2 px-4 text-[10px] font-medium text-[#999] uppercase">Estoque</th>
-                  <th className="text-right py-2 px-4 text-[10px] font-medium text-[#999] uppercase">Preço</th>
-                  <th className="text-center py-2 px-4 text-[10px] font-medium text-[#999] uppercase">Status</th>
-                  <th className="text-right py-2 px-4 text-[10px] font-medium text-[#999] uppercase">Último Sync</th>
+                  <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Marketplace</th>
+                  <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Conta</th>
+                  <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Estoque</th>
+                  <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Preço</th>
+                  <th className="text-center py-3.5 px-5 font-medium text-[#999] text-xs">Status</th>
+                  <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Último Sync</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#eeeeee]">
@@ -401,29 +401,29 @@ function EstoqueTab({ product }: { product: ProductDetail }) {
                     <td className="py-2.5 px-4 text-right font-medium text-[#333]">{mp.stock}</td>
                     <td className="py-2.5 px-4 text-right text-[#999]">{formatBRL(mp.price)}</td>
                     <td className="py-2.5 px-4 text-center"><MarketplaceStatusBadge status={mp.status} /></td>
-                    <td className="py-2.5 px-4 text-right text-[10px] text-[#ccc]">{new Date(mp.last_sync).toLocaleDateString('pt-BR')}</td>
+                    <td className="py-2.5 px-4 text-right text-xs text-[#ccc]">{new Date(mp.last_sync).toLocaleDateString('pt-BR')}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        </div>
-      )}
+         </div>
+       )}
 
       <div className="bg-white border border-[#e6e6e6] rounded-md overflow-hidden">
         <div className="px-4 py-3 border-b border-[#e6e6e6]">
           <SectionTitle>Movimentações de estoque</SectionTitle>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-[12px]">
+        <div className="table-container">
+           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-[#f5f5f5]">
-                <th className="text-left py-2 px-4 text-[10px] font-medium text-[#999] uppercase">Data</th>
-                <th className="text-left py-2 px-4 text-[10px] font-medium text-[#999] uppercase">Tipo</th>
-                <th className="text-right py-2 px-4 text-[10px] font-medium text-[#999] uppercase">Quantidade</th>
-                <th className="text-right py-2 px-4 text-[10px] font-medium text-[#999] uppercase">Saldo</th>
-                <th className="text-left py-2 px-4 text-[10px] font-medium text-[#999] uppercase">Pedido</th>
-                <th className="text-left py-2 px-4 text-[10px] font-medium text-[#999] uppercase">Usuário</th>
+                <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Data</th>
+                <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Tipo</th>
+                <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Quantidade</th>
+                <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Saldo</th>
+                <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Pedido</th>
+                <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Usuário</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#eeeeee]">
@@ -431,7 +431,7 @@ function EstoqueTab({ product }: { product: ProductDetail }) {
                 <tr key={m.id} className="hover:bg-[#fafafa] transition-colors">
                   <td className="py-2.5 px-4 text-[#999]">{m.date}</td>
                   <td className="py-2.5 px-4">
-                    <span className={`inline-flex px-2 py-[2px] rounded text-[10px] font-medium ${
+                    <span className={`inline-flex px-2 py-[2px] rounded text-xs font-medium ${
                       m.type === 'COMPRA' ? 'bg-[#f0fff4] text-[#38a169]' :
                       m.type === 'VENDA' ? 'bg-[#f5f5f5] text-[#333]' :
                       m.type === 'DEVOLUCAO' ? 'bg-[#fffaf0] text-[#e67e22]' :
@@ -467,18 +467,18 @@ function ComprasTab({ product }: { product: ProductDetail }) {
         <div className="px-4 py-3 border-b border-[#e6e6e6]">
           <SectionTitle>Histórico de compras</SectionTitle>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-[12px]">
+        <div className="table-container">
+           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-[#f5f5f5]">
-                <th className="text-left py-2 px-4 text-[10px] font-medium text-[#999] uppercase">Pedido</th>
-                <th className="text-left py-2 px-4 text-[10px] font-medium text-[#999] uppercase">Fornecedor</th>
-                <th className="text-right py-2 px-4 text-[10px] font-medium text-[#999] uppercase">Qtd</th>
-                <th className="text-right py-2 px-4 text-[10px] font-medium text-[#999] uppercase">Custo Unit.</th>
-                <th className="text-right py-2 px-4 text-[10px] font-medium text-[#999] uppercase">Total</th>
-                <th className="text-right py-2 px-4 text-[10px] font-medium text-[#999] uppercase">Data</th>
-                <th className="text-center py-2 px-4 text-[10px] font-medium text-[#999] uppercase">Status</th>
-                <th className="text-right py-2 px-4 text-[10px] font-medium text-[#999] uppercase">Nota Interna</th>
+                <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Pedido</th>
+                <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Fornecedor</th>
+                <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Qtd</th>
+                <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Custo Unit.</th>
+                <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Total</th>
+                <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Data</th>
+                <th className="text-center py-3.5 px-5 font-medium text-[#999] text-xs">Status</th>
+                <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Nota Interna</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#eeeeee]">
@@ -491,7 +491,7 @@ function ComprasTab({ product }: { product: ProductDetail }) {
                   <td className="py-2.5 px-4 text-right font-medium text-[#333]">{formatBRL(p.total)}</td>
                   <td className="py-2.5 px-4 text-right text-[#999]">{p.date}</td>
                   <td className="py-2.5 px-4 text-center">
-                    <span className="inline-flex px-2 py-[2px] rounded text-[10px] font-medium bg-[#f0fff4] text-[#38a169]">{p.status}</span>
+                    <span className="inline-flex px-2 py-[2px] rounded text-xs font-medium bg-[#f0fff4] text-[#38a169]">{p.status}</span>
                   </td>
                   <td className="py-2.5 px-4 text-right">
                     {p.purchase_id && (
@@ -528,22 +528,22 @@ function MarketplacesTab({ product }: { product: ProductDetail }) {
                       </span>
                     )}
                   </div>
-                  <div className="text-[10px] font-mono text-[#999]">ID: {mp.listing_id}</div>
+                  <div className="text-xs font-mono text-[#999]">ID: {mp.listing_id}</div>
                 </div>
               </div>
               <MarketplaceStatusBadge status={mp.status} />
             </div>
             <div className="grid grid-cols-3 gap-4 mt-3 pt-3 border-t border-[#f5f5f5]">
               <div>
-                <div className="text-[10px] text-[#999]">Preço</div>
+                <div className="text-xs text-[#999]">Preço</div>
                 <div className="text-[13px] font-medium text-[#333]">{formatBRL(mp.price)}</div>
               </div>
               <div>
-                <div className="text-[10px] text-[#999]">Estoque</div>
+                <div className="text-xs text-[#999]">Estoque</div>
                 <div className="text-[13px] font-medium text-[#333]">{mp.stock}</div>
               </div>
               <div>
-                <div className="text-[10px] text-[#999]">Última sincronização</div>
+                <div className="text-xs text-[#999]">Última sincronização</div>
                 <div className="text-[11px] text-[#666]">{new Date(mp.last_sync).toLocaleString('pt-BR')}</div>
               </div>
             </div>
@@ -566,13 +566,13 @@ function HistoricoTab({ product }: { product: ProductDetail }) {
             <div className="w-1.5 h-1.5 rounded-full bg-[#3483fa] mt-1.5 flex-shrink-0" />
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <span className="text-[12px] font-medium text-[#333]">{h.action}</span>
-                <span className="text-[10px] text-[#ccc]">•</span>
-                <span className="text-[10px] text-[#999]">{h.user}</span>
+                <span className="text-sm font-medium text-[#333]">{h.action}</span>
+                <span className="text-xs text-[#ccc]">•</span>
+                <span className="text-xs text-[#999]">{h.user}</span>
               </div>
               <div className="text-[11px] text-[#666] mt-0.5">{h.details}</div>
             </div>
-            <div className="text-[10px] text-[#ccc] text-right flex-shrink-0">
+            <div className="text-xs text-[#ccc] text-right flex-shrink-0">
               <div>{h.date}</div>
               <div>{h.time}</div>
             </div>
@@ -607,7 +607,7 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
   return (
     <div>
       <div className="mb-4">
-        <Link href="/operacao" className="inline-flex items-center gap-1.5 text-[12px] text-[#999] hover:text-[#333] transition-colors">
+        <Link href="/operacao" className="inline-flex items-center gap-1.5 text-sm text-[#999] hover:text-[#333] transition-colors">
           <ArrowLeft className="w-3.5 h-3.5" />
           Operação / Produtos
         </Link>
@@ -633,12 +633,12 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
               {/* Badges on main image */}
               <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
                 {selectedImageIndex === 0 && (
-                  <span className="px-2 py-0.5 rounded-md bg-[#3483fa] text-white text-[10px] font-bold shadow-xs">
+                  <span className="px-2 py-0.5 rounded-md bg-[#3483fa] text-white text-xs font-bold shadow-xs">
                     Foto Principal (Capa)
                   </span>
                 )}
               </div>
-              <div className="absolute bottom-2.5 right-2.5 bg-black/60 backdrop-blur-xs text-white text-[10px] font-medium px-2 py-0.5 rounded-md">
+              <div className="absolute bottom-2.5 right-2.5 bg-black/60 backdrop-blur-xs text-white text-xs font-medium px-2 py-0.5 rounded-md">
                 {selectedImageIndex + 1} de {images.length} fotos
               </div>
             </div>
@@ -740,19 +740,19 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
               {/* Price & Stock Quick Highlight Cards */}
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 bg-white border border-[#e6e6e6] rounded-2xl mb-2 shadow-2xs">
                 <div>
-                  <span className="text-[10px] uppercase font-bold text-[#64748b] tracking-wider">Preço no Mercado Livre</span>
+                  <span className="text-xs uppercase font-bold text-[#64748b] tracking-wider">Preço no Mercado Livre</span>
                   <div className="text-xl font-black text-[#0f172a] mt-0.5">
                     {formatBRL(product.pricing.current_price || product.costs.real || 0)}
                   </div>
                 </div>
                 <div>
-                  <span className="text-[10px] uppercase font-bold text-[#64748b] tracking-wider">Estoque Disponível</span>
+                  <span className="text-xs uppercase font-bold text-[#64748b] tracking-wider">Estoque Disponível</span>
                   <div className={`text-xl font-black mt-0.5 ${product.stock.physical > 0 ? 'text-[#16a34a]' : 'text-[#dc2626]'}`}>
                     {product.stock.physical} unidades
                   </div>
                 </div>
                 <div className="hidden sm:block">
-                  <span className="text-[10px] uppercase font-bold text-[#64748b] tracking-wider">Margem / Lucro</span>
+                  <span className="text-xs uppercase font-bold text-[#64748b] tracking-wider">Margem / Lucro</span>
                   <div className="text-xl font-black text-[#2563eb] mt-0.5">
                     {product.pricing.margin ? `${product.pricing.margin}%` : 'Ativo'}
                   </div>

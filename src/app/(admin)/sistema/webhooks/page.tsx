@@ -111,7 +111,7 @@ export default function WebhooksPage() {
       
       {/* Voltar */}
       <div>
-        <Link href="/sistema" className="inline-flex items-center gap-1.5 text-[12px] text-[#999] hover:text-[#333] transition-colors">
+        <Link href="/sistema" className="inline-flex items-center gap-1.5 text-sm text-[#999] hover:text-[#333] transition-colors">
           <ArrowLeft className="w-3.5 h-3.5" /> Voltar ao Sistema
         </Link>
       </div>
@@ -122,14 +122,14 @@ export default function WebhooksPage() {
             <Webhook className="w-6 h-6 text-[#5c8a00]" />
             Webhooks & Eventos ao Vivo
           </h1>
-          <p className="text-[12px] text-[#666] mt-0.5">
+          <p className="text-sm text-[#666] mt-0.5">
             URLs oficiais dos webhooks configurados e auditoria dos eventos recebidos em tempo real.
           </p>
         </div>
 
         <button
           onClick={() => refetch()}
-          className="px-3.5 py-2 rounded-xl border border-[#e6e6e6] bg-white text-[#333] text-[12px] font-bold hover:bg-[#fafafa] transition-colors flex items-center gap-1.5 self-start sm:self-auto"
+          className="px-3.5 py-2 rounded-xl border border-[#e6e6e6] bg-white text-[#333] text-sm font-bold hover:bg-[#fafafa] transition-colors flex items-center gap-1.5 self-start sm:self-auto"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#5c8a00]' : ''}`} />
           <span>Atualizar</span>
@@ -164,7 +164,7 @@ export default function WebhooksPage() {
                     <MarketplaceLogo name={wh.name} className="w-5 h-5 shrink-0" />
                     <h3 className="text-[13px] font-bold text-[#1f2328]">{wh.name}</h3>
                   </div>
-                  <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-[#e8f5e9] text-[#2e7d32]">
+                  <span className="text-xs font-extrabold px-2 py-0.5 rounded-full bg-[#e8f5e9] text-[#2e7d32]">
                     {wh.status}
                   </span>
                 </div>
@@ -181,7 +181,7 @@ export default function WebhooksPage() {
                 </div>
               </div>
 
-              <div className="mt-3 pt-2.5 border-t border-[#eee] flex items-center justify-between text-[10px] text-[#888]">
+              <div className="mt-3 pt-2.5 border-t border-[#eee] flex items-center justify-between text-xs text-[#888]">
                 <span>Tópicos: <strong>{wh.topics}</strong></span>
                 <span className="text-[#38a169] font-medium">SSL / HTTPS Ativo</span>
               </div>
@@ -211,7 +211,7 @@ export default function WebhooksPage() {
             <select
               value={filterMp}
               onChange={e => setFilterMp(e.target.value)}
-              className="h-10 px-3 border border-[#e6e6e6] rounded-xl text-[12px] text-[#666] bg-white focus:outline-none focus:border-[#84cc16]"
+              className="h-10 px-3 border border-[#e6e6e6] rounded-xl text-sm text-[#666] bg-white focus:outline-none focus:border-[#84cc16]"
             >
               <option value="all">Todos os canais</option>
               <option value="mercadolivre">Mercado Livre</option>
@@ -232,14 +232,14 @@ export default function WebhooksPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-[12px]">
+            <table className="w-full text-left text-sm">
               <thead>
-                <tr className="bg-[#fafafa] text-[#888] font-bold uppercase text-[10px] border-b border-[#eee]">
-                  <th className="py-2.5 px-3">Data/Hora</th>
-                  <th className="py-2.5 px-3">Canal</th>
-                  <th className="py-2.5 px-3">Tópico / Evento</th>
-                  <th className="py-2.5 px-3">Recurso (Resource)</th>
-                  <th className="py-2.5 px-3 text-center">Status</th>
+                <tr className="bg-[#fafafa] border-b border-[#eee]">
+                  <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Data/Hora</th>
+                  <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Canal</th>
+                  <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Tópico / Evento</th>
+                  <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Recurso (Resource)</th>
+                  <th className="text-center py-3.5 px-5 font-medium text-[#999] text-xs">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#eee]">
@@ -261,7 +261,7 @@ export default function WebhooksPage() {
                       {e.resource || '—'}
                     </td>
                     <td className="py-3 px-3 text-center">
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#e8f5e9] text-[#2e7d32]">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#e8f5e9] text-[#2e7d32]">
                         <CheckCircle2 className="w-3 h-3" />
                         {e.processed ? 'PROCESSADO' : 'RECEBIDO'}
                       </span>

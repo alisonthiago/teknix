@@ -26,14 +26,14 @@ const SC: Record<string, { l: string; c: string }> = {
 }
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
-  return <h3 className="text-[13px] font-semibold text-[#333] mb-3">{children}</h3>
+  return <h3 className="text-base font-semibold text-[#333] mb-3">{children}</h3>
 }
 
 function InfoRow({ label, value, mono, bold }: { label: string; value: string; mono?: boolean; bold?: boolean }) {
   return (
     <div className="flex justify-between py-1.5 border-b border-[#f5f5f5] last:border-0">
-      <span className="text-[12px] text-[#999]">{label}</span>
-      <span className={`text-[12px] ${mono ? 'font-mono' : ''} ${bold ? 'font-medium text-[#333]' : 'text-[#666]'}`}>{value}</span>
+      <span className="text-sm text-[#999]">{label}</span>
+      <span className={`text-sm ${mono ? 'font-mono' : ''} ${bold ? 'font-medium text-[#333]' : 'text-[#666]'}`}>{value}</span>
     </div>
   )
 }
@@ -41,9 +41,9 @@ function InfoRow({ label, value, mono, bold }: { label: string; value: string; m
 function StatBox({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
     <div className="bg-white border border-[#e6e6e6] rounded-md p-3">
-      <div className="text-[11px] text-[#999] mb-1">{label}</div>
+      <div className="text-sm text-[#999] mb-1">{label}</div>
       <div className="text-[16px] font-semibold text-[#333]">{value}</div>
-      {sub && <div className="text-[10px] text-[#ccc] mt-0.5">{sub}</div>}
+      {sub && <div className="text-xs text-[#ccc] mt-0.5">{sub}</div>}
     </div>
   )
 }
@@ -54,15 +54,15 @@ function VisaoGeralTab({ order }: { order: OrderDetail }) {
       <div className="lg:col-span-2 space-y-4">
         <div className="bg-white border border-[#e6e6e6] rounded-md p-4">
           <SectionTitle>Itens do pedido</SectionTitle>
-          <div className="overflow-x-auto">
-            <table className="w-full text-[12px]">
+          <div className="table-container">
+            <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-[#f5f5f5]">
-                  <th className="text-left py-2 px-3 text-[10px] font-medium text-[#999] uppercase">SKU</th>
-                  <th className="text-left py-2 px-3 text-[10px] font-medium text-[#999] uppercase">Produto</th>
-                  <th className="text-right py-2 px-3 text-[10px] font-medium text-[#999] uppercase">Qtd</th>
-                  <th className="text-right py-2 px-3 text-[10px] font-medium text-[#999] uppercase">Preço</th>
-                  <th className="text-right py-2 px-3 text-[10px] font-medium text-[#999] uppercase">Total</th>
+                  <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">SKU</th>
+                  <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Produto</th>
+                  <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Qtd</th>
+                  <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Preço</th>
+                  <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Total</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#eeeeee]">
@@ -83,7 +83,7 @@ function VisaoGeralTab({ order }: { order: OrderDetail }) {
                               <Package className="w-4 h-4 text-[#ccc]" />
                             )}
                           </div>
-                          <span className="font-semibold text-[13px] group-hover:underline underline-offset-2">
+                          <span className="font-semibold text-base group-hover:underline underline-offset-2">
                             {item.name}
                           </span>
                         </Link>
@@ -96,7 +96,7 @@ function VisaoGeralTab({ order }: { order: OrderDetail }) {
                               <Package className="w-4 h-4 text-[#ccc]" />
                             )}
                           </div>
-                          <span className="font-semibold text-[13px]">{item.name}</span>
+                          <span className="font-semibold text-base">{item.name}</span>
                         </div>
                       )}
                     </td>
@@ -133,7 +133,7 @@ function VisaoGeralTab({ order }: { order: OrderDetail }) {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-base font-extrabold text-[#0f172a] truncate">{order.customer.name}</p>
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#64748b]">
+                <span className="inline-flex items-center gap-1 text-xs font-bold text-[#64748b]">
                   <MarketplaceLogo name={order.marketplace} className="w-3 h-3" />
                   Comprador {order.marketplace}
                 </span>
@@ -258,7 +258,7 @@ function TimelineTab({ order }: { order: OrderDetail }) {
                 <div className="flex-1">
                   <span className="text-xs font-semibold text-[#0f172a]">{h.description}</span>
                 </div>
-                <div className="text-[11px] text-[#94a3b8] font-mono text-right shrink-0">
+                <div className="text-sm text-[#94a3b8] font-mono text-right shrink-0">
                   {h.date} {h.time}
                 </div>
               </div>
@@ -376,7 +376,7 @@ function OrderActions({ order }: { order: OrderDetail }) {
           <button
             onClick={() => handleAction(() => moveOrderToPaid(order.id))}
             disabled={isPending}
-            className="inline-flex items-center gap-1.5 bg-[#38a169] text-white text-[11px] font-medium px-3 py-1.5 rounded-xl hover:bg-[#2d8f55] transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 bg-[#38a169] text-white text-sm font-medium px-3 py-1.5 rounded-xl hover:bg-[#2d8f55] transition-colors disabled:opacity-50"
           >
             {isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />}
             Confirmar Pagamento
@@ -386,7 +386,7 @@ function OrderActions({ order }: { order: OrderDetail }) {
           <button
             onClick={() => handleAction(() => moveOrderStatus(order.id, 'AGUARDANDO_SEPARACAO'))}
             disabled={isPending}
-            className="inline-flex items-center gap-1.5 bg-[#e67e22] text-white text-[11px] font-medium px-3 py-1.5 rounded-xl hover:bg-[#d35400] transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 bg-[#e67e22] text-white text-sm font-medium px-3 py-1.5 rounded-xl hover:bg-[#d35400] transition-colors disabled:opacity-50"
           >
             {isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Package className="w-3 h-3" />}
             Enviar para Separação
@@ -403,7 +403,7 @@ export default function PedidoDetailClient({ order }: { order: OrderDetail }) {
   return (
     <div>
       <div className="mb-4">
-        <Link href="/pedidos" className="inline-flex items-center gap-1.5 text-[12px] text-[#999] hover:text-[#333] transition-colors">
+        <Link href="/pedidos" className="inline-flex items-center gap-1.5 text-sm text-[#999] hover:text-[#333] transition-colors">
           <ArrowLeft className="w-3.5 h-3.5" />
           Pedidos
         </Link>
@@ -426,18 +426,18 @@ export default function PedidoDetailClient({ order }: { order: OrderDetail }) {
                   >
                     <User className="w-3.5 h-3.5 text-[#3b82f6] group-hover:text-[#2563eb]" />
                     <span className="text-[#64748b] font-medium">Cliente:</span>
-                    <strong className="text-[#0f172a] group-hover:text-[#2563eb] font-extrabold text-[13px] group-hover:underline underline-offset-2">
+                    <strong className="text-[#0f172a] group-hover:text-[#2563eb] font-extrabold text-base group-hover:underline underline-offset-2">
                       {order.customer.name}
                     </strong>
                   </Link>
-                  <span className="text-[12px] font-semibold text-[#64748b] bg-[#f8fafc] px-2.5 py-1 rounded-xl border border-[#e2e8f0]">
+                  <span className="text-sm font-semibold text-[#64748b] bg-[#f8fafc] px-2.5 py-1 rounded-xl border border-[#e2e8f0]">
                     {order.marketplace}
                   </span>
-                  <span className={`inline-flex px-2.5 py-1 rounded-xl text-[11px] font-bold ${sc.c}`}>{sc.l}</span>
+                  <span className={`inline-flex px-2.5 py-1 rounded-xl text-sm font-bold ${sc.c}`}>{sc.l}</span>
                 </div>
               </div>
               <div className="sm:text-right bg-[#f8fafc] sm:bg-transparent p-4 sm:p-0 rounded-2xl border sm:border-0 border-[#e2e8f0] shrink-0">
-                <p className="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Total do Pedido</p>
+                <p className="text-sm font-bold text-[#64748b] uppercase tracking-wider">Total do Pedido</p>
                 <div className="text-2xl sm:text-3xl font-black text-[#0f172a] mt-0.5">{formatBRL(order.payment.total)}</div>
                 <div className="text-xs font-semibold text-[#64748b] mt-1.5 flex sm:justify-end items-center gap-1.5">
                   <Calendar className="w-3.5 h-3.5 text-[#94a3b8]" /> {order.date}

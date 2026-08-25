@@ -537,13 +537,13 @@ export default function MonitorAoVivoPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
                   <thead>
-                    <tr className="bg-[#fafafa] text-[#888] font-bold uppercase text-xs border-b border-[#eee]">
-                      <th className="py-2.5 px-3">Canal & Pedido</th>
-                      <th className="py-2.5 px-3">Cliente / Destino</th>
-                      <th className="py-2.5 px-3">Itens Comprados</th>
-                      <th className="py-2.5 px-3">Modalidade & Rastreio</th>
-                      <th className="py-2.5 px-3 text-right">Valor</th>
-                      <th className="py-2.5 px-3 text-center">Status</th>
+                    <tr className="bg-[#fafafa] border-b border-[#eee]">
+                      <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Canal & Pedido</th>
+                      <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Cliente / Destino</th>
+                      <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Itens Comprados</th>
+                      <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Modalidade & Rastreio</th>
+                      <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Valor</th>
+                      <th className="text-center py-3.5 px-5 font-medium text-[#999] text-xs">Status</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#eee]">

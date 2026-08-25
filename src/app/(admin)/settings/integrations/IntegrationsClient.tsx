@@ -157,8 +157,8 @@ export default function IntegrationsClient({ initialConnections, marketplaces }:
                     <div>
                       <h3 className="font-medium text-[#333] text-sm">{mp.name}</h3>
                       <div className="flex items-center gap-2 mt-0.5">
-                        {mp.oauth_available && <span className="text-[10px] text-[#00a650] bg-[#e6f9ef] px-1.5 py-0.5 rounded font-medium">OAuth</span>}
-                        {mp.webhook_available && <span className="text-[10px] text-[#3483fa] bg-[#ecf3fe] px-1.5 py-0.5 rounded font-medium">Webhooks</span>}
+                        {mp.oauth_available && <span className="text-xs text-[#00a650] bg-[#e6f9ef] px-1.5 py-0.5 rounded font-medium">OAuth</span>}
+                        {mp.webhook_available && <span className="text-xs text-[#3483fa] bg-[#ecf3fe] px-1.5 py-0.5 rounded font-medium">Webhooks</span>}
                       </div>
                     </div>
                   </div>
@@ -186,7 +186,7 @@ export default function IntegrationsClient({ initialConnections, marketplaces }:
                   </div>
                   <div>
                     <h3 className="font-medium text-[#666] text-sm">{mp.name}</h3>
-                    <span className="text-[10px] bg-[#f5f5f5] text-[#999] px-1.5 py-0.5 rounded font-medium">
+                    <span className="text-xs bg-[#f5f5f5] text-[#999] px-1.5 py-0.5 rounded font-medium">
                       <Zap className="w-2.5 h-2.5 inline mr-0.5" /> Em breve
                     </span>
                   </div>

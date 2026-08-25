@@ -58,10 +58,8 @@ export function SearchInput({ placeholder = 'Buscar...', value, onChange }: { pl
 
 export function ModuleTable({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`bg-white rounded-2xl border border-[#e6e6e6] overflow-hidden ${className}`}>
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">{children}</table>
-      </div>
+    <div className={`table-container ${className}`}>
+      <table className="w-full text-sm">{children}</table>
     </div>
   )
 }

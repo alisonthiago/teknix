@@ -324,7 +324,7 @@ function HeaderActions({
                     {renderNotificationIcon(n.type, n.module, n.title)}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-1">
-                        <p className={`text-[12px] leading-snug line-clamp-1 ${n.is_read ? 'text-[#333]' : 'text-[#111] font-extrabold'}`}>
+                        <p className={`text-sm leading-snug line-clamp-1 ${n.is_read ? 'text-[#333]' : 'text-[#111] font-extrabold'}`}>
                           {cleanTitle(n.title)}
                         </p>
                         <span className="text-[10px] text-[#999] shrink-0 font-medium">{formatTimeAgo(n.created_at)}</span>
@@ -524,7 +524,7 @@ export default function Header({ userName, userRole, userEmail, userId, userAvat
           </div>
         </div>
         <div className="flex items-center justify-between mt-4 px-1">
-          <h1 className="text-xl font-semibold text-[#333]">{pageTitle}</h1>
+          <h1 className="text-2xl font-semibold text-[#333]">{pageTitle}</h1>
           <div className="relative">
             <button
               onClick={() => setShowBasicCalc(!showBasicCalc)}
@@ -540,7 +540,7 @@ export default function Header({ userName, userRole, userEmail, userId, userAvat
 
       {/* Desktop — título + pill verde */}
       <header className="hidden lg:flex sticky top-0 z-30 bg-[#f5f5f5] items-center justify-between py-5 px-10">
-        <h1 className="text-[26px] font-semibold text-[#333] leading-tight">{pageTitle}</h1>
+        <h1 className="text-[28px] font-semibold text-[#333] leading-tight">{pageTitle}</h1>
         
         <div className="flex items-center gap-3">
           <div className="relative flex items-center gap-1">

@@ -10,9 +10,9 @@ import { MarketplaceLogo } from '@/components/MarketplaceLogos'
 function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
     <div className="bg-white rounded-md border border-[#e6e6e6] p-4">
-      <p className="text-[11px] font-medium text-[#999] mb-1">{label}</p>
+      <p className="text-sm font-medium text-[#999] mb-1">{label}</p>
       <p className="text-[18px] font-semibold text-[#333]">{value}</p>
-      {sub && <p className="text-[10px] text-[#ccc] mt-0.5">{sub}</p>}
+      {sub && <p className="text-xs text-[#ccc] mt-0.5">{sub}</p>}
     </div>
   )
 }
@@ -118,16 +118,16 @@ export default function ClientesPage() {
             placeholder="Buscar por nome, telefone ou endereço..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 bg-[#fafafa] border border-[#e6e6e6] rounded-md text-[12px] text-[#333] focus:outline-none focus:border-[#ccc]"
+            className="w-full pl-9 pr-3 py-1.5 bg-[#fafafa] border border-[#e6e6e6] rounded-md text-sm text-[#333] focus:outline-none focus:border-[#ccc]"
           />
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-[12px] font-medium text-[#999]">Canal:</span>
+          <span className="text-sm font-medium text-[#999]">Canal:</span>
           <select
             value={selectedChannel}
             onChange={(e) => setSelectedChannel(e.target.value)}
-            className="bg-[#fafafa] border border-[#e6e6e6] rounded-md px-3 py-1.5 text-[12px] text-[#333] focus:outline-none"
+            className="bg-[#fafafa] border border-[#e6e6e6] rounded-md px-3 py-1.5 text-sm text-[#333] focus:outline-none"
           >
             <option value="ALL">Todos os Canais</option>
             <option value="Mercado Livre">Mercado Livre</option>
@@ -140,21 +140,21 @@ export default function ClientesPage() {
       {/* Customers Table */}
       <div className="bg-white rounded-md border border-[#e6e6e6] overflow-hidden">
         {loading ? (
-          <div className="p-12 text-center text-[12px] text-[#999]">Carregando clientes...</div>
+          <div className="p-12 text-center text-sm text-[#999]">Carregando clientes...</div>
         ) : filtered.length === 0 ? (
-          <div className="p-12 text-center text-[12px] text-[#999]">Nenhum cliente encontrado.</div>
+          <div className="p-12 text-center text-sm text-[#999]">Nenhum cliente encontrado.</div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-[12px]">
+            <table className="w-full text-left text-sm">
               <thead>
-                <tr className="bg-[#fafafa] border-b border-[#eeeeee] text-[10px] font-medium text-[#999] uppercase">
-                  <th className="py-4 px-4">Cliente / Comprador</th>
-                  <th className="py-4 px-4">Origem / Canal</th>
-                  <th className="py-4 px-4 text-center">Compras</th>
-                  <th className="py-4 px-4 text-right">Total Gasto</th>
-                  <th className="py-4 px-4">Entrega / Localização</th>
-                  <th className="py-4 px-4 text-right">Último Pedido</th>
-                  <th className="py-4 px-4 text-right">Ações</th>
+                <tr className="bg-[#fafafa] border-b border-[#eeeeee]">
+                  <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Cliente / Comprador</th>
+                  <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Origem / Canal</th>
+                  <th className="text-center py-3.5 px-5 font-medium text-[#999] text-xs">Compras</th>
+                  <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Total Gasto</th>
+                  <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Entrega / Localização</th>
+                  <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Último Pedido</th>
+                  <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#eeeeee]">
@@ -173,7 +173,7 @@ export default function ClientesPage() {
                               {c.name}
                             </p>
                             {c.phone !== '—' && (
-                              <p className="text-[11px] text-[#999] flex items-center gap-1 mt-0.5 font-normal">
+                              <p className="text-sm text-[#999] flex items-center gap-1 mt-0.5 font-normal">
                                 <Phone className="w-3 h-3 text-[#ccc]" /> {c.phone}
                               </p>
                             )}
@@ -184,7 +184,7 @@ export default function ClientesPage() {
                       <td className="py-4 px-4">
                         <div className="flex flex-wrap items-center gap-1">
                           {Array.from(c.marketplaces).map((mp, i) => (
-                            <span key={i} className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#fffde7] text-[#856404] border border-[#ffeeba] text-[10px] font-medium">
+                            <span key={i} className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#fffde7] text-[#856404] border border-[#ffeeba] text-xs font-medium">
                               <MarketplaceLogo name={mp} className="w-3 h-3" /> {mp}
                             </span>
                           ))}
@@ -193,7 +193,7 @@ export default function ClientesPage() {
 
                       <td className="py-4 px-4 text-center">
                         <Link href={`/clientes/${customerSlug}`}>
-                          <span className="inline-flex px-2 py-0.5 rounded text-[10px] font-medium bg-[#f0fff4] text-[#38a169]">
+                          <span className="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-[#f0fff4] text-[#38a169]">
                             {c.ordersCount} {c.ordersCount === 1 ? 'pedido' : 'pedidos'}
                           </span>
                         </Link>
@@ -204,20 +204,20 @@ export default function ClientesPage() {
                       </td>
 
                       <td className="py-4 px-4 text-[#999]">
-                        <p className="truncate max-w-xs flex items-center gap-1 text-[11px]">
+                        <p className="truncate max-w-xs flex items-center gap-1 text-sm">
                           <MapPin className="w-3 h-3 text-[#ccc] shrink-0" />
                           {c.address}
                         </p>
                       </td>
 
-                      <td className="py-4 px-4 text-right text-[#999] text-[11px]">
+                      <td className="py-4 px-4 text-right text-[#999] text-sm">
                         {c.lastOrderDate}
                       </td>
 
                       <td className="py-4 px-4 text-right">
                         <Link
                           href={`/clientes/${customerSlug}`}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-white hover:bg-[#f5f5f5] text-[#666] hover:text-[#333] border border-[#e6e6e6] rounded-md text-[11px] font-medium transition-colors"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-white hover:bg-[#f5f5f5] text-[#666] hover:text-[#333] border border-[#e6e6e6] rounded-md text-sm font-medium transition-colors"
                         >
                           Ver Perfil <ArrowUpRight className="w-3 h-3" />
                         </Link>

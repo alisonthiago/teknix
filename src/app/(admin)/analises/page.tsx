@@ -153,15 +153,15 @@ export default function AnalisesPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
                   <thead>
-                    <tr className="bg-[#fafafa] border-b border-[#eeeeee] text-xs font-bold text-[#999] uppercase">
-                      <th className="py-2.5 px-4">Classificação</th>
-                      <th className="py-2.5 px-4">Produto / SKU</th>
-                      <th className="py-2.5 px-4 text-center">Estoque</th>
-                      <th className="py-2.5 px-4 text-right">Vendas</th>
-                      <th className="py-2.5 px-4 text-right">Faturamento</th>
-                      <th className="py-2.5 px-4 text-right">Lucro</th>
-                      <th className="py-2.5 px-4 text-right">Giro Diário</th>
-                      <th className="py-2.5 px-4 text-center">Ações</th>
+                    <tr className="bg-[#fafafa] border-b border-[#eeeeee]">
+                      <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Classificação</th>
+                      <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Produto / SKU</th>
+                      <th className="text-center py-3.5 px-5 font-medium text-[#999] text-xs">Estoque</th>
+                      <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Vendas</th>
+                      <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Faturamento</th>
+                      <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Lucro</th>
+                      <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Giro Diário</th>
+                      <th className="text-center py-3.5 px-5 font-medium text-[#999] text-xs">Ações</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#eeeeee]">
@@ -256,15 +256,15 @@ export default function AnalisesPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
                   <thead>
-                    <tr className="bg-[#fafafa] border-b border-[#eeeeee] text-xs font-bold text-[#999] uppercase">
-                      <th className="py-2.5 px-4">Canal</th>
-                      <th className="py-2.5 px-4 text-center">Pedidos</th>
-                      <th className="py-2.5 px-4 text-center">Unidades</th>
-                      <th className="py-2.5 px-4 text-right">Faturamento</th>
-                      <th className="py-2.5 px-4 text-right">Taxas</th>
-                      <th className="py-2.5 px-4 text-right">Lucro Líquido</th>
-                      <th className="py-2.5 px-4 text-right">Margem %</th>
-                      <th className="py-2.5 px-4 text-right">Ticket Médio</th>
+                    <tr className="bg-[#fafafa] border-b border-[#eeeeee]">
+                      <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Canal</th>
+                      <th className="text-center py-3.5 px-5 font-medium text-[#999] text-xs">Pedidos</th>
+                      <th className="text-center py-3.5 px-5 font-medium text-[#999] text-xs">Unidades</th>
+                      <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Faturamento</th>
+                      <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Taxas</th>
+                      <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Lucro Líquido</th>
+                      <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Margem %</th>
+                      <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Ticket Médio</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#eeeeee]">

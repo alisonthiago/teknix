@@ -67,7 +67,7 @@ export default function ColaboradoresPage() {
   return (
     <ConfigSubLayout title="Colaboradores" description="Pessoas que operam o TEKNIX">
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:justify-between mb-4">
-        <div className="flex gap-4 text-[12px] text-[#999]">
+        <div className="flex gap-4 text-sm text-[#999]">
           {loading ? (
             <span>Carregando...</span>
           ) : error ? (
@@ -100,25 +100,25 @@ export default function ColaboradoresPage() {
           <div className="text-[13px] text-[#999] py-4 text-center">Nenhum colaborador encontrado.</div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-[12px]">
+            <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-[#f5f5f5]">
-                  <th className="text-left py-2 px-3 text-[10px] font-medium text-[#999] uppercase">Nome</th>
-                  <th className="text-left py-2 px-3 text-[10px] font-medium text-[#999] uppercase">E-mail</th>
-                  <th className="text-left py-2 px-3 text-[10px] font-medium text-[#999] uppercase">Função</th>
-                  <th className="text-left py-2 px-3 text-[10px] font-medium text-[#999] uppercase">Último acesso</th>
-                  <th className="text-center py-2 px-3 text-[10px] font-medium text-[#999] uppercase">Status</th>
-                  <th className="text-right py-2 px-3 text-[10px] font-medium text-[#999] uppercase w-20">Ações</th>
+                  <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Nome</th>
+                  <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">E-mail</th>
+                  <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Função</th>
+                  <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Último acesso</th>
+                  <th className="text-center py-3.5 px-5 font-medium text-[#999] text-xs">Status</th>
+                  <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs w-20">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#eeeeee]">
                 {users.map(u => (
                   <tr key={u.id} className="hover:bg-[#fafafa]">
-                    <td className="py-2.5 px-3 font-medium text-[#333]">{u.name} {(u as any).is_master && <span className="ml-2 text-[10px] bg-[#333] text-white px-1.5 py-0.5 rounded">MASTER</span>}</td>
+                    <td className="py-2.5 px-3 font-medium text-[#333]">{u.name} {(u as any).is_master && <span className="ml-2 text-xs bg-[#333] text-white px-1.5 py-0.5 rounded">MASTER</span>}</td>
                     <td className="py-2.5 px-3 text-[#999]">{u.email}</td>
-                    <td className="py-2.5 px-3"><span className={`inline-flex px-2 py-[2px] rounded text-[10px] font-medium ${ROLE_COLORS[u.role] || 'bg-[#f5f5f5] text-[#666]'}`}>{ROLE_LABELS[u.role] || u.role}</span></td>
+                    <td className="py-2.5 px-3"><span className={`inline-flex px-2 py-[2px] rounded text-xs font-medium ${ROLE_COLORS[u.role] || 'bg-[#f5f5f5] text-[#666]'}`}>{ROLE_LABELS[u.role] || u.role}</span></td>
                     <td className="py-2.5 px-3 text-[#999]">{u.last_login ? new Date(u.last_login).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—'}</td>
-                    <td className="py-2.5 px-3 text-center"><span className={`inline-flex px-2 py-[2px] rounded text-[10px] font-medium ${u.status === 'ACTIVE' ? 'bg-[#f0fff4] text-[#38a169]' : 'bg-[#f5f5f5] text-[#999]'}`}>{u.status === 'ACTIVE' ? 'Ativo' : u.status}</span></td>
+                    <td className="py-2.5 px-3 text-center"><span className={`inline-flex px-2 py-[2px] rounded text-xs font-medium ${u.status === 'ACTIVE' ? 'bg-[#f0fff4] text-[#38a169]' : 'bg-[#f5f5f5] text-[#999]'}`}>{u.status === 'ACTIVE' ? 'Ativo' : u.status}</span></td>
                     <td className="py-2.5 px-3 text-right">
                       <div className="flex items-center justify-end gap-1">
                         <button onClick={() => handleEdit(u)} className="p-1.5 rounded hover:bg-[#e6e6e6] text-[#666] transition-colors" title="Editar">

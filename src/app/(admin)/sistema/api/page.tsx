@@ -105,9 +105,9 @@ export default function ApiPage() {
           ) : keys.map(k => (
             <div key={k.id} className="flex items-center justify-between p-3 bg-[#fafafa] rounded-md">
               <div>
-                <p className="text-[12px] font-medium text-[#333]">{k.name}</p>
+                <p className="text-sm font-medium text-[#333]">{k.name}</p>
                 <div className="flex items-center gap-2 mt-1">
-                  <code className="text-[10px] font-mono text-[#999] bg-[#f0f0f0] px-2 py-0.5 rounded">
+                  <code className="text-xs font-mono text-[#999] bg-[#f0f0f0] px-2 py-0.5 rounded">
                     {showKey === k.id ? k.key : `${k.key.substring(0, 10)}...${k.key.substring(k.key.length - 4)}`}
                   </code>
                   <button onClick={() => setShowKey(showKey === k.id ? null : k.id)} className="text-[#ccc] hover:text-[#666]">
@@ -120,8 +120,8 @@ export default function ApiPage() {
               </div>
               <div className="flex items-center gap-3">
                 <div className="text-right">
-                  <p className="text-[10px] text-[#999]">Criada: {k.created}</p>
-                  <p className="text-[10px] text-[#999]">Último uso: {k.last_used}</p>
+                  <p className="text-xs text-[#999]">Criada: {k.created}</p>
+                  <p className="text-xs text-[#999]">Último uso: {k.last_used}</p>
                 </div>
                 <button onClick={() => confirmDelete(k)} className="text-[#ccc] hover:text-[#e74c3c]">
                   <Trash2 className="w-3.5 h-3.5" />
@@ -141,13 +141,13 @@ export default function ApiPage() {
 
       <ConfigSection title="Logs de API">
         <div className="overflow-x-auto">
-          <table className="w-full text-[12px]">
+          <table className="w-full text-sm">
             <thead><tr className="border-b border-[#f5f5f5]">
-              <th className="text-left py-2 px-3 text-[10px] font-medium text-[#999] uppercase">Data</th>
-              <th className="text-left py-2 px-3 text-[10px] font-medium text-[#999] uppercase">Serviço</th>
-              <th className="text-left py-2 px-3 text-[10px] font-medium text-[#999] uppercase">Endpoint</th>
-              <th className="text-center py-2 px-3 text-[10px] font-medium text-[#999] uppercase">Status</th>
-              <th className="text-right py-2 px-3 text-[10px] font-medium text-[#999] uppercase">Tempo</th>
+              <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Data</th>
+              <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Serviço</th>
+              <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Endpoint</th>
+              <th className="text-center py-3.5 px-5 font-medium text-[#999] text-xs">Status</th>
+              <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Tempo</th>
             </tr></thead>
             <tbody className="divide-y divide-[#f5f5f5]">
               {[
@@ -159,7 +159,7 @@ export default function ApiPage() {
                   <td className="py-2 px-3 text-[#999]">{log.date}</td>
                   <td className="py-2 px-3 text-[#333]">{log.service}</td>
                   <td className="py-2 px-3 font-mono text-[#999]">{log.endpoint}</td>
-                  <td className="py-2 px-3 text-center"><span className={`inline-flex px-2 py-[2px] rounded text-[10px] font-medium ${log.status === 200 ? 'bg-[#f0fff4] text-[#38a169]' : 'bg-[#fff5f5] text-[#e74c3c]'}`}>{log.status}</span></td>
+                  <td className="py-2 px-3 text-center"><span className={`inline-flex px-2 py-[2px] rounded text-xs font-medium ${log.status === 200 ? 'bg-[#f0fff4] text-[#38a169]' : 'bg-[#fff5f5] text-[#e74c3c]'}`}>{log.status}</span></td>
                   <td className="py-2 px-3 text-right text-[#999]">{log.time}</td>
                 </tr>
               ))}

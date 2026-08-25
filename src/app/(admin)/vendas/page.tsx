@@ -193,17 +193,17 @@ function SalesTab() {
       ) : (
         <div className="bg-white rounded-2xl border border-[#e6e6e6] overflow-hidden shadow-2xs">
           <table className="w-full text-left text-sm">
-            <thead className="bg-[#fafafa] border-b border-[#eee] text-[#777] font-bold">
+            <thead className="bg-[#fafafa] border-b border-[#eee]">
               <tr>
-                <th className="py-3 px-4">Pedido / ID</th>
-                <th className="py-3 px-4">Comprador</th>
-                <th className="py-3 px-4">Marketplace</th>
-                <th className="py-3 px-4">Conta</th>
-                <th className="py-3 px-4">Data</th>
-                <th className="py-3 px-4 text-right">Itens</th>
-                <th className="py-3 px-4 text-right">Valor Total</th>
-                <th className="py-3 px-4 text-center">Status</th>
-                <th className="py-3 px-4 text-right">Ação</th>
+                <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Pedido / ID</th>
+                <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Comprador</th>
+                <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Marketplace</th>
+                <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Conta</th>
+                <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Data</th>
+                <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Itens</th>
+                <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Valor Total</th>
+                <th className="text-center py-3.5 px-5 font-medium text-[#999] text-xs">Status</th>
+                <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Ação</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#f0f0f0]">

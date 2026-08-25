@@ -180,11 +180,11 @@ export default function MarketplacesPage() {
               </div>
               <div>
                 <h3 className="text-[15px] font-bold text-[#333]">Desconectar {disconnectingMp.name}</h3>
-                <p className="text-[11px] text-[#999]">Confirmação de desconexão</p>
+                <p className="text-xs text-[#999]">Confirmação de desconexão</p>
               </div>
             </div>
 
-            <p className="text-[13px] text-[#555] leading-relaxed mb-6">
+            <p className="text-base text-[#555] leading-relaxed mb-6">
               Tem certeza que deseja desconectar o canal <strong>{disconnectingMp.name}</strong>? A sincronização automática de pedidos e estoque com a sua loja será interrompida.
             </p>
 
@@ -193,7 +193,7 @@ export default function MarketplacesPage() {
                 type="button"
                 onClick={() => setDisconnectingMp(null)}
                 disabled={isDisconnecting}
-                className="px-4 py-2 text-[12px] font-semibold text-[#666] hover:bg-[#f5f5f5] rounded-xl transition-colors"
+                className="px-4 py-2 text-sm font-semibold text-[#666] hover:bg-[#f5f5f5] rounded-xl transition-colors"
               >
                 Cancelar
               </button>
@@ -201,7 +201,7 @@ export default function MarketplacesPage() {
                 type="button"
                 onClick={handleDisconnect}
                 disabled={isDisconnecting}
-                className="px-4 py-2 bg-[#e74c3c] hover:bg-[#c0392b] text-white text-[12px] font-bold rounded-xl transition-colors shadow-sm disabled:opacity-50 flex items-center gap-1.5"
+                className="px-4 py-2 bg-[#e74c3c] hover:bg-[#c0392b] text-white text-sm font-bold rounded-xl transition-colors shadow-sm disabled:opacity-50 flex items-center gap-1.5"
               >
                 {isDisconnecting ? 'Desconectando...' : 'Sim, Desconectar'}
               </button>
@@ -282,7 +282,7 @@ export default function MarketplacesPage() {
                       </div>
                       <div>
                         <h3 className="text-[14px] font-bold text-[#333] group-hover:text-[#3483fa] transition-colors">{mp.name}</h3>
-                        <p className="text-[11px] text-[#999]">{mp.code}</p>
+                        <p className="text-xs text-[#999]">{mp.code}</p>
                       </div>
                     </div>
 
@@ -323,7 +323,7 @@ export default function MarketplacesPage() {
                       {mp.marketplace_accounts.slice(0, 3).map(acc => (
                         <span
                           key={acc.id}
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-[#f0fff4] text-[#276749] border border-[#c6f6d5]"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-[#f0fff4] text-[#276749] border border-[#c6f6d5]"
                         >
                           <span className="w-1.5 h-1.5 rounded-full bg-[#38a169]" />
                           {acc.account_name}
@@ -335,7 +335,7 @@ export default function MarketplacesPage() {
 
                 {/* Footer / Connect / Disconnect Buttons */}
                 <div className="pt-3 border-t border-[#f5f5f5] flex items-center justify-between">
-                  <div className="flex items-center gap-3 text-[10px] text-[#999]">
+                  <div className="flex items-center gap-3 text-xs text-[#999]">
                     <span>Taxa: <strong className="text-[#666]">{Number(mp.default_percentage_fee).toFixed(1)}%</strong></span>
                     <span>Fixa: <strong className="text-[#666]">R$ {Number(mp.default_fixed_fee).toFixed(2)}</strong></span>
                   </div>
@@ -348,7 +348,7 @@ export default function MarketplacesPage() {
                           e.stopPropagation()
                           setDisconnectingMp(mp)
                         }}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-[#e74c3c] hover:bg-[#fff5f5] rounded-lg transition-colors border border-[#fed7d7]"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-[#e74c3c] hover:bg-[#fff5f5] rounded-lg transition-colors border border-[#fed7d7]"
                         title="Desconectar do canal"
                       >
                         <Unlink className="w-3 h-3" /> Desconectar
@@ -360,7 +360,7 @@ export default function MarketplacesPage() {
                           e.stopPropagation()
                           setShowConnectModal(true)
                         }}
-                        className="inline-flex items-center gap-1 px-3 py-1 text-[11px] font-semibold text-white bg-[#3483fa] hover:bg-[#2968c8] rounded-lg transition-colors shadow-sm"
+                        className="inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold text-white bg-[#3483fa] hover:bg-[#2968c8] rounded-lg transition-colors shadow-sm"
                       >
                         <Plus className="w-3 h-3" /> Conectar
                       </button>

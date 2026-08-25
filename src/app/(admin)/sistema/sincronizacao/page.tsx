@@ -84,7 +84,7 @@ export default function SincronizacaoPage() {
   return (
     <div className="space-y-5 max-w-7xl mx-auto pb-14 animate-in fade-in duration-200">
       <div className="mb-2">
-        <Link href="/sistema" className="inline-flex items-center gap-1.5 text-[12px] font-bold text-[#777] hover:text-[#111] transition-colors">
+        <Link href="/sistema" className="inline-flex items-center gap-1.5 text-sm font-bold text-[#777] hover:text-[#111] transition-colors">
           <ArrowLeft className="w-3.5 h-3.5" /> Voltar para Sistema
         </Link>
       </div>
@@ -115,7 +115,7 @@ export default function SincronizacaoPage() {
         <select 
           value={filterMp} 
           onChange={e => setFilterMp(e.target.value)} 
-          className="min-h-[40px] px-3.5 border border-[#e6e6e6] rounded-xl text-[12px] font-medium text-[#333] focus:outline-none focus:border-[#16a34a] bg-white shadow-2xs"
+          className="min-h-[40px] px-3.5 border border-[#e6e6e6] rounded-xl text-sm font-medium text-[#333] focus:outline-none focus:border-[#16a34a] bg-white shadow-2xs"
         >
           <option value="all">Todos marketplaces</option>
           <option value="Mercado Livre">Mercado Livre</option>
@@ -125,16 +125,16 @@ export default function SincronizacaoPage() {
       </div>
 
       <div className="bg-white rounded-2xl border border-[#e6e6e6] overflow-hidden shadow-2xs">
-        <table className="w-full text-left text-[12px]">
-          <thead className="bg-[#fafafa] border-b border-[#eee] text-[#777] font-bold">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-[#fafafa] border-b border-[#eee]">
             <tr>
-              <th className="py-3 px-4">Início</th>
-              <th className="py-3 px-4">Marketplace</th>
-              <th className="py-3 px-4">Conta</th>
-              <th className="py-3 px-4">Tipo de Sincronização</th>
-              <th className="py-3 px-4 text-center">Status</th>
-              <th className="py-3 px-4 text-right">Itens</th>
-              <th className="py-3 px-4 text-right">Duração</th>
+              <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Início</th>
+              <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Marketplace</th>
+              <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Conta</th>
+              <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Tipo de Sincronização</th>
+              <th className="text-center py-3.5 px-5 font-medium text-[#999] text-xs">Status</th>
+              <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Itens</th>
+              <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Duração</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#f0f0f0]">
@@ -148,7 +148,7 @@ export default function SincronizacaoPage() {
                 : j.status === 'running' ? 'Em andamento...' : '1s'
               return (
                 <tr key={j.id as string} className="hover:bg-[#fafafa] transition-colors">
-                  <td className="py-3.5 px-4 text-[11px] text-[#666] font-medium whitespace-nowrap">
+                  <td className="py-3.5 px-4 text-sm text-[#666] font-medium whitespace-nowrap">
                     {j.created_at ? new Date(j.created_at as string).toLocaleString('pt-BR') : '—'}
                   </td>
                   <td className="py-3.5 px-4">
@@ -157,8 +157,8 @@ export default function SincronizacaoPage() {
                       <span className="font-bold text-[#111]">{(mp?.name as string) || 'Mercado Livre'}</span>
                     </div>
                   </td>
-                  <td className="py-3.5 px-4 text-[11px] text-[#777] font-medium">{(acc?.account_name as string) || 'Teknix Oficial'}</td>
-                  <td className="py-3.5 px-4 font-mono font-bold text-[11px] text-[#111]">{(j.sync_type as string) || 'ORDERS_SYNC'}</td>
+                  <td className="py-3.5 px-4 text-sm text-[#777] font-medium">{(acc?.account_name as string) || 'Teknix Oficial'}</td>
+                  <td className="py-3.5 px-4 font-mono font-bold text-sm text-[#111]">{(j.sync_type as string) || 'ORDERS_SYNC'}</td>
                   <td className="py-3.5 px-4 text-center">
                     <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black ${stStyle}`}>
                       {st === 'completed' && <CheckCircle2 className="w-3 h-3 text-[#16a34a]" />}
@@ -168,8 +168,8 @@ export default function SincronizacaoPage() {
                       {st === 'completed' ? 'Concluído' : st}
                     </span>
                   </td>
-                  <td className="py-3.5 px-4 text-[11px] text-[#111] font-bold text-right">{j.items_synced ? `${j.items_synced}/${j.total_items || '12'}` : '12/12'}</td>
-                  <td className="py-3.5 px-4 text-[11px] text-[#777] font-medium text-right">{duration}</td>
+                  <td className="py-3.5 px-4 text-sm text-[#111] font-bold text-right">{j.items_synced ? `${j.items_synced}/${j.total_items || '12'}` : '12/12'}</td>
+                  <td className="py-3.5 px-4 text-sm text-[#777] font-medium text-right">{duration}</td>
                 </tr>
               )
             })}

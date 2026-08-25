@@ -15,15 +15,15 @@ export default function AuditoriaPage() {
     <ConfigSubLayout title="Auditoria" description="Log de todas as alterações realizadas no sistema">
       <ConfigSection title="Registros recentes">
         <div className="overflow-x-auto">
-          <table className="w-full text-[12px]">
+          <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-[#f5f5f5]">
-                <th className="text-left py-2 px-3 text-[10px] font-medium text-[#999] uppercase">Data</th>
-                <th className="text-left py-2 px-3 text-[10px] font-medium text-[#999] uppercase">Usuário</th>
-                <th className="text-left py-2 px-3 text-[10px] font-medium text-[#999] uppercase">Ação</th>
-                <th className="text-left py-2 px-3 text-[10px] font-medium text-[#999] uppercase">Registro</th>
-                <th className="text-left py-2 px-3 text-[10px] font-medium text-[#999] uppercase">Detalhe</th>
-                <th className="text-left py-2 px-3 text-[10px] font-medium text-[#999] uppercase">IP</th>
+                <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Data</th>
+                <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Usuário</th>
+                <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Ação</th>
+                <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Registro</th>
+                <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Detalhe</th>
+                <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">IP</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#f5f5f5]">
@@ -34,7 +34,7 @@ export default function AuditoriaPage() {
                   <td className="py-2.5 px-3 text-[#333]">{log.action}</td>
                   <td className="py-2.5 px-3 font-mono text-[#999]">{log.target}</td>
                   <td className="py-2.5 px-3 text-[#666]">{log.detail}</td>
-                  <td className="py-2.5 px-3 text-[#999] font-mono text-[10px]">{log.ip}</td>
+                  <td className="py-2.5 px-3 text-[#999] font-mono text-xs">{log.ip}</td>
                 </tr>
               ))}
             </tbody>
