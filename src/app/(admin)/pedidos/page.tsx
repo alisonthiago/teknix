@@ -227,7 +227,7 @@ export default function PedidosPage() {
             Pedidos
           </h1>
           <p className="text-sm text-[#64748b]">
-            Gerencie pedidos, separação no estoque e expedição integrada da equipe
+            Pedidos, separação e expedição da equipe
           </p>
         </div>
 

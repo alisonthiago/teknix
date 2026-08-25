@@ -68,7 +68,7 @@ export default function AnalisesPage() {
     <div className="mp-stack max-w-7xl mx-auto pb-12">
       <PageHeader 
         title="Análises" 
-        description="Controle de lucro líquido real, ranking de produtos, comparação de marketplaces e previsão de reposição." 
+        description="Lucro líquido, ranking de produtos e reposição" 
       />
 
       <Tabs defaultValue="lucro-real">
@@ -104,12 +104,12 @@ export default function AnalisesPage() {
             {/* DRE Decomposed Card */}
             <div className="bg-white rounded-md border border-[#e6e6e6] p-5 shadow-2xs">
               <h3 className="text-[14px] font-bold text-[#333] mb-0.5">Demonstrativo de Resultado do Exercício (DRE)</h3>
-              <p className="text-[12px] text-[#666] mb-5">Decomposição financeira dos pedidos faturados.</p>
+              <p className="text-sm text-[#666] mb-5">Decomposição financeira dos pedidos faturados.</p>
 
-              <div className="space-y-2.5 text-[12px] max-w-2xl font-mono">
+              <div className="space-y-2.5 text-sm max-w-2xl font-mono">
                 <div className="flex justify-between items-center py-2 border-b border-[#f0f0f0]">
                   <span className="font-bold text-[#333]">(+) Receita Bruta de Vendas</span>
-                  <span className="font-bold text-[#333] text-[13px]">{formatBRL(profitMetrics.totalRevenue)}</span>
+                  <span className="font-bold text-[#333] text-base">{formatBRL(profitMetrics.totalRevenue)}</span>
                 </div>
                 <div className="flex justify-between items-center py-1.5 border-b border-[#f0f0f0] text-[#e74c3c]">
                   <span>(-) Custo da Mercadoria Vendida (CMV)</span>
@@ -128,7 +128,7 @@ export default function AnalisesPage() {
                   <span>- {formatBRL(profitMetrics.totalTaxes)}</span>
                 </div>
                 <div className="flex justify-between items-center py-2.5 bg-[#f0fff4] border border-[#bbf7d0] rounded-md px-3.5 text-[#16a34a] font-sans">
-                  <span className="font-bold text-[13px]">(=) LUCRO LÍQUIDO REAL</span>
+                  <span className="font-bold text-base">(=) LUCRO LÍQUIDO REAL</span>
                   <span className="font-bold text-[14px]">{formatBRL(profitMetrics.netProfit)} ({profitMetrics.netMarginPercentage.toFixed(1)}%)</span>
                 </div>
               </div>
@@ -143,17 +143,17 @@ export default function AnalisesPage() {
               <div className="p-4 border-b border-[#f0f0f0] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                   <h3 className="text-[14px] font-bold text-[#333]">Ranking & Desempenho de Produtos</h3>
-                  <p className="text-[12px] text-[#666]">Produtos ordenados por faturamento e velocidade de saída.</p>
+                  <p className="text-sm text-[#666]">Produtos ordenados por faturamento e velocidade de saída.</p>
                 </div>
-                <span className="text-[12px] text-[#999]">
+                <span className="text-sm text-[#999]">
                   {ranked.length} produtos analisados
                 </span>
               </div>
 
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-[12px]">
+                <table className="w-full text-left text-sm">
                   <thead>
-                    <tr className="bg-[#fafafa] border-b border-[#eeeeee] text-[10px] font-bold text-[#999] uppercase">
+                    <tr className="bg-[#fafafa] border-b border-[#eeeeee] text-xs font-bold text-[#999] uppercase">
                       <th className="py-2.5 px-4">Classificação</th>
                       <th className="py-2.5 px-4">Produto / SKU</th>
                       <th className="py-2.5 px-4 text-center">Estoque</th>
@@ -170,39 +170,39 @@ export default function AnalisesPage() {
                         <tr key={p.id} className="hover:bg-[#fafafa] transition-colors">
                           <td className="py-3 px-4">
                             {p.category === 'TOP_SELLER' && (
-                              <span className="inline-flex px-2 py-0.5 rounded text-[10px] font-bold bg-[#fffde7] text-[#856404] border border-[#ffeeba]">
+                              <span className="inline-flex px-2 py-0.5 rounded text-xs font-bold bg-[#fffde7] text-[#856404] border border-[#ffeeba]">
                                 Mais vendido
                               </span>
                             )}
                             {p.category === 'HIGH_REVENUE' && (
-                              <span className="inline-flex px-2 py-0.5 rounded text-[10px] font-bold bg-[#f0f7ff] text-[#3483fa] border border-[#3483fa]/20">
+                              <span className="inline-flex px-2 py-0.5 rounded text-xs font-bold bg-[#f0f7ff] text-[#3483fa] border border-[#3483fa]/20">
                                 Alta receita
                               </span>
                             )}
                             {p.category === 'FAST_MOVER' && (
-                              <span className="inline-flex px-2 py-0.5 rounded text-[10px] font-bold bg-[#f0fff4] text-[#16a34a] border border-[#bbf7d0]">
+                              <span className="inline-flex px-2 py-0.5 rounded text-xs font-bold bg-[#f0fff4] text-[#16a34a] border border-[#bbf7d0]">
                                 Alto giro
                               </span>
                             )}
                             {p.category === 'LOW_MARGIN' && (
-                              <span className="inline-flex px-2 py-0.5 rounded text-[10px] font-bold bg-[#fff5f5] text-[#e74c3c] border border-[#ffcdd2]">
+                              <span className="inline-flex px-2 py-0.5 rounded text-xs font-bold bg-[#fff5f5] text-[#e74c3c] border border-[#ffcdd2]">
                                 Baixa margem
                               </span>
                             )}
                             {p.category === 'DEAD_STOCK' && (
-                              <span className="inline-flex px-2 py-0.5 rounded text-[10px] font-medium bg-[#f5f5f5] text-[#999]">
+                              <span className="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-[#f5f5f5] text-[#999]">
                                 Sem saída
                               </span>
                             )}
                             {p.category === 'NORMAL' && (
-                              <span className="text-[11px] text-[#999]">#{idx + 1}</span>
+                              <span className="text-xs text-[#999]">#{idx + 1}</span>
                             )}
                           </td>
 
                           <td className="py-3 px-4 font-medium text-[#333]">
                             <Link href={`/produtos/${p.id}`} className="hover:text-[#3483fa]">
                               <p className="truncate max-w-xs">{p.name}</p>
-                              <p className="text-[10px] font-mono text-[#999]">{p.sku}</p>
+                              <p className="text-xs font-mono text-[#999]">{p.sku}</p>
                             </Link>
                           </td>
 
@@ -231,7 +231,7 @@ export default function AnalisesPage() {
                           <td className="py-3 px-4 text-center">
                             <Link
                               href={`/produtos/${p.id}`}
-                              className="text-[11px] font-medium text-[#3483fa] hover:underline"
+                              className="text-xs font-medium text-[#3483fa] hover:underline"
                             >
                               Ver produto ➔
                             </Link>
@@ -251,12 +251,12 @@ export default function AnalisesPage() {
           <div className="space-y-4">
             <div className="bg-white rounded-md border border-[#e6e6e6] p-5 shadow-2xs">
               <h3 className="text-[14px] font-bold text-[#333] mb-0.5">Comparação de Desempenho por Marketplace</h3>
-              <p className="text-[12px] text-[#666] mb-4">Volume, faturamento, taxas e margem por canal.</p>
+              <p className="text-sm text-[#666] mb-4">Volume, faturamento, taxas e margem por canal.</p>
 
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-[12px]">
+                <table className="w-full text-left text-sm">
                   <thead>
-                    <tr className="bg-[#fafafa] border-b border-[#eeeeee] text-[10px] font-bold text-[#999] uppercase">
+                    <tr className="bg-[#fafafa] border-b border-[#eeeeee] text-xs font-bold text-[#999] uppercase">
                       <th className="py-2.5 px-4">Canal</th>
                       <th className="py-2.5 px-4 text-center">Pedidos</th>
                       <th className="py-2.5 px-4 text-center">Unidades</th>
@@ -299,18 +299,18 @@ export default function AnalisesPage() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                 <div>
                   <h3 className="text-[14px] font-bold text-[#333]">Sugestões Automáticas de Reposição</h3>
-                  <p className="text-[12px] text-[#666]">Baseado na velocidade média diária de vendas para evitar ruptura.</p>
+                  <p className="text-sm text-[#666]">Baseado na velocidade média diária de vendas para evitar ruptura.</p>
                 </div>
                 <Link
                   href="/purchases/new"
-                  className="px-3.5 py-1.5 bg-[#3483fa] hover:bg-[#2968c8] text-white text-[12px] font-semibold rounded-md transition-all flex items-center gap-1.5 self-start sm:self-auto"
+                  className="px-3.5 py-1.5 bg-[#3483fa] hover:bg-[#2968c8] text-white text-sm font-semibold rounded-md transition-all flex items-center gap-1.5 self-start sm:self-auto"
                 >
                   <ShoppingCart className="w-3.5 h-3.5" /> Novo Pedido de Compra
                 </Link>
               </div>
 
               {purchaseSuggestions.length === 0 ? (
-                <div className="p-8 text-center bg-[#fafafa] rounded-md border border-[#eeeeee] text-[12px] text-[#666]">
+                <div className="p-8 text-center bg-[#fafafa] rounded-md border border-[#eeeeee] text-sm text-[#666]">
                   Nenhum produto em risco de ruptura no momento. Todos os estoques estão equilibrados!
                 </div>
               ) : (
@@ -319,28 +319,28 @@ export default function AnalisesPage() {
                     <div key={idx} className="py-3.5 flex flex-col md:flex-row md:items-center justify-between gap-3">
                       <div className="space-y-0.5">
                         <div className="flex items-center gap-2">
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                          <span className={`px-2 py-0.5 rounded text-xs font-bold ${
                             s.urgency === 'CRITICAL' ? 'bg-[#fff5f5] text-[#e74c3c] border border-[#ffcdd2]' : 'bg-[#fffde7] text-[#856404] border border-[#ffeeba]'
                           }`}>
                             {s.urgency === 'CRITICAL' ? 'Estoque Zerado' : `Ruptura em ${s.daysUntilStockout} dias`}
                           </span>
-                          <span className="font-bold text-[13px] text-[#333]">{s.productName}</span>
+                          <span className="font-bold text-base text-[#333]">{s.productName}</span>
                         </div>
-                        <p className="text-[11px] text-[#666]">
+                        <p className="text-xs text-[#666]">
                           SKU: <strong className="font-mono text-[#333]">{s.sku}</strong> • Estoque atual: <strong className="text-[#333]">{s.stock} un</strong> • Giro: <strong>{s.dailyVelocity.toFixed(1)} un/dia</strong>
                         </p>
                       </div>
 
                       <div className="flex items-center gap-4">
                         <div className="text-right">
-                          <p className="text-[10px] uppercase font-bold text-[#999]">Comprar Sugerido</p>
+                          <p className="text-xs uppercase font-bold text-[#999]">Comprar Sugerido</p>
                           <p className="text-[14px] font-bold text-[#3483fa]">{s.suggestedQuantity} unidades</p>
-                          <p className="text-[10px] text-[#666]">Inv. estimado: {formatBRL(s.estimatedInvestment)}</p>
+                          <p className="text-xs text-[#666]">Inv. estimado: {formatBRL(s.estimatedInvestment)}</p>
                         </div>
 
                         <Link
                           href={`/purchases/new?product=${s.productId}&qty=${s.suggestedQuantity}`}
-                          className="px-3 py-1.5 bg-[#f0fff4] hover:bg-[#dcfce7] text-[#16a34a] border border-[#bbf7d0] text-[12px] font-medium rounded-md transition-all"
+                          className="px-3 py-1.5 bg-[#f0fff4] hover:bg-[#dcfce7] text-[#16a34a] border border-[#bbf7d0] text-sm font-medium rounded-md transition-all"
                         >
                           Comprar ➔
                         </Link>
@@ -477,8 +477,8 @@ function ImportExportTab() {
         <div className="flex items-center gap-2.5 mb-2">
           <Upload className="w-4 h-4 text-[#3483fa]" />
           <div>
-            <h3 className="text-[13px] font-semibold text-[#333]">Importar Dados</h3>
-            <p className="text-[11px] text-[#999]">Selecione uma planilha (.xlsx, .csv) do Mercado Livre ou Excel</p>
+            <h3 className="text-base font-semibold text-[#333]">Importar Dados</h3>
+            <p className="text-xs text-[#999]">Selecione uma planilha (.xlsx, .csv) do Mercado Livre ou Excel</p>
           </div>
         </div>
 
@@ -491,8 +491,8 @@ function ImportExportTab() {
             >
               <FileSpreadsheet className="w-4 h-4 text-[#38a169]" />
               <div className="flex-1 min-w-0">
-                <span className="text-[12px] font-semibold text-[#333]">{item.label}</span>
-                <p className="text-[10px] text-[#999]">{item.desc}</p>
+                <span className="text-sm font-semibold text-[#333]">{item.label}</span>
+                <p className="text-xs text-[#999]">{item.desc}</p>
               </div>
             </div>
           ))}
@@ -503,8 +503,8 @@ function ImportExportTab() {
         <div className="flex items-center gap-2.5 mb-2">
           <Download className="w-4 h-4 text-[#38a169]" />
           <div>
-            <h3 className="text-[13px] font-semibold text-[#333]">Exportar Dados</h3>
-            <p className="text-[11px] text-[#999]">Baixe seus dados atualizados em formato Excel (.xlsx)</p>
+            <h3 className="text-base font-semibold text-[#333]">Exportar Dados</h3>
+            <p className="text-xs text-[#999]">Baixe seus dados atualizados em formato Excel (.xlsx)</p>
           </div>
         </div>
 
@@ -517,8 +517,8 @@ function ImportExportTab() {
             >
               <File className="w-4 h-4 text-[#3483fa]" />
               <div className="flex-1 min-w-0">
-                <span className="text-[12px] font-semibold text-[#333]">{item.label}</span>
-                <p className="text-[10px] text-[#999]">{item.desc}</p>
+                <span className="text-sm font-semibold text-[#333]">{item.label}</span>
+                <p className="text-xs text-[#999]">{item.desc}</p>
               </div>
             </div>
           ))}

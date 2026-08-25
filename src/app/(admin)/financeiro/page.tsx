@@ -413,7 +413,7 @@ export default function FinanceiroPage() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-14 animate-in fade-in duration-200">
-      <PageHeader title="Financeiro & DRE" description="Acompanhe receitas, lucros, margens e custos operacionais com gráficos modernos em tempo real" />
+      <PageHeader title="Financeiro & DRE" description="Receitas, lucros, margens e custos em tempo real" />
       <FilterBar mp={filterMp} setMp={setFilterMp} acc={filterAcc} setAcc={setFilterAcc} accounts={accounts || []} />
       
       <Tabs defaultValue="visao-geral">

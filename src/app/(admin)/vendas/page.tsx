@@ -124,29 +124,29 @@ function SalesTab() {
       {/* Top Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
         <div className="bg-white p-5 rounded-2xl border border-[#e6e6e6] shadow-2xs">
-          <p className="text-[11px] font-bold text-[#888] uppercase tracking-wider">Receita de Vendas</p>
+          <p className="text-sm font-bold text-[#888] uppercase tracking-wider">Receita de Vendas</p>
           <p className="text-2xl font-black text-[#111] mt-1">{formatBRL(totalRevenue)}</p>
-          <div className="flex items-center gap-1 text-[11px] font-extrabold text-[#16a34a] mt-2">
+          <div className="flex items-center gap-1 text-sm font-extrabold text-[#16a34a] mt-2">
             <ArrowUpRight className="w-3.5 h-3.5" /> 100% faturamento ativo
           </div>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-[#e6e6e6] shadow-2xs">
-          <p className="text-[11px] font-bold text-[#888] uppercase tracking-wider">Total de Vendas</p>
+          <p className="text-sm font-bold text-[#888] uppercase tracking-wider">Total de Vendas</p>
           <p className="text-2xl font-black text-[#111] mt-1">{filtered.length}</p>
-          <p className="text-[11px] text-[#666] font-semibold mt-2">Pedidos processados</p>
+          <p className="text-sm text-[#666] font-semibold mt-2">Pedidos processados</p>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-[#e6e6e6] shadow-2xs">
-          <p className="text-[11px] font-bold text-[#888] uppercase tracking-wider">Itens Vendidos</p>
+          <p className="text-sm font-bold text-[#888] uppercase tracking-wider">Itens Vendidos</p>
           <p className="text-2xl font-black text-[#111] mt-1">{totalItems}</p>
-          <p className="text-[11px] text-[#666] font-semibold mt-2">Unidades expedidas</p>
+          <p className="text-sm text-[#666] font-semibold mt-2">Unidades expedidas</p>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-[#e6e6e6] shadow-2xs">
-          <p className="text-[11px] font-bold text-[#888] uppercase tracking-wider">Ticket Médio</p>
+          <p className="text-sm font-bold text-[#888] uppercase tracking-wider">Ticket Médio</p>
           <p className="text-2xl font-black text-[#111] mt-1">{formatBRL(totalRevenue / Math.max(1, filtered.length))}</p>
-          <p className="text-[11px] text-[#16a34a] font-bold mt-2">Média por venda</p>
+          <p className="text-sm text-[#16a34a] font-bold mt-2">Média por venda</p>
         </div>
       </div>
 
@@ -159,13 +159,13 @@ function SalesTab() {
             placeholder="Buscar por pedido, comprador ou canal..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3.5 py-2.5 border border-[#e6e6e6] rounded-xl text-[12px] font-medium text-[#333] focus:outline-none focus:border-[#16a34a] bg-white shadow-2xs"
+            className="w-full pl-9 pr-3.5 py-2.5 border border-[#e6e6e6] rounded-xl text-sm font-medium text-[#333] focus:outline-none focus:border-[#16a34a] bg-white shadow-2xs"
           />
         </div>
         <select 
           value={filterMp} 
           onChange={e => { setFilterMp(e.target.value); setFilterAcc('all') }} 
-          className="min-h-[40px] px-3.5 border border-[#e6e6e6] rounded-xl text-[12px] font-medium text-[#333] focus:outline-none focus:border-[#16a34a] bg-white shadow-2xs"
+          className="min-h-[40px] px-3.5 border border-[#e6e6e6] rounded-xl text-sm font-medium text-[#333] focus:outline-none focus:border-[#16a34a] bg-white shadow-2xs"
         >
           <option value="all">Todos marketplaces</option>
           <option value="Mercado Livre">Mercado Livre</option>
@@ -176,7 +176,7 @@ function SalesTab() {
         <select 
           value={filterAcc} 
           onChange={e => setFilterAcc(e.target.value)} 
-          className="min-h-[40px] px-3.5 border border-[#e6e6e6] rounded-xl text-[12px] font-medium text-[#333] focus:outline-none focus:border-[#16a34a] bg-white shadow-2xs"
+          className="min-h-[40px] px-3.5 border border-[#e6e6e6] rounded-xl text-sm font-medium text-[#333] focus:outline-none focus:border-[#16a34a] bg-white shadow-2xs"
         >
           <option value="all">Todas contas</option>
           {(accounts || []).map((a: Record<string, unknown>) => (
@@ -192,7 +192,7 @@ function SalesTab() {
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-[#e6e6e6] overflow-hidden shadow-2xs">
-          <table className="w-full text-left text-[12px]">
+          <table className="w-full text-left text-sm">
             <thead className="bg-[#fafafa] border-b border-[#eee] text-[#777] font-bold">
               <tr>
                 <th className="py-3 px-4">Pedido / ID</th>
@@ -228,11 +228,11 @@ function SalesTab() {
                       <span className="font-semibold text-[#222] text-[13px]">{s.marketplaceName}</span>
                     </div>
                   </td>
-                  <td className="py-4.5 px-5 text-[12px] text-[#64748b] font-medium">
+                  <td className="py-4.5 px-5 text-sm text-[#64748b] font-medium">
                     {s.accountName}
                   </td>
                    <td className="py-4.5 px-5 text-[#64748b] font-medium text-[13px]">
-                    {s.date} <span className="text-[#94a3b8] text-[11px]">{s.time}</span>
+                    {s.date} <span className="text-[#94a3b8] text-sm">{s.time}</span>
                   </td>
                   <td className="py-4.5 px-5 text-right font-bold text-[#111] text-[13px]">
                     {s.itemsCount} un
@@ -241,7 +241,7 @@ function SalesTab() {
                     {formatBRL(s.revenue)}
                   </td>
                   <td className="py-4.5 px-5 text-center">
-                    <span className={`inline-flex px-3 py-1 rounded-full text-[11px] font-bold ${
+                    <span className={`inline-flex px-3 py-1 rounded-full text-sm font-bold ${
                       s.status === 'CONCLUIDO' 
                         ? 'bg-[#ecfdf5] text-[#16a34a] border border-[#bbf7d0]' 
                         : 'bg-[#fef2f2] text-[#ef4444] border border-[#fecaca]'
@@ -316,7 +316,7 @@ function MarketplacesTab() {
                 </div>
                 <div>
                   <p className="font-extrabold text-[#111] text-[14px]">{m.name}</p>
-                  <p className="text-[11px] text-[#16a34a] font-bold mt-0.5">Sincronização Ativa</p>
+                  <p className="text-sm text-[#16a34a] font-bold mt-0.5">Sincronização Ativa</p>
                 </div>
               </div>
               <span className="px-2.5 py-1 rounded-full text-[10px] font-black bg-[#ecfdf5] text-[#16a34a] border border-[#bbf7d0]">
@@ -333,7 +333,7 @@ function MarketplacesTab() {
 export default function VendasPage() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-14 animate-in fade-in duration-200">
-      <PageHeader title="Vendas" description="Acompanhe todas as vendas, canais e desempenho comercial em tempo real" />
+      <PageHeader title="Vendas" description="Vendas, canais e desempenho em tempo real" />
       <Tabs defaultValue="vendas">
         <TabsList>
           <TabsTrigger value="vendas"><DollarSign className="w-3.5 h-3.5 mr-1 inline" /> Vendas</TabsTrigger>
