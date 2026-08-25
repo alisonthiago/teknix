@@ -42,7 +42,7 @@ export default function IntegracoesPage() {
                 <Truck className="w-5 h-5 text-[#999]" />
                 <span className="text-[12px] font-medium text-[#333]">{int.name}</span>
               </div>
-              <button className="px-3 py-1 bg-[#3483fa] text-white text-[10px] font-medium rounded-md hover:bg-[#2968c8]">Conectar</button>
+              <button className="px-3 py-1 bg-[#1f2328] text-white text-[10px] font-medium rounded-md hover:bg-[#111827]">Conectar</button>
             </div>
           ))}
         </div>
@@ -56,7 +56,7 @@ export default function IntegracoesPage() {
                 <Globe className="w-5 h-5 text-[#999]" />
                 <span className="text-[12px] font-medium text-[#333]">{int.name}</span>
               </div>
-              <button className="px-3 py-1 bg-[#3483fa] text-white text-[10px] font-medium rounded-md hover:bg-[#2968c8]">Conectar</button>
+              <button className="px-3 py-1 bg-[#1f2328] text-white text-[10px] font-medium rounded-md hover:bg-[#111827]">Conectar</button>
             </div>
           ))}
         </div>

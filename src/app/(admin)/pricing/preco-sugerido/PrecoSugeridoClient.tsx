@@ -68,12 +68,12 @@ export default function PrecoSugeridoClient({ products }: { products: Array<{ id
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl border-[#dbeafe] bg-[#ecf3fe]/50">
-          <CardHeader><CardTitle className="text-[#2968c8]">Resultado</CardTitle></CardHeader>
+        <Card className="rounded-2xl border-[#dbeafe] bg-[#f5f5f5]/50">
+          <CardHeader><CardTitle className="text-[#111827]">Resultado</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="p-4 bg-white rounded-xl border border-[#dbeafe] text-center">
               <p className="text-sm text-[#999] mb-1">Preço Sugerido</p>
-              <p className="text-4xl font-bold text-[#2968c8]">
+              <p className="text-4xl font-bold text-[#111827]">
                 {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(suggestedPrice)}
               </p>
             </div>

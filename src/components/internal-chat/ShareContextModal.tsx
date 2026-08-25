@@ -66,7 +66,7 @@ export default function ShareContextModal({
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#f0f0f0]">
           <div className="flex items-center gap-2">
-            <MessageSquare className="w-4 h-4 text-[#3483fa]" />
+            <MessageSquare className="w-4 h-4 text-[#1f2328]" />
             <h3 className="text-sm font-black text-[#111]">Compartilhar no Chat Interno</h3>
           </div>
           <button onClick={onClose} className="p-1 rounded-lg hover:bg-[#f0f0f0] text-[#777] transition-colors cursor-pointer">
@@ -78,7 +78,7 @@ export default function ShareContextModal({
           {/* Card Preview do que está sendo compartilhado */}
           <div className="p-3.5 bg-[#f8fafc] rounded-xl border border-[#e2e8f0] space-y-1.5">
             <div className="flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider text-[#64748b]">
-              {messageType === 'CARD_ORDER' && <ShoppingCart className="w-3.5 h-3.5 text-[#3483fa]" />}
+              {messageType === 'CARD_ORDER' && <ShoppingCart className="w-3.5 h-3.5 text-[#1f2328]" />}
               {messageType === 'CARD_PRODUCT' && <Package className="w-3.5 h-3.5 text-[#16a34a]" />}
               {messageType === 'CARD_CUSTOMER' && <User className="w-3.5 h-3.5 text-[#6366f1]" />}
               {messageType === 'CARD_INVOICE' && <FileText className="w-3.5 h-3.5 text-[#0284c7]" />}
@@ -108,7 +108,7 @@ export default function ShareContextModal({
                   }`}
                 >
                   <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-[#3483fa]" />
+                    <Users className="w-4 h-4 text-[#1f2328]" />
                     <span className="text-xs font-bold text-[#1e293b]">{g.name}</span>
                   </div>
                   {selectedTarget === g.id && <Check className="w-4 h-4 text-[#111]" />}

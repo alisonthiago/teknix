@@ -82,7 +82,7 @@ export default function NewSupplierPage() {
             </div>
 
             <div className="pt-4 flex justify-end">
-              <Button type="submit" className="bg-[#3483fa] hover:bg-[#2968c8]">
+              <Button type="submit" className="bg-[#1f2328] hover:bg-[#111827]">
                 Salvar Fornecedor
               </Button>
             </div>

@@ -559,9 +559,9 @@ export default function FloatingMessenger() {
                 </button>
                 <button
                   onClick={() => alert('Envio de arquivo')}
-                  className="flex items-center gap-1.5 text-[12px] font-medium text-[#94a3b8] hover:text-[#3483fa] transition-colors cursor-pointer"
+                  className="flex items-center gap-1.5 text-[12px] font-medium text-[#94a3b8] hover:text-[#1f2328] transition-colors cursor-pointer"
                 >
-                  <Paperclip className="w-4 h-4 text-[#3483fa]" />
+                  <Paperclip className="w-4 h-4 text-[#1f2328]" />
                   Arquivo
                 </button>
               </div>

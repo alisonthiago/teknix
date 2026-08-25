@@ -22,7 +22,7 @@ export default async function PurchasesPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <p className="text-sm text-[#999]">Histórico de entrada de mercadorias.</p>
         <Link href="/purchases/new">
-          <Button className="bg-[#3483fa] hover:bg-[#2968c8]">
+          <Button className="bg-[#1f2328] hover:bg-[#111827]">
             <Plus className="w-4 h-4 mr-2" /> Nova Compra
           </Button>
         </Link>

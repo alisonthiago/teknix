@@ -188,7 +188,7 @@ export default function SupplierModal({ isOpen, onClose, supplierId, onSuccess }
                       <div>
                         <label className="block text-xs font-medium text-[#666] mb-1">Telefone Fixo</label>
                         <div className="relative">
-                          <Phone className="absolute left-2.5 top-2.5 w-4 h-4 text-[#3483fa]" />
+                          <Phone className="absolute left-2.5 top-2.5 w-4 h-4 text-[#1f2328]" />
                           <input value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} className="w-full pl-9 pr-3 py-2 border border-[#e6e6e6] rounded-md text-sm" placeholder="(11) 0000-0000" />
                         </div>
                       </div>
@@ -248,7 +248,7 @@ export default function SupplierModal({ isOpen, onClose, supplierId, onSuccess }
               <button type="button" onClick={onClose} className="px-5 py-2.5 rounded-lg border border-[#e6e6e6] text-[#666] text-sm font-medium hover:bg-white transition-colors">
                 Cancelar
               </button>
-              <button type="submit" disabled={loading} className="px-5 py-2.5 rounded-lg bg-[#3483fa] text-white text-sm font-semibold hover:bg-[#2968c8] transition-colors disabled:opacity-50">
+              <button type="submit" disabled={loading} className="px-5 py-2.5 rounded-lg bg-[#1f2328] text-white text-sm font-semibold hover:bg-[#111827] transition-colors disabled:opacity-50">
                 {loading ? 'Salvando...' : (supplierId ? 'Salvar Alterações' : 'Criar Fornecedor')}
               </button>
             </div>

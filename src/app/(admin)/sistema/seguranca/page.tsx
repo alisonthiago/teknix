@@ -15,7 +15,7 @@ export default function SegurancaPage() {
           <div>
             <label className="block text-[11px] text-[#999] mb-1.5">Senha atual</label>
             <div className="relative">
-              <input type={showPassword ? 'text' : 'password'} placeholder="••••••••" className="w-full px-3 py-2 pr-10 border border-[#e6e6e6] rounded-md text-[13px] text-[#333] outline-none focus:border-[#3483fa] transition-colors" />
+              <input type={showPassword ? 'text' : 'password'} placeholder="••••••••" className="w-full px-3 py-2 pr-10 border border-[#e6e6e6] rounded-md text-[13px] text-[#333] outline-none focus:border-[#1f2328] transition-colors" />
               <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#ccc] hover:text-[#666]">
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -24,14 +24,14 @@ export default function SegurancaPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <label className="block text-[11px] text-[#999] mb-1.5">Nova senha</label>
-              <input type="password" placeholder="••••••••" className="w-full px-3 py-2 border border-[#e6e6e6] rounded-md text-[13px] text-[#333] outline-none focus:border-[#3483fa] transition-colors" />
+              <input type="password" placeholder="••••••••" className="w-full px-3 py-2 border border-[#e6e6e6] rounded-md text-[13px] text-[#333] outline-none focus:border-[#1f2328] transition-colors" />
             </div>
             <div>
               <label className="block text-[11px] text-[#999] mb-1.5">Confirmar nova senha</label>
-              <input type="password" placeholder="••••••••" className="w-full px-3 py-2 border border-[#e6e6e6] rounded-md text-[13px] text-[#333] outline-none focus:border-[#3483fa] transition-colors" />
+              <input type="password" placeholder="••••••••" className="w-full px-3 py-2 border border-[#e6e6e6] rounded-md text-[13px] text-[#333] outline-none focus:border-[#1f2328] transition-colors" />
             </div>
           </div>
-          <button className="px-4 py-2 bg-[#3483fa] text-white text-[12px] font-medium rounded-md hover:bg-[#2968c8] transition-colors">
+          <button className="px-4 py-2 bg-[#1f2328] text-white text-[12px] font-medium rounded-md hover:bg-[#111827] transition-colors">
             Alterar senha
           </button>
         </div>
@@ -43,7 +43,7 @@ export default function SegurancaPage() {
             <p className="text-[12px] font-medium text-[#333]">Autenticação em dois fatores (2FA)</p>
             <p className="text-[11px] text-[#999] mt-0.5">Adicione uma camada extra de segurança à sua conta.</p>
           </div>
-          <button onClick={() => setTwoFactor(!twoFactor)} className={`relative w-10 h-[22px] rounded-full transition-colors flex-shrink-0 ${twoFactor ? 'bg-[#3483fa]' : 'bg-[#ccc]'}`}>
+          <button onClick={() => setTwoFactor(!twoFactor)} className={`relative w-10 h-[22px] rounded-full transition-colors flex-shrink-0 ${twoFactor ? 'bg-[#1f2328]' : 'bg-[#ccc]'}`}>
             <div className={`absolute top-[3px] w-4 h-4 rounded-full bg-white transition-transform ${twoFactor ? 'translate-x-[22px]' : 'translate-x-[3px]'}`} />
           </button>
         </div>

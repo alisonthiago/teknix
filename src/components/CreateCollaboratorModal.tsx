@@ -59,7 +59,7 @@ export default function CreateCollaboratorModal({ isOpen, onClose, onSuccess }: 
               name="name" 
               required 
               placeholder="Ex: João Silva"
-              className="w-full border border-[#e6e6e6] rounded-xl px-3 py-2 text-sm outline-none focus:border-[#3483fa] transition-colors text-[#333]" 
+              className="w-full border border-[#e6e6e6] rounded-xl px-3 py-2 text-sm outline-none focus:border-[#1f2328] transition-colors text-[#333]" 
             />
           </div>
 
@@ -70,7 +70,7 @@ export default function CreateCollaboratorModal({ isOpen, onClose, onSuccess }: 
               name="email" 
               required 
               placeholder="joao@empresa.com"
-              className="w-full border border-[#e6e6e6] rounded-xl px-3 py-2 text-sm outline-none focus:border-[#3483fa] transition-colors text-[#333]" 
+              className="w-full border border-[#e6e6e6] rounded-xl px-3 py-2 text-sm outline-none focus:border-[#1f2328] transition-colors text-[#333]" 
             />
           </div>
 
@@ -82,7 +82,7 @@ export default function CreateCollaboratorModal({ isOpen, onClose, onSuccess }: 
               required 
               minLength={6}
               placeholder="Crie uma senha inicial"
-              className="w-full border border-[#e6e6e6] rounded-xl px-3 py-2 text-sm outline-none focus:border-[#3483fa] transition-colors text-[#333]" 
+              className="w-full border border-[#e6e6e6] rounded-xl px-3 py-2 text-sm outline-none focus:border-[#1f2328] transition-colors text-[#333]" 
             />
           </div>
 
@@ -91,7 +91,7 @@ export default function CreateCollaboratorModal({ isOpen, onClose, onSuccess }: 
             <select 
               name="role" 
               required
-              className="w-full border border-[#e6e6e6] rounded-xl px-3 py-2 text-sm outline-none focus:border-[#3483fa] transition-colors text-[#333] bg-white"
+              className="w-full border border-[#e6e6e6] rounded-xl px-3 py-2 text-sm outline-none focus:border-[#1f2328] transition-colors text-[#333] bg-white"
             >
               <option value="ADMIN">ADMIN - Acesso total ao sistema</option>
               <option value="GERENTE">GERENTE - Gerenciamento e supervisão</option>
@@ -118,7 +118,7 @@ export default function CreateCollaboratorModal({ isOpen, onClose, onSuccess }: 
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 py-2.5 rounded-xl bg-[#3483fa] hover:bg-[#2968c8] text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
+              className="flex-1 py-2.5 rounded-xl bg-[#1f2328] hover:bg-[#111827] text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               {loading ? 'Cadastrando...' : 'Cadastrar'}

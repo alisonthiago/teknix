@@ -67,7 +67,7 @@ export default function NotificationsClient({ initialNotifications }: { initialN
       case 'LOW_STOCK': return <Package className="w-5 h-5 text-orange-600" />
       case 'WARNING': return <AlertTriangle className="w-5 h-5 text-lime-600" />
       case 'LOW_MARGIN': return <ArrowDown className="w-5 h-5 text-red-600" />
-      default: return <Bell className="w-5 h-5 text-[#3483fa]" />
+      default: return <Bell className="w-5 h-5 text-[#1f2328]" />
     }
   }
 
@@ -77,7 +77,7 @@ export default function NotificationsClient({ initialNotifications }: { initialN
       case 'LOW_STOCK': return 'bg-orange-100'
       case 'WARNING': return 'bg-lime-100'
       case 'LOW_MARGIN': return 'bg-red-100'
-      default: return 'bg-[#ecf3fe]'
+      default: return 'bg-[#f5f5f5]'
     }
   }
 
@@ -89,7 +89,7 @@ export default function NotificationsClient({ initialNotifications }: { initialN
           {unreadCount > 0 && <p className="text-sm text-[#999] mt-1">{unreadCount} não lida{unreadCount > 1 ? 's' : ''}</p>}
         </div>
         {unreadCount > 0 && (
-          <button onClick={handleMarkAllRead} className="text-sm text-[#3483fa] hover:text-[#2968c8] font-medium">
+          <button onClick={handleMarkAllRead} className="text-sm text-[#1f2328] hover:text-[#111827] font-medium">
             Marcar todas como lidas
           </button>
         )}
@@ -119,7 +119,7 @@ export default function NotificationsClient({ initialNotifications }: { initialN
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <h4 className={`text-sm font-medium ${n.is_read ? 'text-[#666]' : 'text-[#333]'}`}>
-                        {!n.is_read && <span className="w-2 h-2 rounded-full bg-[#3483fa] inline-block mr-2"></span>}
+                        {!n.is_read && <span className="w-2 h-2 rounded-full bg-[#1f2328] inline-block mr-2"></span>}
                         {n.title}
                       </h4>
                       <p className="text-sm text-[#999] mt-1">{n.message}</p>
@@ -130,7 +130,7 @@ export default function NotificationsClient({ initialNotifications }: { initialN
                   </div>
                   {n.resource === 'sale' && n.resource_id && (
                     <div className="mt-3">
-                      <Link href="/sales" className="inline-flex items-center gap-1.5 text-xs font-medium text-[#3483fa] hover:text-[#2968c8]">
+                      <Link href="/sales" className="inline-flex items-center gap-1.5 text-xs font-medium text-[#1f2328] hover:text-[#111827]">
                         Ver Vendas <ExternalLink className="w-3.5 h-3.5" />
                       </Link>
                     </div>

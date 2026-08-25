@@ -150,7 +150,7 @@ export default async function EditSupplierPage({ params }: { params: Promise<{ i
         </Card>
 
         <div className="flex justify-end">
-          <Button type="submit" className="bg-[#3483fa] hover:bg-[#2968c8]">
+          <Button type="submit" className="bg-[#1f2328] hover:bg-[#111827]">
             Salvar Alterações
           </Button>
         </div>

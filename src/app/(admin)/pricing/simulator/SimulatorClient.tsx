@@ -134,7 +134,7 @@ export default function SimulatorClient({ products, marketplaces }: { products: 
                 <Label className="text-[#ccc]">Margem Alvo (%)</Label>
                 <div className="flex gap-2">
                   {[10, 15, 20, 30].map(m => (
-                    <Button key={m} size="sm" variant={targetMargin === m ? 'default' : 'secondary'} onClick={() => setTargetMargin(m)} className={targetMargin === m ? 'bg-[#3483fa]' : 'bg-[#666] text-[#999]'}>
+                    <Button key={m} size="sm" variant={targetMargin === m ? 'default' : 'secondary'} onClick={() => setTargetMargin(m)} className={targetMargin === m ? 'bg-[#1f2328]' : 'bg-[#666] text-[#999]'}>
                       {m}%
                     </Button>
                   ))}

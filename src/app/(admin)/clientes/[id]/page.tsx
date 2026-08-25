@@ -400,7 +400,7 @@ export default function ClienteProfilePage() {
                             <div className="flex items-center gap-2">
                               <Link
                                 href={`/pedidos/${ord.id}`}
-                                className="text-[14px] font-extrabold text-[#111] hover:text-[#3483fa] hover:underline font-mono"
+                                className="text-[14px] font-extrabold text-[#111] hover:text-[#1f2328] hover:underline font-mono"
                               >
                                 {ord.order_number}
                               </Link>
@@ -454,7 +454,7 @@ export default function ClienteProfilePage() {
                                   {prod?.id ? (
                                     <Link
                                       href={`/produtos/${prod.id}`}
-                                      className="text-[12px] font-bold text-[#111] hover:text-[#3483fa] hover:underline truncate block"
+                                      className="text-[12px] font-bold text-[#111] hover:text-[#1f2328] hover:underline truncate block"
                                     >
                                       {prodTitle}
                                     </Link>
@@ -522,7 +522,7 @@ export default function ClienteProfilePage() {
                     {/* Header do Chat */}
                     <div className="p-3.5 bg-white border-b border-[#eee] flex items-center justify-between shadow-2xs z-10">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-[#f0f7ff] border border-[#d0e4ff] flex items-center justify-center font-bold text-[#3483fa] text-[13px]">
+                        <div className="w-10 h-10 rounded-full bg-[#f5f5f5] border border-[#d0e4ff] flex items-center justify-center font-bold text-[#1f2328] text-[13px]">
                           {customerName.substring(0, 2).toUpperCase()}
                         </div>
                         <div>
@@ -561,7 +561,7 @@ export default function ClienteProfilePage() {
                       </div>
                       {loadingChat ? (
                         <div className="flex items-center justify-center h-40">
-                          <Loader2 className="w-6 h-6 animate-spin text-[#3483fa]" />
+                          <Loader2 className="w-6 h-6 animate-spin text-[#1f2328]" />
                         </div>
                       ) : chatMessages.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-40 text-center">
@@ -579,7 +579,7 @@ export default function ClienteProfilePage() {
                             <div key={m.id || idx} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
                               <div className={`max-w-[82%] p-3.5 rounded-2xl text-[13px] leading-relaxed shadow-xs relative ${
                                 isMe
-                                  ? 'bg-[#3483fa] text-white rounded-tr-none'
+                                  ? 'bg-[#1f2328] text-white rounded-tr-none'
                                   : 'bg-white border border-[#e6e6e6] text-[#222] rounded-tl-none'
                               }`}>
                                 <p className="whitespace-pre-wrap">{m.text}</p>
@@ -606,7 +606,7 @@ export default function ClienteProfilePage() {
                           <button
                             key={i}
                             onClick={() => { setMessageInput(tmpl); setShowTemplates(false) }}
-                            className="w-full text-left p-2 rounded-xl text-[11px] text-[#333] hover:bg-[#f0f7ff] border border-[#eee] transition-colors"
+                            className="w-full text-left p-2 rounded-xl text-[11px] text-[#333] hover:bg-[#f5f5f5] border border-[#eee] transition-colors"
                           >
                             "{tmpl}"
                           </button>
@@ -631,12 +631,12 @@ export default function ClienteProfilePage() {
                           onChange={e => setMessageInput(e.target.value)}
                           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage() } }}
                           maxLength={350}
-                          className="flex-1 h-11 px-4 rounded-xl border border-[#d0d7de] bg-[#f8f9fa] text-[13px] text-[#333] focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#3483fa]/20 focus:border-[#3483fa] transition-all"
+                          className="flex-1 h-11 px-4 rounded-xl border border-[#d0d7de] bg-[#f8f9fa] text-[13px] text-[#333] focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#1f2328]/20 focus:border-[#1f2328] transition-all"
                         />
                         <button
                           onClick={handleSendMessage}
                           disabled={sending || !messageInput.trim()}
-                          className="w-11 h-11 bg-[#3483fa] hover:bg-[#2968c8] text-white rounded-xl flex items-center justify-center transition-colors disabled:opacity-50 cursor-pointer shadow-sm"
+                          className="w-11 h-11 bg-[#1f2328] hover:bg-[#111827] text-white rounded-xl flex items-center justify-center transition-colors disabled:opacity-50 cursor-pointer shadow-sm"
                         >
                           {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                         </button>

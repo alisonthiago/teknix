@@ -59,7 +59,7 @@ export default function OrderStatusActions({ orderId, currentStatus }: { orderId
               ? 'bg-red-600 text-white hover:bg-red-700'
               : status === 'ENTREGUE'
               ? 'bg-green-600 text-white hover:bg-green-700'
-              : 'bg-[#3483fa] text-white hover:bg-[#2968c8]'
+              : 'bg-[#1f2328] text-white hover:bg-[#111827]'
           }`}
         >
           {processing ? '...' : STATUS_LABELS[status] || status}

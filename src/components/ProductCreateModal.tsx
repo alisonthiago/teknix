@@ -308,7 +308,7 @@ export default function ProductCreateModal({ open, onClose, onCreated }: Product
             {/* SECTION 1: IDENTIFICAÇÃO */}
             <section>
               <h3 className="text-[12px] font-semibold text-[#333] uppercase tracking-wide mb-4 flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#3483fa]"></span>
+                <span className="w-1.5 h-1.5 rounded-full bg-[#1f2328]"></span>
                 Identificação
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -327,7 +327,7 @@ export default function ProductCreateModal({ open, onClose, onCreated }: Product
                     <button
                       type="button"
                       onClick={() => updateField('sku', generateSKU(form.brand))}
-                      className="text-[#3483fa] hover:text-[#2968c8] text-[10px] flex items-center gap-1 font-medium transition-colors"
+                      className="text-[#1f2328] hover:text-[#111827] text-[10px] flex items-center gap-1 font-medium transition-colors"
                       title="Gerar código automático"
                     >
                       <Wand2 className="w-3 h-3" /> Gerar
@@ -422,7 +422,7 @@ export default function ProductCreateModal({ open, onClose, onCreated }: Product
               </h3>
               <div
                 className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer ${
-                  dragActive ? 'border-[#3483fa] bg-[#f0f7ff]' : 'border-[#d0d0d0] hover:border-[#bbb] hover:bg-[#fafafa]'
+                  dragActive ? 'border-[#1f2328] bg-[#f5f5f5]' : 'border-[#d0d0d0] hover:border-[#bbb] hover:bg-[#fafafa]'
                 }`}
                 onDragEnter={handleDrag}
                 onDragLeave={handleDrag}
@@ -457,7 +457,7 @@ export default function ProductCreateModal({ open, onClose, onCreated }: Product
                         {i !== 0 && (
                           <button
                             onClick={e => { e.stopPropagation(); setPrimaryPhoto(i) }}
-                            className="p-0.5 rounded-full bg-[#3483fa] text-white shadow-sm"
+                            className="p-0.5 rounded-full bg-[#1f2328] text-white shadow-sm"
                             title="Definir como principal"
                           >
                             <Star className="w-3 h-3" />
@@ -472,7 +472,7 @@ export default function ProductCreateModal({ open, onClose, onCreated }: Product
                         </button>
                       </div>
                       {i === 0 && (
-                        <div className="absolute bottom-0 inset-x-0 bg-[#3483fa]/90 text-white text-[9px] text-center py-0.5 font-medium">
+                        <div className="absolute bottom-0 inset-x-0 bg-[#1f2328]/90 text-white text-[9px] text-center py-0.5 font-medium">
                           Principal
                         </div>
                       )}

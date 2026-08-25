@@ -146,7 +146,7 @@ export default function ImportExportClient({ type }: { type: 'import' | 'export'
           </div>
           {importedCount > 0 && (
             <div className="w-full bg-[#f5f5f5] rounded-full h-2">
-              <div className="bg-[#3483fa] h-2 rounded-full transition-all" style={{ width: `${Math.min(100, (importedCount / (importedCount || 1)) * 100)}%` }}></div>
+              <div className="bg-[#1f2328] h-2 rounded-full transition-all" style={{ width: `${Math.min(100, (importedCount / (importedCount || 1)) * 100)}%` }}></div>
             </div>
           )}
         </>
@@ -154,7 +154,7 @@ export default function ImportExportClient({ type }: { type: 'import' | 'export'
 
       {message && (
         <div className={`flex items-center gap-2 text-sm text-center justify-center ${success ? 'text-green-600' : 'text-[#666]'}`}>
-          {success ? <CheckCircle className="w-4 h-4" /> : loading ? <div className="w-4 h-4 border-2 border-[#e6e6e6] border-t-[#3483fa] rounded-full animate-spin" /> : <AlertCircle className="w-4 h-4" />}
+          {success ? <CheckCircle className="w-4 h-4" /> : loading ? <div className="w-4 h-4 border-2 border-[#e6e6e6] border-t-[#1f2328] rounded-full animate-spin" /> : <AlertCircle className="w-4 h-4" />}
           {message}
         </div>
       )}

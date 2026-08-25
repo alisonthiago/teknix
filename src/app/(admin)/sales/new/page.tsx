@@ -36,7 +36,7 @@ export default async function NewSalePage() {
                   id="marketplace_id" 
                   name="marketplace_id" 
                   required
-                  className="flex h-9 w-full items-center justify-between rounded-md border border-[#e6e6e6] bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-white placeholder:text-[#999] focus:outline-none focus:ring-1 focus:ring-[#3483fa] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-9 w-full items-center justify-between rounded-md border border-[#e6e6e6] bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-white placeholder:text-[#999] focus:outline-none focus:ring-1 focus:ring-[#1f2328] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <option value="">Selecione um canal</option>
                   {marketplaces?.map(mp => (
@@ -69,7 +69,7 @@ export default async function NewSalePage() {
                   id="product_id" 
                   name="product_id" 
                   required
-                  className="flex h-9 w-full items-center justify-between rounded-md border border-[#e6e6e6] bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-white placeholder:text-[#999] focus:outline-none focus:ring-1 focus:ring-[#3483fa] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-9 w-full items-center justify-between rounded-md border border-[#e6e6e6] bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-white placeholder:text-[#999] focus:outline-none focus:ring-1 focus:ring-[#1f2328] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <option value="">Selecione um produto</option>
                   {products?.map(product => (
@@ -109,7 +109,7 @@ export default async function NewSalePage() {
             </div>
 
             <div className="pt-6 flex justify-end">
-              <Button type="submit" className="bg-[#3483fa] hover:bg-[#2968c8]">
+              <Button type="submit" className="bg-[#1f2328] hover:bg-[#111827]">
                 Registrar Venda e Abater Estoque
               </Button>
             </div>

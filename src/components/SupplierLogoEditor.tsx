@@ -59,7 +59,7 @@ export default function SupplierLogoEditor({ supplierId, currentLogoUrl }: { sup
         onClick={() => fileInputRef.current?.click()}
       >
         {uploading ? (
-          <Loader2 className="w-6 h-6 animate-spin text-[#3483fa]" />
+          <Loader2 className="w-6 h-6 animate-spin text-[#1f2328]" />
         ) : logoPreview ? (
           <img src={logoPreview} alt="Logo" className="w-full h-full object-cover" />
         ) : (

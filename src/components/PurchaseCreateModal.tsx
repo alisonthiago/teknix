@@ -152,7 +152,7 @@ export default function PurchaseCreateModal({ open, onClose, onCreated }: Purcha
           <div className="space-y-8">
             <section>
               <h3 className="text-[12px] font-semibold text-[#333] uppercase tracking-wide mb-4 flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#3483fa]"></span>
+                <span className="w-1.5 h-1.5 rounded-full bg-[#1f2328]"></span>
                 Dados Principais
               </h3>
               <div className="grid grid-cols-1 gap-4">

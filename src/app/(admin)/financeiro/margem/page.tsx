@@ -82,7 +82,7 @@ export default async function MargemPage() {
                   <TableCell className="text-right">
                     <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                       Number(item.margin) > 25 ? 'bg-green-100 text-green-700' :
-                      Number(item.margin) > 15 ? 'bg-blue-100 text-blue-700' :
+                      Number(item.margin) > 15 ? 'bg-amber-100 text-amber-700' :
                       Number(item.margin) > 0 ? 'bg-lime-100 text-lime-700' :
                       'bg-red-100 text-red-700'
                     }`}>

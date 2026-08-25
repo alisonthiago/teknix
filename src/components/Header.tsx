@@ -255,7 +255,7 @@ function HeaderActions({
               {activeUnreadCount > 0 && (
                 <button
                   onClick={markAllAsRead}
-                  className="text-[11px] font-bold text-[#3483fa] hover:underline cursor-pointer"
+                  className="text-[11px] font-bold text-[#1f2328] hover:underline cursor-pointer"
                 >
                   Marcar todas como lidas
                 </button>
@@ -528,7 +528,7 @@ export default function Header({ userName, userRole, userEmail, userId, userAvat
           <div className="relative">
             <button
               onClick={() => setShowBasicCalc(!showBasicCalc)}
-              className="w-10 h-10 rounded-full hover:bg-[#ecf3fe] text-[#3483fa] flex items-center justify-center transition-colors border border-[#e6e6e6] hover:border-[#3483fa] bg-white shadow-sm"
+              className="w-10 h-10 rounded-full hover:bg-[#f5f5f5] text-[#1f2328] flex items-center justify-center transition-colors border border-[#e6e6e6] hover:border-[#1f2328] bg-white shadow-sm"
               title="Abrir Calculadora Básica"
             >
               <Calculator className="w-5 h-5" strokeWidth={1.5} />

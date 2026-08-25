@@ -53,9 +53,9 @@ export default function PrecoVendaClient() {
           <Card className="rounded-2xl border-[#e6e6e6]">
             <CardHeader><CardTitle>Comparação</CardTitle></CardHeader>
             <CardContent className="space-y-3">
-              <div className="flex justify-between p-3 bg-[#ecf3fe] rounded-lg">
-                <span className="text-sm font-medium text-[#2968c8]">Preço Atual</span>
-                <span className="text-sm font-bold text-[#2968c8]">R$ {salePrice.toFixed(2)}</span>
+              <div className="flex justify-between p-3 bg-[#f5f5f5] rounded-lg">
+                <span className="text-sm font-medium text-[#111827]">Preço Atual</span>
+                <span className="text-sm font-bold text-[#111827]">R$ {salePrice.toFixed(2)}</span>
               </div>
               <div className="flex justify-between p-3 bg-lime-50 rounded-lg">
                 <span className="text-sm font-medium text-lime-700">Preço Mínimo</span>

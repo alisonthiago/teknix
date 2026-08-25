@@ -99,7 +99,7 @@ export default function MarketplacesConfigPage() {
                     <button className="px-3 py-1.5 border border-[#e74c3c]/20 text-[#e74c3c] text-[11px] font-medium rounded-md hover:bg-[#fff5f5]">Desconectar</button>
                   </>
                 ) : (
-                  <a href={`/marketplaces/${m.id}`} className="px-3 py-1.5 bg-[#3483fa] text-white text-[11px] font-medium rounded-md hover:bg-[#2968c8] inline-block">Conectar via OAuth</a>
+                  <a href={`/marketplaces/${m.id}`} className="px-3 py-1.5 bg-[#1f2328] text-white text-[11px] font-medium rounded-md hover:bg-[#111827] inline-block">Conectar via OAuth</a>
                 )}
               </div>
             </div>

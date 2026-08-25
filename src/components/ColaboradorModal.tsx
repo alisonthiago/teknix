@@ -161,7 +161,7 @@ export default function ColaboradorModal({ open, onClose, onSuccess, colaborador
         </div>
         <div className="p-4 border-t border-[#e6e6e6] flex justify-end gap-2 bg-[#fafafa] rounded-b-lg">
           <Button type="button" variant="outline" onClick={onClose} disabled={saving}>Cancelar</Button>
-          <Button type="submit" form="colab-form" className="bg-[#3483fa] hover:bg-[#2968c8] text-white" disabled={saving}>
+          <Button type="submit" form="colab-form" className="bg-[#1f2328] hover:bg-[#111827] text-white" disabled={saving}>
             {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
             {colaborador ? 'Salvar Alterações' : 'Criar Colaborador'}
           </Button>

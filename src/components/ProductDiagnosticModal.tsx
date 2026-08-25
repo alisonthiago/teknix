@@ -57,7 +57,7 @@ export default function ProductDiagnosticModal({
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#f0f0f0]">
           <div className="flex items-center gap-2">
-            <Info className="w-5 h-5 text-[#3483fa]" />
+            <Info className="w-5 h-5 text-[#1f2328]" />
             <h3 className="text-[14px] font-black text-[#111]">Diagnóstico do Marketplace & Situação</h3>
           </div>
           <button onClick={onClose} className="p-1 rounded-lg hover:bg-[#f0f0f0] text-[#777] transition-colors cursor-pointer">

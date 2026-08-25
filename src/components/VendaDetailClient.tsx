@@ -120,7 +120,7 @@ function TimelineTab({ sale }: { sale: SaleDetail }) {
       <div className="divide-y divide-[#eeeeee]">
         {sale.timeline.map((h, i) => (
           <div key={i} className="px-4 py-3 flex items-start gap-3">
-            <div className="w-1.5 h-1.5 rounded-full bg-[#3483fa] mt-1.5 flex-shrink-0" />
+            <div className="w-1.5 h-1.5 rounded-full bg-[#1f2328] mt-1.5 flex-shrink-0" />
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <span className="text-[12px] font-medium text-[#333]">{h.action}</span>

@@ -32,7 +32,7 @@ type TabType = 'pedidos' | 'separacao' | 'expedicao'
 
 type StatusConfig = { l: string; c: string }
 const SC: Record<string, StatusConfig> = {
-  NOVO: { l: 'Novo', c: 'bg-[#f0f7ff] text-[#3483fa]' },
+  NOVO: { l: 'Novo', c: 'bg-[#f5f5f5] text-[#1f2328]' },
   PAGO: { l: 'Pago', c: 'bg-[#ecfdf5] text-[#16a34a]' },
   PAID: { l: 'Pago', c: 'bg-[#ecfdf5] text-[#16a34a]' },
   AGUARDANDO_SEPARACAO: { l: 'Aguardando', c: 'bg-[#fffaf0] text-[#e67e22]' },
@@ -40,8 +40,8 @@ const SC: Record<string, StatusConfig> = {
   SEPARADO: { l: 'Separado', c: 'bg-[#f0f0ff] text-[#6c5ce7]' },
   AGUARDANDO_EXPEDICAO: { l: 'Expedição', c: 'bg-[#f0f0ff] text-[#6c5ce7]' },
   ETIQUETA_IMPRESSA: { l: 'Etiqueta Impressa', c: 'bg-[#ecfdf5] text-[#16a34a]' },
-  EMBALADO: { l: 'Embalado', c: 'bg-[#f0f7ff] text-[#3483fa]' },
-  ENVIADO: { l: 'Enviado', c: 'bg-[#f0f7ff] text-[#3483fa]' },
+  EMBALADO: { l: 'Embalado', c: 'bg-[#f5f5f5] text-[#1f2328]' },
+  ENVIADO: { l: 'Enviado', c: 'bg-[#f5f5f5] text-[#1f2328]' },
   ENTREGUE: { l: 'Entregue', c: 'bg-[#f0fff4] text-[#38a169]' },
   CANCELADO: { l: 'Cancelado', c: 'bg-[#fff5f5] text-[#e74c3c]' },
   DEVOLVIDO: { l: 'Devolvido', c: 'bg-[#fff5f5] text-[#e74c3c]' },

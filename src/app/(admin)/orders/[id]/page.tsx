@@ -15,9 +15,9 @@ const STATUS_LABELS: Record<string, string> = {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  NOVO: 'bg-[#ecf3fe] text-[#2968c8]', PAGO: 'bg-[#e6f9ef] text-[#00a650]',
+  NOVO: 'bg-[#f5f5f5] text-[#111827]', PAGO: 'bg-[#e6f9ef] text-[#00a650]',
   AGUARDANDO_SEPARACAO: 'bg-lime-100 text-lime-700', EM_SEPARACAO: 'bg-orange-100 text-orange-700',
-  SEPARADO: 'bg-purple-100 text-purple-700', ENVIADO: 'bg-[#ecf3fe] text-[#2968c8]',
+  SEPARADO: 'bg-purple-100 text-purple-700', ENVIADO: 'bg-[#f5f5f5] text-[#111827]',
   ENTREGUE: 'bg-green-100 text-green-700', CANCELADO: 'bg-red-100 text-red-700',
 }
 
@@ -123,7 +123,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
             <div className="space-y-2">
               {history.map(h => (
                 <div key={h.id} className="flex items-center gap-3 text-sm">
-                  <div className="w-2 h-2 rounded-full bg-[#3483fa] shrink-0" />
+                  <div className="w-2 h-2 rounded-full bg-[#1f2328] shrink-0" />
                   <span className="text-[#999]">{new Date(h.created_at).toLocaleString('pt-BR')}</span>
                   <span className="font-medium">{h.profiles?.name || 'Sistema'}</span>
                   <span>{h.from_status ? `${STATUS_LABELS[h.from_status] || h.from_status} → ` : ''}{STATUS_LABELS[h.to_status] || h.to_status}</span>

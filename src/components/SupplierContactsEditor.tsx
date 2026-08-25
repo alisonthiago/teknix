@@ -98,7 +98,7 @@ export default function SupplierContactsEditor({ supplierId }: { supplierId: str
         </div>
         <div className="flex items-center pb-2 px-2">
           <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" checked={newIsWhatsapp} onChange={e=>setNewIsWhatsapp(e.target.checked)} className="w-4 h-4 rounded text-[#3483fa]" />
+            <input type="checkbox" checked={newIsWhatsapp} onChange={e=>setNewIsWhatsapp(e.target.checked)} className="w-4 h-4 rounded text-[#1f2328]" />
             <span className="text-[12px] text-[#555] font-medium">WhatsApp</span>
           </label>
         </div>

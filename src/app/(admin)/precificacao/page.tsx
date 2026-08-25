@@ -185,7 +185,7 @@ function PrecoVendaTab() {
 function SimulatorTab() {
   const [cost, setCost] = useState(45); const [freight, setFreight] = useState(10); const [margin, setMargin] = useState(30); const [fee, setFee] = useState(16)
   const total = cost + freight; const price = total / (1 - fee / 100 - margin / 100); const profit = price - total - price * fee / 100
-  const inp = "w-full border border-[#e6e6e6] rounded-md px-3 py-2 text-[13px] text-[#333] outline-none focus:border-[#3483fa] transition-colors"
+  const inp = "w-full border border-[#e6e6e6] rounded-md px-3 py-2 text-[13px] text-[#333] outline-none focus:border-[#1f2328] transition-colors"
   return (
     <div className="bg-white rounded-2xl border border-[#e6e6e6] p-5">
       <h3 className="text-[13px] font-semibold text-[#333] mb-4">Simulador de Preço</h3>
@@ -197,7 +197,7 @@ function SimulatorTab() {
       </div>
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
         <div className="p-3 rounded-md bg-[#f5f5f5] text-center"><p className="text-[9px] text-[#999] uppercase font-medium">Custo Total</p><p className="text-[14px] font-bold text-[#333] mt-0.5">R$ {total.toFixed(2)}</p></div>
-        <div className="p-3 rounded-md bg-[#f0f7ff] text-center"><p className="text-[9px] text-[#3483fa] uppercase font-medium">Preço Sugerido</p><p className="text-[14px] font-bold text-[#3483fa] mt-0.5">R$ {price.toFixed(2)}</p></div>
+        <div className="p-3 rounded-md bg-[#f5f5f5] text-center"><p className="text-[9px] text-[#1f2328] uppercase font-medium">Preço Sugerido</p><p className="text-[14px] font-bold text-[#1f2328] mt-0.5">R$ {price.toFixed(2)}</p></div>
         <div className="p-3 rounded-md bg-[#f0fff4] text-center"><p className="text-[9px] text-[#38a169] uppercase font-medium">Lucro</p><p className="text-[14px] font-bold text-[#38a169] mt-0.5">R$ {profit.toFixed(2)}</p></div>
       </div>
     </div>

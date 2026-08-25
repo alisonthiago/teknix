@@ -174,7 +174,7 @@ export default function ProductPhotosEditor({ productId }: { productId: string }
     <div className="space-y-4">
       <div
         className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer ${
-          dragActive ? 'border-[#3483fa] bg-[#f0f7ff]' : 'border-[#d0d0d0] hover:border-[#bbb] hover:bg-[#fafafa]'
+          dragActive ? 'border-[#1f2328] bg-[#f5f5f5]' : 'border-[#d0d0d0] hover:border-[#bbb] hover:bg-[#fafafa]'
         }`}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
@@ -195,7 +195,7 @@ export default function ProductPhotosEditor({ productId }: { productId: string }
         />
         {uploading ? (
           <div className="flex flex-col items-center py-2">
-            <Loader2 className="w-8 h-8 text-[#3483fa] animate-spin mb-2" />
+            <Loader2 className="w-8 h-8 text-[#1f2328] animate-spin mb-2" />
             <p className="text-[13px] text-[#666]">Enviando fotos...</p>
           </div>
         ) : (
@@ -223,7 +223,7 @@ export default function ProductPhotosEditor({ productId }: { productId: string }
                   <button
                     type="button"
                     onClick={(e) => { e.stopPropagation(); handleSetPrimary(img.id) }}
-                    className="p-1.5 rounded-full bg-[#3483fa] text-white shadow-sm hover:bg-[#2968c8]"
+                    className="p-1.5 rounded-full bg-[#1f2328] text-white shadow-sm hover:bg-[#111827]"
                     title="Definir como principal"
                   >
                     <Star className="w-3.5 h-3.5" />
@@ -239,7 +239,7 @@ export default function ProductPhotosEditor({ productId }: { productId: string }
                 </button>
               </div>
               {img.is_primary && (
-                <div className="absolute bottom-0 inset-x-0 bg-[#3483fa]/90 text-white text-[10px] text-center py-0.5 font-medium">
+                <div className="absolute bottom-0 inset-x-0 bg-[#1f2328]/90 text-white text-[10px] text-center py-0.5 font-medium">
                   Principal
                 </div>
               )}

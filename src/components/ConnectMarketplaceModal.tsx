@@ -225,7 +225,7 @@ export default function ConnectMarketplaceModal({ open, onClose, onSuccess }: Co
         <div className="flex items-center justify-between px-6 py-5 border-b border-[#eeeeee]">
           <div>
             <h2 className="text-[17px] font-bold text-[#1f2328] flex items-center gap-2">
-              <Zap className="w-5 h-5 text-[#3483fa]" />
+              <Zap className="w-5 h-5 text-[#1f2328]" />
               Conectar Canal de Venda
             </h2>
             <p className="text-[12px] text-[#999] mt-0.5">
@@ -256,7 +256,7 @@ export default function ConnectMarketplaceModal({ open, onClose, onSuccess }: Co
                      className={`p-4 rounded-2xl border transition-all flex flex-col justify-between ${
                        p.disabled
                          ? 'border-[#e6e6e6] bg-[#fafafa] opacity-70 cursor-not-allowed'
-                         : 'border-[#e6e6e6] hover:border-[#3483fa] hover:shadow-md cursor-pointer bg-white group'
+                         : 'border-[#e6e6e6] hover:border-[#1f2328] hover:shadow-md cursor-pointer bg-white group'
                      }`}
                    >
                      <div>
@@ -269,12 +269,12 @@ export default function ConnectMarketplaceModal({ open, onClose, onSuccess }: Co
                              Em breve
                            </span>
                          ) : (
-                           <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-[#f0f7ff] text-[#3483fa] group-hover:bg-[#3483fa] group-hover:text-white transition-colors">
+                           <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-[#f5f5f5] text-[#1f2328] group-hover:bg-[#1f2328] group-hover:text-white transition-colors">
                              Conectar →
                            </span>
                          )}
                        </div>
-                       <h3 className="text-[14px] font-bold text-[#333] group-hover:text-[#3483fa] transition-colors">
+                       <h3 className="text-[14px] font-bold text-[#333] group-hover:text-[#1f2328] transition-colors">
                          {p.name}
                        </h3>
                        <p className="text-[11px] text-[#888] mt-1 leading-relaxed line-clamp-2">
@@ -323,7 +323,7 @@ export default function ConnectMarketplaceModal({ open, onClose, onSuccess }: Co
                 <button
                   type="button"
                   onClick={() => setSelectedPlatform(null)}
-                  className="text-[11px] text-[#3483fa] hover:underline font-medium"
+                  className="text-[11px] text-[#1f2328] hover:underline font-medium"
                 >
                   Trocar
                 </button>
@@ -335,7 +335,7 @@ export default function ConnectMarketplaceModal({ open, onClose, onSuccess }: Co
                   <p className="text-[11px] text-[#999] mt-1">Estamos trabalhando para disponibilizar em breve.</p>
                 </div>
               ) : selectedPlatform.authType === 'oauth' ? (
-                <div className="p-6 rounded-2xl bg-[#f0f7ff] border border-[#d0e4ff] space-y-4 text-center">
+                <div className="p-6 rounded-2xl bg-[#f5f5f5] border border-[#d0e4ff] space-y-4 text-center">
                   <div className="w-14 h-14 rounded-2xl bg-white shadow-xs border border-[#d0e4ff] mx-auto flex items-center justify-center p-2.5">
                     <MarketplaceLogo name={selectedPlatform.name} className="w-9 h-9" />
                   </div>
@@ -377,7 +377,7 @@ export default function ConnectMarketplaceModal({ open, onClose, onSuccess }: Co
                         placeholder={f.placeholder}
                         value={formData[f.key] || ''}
                         onChange={e => setFormData({ ...formData, [f.key]: e.target.value })}
-                        className="w-full h-10 px-3 rounded-xl border border-[#d0d7de] bg-white text-[13px] text-[#333] focus:outline-none focus:ring-2 focus:ring-[#3483fa]/20 focus:border-[#3483fa] transition-all"
+                        className="w-full h-10 px-3 rounded-xl border border-[#d0d7de] bg-white text-[13px] text-[#333] focus:outline-none focus:ring-2 focus:ring-[#1f2328]/20 focus:border-[#1f2328] transition-all"
                       />
                     </div>
                   ))}
@@ -433,7 +433,7 @@ export default function ConnectMarketplaceModal({ open, onClose, onSuccess }: Co
                 type="submit"
                 form="connect-mp-form"
                 disabled={connecting}
-                className="px-5 py-2.5 bg-[#3483fa] hover:bg-[#2968c8] text-white text-[12px] font-bold rounded-xl shadow-sm transition-colors flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                className="px-5 py-2.5 bg-[#1f2328] hover:bg-[#111827] text-white text-[12px] font-bold rounded-xl shadow-sm transition-colors flex items-center gap-2 disabled:opacity-50 cursor-pointer"
               >
                 {connecting ? (
                   <>

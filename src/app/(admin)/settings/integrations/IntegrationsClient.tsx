@@ -32,11 +32,11 @@ const MARKETPLACE_COLORS: Record<string, { bg: string; text: string; border: str
   SHOPEE: { bg: 'bg-orange-100', text: 'text-orange-600', border: 'border-orange-400' },
   AMAZON: { bg: 'bg-amber-100', text: 'text-amber-700', border: 'border-amber-500' },
   TIKTOK_SHOP: { bg: 'bg-[#f5f5f5]', text: 'text-[#333]', border: 'border-[#999]' },
-  MAGALU: { bg: 'bg-[#ecf3fe]', text: 'text-[#3483fa]', border: 'border-blue-400' },
+  MAGALU: { bg: 'bg-[#f5f5f5]', text: 'text-[#1f2328]', border: 'border-[#cbd5e1]' },
   TEMU: { bg: 'bg-orange-50', text: 'text-orange-500', border: 'border-orange-300' },
   SHEIN: { bg: 'bg-pink-100', text: 'text-pink-600', border: 'border-pink-300' },
   ALIEXPRESS: { bg: 'bg-red-100', text: 'text-red-600', border: 'border-red-400' },
-  CASAS_BAHIA: { bg: 'bg-[#ecf3fe]', text: 'text-[#3483fa]', border: 'border-blue-300' },
+  CASAS_BAHIA: { bg: 'bg-[#f5f5f5]', text: 'text-[#1f2328]', border: 'border-[#cbd5e1]' },
   AMERICANAS: { bg: 'bg-red-50', text: 'text-red-500', border: 'border-red-300' },
   OLX: { bg: 'bg-[#f5f5f5]', text: 'text-[#666]', border: 'border-[#e6e6e6]' },
   OUTROS: { bg: 'bg-[#fafafa]', text: 'text-[#999]', border: 'border-[#e6e6e6]' },
@@ -158,7 +158,7 @@ export default function IntegrationsClient({ initialConnections, marketplaces }:
                       <h3 className="font-medium text-[#333] text-sm">{mp.name}</h3>
                       <div className="flex items-center gap-2 mt-0.5">
                         {mp.oauth_available && <span className="text-xs text-[#00a650] bg-[#e6f9ef] px-1.5 py-0.5 rounded font-medium">OAuth</span>}
-                        {mp.webhook_available && <span className="text-xs text-[#3483fa] bg-[#ecf3fe] px-1.5 py-0.5 rounded font-medium">Webhooks</span>}
+                        {mp.webhook_available && <span className="text-xs text-[#1f2328] bg-[#f5f5f5] px-1.5 py-0.5 rounded font-medium">Webhooks</span>}
                       </div>
                     </div>
                   </div>

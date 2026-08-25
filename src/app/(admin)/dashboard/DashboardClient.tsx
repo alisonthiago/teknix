@@ -76,7 +76,7 @@ export default function DashboardClient({ metrics }: { metrics: DashboardMetrics
                   cursor={{ fill: '#f5f5f5' }}
                   contentStyle={{ borderRadius: '12px', border: '1px solid #e6e6e6', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
                 />
-                <Bar dataKey={p.canViewRevenue ? 'revenue' : 'count'} fill="#dbeafe" radius={[4, 4, 0, 0]} barSize={40} activeBar={{ fill: '#3483fa' }} name={p.canViewRevenue ? 'Faturamento' : 'Vendas'} />
+                <Bar dataKey={p.canViewRevenue ? 'revenue' : 'count'} fill="#dbeafe" radius={[4, 4, 0, 0]} barSize={40} activeBar={{ fill: '#1f2328' }} name={p.canViewRevenue ? 'Faturamento' : 'Vendas'} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -94,7 +94,7 @@ export default function DashboardClient({ metrics }: { metrics: DashboardMetrics
               <div className="w-64 h-32 overflow-hidden relative">
                 <div className="w-64 h-64 border-[30px] border-[#f5f5f5] rounded-full absolute top-0 left-0"></div>
                 <div
-                  className="w-64 h-64 border-[30px] border-[#3483fa] rounded-full absolute top-0 left-0 border-b-transparent border-r-transparent"
+                  className="w-64 h-64 border-[30px] border-[#1f2328] rounded-full absolute top-0 left-0 border-b-transparent border-r-transparent"
                   style={{ transform: 'rotate(25deg)' }}
                 ></div>
               </div>
@@ -168,7 +168,7 @@ export default function DashboardClient({ metrics }: { metrics: DashboardMetrics
               })
             )}
           </div>
-          <Link href="/settings/integrations" className="mt-4 flex items-center justify-center text-sm text-[#3483fa] hover:text-[#2968c8] gap-1 font-medium">
+          <Link href="/settings/integrations" className="mt-4 flex items-center justify-center text-sm text-[#1f2328] hover:text-[#111827] gap-1 font-medium">
             Gerenciar Integrações <ArrowRight className="w-4 h-4" />
           </Link>
         </CardContent>
@@ -179,7 +179,7 @@ export default function DashboardClient({ metrics }: { metrics: DashboardMetrics
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Últimas atividades</CardTitle>
-            <Link href="/sales" className="text-sm text-[#3483fa] hover:text-[#2968c8] flex items-center gap-1 font-medium">
+            <Link href="/sales" className="text-sm text-[#1f2328] hover:text-[#111827] flex items-center gap-1 font-medium">
               Conferir todas →
             </Link>
           </CardHeader>
@@ -213,7 +213,7 @@ export default function DashboardClient({ metrics }: { metrics: DashboardMetrics
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Notificações</CardTitle>
-            <Link href="/notifications" className="text-sm text-[#3483fa] hover:text-[#2968c8] flex items-center gap-1 font-medium">
+            <Link href="/notifications" className="text-sm text-[#1f2328] hover:text-[#111827] flex items-center gap-1 font-medium">
               Conferir todas →
             </Link>
           </CardHeader>
@@ -224,7 +224,7 @@ export default function DashboardClient({ metrics }: { metrics: DashboardMetrics
               ) : (
                 metrics.recentNotifications?.map((notif) => (
                   <div key={notif.id} className="flex gap-3 py-4 border-b border-[#eeeeee] last:border-0">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${notif.type === 'NEW_SALE' ? 'bg-[#e6f9ef] text-[#00a650]' : notif.type === 'WARNING' ? 'bg-[#EEFFB3] text-[#e67e22]' : 'bg-[#ecf3fe] text-[#3483fa]'}`}>
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${notif.type === 'NEW_SALE' ? 'bg-[#e6f9ef] text-[#00a650]' : notif.type === 'WARNING' ? 'bg-[#EEFFB3] text-[#e67e22]' : 'bg-[#f5f5f5] text-[#1f2328]'}`}>
                       {notif.type === 'NEW_SALE' ? <CheckCircle2 className="w-4 h-4" strokeWidth={2} /> : notif.type === 'WARNING' ? <AlertCircle className="w-4 h-4" strokeWidth={2} /> : <Bell className="w-4 h-4" strokeWidth={2} />}
                     </div>
                     <div className="min-w-0">

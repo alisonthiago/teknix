@@ -86,7 +86,7 @@ export default function RelatorioContasPage() {
       <div className="flex flex-wrap items-center gap-2 mb-4">
         {(['7d', '30d', '90d'] as const).map(p => (
           <button key={p} onClick={() => setPeriod(p)}
-            className={`px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors ${period === p ? 'bg-[#3483fa] text-white' : 'bg-white border border-[#e6e6e6] text-[#999] hover:text-[#333]'}`}>
+            className={`px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors ${period === p ? 'bg-[#1f2328] text-white' : 'bg-white border border-[#e6e6e6] text-[#999] hover:text-[#333]'}`}>
             {p === '7d' ? '7 dias' : p === '30d' ? '30 dias' : '90 dias'}
           </button>
         ))}
@@ -147,9 +147,9 @@ export default function RelatorioContasPage() {
                     <MarketplaceLogo name={row.marketplace} className="w-5 h-5 flex-shrink-0" />
                     <span className="w-32 text-[11px] text-[#333] truncate">{row.name}</span>
                     <div className="flex-1 h-4 rounded bg-[#f5f5f5] relative overflow-hidden">
-                      <div className="absolute inset-y-0 left-0 bg-[#3483fa]/[0.2] rounded flex items-center pl-2"
+                      <div className="absolute inset-y-0 left-0 bg-[#1f2328]/[0.2] rounded flex items-center pl-2"
                         style={{ width: `${totalRevenue > 0 ? (row.revenue / totalRevenue) * 100 : 0}%` }}>
-                        <span className="text-[9px] text-[#3483fa] font-medium">{formatBRL(row.revenue)}</span>
+                        <span className="text-[9px] text-[#1f2328] font-medium">{formatBRL(row.revenue)}</span>
                       </div>
                     </div>
                     <span className="w-10 text-[10px] text-[#ccc] text-right">

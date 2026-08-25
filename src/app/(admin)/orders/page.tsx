@@ -8,14 +8,14 @@ import Link from 'next/link'
 import { Plus } from 'lucide-react'
 
 const STATUS_COLORS: Record<string, string> = {
-  NOVO: 'bg-[#ecf3fe] text-[#2968c8]',
+  NOVO: 'bg-[#f5f5f5] text-[#111827]',
   PAGO: 'bg-[#e6f9ef] text-[#00a650]',
   AGUARDANDO_SEPARACAO: 'bg-lime-100 text-lime-700',
   EM_SEPARACAO: 'bg-orange-100 text-orange-700',
   SEPARADO: 'bg-purple-100 text-purple-700',
-  AGUARDANDO_EXPEDICAO: 'bg-[#ecf3fe] text-[#3483fa]',
+  AGUARDANDO_EXPEDICAO: 'bg-[#f5f5f5] text-[#1f2328]',
   EMBALADO: 'bg-cyan-100 text-cyan-700',
-  ENVIADO: 'bg-[#ecf3fe] text-[#2968c8]',
+  ENVIADO: 'bg-[#f5f5f5] text-[#111827]',
   ENTREGUE: 'bg-green-100 text-green-700',
   CANCELADO: 'bg-red-100 text-red-700',
   DEVOLVIDO: 'bg-amber-100 text-amber-700',
@@ -85,16 +85,16 @@ export default async function OrdersPage() {
             <p className="text-xs text-orange-600">Em Separação</p>
           </CardContent>
         </Card>
-        <Card className="rounded-xl border-[#dbeafe] bg-[#ecf3fe]/50">
+        <Card className="rounded-xl border-[#dbeafe] bg-[#f5f5f5]/50">
           <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-[#3483fa]">{stats.aguardandoExpedicao}</p>
-            <p className="text-xs text-[#3483fa]">Para Expedição</p>
+            <p className="text-2xl font-bold text-[#1f2328]">{stats.aguardandoExpedicao}</p>
+            <p className="text-xs text-[#1f2328]">Para Expedição</p>
           </CardContent>
         </Card>
-        <Card className="rounded-xl border-[#dbeafe] bg-[#ecf3fe]/50">
+        <Card className="rounded-xl border-[#dbeafe] bg-[#f5f5f5]/50">
           <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-[#2968c8]">{stats.enviados}</p>
-            <p className="text-xs text-[#3483fa]">Enviados</p>
+            <p className="text-2xl font-bold text-[#111827]">{stats.enviados}</p>
+            <p className="text-xs text-[#1f2328]">Enviados</p>
           </CardContent>
         </Card>
       </div>
@@ -123,7 +123,7 @@ export default async function OrdersPage() {
               {orders?.map(order => (
                 <TableRow key={order.id}>
                   <TableCell>
-                    <Link href={`/orders/${order.id}`} className="font-medium text-[#3483fa] hover:underline">
+                    <Link href={`/orders/${order.id}`} className="font-medium text-[#1f2328] hover:underline">
                       #{order.order_number}
                     </Link>
                   </TableCell>

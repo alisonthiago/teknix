@@ -159,7 +159,7 @@ export function CockpitCentralOperacao({ orders = [], products = [] }: CockpitDa
 
         <div>
           <div className="flex items-center gap-1.5 text-[11px] text-[#666] font-medium">
-            <span className="w-2 h-2 rounded-full bg-[#3483fa]" />
+            <span className="w-2 h-2 rounded-full bg-[#1f2328]" />
             Estoque Baixo
           </div>
           <div className="text-[22px] font-bold text-[#333] mt-0.5">

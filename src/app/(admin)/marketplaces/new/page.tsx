@@ -74,7 +74,7 @@ export default function NewMarketplacePage() {
             </div>
 
             <div className="pt-6 flex justify-end">
-              <Button type="submit" className="bg-[#3483fa] hover:bg-[#2968c8]">
+              <Button type="submit" className="bg-[#1f2328] hover:bg-[#111827]">
                 Salvar Configurações
               </Button>
             </div>

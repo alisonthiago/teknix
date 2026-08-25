@@ -139,7 +139,7 @@ DIMENSÕES E EXPEDIÇÃO:
             <InfoRow label="Margem" value={`${product.pricing.margin}%`} />
           </div>
           <div className="mt-3">
-            <button className="text-[11px] text-[#3483fa] hover:underline font-medium">Ajustar preço</button>
+            <button className="text-[11px] text-[#1f2328] hover:underline font-medium">Ajustar preço</button>
           </div>
         </div>
 
@@ -172,7 +172,7 @@ DIMENSÕES E EXPEDIÇÃO:
             <InfoRow label="Custo atual" value={formatBRL(product.supplier.cost)} />
           </div>
           <div className="mt-3">
-            <Link href={`/fornecedores/${product.supplier.id}`} className="text-[11px] text-[#3483fa] hover:underline font-medium">Ver fornecedor</Link>
+            <Link href={`/fornecedores/${product.supplier.id}`} className="text-[11px] text-[#1f2328] hover:underline font-medium">Ver fornecedor</Link>
           </div>
         </div>
 
@@ -204,7 +204,7 @@ DIMENSÕES E EXPEDIÇÃO:
               <div key={d.period} className="flex items-center gap-2">
                 <span className="text-xs text-[#999] w-8">{d.period}</span>
                 <div className="flex-1 h-1.5 bg-[#f5f5f5] rounded-full overflow-hidden">
-                  <div className="h-full bg-[#3483fa] rounded-full" style={{ width: `${(d.units / 5) * 100}%` }} />
+                  <div className="h-full bg-[#1f2328] rounded-full" style={{ width: `${(d.units / 5) * 100}%` }} />
                 </div>
                 <span className="text-xs text-[#666] w-6 text-right">{d.units}</span>
               </div>
@@ -291,7 +291,7 @@ function VendasTab({ product }: { product: ProductDetail }) {
                 <tbody className="divide-y divide-[#eeeeee]">
                   {filteredSales.map(sale => (
                     <tr key={sale.id} className="hover:bg-[#fafafa] transition-colors">
-                      <td className="py-3 px-4 font-mono font-bold text-[#3483fa]">
+                      <td className="py-3 px-4 font-mono font-bold text-[#1f2328]">
                         <Link href={`/pedidos/${sale.order_uuid || sale.order_id}`} className="hover:underline">
                           {sale.order_id}
                         </Link>
@@ -495,7 +495,7 @@ function ComprasTab({ product }: { product: ProductDetail }) {
                   </td>
                   <td className="py-2.5 px-4 text-right">
                     {p.purchase_id && (
-                      <Link href={`/purchases/${p.purchase_id}/nota`} className="inline-flex items-center justify-center w-7 h-7 rounded bg-[#f5f5f5] text-[#666] hover:bg-[#3483fa] hover:text-white transition-colors" title="Ver Nota Interna">
+                      <Link href={`/purchases/${p.purchase_id}/nota`} className="inline-flex items-center justify-center w-7 h-7 rounded bg-[#f5f5f5] text-[#666] hover:bg-[#1f2328] hover:text-white transition-colors" title="Ver Nota Interna">
                         <FileText className="w-3.5 h-3.5" />
                       </Link>
                     )}
@@ -563,7 +563,7 @@ function HistoricoTab({ product }: { product: ProductDetail }) {
       <div className="divide-y divide-[#eeeeee]">
         {product.history.map(h => (
           <div key={h.id} className="px-4 py-3 flex items-start gap-3">
-            <div className="w-1.5 h-1.5 rounded-full bg-[#3483fa] mt-1.5 flex-shrink-0" />
+            <div className="w-1.5 h-1.5 rounded-full bg-[#1f2328] mt-1.5 flex-shrink-0" />
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-[#333]">{h.action}</span>
@@ -633,7 +633,7 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
               {/* Badges on main image */}
               <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
                 {selectedImageIndex === 0 && (
-                  <span className="px-2 py-0.5 rounded-md bg-[#3483fa] text-white text-xs font-bold shadow-xs">
+                  <span className="px-2 py-0.5 rounded-md bg-[#1f2328] text-white text-xs font-bold shadow-xs">
                     Foto Principal (Capa)
                   </span>
                 )}
@@ -653,7 +653,7 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
                     onClick={() => setSelectedImageIndex(idx)}
                     className={`relative w-14 h-14 rounded-xl border-2 overflow-hidden p-1 shrink-0 transition-all cursor-pointer bg-white ${
                       selectedImageIndex === idx 
-                        ? 'border-[#3483fa] ring-2 ring-[#3483fa]/20 shadow-sm scale-105' 
+                        ? 'border-[#1f2328] ring-2 ring-[#1f2328]/20 shadow-sm scale-105' 
                         : 'border-[#e6e6e6] opacity-60 hover:opacity-100 hover:border-[#ccc]'
                     }`}
                   >

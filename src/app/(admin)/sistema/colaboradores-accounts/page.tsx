@@ -64,8 +64,8 @@ export default function ColaboradoresAccountsPage() {
               <div key={user.id as string} className="bg-white border border-[#e6e6e6] rounded-lg p-4">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-[#f0f7ff] flex items-center justify-center">
-                      <Users className="w-4 h-4 text-[#3483fa]" />
+                    <div className="w-9 h-9 rounded-full bg-[#f5f5f5] flex items-center justify-center">
+                      <Users className="w-4 h-4 text-[#1f2328]" />
                     </div>
                     <div>
                       <div className="text-[13px] font-medium text-[#333]">{(user.full_name as string) || (user.email as string)}</div>
@@ -79,11 +79,11 @@ export default function ColaboradoresAccountsPage() {
                     const assigned = userAccounts.has(acc.id as string)
                     return (
                       <div key={acc.id as string}
-                        className={`flex items-center gap-2 px-3 py-2 rounded-md border transition-colors ${assigned ? 'border-[#3483fa]/30 bg-[#f0f7ff]' : 'border-[#e6e6e6] bg-[#fafafa]'}`}>
+                        className={`flex items-center gap-2 px-3 py-2 rounded-md border transition-colors ${assigned ? 'border-[#1f2328]/30 bg-[#f5f5f5]' : 'border-[#e6e6e6] bg-[#fafafa]'}`}>
                         {typeof mp?.logo === 'string' && <MarketplaceLogo name={mp.name as string} className="w-4 h-4" />}
                         <span className="text-[11px] text-[#333] flex-1">{acc.account_name as string}</span>
                         {assigned
-                          ? <CheckCircle2 className="w-3.5 h-3.5 text-[#3483fa] shrink-0" />
+                          ? <CheckCircle2 className="w-3.5 h-3.5 text-[#1f2328] shrink-0" />
                           : <XCircle className="w-3.5 h-3.5 text-[#ccc] shrink-0" />}
                       </div>
                     )

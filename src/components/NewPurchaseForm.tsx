@@ -169,7 +169,7 @@ export default function NewPurchaseForm({ suppliers, products }: NewPurchaseForm
                   setItems([]) // clear items on supplier change
                 }}
                 required
-                className="flex h-9 w-full items-center justify-between rounded-md border border-[#e6e6e6] bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-white focus:outline-none focus:ring-1 focus:ring-[#3483fa]"
+                className="flex h-9 w-full items-center justify-between rounded-md border border-[#e6e6e6] bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-white focus:outline-none focus:ring-1 focus:ring-[#1f2328]"
               >
                 <option value="">Selecione um fornecedor</option>
                 {suppliers.map(supplier => (
@@ -240,7 +240,7 @@ export default function NewPurchaseForm({ suppliers, products }: NewPurchaseForm
                     value={item.product_id}
                     onChange={e => updateItem(item.id, 'product_id', e.target.value)}
                     required
-                    className="flex h-8 w-full items-center justify-between rounded-md border border-[#e6e6e6] bg-white px-2 py-1 text-[12px] focus:outline-none focus:ring-1 focus:ring-[#3483fa]"
+                    className="flex h-8 w-full items-center justify-between rounded-md border border-[#e6e6e6] bg-white px-2 py-1 text-[12px] focus:outline-none focus:ring-1 focus:ring-[#1f2328]"
                   >
                     <option value="">Selecione...</option>
                     {availableProducts.map(p => (
@@ -313,7 +313,7 @@ export default function NewPurchaseForm({ suppliers, products }: NewPurchaseForm
           </div>
 
           <div className="pt-6 flex justify-end">
-            <Button type="submit" disabled={saving} className="bg-[#3483fa] hover:bg-[#2968c8]">
+            <Button type="submit" disabled={saving} className="bg-[#1f2328] hover:bg-[#111827]">
               {saving ? 'Registrando...' : 'Salvar Compra e Gerar Nota'} <ArrowRight className="w-4 h-4 ml-1.5" />
             </Button>
           </div>

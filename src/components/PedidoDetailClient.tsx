@@ -15,12 +15,12 @@ function formatBRL(value: number) {
 }
 
 const SC: Record<string, { l: string; c: string }> = {
-  NOVO: { l: 'Novo', c: 'bg-[#f0f7ff] text-[#3483fa]' },
-  PAGO: { l: 'Pago', c: 'bg-[#f0f7ff] text-[#3483fa]' },
+  NOVO: { l: 'Novo', c: 'bg-[#f5f5f5] text-[#1f2328]' },
+  PAGO: { l: 'Pago', c: 'bg-[#f5f5f5] text-[#1f2328]' },
   AGUARDANDO_SEPARACAO: { l: 'Aguardando', c: 'bg-[#fffaf0] text-[#e67e22]' },
   EM_SEPARACAO: { l: 'Separação', c: 'bg-[#fffaf0] text-[#e67e22]' },
   SEPARADO: { l: 'Separado', c: 'bg-[#f0f0ff] text-[#6c5ce7]' },
-  ENVIADO: { l: 'Enviado', c: 'bg-[#f0f7ff] text-[#3483fa]' },
+  ENVIADO: { l: 'Enviado', c: 'bg-[#f5f5f5] text-[#1f2328]' },
   ENTREGUE: { l: 'Entregue', c: 'bg-[#f0fff4] text-[#38a169]' },
   CANCELADO: { l: 'Cancelado', c: 'bg-[#fff5f5] text-[#e74c3c]' },
 }
@@ -73,10 +73,10 @@ function VisaoGeralTab({ order }: { order: OrderDetail }) {
                       {item.product_id ? (
                         <Link 
                           href={`/produtos/${item.product_id}`}
-                          className="flex items-center gap-3 group hover:text-[#3483fa] transition-colors cursor-pointer"
+                          className="flex items-center gap-3 group hover:text-[#1f2328] transition-colors cursor-pointer"
                           title="Clique para abrir os detalhes deste produto"
                         >
-                          <div className="w-10 h-10 rounded-lg bg-[#f5f5f5] border border-[#e6e6e6] group-hover:border-[#3483fa]/50 overflow-hidden flex items-center justify-center shrink-0 transition-all shadow-2xs">
+                          <div className="w-10 h-10 rounded-lg bg-[#f5f5f5] border border-[#e6e6e6] group-hover:border-[#1f2328]/50 overflow-hidden flex items-center justify-center shrink-0 transition-all shadow-2xs">
                             {item.image ? (
                               <img src={item.image} alt="" className="w-full h-full object-cover" />
                             ) : (

@@ -44,7 +44,7 @@ const ROLE_LABELS: Record<string, string> = {
 
 const ROLE_COLORS: Record<string, string> = {
   ADMIN: 'bg-purple-100 text-purple-700',
-  GERENTE: 'bg-[#ecf3fe] text-[#2968c8]',
+  GERENTE: 'bg-[#f5f5f5] text-[#111827]',
   FINANCEIRO: 'bg-green-100 text-green-700',
   SEPARADOR: 'bg-orange-100 text-orange-700',
   EXPEDICAO: 'bg-cyan-100 text-cyan-700',
@@ -171,7 +171,7 @@ export default function UsersClient({
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <p className="text-sm text-[#999]">Gerencie usuários, perfis e permissões do sistema.</p>
         <Dialog open={newUserOpen} onOpenChange={setNewUserOpen}>
-          <DialogTrigger render={<Button className="bg-[#3483fa] hover:bg-[#2968c8]" />}>
+          <DialogTrigger render={<Button className="bg-[#1f2328] hover:bg-[#111827]" />}>
             <Plus className="w-4 h-4 mr-2" /> Novo Usuário
           </DialogTrigger>
           <DialogContent className="max-w-lg">
@@ -206,7 +206,7 @@ export default function UsersClient({
                   <p className="text-[11px] font-medium text-[#666] mb-2">Permissões deste perfil:</p>
                   <div className="flex flex-wrap gap-1">
                     {previewPerms.slice(0, 8).map(code => (
-                      <span key={code} className="text-[10px] bg-[#e6f7ff] text-[#2968c8] px-2 py-0.5 rounded">
+                      <span key={code} className="text-[10px] bg-[#e6f7ff] text-[#111827] px-2 py-0.5 rounded">
                         {code}
                       </span>
                     ))}
@@ -243,7 +243,7 @@ export default function UsersClient({
                   {users.map(u => (
                     <div
                       key={u.id}
-                      className={`p-4 cursor-pointer hover:bg-[#fafafa] transition-colors ${selectedUser?.id === u.id ? 'bg-[#ecf3fe] border-l-2 border-[#3483fa]' : ''} ${!u.is_active ? 'opacity-50' : ''}`}
+                      className={`p-4 cursor-pointer hover:bg-[#fafafa] transition-colors ${selectedUser?.id === u.id ? 'bg-[#f5f5f5] border-l-2 border-[#1f2328]' : ''} ${!u.is_active ? 'opacity-50' : ''}`}
                       onClick={() => setSelectedUser(u)}
                     >
                       <div className="flex items-center justify-between">

@@ -175,7 +175,7 @@ export default function AnalisesPage() {
                               </span>
                             )}
                             {p.category === 'HIGH_REVENUE' && (
-                              <span className="inline-flex px-2 py-0.5 rounded text-xs font-bold bg-[#f0f7ff] text-[#3483fa] border border-[#3483fa]/20">
+                              <span className="inline-flex px-2 py-0.5 rounded text-xs font-bold bg-[#f5f5f5] text-[#1f2328] border border-[#1f2328]/20">
                                 Alta receita
                               </span>
                             )}
@@ -200,7 +200,7 @@ export default function AnalisesPage() {
                           </td>
 
                           <td className="py-3 px-4 font-medium text-[#333]">
-                            <Link href={`/produtos/${p.id}`} className="hover:text-[#3483fa]">
+                            <Link href={`/produtos/${p.id}`} className="hover:text-[#1f2328]">
                               <p className="truncate max-w-xs">{p.name}</p>
                               <p className="text-xs font-mono text-[#999]">{p.sku}</p>
                             </Link>
@@ -231,7 +231,7 @@ export default function AnalisesPage() {
                           <td className="py-3 px-4 text-center">
                             <Link
                               href={`/produtos/${p.id}`}
-                              className="text-xs font-medium text-[#3483fa] hover:underline"
+                              className="text-xs font-medium text-[#1f2328] hover:underline"
                             >
                               Ver produto ➔
                             </Link>
@@ -281,7 +281,7 @@ export default function AnalisesPage() {
                         <td className="py-3 px-4 text-right font-bold text-[#333]">{formatBRL(mp.revenue)}</td>
                         <td className="py-3 px-4 text-right text-[#e74c3c]">- {formatBRL(mp.fees)}</td>
                         <td className="py-3 px-4 text-right font-bold text-[#16a34a]">{formatBRL(mp.netProfit)}</td>
-                        <td className="py-3 px-4 text-right font-bold text-[#3483fa]">{mp.netMargin.toFixed(1)}%</td>
+                        <td className="py-3 px-4 text-right font-bold text-[#1f2328]">{mp.netMargin.toFixed(1)}%</td>
                         <td className="py-3 px-4 text-right font-mono text-[#666]">{formatBRL(mp.averageTicket)}</td>
                       </tr>
                     ))}
@@ -303,7 +303,7 @@ export default function AnalisesPage() {
                 </div>
                 <Link
                   href="/purchases/new"
-                  className="px-3.5 py-1.5 bg-[#3483fa] hover:bg-[#2968c8] text-white text-sm font-semibold rounded-md transition-all flex items-center gap-1.5 self-start sm:self-auto"
+                  className="px-3.5 py-1.5 bg-[#1f2328] hover:bg-[#111827] text-white text-sm font-semibold rounded-md transition-all flex items-center gap-1.5 self-start sm:self-auto"
                 >
                   <ShoppingCart className="w-3.5 h-3.5" /> Novo Pedido de Compra
                 </Link>
@@ -334,7 +334,7 @@ export default function AnalisesPage() {
                       <div className="flex items-center gap-4">
                         <div className="text-right">
                           <p className="text-xs uppercase font-bold text-[#999]">Comprar Sugerido</p>
-                          <p className="text-[14px] font-bold text-[#3483fa]">{s.suggestedQuantity} unidades</p>
+                          <p className="text-[14px] font-bold text-[#1f2328]">{s.suggestedQuantity} unidades</p>
                           <p className="text-xs text-[#666]">Inv. estimado: {formatBRL(s.estimatedInvestment)}</p>
                         </div>
 
@@ -475,7 +475,7 @@ function ImportExportTab() {
 
       <div className="bg-white rounded-md border border-[#e6e6e6] p-5 shadow-2xs">
         <div className="flex items-center gap-2.5 mb-2">
-          <Upload className="w-4 h-4 text-[#3483fa]" />
+          <Upload className="w-4 h-4 text-[#1f2328]" />
           <div>
             <h3 className="text-base font-semibold text-[#333]">Importar Dados</h3>
             <p className="text-xs text-[#999]">Selecione uma planilha (.xlsx, .csv) do Mercado Livre ou Excel</p>
@@ -515,7 +515,7 @@ function ImportExportTab() {
               onClick={() => !loadingAction && handleExport(item.id)}
               className="flex items-center gap-3 p-3 rounded-md border border-[#eeeeee] hover:bg-[#fafafa] transition-all cursor-pointer"
             >
-              <File className="w-4 h-4 text-[#3483fa]" />
+              <File className="w-4 h-4 text-[#1f2328]" />
               <div className="flex-1 min-w-0">
                 <span className="text-sm font-semibold text-[#333]">{item.label}</span>
                 <p className="text-xs text-[#999]">{item.desc}</p>

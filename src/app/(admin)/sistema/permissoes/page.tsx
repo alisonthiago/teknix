@@ -137,7 +137,7 @@ export default function PermissoesPage() {
           <p className="text-[11px] text-[#999]">Selecione um colaborador para editar suas permissões</p>
           <button
             onClick={() => setShowModal(true)}
-            className="px-3 py-1.5 bg-[#3483fa] text-white text-[11px] font-medium rounded-md hover:bg-[#2968c8] flex items-center gap-1"
+            className="px-3 py-1.5 bg-[#1f2328] text-white text-[11px] font-medium rounded-md hover:bg-[#111827] flex items-center gap-1"
           >
             <Plus className="w-3.5 h-3.5" /> Novo Colaborador
           </button>
@@ -154,7 +154,7 @@ export default function PermissoesPage() {
                 key={p.id}
                 onClick={() => setSelectedId(p.id)}
                 className={`px-3 py-1.5 rounded-md text-[12px] font-medium transition-colors flex items-center gap-1.5 ${
-                  selectedId === p.id ? 'bg-[#3483fa] text-white' : 'bg-[#f5f5f5] text-[#666] hover:bg-[#eee]'
+                  selectedId === p.id ? 'bg-[#1f2328] text-white' : 'bg-[#f5f5f5] text-[#666] hover:bg-[#eee]'
                 }`}
               >
                 <Users className="w-3 h-3" />

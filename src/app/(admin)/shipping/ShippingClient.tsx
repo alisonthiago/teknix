@@ -59,7 +59,7 @@ export default function ShippingClient({ shipments }: { shipments: Shipment[] })
               </CardTitle>
               <Badge variant="outline" className={
                 shipment.status === 'ENVIADO'
-                  ? 'bg-[#ecf3fe] text-[#2968c8] border-blue-200'
+                  ? 'bg-[#f5f5f5] text-[#111827] border-[#cbd5e1]'
                   : 'bg-cyan-100 text-cyan-700 border-cyan-200'
               }>
                 {shipment.status}
@@ -98,7 +98,7 @@ export default function ShippingClient({ shipments }: { shipments: Shipment[] })
                 <button
                   onClick={() => handleAction(shipment.id, 'enviar')}
                   disabled={processing === shipment.id}
-                  className="flex-1 py-2.5 bg-[#3483fa] text-white text-sm font-medium rounded-lg hover:bg-[#2968c8] disabled:opacity-50 transition-colors"
+                  className="flex-1 py-2.5 bg-[#1f2328] text-white text-sm font-medium rounded-lg hover:bg-[#111827] disabled:opacity-50 transition-colors"
                 >
                   Marcar Enviado
                 </button>

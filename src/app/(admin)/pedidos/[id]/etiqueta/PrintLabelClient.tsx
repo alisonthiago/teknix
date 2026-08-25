@@ -62,7 +62,7 @@ export default function PrintLabelClient({ order }: { order: OrderDetail }) {
                   window.open(pdfUrl, '_blank')?.print()
                 }
               }}
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-[#3483fa] hover:bg-[#2968c8] px-4 py-2 rounded-xl transition-all cursor-pointer shadow-xs"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-[#1f2328] hover:bg-[#111827] px-4 py-2 rounded-xl transition-all cursor-pointer shadow-xs"
             >
               <Printer className="w-4 h-4" /> Imprimir Etiqueta Térmica
             </button>
@@ -94,7 +94,7 @@ export default function PrintLabelClient({ order }: { order: OrderDetail }) {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setLoadError(false)}
-                className="px-4 py-2 bg-[#3483fa] text-white text-xs font-semibold rounded-xl hover:bg-[#2968c8] transition-colors flex items-center gap-1.5"
+                className="px-4 py-2 bg-[#1f2328] text-white text-xs font-semibold rounded-xl hover:bg-[#111827] transition-colors flex items-center gap-1.5"
               >
                 <RefreshCw className="w-3.5 h-3.5" /> Tentar Novamente
               </button>

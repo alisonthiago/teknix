@@ -99,7 +99,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
             </button>
 
             <p className="text-center text-[13px] text-[#666] pt-2">
-              Não tem uma conta? <Link href="#" className="text-[#3483fa] hover:underline font-medium">Cadastre-se</Link>
+              Não tem uma conta? <Link href="#" className="text-[#1f2328] hover:underline font-medium">Cadastre-se</Link>
             </p>
           </form>
         </div>

@@ -160,7 +160,7 @@ export default function DashboardPage() {
               setSelectedMarketplace(e.target.value)
               setSelectedAccount('ALL')
             }}
-            className="w-full sm:w-auto px-3 py-2.5 sm:py-1.5 border border-[#e6e6e6] rounded-md text-xs text-[#333] bg-white focus:outline-none focus:border-[#3483fa] min-h-[44px]"
+            className="w-full sm:w-auto px-3 py-2.5 sm:py-1.5 border border-[#e6e6e6] rounded-md text-xs text-[#333] bg-white focus:outline-none focus:border-[#1f2328] min-h-[44px]"
           >
             <option value="ALL">Todos os marketplaces</option>
             {filterData?.marketplaces.map(mp => (
@@ -171,7 +171,7 @@ export default function DashboardPage() {
           <select
             value={selectedAccount}
             onChange={e => setSelectedAccount(e.target.value)}
-            className="w-full sm:w-auto px-3 py-2.5 sm:py-1.5 border border-[#e6e6e6] rounded-md text-xs text-[#333] bg-white focus:outline-none focus:border-[#3483fa] min-h-[44px]"
+            className="w-full sm:w-auto px-3 py-2.5 sm:py-1.5 border border-[#e6e6e6] rounded-md text-xs text-[#333] bg-white focus:outline-none focus:border-[#1f2328] min-h-[44px]"
           >
             <option value="ALL">Todas as contas</option>
             {filteredAccounts.map(acc => (
@@ -182,7 +182,7 @@ export default function DashboardPage() {
           <select
             value={period}
             onChange={e => setPeriod(e.target.value)}
-            className="w-full sm:w-auto px-3 py-2.5 sm:py-1.5 border border-[#e6e6e6] rounded-md text-xs text-[#333] bg-white focus:outline-none focus:border-[#3483fa] min-h-[44px]"
+            className="w-full sm:w-auto px-3 py-2.5 sm:py-1.5 border border-[#e6e6e6] rounded-md text-xs text-[#333] bg-white focus:outline-none focus:border-[#1f2328] min-h-[44px]"
           >
             <option value="7">Últimos 7 dias</option>
             <option value="30">Últimos 30 dias</option>

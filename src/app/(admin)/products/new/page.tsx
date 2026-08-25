@@ -71,7 +71,7 @@ export default async function NewProductPage() {
                 <select 
                   id="supplier_id" 
                   name="supplier_id" 
-                  className="flex h-9 w-full items-center justify-between rounded-md border border-[#e6e6e6] bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-white placeholder:text-[#999] focus:outline-none focus:ring-1 focus:ring-[#3483fa] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-9 w-full items-center justify-between rounded-md border border-[#e6e6e6] bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-white placeholder:text-[#999] focus:outline-none focus:ring-1 focus:ring-[#1f2328] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <option value="">Selecione um fornecedor</option>
                   {suppliers?.map(supplier => (
@@ -136,7 +136,7 @@ export default async function NewProductPage() {
           <Link href="/products">
             <Button type="button" variant="outline">Cancelar</Button>
           </Link>
-          <Button type="submit" className="bg-[#3483fa] hover:bg-[#2968c8]">
+          <Button type="submit" className="bg-[#1f2328] hover:bg-[#111827]">
             Salvar Produto
           </Button>
         </div>

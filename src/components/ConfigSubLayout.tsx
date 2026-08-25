@@ -53,7 +53,7 @@ export function Toggle({ label, description, enabled, onChange }: { label: strin
       </div>
       <button
         onClick={() => onChange(!enabled)}
-        className={`relative w-10 h-[22px] rounded-full transition-colors flex-shrink-0 ${enabled ? 'bg-[#3483fa]' : 'bg-[#ccc]'}`}
+        className={`relative w-10 h-[22px] rounded-full transition-colors flex-shrink-0 ${enabled ? 'bg-[#1f2328]' : 'bg-[#ccc]'}`}
       >
         <div className={`absolute top-[3px] w-4 h-4 rounded-full bg-white transition-transform ${enabled ? 'translate-x-[22px]' : 'translate-x-[3px]'}`} />
       </button>

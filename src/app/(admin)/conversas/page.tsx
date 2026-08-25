@@ -279,7 +279,7 @@ export default function ConversasPage() {
                       title="Em breve: envio de arquivos"
                       className="p-1 rounded-lg hover:bg-[#f0f0f0] hover:text-[#111] flex items-center gap-1 text-[11px] font-bold transition-colors cursor-pointer opacity-50"
                     >
-                      <Paperclip className="w-3.5 h-3.5 text-[#3483fa]" /> Arquivo
+                      <Paperclip className="w-3.5 h-3.5 text-[#1f2328]" /> Arquivo
                     </button>
                   </div>
                   <span className="text-[10px] text-[#999]">Pressione Enter para enviar</span>

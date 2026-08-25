@@ -31,8 +31,8 @@ export default async function StockPage() {
           <CardContent className="p-6">
             <div className="flex justify-between items-start mb-4">
               <p className="text-[#999] font-medium">Total Itens</p>
-              <div className="p-2 bg-[#ecf3fe] rounded-full">
-                <Package className="h-5 w-5 text-[#3483fa]" />
+              <div className="p-2 bg-[#f5f5f5] rounded-full">
+                <Package className="h-5 w-5 text-[#1f2328]" />
               </div>
             </div>
             <h3 className="text-3xl font-bold text-[#333]">{products?.length || 0}</h3>
@@ -44,8 +44,8 @@ export default async function StockPage() {
           <CardContent className="p-6">
             <div className="flex justify-between items-start mb-4">
               <p className="text-[#999] font-medium">Estoque Total</p>
-              <div className="p-2 bg-[#ecf3fe] rounded-full">
-                <Package className="h-5 w-5 text-[#3483fa]" />
+              <div className="p-2 bg-[#f5f5f5] rounded-full">
+                <Package className="h-5 w-5 text-[#1f2328]" />
               </div>
             </div>
             <h3 className="text-3xl font-bold text-[#333]">
@@ -93,7 +93,7 @@ export default async function StockPage() {
                   <TableRow key={p.id}>
                     <TableCell className="font-mono text-sm">{p.sku}</TableCell>
                     <TableCell>
-                      <Link href={`/products/${p.id}`} className="text-[#3483fa] hover:underline">{p.name}</Link>
+                      <Link href={`/products/${p.id}`} className="text-[#1f2328] hover:underline">{p.name}</Link>
                     </TableCell>
                     <TableCell className="text-center font-bold text-red-600">{p.stock}</TableCell>
                     <TableCell className="text-center">{p.min_stock}</TableCell>
@@ -136,7 +136,7 @@ export default async function StockPage() {
                 <TableRow key={p.id}>
                   <TableCell className="font-mono text-sm">{p.sku}</TableCell>
                   <TableCell>
-                    <Link href={`/products/${p.id}`} className="text-[#3483fa] hover:underline">{p.name}</Link>
+                    <Link href={`/products/${p.id}`} className="text-[#1f2328] hover:underline">{p.name}</Link>
                   </TableCell>
                   <TableCell className="text-center font-medium">{p.stock}</TableCell>
                   <TableCell className="text-center">{p.min_stock}</TableCell>

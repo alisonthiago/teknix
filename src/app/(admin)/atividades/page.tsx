@@ -164,7 +164,7 @@ export default function AtividadesPage() {
 
                     <div className="flex items-center gap-3 text-[11px] text-[#64748b] pt-1 flex-wrap font-medium">
                       <span className="flex items-center gap-1">
-                        <User className="w-3.5 h-3.5 text-[#3483fa]" /> Responsável: <strong className="text-[#1e293b]">{task.assigned_to.name}</strong>
+                        <User className="w-3.5 h-3.5 text-[#1f2328]" /> Responsável: <strong className="text-[#1e293b]">{task.assigned_to.name}</strong>
                       </span>
                       {task.related_order_number && (
                         <span className="flex items-center gap-1 font-mono text-[#1e293b]">
@@ -213,7 +213,7 @@ export default function AtividadesPage() {
           <div className="bg-white rounded-2xl w-full max-w-lg p-6 space-y-4 shadow-2xl border border-[#e6e6e6]" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between pb-3 border-b border-[#f0f0f0]">
               <h3 className="text-sm font-black text-[#111] flex items-center gap-2">
-                <CheckSquare className="w-4 h-4 text-[#3483fa]" /> Atribuir Nova Atividade
+                <CheckSquare className="w-4 h-4 text-[#1f2328]" /> Atribuir Nova Atividade
               </h3>
               <button onClick={() => setShowCreateModal(false)} className="text-[#888] hover:text-[#111]">✕</button>
             </div>

@@ -184,7 +184,7 @@ function NegocioTab({ onNavigate }: { onNavigate: (path: string) => void }) {
         <h3 className="text-[13px] font-semibold text-[#333] mb-3">Operação</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           <ConfigCard
-            icon={<Package className="w-5 h-5 text-[#3483fa]" />}
+            icon={<Package className="w-5 h-5 text-[#1f2328]" />}
             title="Configurações de estoque"
             description="Mínimo, máximo, alertas, reserva, localização, lote."
             onClick={() => onNavigate('/sistema/estoque-config')}
@@ -214,7 +214,7 @@ function NegocioTab({ onNavigate }: { onNavigate: (path: string) => void }) {
         <h3 className="text-[13px] font-semibold text-[#333] mb-3">Dados</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           <ConfigCard
-            icon={<Upload className="w-5 h-5 text-[#3483fa]" />}
+            icon={<Upload className="w-5 h-5 text-[#1f2328]" />}
             title="Importar / Exportar"
             description="Produtos, estoque, vendas, pedidos em XLSX e CSV."
             onClick={() => onNavigate('/sistema/import-export')}

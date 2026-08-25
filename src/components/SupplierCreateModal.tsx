@@ -321,7 +321,7 @@ export default function SupplierCreateModal({ open, onClose, onCreated }: Suppli
                   variant="ghost"
                   size="sm"
                   onClick={() => setContacts(prev => [...prev, { name: '', phone: '', is_whatsapp: true }])}
-                  className="h-7 text-[11px] px-2 text-[#3483fa] hover:text-[#2968c8] hover:bg-[#eff4fe]"
+                  className="h-7 text-[11px] px-2 text-[#1f2328] hover:text-[#111827] hover:bg-[#eff4fe]"
                 >
                   <Plus className="w-3 h-3 mr-1" />
                   Adicionar Contato
@@ -367,7 +367,7 @@ export default function SupplierCreateModal({ open, onClose, onCreated }: Suppli
                             newContacts[index].is_whatsapp = e.target.checked
                             setContacts(newContacts)
                           }}
-                          className="w-4 h-4 rounded text-[#3483fa] border-[#ccc] focus:ring-[#3483fa]"
+                          className="w-4 h-4 rounded text-[#1f2328] border-[#ccc] focus:ring-[#1f2328]"
                         />
                         <span className="text-[12px] text-[#555] font-medium">É WhatsApp?</span>
                       </label>

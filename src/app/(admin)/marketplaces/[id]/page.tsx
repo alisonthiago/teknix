@@ -248,14 +248,14 @@ export default function MarketplaceDetailPage() {
       <div>
         <button
           onClick={() => router.push('/marketplaces')}
-          className="inline-flex items-center gap-1.5 text-sm text-[#999] hover:text-[#3483fa] transition-colors mb-4 cursor-pointer"
+          className="inline-flex items-center gap-1.5 text-sm text-[#999] hover:text-[#1f2328] transition-colors mb-4 cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" /> Voltar para Marketplaces
         </button>
 
         {loading ? (
           <div className="flex items-center gap-3">
-            <RefreshCw className="w-6 h-6 animate-spin text-[#3483fa]" />
+            <RefreshCw className="w-6 h-6 animate-spin text-[#1f2328]" />
             <span className="text-sm text-[#999]">Carregando marketplace...</span>
           </div>
         ) : error ? (
@@ -273,7 +273,7 @@ export default function MarketplaceDetailPage() {
             </div>
             <button
               onClick={() => setShowConnectModal(true)}
-              className="inline-flex items-center justify-center gap-2 bg-[#3483fa] text-white text-sm font-semibold px-4 py-2.5 rounded-lg hover:bg-[#2968c8] transition-colors w-full sm:w-auto shadow-sm cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 bg-[#1f2328] text-white text-sm font-semibold px-4 py-2.5 rounded-lg hover:bg-[#111827] transition-colors w-full sm:w-auto shadow-sm cursor-pointer"
             >
               <Plus className="w-4 h-4" /> Conectar Nova Conta
             </button>
@@ -360,7 +360,7 @@ export default function MarketplaceDetailPage() {
                   placeholder="Ex: APP_USR-8874323668438382-..."
                   value={tokenInput}
                   onChange={e => setTokenInput(e.target.value)}
-                  className="w-full h-11 px-3.5 rounded-xl border border-[#d0d7de] font-mono text-sm text-[#333] focus:outline-none focus:ring-2 focus:ring-[#3483fa]/20 focus:border-[#3483fa]"
+                  className="w-full h-11 px-3.5 rounded-xl border border-[#d0d7de] font-mono text-sm text-[#333] focus:outline-none focus:ring-2 focus:ring-[#1f2328]/20 focus:border-[#1f2328]"
                 />
               </div>
 
@@ -373,11 +373,11 @@ export default function MarketplaceDetailPage() {
                   placeholder="Ex: TG-64a..."
                   value={refreshTokenInput}
                   onChange={e => setRefreshTokenInput(e.target.value)}
-                  className="w-full h-10 px-3.5 rounded-xl border border-[#d0d7de] font-mono text-sm text-[#333] focus:outline-none focus:ring-2 focus:ring-[#3483fa]/20 focus:border-[#3483fa]"
+                  className="w-full h-10 px-3.5 rounded-xl border border-[#d0d7de] font-mono text-sm text-[#333] focus:outline-none focus:ring-2 focus:ring-[#1f2328]/20 focus:border-[#1f2328]"
                 />
               </div>
 
-              <div className="p-3 rounded-xl bg-[#f0f7ff] border border-[#d0e4ff] text-xs text-[#1c64f2] space-y-1">
+              <div className="p-3 rounded-xl bg-[#f5f5f5] border border-[#d0e4ff] text-xs text-[#1c64f2] space-y-1">
                 <p className="font-bold">Onde pegar o token?</p>
                 <p>Acesse <strong>developers.mercadolivre.com.br</strong> → Meus Aplicativos → Detalhes → Testar / Obter Token.</p>
               </div>
@@ -394,7 +394,7 @@ export default function MarketplaceDetailPage() {
                 <button
                   type="submit"
                   disabled={isSavingToken}
-                  className="px-5 py-2.5 bg-[#3483fa] hover:bg-[#2968c8] text-white text-sm font-bold rounded-xl transition-colors shadow-sm disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
+                  className="px-5 py-2.5 bg-[#1f2328] hover:bg-[#111827] text-white text-sm font-bold rounded-xl transition-colors shadow-sm disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
                 >
                   {isSavingToken ? (
                     <>
@@ -435,7 +435,7 @@ export default function MarketplaceDetailPage() {
               <p className="text-sm text-[#999] mb-4">Nenhuma conta conectada neste marketplace.</p>
               <button
                 onClick={() => setShowConnectModal(true)}
-                className="inline-flex items-center gap-2 bg-[#3483fa] text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-[#2968c8] transition-colors cursor-pointer"
+                className="inline-flex items-center gap-2 bg-[#1f2328] text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-[#111827] transition-colors cursor-pointer"
               >
                 <Plus className="w-4 h-4" /> Conectar Primeira Conta
               </button>
@@ -447,7 +447,7 @@ export default function MarketplaceDetailPage() {
                 return (
                   <div
                     key={account.id}
-                    className="bg-white border border-[#e6e6e6] rounded-2xl p-5 hover:border-[#3483fa]/40 hover:shadow-md transition-all flex flex-col justify-between"
+                    className="bg-white border border-[#e6e6e6] rounded-2xl p-5 hover:border-[#1f2328]/40 hover:shadow-md transition-all flex flex-col justify-between"
                   >
                     <div>
                       {/* Header */}
@@ -478,7 +478,7 @@ export default function MarketplaceDetailPage() {
                         </div>
                         <div className="flex items-center justify-between">
                           <span>Estoque Centralizado:</span>
-                          <span className="text-[#3483fa] font-medium">Sincronização Ativa</span>
+                          <span className="text-[#1f2328] font-medium">Sincronização Ativa</span>
                         </div>
                         <div className="flex items-center justify-between pt-1 border-t border-[#eeeeee]">
                           <span>Última Sincronização:</span>
@@ -496,7 +496,7 @@ export default function MarketplaceDetailPage() {
                           type="button"
                           onClick={() => handleSyncAccount(account)}
                           disabled={isSyncing}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#f0f7ff] hover:bg-[#e0efff] text-[#3483fa] text-xs font-bold rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#f5f5f5] hover:bg-[#e0efff] text-[#1f2328] text-xs font-bold rounded-lg transition-colors cursor-pointer disabled:opacity-50"
                         >
                           {isSyncing ? (
                             <>

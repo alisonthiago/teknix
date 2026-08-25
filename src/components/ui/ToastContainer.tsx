@@ -21,7 +21,7 @@ export function ToastContainer() {
               isSuccess ? 'border-l-[#38a169]' :
               isError ? 'border-l-[#e74c3c]' :
               isWarning ? 'border-l-[#f59e0b]' :
-              'border-l-[#3483fa]'
+              'border-l-[#1f2328]'
             }`}
           >
             {/* Icon */}
@@ -29,7 +29,7 @@ export function ToastContainer() {
               {isSuccess && <CheckCircle className="w-5 h-5 text-[#38a169]" />}
               {isError && <AlertCircle className="w-5 h-5 text-[#e74c3c]" />}
               {isWarning && <AlertTriangle className="w-5 h-5 text-[#f59e0b]" />}
-              {isInfo && <Info className="w-5 h-5 text-[#3483fa]" />}
+              {isInfo && <Info className="w-5 h-5 text-[#1f2328]" />}
             </div>
 
             {/* Content */}

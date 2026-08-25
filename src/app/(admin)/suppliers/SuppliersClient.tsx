@@ -63,7 +63,7 @@ export default function SuppliersClient({ suppliers }: { suppliers: { id: string
     <div className="mp-stack">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <p className="text-sm text-[#999]">Gerencie os fornecedores da sua operação.</p>
-        <Button onClick={handleOpenNew} className="bg-[#3483fa] hover:bg-[#2968c8]">
+        <Button onClick={handleOpenNew} className="bg-[#1f2328] hover:bg-[#111827]">
           <Plus className="w-4 h-4 mr-2" /> Novo Fornecedor
         </Button>
       </div>

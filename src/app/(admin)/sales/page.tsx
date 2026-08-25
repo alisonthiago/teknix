@@ -29,7 +29,7 @@ export default async function SalesPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <p className="text-sm text-[#999]">Acompanhe as saídas e a rentabilidade real de cada venda.</p>
         <Link href="/sales/new">
-          <Button className="bg-[#3483fa] hover:bg-[#2968c8]">
+          <Button className="bg-[#1f2328] hover:bg-[#111827]">
             <Plus className="w-4 h-4 mr-2" /> Registrar Venda
           </Button>
         </Link>

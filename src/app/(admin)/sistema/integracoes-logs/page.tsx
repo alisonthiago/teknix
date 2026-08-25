@@ -14,7 +14,7 @@ const STATUS_STYLES: Record<string, string> = {
 }
 
 const METHOD_STYLES: Record<string, string> = {
-  GET: 'bg-[#f0f7ff] text-[#3483fa]',
+  GET: 'bg-[#f5f5f5] text-[#1f2328]',
   POST: 'bg-[#f0fff4] text-[#38a169]',
   PUT: 'bg-[#fffaf0] text-[#e67e22]',
   DELETE: 'bg-[#fff5f5] text-[#e74c3c]',
@@ -79,13 +79,13 @@ export default function IntegracoesLogsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:justify-between mb-4">
         <SearchInput placeholder="Buscar log..." value={search} onChange={setSearch} />
         <div className="flex gap-2">
-          <select value={filterMp} onChange={e => setFilterMp(e.target.value)} className="w-full sm:w-auto min-h-[44px] flex-1 sm:flex-none px-3 border border-[#e6e6e6] rounded-lg text-[12px] text-[#666] focus:outline-none focus:border-[#3483fa] bg-white">
+          <select value={filterMp} onChange={e => setFilterMp(e.target.value)} className="w-full sm:w-auto min-h-[44px] flex-1 sm:flex-none px-3 border border-[#e6e6e6] rounded-lg text-[12px] text-[#666] focus:outline-none focus:border-[#1f2328] bg-white">
             <option value="all">Todos marketplaces</option>
             {(marketplaces || []).map((m: Record<string, unknown>) => (
               <option key={m.code as string} value={m.code as string}>{m.name as string}</option>
             ))}
           </select>
-          <select value={filterAction} onChange={e => setFilterAction(e.target.value)} className="w-full sm:w-auto min-h-[44px] flex-1 sm:flex-none px-3 border border-[#e6e6e6] rounded-lg text-[12px] text-[#666] focus:outline-none focus:border-[#3483fa] bg-white">
+          <select value={filterAction} onChange={e => setFilterAction(e.target.value)} className="w-full sm:w-auto min-h-[44px] flex-1 sm:flex-none px-3 border border-[#e6e6e6] rounded-lg text-[12px] text-[#666] focus:outline-none focus:border-[#1f2328] bg-white">
             <option value="all">Todas ações</option>
             {actions.map(a => (
               <option key={a} value={a}>{a}</option>

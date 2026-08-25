@@ -201,7 +201,7 @@ export default function SupplierCatalogsEditor({ supplierId }: { supplierId: str
         {/* Dropzone PDF / Imagem */}
         <div
           className={`relative border-2 border-dashed rounded-xl p-6 text-center transition-colors cursor-pointer flex flex-col justify-center items-center h-40 ${
-            dragActive ? 'border-[#3483fa] bg-[#f0f7ff]' : 'border-[#d0d0d0] hover:border-[#bbb] hover:bg-[#fafafa]'
+            dragActive ? 'border-[#1f2328] bg-[#f5f5f5]' : 'border-[#d0d0d0] hover:border-[#bbb] hover:bg-[#fafafa]'
           }`}
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
@@ -222,13 +222,13 @@ export default function SupplierCatalogsEditor({ supplierId }: { supplierId: str
           />
           {uploading && !showLinkForm ? (
             <>
-              <Loader2 className="w-8 h-8 text-[#3483fa] animate-spin mb-2" />
+              <Loader2 className="w-8 h-8 text-[#1f2328] animate-spin mb-2" />
               <p className="text-[13px] text-[#333] font-bold">Enviando catálogo...</p>
               <p className="text-[11px] text-[#999] mt-0.5">Salvando no Supabase Storage</p>
             </>
           ) : (
             <>
-              <UploadCloud className="w-8 h-8 text-[#3483fa] mb-2" />
+              <UploadCloud className="w-8 h-8 text-[#1f2328] mb-2" />
               <p className="text-[13px] text-[#333] font-bold">Enviar Catálogo (PDF ou Imagem)</p>
               <p className="text-[11px] text-[#888] mt-1">Arraste ou clique para selecionar (até 50MB)</p>
             </>
@@ -298,7 +298,7 @@ export default function SupplierCatalogsEditor({ supplierId }: { supplierId: str
                   ) : isImage ? (
                     <ImageIcon className="w-10 h-10 text-[#16a34a] mb-2" />
                   ) : (
-                    <LinkIcon className="w-10 h-10 text-[#3483fa] mb-2" />
+                    <LinkIcon className="w-10 h-10 text-[#1f2328] mb-2" />
                   )}
                   <span className="text-[11px] text-center font-bold text-[#333] line-clamp-2 w-full" title={cat.title}>
                     {cat.title}

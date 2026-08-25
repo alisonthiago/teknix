@@ -286,9 +286,9 @@ function ProductsTab() {
 
             {/* Ações em Lote ou Botões de Ação */}
             {selectedItems.length > 0 ? (
-              <div className="flex items-center gap-2 bg-[#f0f7ff] px-3 py-1 rounded-xl border border-[#3483fa]/20 shadow-2xs">
-                <span className="text-xs font-bold text-[#3483fa]">{selectedItems.length} sel.</span>
-                <button onClick={handleExportSelected} className="text-xs font-bold text-[#3483fa] hover:underline cursor-pointer">Exportar</button>
+              <div className="flex items-center gap-2 bg-[#f5f5f5] px-3 py-1 rounded-xl border border-[#1f2328]/20 shadow-2xs">
+                <span className="text-xs font-bold text-[#1f2328]">{selectedItems.length} sel.</span>
+                <button onClick={handleExportSelected} className="text-xs font-bold text-[#1f2328] hover:underline cursor-pointer">Exportar</button>
                 <button onClick={handleDeleteSelected} className="text-xs font-bold text-[#dc2626] hover:underline cursor-pointer">Excluir</button>
               </div>
             ) : (
@@ -638,9 +638,9 @@ function SuppliersTab() {
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:justify-between mb-4">
         <SearchInput placeholder="Buscar fornecedor..." value={search} onChange={setSearch} />
         {selectedItems.length > 0 ? (
-          <div className="flex items-center gap-2 bg-[#f0f7ff] px-3 py-1.5 rounded-md border border-[#3483fa]/20">
-            <span className="text-[12px] font-medium text-[#3483fa] mr-2">{selectedItems.length} selecionado(s)</span>
-            <button onClick={handleExportSelected} className="flex items-center gap-1.5 text-[12px] font-medium text-[#3483fa] bg-white px-2.5 py-1.5 rounded border border-[#3483fa]/20 hover:bg-[#3483fa] hover:text-white transition-colors cursor-pointer"><Download className="w-3.5 h-3.5" /> Exportar</button>
+          <div className="flex items-center gap-2 bg-[#f5f5f5] px-3 py-1.5 rounded-md border border-[#1f2328]/20">
+            <span className="text-[12px] font-medium text-[#1f2328] mr-2">{selectedItems.length} selecionado(s)</span>
+            <button onClick={handleExportSelected} className="flex items-center gap-1.5 text-[12px] font-medium text-[#1f2328] bg-white px-2.5 py-1.5 rounded border border-[#1f2328]/20 hover:bg-[#1f2328] hover:text-white transition-colors cursor-pointer"><Download className="w-3.5 h-3.5" /> Exportar</button>
             <button onClick={handleDeleteSelected} className="flex items-center gap-1.5 text-[12px] font-medium text-[#e74c3c] bg-white px-2.5 py-1.5 rounded border border-[#e74c3c]/20 hover:bg-[#e74c3c] hover:text-white transition-colors cursor-pointer"><Trash2 className="w-3.5 h-3.5" /> Excluir</button>
           </div>
         ) : (
@@ -688,7 +688,7 @@ function SuppliersTab() {
                 type="checkbox" 
                 checked={filtered.length > 0 && selectedItems.length === filtered.length}
                 onChange={toggleSelectAll}
-                className="rounded border-[#ccc] text-[#3483fa] focus:ring-[#3483fa]"
+                className="rounded border-[#ccc] text-[#1f2328] focus:ring-[#1f2328]"
               />
             </Th>
             <Th>Fornecedor</Th><Th>Contato</Th><Th>Cidade</Th><Th className="text-right">Prazo</Th><Th className="text-right">Ações</Th>
@@ -702,7 +702,7 @@ function SuppliersTab() {
                       type="checkbox" 
                       checked={selectedItems.includes(s.id as string)}
                       onChange={() => toggleSelect(s.id as string)}
-                      className="rounded border-[#ccc] text-[#3483fa] focus:ring-[#3483fa]"
+                      className="rounded border-[#ccc] text-[#1f2328] focus:ring-[#1f2328]"
                     />
                   </div>
                 </Td>
@@ -806,9 +806,9 @@ function PurchasesTab() {
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:justify-between mb-4">
         <SearchInput placeholder="Buscar compra..." value={search} onChange={setSearch} />
         {selectedItems.length > 0 ? (
-          <div className="flex items-center gap-2 bg-[#f0f7ff] px-3 py-1.5 rounded-md border border-[#3483fa]/20">
-            <span className="text-[12px] font-medium text-[#3483fa] mr-2">{selectedItems.length} selecionado(s)</span>
-            <button onClick={handleExportSelected} className="flex items-center gap-1.5 text-[12px] font-medium text-[#3483fa] bg-white px-2.5 py-1.5 rounded border border-[#3483fa]/20 hover:bg-[#3483fa] hover:text-white transition-colors cursor-pointer"><Download className="w-3.5 h-3.5" /> Exportar</button>
+          <div className="flex items-center gap-2 bg-[#f5f5f5] px-3 py-1.5 rounded-md border border-[#1f2328]/20">
+            <span className="text-[12px] font-medium text-[#1f2328] mr-2">{selectedItems.length} selecionado(s)</span>
+            <button onClick={handleExportSelected} className="flex items-center gap-1.5 text-[12px] font-medium text-[#1f2328] bg-white px-2.5 py-1.5 rounded border border-[#1f2328]/20 hover:bg-[#1f2328] hover:text-white transition-colors cursor-pointer"><Download className="w-3.5 h-3.5" /> Exportar</button>
             <button onClick={handleDeleteSelected} className="flex items-center gap-1.5 text-[12px] font-medium text-[#e74c3c] bg-white px-2.5 py-1.5 rounded border border-[#e74c3c]/20 hover:bg-[#e74c3c] hover:text-white transition-colors cursor-pointer"><Trash2 className="w-3.5 h-3.5" /> Excluir</button>
           </div>
         ) : (
@@ -855,7 +855,7 @@ function PurchasesTab() {
                 type="checkbox" 
                 checked={filtered.length > 0 && selectedItems.length === filtered.length}
                 onChange={toggleSelectAll}
-                className="rounded border-[#ccc] text-[#3483fa] focus:ring-[#3483fa]"
+                className="rounded border-[#ccc] text-[#1f2328] focus:ring-[#1f2328]"
               />
             </Th>
             <Th>Data</Th><Th>Fornecedor</Th><Th>Comprador</Th><Th className="text-right">Custo Total</Th><Th className="text-center">Status</Th><Th className="text-right w-12">Ações</Th>
@@ -872,7 +872,7 @@ function PurchasesTab() {
                         type="checkbox" 
                         checked={selectedItems.includes(p.id as string)}
                         onChange={() => toggleSelect(p.id as string)}
-                        className="rounded border-[#ccc] text-[#3483fa] focus:ring-[#3483fa]"
+                        className="rounded border-[#ccc] text-[#1f2328] focus:ring-[#1f2328]"
                       />
                     </div>
                   </Td>
@@ -1099,7 +1099,7 @@ function StockCountTab() {
                         value={counts[p.id as string] ?? ''}
                         onChange={e => updateCount(p.id as string, e.target.value)}
                         placeholder="—"
-                        className="w-20 px-2 py-1 text-center border border-[#e6e6e6] rounded-md text-[13px] text-[#333] focus:outline-none focus:border-[#3483fa] transition-colors min-h-[44px] sm:min-h-[34px] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        className="w-20 px-2 py-1 text-center border border-[#e6e6e6] rounded-md text-[13px] text-[#333] focus:outline-none focus:border-[#1f2328] transition-colors min-h-[44px] sm:min-h-[34px] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                     </Td>
                     <Td className="text-center">
@@ -1126,7 +1126,7 @@ function StockCountTab() {
             <div className="flex flex-col sm:flex-row justify-end mt-4 gap-2">
               <button
                 onClick={handleSave}
-                className="inline-flex items-center justify-center gap-2 bg-[#3483fa] text-white text-sm font-semibold px-5 py-2.5 rounded-lg hover:bg-[#2968c8] transition-colors min-h-[44px]"
+                className="inline-flex items-center justify-center gap-2 bg-[#1f2328] text-white text-sm font-semibold px-5 py-2.5 rounded-lg hover:bg-[#111827] transition-colors min-h-[44px]"
               >
                 <CheckCircle2 className="w-4 h-4" /> Salvar Conferência
               </button>

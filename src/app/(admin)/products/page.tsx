@@ -21,7 +21,7 @@ export default async function ProductsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <p className="text-sm text-[#999]">Catálogo de produtos da sua operação.</p>
         <Link href="/products/new">
-          <Button className="bg-[#3483fa] hover:bg-[#2968c8]">
+          <Button className="bg-[#1f2328] hover:bg-[#111827]">
             <Plus className="w-4 h-4 mr-2" /> Novo Produto
           </Button>
         </Link>

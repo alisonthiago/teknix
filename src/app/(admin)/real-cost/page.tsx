@@ -33,7 +33,7 @@ export default async function RealCostPage() {
                   <TableHead className="text-right">Outros</TableHead>
                   <TableHead className="text-right bg-[#fafafa] font-bold">Custo Real</TableHead>
                   <TableHead className="text-right">Estoque</TableHead>
-                  <TableHead className="text-right bg-[#ecf3fe] text-blue-900 font-bold">Total em Estoque</TableHead>
+                  <TableHead className="text-right bg-[#f5f5f5] text-[#1f2328] font-bold">Total em Estoque</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -62,7 +62,7 @@ export default async function RealCostPage() {
                       <TableCell className="text-right">R$ {other.toFixed(2)}</TableCell>
                       <TableCell className="text-right bg-[#fafafa] font-bold">R$ {realCost.toFixed(2)}</TableCell>
                       <TableCell className="text-right">{product.stock} un</TableCell>
-                      <TableCell className="text-right bg-[#ecf3fe] text-blue-900 font-bold">
+                      <TableCell className="text-right bg-[#f5f5f5] text-[#1f2328] font-bold">
                         R$ {totalInStock.toFixed(2)}
                       </TableCell>
                     </TableRow>

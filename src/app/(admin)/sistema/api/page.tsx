@@ -92,7 +92,7 @@ export default function ApiPage() {
           <button 
             onClick={handleCreateKey}
             disabled={saving || loading}
-            className="px-3 py-1.5 bg-[#3483fa] text-white text-[11px] font-medium rounded-md hover:bg-[#2968c8] flex items-center gap-1 disabled:opacity-50"
+            className="px-3 py-1.5 bg-[#1f2328] text-white text-[11px] font-medium rounded-md hover:bg-[#111827] flex items-center gap-1 disabled:opacity-50"
           >
             {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />} Criar chave
           </button>

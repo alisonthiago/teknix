@@ -78,7 +78,7 @@ export default async function ReportsPage() {
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         <Card>
           <CardContent className="p-4 text-center">
-            <DollarSign className="w-5 h-5 text-[#3483fa] mx-auto mb-2" />
+            <DollarSign className="w-5 h-5 text-[#1f2328] mx-auto mb-2" />
             <p className="text-xs text-[#999]">Faturamento</p>
             <p className="text-base sm:text-lg font-bold text-[#333]">{fmt(totalRevenue)}</p>
           </CardContent>
@@ -172,7 +172,7 @@ export default async function ReportsPage() {
                         <span className="text-[#999] text-xs sm:text-sm text-right shrink-0 ml-2">{mp.count} vendas — {fmt(mp.revenue)}</span>
                       </div>
                       <div className="w-full bg-[#f5f5f5] rounded-full h-2">
-                        <div className="bg-[#3483fa] h-2 rounded-full" style={{ width: `${pct}%` }}></div>
+                        <div className="bg-[#1f2328] h-2 rounded-full" style={{ width: `${pct}%` }}></div>
                       </div>
                     </div>
                   )

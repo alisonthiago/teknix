@@ -237,7 +237,7 @@ function SupplierCatalogsDisplay({ supplierId }: { supplierId: string }) {
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            className="mt-2 text-[11px] text-[#3483fa] hover:underline font-semibold"
+            className="mt-2 text-[11px] text-[#1f2328] hover:underline font-semibold"
           >
             + Enviar arquivo PDF / Imagem
           </button>
@@ -278,7 +278,7 @@ function SupplierCatalogsDisplay({ supplierId }: { supplierId: string }) {
                   <span className="text-[11px] text-center font-medium text-[#333] line-clamp-2 w-full" title={cat.title}>
                     {cat.title}
                   </span>
-                  <span className="text-xs text-[#3483fa] mt-1 group-hover:underline">
+                  <span className="text-xs text-[#1f2328] mt-1 group-hover:underline">
                     Abrir / Baixar ↗
                   </span>
                 </a>
@@ -314,14 +314,14 @@ function VisaoGeralTab({ supplier }: { supplier: SupplierDetail }) {
                   </tr>
                 ) : (
                   supplier.products.map(p => (
-                    <tr key={p.id} className="hover:bg-[#f0f7ff]/50 transition-colors">
+                    <tr key={p.id} className="hover:bg-[#f5f5f5]/50 transition-colors">
                       <td className="py-2.5 px-3 font-mono text-[#999]">
-                        <Link href={`/produtos/${p.id}`} className="hover:text-[#3483fa] hover:underline font-mono">
+                        <Link href={`/produtos/${p.id}`} className="hover:text-[#1f2328] hover:underline font-mono">
                           {p.sku}
                         </Link>
                       </td>
                       <td className="py-2.5 px-3">
-                        <Link href={`/produtos/${p.id}`} className="text-[#333] font-medium hover:text-[#3483fa] hover:underline inline-flex items-center gap-1.5 group">
+                        <Link href={`/produtos/${p.id}`} className="text-[#333] font-medium hover:text-[#1f2328] hover:underline inline-flex items-center gap-1.5 group">
                           <span>{p.name}</span>
                           <ExternalLink className="w-3 h-3 text-[#999] opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
                         </Link>
@@ -374,7 +374,7 @@ function VisaoGeralTab({ supplier }: { supplier: SupplierDetail }) {
                       <td className="py-2.5 px-3 text-right">
                         <Link 
                           href={`/purchases/${p.id}/nota`} 
-                          className="inline-flex items-center justify-center w-7 h-7 rounded bg-[#f5f5f5] text-[#666] hover:bg-[#3483fa] hover:text-white transition-colors" 
+                          className="inline-flex items-center justify-center w-7 h-7 rounded bg-[#f5f5f5] text-[#666] hover:bg-[#1f2328] hover:text-white transition-colors" 
                           title="Ver Nota Interna"
                         >
                           <FileText className="w-3.5 h-3.5" />
@@ -616,7 +616,7 @@ function TimelineTab({ supplier }: { supplier: SupplierDetail }) {
         ) : (
           supplier.timeline.map((h, i) => (
             <div key={i} className="px-4 py-3 flex items-start gap-3 hover:bg-[#fafafa] transition-colors">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#3483fa] mt-1.5 shrink-0" />
+              <div className="w-1.5 h-1.5 rounded-full bg-[#1f2328] mt-1.5 shrink-0" />
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium text-[#333]">{h.action}</span>
@@ -702,7 +702,7 @@ export default function FornecedorDetailClient({ supplier }: { supplier: Supplie
               <div className="flex items-center gap-2 relative">
                 <Link 
                   href={`/purchases/new?supplier=${supplier.id}`}
-                  className="h-[30px] inline-flex items-center gap-1.5 px-3 bg-[#3483fa] hover:bg-[#2968c8] text-white text-sm font-medium rounded-md transition-colors"
+                  className="h-[30px] inline-flex items-center gap-1.5 px-3 bg-[#1f2328] hover:bg-[#111827] text-white text-sm font-medium rounded-md transition-colors"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   Comprar

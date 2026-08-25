@@ -66,13 +66,13 @@ export function TabsTrigger({
       onClick={() => setActiveTab(value)}
       className={`pb-3 text-sm font-semibold transition-colors relative whitespace-nowrap cursor-pointer ${
         isActive
-          ? 'text-[#3483fa]'
+          ? 'text-[#1f2328]'
           : 'text-[#333] hover:text-[#666]'
       } ${className}`}
     >
       {children}
       {isActive && (
-        <span className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#3483fa] rounded-full" />
+        <span className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#1f2328] rounded-full" />
       )}
     </button>
   )

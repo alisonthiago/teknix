@@ -157,7 +157,7 @@ export default function MarketplacesPage() {
         </div>
         <button
           onClick={() => setShowConnectModal(true)}
-          className="inline-flex items-center gap-2 bg-[#3483fa] text-white text-sm font-semibold px-4 py-2.5 rounded-lg hover:bg-[#2968c8] transition-colors shadow-sm cursor-pointer"
+          className="inline-flex items-center gap-2 bg-[#1f2328] text-white text-sm font-semibold px-4 py-2.5 rounded-lg hover:bg-[#111827] transition-colors shadow-sm cursor-pointer"
         >
           <Plus className="w-4 h-4" /> Novo Marketplace
         </button>
@@ -238,7 +238,7 @@ export default function MarketplacesPage() {
             onClick={() => setFilter(f)}
             className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
               filter === f
-                ? 'bg-[#3483fa] text-white'
+                ? 'bg-[#1f2328] text-white'
                 : 'bg-[#f5f5f5] text-[#666] hover:bg-[#eee]'
             }`}
           >
@@ -250,7 +250,7 @@ export default function MarketplacesPage() {
       {/* Loading / Error */}
       {loading && (
         <div className="bg-white border border-[#e6e6e6] rounded-lg p-12 text-center text-sm text-[#999]">
-          <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-[#3483fa]" />
+          <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-[#1f2328]" />
           Carregando marketplaces...
         </div>
       )}
@@ -268,7 +268,7 @@ export default function MarketplacesPage() {
             return (
               <div
                 key={mp.id}
-                className="bg-white border border-[#e6e6e6] rounded-2xl p-5 hover:border-[#3483fa]/40 hover:shadow-md transition-all flex flex-col justify-between"
+                className="bg-white border border-[#e6e6e6] rounded-2xl p-5 hover:border-[#1f2328]/40 hover:shadow-md transition-all flex flex-col justify-between"
               >
                 {/* Top Section */}
                 <div>
@@ -281,14 +281,14 @@ export default function MarketplacesPage() {
                         <MarketplaceLogo name={mp.name} className="w-8 h-8" />
                       </div>
                       <div>
-                        <h3 className="text-[14px] font-bold text-[#333] group-hover:text-[#3483fa] transition-colors">{mp.name}</h3>
+                        <h3 className="text-[14px] font-bold text-[#333] group-hover:text-[#1f2328] transition-colors">{mp.name}</h3>
                         <p className="text-xs text-[#999]">{mp.code}</p>
                       </div>
                     </div>
 
                     <button
                       onClick={() => router.push(`/marketplaces/${mp.id}`)}
-                      className="p-1.5 rounded-lg text-[#999] hover:text-[#3483fa] hover:bg-[#f0f7ff] transition-colors"
+                      className="p-1.5 rounded-lg text-[#999] hover:text-[#1f2328] hover:bg-[#f5f5f5] transition-colors"
                       title="Ver detalhes do canal"
                     >
                       <ArrowRight className="w-4 h-4" />
@@ -360,7 +360,7 @@ export default function MarketplacesPage() {
                           e.stopPropagation()
                           setShowConnectModal(true)
                         }}
-                        className="inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold text-white bg-[#3483fa] hover:bg-[#2968c8] rounded-lg transition-colors shadow-sm"
+                        className="inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold text-white bg-[#1f2328] hover:bg-[#111827] rounded-lg transition-colors shadow-sm"
                       >
                         <Plus className="w-3 h-3" /> Conectar
                       </button>

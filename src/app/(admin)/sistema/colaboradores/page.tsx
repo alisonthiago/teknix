@@ -24,7 +24,7 @@ const ROLE_LABELS: Record<string, string> = {
 }
 
 const ROLE_COLORS: Record<string, string> = {
-  ADMIN: 'bg-[#f0f7ff] text-[#3483fa]', GESTOR: 'bg-[#f0f0ff] text-[#6c5ce7]',
+  ADMIN: 'bg-[#f5f5f5] text-[#1f2328]', GESTOR: 'bg-[#f0f0ff] text-[#6c5ce7]',
   FINANCEIRO: 'bg-[#f0fff4] text-[#38a169]', ESTOQUE: 'bg-[#fffaf0] text-[#e67e22]',
   SEPARADOR: 'bg-[#fff5f5] text-[#e74c3c]', VENDEDOR: 'bg-[#f5f5f5] text-[#666]',
 }
@@ -79,7 +79,7 @@ export default function ColaboradoresPage() {
             </>
           )}
         </div>
-        <button onClick={() => { setColabToEdit(null); setShowModal(true); }} className="w-full sm:w-auto min-h-[44px] px-3 py-1.5 bg-[#3483fa] text-white text-[11px] font-medium rounded-md hover:bg-[#2968c8] transition-colors flex items-center gap-1 justify-center">
+        <button onClick={() => { setColabToEdit(null); setShowModal(true); }} className="w-full sm:w-auto min-h-[44px] px-3 py-1.5 bg-[#1f2328] text-white text-[11px] font-medium rounded-md hover:bg-[#111827] transition-colors flex items-center gap-1 justify-center">
           <Plus className="w-3.5 h-3.5" /> Adicionar colaborador
         </button>
       </div>

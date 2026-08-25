@@ -44,7 +44,7 @@ export default function MessageCardRenderer({ message, isMe, showChannel, channe
           <div className="p-5 bg-white rounded-2xl border border-[#e2e8f0] shadow-sm space-y-4 w-full text-left">
             <div className="flex items-center justify-between pb-3 border-b border-[#f1f5f9]">
               <div className="flex items-center gap-2">
-                <ShoppingCart className="w-4 h-4 text-[#3483fa]" />
+                <ShoppingCart className="w-4 h-4 text-[#1f2328]" />
                 <span className="font-mono font-bold text-sm text-[#1e293b]">{meta.order_number || 'Pedido'}</span>
               </div>
               {meta.marketplace_name && (
@@ -272,7 +272,7 @@ export default function MessageCardRenderer({ message, isMe, showChannel, channe
               <img src={meta.file_url} alt="" className="w-full h-36 object-cover rounded-xl border border-[#eee]" />
             ) : (
               <div className="flex items-center gap-2.5 p-2 bg-[#f8fafc] rounded-xl border border-[#eee]">
-                <Paperclip className="w-4 h-4 text-[#3483fa]" />
+                <Paperclip className="w-4 h-4 text-[#1f2328]" />
                 <span className="text-xs font-bold text-[#1e293b] truncate">{meta.file_name || 'Documento.pdf'}</span>
               </div>
             )}

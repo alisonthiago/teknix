@@ -24,7 +24,7 @@ export default function PreferenciasPage() {
               <select
                 value={prefs[field.key as keyof typeof prefs]}
                 onChange={e => setPrefs(p => ({ ...p, [field.key]: e.target.value }))}
-                className="w-full px-3 py-2 border border-[#e6e6e6] rounded-md text-[13px] text-[#333] outline-none focus:border-[#3483fa] bg-white transition-colors"
+                className="w-full px-3 py-2 border border-[#e6e6e6] rounded-md text-[13px] text-[#333] outline-none focus:border-[#1f2328] bg-white transition-colors"
               >
                 {field.options.map(o => <option key={o} value={o}>{o}</option>)}
               </select>
@@ -40,7 +40,7 @@ export default function PreferenciasPage() {
             <select
               value={prefs.itens_pagina}
               onChange={e => setPrefs(p => ({ ...p, itens_pagina: e.target.value }))}
-              className="w-full px-3 py-2 border border-[#e6e6e6] rounded-md text-[13px] text-[#333] outline-none focus:border-[#3483fa] bg-white transition-colors"
+              className="w-full px-3 py-2 border border-[#e6e6e6] rounded-md text-[13px] text-[#333] outline-none focus:border-[#1f2328] bg-white transition-colors"
             >
               {['10', '20', '50', '100'].map(o => <option key={o} value={o}>{o} itens</option>)}
             </select>
@@ -50,7 +50,7 @@ export default function PreferenciasPage() {
             <select
               value={prefs.visualizacao}
               onChange={e => setPrefs(p => ({ ...p, visualizacao: e.target.value }))}
-              className="w-full px-3 py-2 border border-[#e6e6e6] rounded-md text-[13px] text-[#333] outline-none focus:border-[#3483fa] bg-white transition-colors"
+              className="w-full px-3 py-2 border border-[#e6e6e6] rounded-md text-[13px] text-[#333] outline-none focus:border-[#1f2328] bg-white transition-colors"
             >
               <option value="tabela">Tabela</option>
               <option value="cards">Cards</option>
@@ -61,7 +61,7 @@ export default function PreferenciasPage() {
       </ConfigSection>
 
       <div className="flex justify-end">
-        <button className="px-4 py-2 bg-[#3483fa] text-white text-[12px] font-medium rounded-md hover:bg-[#2968c8] transition-colors">Salvar preferências</button>
+        <button className="px-4 py-2 bg-[#1f2328] text-white text-[12px] font-medium rounded-md hover:bg-[#111827] transition-colors">Salvar preferências</button>
       </div>
     </ConfigSubLayout>
   )

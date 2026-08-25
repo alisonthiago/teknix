@@ -701,7 +701,7 @@ export default function MonitorAoVivoPage() {
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-1">
-                        <span className="text-sm font-bold text-[#1f2328] truncate group-hover:text-[#3483fa] transition-colors">
+                        <span className="text-sm font-bold text-[#1f2328] truncate group-hover:text-[#1f2328] transition-colors">
                           {evt.title}
                         </span>
                         <span className="text-xs text-[#999] shrink-0">
@@ -738,7 +738,7 @@ export default function MonitorAoVivoPage() {
                   className="py-2.5 flex items-center gap-3 hover:bg-[#fafafa] -mx-2 px-2 rounded-xl transition-colors group cursor-pointer"
                 >
                   <span className="text-sm font-extrabold text-[#888]">{idx + 1}</span>
-                  <div className="w-10 h-10 rounded-xl bg-[#fafafa] border border-[#eee] p-1 flex items-center justify-center shrink-0 overflow-hidden group-hover:border-[#3483fa] transition-colors">
+                  <div className="w-10 h-10 rounded-xl bg-[#fafafa] border border-[#eee] p-1 flex items-center justify-center shrink-0 overflow-hidden group-hover:border-[#1f2328] transition-colors">
                     {p.imageUrl && p.imageUrl !== '/placeholder.png' ? (
                       <img src={p.imageUrl} alt={p.name} className="w-full h-full object-contain" />
                     ) : (
@@ -746,10 +746,10 @@ export default function MonitorAoVivoPage() {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-[#222] group-hover:text-[#3483fa] transition-colors truncate">{p.name}</p>
+                    <p className="text-sm font-bold text-[#222] group-hover:text-[#1f2328] transition-colors truncate">{p.name}</p>
                     <p className="text-xs text-[#888]">{p.quantity} un. • R$ {p.revenue.toFixed(2)}</p>
                   </div>
-                  <ArrowRight className="w-3.5 h-3.5 text-[#ccc] group-hover:text-[#3483fa] group-hover:translate-x-0.5 transition-all shrink-0" />
+                  <ArrowRight className="w-3.5 h-3.5 text-[#ccc] group-hover:text-[#1f2328] group-hover:translate-x-0.5 transition-all shrink-0" />
                 </Link>
               ))}
             </div>
@@ -784,7 +784,7 @@ export default function MonitorAoVivoPage() {
               </div>
               <div className="p-3 bg-[#fafafa] rounded-xl border border-[#eee]">
                 <span className="text-xs text-[#888] font-bold uppercase block">Status</span>
-                <span className="font-bold text-[#3483fa]">{selectedOrder.status}</span>
+                <span className="font-bold text-[#1f2328]">{selectedOrder.status}</span>
               </div>
               <div className="p-3 bg-[#fafafa] rounded-xl border border-[#eee]">
                 <span className="text-xs text-[#888] font-bold uppercase block">Comprador</span>
