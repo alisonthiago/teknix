@@ -58,7 +58,7 @@ function PrecoSugeridoTab() {
   })
 
   const { data: mps } = useSupabaseQuery(async (s) => {
-    const { data } = await s.from('marketplaces').select('code, default_percentage_fee').eq('status', 'active')
+    const { data } = await s.from('marketplaces').select('code, default_percentage_fee').eq('status', 'ACTIVE')
     return data || []
   })
 
@@ -68,7 +68,7 @@ function PrecoSugeridoTab() {
     fees[mp.code as string] = Number(mp.default_percentage_fee || 0)
   }
   if (Object.keys(fees).length === 0) {
-    Object.assign(fees, { ML: 16, SHP: 18, AMZ: 15, TT: 20, MAG: 17 })
+    Object.assign(fees, { MERCADO_LIVRE: 16, SHOPEE: 18, AMAZON: 15, TIKTOK: 20, MAGALU: 17 })
   }
 
   return (

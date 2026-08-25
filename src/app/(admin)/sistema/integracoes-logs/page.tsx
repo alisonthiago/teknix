@@ -29,7 +29,7 @@ export default function IntegracoesLogsPage() {
   const { data: logs, loading } = useSupabaseQuery(async (s) => {
     const { data, error } = await s
       .from('integration_logs')
-      .select('*, marketplaces(name, code, logo), marketplace_accounts(account_name)')
+      .select('*, marketplaces(name, code, logo)')
       .order('created_at', { ascending: false })
       .limit(200)
     if (error) throw error

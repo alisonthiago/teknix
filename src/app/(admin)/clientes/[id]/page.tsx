@@ -290,12 +290,6 @@ export default function ClienteProfilePage() {
 
               {/* Total em Compras (LTV) e Compartilhar */}
               <div className="flex flex-col items-end gap-2.5 shrink-0">
-                <div className="bg-[#fafafa] border border-[#e6e6e6] p-4 rounded-2xl md:text-right w-full">
-                  <p className="text-[11px] font-bold text-[#888] uppercase tracking-wider">Total em Compras (LTV)</p>
-                  <p className="text-2xl font-black text-[#16a34a] mt-0.5">{formatBRL(totalSpent)}</p>
-                  <p className="text-[11px] text-[#999] mt-0.5">{orders.length} pedido{orders.length !== 1 ? 's' : ''} realizados</p>
-                </div>
-
                 <button
                   onClick={() => setShowShareModal(true)}
                   className="px-4 py-2 bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
@@ -303,6 +297,12 @@ export default function ClienteProfilePage() {
                   <Share2 className="w-3.5 h-3.5" />
                   <span>Compartilhar Cliente</span>
                 </button>
+
+                <div className="bg-[#fafafa] border border-[#e6e6e6] p-4 rounded-2xl md:text-right w-full">
+                  <p className="text-[11px] font-bold text-[#888] uppercase tracking-wider">Total em Compras (LTV)</p>
+                  <p className="text-2xl font-black text-[#16a34a] mt-0.5">{formatBRL(totalSpent)}</p>
+                  <p className="text-[11px] text-[#999] mt-0.5">{orders.length} pedido{orders.length !== 1 ? 's' : ''} realizados</p>
+                </div>
               </div>
             </div>
           </div>

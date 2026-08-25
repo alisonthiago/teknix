@@ -23,7 +23,7 @@ function SalesTab() {
   const { data: sales, loading: loadingSales } = useSupabaseQuery(async (s) => {
     const { data } = await s
       .from('sales')
-      .select('*, marketplaces(name, code, logo, id), marketplace_accounts(account_name, id, marketplace_id), sale_items(*, products(name, sku))')
+      .select('*, marketplaces(name, code, logo, id), sale_items(*, products(name, sku))')
       .order('created_at', { ascending: false })
     return data || []
   })
@@ -31,7 +31,7 @@ function SalesTab() {
   const { data: orders, loading: loadingOrders } = useSupabaseQuery(async (s) => {
     const { data } = await s
       .from('orders')
-      .select('*, marketplaces(name, code, logo, id), marketplace_accounts(account_name, id, marketplace_id), order_items(*, products(name, sku, price))')
+      .select('*, marketplaces(name, code, logo, id), order_items(*, products(name, sku, price))')
       .order('created_at', { ascending: false })
     return data || []
   })
@@ -52,9 +52,8 @@ function SalesTab() {
     if (salesList.length > 0) {
       return salesList.map(s => {
         const mp = s.marketplaces || { name: 'Mercado Livre', logo: '/logos/mercado-livre.svg' }
-        const acc = s.marketplace_accounts || { account_name: 'Conta Principal' }
         const items = s.sale_items || []
-        const qty = items.reduce((acc: number, i: any) => acc + (Number(i.quantity) || 1), 0) || 1
+        const qty = items.reduce((sum: number, i: any) => sum + (Number(i.quantity) || 1), 0) || 1
         return {
           id: s.id,
           orderId: s.order_id || s.id?.slice(0, 8),
@@ -62,7 +61,7 @@ function SalesTab() {
           marketplaceName: mp.name || 'Mercado Livre',
           marketplaceId: mp.id,
           marketplaceLogo: mp.logo,
-          accountName: acc.account_name || 'Conta Principal',
+          accountName: 'Conta Principal',
           accountId: s.marketplace_account_id,
           revenue: Number(s.total_revenue || 0),
           itemsCount: qty,
@@ -76,9 +75,8 @@ function SalesTab() {
     if (ordersList.length > 0) {
       return ordersList.map(o => {
         const mp = o.marketplaces || { name: 'Mercado Livre', logo: '/logos/mercado-livre.svg' }
-        const acc = o.marketplace_accounts || { account_name: 'Conta Principal' }
         const items = o.order_items || []
-        const qty = items.reduce((acc: number, i: any) => acc + (Number(i.quantity) || 1), 0) || 1
+        const qty = items.reduce((sum: number, i: any) => sum + (Number(i.quantity) || 1), 0) || 1
         return {
           id: o.id,
           orderId: o.order_number || o.id?.slice(0, 8),
@@ -86,7 +84,7 @@ function SalesTab() {
           marketplaceName: mp.name || 'Mercado Livre',
           marketplaceId: mp.id,
           marketplaceLogo: mp.logo,
-          accountName: acc.account_name || 'Conta Principal',
+          accountName: 'Conta Principal',
           accountId: o.marketplace_account_id,
           revenue: Number(o.total_amount || 0),
           itemsCount: qty,

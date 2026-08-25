@@ -17,7 +17,7 @@ export default function RelatorioContasPage() {
   const { data: sales, loading } = useSupabaseQuery(async (s) => {
     const { data, error } = await s
       .from('sales')
-      .select('*, marketplace_accounts(id, account_name, marketplace_id), marketplaces(name, code, logo), sale_items(cogs, fees, taxes, other_costs)')
+      .select('*, marketplaces(name, code, logo), sale_items(cogs, fees, taxes, other_costs)')
     if (error) throw error
     return data || []
   })

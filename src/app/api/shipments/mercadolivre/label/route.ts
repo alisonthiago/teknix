@@ -21,42 +21,38 @@ export async function GET(req: NextRequest) {
       const idsToFetch = orderIds ? orderIds.split(',').filter(Boolean) : (orderId ? [orderId] : [])
       const isAllUuid = idsToFetch.every(id => id.includes('-') && id.length === 36)
        if (isAllUuid) {
-         const { data: orders } = await supabase
-           .from('orders')
-           .select('*, order_items(*, products(name, sku, image_url)), marketplace_accounts(seller_id)')
-           .in('id', idsToFetch)
-         ordersData = orders || []
-         if (ordersData?.[0]?.marketplace_accounts?.seller_id) {
-           sellerId = ordersData[0].marketplace_accounts.seller_id
-         } else if ((ordersData[0] as any)?.marketplace_id) {
-           const { data: conn } = await supabase
-             .from('marketplace_connections')
-             .select('seller_id')
-             .eq('marketplace_id', (ordersData[0] as any).marketplace_id)
-             .limit(1)
-             .maybeSingle()
-           if (conn?.seller_id) sellerId = conn.seller_id
-         }
-       } else {
-         const { data: orders } = await supabase
-           .from('orders')
-           .select('*, order_items(*, products(name, sku, image_url)), marketplace_accounts(seller_id)')
-         
-         ordersData = (orders || []).filter(o => 
-           idsToFetch.includes(o.id) || idsToFetch.includes(o.order_number)
-         )
-         if (ordersData?.[0]?.marketplace_accounts?.seller_id) {
-           sellerId = ordersData[0].marketplace_accounts.seller_id
-         } else if ((ordersData[0] as any)?.marketplace_id) {
-           const { data: conn } = await supabase
-             .from('marketplace_connections')
-             .select('seller_id')
-             .eq('marketplace_id', (ordersData[0] as any).marketplace_id)
-             .limit(1)
-             .maybeSingle()
-           if (conn?.seller_id) sellerId = conn.seller_id
-         }
-       }
+          const { data: orders } = await supabase
+            .from('orders')
+            .select('*, order_items(*, products(name, sku, image_url))')
+            .in('id', idsToFetch)
+          ordersData = orders || []
+          if ((ordersData[0] as any)?.marketplace_id) {
+            const { data: conn } = await supabase
+              .from('marketplace_connections')
+              .select('seller_id')
+              .eq('marketplace_id', (ordersData[0] as any).marketplace_id)
+              .limit(1)
+              .maybeSingle()
+            if (conn?.seller_id) sellerId = conn.seller_id
+          }
+        } else {
+          const { data: orders } = await supabase
+            .from('orders')
+            .select('*, order_items(*, products(name, sku, image_url))')
+          
+          ordersData = (orders || []).filter(o => 
+            idsToFetch.includes(o.id) || idsToFetch.includes(o.order_number)
+          )
+          if ((ordersData[0] as any)?.marketplace_id) {
+            const { data: conn } = await supabase
+              .from('marketplace_connections')
+              .select('seller_id')
+              .eq('marketplace_id', (ordersData[0] as any).marketplace_id)
+              .limit(1)
+              .maybeSingle()
+            if (conn?.seller_id) sellerId = conn.seller_id
+          }
+        }
     }
 
     let token = ''

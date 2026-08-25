@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
 
     const { data: orders, error: ordersError } = await supabase
       .from('orders')
-      .select('*, marketplaces(id, name, code, logo), marketplace_accounts(seller_id), order_items(*, products(id, name, sku, image_url, cost_purchase, stock))')
+      .select('*, marketplaces(id, name, code, logo), order_items(*, products(id, name, sku, image_url, cost_purchase, stock))')
       .order('created_at', { ascending: false })
 
     if (ordersError) {
@@ -25,6 +25,7 @@ export async function GET(req: NextRequest) {
     const { data: printLogs } = await supabase
       .from('order_status_history')
       .select('*')
+      .ilike('notes', '%etiqueta%')
       .order('created_at', { ascending: false })
       .limit(100)
 

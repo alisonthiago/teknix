@@ -116,7 +116,10 @@ export default function CentralEtiquetasPage() {
   const fetchLabelsData = async () => {
     try {
       const res = await fetch('/api/shipments/labels')
-      if (!res.ok) return
+      if (!res.ok) {
+        console.error('Labels API error:', res.status)
+        return
+      }
       const data = await res.json()
 
       if (data.orders) {
@@ -125,11 +128,11 @@ export default function CentralEtiquetasPage() {
       if (data.printLogs) {
         const mappedLogs: PrintLogItem[] = data.printLogs.map((log: any, idx: number) => ({
           id: log.id || `log-${idx}`,
-          orderNumber: log.notes?.match(/Pedido #([A-Za-z0-9-_]+)/)?.[1] || log.order_id?.slice(0, 10) || 'Pedido',
+          orderNumber: log.notes?.match(/Pedido #([A-Za-z0-9-_]+)/)?.[1] || log.order_id?.slice(0, 8) || 'Pedido',
           marketplace: 'Mercado Livre',
           printedAt: new Date(log.created_at).toLocaleString('pt-BR'),
-          operator: log.notes?.match(/por (.+?)\./)?.[1] || 'Alison',
-          status: 'SUCCESS',
+          operator: log.notes?.match(/por (.+?)\./)?.[1] || 'Sistema',
+          status: log.notes?.includes('sucesso') ? 'SUCCESS' : 'INFO',
           attempt: log.notes?.includes('2ª') ? 2 : (log.notes?.includes('3ª') ? 3 : 1),
         }))
         setPrintLogs(mappedLogs)

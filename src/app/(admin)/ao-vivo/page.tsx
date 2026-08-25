@@ -78,7 +78,7 @@ export default function MonitorAoVivoPage() {
     // 1. Buscar Pedidos recentes com produtos e itens
     const { data: ordersData } = await supabase
       .from('orders')
-      .select('*, marketplaces(name, code, logo), order_items(*, products(*)), marketplace_accounts(account_name)')
+      .select('*, marketplaces(name, code, logo), order_items(*, products(*))')
       .order('created_at', { ascending: false })
       .limit(100)
 
@@ -325,67 +325,64 @@ export default function MonitorAoVivoPage() {
     <div className="space-y-6 animate-in fade-in duration-300 pb-12">
 
       {/* 🔴 HEADER SUPERIOR DO MONITOR AO VIVO */}
-      <div className="bg-white rounded-2xl border border-[#e6e6e6] p-4 sm:p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
+      <div className="bg-white rounded-2xl border border-[#e6e6e6] p-3 sm:p-4 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
           <div className="relative flex items-center justify-center">
-            <span className="absolute w-4 h-4 rounded-full bg-[#e74c3c] animate-ping opacity-75" />
-            <span className="relative w-3.5 h-3.5 rounded-full bg-[#e74c3c]" />
+            <span className="absolute w-3 h-3 rounded-full bg-[#e74c3c] animate-ping opacity-75" />
+            <span className="relative w-2.5 h-2.5 rounded-full bg-[#e74c3c]" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-[18px] sm:text-[20px] font-black text-[#1f2328] tracking-tight">
+              <h1 className="text-[14px] sm:text-[15px] font-black text-[#1f2328] tracking-tight">
                 Monitor ao Vivo Multicanal
               </h1>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#ffebee] text-[#e74c3c] border border-[#ffcdd2] flex items-center gap-1 uppercase tracking-wider">
-                <Radio className="w-3 h-3 animate-pulse" />
-                Em Tempo Real (2s)
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#ffebee] text-[#e74c3c] border border-[#ffcdd2] flex items-center gap-1 uppercase tracking-wider">
+                <Radio className="w-2.5 h-2.5 animate-pulse" />
+                Em Tempo Real
               </span>
             </div>
-            <p className="text-sm text-[#666] mt-0.5">
+            <p className="text-[11px] text-[#999] mt-0.5">
               Vendas, faturamento e logística em tempo real de todos os canais.
-            </p>
-            <p className="text-sm text-[#999] mt-0.5">
-              Atualizado há {lastUpdateSeconds}s
             </p>
           </div>
         </div>
 
-         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
           {/* Som Ativar / Desativar */}
           <button
             onClick={() => setSoundEnabled(!soundEnabled)}
-            className={`p-2 sm:px-3 sm:py-2 rounded-xl text-sm font-medium border flex items-center gap-1.5 transition-all ${soundEnabled
+            className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg text-[11px] font-medium border flex items-center gap-1 transition-all ${soundEnabled
                 ? 'bg-[#EEFFB3]/70 border-[#d9f99d] text-[#111] font-bold hover:bg-[#EEFFB3]'
                 : 'bg-[#f5f5f5] border-[#e6e6e6] text-[#888] hover:bg-[#eee]'
               }`}
             title={soundEnabled ? 'Som de nova venda ativado' : 'Som desativado'}
           >
-            {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+            {soundEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
             <span className="hidden sm:inline">{soundEnabled ? 'Alerta Sonoro' : 'Mudo'}</span>
           </button>
 
           {/* Refresh Manual */}
           <button
             onClick={() => refetch()}
-            className="p-2 sm:px-3 sm:py-2 rounded-xl border border-[#e6e6e6] bg-white hover:bg-[#f5f5f5] text-[#333] text-sm font-medium flex items-center gap-1.5 transition-all cursor-pointer"
+            className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg border border-[#e6e6e6] bg-white hover:bg-[#f5f5f5] text-[#333] text-[11px] font-medium flex items-center gap-1 transition-all cursor-pointer"
             title="Atualizar dados agora"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
             <span className="hidden sm:inline">Atualizar</span>
           </button>
 
           {/* Filtro de Período */}
-          <div className="flex bg-[#f5f5f5] p-1 rounded-xl border border-[#e6e6e6] text-sm font-semibold text-[#666]">
+          <div className="flex bg-[#f5f5f5] p-0.5 rounded-lg border border-[#e6e6e6] text-[11px] font-semibold text-[#666]">
             {[
               { id: 'NOW', label: 'Agora' },
               { id: 'TODAY', label: 'Hoje' },
               { id: '24H', label: '24h' },
-              { id: '7D', label: '7 Dias' }
+              { id: '7D', label: '7D' }
             ].map(p => (
               <button
                 key={p.id}
                 onClick={() => setPeriod(p.id as any)}
-                className={`px-3 py-1.5 rounded-lg transition-all ${period === p.id ? 'bg-white text-[#1f2328] shadow-2xs font-bold' : 'hover:text-[#1f2328]'
+                className={`px-2 py-1 rounded-md transition-all ${period === p.id ? 'bg-white text-[#1f2328] shadow-xs font-bold' : 'hover:text-[#1f2328]'
                   }`}
               >
                 {p.label}
@@ -393,13 +390,6 @@ export default function MonitorAoVivoPage() {
             ))}
           </div>
 
-          <button
-            onClick={() => refetch()}
-            className="p-2 rounded-xl border border-[#e6e6e6] bg-white text-[#666] hover:text-[#1f2328] hover:bg-[#fafafa] transition-colors"
-            title="Atualizar agora"
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-[#5c8a00]' : ''}`} />
-          </button>
         </div>
       </div>
 
@@ -497,20 +487,20 @@ export default function MonitorAoVivoPage() {
           </div>
 
           {/* 🚚 DETALHES COMPLETOS DE ENVIO E EXPEDIÇÃO AO VIVO */}
-          <div className="bg-white rounded-2xl border border-[#e6e6e6] p-5 shadow-xs space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#f0f0f0] pb-4">
+          <div className="bg-white rounded-2xl border border-[#e6e6e6] p-4 shadow-xs space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#f0f0f0] pb-3">
               <div>
-                <h3 className="text-[15px] font-bold text-[#1f2328] flex items-center gap-2">
-                  <Truck className="w-5 h-5 text-[#5c8a00]" />
-                  Logística & Detalhes de Envio ao Vivo
+                <h3 className="text-[13px] font-bold text-[#1f2328] flex items-center gap-1.5">
+                  <Truck className="w-4 h-4 text-[#5c8a00]" />
+                  Envio ao Vivo
                 </h3>
-                <p className="text-sm text-[#666] mt-0.5">
-                  Acompanhe etiquetas, prazos, código de rastreamento e endereço de cada entrega.
+                <p className="text-[11px] text-[#999] mt-0.5">
+                  Etiquetas, rastreio e endereços.
                 </p>
               </div>
 
               {/* Filtros de Envio */}
-              <div className="flex items-center gap-1.5 bg-[#f5f5f5] p-1 rounded-xl text-sm font-semibold text-[#666]">
+              <div className="flex items-center gap-1 bg-[#f5f5f5] p-0.5 rounded-lg text-[11px] font-semibold text-[#666]">
                 {[
                   { id: 'ALL', label: 'Todos' },
                   { id: 'TO_SHIP', label: 'A Enviar' },

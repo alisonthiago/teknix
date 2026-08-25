@@ -25,7 +25,7 @@ export default function SincronizacaoPage() {
   const { data: jobs, loading, refetch } = useSupabaseQuery(async (s) => {
     const { data } = await s
       .from('sync_jobs')
-      .select('*, marketplaces(name, code, logo), marketplace_accounts(account_name)')
+      .select('*, marketplaces(name, code, logo)')
       .order('created_at', { ascending: false })
       .limit(100)
     return data || []

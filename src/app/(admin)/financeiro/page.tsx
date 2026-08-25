@@ -279,7 +279,7 @@ export default function FinanceiroPage() {
   const { data: orders } = useSupabaseQuery(async (s) => {
     const { data, error } = await s
       .from('orders')
-      .select('*, marketplace_accounts(account_name), marketplaces(id, name, logo), order_items(*, products(cost_purchase, price))')
+      .select('*, marketplaces(id, name, logo), order_items(*, products(cost_purchase, price))')
       .order('created_at', { ascending: false })
     if (error) throw error
     return data || []
@@ -288,7 +288,7 @@ export default function FinanceiroPage() {
   const { data: sales } = useSupabaseQuery(async (s) => {
     const { data, error } = await s
       .from('sales')
-      .select('*, marketplace_accounts(account_name), marketplaces(id, name, logo), sale_items(cogs, fees, taxes, freight, other_costs)')
+      .select('*, marketplaces(id, name, logo), sale_items(cogs, fees, taxes, freight, other_costs)')
       .order('created_at', { ascending: false })
     if (error) throw error
     return data || []
