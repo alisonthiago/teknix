@@ -249,7 +249,7 @@
   }
 
   .mp-card-tab {
-    @apply pb-3 text-[15px] sm:text-base font-semibold transition-colors relative whitespace-nowrap text-[#333] hover:text-[#666];
+    @apply pb-3 text-[13px] sm:text-[14px] font-semibold transition-colors relative whitespace-nowrap text-[#333] hover:text-[#666];
     flex-shrink: 0;
   }
 

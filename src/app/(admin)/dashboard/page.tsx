@@ -334,7 +334,7 @@ export default function DashboardPage() {
                 <div
                   key={order.id as string}
                   onClick={() => router.push(`/pedidos/${order.id}`)}
-                  className="py-3 px-3 sm:py-4 sm:px-4 hover:bg-[#fafafa] rounded-xl transition-all cursor-pointer flex items-center gap-3 sm:gap-3.5 group"
+                  className="py-4 px-3 sm:py-5 sm:px-4 hover:bg-[#fafafa] rounded-xl transition-all cursor-pointer flex items-center gap-3 sm:gap-3.5 group"
                 >
                   {/* Foto */}
                   <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-[#f5f5f5] border border-[#e6e6e6] p-1 flex items-center justify-center shrink-0 overflow-hidden">
@@ -349,7 +349,7 @@ export default function DashboardPage() {
                   <div className="flex-1 min-w-0">
                     <p className="mp-list-item-title truncate">{prodTitle}</p>
                     <div className="flex items-center gap-1.5 mt-0.5 min-w-0">
-                      <span className="text-[12px] text-[#666] truncate">{(order.customer_name as string) || 'Comprador'}</span>
+                      <span className="text-[11px] text-[#888] truncate">{(order.customer_name as string) || 'Comprador'}</span>
                       <span className="hidden sm:inline text-[#bbb]">•</span>
                       <span className="hidden sm:inline font-mono text-[12px] text-[#999] truncate">SKU: {prodSku}</span>
                       <span className={`inline-flex px-1.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-black border shrink-0 ${
