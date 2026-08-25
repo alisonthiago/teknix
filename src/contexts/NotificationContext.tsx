@@ -93,12 +93,53 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         }
         return true
       })
-      setNotifications(validNotifs)
 
-      // Enriquecer notificações de vendas com fotos dos produtos
-      const saleNotifs = validNotifs.filter(n => {
+      // Gerar notificações de vendas a partir de pedidos recentes (últimos 7 dias)
+      const { data: recentOrders } = await supabase
+        .from('orders')
+        .select('id, order_number, total_amount, customer_name, created_at, order_items(products(name, image_url))')
+        .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+        .order('created_at', { ascending: false })
+        .limit(30)
+
+      const existingOrderNums = new Set(
+        validNotifs
+          .filter(n => String(n.title || '').includes('Venda'))
+          .map(n => {
+            const m = String(n.title).match(/MLB-?\d+/)
+            return m ? m[0] : ''
+          })
+          .filter(Boolean)
+      )
+
+      const syntheticSaleNotifs: AppNotification[] = []
+      for (const o of (recentOrders || []) as Record<string, any>[]) {
+        if (existingOrderNums.has(o.order_number)) continue
+        const items = o.order_items || []
+        const productName = items[0]?.products?.name || 'Produto'
+        const imageUrl = items[0]?.products?.image_url || ''
+        syntheticSaleNotifs.push({
+          id: `synth-${o.id}`,
+          title: `🛒 Nova Venda: ${o.order_number}`,
+          message: `${o.customer_name || 'Cliente'} comprou R$ ${Number(o.total_amount || 0).toFixed(2)} no Mercado Livre.`,
+          type: 'success',
+          is_read: false,
+          created_at: o.created_at,
+          image_url: imageUrl,
+          module: 'sales'
+        })
+      }
+
+      const mergedNotifs = [...syntheticSaleNotifs, ...validNotifs]
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .slice(0, 50)
+
+      setNotifications(mergedNotifs)
+
+      // Enriquecer notificações de vendas com fotos dos produtos (apenas para notificações reais sem imagem)
+      const saleNotifs = mergedNotifs.filter(n => {
         const t = String(n.title || '').toLowerCase() + ' ' + String(n.message || '').toLowerCase()
-        return t.includes('venda') || t.includes('comprou') || t.includes('pedido')
+        return (t.includes('venda') || t.includes('comprou') || t.includes('pedido')) && !n.image_url
       })
       if (saleNotifs.length > 0) {
         const orderNums = new Set<string>()

@@ -361,16 +361,19 @@ export default function FinanceiroPage() {
     const totalProfit = filtered.reduce((a, b) => a + b.profit, 0)
     const avgMargin = totalRevenue > 0 ? ((totalProfit / totalRevenue) * 100).toFixed(1) : '0.0'
 
-    // Pontos do Gráfico de 7 Dias (Modelo Exato Solicitado com Cores Verdes)
-    const sevenDaysPoints = [
-      { label: '15 Ago', value: 78, displayVal: '78', profit: 21.84 },
-      { label: '16 Ago', value: 92, displayVal: '92', profit: 25.76 },
-      { label: '17 Ago', value: 105, displayVal: '105', profit: 29.40 },
-      { label: '18 Ago', value: 98, displayVal: '98', profit: 27.44 },
-      { label: '19 Ago', value: 120, displayVal: '120', profit: 33.60 },
-      { label: '20 Ago', value: 110, displayVal: '110', profit: 30.80 },
-      { label: '21 Ago', value: 128, displayVal: '128', profit: 35.84 },
-    ]
+    // Gráfico de 7 Dias baseado em dados reais agrupados por data
+    const dateMap = new Map<string, { revenue: number; profit: number }>()
+    filtered.forEach(item => {
+      const d = new Date(item.date)
+      const label = `${d.getDate()} ${['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][d.getMonth()]}`
+      const cur = dateMap.get(label) || { revenue: 0, profit: 0 }
+      cur.revenue += item.revenue
+      cur.profit += item.profit
+      dateMap.set(label, cur)
+    })
+    const sevenDaysPoints = Array.from(dateMap.entries())
+      .slice(-7)
+      .map(([label, v]) => ({ label, value: Math.round(v.revenue), displayVal: Math.round(v.revenue).toString(), profit: Math.round(v.profit * 100) / 100 }))
 
     // Breakdown por Marketplace
     const mpMap = new Map<string, { name: string; revenue: number; orders: number }>()
@@ -381,11 +384,6 @@ export default function FinanceiroPage() {
       cur.orders += 1
       mpMap.set(name, cur)
     })
-
-    if (mpMap.size === 0) {
-      mpMap.set('Mercado Livre', { name: 'Mercado Livre', revenue: totalRevenue * 0.88, orders: 4 })
-      mpMap.set('Shopee', { name: 'Shopee', revenue: totalRevenue * 0.12, orders: 1 })
-    }
 
     const marketplacesList = Array.from(mpMap.values()).sort((a, b) => b.revenue - a.revenue)
 
@@ -399,7 +397,7 @@ export default function FinanceiroPage() {
       avgMargin,
       sevenDaysPoints,
       marketplacesList,
-      totalOrders: filtered.length || 5
+      totalOrders: filtered.length
     }
   }, [orders, sales, filterMp, filterAcc])
 
