@@ -318,7 +318,7 @@ export default function CentralEtiquetasPage() {
             Central de Etiquetas
           </h1>
           <p className="text-sm text-[#64748b]">
-            Emissão oficial em lote no formato térmico 100x150mm integrada aos marketplaces
+            Emissão em lote de etiquetas térmicas 100x150mm
           </p>
         </div>
 
@@ -602,7 +602,7 @@ export default function CentralEtiquetasPage() {
                       {/* Rastreio */}
                       <div className="hidden sm:block min-w-[150px] space-y-0.5">
                         <p className="text-xs font-semibold text-[#0f172a] truncate max-w-[140px]">{order.customerName}</p>
-                        <p className="font-mono text-[11px] font-bold text-[#16a34a]">{order.trackingCode}</p>
+                        <p className="font-mono text-xs font-bold text-[#16a34a]">{order.trackingCode}</p>
                       </div>
 
                       {/* Status */}
@@ -731,12 +731,12 @@ export default function CentralEtiquetasPage() {
                         )}
                         <div className="min-w-0 space-y-0.5">
                           <p className="font-bold text-xs text-[#0f172a] truncate">Pedido #{order.orderNumber}</p>
-                          <p className="text-[11px] text-[#64748b] truncate">{order.customerName}</p>
-                          <p className="font-mono text-[10px] text-[#16a34a]">{order.trackingCode}</p>
+                          <p className="text-xs text-[#64748b] truncate">{order.customerName}</p>
+                          <p className="font-mono text-xs text-[#16a34a]">{order.trackingCode}</p>
                         </div>
                       </div>
 
-                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 ml-2 ${
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 ml-2 ${
                         order.labelStatus === 'AVAILABLE'
                           ? 'bg-[#fef9c3] text-[#a16207]'
                           : 'bg-[#ecfdf5] text-[#16a34a]'
@@ -947,7 +947,7 @@ export default function CentralEtiquetasPage() {
 
             {/* Barra de Ações */}
             <div className="pt-2 flex items-center justify-between gap-3 border-t border-[#f1f5f9]">
-              <span className="text-[11px] text-[#94a3b8] font-medium hidden sm:inline">
+              <span className="text-xs text-[#94a3b8] font-medium hidden sm:inline">
                 Formato térmico padrão 100x150mm pronto para expedição
               </span>
 

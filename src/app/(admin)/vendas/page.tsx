@@ -124,7 +124,7 @@ function SalesTab() {
       {/* Top Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
         <div className="bg-white p-5 rounded-2xl border border-[#e6e6e6] shadow-2xs">
-          <p className="text-sm font-bold text-[#888] uppercase tracking-wider">Receita de Vendas</p>
+          <p className="text-xs font-semibold text-[#999] uppercase tracking-wide">Receita de Vendas</p>
           <p className="text-2xl font-black text-[#111] mt-1">{formatBRL(totalRevenue)}</p>
           <div className="flex items-center gap-1 text-sm font-extrabold text-[#16a34a] mt-2">
             <ArrowUpRight className="w-3.5 h-3.5" /> 100% faturamento ativo
