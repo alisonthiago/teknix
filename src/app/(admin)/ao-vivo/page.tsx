@@ -622,7 +622,7 @@ export default function MonitorAoVivoPage() {
 
           {/* 🟢 CANAIS CONECTADOS AO VIVO */}
           <div className="bg-white rounded-2xl border border-[#e6e6e6] p-5 shadow-xs">
-            <h3 className="text-xs font-semibold uppercase tracking-wide text-[#999] mb-3 flex items-center justify-between">
+            <h3 className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-[#999] mb-3 flex items-center justify-between">
               <span>Canais ao Vivo</span>
               <span className="flex items-center gap-1 text-xs text-[#38a169] font-bold">
                 <span className="w-2 h-2 rounded-full bg-[#38a169] animate-pulse" />
@@ -661,7 +661,7 @@ export default function MonitorAoVivoPage() {
           {/* 🔴 TIMELINE / FEED AO VIVO */}
           <div className="bg-white rounded-2xl border border-[#e6e6e6] p-5 shadow-xs flex flex-col h-[460px]">
             <div className="flex items-center justify-between mb-3 shrink-0">
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-[#999] flex items-center gap-2">
+              <h3 className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-[#999] flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#e74c3c] animate-ping" />
                 Feed Operacional ao Vivo
               </h3>
@@ -723,7 +723,7 @@ export default function MonitorAoVivoPage() {
 
           {/* 🏆 PRODUTOS CAMPEÕES */}
           <div className="bg-white rounded-2xl border border-[#e6e6e6] p-5 shadow-xs">
-            <h3 className="text-xs font-semibold uppercase tracking-wide text-[#999] mb-3">
+            <h3 className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-[#999] mb-3">
               Campeões de Vendas Hoje
             </h3>
 
