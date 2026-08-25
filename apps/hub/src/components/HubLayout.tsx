@@ -18,6 +18,13 @@ const icons: Record<string, JSX.Element> = {
   external: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="20" height="20"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>,
   layout: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="20" height="20"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>,
   palette: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="20" height="20"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12" r="2.5"/><path d="M12 2C6.49 2 2 6.49 2 12s4.49 10 10 10 10-4.49 10-10S17.51 2 12 2z"/></svg>,
+  image: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="20" height="20"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>,
+  menu: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="20" height="20"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>,
+  template: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="20" height="20"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="3" x2="9" y2="21"/></svg>,
+  header: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="20" height="20"><rect x="3" y="3" width="18" height="6" rx="1"/><line x1="3" y1="15" x2="21" y2="15"/></svg>,
+  footer: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="20" height="20"><rect x="3" y="15" width="18" height="6" rx="1"/><line x1="3" y1="9" x2="21" y2="9"/></svg>,
+  banner: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="20" height="20"><rect x="2" y="7" width="20" height="10" rx="1"/><path d="M12 17v4M8 21h8"/></svg>,
+  media: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="20" height="20"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>,
 }
 
 export default function HubLayout() {
@@ -61,10 +68,16 @@ export default function HubLayout() {
       ]
     },
     {
-      section: 'Páginas',
+      section: 'Conteúdo',
       items: [
         { icon: 'layout', label: 'Páginas', path: '/hub/paginas' },
+        { icon: 'template', label: 'Templates', path: '/hub/templates' },
         { icon: 'palette', label: 'Temas', path: '/hub/temas' },
+        { icon: 'header', label: 'Headers', path: '/hub/headers' },
+        { icon: 'menu', label: 'Menus', path: '/hub/menus' },
+        { icon: 'footer', label: 'Footers', path: '/hub/footers' },
+        { icon: 'banner', label: 'Banners', path: '/hub/banners' },
+        { icon: 'media', label: 'Mídia', path: '/hub/media' },
       ]
     },
     {
@@ -174,5 +187,12 @@ function getPageTitle(pathname: string): string {
   if (pathname.includes('/temas/editar')) return 'Editor de tema'
   if (pathname.includes('/temas/novo')) return 'Novo tema'
   if (pathname.includes('/temas')) return 'Temas'
+  if (pathname.includes('/templates/editar')) return 'Editor de template'
+  if (pathname.includes('/templates')) return 'Templates'
+  if (pathname.includes('/headers')) return 'Headers'
+  if (pathname.includes('/menus')) return 'Menus'
+  if (pathname.includes('/footers')) return 'Footers'
+  if (pathname.includes('/banners')) return 'Banners'
+  if (pathname.includes('/media')) return 'Biblioteca de Mídia'
   return 'HUB'
 }

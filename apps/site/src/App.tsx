@@ -6,6 +6,8 @@ import Home from './pages/Home'
 import Products from './pages/Products'
 import Product from './pages/Product'
 import Contact from './pages/Contact'
+import DynamicPage from './pages/DynamicPage'
+import PagePreview from './pages/PagePreview'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import ForgotPassword from './pages/ForgotPassword'
@@ -66,6 +68,14 @@ function App() {
           <>
             <Header />
             <main><Account /></main>
+          </>
+        } />
+        <Route path="/preview/:id" element={<PagePreview />} />
+        <Route path="/:slug" element={
+          <>
+            <Header />
+            <main><DynamicPage /></main>
+            <Footer />
           </>
         } />
       </Routes>
