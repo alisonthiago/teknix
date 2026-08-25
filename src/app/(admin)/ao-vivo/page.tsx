@@ -468,13 +468,13 @@ export default function MonitorAoVivoPage() {
               </div>
 
               <div className="p-4 rounded-xl bg-[#fafafa] border border-[#eeeeee]">
-                <span className="text-sm font-semibold text-[#888] block">Itens Vendidos</span>
+                <span className="text-xs font-semibold text-[#999] block">Itens Vendidos</span>
                 <span className="text-[20px] font-extrabold text-[#1f2328] mt-1 block">{metrics.totalUnits} <span className="text-sm font-normal text-[#888]">u.</span></span>
                 <span className="text-xs text-[#666] font-medium">Unidades totais</span>
               </div>
 
               <div className="p-4 rounded-xl bg-[#fafafa] border border-[#eeeeee]">
-                <span className="text-sm font-semibold text-[#888] block">Ticket Médio</span>
+                <span className="text-xs font-semibold text-[#999] block">Ticket Médio</span>
                 <span className="text-[20px] font-extrabold text-[#1f2328] mt-1 block">R$ {Math.round(metrics.ticketMedio)}</span>
                 <span className="text-xs text-[#888] font-medium">Valor médio</span>
               </div>

@@ -132,19 +132,19 @@ function SalesTab() {
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-[#e6e6e6] shadow-2xs">
-          <p className="text-sm font-bold text-[#888] uppercase tracking-wider">Total de Vendas</p>
+          <p className="text-xs font-semibold text-[#999] uppercase tracking-wide">Total de Vendas</p>
           <p className="text-2xl font-black text-[#111] mt-1">{filtered.length}</p>
           <p className="text-sm text-[#666] font-semibold mt-2">Pedidos processados</p>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-[#e6e6e6] shadow-2xs">
-          <p className="text-sm font-bold text-[#888] uppercase tracking-wider">Itens Vendidos</p>
+          <p className="text-xs font-semibold text-[#999] uppercase tracking-wide">Itens Vendidos</p>
           <p className="text-2xl font-black text-[#111] mt-1">{totalItems}</p>
           <p className="text-sm text-[#666] font-semibold mt-2">Unidades expedidas</p>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-[#e6e6e6] shadow-2xs">
-          <p className="text-sm font-bold text-[#888] uppercase tracking-wider">Ticket Médio</p>
+          <p className="text-xs font-semibold text-[#999] uppercase tracking-wide">Ticket Médio</p>
           <p className="text-2xl font-black text-[#111] mt-1">{formatBRL(totalRevenue / Math.max(1, filtered.length))}</p>
           <p className="text-sm text-[#16a34a] font-bold mt-2">Média por venda</p>
         </div>
