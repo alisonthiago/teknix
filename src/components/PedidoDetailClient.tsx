@@ -83,7 +83,7 @@ function VisaoGeralTab({ order }: { order: OrderDetail }) {
                               <Package className="w-4 h-4 text-[#ccc]" />
                             )}
                           </div>
-                          <span className="font-semibold text-base group-hover:underline underline-offset-2">
+                           <span className="font-semibold text-[13px] group-hover:underline underline-offset-2">
                             {item.name}
                           </span>
                         </Link>
@@ -426,7 +426,7 @@ export default function PedidoDetailClient({ order }: { order: OrderDetail }) {
                   >
                     <User className="w-3.5 h-3.5 text-[#3b82f6] group-hover:text-[#2563eb]" />
                     <span className="text-[#64748b] font-medium">Cliente:</span>
-                    <strong className="text-[#0f172a] group-hover:text-[#2563eb] font-extrabold text-base group-hover:underline underline-offset-2">
+                    <strong className="text-[#0f172a] group-hover:text-[#2563eb] font-extrabold text-[13px] group-hover:underline underline-offset-2">
                       {order.customer.name}
                     </strong>
                   </Link>
@@ -437,12 +437,12 @@ export default function PedidoDetailClient({ order }: { order: OrderDetail }) {
                 </div>
               </div>
               <div className="sm:text-right bg-[#f8fafc] sm:bg-transparent p-4 sm:p-0 rounded-2xl border sm:border-0 border-[#e2e8f0] shrink-0">
+                <OrderActions order={order} />
                 <p className="text-sm font-bold text-[#64748b] uppercase tracking-wider">Total do Pedido</p>
                 <div className="text-2xl sm:text-3xl font-black text-[#0f172a] mt-0.5">{formatBRL(order.payment.total)}</div>
                 <div className="text-xs font-semibold text-[#64748b] mt-1.5 flex sm:justify-end items-center gap-1.5">
                   <Calendar className="w-3.5 h-3.5 text-[#94a3b8]" /> {order.date}
                 </div>
-                <OrderActions order={order} />
               </div>
             </div>
           </div>
