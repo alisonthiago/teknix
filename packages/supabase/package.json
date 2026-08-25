@@ -1,0 +1,10 @@
+{
+  "name": "@teknix/supabase",
+  "private": true,
+  "version": "0.0.0",
+  "main": "./client.ts",
+  "types": "./client.ts",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.112.4"
+  }
+}

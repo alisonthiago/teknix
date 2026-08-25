@@ -1,0 +1,11 @@
+{
+  "name": "@teknix/ui",
+  "private": true,
+  "version": "0.0.0",
+  "main": "./index.tsx",
+  "types": "./index.tsx",
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
+}

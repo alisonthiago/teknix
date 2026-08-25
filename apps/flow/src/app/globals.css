@@ -1,0 +1,329 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Brand design tokens */
+  --brand-lime: #B5F500;
+  --brand-lime-light: #EEFFB3;
+  --color-mp-blue: #1f2328;
+  --color-mp-blue-hover: #111827;
+  --color-mp-blue-light: #ecf3fe;
+  --color-mp-green: #00a650;
+  --color-mp-bg: #f5f5f5;
+  --color-mp-border: #e6e6e6;
+  --color-mp-divider: #eeeeee;
+  --color-mp-text: #333333;
+  --color-mp-text-secondary: #666666;
+  --color-mp-text-muted: #999999;
+}
+
+:root {
+  --background: #f5f5f5;
+  --foreground: #333333;
+  --card: #ffffff;
+  --card-foreground: #333333;
+  --popover: #ffffff;
+  --popover-foreground: #333333;
+  --primary: #1f2328;
+  --primary-foreground: #ffffff;
+  --secondary: #ecf3fe;
+  --secondary-foreground: #1f2328;
+  --muted: #f5f5f5;
+  --muted-foreground: #999999;
+  --accent: #ecf3fe;
+  --accent-foreground: #1f2328;
+  --destructive: #f23d4f;
+  --border: #e6e6e6;
+  --input: #e6e6e6;
+  --ring: #1f2328;
+  --chart-1: #1f2328;
+  --chart-2: #00a650;
+  --chart-3: #B5F500;
+  --chart-4: #f23d4f;
+  --chart-5: #666666;
+  --radius: 0.5rem;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #333333;
+  --sidebar-primary: #1f2328;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f5f5f5;
+  --sidebar-accent-foreground: #333333;
+  --sidebar-border: #e6e6e6;
+  --sidebar-ring: #1f2328;
+
+  /* Spacing */
+  --mp-content-max: 1280px;
+  --mp-content-px: 24px;
+  --mp-content-py: 24px;
+  --mp-card-radius: 12px;
+  --mp-card-padding: 24px;
+  --mp-gap: 24px;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html, body {
+    @apply bg-[#f5f5f5] text-[#333] antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    overflow-x: hidden;
+    /* Base font: 17px mobile, 18.5px desktop — textos menos pequenos */
+    font-size: 17px;
+  }
+  html {
+    @apply font-sans;
+  }
+  /* Desktop: ligeiramente maior */
+  @media (min-width: 1024px) {
+    html, body {
+      font-size: 18.5px;
+    }
+  }
+  /* Tabelas ficam legíveis no celular */
+  table {
+    font-size: 0.875rem;
+  }
+  @media (min-width: 768px) {
+    table {
+      font-size: 0.9375rem;
+    }
+  }
+}
+
+@layer components {
+  .mp-card {
+    @apply bg-white rounded-2xl border border-[#e6e6e6];
+    padding: var(--mp-card-padding);
+  }
+
+  .mp-card-sm {
+    @apply bg-white rounded-2xl border border-[#e6e6e6] p-3 sm:p-5;
+  }
+
+  .mp-card-flush {
+    @apply bg-white rounded-2xl border border-[#e6e6e6] overflow-hidden;
+  }
+
+  .mp-btn-primary {
+    @apply inline-flex items-center justify-center gap-2 bg-[#111111] text-white font-semibold rounded-xl px-5 py-3 text-base hover:bg-black transition-colors shadow-2xs;
+    min-height: 44px;
+  }
+
+  .mp-btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 bg-white text-[#333333] border border-[#e6e6e6] font-semibold rounded-xl px-5 py-3 text-base hover:bg-[#f8f8f8] transition-colors;
+    min-height: 44px;
+  }
+
+  .mp-btn-outline {
+    @apply inline-flex items-center justify-center gap-2 bg-white text-[#333333] font-semibold rounded-xl px-5 py-3 text-base border border-[#e6e6e6] hover:bg-[#f8f8f8] transition-colors;
+    min-height: 44px;
+  }
+
+  .mp-link {
+    @apply text-[#111111] text-base font-semibold hover:underline transition-colors inline-flex items-center gap-1;
+  }
+
+  .mp-status-success {
+    @apply inline-flex items-center gap-1.5 text-[#00a650] text-base font-semibold whitespace-nowrap;
+  }
+
+  .mp-search {
+    @apply w-full border border-[#e6e6e6] rounded-full px-4 sm:px-5 py-3 text-base text-[#333] placeholder:text-[#999] outline-none focus:border-[#1f2328] transition-colors bg-white;
+    min-height: 44px;
+  }
+
+  .mp-activity-row {
+    @apply grid items-center gap-3 py-4 sm:py-5 border-b border-[#eeeeee] last:border-0;
+    grid-template-columns: 40px 1fr;
+  }
+
+  @media (min-width: 768px) {
+    .mp-activity-row {
+      grid-template-columns: 56px 48px 1fr auto auto;
+    }
+  }
+
+  .mp-header-pill {
+    @apply flex items-center bg-[#B5F500] rounded-full px-2 py-1;
+  }
+
+  .mp-icon-circle {
+    @apply w-11 h-11 rounded-full bg-[#f5f5f5] border border-[#eeeeee] flex items-center justify-center shrink-0 overflow-hidden;
+  }
+
+  .mp-grid {
+    @apply grid gap-3 sm:gap-4;
+  }
+
+  .mp-stack {
+    @apply flex flex-col gap-3 sm:gap-4;
+  }
+
+  /* ─── Tipografia estilo Nubank/MP — título + descrição ─── */
+
+  /* Título principal da página — grande e bold como no print */
+  .mp-page-title {
+    @apply text-[28px] sm:text-[32px] font-bold text-[#111] leading-tight;
+  }
+
+  /* Descrição abaixo do título — legível e respira */
+  .mp-page-subtitle {
+    @apply text-[15px] sm:text-[16px] text-[#666] mt-2 leading-relaxed;
+  }
+
+  /* Título de seção dentro de card (ex: "Informações pessoais") */
+  .mp-section-title {
+    @apply text-[17px] sm:text-[18px] font-bold text-[#111] leading-snug;
+  }
+
+  /* Texto principal de item de lista (ex: nome, produto) */
+  .mp-list-item-title {
+    @apply text-[15px] sm:text-[16px] font-semibold text-[#111] leading-snug;
+  }
+
+  /* Subtexto de item de lista (ex: "Nome e sobrenome", SKU) */
+  .mp-list-item-sub {
+    @apply text-[13px] sm:text-[14px] text-[#777] leading-snug mt-0.5;
+  }
+
+  /* Link "Conferir tudo →" / "Ver todos →" */
+  .mp-see-all-link {
+    @apply text-[14px] font-bold text-[#111] hover:underline flex items-center gap-1 transition-colors;
+  }
+
+  /* ─── Tabs de card ─── */
+  .mp-card-tabs {
+    @apply flex gap-4 sm:gap-6 border-b border-[#eeeeee] overflow-x-auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .mp-card-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mp-card-tab {
+    @apply pb-3 text-[13px] sm:text-[14px] font-semibold transition-colors relative whitespace-nowrap text-[#333] hover:text-[#666];
+    flex-shrink: 0;
+  }
+
+  .mp-card-tab-active {
+    @apply text-[#111] font-bold;
+  }
+
+  .mp-card-tab-active::after {
+    content: '';
+    @apply absolute bottom-0 left-0 right-0 h-[3px] bg-[#B5F500] rounded-full;
+  }
+
+  .mp-amount {
+    @apply text-3xl sm:text-4xl font-semibold text-[#333] tracking-tight leading-none;
+  }
+
+  .mp-amount-sup {
+    @apply text-xl align-super font-semibold;
+  }
+
+  /* Table scroll container — ONLY this can have horizontal scroll */
+  .table-container {
+    @apply bg-white rounded-2xl border border-[#e6e6e6] overflow-hidden;
+  }
+  .table-container > div {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Modal responsive */
+  .mp-modal-content {
+    @apply bg-white rounded-2xl w-full;
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+  }
+  @media (min-width: 640px) {
+    .mp-modal-content {
+      max-width: 560px;
+    }
+  }
+  @media (min-width: 768px) {
+    .mp-modal-content {
+      max-width: 640px;
+    }
+  }
+
+  /* Filter panel mobile */
+  .mp-filter-bar {
+    @apply flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3;
+  }
+
+  /* Responsive grid for stat cards */
+  .mp-stat-grid {
+    @apply grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4;
+  }
+
+  /* Page content wrapper */
+  .mp-page {
+    @apply px-4 sm:px-6 lg:px-10 py-4 lg:py-8;
+  }
+
+  /* Responsive form layout */
+  .mp-form-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4;
+  }
+}
+
+/* ─── AUMENTO GLOBAL DE TIPOGRAFIA ───
+   A interface densa usa tamanhos fixos (text-[Npx]) que não acompanham a
+   base. Estas regras (não agrupadas em @layer) vencem as utilities do
+   Tailwind e aumentam os textos pequenos em desktop e mobile. */
+.text-\[10px\] { font-size: 12px; }
+.text-\[11px\] { font-size: 13px; }
+.text-\[12px\] { font-size: 14px; }
+.text-\[13px\] { font-size: 15px; }
+.text-\[14px\] { font-size: 15.5px; }
+.text-\[15px\] { font-size: 16.5px; }

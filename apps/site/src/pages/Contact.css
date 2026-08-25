@@ -1,0 +1,118 @@
+.contact-page {
+  padding: 120px 24px 80px;
+  max-width: var(--tkn-max-width);
+  margin: 0 auto;
+}
+
+.contact-header {
+  text-align: center;
+  margin-bottom: 64px;
+}
+
+.contact-header h1 {
+  font-size: clamp(2rem, 4vw, 2.5rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 12px;
+}
+
+.contact-header p {
+  color: var(--tkn-text-dim);
+  font-size: 1.1rem;
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 64px;
+  align-items: start;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--tkn-text);
+}
+
+.form-group input,
+.form-group textarea {
+  padding: 12px 14px;
+  background: var(--tkn-gray-2);
+  border: 1px solid var(--tkn-border);
+  border-radius: var(--tkn-radius-sm);
+  color: var(--tkn-text);
+  font-size: 0.95rem;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--tkn-green);
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: var(--tkn-text-faint);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.info-card {
+  background: var(--tkn-gray-2);
+  border: 1px solid var(--tkn-border);
+  border-radius: var(--tkn-radius-md);
+  padding: 24px;
+}
+
+.info-card h3 {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--tkn-text);
+  margin-bottom: 12px;
+}
+
+.info-card p {
+  color: var(--tkn-text-dim);
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+}
+
+.info-card .btn {
+  margin-top: 12px;
+}
+
+@media (max-width: 768px) {
+  .contact-page {
+    padding: 100px 16px 60px;
+  }
+
+  .contact-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}

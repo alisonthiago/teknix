@@ -1,0 +1,145 @@
+.pages-list-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.pages-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-chip {
+  padding: 6px 14px;
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 980px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.filter-chip:hover {
+  border-color: #ccc;
+  color: #1a1a1a;
+}
+
+.filter-chip.active {
+  background: #00ff88;
+  border-color: #00ff88;
+  color: #0a0a0a;
+}
+
+.pages-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.page-card {
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.15s;
+}
+
+.page-card:hover {
+  border-color: #d5d5d5;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.page-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.page-type-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.page-type-badge.home { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+.page-type-badge.product { background: rgba(0, 255, 136, 0.1); color: #00cc6a; }
+.page-type-badge.category { background: rgba(249, 115, 22, 0.1); color: #f97316; }
+.page-type-badge.segment { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
+.page-type-badge.campaign { background: rgba(236, 72, 153, 0.1); color: #ec4899; }
+.page-type-badge.custom { background: #f5f5f7; color: #666; }
+
+.page-status {
+  font-size: 0.7rem;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.page-status.published { background: rgba(0, 255, 136, 0.1); color: #00cc6a; }
+.page-status.draft { background: #f5f5f7; color: #999; }
+
+.page-card-body {
+  padding: 16px;
+}
+
+.page-card-body h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
+
+.page-slug {
+  font-size: 0.8rem;
+  color: #999;
+  font-family: monospace;
+}
+
+.page-card-footer {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.page-action {
+  flex: 1;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-decoration: none;
+}
+
+.page-action.primary {
+  background: #00ff88;
+  color: #0a0a0a;
+  border: none;
+}
+
+.page-action.primary:hover {
+  background: #00cc6a;
+}
+
+.page-action.danger {
+  background: none;
+  border: 1px solid #e5e5e5;
+  color: #666;
+}
+
+.page-action.danger:hover {
+  border-color: #dc2626;
+  color: #dc2626;
+  background: rgba(239, 68, 68, 0.05);
+}

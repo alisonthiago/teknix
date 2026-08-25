@@ -1,0 +1,66 @@
+'use client'
+
+import { useState } from 'react'
+import Sidebar from '@/components/Sidebar'
+import Header from '@/components/Header'
+import { InternalChatProvider } from '@/contexts/InternalChatContext'
+import FloatingMessenger from '@/components/internal-chat/FloatingMessenger'
+
+interface AdminChromeProps {
+  children: React.ReactNode
+  permissions: string[]
+  userName: string
+  userRole: string
+  userEmail: string
+  userId: string
+  userAvatarUrl?: string | null
+}
+
+export default function AdminChrome({
+  children,
+  permissions,
+  userName,
+  userRole,
+  userEmail,
+  userId,
+  userAvatarUrl,
+}: AdminChromeProps) {
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const [collapsed, setCollapsed] = useState(true)
+
+  return (
+    <InternalChatProvider>
+      <div className="min-h-screen bg-[#f5f5f5] flex print:bg-white">
+        <div className="print:hidden">
+          <Sidebar
+            permissions={permissions}
+            mobileOpen={mobileOpen}
+            setMobileOpen={setMobileOpen}
+            collapsed={collapsed}
+            setCollapsed={setCollapsed}
+          />
+        </div>
+        <div className={`flex-1 flex flex-col transition-all duration-300 ${collapsed ? 'lg:ml-[72px]' : 'lg:ml-[260px]'} min-w-0 max-w-full print:ml-0`}>
+          <div className="print:hidden">
+            <Header
+              userName={userName}
+              userRole={userRole}
+              userEmail={userEmail}
+              userId={userId}
+              userAvatarUrl={userAvatarUrl}
+              onMenuOpen={() => setMobileOpen(true)}
+              collapsed={collapsed}
+              onToggleCollapse={() => setCollapsed(!collapsed)}
+            />
+          </div>
+          <main className="flex-1 w-full max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16 py-4 lg:py-8 print:p-0 print:max-w-none print:w-full">
+            {children}
+          </main>
+        </div>
+        {/* Janela Flutuante do Messenger Operacional */}
+        <FloatingMessenger />
+      </div>
+    </InternalChatProvider>
+  )
+}
+
