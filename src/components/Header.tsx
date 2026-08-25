@@ -245,7 +245,7 @@ function HeaderActions({
             {/* Header Notificações Inteligentes */}
             <div className="p-4 border-b border-[#eeeeee] flex items-center justify-between bg-white">
               <div className="flex items-center gap-2">
-                <h3 className="text-[15px] font-black text-[#1f2328]">Alertas & Mercado Livre</h3>
+                <h3 className="text-[14px] font-black text-[#1f2328]">Alertas & Mercado Livre</h3>
                 {activeUnreadCount > 0 && (
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#fff0f0] text-[#e74c3c] border border-[#ffcdd2]">
                     {activeUnreadCount} nova{activeUnreadCount !== 1 ? 's' : ''}
@@ -255,44 +255,21 @@ function HeaderActions({
               {activeUnreadCount > 0 && (
                 <button
                   onClick={markAllAsRead}
-                  className="text-[11px] font-bold text-[#1f2328] hover:underline cursor-pointer"
+                  className="text-[10px] font-bold text-[#1f2328] hover:underline cursor-pointer"
                 >
                   Marcar todas como lidas
                 </button>
               )}
             </div>
 
-            {/* Category Filter Tabs */}
-            <div className="flex items-center gap-1.5 p-2.5 border-b border-[#f0f0f0] bg-[#fafafa] overflow-x-auto text-[11px]">
-              {[
-                { id: 'all', label: 'Todas' },
-                { id: 'mensagens', label: 'Mensagens' },
-                { id: 'vendas', label: 'Vendas' },
-                { id: 'perguntas', label: 'Perguntas' },
-                { id: 'estoque', label: 'Estoque' },
-              ].map(cat => (
-                <button
-                  key={cat.id}
-                  onClick={() => setSelectedCategory(cat.id as any)}
-                  className={`px-3 py-1.5 rounded-xl font-bold transition-all whitespace-nowrap cursor-pointer ${
-                    selectedCategory === cat.id
-                      ? 'bg-[#1f2328] text-white shadow-2xs'
-                      : 'text-[#666] hover:bg-white hover:text-[#111]'
-                  }`}
-                >
-                  {cat.label}
-                </button>
-              ))}
-            </div>
-
             {/* Notification Items List Estilo Mercado Livre */}
-            <div className="max-h-[380px] overflow-y-auto divide-y divide-[#f0f0f0] p-3 space-y-2">
+            <div className="max-h-[360px] overflow-y-auto divide-y divide-[#f0f0f0] p-2.5 space-y-1.5">
               {filteredNotifications.length === 0 ? (
                 <div className="p-8 text-center">
                   <div className="w-10 h-10 rounded-full bg-[#f8fafc] border border-[#e2e8f0] flex items-center justify-center mx-auto mb-2 text-[#94a3b8]">
                     <Bell className="w-5 h-5" />
                   </div>
-                  <p className="text-sm font-semibold text-[#333]">Nenhum alerta recente</p>
+                  <p className="text-[13px] font-semibold text-[#333]">Nenhum alerta recente</p>
                   <p className="text-[11px] text-[#999] mt-1">Você está em dia com todas as perguntas, vendas e estoque do Mercado Livre.</p>
                 </div>
               ) : (
@@ -315,7 +292,7 @@ function HeaderActions({
                       setNotifOpen(false)
                       router.push(path)
                     }}
-                     className={`p-4 rounded-2xl transition-all cursor-pointer flex gap-4 items-center ${
+                     className={`p-3 rounded-xl transition-all cursor-pointer flex gap-4 items-center ${
                        n.is_read
                          ? 'bg-white hover:bg-[#fafafa]'
                          : 'bg-[#fafafa] hover:bg-[#f5f5f5] border border-[#e2e8f0]'
@@ -324,12 +301,12 @@ function HeaderActions({
                     {renderNotificationIcon(n.type, n.module, n.title)}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-1">
-                        <p className={`text-sm leading-snug line-clamp-1 ${n.is_read ? 'text-[#333]' : 'text-[#111] font-extrabold'}`}>
+                          <p className={`text-[13px] leading-snug line-clamp-1 ${n.is_read ? 'text-[#333]' : 'text-[#111] font-extrabold'}`}>
                           {cleanTitle(n.title)}
                         </p>
                         <span className="text-[10px] text-[#999] shrink-0 font-medium">{formatTimeAgo(n.created_at)}</span>
                       </div>
-                      <p className="text-[11px] text-[#666] leading-tight mt-1 line-clamp-1">{cleanTitle(n.message)}</p>
+                       <p className="text-[10px] text-[#666] leading-tight mt-1 line-clamp-1">{cleanTitle(n.message)}</p>
                     </div>
                     {!n.is_read && (
                       <span className="w-2 h-2 rounded-full bg-[#16a34a] shrink-0" />

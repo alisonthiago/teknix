@@ -163,7 +163,7 @@ export default function ClientesPage() {
 
                   return (
                     <tr key={idx} className="hover:bg-[#fafafa] transition-colors group">
-                      <td className="py-4 px-4 font-medium text-[#333]">
+                      <td className="py-3 px-4 font-medium text-[#333] text-[13px]">
                         <Link href={`/clientes/${customerSlug}`} className="flex items-center gap-2.5">
                           <div className="w-8 h-8 rounded-full bg-[#f5f5f5] border border-[#e6e6e6] flex items-center justify-center text-[#666] font-medium uppercase shrink-0">
                             {c.name.slice(0, 1)}
@@ -173,7 +173,7 @@ export default function ClientesPage() {
                               {c.name}
                             </p>
                             {c.phone !== '—' && (
-                              <p className="text-sm text-[#999] flex items-center gap-1 mt-0.5 font-normal">
+                              <p className="text-[12px] text-[#999] flex items-center gap-1 mt-0.5 font-normal">
                                 <Phone className="w-3 h-3 text-[#ccc]" /> {c.phone}
                               </p>
                             )}
@@ -203,8 +203,8 @@ export default function ClientesPage() {
                         {formatBRL(c.totalSpent)}
                       </td>
 
-                      <td className="py-4 px-4 text-[#999]">
-                        <p className="truncate max-w-xs flex items-center gap-1 text-sm">
+                      <td className="py-3 px-4 text-[#999]">
+                        <p className="truncate max-w-[200px] flex items-center gap-1 text-[12px]">
                           <MapPin className="w-3 h-3 text-[#ccc] shrink-0" />
                           {c.address}
                         </p>

@@ -43,7 +43,7 @@ export function TabsList({
   className?: string
 }) {
   return (
-    <div className={`flex gap-6 border-b border-[#eeeeee] overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${className}`}>
+    <div       className={`flex gap-8 border-b border-[#eeeeee] overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${className}`}>
       {children}
     </div>
   )
@@ -64,7 +64,7 @@ export function TabsTrigger({
     <button
       type="button"
       onClick={() => setActiveTab(value)}
-      className={`pb-3 text-sm font-semibold transition-colors relative whitespace-nowrap cursor-pointer ${
+      className={`px-2 pb-3 text-sm font-semibold transition-colors relative whitespace-nowrap cursor-pointer ${
         isActive
           ? 'text-[#1f2328]'
           : 'text-[#333] hover:text-[#666]'

@@ -335,7 +335,7 @@ function SimulatorTab({ initialProduct, onShare }: { initialProduct?: Product | 
       </div>
 
       {/* Coluna Direita: Painel de Decisão Super Simples */}
-      <div className="bg-[#f8fafc] rounded-2xl p-3.5 sm:p-4 border border-[#e2e8f0] flex flex-col justify-between space-y-2.5">
+      <div className="bg-[#f5f5f5] rounded-2xl p-3.5 sm:p-4 border border-[#e6e6e6] flex flex-col justify-between space-y-2.5">
         {sumPct >= 1 ? (
           <div className="p-4 text-center text-[#f23d4f] font-medium text-sm flex-1 flex items-center justify-center">
             Margem inatingível (&gt;=100%)
@@ -355,9 +355,9 @@ function SimulatorTab({ initialProduct, onShare }: { initialProduct?: Product | 
             {/* 2. Destaques das 3 Perguntas (Preço, Lucro e Custos) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {/* Preço de Venda */}
-              <div className="bg-white border border-[#e2e8f0] rounded-xl p-3 shadow-2xs">
-                <span className="text-[9px] font-bold uppercase tracking-wider text-[#64748b]">Preço de Venda</span>
-                <p className="text-xl font-black text-[#1e293b] mt-0.5">{formatCurrency(precoSugerido)}</p>
+              <div className="bg-white border border-[#e6e6e6] rounded-xl p-3 shadow-2xs">
+                <span className="text-[9px] font-bold uppercase tracking-wider text-[#666]">Preço de Venda</span>
+                <p className="text-xl font-black text-[#1f2328] mt-0.5">{formatCurrency(precoSugerido)}</p>
               </div>
 
               {/* Seu Lucro */}
@@ -371,73 +371,73 @@ function SimulatorTab({ initialProduct, onShare }: { initialProduct?: Product | 
             </div>
 
             {/* Resumo dos Custos */}
-            <div className="bg-white rounded-xl border border-[#e2e8f0] p-3 shadow-2xs space-y-1.5">
-              <div className="flex items-center justify-between pb-1.5 border-b border-[#f1f5f9]">
-                <span className="text-[11px] font-bold text-[#334155] uppercase tracking-wider">Custos Totais</span>
-                <span className="text-xs font-black text-[#0f172a]">{formatCurrency(custoTotal)}</span>
+            <div className="bg-white rounded-xl border border-[#e6e6e6] p-3 shadow-2xs space-y-1.5">
+              <div className="flex items-center justify-between pb-1.5 border-b border-[#eeeeee]">
+                <span className="text-[11px] font-bold text-[#333] uppercase tracking-wider">Custos Totais</span>
+                <span className="text-xs font-black text-[#1f2328]">{formatCurrency(custoTotal)}</span>
               </div>
-              <div className="space-y-1 text-[11px] text-[#64748b]">
+              <div className="space-y-1 text-[11px] text-[#666]">
                 <div className="flex justify-between">
                   <span>Produto (Investimento)</span>
-                  <span className="font-medium text-[#334155]">{formatCurrency(custo)}</span>
+                  <span className="font-medium text-[#333]">{formatCurrency(custo)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Comissão MKT ({comissaoMkt}%)</span>
-                  <span className="font-medium text-[#334155]">{formatCurrency(valComissao)}</span>
+                  <span className="font-medium text-[#333]">{formatCurrency(valComissao)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Imposto ({imposto}%)</span>
-                  <span className="font-medium text-[#334155]">{formatCurrency(valImposto)}</span>
+                  <span className="font-medium text-[#333]">{formatCurrency(valImposto)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Outros custos (Fretes/Embalagem/Tarifas)</span>
-                  <span className="font-medium text-[#334155]">{formatCurrency(outrosCustosVal)}</span>
+                  <span className="font-medium text-[#333]">{formatCurrency(outrosCustosVal)}</span>
                 </div>
               </div>
             </div>
 
             {/* 3. Simulação Visual de Cenários (3 Cards) */}
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-[#94a3b8] mb-1.5 flex items-center gap-1">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[#999] mb-1.5 flex items-center gap-1">
                 <Sparkles className="w-3 h-3 text-[#1f2328]" /> Cenários Recomendados de Preço
               </p>
               <div className="grid grid-cols-3 gap-1.5">
                 {/* Preço Mínimo */}
-                <div className="bg-white border border-[#e2e8f0] rounded-xl p-2 text-center shadow-2xs">
-                  <span className="text-[9px] font-bold text-[#94a3b8] block">Mínimo</span>
-                  <span className="text-xs font-bold text-[#475569] block mt-0.5">{formatCurrency(precoMinimo)}</span>
-                  <span className="text-[9px] text-[#94a3b8] block">Lucro: R$ 0</span>
+                <div className="bg-white border border-[#e6e6e6] rounded-xl p-2 text-center shadow-2xs">
+                  <span className="text-[9px] font-bold text-[#999] block">Mínimo</span>
+                  <span className="text-xs font-bold text-[#555] block mt-0.5">{formatCurrency(precoMinimo)}</span>
+                  <span className="text-[9px] text-[#999] block">Lucro: R$ 0</span>
                 </div>
 
                 {/* Preço Recomendado (Alvo) */}
                 <div className="bg-[#f5f5f5] border-2 border-[#1f2328] rounded-xl p-2 text-center shadow-2xs relative">
                   <span className="text-[8px] font-black text-white bg-[#1f2328] px-1 py-0.2 rounded-full absolute -top-2 left-1/2 -translate-x-1/2 whitespace-nowrap">Ideal</span>
                   <span className="text-[9px] font-bold text-[#1f2328] block">Recomendado</span>
-                  <span className="text-xs font-black text-[#1e293b] block mt-0.5">{formatCurrency(precoSugerido)}</span>
+                  <span className="text-xs font-black text-[#1f2328] block mt-0.5">{formatCurrency(precoSugerido)}</span>
                   <span className="text-[9px] font-bold text-[#16a34a] block">Lucro: {formatCurrency(lucroLiq)}</span>
                 </div>
 
                 {/* Maior Margem */}
-                <div className="bg-white border border-[#e2e8f0] rounded-xl p-2 text-center shadow-2xs">
-                  <span className="text-[9px] font-bold text-[#94a3b8] block">Maior Margem</span>
-                  <span className="text-xs font-bold text-[#475569] block mt-0.5">{formatCurrency(precoAlto)}</span>
+                <div className="bg-white border border-[#e6e6e6] rounded-xl p-2 text-center shadow-2xs">
+                  <span className="text-[9px] font-bold text-[#999] block">Maior Margem</span>
+                  <span className="text-xs font-bold text-[#555] block mt-0.5">{formatCurrency(precoAlto)}</span>
                   <span className="text-[9px] font-bold text-[#16a34a] block">Lucro: {formatCurrency(lucroAlto)}</span>
                 </div>
               </div>
             </div>
 
             {/* 4. Acordeão: Detalhamento Avançado */}
-            <div className="border-t border-[#e2e8f0] pt-1.5">
+            <div className="border-t border-[#e6e6e6] pt-1.5">
               <button
                 onClick={() => setShowDetails(!showDetails)}
-                className="w-full flex items-center justify-between py-1 text-[11px] font-bold text-[#64748b] hover:text-[#1e293b] transition-colors cursor-pointer"
+                className="w-full flex items-center justify-between py-1 text-[11px] font-bold text-[#666] hover:text-[#1f2328] transition-colors cursor-pointer"
               >
                 <span>Ver detalhamento dos custos</span>
                 {showDetails ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
               </button>
 
               {showDetails && (
-                <div className="mt-1.5 p-2.5 bg-white rounded-xl border border-[#e2e8f0] space-y-1 text-[11px] animate-in fade-in duration-150 max-h-48 overflow-y-auto">
+                <div className="mt-1.5 p-2.5 bg-white rounded-xl border border-[#e6e6e6] space-y-1 text-[11px] animate-in fade-in duration-150 max-h-48 overflow-y-auto">
                   <ResultCard label="Custo do Produto" value={formatCurrency(custo)} />
                   <ResultCard label="Comissão MKT" value={formatCurrency(valComissao)} />
                   <ResultCard label="Tarifa Fixa" value={formatCurrency(finalTarifa)} />
@@ -448,13 +448,13 @@ function SimulatorTab({ initialProduct, onShare }: { initialProduct?: Product | 
                   <ResultCard label="Embalagem" value={formatCurrency(embalagem)} />
                   <ResultCard label="Frete Fornecedor" value={formatCurrency(freteLogistica)} />
                   <ResultCard label="Frete Marketplace" value={formatCurrency(finalFrete)} />
-                  <div className="border-t border-[#f1f5f9] my-1" />
-                  <div className="bg-[#f8fafc] p-2 rounded-lg border border-[#e2e8f0]">
-                    <div className="flex justify-between items-center text-[11px] font-semibold text-[#0f172a]">
+                  <div className="border-t border-[#eeeeee] my-1" />
+                  <div className="bg-[#f5f5f5] p-2 rounded-lg border border-[#e6e6e6]">
+                    <div className="flex justify-between items-center text-[11px] font-semibold text-[#1f2328]">
                       <span>Repasse do Marketplace</span>
                       <span className="text-[#16a34a] font-bold">{formatCurrency(repasseMkt)}</span>
                     </div>
-                    <p className="text-[10px] text-[#94a3b8] mt-0.5">
+                    <p className="text-[10px] text-[#999] mt-0.5">
                       Valor depositado na conta (Preço - Tarifas/Frete MKT). Repasse não é o lucro líquido final.
                     </p>
                   </div>
@@ -743,26 +743,26 @@ function SharePricingModal({ summary, onClose }: { summary: string; onClose: () 
       <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]" onClick={onClose} />
       <div className="relative bg-white rounded-2xl w-full max-w-md shadow-[0_16px_64px_rgba(0,0,0,0.16)] overflow-hidden animate-in zoom-in-95 duration-150">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#f1f5f9]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#eeeeee]">
           <div className="flex items-center gap-2.5">
             <span className="w-8 h-8 rounded-full bg-[#f5f5f5] flex items-center justify-center">
               <Share2 className="w-4 h-4 text-[#1f2328]" />
             </span>
             <div>
-              <h3 className="font-bold text-[14px] text-[#0f172a]">Compartilhar Precificação</h3>
-              <p className="text-[11px] text-[#64748b]">Envie o resultado para um colaborador ou grupo</p>
+              <h3 className="font-bold text-[14px] text-[#1f2328]">Compartilhar Precificação</h3>
+              <p className="text-[11px] text-[#666]">Envie o resultado para um colaborador ou grupo</p>
             </div>
           </div>
-          <button onClick={onClose} className="w-8 h-8 rounded-full hover:bg-[#f5f5f5] flex items-center justify-center text-[#94a3b8] hover:text-[#475569] transition-colors cursor-pointer">
+          <button onClick={onClose} className="w-8 h-8 rounded-full hover:bg-[#f5f5f5] flex items-center justify-center text-[#999] hover:text-[#555] transition-colors cursor-pointer">
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Target selection */}
         <div className="px-5 py-4 space-y-3 max-h-64 overflow-y-auto">
-          <p className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider">Enviar para:</p>
+          <p className="text-[11px] font-bold text-[#999] uppercase tracking-wider">Enviar para:</p>
           {targets.length === 0 && (
-            <p className="text-sm text-[#94a3b8] text-center py-4">Nenhum colaborador disponível</p>
+            <p className="text-sm text-[#999] text-center py-4">Nenhum colaborador disponível</p>
           )}
           {targets.map(t => (
             <button
@@ -771,11 +771,11 @@ function SharePricingModal({ summary, onClose }: { summary: string; onClose: () 
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition-all cursor-pointer text-left ${
                 selectedTarget === t.id
                   ? 'border-[#1f2328] bg-[#f5f5f5] shadow-xs'
-                  : 'border-[#f1f5f9] hover:border-[#e2e8f0] hover:bg-[#f5f5f5]'
+                  : 'border-[#eeeeee] hover:border-[#e6e6e6] hover:bg-[#f5f5f5]'
               }`}
             >
               <div className="relative shrink-0">
-                <div className="w-9 h-9 rounded-full bg-[#f1f5f9] flex items-center justify-center text-[13px] font-bold text-[#334155]">
+                <div className="w-9 h-9 rounded-full bg-[#f0f0f0] flex items-center justify-center text-[13px] font-bold text-[#333]">
                   {t.label.slice(0, 1).toUpperCase()}
                 </div>
                 {t.type === 'DIRECT' && (
@@ -783,8 +783,8 @@ function SharePricingModal({ summary, onClose }: { summary: string; onClose: () 
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-[13px] text-[#0f172a] truncate">{t.label}</p>
-                <p className="text-[11px] text-[#64748b]">{t.sublabel}</p>
+                <p className="font-bold text-[13px] text-[#1f2328] truncate">{t.label}</p>
+                <p className="text-[11px] text-[#666]">{t.sublabel}</p>
               </div>
               {selectedTarget === t.id && <CheckCircle2 className="w-4 h-4 text-[#1f2328] shrink-0" />}
             </button>
@@ -793,13 +793,13 @@ function SharePricingModal({ summary, onClose }: { summary: string; onClose: () 
 
         {/* Optional note */}
         <div className="px-5 pb-4">
-          <label className="block text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider mb-1.5">Mensagem adicional (opcional)</label>
+          <label className="block text-[11px] font-bold text-[#999] uppercase tracking-wider mb-1.5">Mensagem adicional (opcional)</label>
           <textarea
             value={note}
             onChange={e => setNote(e.target.value)}
             placeholder="Ex: Segue a simulação que fizemos para esse produto..."
             rows={2}
-            className="w-full border border-[#e2e8f0] rounded-xl px-3 py-2 text-sm text-[#0f172a] placeholder:text-[#94a3b8] resize-none focus:outline-none focus:border-[#1f2328] transition-colors"
+            className="w-full border border-[#e6e6e6] rounded-xl px-3 py-2 text-sm text-[#1f2328] placeholder:text-[#999] resize-none focus:outline-none focus:border-[#1f2328] transition-colors"
           />
         </div>
 
@@ -807,7 +807,7 @@ function SharePricingModal({ summary, onClose }: { summary: string; onClose: () 
         <div className="px-5 pb-5 flex items-center gap-3">
           <button
             onClick={onClose}
-            className="flex-1 py-2.5 text-sm font-bold text-[#64748b] border border-[#e2e8f0] rounded-xl hover:bg-[#f5f5f5] transition-colors cursor-pointer"
+            className="flex-1 py-2.5 text-sm font-bold text-[#666] border border-[#e6e6e6] rounded-xl hover:bg-[#f5f5f5] transition-colors cursor-pointer"
           >
             Cancelar
           </button>

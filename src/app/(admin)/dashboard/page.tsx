@@ -194,7 +194,7 @@ export default function DashboardPage() {
       </div>
 
       {/* CARD DESTAQUE VENDAS DE HOJE (MONITOR AO VIVO) */}
-      <div className="bg-[#B5F500] rounded-2xl px-5 sm:px-6 py-3 sm:py-4 shadow-sm border border-[#a2e000] text-[#111] flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-[#B5F500] rounded-2xl px-5 sm:px-6 py-4 sm:py-6 shadow-sm border border-[#a2e000] text-[#111] flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-2xl bg-black/10 flex items-center justify-center shrink-0">
             <span className="relative flex h-3.5 w-3.5">

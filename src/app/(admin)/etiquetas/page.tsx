@@ -326,7 +326,7 @@ export default function CentralEtiquetasPage() {
         <div className="flex items-center gap-3 shrink-0">
           <button
             onClick={() => setShowConfigModal(true)}
-            className="px-4 py-2.5 bg-white border border-[#e2e8f0] hover:border-[#cbd5e1] text-[#475569] hover:text-[#0f172a] rounded-xl text-sm font-medium flex items-center gap-2 transition-all cursor-pointer shadow-xs"
+            className="px-4 py-2.5 bg-white border border-[#e6e6e6] hover:border-[#cbd5e1] text-[#666] hover:text-[#333] rounded-xl text-[13px] font-medium flex items-center gap-2 transition-all cursor-pointer shadow-xs"
           >
             <Sliders className="w-4 h-4 text-[#64748b]" />
             <span>Configurar Impressora</span>
