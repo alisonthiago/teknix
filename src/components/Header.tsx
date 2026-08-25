@@ -130,8 +130,13 @@ function HeaderActions({
     return text.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]/gu, '').trim()
   }
 
-  const renderNotificationIcon = (type?: string, module?: string, title?: string) => {
-    const t = String(type || module || title || '').toLowerCase()
+  const renderNotificationIcon = (n: any) => {
+    if (n.image_url) {
+      return (
+        <img src={n.image_url} alt="" className="w-10 h-10 rounded-xl object-contain border border-[#e6e6e6] bg-white p-0.5 shrink-0" />
+      )
+    }
+    const t = String(n.module || n.title || n.type || '').toLowerCase()
 
     if (t.includes('lava jato') || t.includes('lavadora') || t.includes('pressão') || t.includes('mlb5090385757') || t.includes('2000018029918832')) {
       return (
@@ -243,11 +248,11 @@ function HeaderActions({
         {notifOpen && (
           <div className="absolute right-0 top-full mt-2 w-[420px] max-w-[94vw] bg-white rounded-3xl border border-[#e6e6e6] shadow-[0_12px_40px_rgba(0,0,0,0.14)] overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150">
             {/* Header Notificações Inteligentes */}
-            <div className="p-4 border-b border-[#eeeeee] flex items-center justify-between bg-white">
+            <div className="px-3 py-2.5 border-b border-[#eeeeee] flex items-center justify-between bg-white">
               <div className="flex items-center gap-2">
-                <h3 className="text-[14px] font-black text-[#1f2328]">Alertas & Mercado Livre</h3>
+                <h3 className="text-[13px] font-bold text-[#1f2328]">Alertas & Mercado Livre</h3>
                 {activeUnreadCount > 0 && (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#fff0f0] text-[#e74c3c] border border-[#ffcdd2]">
+                  <span className="px-1.5 py-0.5 rounded-full text-[9px] font-extrabold bg-[#fff0f0] text-[#e74c3c] border border-[#ffcdd2]">
                     {activeUnreadCount} nova{activeUnreadCount !== 1 ? 's' : ''}
                   </span>
                 )}
@@ -255,7 +260,7 @@ function HeaderActions({
               {activeUnreadCount > 0 && (
                 <button
                   onClick={markAllAsRead}
-                  className="text-[10px] font-bold text-[#1f2328] hover:underline cursor-pointer"
+                  className="text-[9px] font-bold text-[#1f2328] hover:underline cursor-pointer"
                 >
                   Marcar todas como lidas
                 </button>
@@ -298,15 +303,15 @@ function HeaderActions({
                          : 'bg-[#fafafa] hover:bg-[#f5f5f5] border border-[#e2e8f0]'
                      }`}
                   >
-                    {renderNotificationIcon(n.type, n.module, n.title)}
+                     {renderNotificationIcon(n)}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-1">
-                          <p className={`text-[13px] leading-snug line-clamp-1 ${n.is_read ? 'text-[#333]' : 'text-[#111] font-extrabold'}`}>
+                          <p className={`text-[12px] leading-snug line-clamp-1 ${n.is_read ? 'text-[#333]' : 'text-[#111] font-extrabold'}`}>
                           {cleanTitle(n.title)}
                         </p>
-                        <span className="text-[10px] text-[#999] shrink-0 font-medium">{formatTimeAgo(n.created_at)}</span>
+                        <span className="text-[9px] text-[#999] shrink-0 font-medium">{formatTimeAgo(n.created_at)}</span>
                       </div>
-                       <p className="text-[10px] text-[#666] leading-tight mt-1 line-clamp-1">{cleanTitle(n.message)}</p>
+                       <p className="text-[9px] text-[#666] leading-tight mt-0.5 line-clamp-1">{cleanTitle(n.message)}</p>
                     </div>
                     {!n.is_read && (
                       <span className="w-2 h-2 rounded-full bg-[#16a34a] shrink-0" />

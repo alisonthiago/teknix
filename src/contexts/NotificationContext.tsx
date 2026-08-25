@@ -17,6 +17,7 @@ export interface AppNotification {
   module?: string
   entity_id?: string
   entity_type?: string
+  image_url?: string
 }
 
 export interface NotifyOptions {
@@ -93,6 +94,40 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         return true
       })
       setNotifications(validNotifs)
+
+      // Enriquecer notificações de vendas com fotos dos produtos
+      const saleNotifs = validNotifs.filter(n => {
+        const t = String(n.title || '').toLowerCase() + ' ' + String(n.message || '').toLowerCase()
+        return t.includes('venda') || t.includes('comprou') || t.includes('pedido')
+      })
+      if (saleNotifs.length > 0) {
+        const orderNums = new Set<string>()
+        for (const n of saleNotifs) {
+          const matches = (n.title + ' ' + n.message).match(/MLB-?\d+/g)
+          if (matches) matches.forEach(m => orderNums.add(m))
+        }
+        if (orderNums.size > 0) {
+          const { data: ordersData } = await supabase
+            .from('orders')
+            .select('order_number, order_items(products(name, image_url))')
+            .in('order_number', Array.from(orderNums))
+          const imageMap: Record<string, string> = {}
+          for (const o of ordersData || []) {
+            const items = (o as any).order_items || []
+            for (const item of items) {
+              if (item.products?.image_url) {
+                imageMap[(o as any).order_number] = item.products.image_url
+                break
+              }
+            }
+          }
+          setNotifications(prev => prev.map(n => {
+            const match = (n.title + ' ' + n.message).match(/MLB-?\d+/)
+            if (match && imageMap[match[0]]) return { ...n, image_url: imageMap[match[0]] }
+            return n
+          }))
+        }
+      }
     }
   }, [supabase])
 
