@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createHash } from 'crypto'
 import { enqueueAndProcessWebhook } from '@/services/mercadolivre/webhookProcessor'
 
 export async function POST(req: NextRequest) {
@@ -32,7 +33,24 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  // Validação de desafio do Mercado Livre (obrigatória no registro do webhook)
+  // ML envia ?challenge_code=XXX e espera o SHA-256 de (challenge_code + client_secret + client_id) em texto puro.
+  const challengeCode = req.nextUrl.searchParams.get('challenge_code')
+
+  if (challengeCode) {
+    const clientId = process.env.MERCADOLIBRE_CLIENT_ID || ''
+    const clientSecret = process.env.MERCADOLIBRE_CLIENT_SECRET || ''
+    const hash = createHash('sha256')
+      .update(challengeCode + clientSecret + clientId)
+      .digest('hex')
+
+    return new NextResponse(hash, {
+      status: 200,
+      headers: { 'Content-Type': 'text/plain' },
+    })
+  }
+
   return NextResponse.json({
     status: 'ACTIVE',
     endpoint: '/api/webhooks/mercadolivre',
