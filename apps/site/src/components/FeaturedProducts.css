@@ -1,6 +1,6 @@
 .featured {
   padding: var(--tkn-section-pad) 0;
-  background: var(--tkn-dark);
+  background: var(--tkn-bg);
 }
 
 .featured-inner {
@@ -42,7 +42,7 @@
 .featured-item-image {
   position: relative;
   aspect-ratio: 1;
-  background: var(--tkn-gray-2);
+  background: var(--tkn-bg-alt);
   border-radius: var(--tkn-radius-md);
   overflow: hidden;
   margin-bottom: 16px;
@@ -62,7 +62,7 @@
 }
 
 .featured-item:hover .featured-item-image img {
-  transform: scale(1.04);
+  transform: scale(1.03);
 }
 
 .featured-item-placeholder {
@@ -71,7 +71,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--tkn-text-faint);
+  color: var(--tkn-gray-lighter);
 }
 
 .featured-badge {
@@ -95,7 +95,7 @@
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--tkn-text-faint);
+  color: var(--tkn-text-tertiary);
   margin-bottom: 6px;
   display: block;
 }
@@ -121,14 +121,14 @@
 
 .price-old {
   font-size: 0.85rem;
-  color: var(--tkn-text-faint);
+  color: var(--tkn-text-tertiary);
   text-decoration: line-through;
 }
 
 .price-current {
   font-size: 1.1rem;
   font-weight: 700;
-  color: var(--tkn-green);
+  color: var(--tkn-text);
 }
 
 .featured-item-hero .price-current {

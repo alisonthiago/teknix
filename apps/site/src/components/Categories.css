@@ -1,6 +1,6 @@
 .segments {
   padding: var(--tkn-section-pad) 0;
-  background: var(--tkn-gray);
+  background: var(--tkn-bg-alt);
 }
 
 .segments-header {
@@ -36,6 +36,8 @@
   justify-content: flex-end;
   opacity: 0;
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--tkn-bg);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .segment-card:hover {
@@ -45,7 +47,8 @@
 .segment-visual {
   position: absolute;
   inset: 0;
-  background: var(--tkn-gray-2);
+  background: var(--tkn-bg-alt);
+  overflow: hidden;
 }
 
 .segment-visual img {
@@ -56,7 +59,7 @@
 }
 
 .segment-card:hover .segment-visual img {
-  transform: scale(1.08);
+  transform: scale(1.05);
 }
 
 .segment-icon {
@@ -65,29 +68,19 @@
   left: 50%;
   transform: translate(-50%, -60%);
   font-size: 4rem;
-  opacity: 0.15;
-}
-
-.segment-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to top,
-    rgba(10, 10, 10, 0.85) 0%,
-    rgba(10, 10, 10, 0.2) 50%,
-    transparent 100%
-  );
+  opacity: 0.12;
 }
 
 .segment-info {
   position: relative;
   z-index: 1;
   padding: 28px;
+  background: linear-gradient(to top, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.8) 50%, transparent 100%);
 }
 
 .segment-info h3 {
-  font-size: 1.4rem;
-  font-weight: 700;
+  font-size: 1.3rem;
+  font-weight: 600;
   letter-spacing: -0.01em;
   margin-bottom: 4px;
   color: var(--tkn-text);
@@ -95,7 +88,7 @@
 
 .segment-info p {
   font-size: 0.85rem;
-  color: var(--tkn-text-dim);
+  color: var(--tkn-text-secondary);
   line-height: 1.4;
   margin-bottom: 12px;
 }
@@ -106,7 +99,7 @@
   gap: 6px;
   font-size: 0.8rem;
   font-weight: 600;
-  color: var(--tkn-green);
+  color: var(--tkn-green-dark);
   opacity: 0;
   transform: translateY(8px);
   transition: all 0.3s ease;

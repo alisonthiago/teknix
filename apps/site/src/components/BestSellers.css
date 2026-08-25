@@ -1,6 +1,6 @@
 .bestsellers {
   padding: var(--tkn-section-pad) 0;
-  background: var(--tkn-dark);
+  background: var(--tkn-bg-alt);
 }
 
 .bestsellers-inner {

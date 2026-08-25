@@ -5,13 +5,13 @@ import type { Category } from '../types/database'
 import './Categories.css'
 
 const segmentThemes: Record<string, { icon: string; color: string }> = {
-  'ferramentas-eletricas': { icon: '⚡', color: '#00ff88' },
-  'ferramentas-manuais': { icon: '🔧', color: '#00d4ff' },
-  'furadeiras': { icon: '🔩', color: '#ff6b35' },
-  'parafusadeiras': { icon: '🛠️', color: '#a78bfa' },
-  'serras': { icon: '⚙️', color: '#f472b6' },
-  'kits': { icon: '📦', color: '#fbbf24' },
-  'acessorios': { icon: '🎯', color: '#34d399' },
+  'ferramentas-eletricas': { icon: '⚡', color: '#1d1d1f' },
+  'ferramentas-manuais': { icon: '🔧', color: '#1d1d1f' },
+  'furadeiras': { icon: '🔩', color: '#1d1d1f' },
+  'parafusadeiras': { icon: '🛠️', color: '#1d1d1f' },
+  'serras': { icon: '⚙️', color: '#1d1d1f' },
+  'kits': { icon: '📦', color: '#1d1d1f' },
+  'acessorios': { icon: '🎯', color: '#1d1d1f' },
 }
 
 export default function Categories() {
@@ -37,13 +37,13 @@ export default function Categories() {
 
       <div className={`segments-grid ${isInView ? 'visible' : ''}`}>
         {categories.map((cat, i) => {
-          const theme = segmentThemes[cat.slug || ''] || { icon: '📦', color: '#00ff88' }
+          const theme = segmentThemes[cat.slug || ''] || { icon: '📦', color: '#1d1d1f' }
           return (
             <a
               key={cat.id}
               href={`/produtos?categoria=${cat.slug || cat.id}`}
               className="segment-card"
-              style={{ '--segment-color': theme.color, '--delay': `${i * 0.08}s` } as React.CSSProperties}
+              style={{ '--delay': `${i * 0.08}s` } as React.CSSProperties}
             >
               <div className="segment-visual">
                 {cat.image_url ? (
@@ -51,7 +51,6 @@ export default function Categories() {
                 ) : (
                   <span className="segment-icon">{theme.icon}</span>
                 )}
-                <div className="segment-overlay"></div>
               </div>
               <div className="segment-info">
                 <h3>{cat.name}</h3>

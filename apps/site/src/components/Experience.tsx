@@ -11,7 +11,7 @@ export default function Experience() {
           <span className="section-eyebrow">A DIFERENÇA TEKNIX</span>
           <h2 className="experience-title">
             Você faz.<br />
-            <span className="experience-accent">A ferramenta ajuda.</span>
+            A ferramenta ajuda.
           </h2>
           <p className="experience-description">
             Cada ferramenta Teknix é projetada para entregar performance

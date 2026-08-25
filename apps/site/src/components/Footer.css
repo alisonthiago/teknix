@@ -1,6 +1,6 @@
 .site-footer {
   padding: 80px 0 0;
-  background: var(--tkn-gray);
+  background: var(--tkn-bg-alt);
   border-top: 1px solid var(--tkn-border);
 }
 
@@ -38,13 +38,13 @@
 }
 
 .footer-logo .logo-text {
-  font-weight: 800;
+  font-weight: 700;
   font-size: 0.95rem;
   letter-spacing: -0.02em;
 }
 
 .footer-tagline {
-  color: var(--tkn-text-dim);
+  color: var(--tkn-text-secondary);
   font-size: 0.9rem;
 }
 
@@ -55,8 +55,8 @@
 }
 
 .footer-col h4 {
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-size: 0.72rem;
+  font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--tkn-text);
@@ -73,7 +73,7 @@
 .footer-col li,
 .footer-col a {
   font-size: 0.85rem;
-  color: var(--tkn-text-dim);
+  color: var(--tkn-text-secondary);
   text-decoration: none;
   transition: color 0.2s ease;
 }
@@ -89,7 +89,7 @@
 
 .footer-bottom p {
   font-size: 0.8rem;
-  color: var(--tkn-text-faint);
+  color: var(--tkn-text-tertiary);
 }
 
 @media (max-width: 768px) {

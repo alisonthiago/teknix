@@ -12,13 +12,14 @@
 
 .products-hero h1 {
   font-size: clamp(2rem, 4vw, 3rem);
-  font-weight: 800;
-  letter-spacing: -0.03em;
+  font-weight: 700;
+  letter-spacing: -0.035em;
   margin-bottom: 12px;
+  color: var(--tkn-text);
 }
 
 .products-hero p {
-  color: var(--tkn-text-dim);
+  color: var(--tkn-text-secondary);
   font-size: 1.1rem;
 }
 
@@ -42,7 +43,7 @@
 .search-input {
   flex: 1;
   padding: 12px 14px;
-  background: var(--tkn-gray-2);
+  background: var(--tkn-bg-alt);
   border: 1px solid var(--tkn-border);
   border-radius: var(--tkn-radius-sm);
   color: var(--tkn-text);
@@ -53,25 +54,25 @@
 
 .search-input:focus {
   outline: none;
-  border-color: var(--tkn-green);
+  border-color: var(--tkn-text);
 }
 
 .search-input::placeholder {
-  color: var(--tkn-text-faint);
+  color: var(--tkn-text-tertiary);
 }
 
 .search-btn {
   padding: 12px 14px;
-  background: var(--tkn-green);
+  background: var(--tkn-dark);
   border: none;
   border-radius: var(--tkn-radius-sm);
-  color: var(--tkn-dark);
+  color: #fff;
   cursor: pointer;
   transition: background 0.2s;
 }
 
 .search-btn:hover {
-  background: #33ffaa;
+  background: #333;
 }
 
 .filter-group {
@@ -82,7 +83,7 @@
 
 .filter-group h3 {
   font-size: 0.7rem;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--tkn-text);
@@ -94,7 +95,7 @@
   background: transparent;
   border: 1px solid transparent;
   border-radius: var(--tkn-radius-sm);
-  color: var(--tkn-text-dim);
+  color: var(--tkn-text-secondary);
   font-size: 0.85rem;
   font-family: inherit;
   text-align: left;
@@ -104,13 +105,13 @@
 
 .filter-btn:hover {
   color: var(--tkn-text);
-  background: var(--tkn-gray-2);
+  background: var(--tkn-bg-alt);
 }
 
 .filter-btn.active {
-  color: var(--tkn-green);
-  background: var(--tkn-green-dim);
-  border-color: rgba(0, 255, 136, 0.15);
+  color: var(--tkn-text);
+  background: var(--tkn-bg-alt);
+  font-weight: 600;
 }
 
 .products-main {
@@ -119,7 +120,7 @@
 
 .products-count {
   font-size: 0.85rem;
-  color: var(--tkn-text-dim);
+  color: var(--tkn-text-secondary);
   margin-bottom: 24px;
 }
 
@@ -138,7 +139,7 @@
 }
 
 .products-loading p {
-  color: var(--tkn-text-dim);
+  color: var(--tkn-text-secondary);
 }
 
 .products-empty {
@@ -147,7 +148,7 @@
   align-items: center;
   gap: 16px;
   padding: 80px 0;
-  color: var(--tkn-text-dim);
+  color: var(--tkn-text-secondary);
 }
 
 @media (max-width: 968px) {

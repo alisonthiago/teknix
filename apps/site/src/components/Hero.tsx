@@ -15,12 +15,12 @@ export default function Hero() {
 
   return (
     <section className="hero">
-      <div className="hero-content">
+      <div className="hero-inner">
         <div className="hero-text">
           <span className="hero-eyebrow">NOVA COLEÇÃO 2026</span>
           <h1 className="hero-title">
             Ferramentas<br />
-            <span className="hero-title-accent">Feitas para fazer.</span>
+            Feitas para fazer.
           </h1>
           <p className="hero-description">
             Equipamentos profissionais com a qualidade que você precisa
@@ -50,7 +50,6 @@ export default function Hero() {
                   </svg>
                 </div>
               )}
-              <div className="hero-featured-glow"></div>
             </div>
             <div className="hero-featured-info">
               <span className="hero-featured-badge">DESTAQUE</span>
@@ -78,11 +77,6 @@ export default function Hero() {
             </div>
           </Link>
         )}
-      </div>
-
-      <div className="hero-scroll">
-        <span>Scroll</span>
-        <div className="hero-scroll-line"></div>
       </div>
     </section>
   )
