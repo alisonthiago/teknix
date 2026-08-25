@@ -447,7 +447,7 @@ export default function CentralEtiquetasPage() {
         </div>
 
         {/* Campo de Busca & Filtro de Canais */}
-        <div className="flex flex-col sm:flex-row items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-center gap-3 py-2">
           <div className="relative flex-1 w-full">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94a3b8]" />
             <input
@@ -464,7 +464,7 @@ export default function CentralEtiquetasPage() {
             )}
           </div>
 
-          <div className="flex items-center gap-2 overflow-x-auto shrink-0 w-full sm:w-auto">
+          <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
             {['ALL', 'MERCADO_LIVRE', 'SHOPEE', 'TIKTOK', 'MAGALU'].map(m => {
               const label = m === 'ALL' ? 'Todos Canais' : m === 'MERCADO_LIVRE' ? 'Mercado Livre' : m === 'TIKTOK' ? 'TikTok' : m === 'MAGALU' ? 'Magalu' : 'Shopee'
               const isSelected = marketplaceFilter === m

@@ -494,10 +494,10 @@ export default function PedidosPage() {
                           {productName}
                         </p>
                         <div className="flex items-center gap-2 text-xs flex-wrap">
-                          <span className="px-2 py-0.5 rounded-md bg-[#f1f5f9] text-[11px] font-mono font-bold text-[#475569]">
+                          <span className="px-2 py-0.5 rounded-md bg-[#f1f5f9] text-[10px] font-mono font-bold text-[#475569]">
                             SKU: {productSku}
                           </span>
-                          <span className="px-2 py-0.5 rounded-md bg-[#f5f5f5] border border-[#e2e8f0] text-[11px] font-mono font-bold text-[#0f172a]">
+                          <span className="px-2 py-0.5 rounded-md bg-[#f5f5f5] border border-[#e2e8f0] text-[10px] font-mono font-bold text-[#0f172a]">
                             #{order.order_number}
                           </span>
                         </div>

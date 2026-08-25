@@ -236,7 +236,7 @@ function SimulatorTab({ initialProduct, onShare }: { initialProduct?: Product | 
         )}
 
         <div>
-          <h3 className="text-sm font-semibold text-[#333] mb-2 flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-[#333] mb-3.5 flex items-center justify-between">
             <span>Marketplace (Auto-Config)</span>
             {selectedMktId && <span className="text-[10px] text-[#00a650] bg-[#e6fce5] px-2 py-0.5 rounded-full flex items-center gap-1"><Info className="w-3 h-3"/> Aplicando regras de {activeMpConfig?.name}</span>}
           </h3>
@@ -347,7 +347,7 @@ function SimulatorTab({ initialProduct, onShare }: { initialProduct?: Product | 
               <div className="w-6 h-6 rounded-full bg-[#16a34a] text-white flex items-center justify-center shrink-0">
                 <Check className="w-3.5 h-3.5" />
               </div>
-              <p className="text-[11px] sm:text-xs font-bold text-[#15803d] leading-snug">
+              <p className="text-[10px] sm:text-[11px] font-bold text-[#15803d] leading-snug">
                 Vendendo por <span className="underline decoration-2">{formatCurrency(precoSugerido)}</span>, você ganha <span className="underline decoration-2">{formatCurrency(lucroLiq)}</span> por venda.
               </p>
             </div>
@@ -356,14 +356,14 @@ function SimulatorTab({ initialProduct, onShare }: { initialProduct?: Product | 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {/* Preço de Venda */}
               <div className="bg-white border border-[#e2e8f0] rounded-xl p-3 shadow-2xs">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#64748b]">Preço de Venda</span>
+                <span className="text-[9px] font-bold uppercase tracking-wider text-[#64748b]">Preço de Venda</span>
                 <p className="text-xl font-black text-[#1e293b] mt-0.5">{formatCurrency(precoSugerido)}</p>
               </div>
 
               {/* Seu Lucro */}
               <div className="bg-[#16a34a] text-white rounded-xl p-3 shadow-2xs">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-100">Seu Lucro Real</span>
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-100">Seu Lucro Real</span>
                   <span className="text-[10px] font-extrabold bg-white/20 px-1.5 py-0.5 rounded-full">{margemLiquida}% margem</span>
                 </div>
                 <p className="text-xl font-black mt-0.5">{formatCurrency(lucroLiq)}</p>
@@ -879,7 +879,7 @@ export default function MarginCalculator({ open, onClose }: MarginCalculatorProp
         </div>
 
         {/* Tabs */}
-        <div className="border-b border-[#e6e6e6] px-4 flex gap-0 overflow-x-auto shrink-0">
+        <div className="border-b border-[#e6e6e6] px-4 py-2 flex gap-0 overflow-x-auto shrink-0">
           <TabButton active={activeTab === 'simulador'} onClick={() => setActiveTab('simulador')} icon={TrendingUp} label="Simulador" />
           <TabButton active={activeTab === 'produtos'} onClick={() => setActiveTab('produtos')} icon={Package} label="Produtos" />
           <TabButton active={activeTab === 'comparar'} onClick={() => setActiveTab('comparar')} icon={Search} label="Comparar" />

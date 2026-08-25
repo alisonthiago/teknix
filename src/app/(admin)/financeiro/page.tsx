@@ -429,7 +429,7 @@ export default function FinanceiroPage() {
           <div className="space-y-5">
             {/* Top Stat Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-              <div className="bg-white p-5 rounded-2xl border border-[#e6e6e6] shadow-2xs">
+              <div className="bg-white px-5 py-6 rounded-2xl border border-[#e6e6e6] shadow-2xs">
                 <p className="text-[11px] font-bold text-[#888] uppercase tracking-wider">Receita Bruta</p>
                 <p className="text-2xl font-black text-[#111] mt-1">{formatBRL(financialData.revenue)}</p>
                 <div className="flex items-center gap-1 text-[11px] font-extrabold text-[#16a34a] mt-2">
@@ -437,7 +437,7 @@ export default function FinanceiroPage() {
                 </div>
               </div>
 
-              <div className="bg-white p-5 rounded-2xl border border-[#e6e6e6] shadow-2xs">
+              <div className="bg-white px-5 py-6 rounded-2xl border border-[#e6e6e6] shadow-2xs">
                 <p className="text-[11px] font-bold text-[#888] uppercase tracking-wider">Lucro Líquido</p>
                 <p className="text-2xl font-black text-[#16a34a] mt-1">{formatBRL(financialData.profit)}</p>
                 <div className="flex items-center gap-1 text-[11px] font-extrabold text-[#16a34a] mt-2">
@@ -445,7 +445,7 @@ export default function FinanceiroPage() {
                 </div>
               </div>
 
-              <div className="bg-white p-5 rounded-2xl border border-[#e6e6e6] shadow-2xs">
+              <div className="bg-white px-5 py-6 rounded-2xl border border-[#e6e6e6] shadow-2xs">
                 <p className="text-[11px] font-bold text-[#888] uppercase tracking-wider">Custos & Taxas</p>
                 <p className="text-2xl font-black text-[#111] mt-1">{formatBRL(financialData.cost + financialData.fees + financialData.taxes + financialData.freight)}</p>
                 <div className="flex items-center gap-1 text-[11px] font-bold text-[#777] mt-2">
@@ -453,7 +453,7 @@ export default function FinanceiroPage() {
                 </div>
               </div>
 
-              <div className="bg-white p-5 rounded-2xl border border-[#e6e6e6] shadow-2xs">
+              <div className="bg-white px-5 py-6 rounded-2xl border border-[#e6e6e6] shadow-2xs">
                 <p className="text-[11px] font-bold text-[#888] uppercase tracking-wider">Ticket Médio</p>
                 <p className="text-2xl font-black text-[#111] mt-1">{formatBRL(financialData.revenue / Math.max(1, financialData.totalOrders))}</p>
                 <div className="flex items-center gap-1 text-[11px] font-bold text-[#16a34a] mt-2">
@@ -563,17 +563,17 @@ export default function FinanceiroPage() {
         <TabsContent value="faturamento">
           <div className="space-y-5">
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-              <div className="bg-white p-5 rounded-2xl border border-[#e6e6e6] shadow-2xs">
+              <div className="bg-white px-5 py-6 rounded-2xl border border-[#e6e6e6] shadow-2xs">
                 <p className="text-[11px] font-bold text-[#888] uppercase tracking-wider">Receita Bruta</p>
                 <p className="text-2xl font-black text-[#111] mt-1">{formatBRL(financialData.revenue)}</p>
                 <p className="text-[11px] text-[#16a34a] font-bold mt-1">100% de volume faturado</p>
               </div>
-              <div className="bg-white p-5 rounded-2xl border border-[#e6e6e6] shadow-2xs">
+              <div className="bg-white px-5 py-6 rounded-2xl border border-[#e6e6e6] shadow-2xs">
                 <p className="text-[11px] font-bold text-[#888] uppercase tracking-wider">Receita Líquida (Sem Comissões)</p>
                 <p className="text-2xl font-black text-[#111] mt-1">{formatBRL(financialData.revenue - financialData.fees)}</p>
                 <p className="text-[11px] text-[#666] mt-1">Livre de taxas de plataforma</p>
               </div>
-              <div className="bg-white p-5 rounded-2xl border border-[#e6e6e6] shadow-2xs">
+              <div className="bg-white px-5 py-6 rounded-2xl border border-[#e6e6e6] shadow-2xs">
                 <p className="text-[11px] font-bold text-[#888] uppercase tracking-wider">Ticket Médio por Venda</p>
                 <p className="text-2xl font-black text-[#111] mt-1">{formatBRL(financialData.revenue / Math.max(1, financialData.totalOrders))}</p>
                 <p className="text-[11px] text-[#666] mt-1">Média por pedido aprovado</p>
@@ -615,17 +615,17 @@ export default function FinanceiroPage() {
         <TabsContent value="lucro">
           <div className="space-y-5">
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-              <div className="bg-white p-5 rounded-2xl border border-[#e6e6e6] shadow-2xs">
+              <div className="bg-white px-5 py-6 rounded-2xl border border-[#e6e6e6] shadow-2xs">
                 <p className="text-[11px] font-bold text-[#888] uppercase tracking-wider">Lucro Líquido</p>
                 <p className="text-2xl font-black text-[#16a34a] mt-1">{formatBRL(financialData.profit)}</p>
                 <p className="text-[11px] text-[#16a34a] font-bold mt-1">{financialData.avgMargin}% de margem líquida</p>
               </div>
-              <div className="bg-white p-5 rounded-2xl border border-[#e6e6e6] shadow-2xs">
+              <div className="bg-white px-5 py-6 rounded-2xl border border-[#e6e6e6] shadow-2xs">
                 <p className="text-[11px] font-bold text-[#888] uppercase tracking-wider">Lucro Bruto</p>
                 <p className="text-2xl font-black text-[#111] mt-1">{formatBRL(financialData.revenue - financialData.cost)}</p>
                 <p className="text-[11px] text-[#666] mt-1">Antes de taxas e frete</p>
               </div>
-              <div className="bg-white p-5 rounded-2xl border border-[#e6e6e6] shadow-2xs">
+              <div className="bg-white px-5 py-6 rounded-2xl border border-[#e6e6e6] shadow-2xs">
                 <p className="text-[11px] font-bold text-[#888] uppercase tracking-wider">Lucro Médio / Pedido</p>
                 <p className="text-2xl font-black text-[#16a34a] mt-1">{formatBRL(financialData.profit / Math.max(1, financialData.totalOrders))}</p>
                 <p className="text-[11px] text-[#666] mt-1">Ganho real por pacote</p>
@@ -650,17 +650,17 @@ export default function FinanceiroPage() {
         <TabsContent value="margem">
           <div className="space-y-5">
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-              <div className="bg-white p-5 rounded-2xl border border-[#e6e6e6] shadow-2xs">
+              <div className="bg-white px-5 py-6 rounded-2xl border border-[#e6e6e6] shadow-2xs">
                 <p className="text-[11px] font-bold text-[#888] uppercase tracking-wider">Margem Média Líquida</p>
                 <p className="text-2xl font-black text-[#16a34a] mt-1">{financialData.avgMargin}%</p>
                 <p className="text-[11px] text-[#16a34a] font-bold mt-1">Margem operacional saudável</p>
               </div>
-              <div className="bg-white p-5 rounded-2xl border border-[#e6e6e6] shadow-2xs">
+              <div className="bg-white px-5 py-6 rounded-2xl border border-[#e6e6e6] shadow-2xs">
                 <p className="text-[11px] font-bold text-[#888] uppercase tracking-wider">Melhor Margem</p>
                 <p className="text-2xl font-black text-[#16a34a] mt-1">34.8%</p>
                 <p className="text-[11px] text-[#666] mt-1">Anúncios sem taxa fixa</p>
               </div>
-              <div className="bg-white p-5 rounded-2xl border border-[#e6e6e6] shadow-2xs">
+              <div className="bg-white px-5 py-6 rounded-2xl border border-[#e6e6e6] shadow-2xs">
                 <p className="text-[11px] font-bold text-[#888] uppercase tracking-wider">Margem Mínima de Segurança</p>
                 <p className="text-2xl font-black text-[#f59e0b] mt-1">15.0%</p>
                 <p className="text-[11px] text-[#666] mt-1">Target de proteção</p>

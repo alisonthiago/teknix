@@ -123,7 +123,7 @@ function SalesTab() {
     <div className="space-y-4">
       {/* Top Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-        <div className="bg-white p-5 rounded-2xl border border-[#e6e6e6] shadow-2xs">
+        <div className="bg-white px-5 py-6 rounded-2xl border border-[#e6e6e6] shadow-2xs">
           <p className="text-[10px] sm:text-xs font-semibold text-[#999] uppercase tracking-wide">Receita de Vendas</p>
           <p className="text-2xl font-black text-[#111] mt-1">{formatBRL(totalRevenue)}</p>
           <div className="flex items-center gap-1 text-sm font-extrabold text-[#16a34a] mt-2">
@@ -131,19 +131,19 @@ function SalesTab() {
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-[#e6e6e6] shadow-2xs">
+        <div className="bg-white px-5 py-6 rounded-2xl border border-[#e6e6e6] shadow-2xs">
           <p className="text-[10px] sm:text-xs font-semibold text-[#999] uppercase tracking-wide">Total de Vendas</p>
           <p className="text-2xl font-black text-[#111] mt-1">{filtered.length}</p>
           <p className="text-sm text-[#666] font-semibold mt-2">Pedidos processados</p>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-[#e6e6e6] shadow-2xs">
+        <div className="bg-white px-5 py-6 rounded-2xl border border-[#e6e6e6] shadow-2xs">
           <p className="text-[10px] sm:text-xs font-semibold text-[#999] uppercase tracking-wide">Itens Vendidos</p>
           <p className="text-2xl font-black text-[#111] mt-1">{totalItems}</p>
           <p className="text-sm text-[#666] font-semibold mt-2">Unidades expedidas</p>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-[#e6e6e6] shadow-2xs">
+        <div className="bg-white px-5 py-6 rounded-2xl border border-[#e6e6e6] shadow-2xs">
           <p className="text-[10px] sm:text-xs font-semibold text-[#999] uppercase tracking-wide">Ticket Médio</p>
           <p className="text-2xl font-black text-[#111] mt-1">{formatBRL(totalRevenue / Math.max(1, filtered.length))}</p>
           <p className="text-sm text-[#16a34a] font-bold mt-2">Média por venda</p>
@@ -309,7 +309,7 @@ function MarketplacesTab() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {(marketplaces || []).map((m: any) => (
-            <div key={m.id} className="bg-white p-5 rounded-2xl border border-[#e6e6e6] shadow-2xs flex items-center justify-between">
+            <div key={m.id} className="bg-white px-5 py-6 rounded-2xl border border-[#e6e6e6] shadow-2xs flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-xl bg-[#fafafa] border border-[#eee] flex items-center justify-center">
                   <MarketplaceLogo name={m.name} className="w-7 h-7" />

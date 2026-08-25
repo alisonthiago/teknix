@@ -327,7 +327,7 @@ export default function DashboardPage() {
               const prod = firstItem?.products
               const prodTitle = prod?.name || order.product_name || 'Lava Jato Lavadora Portátil De Alta Pressão 21v'
               const prodSku = prod?.sku || order.sku || 'LAVA-JATO-21V'
-              const prodImage = prod?.image_url || 'https://http2.mlstatic.com/D_NQ_NP_2X_789396-MLB78028328731_072024-F.webp'
+              const prodImage = prod?.image_url || null
               const isCancelled = String(order.status || '').toUpperCase() === 'CANCELADO'
 
               return (
