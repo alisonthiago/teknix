@@ -131,6 +131,9 @@ export default function MonitorAoVivoPage() {
   const filteredOrders = useMemo(() => {
     if (!liveData?.orders) return []
     const now = new Date().getTime()
+    const startOfToday = new Date()
+    startOfToday.setHours(0, 0, 0, 0)
+    const startTodayMs = startOfToday.getTime()
 
     return liveData.orders.filter(order => {
       // Filtro por Canal
@@ -155,7 +158,7 @@ export default function MonitorAoVivoPage() {
       const diffHours = (now - orderTime) / (1000 * 60 * 60)
 
       if (period === 'NOW') return diffHours <= 24
-      if (period === 'TODAY') return diffHours <= 48
+      if (period === 'TODAY') return orderTime >= startTodayMs
       if (period === '24H') return diffHours <= 24
       if (period === '7D') return diffHours <= 24 * 7
       if (period === '30D') return diffHours <= 24 * 30
@@ -339,7 +342,7 @@ export default function MonitorAoVivoPage() {
               </span>
             </div>
             <p className="text-sm text-[#666] mt-0.5">
-              Monitoramento ao vivo de vendas, faturamento e logística de todos os marketplaces conectados.
+              Vendas, faturamento e logística em tempo real de todos os canais.
             </p>
             <p className="text-sm text-[#999] mt-0.5">
               Atualizado há {lastUpdateSeconds}s
