@@ -299,7 +299,12 @@ export default function PagesList() {
 
     setIsCreating(true)
     try {
-      const cleanSlug = newPageSlug.trim().toLowerCase().replace(/^\//, '').replace(/\s+/g, '-')
+      let cleanSlug = newPageSlug.trim().toLowerCase()
+      if (cleanSlug !== '/' && cleanSlug.startsWith('/')) {
+        cleanSlug = cleanSlug.replace(/^\/+/, '')
+      }
+      cleanSlug = cleanSlug.replace(/\s+/g, '-')
+
       const created = await createPage({
         title: newPageTitle.trim(),
         slug: cleanSlug,
@@ -316,7 +321,7 @@ export default function PagesList() {
           const tpl = PAGE_TEMPLATES.find(t => t.id === selectedTemplateId)
           if (tpl && (tpl as any).sections && (tpl as any).sections.length > 0) {
             const seededSections = (tpl as any).sections.map((sSchema: any, sIdx: number) => {
-              const sId = `${created.id}-s${sIdx + 1}`
+              const sId = crypto.randomUUID()
               return {
                 id: sId,
                 page_id: created.id,
@@ -328,7 +333,7 @@ export default function PagesList() {
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
                 containers: (sSchema.containers || []).map((cSchema: any, cIdx: number) => {
-                  const cId = `${created.id}-c${sIdx + 1}-${cIdx + 1}`
+                  const cId = crypto.randomUUID()
                   return {
                     id: cId,
                     section_id: sId,
@@ -340,7 +345,7 @@ export default function PagesList() {
                     created_at: new Date().toISOString(),
                     updated_at: new Date().toISOString(),
                     widgets: (cSchema.widgets || []).map((wSchema: any, wIdx: number) => ({
-                      id: `${created.id}-w${sIdx + 1}-${cIdx + 1}-${wIdx + 1}`,
+                      id: crypto.randomUUID(),
                       container_id: cId,
                       type: wSchema.type,
                       order: wIdx,
@@ -363,9 +368,14 @@ export default function PagesList() {
         setNewPageSlug('')
         navigate(`/editor/page/${created.id}`)
       }
-    } catch (err) {
-      console.error(err)
-      alert('Erro ao criar página.')
+    } catch (err: any) {
+      console.error('Erro detalhado ao criar página:', err)
+      const msg = err?.message || 'Erro ao criar página.'
+      if (err?.code === '23505') {
+        alert('Já existe uma página cadastrada com esta URL / slug. Escolha um slug diferente.')
+      } else {
+        alert(`Erro ao criar página: ${msg}`)
+      }
     } finally {
       setIsCreating(false)
     }
