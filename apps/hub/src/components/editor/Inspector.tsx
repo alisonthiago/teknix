@@ -461,6 +461,56 @@ export default function Inspector({
                       placeholder="Descrição da imagem"
                     />
                   </ControlRow>
+
+                  {/* imageBox (Caixa de Imagem) - Título e Descrição */}
+                  {obj.type === 'imageBox' && (
+                    <>
+                      <div className="elementor-control-row stacked" style={{ marginTop: 10 }}>
+                        <span className="elementor-control-label">Título</span>
+                        <input
+                          className="elementor-input"
+                          value={obj.content?.title ?? obj.content?.heading ?? ''}
+                          onChange={e => {
+                            updateWidgetContent('title', e.target.value)
+                            updateWidgetContent('heading', e.target.value)
+                          }}
+                          placeholder="Título da Caixa"
+                        />
+                      </div>
+
+                      <div className="elementor-control-row stacked" style={{ marginTop: 10 }}>
+                        <span className="elementor-control-label">Descrição / Legenda</span>
+                        <textarea
+                          className="elementor-textarea"
+                          rows={3}
+                          value={obj.content?.description ?? obj.content?.text ?? ''}
+                          onChange={e => {
+                            updateWidgetContent('description', e.target.value)
+                            updateWidgetContent('text', e.target.value)
+                          }}
+                          placeholder="Legenda ou descrição da imagem..."
+                        />
+                      </div>
+
+                      <ControlRow label="Tag do Título">
+                        <select
+                          className="elementor-select"
+                          value={obj.content?.title_tag || 'h3'}
+                          onChange={e => updateWidgetContent('title_tag', e.target.value)}
+                        >
+                          <option value="h1">H1</option>
+                          <option value="h2">H2</option>
+                          <option value="h3">H3</option>
+                          <option value="h4">H4</option>
+                          <option value="h5">H5</option>
+                          <option value="h6">H6</option>
+                          <option value="div">div</option>
+                          <option value="span">span</option>
+                          <option value="p">p</option>
+                        </select>
+                      </ControlRow>
+                    </>
+                  )}
                 </AccordionSection>
               )}
 

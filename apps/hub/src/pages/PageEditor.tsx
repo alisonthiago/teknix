@@ -882,6 +882,11 @@ export default function PageEditor() {
       defaultContent.url = 'https://www.youtube.com/watch?v=XHTrA56kH10'
       defaultContent.provider = 'youtube'
     }
+    if (type === 'imageBox') {
+      defaultContent.title = 'Caixa de Imagem'
+      defaultContent.description = 'Legenda ou descrição detalhada da imagem.'
+      defaultContent.image = ''
+    }
 
     const newWidget = {
       id: wId, container_id: containerId, type, order: 99,
@@ -924,6 +929,11 @@ export default function PageEditor() {
     if (type === 'video') {
       defaultContent.url = 'https://www.youtube.com/watch?v=XHTrA56kH10'
       defaultContent.provider = 'youtube'
+    }
+    if (type === 'imageBox') {
+      defaultContent.title = 'Caixa de Imagem'
+      defaultContent.description = 'Legenda ou descrição detalhada da imagem.'
+      defaultContent.image = ''
     }
 
     const newWidget = {
@@ -3349,12 +3359,31 @@ function WidgetPreview({ widget, viewportMode = 'desktop' }: { widget: PageWidge
         <h4 style={{ margin: '0 0 4px', color: '#1d1d1f' }}>Título do Destaque</h4>
         <p style={{ margin: 0, fontSize: '0.85rem', color: '#6e6e73' }}>Descrição detalhada do recurso em destaque.</p>
       </div>
-    case 'imageBox':
-      return <div style={{ padding: 24, border: '1px solid #e8e8ed', borderRadius: 12, textAlign: 'center', ...es }}>
-        <div style={{ height: 120, background: '#f5f5f7', borderRadius: 12, marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#86868b' }}><ImageIcon size={24} /></div>
-        <h4 style={{ margin: '0 0 4px', color: '#1d1d1f' }}>Caixa de Imagem</h4>
-        <p style={{ margin: 0, fontSize: '0.85rem', color: '#6e6e73' }}>Legenda ou descrição da imagem.</p>
-      </div>
+    case 'imageBox': {
+      const src = (content?.image as string) || (content?.url as string)
+      const title = (content?.title as string) || (content?.heading as string) || 'Caixa de Imagem'
+      const desc = (content?.description as string) || (content?.text as string) || 'Legenda ou descrição da imagem.'
+      const Tag = ((content?.title_tag as string) || 'h3') as any
+      const alignVal = align || 'center'
+      return (
+        <div style={{ padding: 24, border: '1px solid #e8e8ed', borderRadius: 16, textAlign: alignVal as any, background: '#fff', ...es }}>
+          {src ? (
+            <img
+              src={src}
+              alt={title}
+              style={{ width: '100%', height: 180, objectFit: 'cover', borderRadius: 12, marginBottom: 16 }}
+            />
+          ) : (
+            <div style={{ height: 140, background: 'linear-gradient(135deg, #fbfbfd 0%, #f5f5f7 100%)', border: '1.5px dashed #d2d2d7', borderRadius: 12, marginBottom: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#86868b', gap: 8 }}>
+              <ImageIcon size={32} color="#0071e3" strokeWidth={1.5} />
+              <span style={{ fontSize: '0.8rem', color: '#86868b' }}>Selecione uma imagem</span>
+            </div>
+          )}
+          <Tag style={{ margin: '0 0 8px', color: '#1d1d1f', fontSize: '1.15rem', fontWeight: 600, letterSpacing: '-0.02em' }}>{title}</Tag>
+          <p style={{ margin: 0, fontSize: '0.9rem', color: '#6e6e73', lineHeight: 1.5 }}>{desc}</p>
+        </div>
+      )
+    }
     case 'starRating': {
       const alignVal = align || (widget as any).settings?.text_align || (widget.content as any)?.align || (widget.content as any)?.text_align || (widget as any).style?.textAlign || 'left'
       const flexJustify = alignVal === 'center' ? 'center' : alignVal === 'right' ? 'flex-end' : 'flex-start'

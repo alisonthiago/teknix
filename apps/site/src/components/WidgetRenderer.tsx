@@ -229,6 +229,27 @@ export default function WidgetRenderer({ widget, product }: WidgetRendererProps)
       )
     }
 
+    case 'imageBox': {
+      const src = resolveDynamicValue(content.image || content.url, product) as string
+      const title = (resolveDynamicValue(content.title || content.heading, product) as string) || 'Caixa de Imagem'
+      const desc = (resolveDynamicValue(content.description || content.text, product) as string) || 'Legenda ou descrição da imagem.'
+      const Tag = ((content.title_tag as string) || 'h3') as any
+      const alignVal = (s.textAlign as string) || (content.align as string) || 'center'
+      return (
+        <div id={id} className={className} style={{ padding: 24, border: '1px solid #e8e8ed', borderRadius: 16, textAlign: alignVal as any, background: '#fff', ...s }}>
+          {src && (
+            <img
+              src={src}
+              alt={title}
+              style={{ width: '100%', height: 180, objectFit: 'cover', borderRadius: 12, marginBottom: 16 }}
+            />
+          )}
+          <Tag style={{ margin: '0 0 8px', color: '#1d1d1f', fontSize: '1.15rem', fontWeight: 600, letterSpacing: '-0.02em' }}>{title}</Tag>
+          <p style={{ margin: 0, fontSize: '0.9rem', color: '#6e6e73', lineHeight: 1.5 }}>{desc}</p>
+        </div>
+      )
+    }
+
     case 'button': {
       const label = resolveDynamicValue(content.label || content.text, product) as string
       const align = s.textAlign || 'left'
