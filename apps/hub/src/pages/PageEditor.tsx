@@ -1884,9 +1884,12 @@ export default function PageEditor() {
                             onDragStart={(e) => {
                               const p: DragPayload = { kind: 'widget-new', widgetType: w.type }
                               _dragPayload = p
-                              e.dataTransfer.setData('text/plain', JSON.stringify(p))
-                              e.dataTransfer.setData('application/json', JSON.stringify(p))
-                              e.dataTransfer.effectAllowed = 'copy'
+                              try { (window as any).__dragPayload = p } catch {}
+                              e.dataTransfer.effectAllowed = 'all'
+                              try {
+                                e.dataTransfer.setData('text/plain', JSON.stringify(p))
+                                e.dataTransfer.setData('application/json', JSON.stringify(p))
+                              } catch {}
                             }}
                           >
                             {w.category === 'pro' && <span className="pro-badge">PRO</span>}
@@ -2899,14 +2902,15 @@ function ContainerBlock({ container, isSelected, selectedWidgetId, viewportMode,
     setDragOver(false)
     setDropIndicator(null)
 
-    let payload: any = _dragPayload
+    let payload: any = _dragPayload || (window as any).__dragPayload
     if (!payload) {
       try {
-        const raw = e.dataTransfer.getData('text/plain') || e.dataTransfer.getData('application/json')
+        const raw = e.dataTransfer.getData('application/json') || e.dataTransfer.getData('text/plain')
         if (raw) payload = JSON.parse(raw)
       } catch {}
     }
     _dragPayload = null
+    try { (window as any).__dragPayload = null } catch {}
 
     if (!payload) return
 
@@ -2934,7 +2938,7 @@ function ContainerBlock({ container, isSelected, selectedWidgetId, viewportMode,
       onDragOver={(e) => {
         e.preventDefault()
         e.stopPropagation()
-        e.dataTransfer.dropEffect = 'move'
+        e.dataTransfer.dropEffect = 'copy'
         setDragOver(true)
       }}
       onDragLeave={(e) => {
@@ -2987,11 +2991,11 @@ function ContainerBlock({ container, isSelected, selectedWidgetId, viewportMode,
         {widgets.length === 0 ? (
           <div
             className={`widget-drop-zone ${dragOver ? 'drag-over' : ''}`}
-            style={{ width: '100%' }}
+            style={{ width: '100%', minHeight: 70, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             onDragOver={(e) => {
               e.preventDefault()
               e.stopPropagation()
-              e.dataTransfer.dropEffect = 'move'
+              e.dataTransfer.dropEffect = 'copy'
               setDragOver(true)
             }}
             onDrop={(e) => handleDrop(e, null)}
@@ -3019,7 +3023,7 @@ function ContainerBlock({ container, isSelected, selectedWidgetId, viewportMode,
                     onDragOver={(e) => {
                       e.preventDefault()
                       e.stopPropagation()
-                      e.dataTransfer.dropEffect = 'move'
+                      e.dataTransfer.dropEffect = 'copy'
                       setDragOver(true)
                       setDropIndicator({ targetId: widget.id, position: 'before' })
                     }}
@@ -3031,7 +3035,7 @@ function ContainerBlock({ container, isSelected, selectedWidgetId, viewportMode,
                     onDragOver={(e) => {
                       e.preventDefault()
                       e.stopPropagation()
-                      e.dataTransfer.dropEffect = 'move'
+                      e.dataTransfer.dropEffect = 'copy'
                       setDragOver(true)
                       const rect = e.currentTarget.getBoundingClientRect()
                       const isTopHalf = (e.clientY - rect.top) < (rect.height / 2)
@@ -3065,8 +3069,9 @@ function ContainerBlock({ container, isSelected, selectedWidgetId, viewportMode,
                       onDragStart={(e: any) => {
                         const payload = { kind: 'widget-move' as const, widgetId: widget.id, fromContainerId: container.id }
                         _dragPayload = payload as any
+                        try { (window as any).__dragPayload = payload } catch {}
                         if (e && e.dataTransfer) {
-                          e.dataTransfer.effectAllowed = 'move'
+                          e.dataTransfer.effectAllowed = 'all'
                           try {
                             e.dataTransfer.setData('text/plain', JSON.stringify(payload))
                             e.dataTransfer.setData('application/json', JSON.stringify(payload))
@@ -3083,7 +3088,7 @@ function ContainerBlock({ container, isSelected, selectedWidgetId, viewportMode,
                       onDragOver={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
-                        e.dataTransfer.dropEffect = 'move'
+                        e.dataTransfer.dropEffect = 'copy'
                         setDragOver(true)
                         setDropIndicator({ targetId: widget.id, position: 'after' })
                       }}
@@ -3113,11 +3118,13 @@ function WidgetBlock({ widget, viewportMode = 'desktop', isSelected, onSelect, o
       draggable={true}
       onDragStart={(e) => {
         if (onDragStart) onDragStart(e)
-        e.dataTransfer.effectAllowed = 'move'
+        e.dataTransfer.effectAllowed = 'all'
         try {
-          const payload = JSON.stringify({ kind: 'widget-move', widgetId: widget.id, fromContainerId: widget.container_id })
-          e.dataTransfer.setData('text/plain', payload)
-          e.dataTransfer.setData('application/json', payload)
+          const payload = { kind: 'widget-move' as const, widgetId: widget.id, fromContainerId: widget.container_id }
+          _dragPayload = payload as any
+          try { (window as any).__dragPayload = payload } catch {}
+          e.dataTransfer.setData('text/plain', JSON.stringify(payload))
+          e.dataTransfer.setData('application/json', JSON.stringify(payload))
         } catch {}
       }}
     >
@@ -3756,9 +3763,12 @@ function WidgetCategory({ label, widgets }: { label: string; widgets: typeof WID
               onDragStart={(e) => {
                 const p: DragPayload = { kind: 'widget-new', widgetType: w.type }
                 _dragPayload = p
-                e.dataTransfer.setData('text/plain', JSON.stringify(p))
-                e.dataTransfer.setData('application/json', JSON.stringify(p))
-                e.dataTransfer.effectAllowed = 'copy'
+                try { (window as any).__dragPayload = p } catch {}
+                e.dataTransfer.effectAllowed = 'all'
+                try {
+                  e.dataTransfer.setData('text/plain', JSON.stringify(p))
+                  e.dataTransfer.setData('application/json', JSON.stringify(p))
+                } catch {}
               }}
             >
               {w.category === 'pro' && <span className="pro-badge">PRO</span>}
