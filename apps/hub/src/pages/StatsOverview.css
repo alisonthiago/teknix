@@ -1,0 +1,171 @@
+/* ============================================================
+   TEKNIX HUB — STATS / ESTATÍSTICAS (REFINED APPLE MINIMAL)
+   ============================================================ */
+
+.stats-page-container {
+  width: 100%;
+  font-family: var(--tk-font-family);
+}
+
+.stats-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Filter Bar */
+.stats-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: transparent;
+}
+
+.stats-filters-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.filter-select-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #ffffff;
+  border: 1px solid var(--tk-color-border-dark, #d2d2d7);
+  border-radius: 980px;
+  padding: 5px 12px;
+  font-size: 0.78rem;
+  color: var(--tk-color-text-secondary, #6e6e73);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.stats-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+.stats-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--tk-color-text-primary, #1d1d1f);
+  margin: 0;
+  letter-spacing: -0.015em;
+}
+
+.stats-timestamp {
+  font-size: 0.75rem;
+  color: var(--tk-color-text-secondary, #86868b);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.stats-subtitle {
+  font-size: 0.8125rem;
+  color: var(--tk-color-text-secondary, #86868b);
+  margin: -8px 0 0 0;
+}
+
+/* 4 Metrics Grid */
+.stats-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.stat-card {
+  background: #ffffff;
+  border: 1px solid var(--tk-color-border, #e5e5e7);
+  border-radius: var(--tk-radius-card, 14px);
+  padding: 16px 18px;
+  box-shadow: var(--tk-shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 120px;
+}
+
+.stat-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stat-card-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--tk-color-text-primary, #1d1d1f);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat-card-info-icon {
+  color: #86868b;
+  cursor: pointer;
+}
+
+.stat-card-dots {
+  color: #86868b;
+  cursor: pointer;
+}
+
+.stat-card-value {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--tk-color-text-primary, #1d1d1f);
+  letter-spacing: -0.02em;
+}
+
+.stat-card-nodata {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--tk-color-text-primary, #1d1d1f);
+}
+
+.stat-card-hint {
+  font-size: 0.7rem;
+  color: var(--tk-color-text-secondary, #86868b);
+  line-height: 1.3;
+}
+
+/* Dual Grid */
+.stats-dual-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 14px;
+}
+
+.stat-card-large {
+  background: #ffffff;
+  border: 1px solid var(--tk-color-border, #e5e5e7);
+  border-radius: var(--tk-radius-card, 14px);
+  padding: 18px 20px;
+  box-shadow: var(--tk-shadow-card);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 240px;
+}
+
+.stat-empty-chart-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: var(--tk-color-text-secondary, #86868b);
+  gap: 6px;
+}
+
+.stats-stack-right {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}

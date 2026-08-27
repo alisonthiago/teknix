@@ -1,1 +1,841 @@
-/* Inspector.css is now part of PageEditor.css - kept for backwards compat */
+/* ============================================================
+   TEKNIX ELEMENTOR PRO INSPECTOR (ULTRA CLEAN LIGHT MODE)
+   ============================================================ */
+
+.elementor-dark-inspector {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
+  background: #ffffff;
+  color: #1d1d1f;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+  font-size: 12px;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* ── 1. TITLEBAR ── */
+.inspector-titlebar-elementor {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e5ea;
+  flex-shrink: 0;
+  height: 44px;
+  box-sizing: border-box;
+}
+
+.inspector-titlebar-back {
+  background: none;
+  border: none;
+  color: #6e6e73;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.inspector-titlebar-back:hover {
+  color: #1d1d1f;
+  background: #f5f5f7;
+}
+
+.inspector-titlebar-heading {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1d1d1f;
+  flex: 1;
+  text-align: center;
+  letter-spacing: -0.01em;
+}
+
+.inspector-titlebar-delete {
+  background: none;
+  border: none;
+  color: #86868b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.inspector-titlebar-delete:hover {
+  color: #ff3b30;
+  background: rgba(255, 59, 48, 0.08);
+}
+
+/* ── 2. TABS BAR (Layout/Conteúdo, Estilo, Avançado) ── */
+.inspector-tabs-elementor {
+  display: flex;
+  background: #fafafa;
+  border-bottom: 1px solid #e5e5ea;
+  flex-shrink: 0;
+  height: 48px;
+}
+
+.inspector-tab-btn-elementor {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 6px 4px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #6e6e73;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.inspector-tab-btn-elementor:hover {
+  color: #1d1d1f;
+}
+
+.inspector-tab-btn-elementor.active {
+  color: #0071e3;
+  border-bottom-color: #0071e3;
+  background: #ffffff;
+}
+
+/* ── 3. INSPECTOR BODY ── */
+.inspector-body-elementor {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.inspector-body-elementor::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* ── 4. ACCORDION SECTION ── */
+.inspector-accordion {
+  border-bottom: 1px solid #f0f0f2;
+}
+
+.inspector-accordion-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 16px;
+  background: #ffffff;
+  border: none;
+  color: #1d1d1f;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s ease;
+}
+
+.inspector-accordion-header:hover {
+  background: #fbfbfd;
+}
+
+.accordion-title-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.accordion-arrow {
+  color: #86868b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease;
+}
+
+.accordion-arrow.open {
+  transform: rotate(90deg);
+}
+
+.accordion-pro-badge {
+  font-size: 9px;
+  font-weight: 800;
+  background: #db468e;
+  color: #ffffff;
+  padding: 1px 5px;
+  border-radius: 3px;
+  letter-spacing: 0.05em;
+}
+
+.inspector-accordion-content {
+  padding: 14px 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: #ffffff;
+}
+
+/* ── 5. CONTROL ROWS & LABELS ── */
+.elementor-control-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.elementor-control-row.stacked {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.elementor-control-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #424245;
+  flex-shrink: 0;
+}
+
+.elementor-control-row.stacked .elementor-control-label {
+  width: 100%;
+}
+
+.elementor-control-field {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  max-width: 180px;
+}
+
+.elementor-control-field.full-width,
+.elementor-control-row.stacked .elementor-control-field {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* ── 6. RESPONSIVE LABEL SWITCHER MINI BUTTONS ── */
+.responsive-label-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: #f5f5f7;
+  padding: 2px;
+  border-radius: 4px;
+  border: 1px solid #e5e5ea;
+}
+
+.responsive-mini-btn {
+  width: 18px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 2px;
+  color: #86868b;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  padding: 0;
+}
+
+.responsive-mini-btn:hover {
+  color: #1d1d1f;
+}
+
+.responsive-mini-btn.active {
+  background: #ffffff;
+  color: #0071e3;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+/* ── 7. INPUTS & SELECTS (Crisp Light) ── */
+.elementor-input,
+.elementor-select,
+.elementor-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 7px 10px;
+  background: #ffffff;
+  border: 1px solid #d2d2d7;
+  border-radius: 6px;
+  color: #1d1d1f;
+  font-size: 12px;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.elementor-input:focus,
+.elementor-select:focus,
+.elementor-textarea:focus {
+  border-color: #0071e3;
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.12);
+}
+
+.elementor-textarea {
+  min-height: 64px;
+  resize: vertical;
+}
+
+/* ── 8. ICON GROUP SELECTOR (Alignment / Direction / Flex Justify) ── */
+.elementor-icon-group {
+  display: flex;
+  align-items: center;
+  background: #f5f5f7;
+  border-radius: 6px;
+  padding: 2px;
+  border: 1px solid #e5e5ea;
+  gap: 2px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.elementor-icon-btn {
+  flex: 1;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: #6e6e73;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  padding: 0;
+}
+
+.elementor-icon-btn:hover {
+  color: #1d1d1f;
+}
+
+.elementor-icon-btn.active {
+  background: #ffffff;
+  color: #0071e3;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.elementor-icon-btn svg {
+  display: block;
+}
+
+/* ── 9. DIMENSIONS CONTROL (4 Sides Margin/Padding & 2 Sides Gaps) ── */
+.elementor-dimensions-control,
+.elementor-gaps-control {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.dimensions-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.dimensions-unit-tag {
+  font-size: 10px;
+  color: #86868b;
+  font-weight: 600;
+}
+
+.dimensions-boxes-row,
+.gaps-boxes-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.dimension-single-box,
+.gaps-single-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.dimension-input,
+.gaps-input {
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+  padding: 6px 2px;
+  background: #ffffff;
+  border: 1px solid #d2d2d7;
+  border-radius: 5px;
+  color: #1d1d1f;
+  font-size: 11.5px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.dimension-input:focus,
+.gaps-input:focus {
+  border-color: #0071e3;
+  box-shadow: 0 0 0 2px rgba(0, 113, 227, 0.12);
+}
+
+.dimension-box-caption,
+.gaps-box-caption {
+  font-size: 9.5px;
+  color: #86868b;
+}
+
+.dimension-link-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f7;
+  border: 1px solid #d2d2d7;
+  border-radius: 5px;
+  color: #6e6e73;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-top: -14px;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.dimension-link-btn:hover {
+  background: #e8e8ed;
+}
+
+.dimension-link-btn.linked {
+  background: #34c759;
+  border-color: #34c759;
+  color: #ffffff;
+}
+
+/* ── 10. COLOR CONTROL ── */
+.elementor-color-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.elementor-global-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f7;
+  border: 1px solid #e5e5ea;
+  border-radius: 6px;
+  color: #6e6e73;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.elementor-global-btn:hover {
+  color: #0071e3;
+  background: #ffffff;
+}
+
+.elementor-color-swatch-box {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid #d2d2d7;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+.elementor-color-preview-fill {
+  width: 100%;
+  height: 100%;
+}
+
+.elementor-color-transparent-line {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, transparent 45%, #ff3b30 45%, #ff3b30 55%, transparent 55%);
+}
+
+.elementor-color-picker-input {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  width: 50px;
+  height: 50px;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* ── 11. MEDIA IMAGE BOX ── */
+.elementor-control-media-box {
+  width: 100%;
+}
+
+.elementor-control-media__preview {
+  width: 100%;
+  min-height: 120px;
+  border: 1.5px dashed #d2d2d7;
+  border-radius: 8px;
+  background: #fafafa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.15s ease;
+}
+
+.elementor-control-media__preview:hover {
+  border-color: #0071e3;
+}
+
+.elementor-control-media__empty-btn {
+  color: #86868b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.elementor-control-media__filled {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 120px;
+}
+
+.elementor-control-media__image {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  display: block;
+}
+
+.elementor-control-media__overlay-actions {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  display: flex;
+  gap: 4px;
+}
+
+.elementor-control-media__action-btn {
+  background: rgba(0, 0, 0, 0.75);
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.elementor-control-media__action-btn.delete:hover {
+  background: #ff3b30;
+}
+
+/* ── 12. TOGGLE SWITCH ── */
+.elementor-toggle-switch-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.elementor-switch-track {
+  width: 36px;
+  height: 20px;
+  background: #e5e5ea;
+  border-radius: 10px;
+  position: relative;
+  transition: background 0.2s ease;
+}
+
+.elementor-toggle-switch-wrapper.on .elementor-switch-track {
+  background: #34c759;
+}
+
+.elementor-switch-thumb {
+  width: 16px;
+  height: 16px;
+  background: #ffffff;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
+}
+
+.elementor-toggle-switch-wrapper.on .elementor-switch-thumb {
+  transform: translateX(16px);
+}
+
+.elementor-switch-state-text {
+  font-size: 11px;
+  color: #6e6e73;
+  font-weight: 500;
+}
+
+/* ── 13. DIVIDER & FOOTER HELP ── */
+.elementor-divider-row {
+  height: 1px;
+  background: #f0f0f2;
+  margin: 4px 0;
+  width: 100%;
+}
+
+.elementor-inspector-footer {
+  padding: 24px 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #86868b;
+  font-size: 11.5px;
+  font-weight: 500;
+  border-top: 1px solid #f0f0f2;
+  margin-top: auto;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.elementor-inspector-footer:hover {
+  color: #0071e3;
+}
+
+/* ── 14. SEGMENTED TABS & STEPPERS ── */
+.elementor-segmented-tabs {
+  display: flex;
+  background: #f5f5f7;
+  border: 1px solid #e5e5ea;
+  border-radius: 6px;
+  padding: 2px;
+  gap: 2px;
+  margin-bottom: 12px;
+  width: 100%;
+}
+
+.elementor-segmented-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  font-size: 11px;
+  font-weight: 500;
+  color: #6e6e73;
+  padding: 5px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+}
+
+.elementor-segmented-btn:hover {
+  color: #1d1d1f;
+}
+
+.elementor-segmented-btn.active {
+  background: #ffffff;
+  color: #1d1d1f;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.stepper-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.stepper-input-container input {
+  width: 100%;
+  padding-right: 18px !important;
+}
+
+.stepper-buttons-col {
+  position: absolute;
+  right: 2px;
+  top: 2px;
+  bottom: 2px;
+  width: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  opacity: 0.6;
+  transition: opacity 0.15s;
+}
+
+.stepper-input-container:hover .stepper-buttons-col {
+  opacity: 1;
+}
+
+.stepper-btn {
+  background: transparent;
+  border: none;
+  font-size: 7px;
+  line-height: 1;
+  height: 50%;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6e6e73;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: background 0.1s, color 0.1s;
+}
+
+.stepper-btn:hover {
+  background: rgba(0, 113, 227, 0.15);
+  color: #0071e3;
+}
+
+/* ── 15. ELEMENTOR FLOATING TYPOGRAPHY POPOVER (1:1 DARK POPOVER) ── */
+.elementor-typography-trigger-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.elementor-typography-trigger-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  background: #f5f5f7;
+  border: 1px solid #e5e5ea;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6e6e73;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.elementor-typography-trigger-btn:hover {
+  background: #e8e8ed;
+  color: #1d1d1f;
+}
+
+.elementor-typography-trigger-btn.active {
+  background: #0071e3;
+  color: #ffffff;
+  border-color: #0071e3;
+}
+
+.elementor-typography-popover {
+  background: #ffffff;
+  border: 1px solid #e5e5ea;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: #1d1d1f;
+  animation: fadeInDown 0.15s ease-out;
+}
+
+.elementor-typography-popover-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f0f0f2;
+}
+
+.elementor-typography-popover-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+.elementor-typography-popover-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.elementor-typography-popover-actions button {
+  background: transparent;
+  border: none;
+  color: #86868b;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  transition: color 0.12s;
+}
+
+.elementor-typography-popover-actions button:hover {
+  color: #1d1d1f;
+}
+
+.elementor-typography-popover .elementor-control-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.elementor-typography-popover .elementor-control-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 500;
+  color: #6e6e73;
+}
+
+.elementor-typography-popover select,
+.elementor-typography-popover input[type="text"],
+.elementor-typography-popover input[type="number"] {
+  background: #f5f5f7;
+  border: 1px solid #e5e5ea;
+  color: #1d1d1f;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 11.5px;
+  width: 100%;
+}
+
+.elementor-typography-popover select:focus,
+.elementor-typography-popover input:focus {
+  border-color: #0071e3;
+  background: #ffffff;
+  outline: none;
+}
+
+.elementor-unit-badge {
+  font-size: 10px;
+  color: #86868b;
+  font-weight: 600;
+}
+

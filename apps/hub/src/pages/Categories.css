@@ -1,0 +1,216 @@
+/* ============================================================
+   TEKNIX HUB — CATEGORIAS & TABELAS DE PREÇOS (Nuvemshop-inspired)
+   ============================================================ */
+
+.categories-page-container {
+  min-height: 100vh;
+  background: #f5f5f7;
+  padding: 30px 40px 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.categories-wrapper {
+  width: 100%;
+  max-width: 860px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.categories-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.categories-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #111827;
+  margin: 0 0 4px 0;
+}
+
+.categories-subtitle {
+  font-size: 0.88rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.category-tree-card {
+  background: #ffffff;
+  border: 1px solid #e6e6e6;
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.category-tree-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  background: #ffffff;
+  border-radius: 10px;
+  border: 1px solid #f0f0f0;
+  transition: all 0.12s ease;
+}
+
+.category-tree-item:hover {
+  background: #fafafa;
+  border-color: #e6e6e6;
+}
+
+.category-tree-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.category-drag-handle {
+  color: #9ca3af;
+  cursor: grab;
+}
+
+.category-name {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.category-product-count {
+  font-size: 0.75rem;
+  color: #6b7280;
+  background: #f3f4f6;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.category-tree-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.category-action-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.category-action-btn:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+/* Price Tables Page */
+.price-tables-hero {
+  text-align: center;
+  padding: 20px 0 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.hero-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6b7280;
+}
+
+.hero-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #111827;
+  margin: 0;
+}
+
+.hero-subtitle {
+  font-size: 0.9rem;
+  color: #4b5563;
+  max-width: 620px;
+  line-height: 1.5;
+  margin: 0 0 12px 0;
+}
+
+.price-steps-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  margin-top: 14px;
+}
+
+.step-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.step-number {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: #eff6ff;
+  color: #2563eb;
+  font-weight: 800;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.step-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.step-desc {
+  font-size: 0.82rem;
+  color: #6b7280;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* AI Generate Badge */
+.btn-ai-generate {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #7c3aed;
+  background: #faf5ff;
+  border: 1px solid #e9d5ff;
+  border-radius: 14px;
+  padding: 2px 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-ai-generate:hover {
+  background: #f3e8ff;
+  border-color: #c084fc;
+}

@@ -57,7 +57,7 @@ export default function FeaturedProducts() {
                     </svg>
                   </div>
                 )}
-                {product.promo_price && product.promo_price < product.price && (
+                {product.price != null && product.promo_price && product.promo_price < product.price && (
                   <span className="featured-badge">
                     -{Math.round(((product.price - product.promo_price) / product.price) * 100)}%
                   </span>
@@ -69,11 +69,11 @@ export default function FeaturedProducts() {
                 )}
                 <h3>{product.name}</h3>
                 <div className="featured-item-prices">
-                  {product.promo_price && product.promo_price < product.price && (
+                  {product.price != null && product.promo_price && product.promo_price < product.price && (
                     <span className="price-old">{formatPrice(product.price)}</span>
                   )}
                   <span className="price-current">
-                    {formatPrice(product.promo_price && product.promo_price < product.price ? product.promo_price : product.price)}
+                    {formatPrice((product.price != null && product.promo_price && product.promo_price < product.price ? product.promo_price : product.price) || 0)}
                   </span>
                 </div>
               </div>

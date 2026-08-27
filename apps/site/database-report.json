@@ -1,0 +1,105 @@
+{
+  "timestamp": "2026-08-27T20:13:56.752Z",
+  "tables": [
+    {
+      "name": "products",
+      "exists": true,
+      "rowCount": 0,
+      "columns": []
+    },
+    {
+      "name": "categories",
+      "exists": true,
+      "rowCount": 0,
+      "columns": [],
+      "error": "Could not find the table 'public.categories' in the schema cache"
+    },
+    {
+      "name": "customers",
+      "exists": true,
+      "rowCount": 0,
+      "columns": []
+    },
+    {
+      "name": "orders",
+      "exists": true,
+      "rowCount": 0,
+      "columns": []
+    },
+    {
+      "name": "order_items",
+      "exists": true,
+      "rowCount": 0,
+      "columns": []
+    },
+    {
+      "name": "users",
+      "exists": true,
+      "rowCount": 0,
+      "columns": [],
+      "error": "Could not find the table 'public.users' in the schema cache"
+    },
+    {
+      "name": "profiles",
+      "exists": true,
+      "rowCount": 0,
+      "columns": []
+    },
+    {
+      "name": "stock",
+      "exists": true,
+      "rowCount": 0,
+      "columns": [],
+      "error": "Could not find the table 'public.stock' in the schema cache"
+    },
+    {
+      "name": "inventory",
+      "exists": true,
+      "rowCount": 0,
+      "columns": [],
+      "error": "Could not find the table 'public.inventory' in the schema cache"
+    },
+    {
+      "name": "payments",
+      "exists": true,
+      "rowCount": 0,
+      "columns": [],
+      "error": "Could not find the table 'public.payments' in the schema cache"
+    },
+    {
+      "name": "transactions",
+      "exists": true,
+      "rowCount": 0,
+      "columns": [],
+      "error": "Could not find the table 'public.transactions' in the schema cache"
+    },
+    {
+      "name": "addresses",
+      "exists": true,
+      "rowCount": 0,
+      "columns": [],
+      "error": "Could not find the table 'public.addresses' in the schema cache"
+    },
+    {
+      "name": "wishlists",
+      "exists": true,
+      "rowCount": 0,
+      "columns": [],
+      "error": "Could not find the table 'public.wishlists' in the schema cache"
+    },
+    {
+      "name": "reviews",
+      "exists": true,
+      "rowCount": 0,
+      "columns": [],
+      "error": "Could not find the table 'public.reviews' in the schema cache"
+    }
+  ],
+  "summary": {
+    "total": 14,
+    "found": 14,
+    "notFound": 0,
+    "withData": 0,
+    "withPermissionIssues": 9
+  }
+}

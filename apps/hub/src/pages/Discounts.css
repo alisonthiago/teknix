@@ -1,0 +1,319 @@
+/* ============================================================
+   TEKNIX HUB — TOPBAR USER MENU, DISCOUNTS & PROMOTIONS CSS
+   ============================================================ */
+
+/* Topbar Header Right Area */
+.hub-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+}
+
+.hub-header-icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  color: #4b5563;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.hub-header-icon-btn:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.hub-lumi-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  color: #7c3aed;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.hub-lumi-btn:hover {
+  background: #faf5ff;
+  border-color: #c084fc;
+}
+
+.hub-store-user-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px 4px 6px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.hub-store-user-btn:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.store-user-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #eff6ff;
+  color: #2563eb;
+  font-weight: 800;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.store-user-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+/* User Profile Dropdown Menu (Print 1) */
+.user-profile-dropdown {
+  position: absolute;
+  top: 48px;
+  right: 0;
+  width: 250px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  padding: 8px 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+.dropdown-section-header {
+  padding: 10px 16px 6px;
+}
+
+.dropdown-user-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.dropdown-user-email {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: #f3f4f6;
+  margin: 6px 0;
+}
+
+.dropdown-item-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 16px;
+  background: none;
+  border: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #374151;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.dropdown-item-btn:hover {
+  background: #f9fafb;
+  color: #111827;
+}
+
+.dropdown-item-btn.logout {
+  color: #ef4444;
+}
+
+.dropdown-item-btn.logout:hover {
+  background: #fef2f2;
+}
+
+/* Submenu on sidebar (Descontos -> Cupons / Promoções / Frete) */
+.nav-subitem {
+  padding-left: 36px !important;
+  font-size: 0.8rem !important;
+}
+
+/* Nuvemshop Standard Tables (Cupons / Promoções / Frete) */
+.discounts-page-container {
+  width: 100%;
+  font-family: var(--tk-font-family);
+}
+
+.discounts-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.discounts-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.discounts-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--tk-color-text-primary, #1d1d1f);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.discounts-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-secondary-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #ffffff;
+  border: 1px solid var(--tk-color-border-dark, #d2d2d7);
+  border-radius: 980px;
+  padding: 7px 14px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--tk-color-text-primary, #1d1d1f);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-secondary-pill:hover {
+  background: #f5f5f7;
+}
+
+.btn-primary-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--tk-color-primary, #0071e3);
+  border: 1px solid var(--tk-color-primary, #0071e3);
+  border-radius: 980px;
+  padding: 7px 18px;
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-primary-pill:hover {
+  background: var(--tk-color-primary-hover, #0077ed);
+}
+
+.search-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 8px 14px;
+}
+
+.search-input-clean {
+  flex: 1;
+  border: none;
+  background: none;
+  outline: none;
+  font-size: 0.88rem;
+  color: #111827;
+}
+
+.filter-btn-pill {
+  background: #f3f4f6;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #4b5563;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.discounts-card-table {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+.nuvem-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.nuvem-table th {
+  padding: 14px 16px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #6b7280;
+  background: #fafbfc;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.nuvem-table td {
+  padding: 14px 16px;
+  font-size: 0.85rem;
+  color: #1f2937;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.coupon-code-pill {
+  font-family: monospace;
+  font-weight: 700;
+  background: #eff6ff;
+  color: #1d4ed8;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.badge-status-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.badge-status-dot.active {
+  color: #059669;
+}
+
+.badge-status-dot.inactive {
+  color: #9ca3af;
+}

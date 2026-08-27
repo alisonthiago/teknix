@@ -16,7 +16,7 @@ function formatPrice(price: number) {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const hasDiscount = product.promo_price && product.promo_price < product.price
+  const hasDiscount = Boolean(product.price != null && product.promo_price && product.promo_price < product.price)
 
   function openWhatsApp(e: React.MouseEvent) {
     e.preventDefault()
@@ -43,9 +43,9 @@ export default function ProductCard({ product }: ProductCardProps) {
             </svg>
           </div>
         )}
-        {hasDiscount && (
+        {hasDiscount && product.price != null && (
           <span className="product-card-discount">
-            -{Math.round(((product.price - product.promo_price!) / product.price) * 100)}%
+            -{Math.round(((product.price - (product.promo_price || 0)) / product.price) * 100)}%
           </span>
         )}
       </div>
@@ -56,11 +56,11 @@ export default function ProductCard({ product }: ProductCardProps) {
         )}
         <h3 className="product-card-name">{product.name}</h3>
         <div className="product-card-prices">
-          {hasDiscount && (
+          {hasDiscount && product.price != null && (
             <span className="price-old">{formatPrice(product.price)}</span>
           )}
           <span className="price-current">
-            {formatPrice(hasDiscount ? product.promo_price! : product.price)}
+            {formatPrice((hasDiscount ? product.promo_price : product.price) || 0)}
           </span>
         </div>
         {product.stock !== undefined && product.stock <= 5 && product.stock > 0 && (

@@ -1,0 +1,194 @@
+/* ==========================================================================
+   TEKNIX HUB — FINANCE OVERVIEW CSS (FLOW 1:1)
+   ========================================================================== */
+
+.finance-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* ── KPI Cards Grid ── */
+.finance-kpis-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 640px) {
+  .finance-kpis-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.finance-kpi-card {
+  background: #ffffff;
+  border: 1px solid #e6e6e6;
+  border-radius: 14px;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.12s ease;
+}
+
+.finance-kpi-card:hover {
+  border-color: #d1d5db;
+}
+
+.finance-kpi-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.finance-kpi-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #666666;
+}
+
+.finance-kpi-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #f5f5f5;
+  color: #333333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.finance-kpi-val {
+  font-size: 26px;
+  font-weight: 700;
+  color: #111111;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.finance-kpi-curr {
+  font-size: 18px;
+  font-weight: 600;
+  color: #666666;
+  margin-right: 2px;
+}
+
+.finance-kpi-sub {
+  font-size: 12px;
+  color: #999999;
+  margin: 6px 0 0;
+}
+
+/* ── Transactions Table Card ── */
+.finance-table-card {
+  background: #ffffff;
+  border: 1px solid #e6e6e6;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.finance-table-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.finance-table-card-header h2 {
+  font-size: 17px;
+  font-weight: 700;
+  color: #111111;
+  margin: 0;
+}
+
+.finance-table-card-header p {
+  font-size: 12px;
+  color: #888888;
+  margin: 2px 0 0;
+}
+
+.finance-see-all {
+  font-size: 12px;
+  font-weight: 700;
+  color: #111111;
+  text-decoration: none;
+}
+
+.finance-see-all:hover {
+  text-decoration: underline;
+}
+
+.finance-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.finance-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.finance-table th {
+  padding: 12px 24px;
+  background: #fafafa;
+  font-size: 11px;
+  font-weight: 700;
+  color: #999999;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid #eeeeee;
+}
+
+.finance-table td {
+  padding: 16px 24px;
+  font-size: 13px;
+  color: #333333;
+  border-bottom: 1px solid #f5f5f5;
+  vertical-align: middle;
+}
+
+.finance-table tr:last-child td {
+  border-bottom: none;
+}
+
+.finance-table tr:hover td {
+  background: #fafafa;
+}
+
+.finance-order-link {
+  font-family: monospace;
+  font-weight: 700;
+  color: #111111;
+  text-decoration: none;
+}
+
+.finance-order-link:hover {
+  text-decoration: underline;
+}
+
+.finance-amount-col {
+  font-weight: 700;
+  color: #111111;
+  font-size: 14px;
+}
+
+.finance-badge-success {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 980px;
+  background: #ecfdf5;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+  font-size: 11px;
+  font-weight: 700;
+}

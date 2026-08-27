@@ -55,16 +55,16 @@ export default function Hero() {
               <span className="hero-featured-badge">DESTAQUE</span>
               <h3>{product.name}</h3>
               <p className="hero-featured-price">
-                {product.promo_price && product.promo_price < product.price && (
+                {product.price != null && product.promo_price && product.promo_price < product.price && (
                   <span className="hero-price-old">
                     {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.price)}
                   </span>
                 )}
                 <span className="hero-price-current">
                   {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
-                    product.promo_price && product.promo_price < product.price
+                    (product.price != null && product.promo_price && product.promo_price < product.price
                       ? product.promo_price
-                      : product.price
+                      : product.price) || 0
                   )}
                 </span>
               </p>

@@ -1,0 +1,13 @@
+{
+  "name": "@teknix/auth",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.1",
+    "@teknix/database": "workspace:*",
+    "@teknix/2fa": "workspace:*",
+    "@teknix/notifications": "workspace:*"
+  }
+}

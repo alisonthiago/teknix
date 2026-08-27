@@ -1,177 +1,635 @@
-.products-page {
-  padding: 100px 24px 80px;
-  max-width: var(--tkn-max-width);
+/* ==========================================================================
+   OFFICIAL APPLE.COM EXACT 1:1 CHAPTERNAV, PRODUCT CAROUSEL & CATEGORY PAGES
+   ========================================================================== */
+
+:root {
+  --sf-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "SF Pro Icons", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+  --apple-blue: #0071e3;
+  --apple-blue-hover: #0077ed;
+  --apple-text: #1d1d1f;
+  --apple-gray: #6e6e73;
+  --apple-bg: #f5f5f7;
+  --apple-bg-alt: #fbfbfd;
+}
+
+.apple-cat-page {
+  font-family: var(--sf-font);
+  color: var(--apple-text);
+  background-color: #ffffff;
+  width: 100%;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Ribbon Superior ── */
+.apple-cat-ribbon {
+  background-color: #ffffff;
+  padding: 12px 20px;
+  text-align: center;
+  font-size: 14px;
+  border-bottom: 1px solid #f2f2f2;
+}
+
+.apple-cat-ribbon a {
+  color: var(--apple-blue);
+  text-decoration: none;
+  margin-left: 6px;
+}
+
+.apple-cat-ribbon a:hover {
+  text-decoration: underline;
+}
+
+/* ── ChapterNav (Barra de Ícones Oficiais Apple) ── */
+.ChapterNav_chapternav {
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid #e5e5e7;
+  padding: 16px 0 12px;
+  position: sticky;
+  top: 44px;
+  z-index: 800;
+  width: 100%;
+}
+
+.ChapterNav_chapternav-wrapper {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 24px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ChapterNav_chapternav-items {
+  list-style: none;
+  margin: 0;
+  padding: 0 10px;
+  display: flex;
+  gap: 32px;
+  align-items: flex-end;
+  overflow-x: auto;
+  scrollbar-width: none;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.ChapterNav_chapternav-items::-webkit-scrollbar {
+  display: none;
+}
+
+.ChapterNav_chapternav-item {
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.ChapterNav_chapternav-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: var(--apple-text);
+  font-size: 12px;
+  line-height: 1.25;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.ChapterNav_chapternav-link:hover {
+  opacity: 0.7;
+  transform: translateY(-2px);
+}
+
+.ChapterNav_chapternav-icon {
+  margin: 0 0 8px 0;
+  height: 56px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.ChapterNav_chapternav-image {
+  max-height: 56px;
+  width: auto;
+  object-fit: contain;
+}
+
+.ChapterNav_chapternav-label {
+  margin: 0;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.ChapterNav_chapternav-badge {
+  color: #bf4800;
+  font-size: 10px;
+  font-weight: 600;
+  margin: 2px 0 0 0;
+  text-transform: uppercase;
+}
+
+/* ── Category Title Header ── */
+.PageHeader_container {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 64px 24px 24px;
+}
+
+.PageHeader_title {
+  font-size: clamp(48px, 7vw, 80px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin: 0 0 8px 0;
+  line-height: 1.05;
+}
+
+.PageHeader_subtitle {
+  font-size: 21px;
+  color: var(--apple-gray);
+  max-width: 600px;
+  margin: 0;
+}
+
+/* ── Hero Sections (Category Page Banners) ── */
+.HeroSections_container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 16px;
+  max-width: 2560px;
   margin: 0 auto;
 }
 
-.products-hero {
+.HeroSection_hero {
+  border-radius: 28px;
+  overflow: hidden;
+  position: relative;
   text-align: center;
-  margin-bottom: 60px;
-  padding: 40px 0;
-}
-
-.products-hero h1 {
-  font-size: clamp(2rem, 4vw, 3rem);
-  font-weight: 700;
-  letter-spacing: -0.035em;
-  margin-bottom: 12px;
-  color: var(--tkn-text);
-}
-
-.products-hero p {
-  color: var(--tkn-text-secondary);
-  font-size: 1.1rem;
-}
-
-.products-layout {
-  display: grid;
-  grid-template-columns: 240px 1fr;
-  gap: 40px;
-}
-
-.products-sidebar {
+  padding: 64px 20px 0;
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  align-items: center;
+  min-height: 600px;
 }
 
-.search-form {
-  display: flex;
-  gap: 8px;
+.HeroSection_dark {
+  background-color: #000000;
+  color: #ffffff;
 }
 
-.search-input {
-  flex: 1;
-  padding: 12px 14px;
-  background: var(--tkn-bg-alt);
-  border: 1px solid var(--tkn-border);
-  border-radius: var(--tkn-radius-sm);
-  color: var(--tkn-text);
-  font-size: 0.85rem;
-  font-family: inherit;
-  transition: border-color 0.2s;
+.HeroSection_light {
+  background-color: #fbfbfd;
+  color: #1d1d1f;
 }
 
-.search-input:focus {
-  outline: none;
-  border-color: var(--tkn-text);
+.HeroSection_alt {
+  background-color: #f5f5f7;
 }
 
-.search-input::placeholder {
-  color: var(--tkn-text-tertiary);
+.HeroSection_content {
+  max-width: 600px;
+  margin: 0 auto 40px;
+  z-index: 2;
+  position: relative;
 }
 
-.search-btn {
-  padding: 12px 14px;
-  background: var(--tkn-dark);
-  border: none;
-  border-radius: var(--tkn-radius-sm);
-  color: #fff;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.search-btn:hover {
-  background: #333;
-}
-
-.filter-group {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.filter-group h3 {
-  font-size: 0.7rem;
+.HeroSection_badge {
+  font-size: 14px;
   font-weight: 600;
+  color: #bf4800;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--tkn-text);
   margin-bottom: 8px;
 }
 
-.filter-btn {
-  padding: 8px 12px;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: var(--tkn-radius-sm);
-  color: var(--tkn-text-secondary);
-  font-size: 0.85rem;
-  font-family: inherit;
-  text-align: left;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.filter-btn:hover {
-  color: var(--tkn-text);
-  background: var(--tkn-bg-alt);
-}
-
-.filter-btn.active {
-  color: var(--tkn-text);
-  background: var(--tkn-bg-alt);
+.HeroSection_headline {
+  font-size: clamp(40px, 6vw, 56px);
   font-weight: 600;
+  letter-spacing: -0.015em;
+  margin: 0 0 12px 0;
 }
 
-.products-main {
-  min-height: 400px;
+.HeroSection_subhead {
+  font-size: clamp(20px, 3vw, 26px);
+  margin: 0 0 16px 0;
+  font-weight: 400;
 }
 
-.products-count {
-  font-size: 0.85rem;
-  color: var(--tkn-text-secondary);
-  margin-bottom: 24px;
+.HeroSection_price {
+  font-size: 17px;
+  margin: 0 0 24px 0;
+  color: inherit;
+  opacity: 0.8;
 }
 
-.products-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+.HeroSection_links {
+  display: flex;
   gap: 20px;
+  justify-content: center;
+  align-items: center;
 }
 
-.products-loading {
+.HeroSection_imageWrapper {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 1;
+}
+
+.HeroSection_imageWrapper img {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  margin-bottom: -10px;
+}
+
+@media (min-width: 1068px) {
+  .HeroSection_hero {
+    min-height: 700px;
+  }
+}
+
+/* ── Product Carousel Section (StickyFooterGallery) ── */
+.ProductTileGallery_section {
+  padding: 20px 0 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+.ProductTileGallery_header {
+  max-width: 1080px;
+  margin: 0 auto 32px;
+  padding: 0 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.ProductTileGallery_headline {
+  font-size: clamp(32px, 4.5vw, 44px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.Gallery_paddleNav {
+  display: flex;
+  gap: 12px;
+}
+
+.PaddleNav_btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: rgba(210, 210, 215, 0.4);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--apple-text);
+  transition: all 0.2s ease;
+}
+
+.PaddleNav_btn:hover:not(:disabled) {
+  background-color: rgba(210, 210, 215, 0.8);
+  transform: scale(1.05);
+}
+
+.PaddleNav_btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* ── Carousel Track ── */
+.StickyFooterGallery_track {
+  display: flex;
+  gap: 24px;
+  padding: 10px 24px 40px;
+  max-width: 1280px;
+  margin: 0 auto;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+}
+
+.StickyFooterGallery_track::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Product Tile Card 1:1 ── */
+.ProductTile_productTile {
+  flex: 0 0 340px;
+  background-color: #ffffff;
+  border-radius: 24px;
+  padding: 36px 24px 28px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
-  padding: 80px 0;
+  text-align: center;
+  box-sizing: border-box;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  border: 1px solid #f0f0f2;
+  transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.3s ease;
+  position: relative;
 }
 
-.products-loading p {
-  color: var(--tkn-text-secondary);
+.ProductTile_productTile:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.08);
 }
 
-.products-empty {
+.ProductTile_badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: #f56300;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+  min-height: 14px;
+}
+
+.typography_headline {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  margin: 0 0 12px 0;
+  color: var(--apple-text);
+}
+
+.ProductTile_productImage {
+  height: 230px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.ProductTile_productImage img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  transition: transform 0.4s ease;
+}
+
+.ProductTile_productTile:hover .ProductTile_productImage img {
+  transform: scale(1.04);
+}
+
+/* Color Swatches */
+.ColorIndicator_colorindicator-items {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px 0;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+}
+
+.ColorIndicator_swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.ProductTile_copy {
+  font-size: 14px;
+  color: var(--apple-gray);
+  line-height: 1.4;
+  margin: 0 0 12px 0;
+  min-height: 40px;
+}
+
+.ProductTile_pricing {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--apple-text);
+  margin: 0 0 16px 0;
+}
+
+.ProductTileLinks_tileFooter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: auto;
+  width: 100%;
+}
+
+.Button_primary {
+  background-color: var(--apple-blue);
+  color: #ffffff !important;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 980px;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.2s ease;
+}
+
+.Button_primary:hover {
+  background-color: var(--apple-blue-hover);
+  transform: scale(1.02);
+}
+
+.StandardsLink_link {
+  color: var(--apple-blue);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.StandardsLink_link:hover {
+  text-decoration: underline;
+}
+
+/* ── Section Why Apple / Why TEKNIX (Feature Cards) ── */
+.MarcomSection_backgroundTertiary {
+  background-color: var(--apple-bg);
+  padding: 80px 24px;
+}
+
+.SectionHeader_container {
+  max-width: 1080px;
+  margin: 0 auto 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.SectionHeader_headline {
+  font-size: clamp(32px, 4vw, 44px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.FeatureCard_grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+.FeatureCard_card {
+  background-color: #ffffff;
+  border-radius: 20px;
+  padding: 32px 24px 20px;
   display: flex;
   flex-direction: column;
+  min-height: 380px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.03);
+}
+
+.FeatureCard_label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--apple-gray);
+  margin: 0 0 6px 0;
+}
+
+.FeatureCard_headline {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  margin: 0 0 8px 0;
+  color: var(--apple-text);
+}
+
+.FeatureCard_body {
+  font-size: 14px;
+  color: var(--apple-gray);
+  line-height: 1.4;
+  margin: 0 0 20px 0;
+}
+
+.FeatureCard_image {
+  margin-top: auto;
+  display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 80px 0;
-  color: var(--tkn-text-secondary);
+  justify-content: center;
+  max-height: 180px;
 }
 
-@media (max-width: 968px) {
-  .products-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .products-sidebar {
-    display: none;
-  }
-
-  .products-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+.FeatureCard_image img {
+  max-width: 100%;
+  max-height: 180px;
+  object-fit: contain;
 }
 
-@media (max-width: 640px) {
-  .products-page {
-    padding: 80px 16px 60px;
-  }
+/* ── Section Get To Know (Cards Verticais Altos) ── */
+.GetToKnow_section {
+  padding: 80px 24px;
+  max-width: 1080px;
+  margin: 0 auto;
+}
 
-  .products-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+.GetToKnow_grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin-top: 32px;
+}
+
+.GetToKnow_card {
+  border-radius: 22px;
+  height: 480px;
+  padding: 32px 24px;
+  color: #ffffff;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.15);
+}
+
+.GetToKnow_card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.7) 100%);
+  z-index: 1;
+}
+
+.GetToKnow_card-content {
+  position: relative;
+  z-index: 2;
+}
+
+.GetToKnow_topic {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.85;
+}
+
+.GetToKnow_title {
+  font-size: 26px;
+  font-weight: 700;
+  margin: 6px 0 0 0;
+  line-height: 1.2;
+}
+
+/* ── Section Essentials Banner ── */
+.Essentials_section {
+  padding: 60px 24px 80px;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+.Essentials_banner {
+  background-color: var(--apple-bg);
+  border-radius: 24px;
+  padding: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+.Essentials_info h3 {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+}
+
+.Essentials_info p {
+  font-size: 16px;
+  color: var(--apple-gray);
+  margin: 0 0 20px 0;
+}
+
+.Essentials_image img {
+  max-width: 400px;
+  width: 100%;
+  object-fit: contain;
+}
+
+/* ── Responsividade ── */
+@media (max-width: 768px) {
+  .ChapterNav_chapternav-items {
+    gap: 20px;
+  }
+  .Essentials_banner {
+    flex-direction: column;
+    padding: 32px 24px;
+    text-align: center;
+  }
+  .Essentials_image img {
+    max-width: 280px;
   }
 }

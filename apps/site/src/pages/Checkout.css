@@ -1,0 +1,583 @@
+/* ==========================================================================
+   TEKNIX SITE — CHECKOUT CSS (1:1 PADRÃO APPLE STORE OFICIAL DEFINITIVO)
+   Referência: https://secure8.store.apple.com/br/shop/checkout?_s=Shipping-init
+   ========================================================================== */
+
+.rs-page-content {
+  background-color: #ffffff;
+  color: #1d1d1f;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  min-height: 100vh;
+  padding-bottom: 80px;
+}
+
+.as-l-container {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+/* ── 1. Companion Sticky Header Bar (1:1 Apple) ── */
+.rs-checkout-headerbar {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 52px;
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid #d2d2d7;
+  z-index: 99;
+}
+
+.rs-checkout-headerbar-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+}
+
+.rs-checkout-headerbar-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1d1d1f;
+  letter-spacing: -0.015em;
+}
+
+.rs-companionbar-button button,
+.as-buttonlink {
+  background: none;
+  border: none;
+  color: #0071e3;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+}
+
+.as-buttonlink:hover {
+  text-decoration: underline;
+}
+
+/* Drawer Resumo do Pedido */
+.rs-companionbar-drawer {
+  background: #fbfbfd;
+  border-bottom: 1px solid #e5e5ea;
+  padding: 24px 20px;
+  animation: companionFade 0.2s ease;
+}
+
+@keyframes companionFade {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.rs-companionbar-items {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px 0;
+}
+
+.rs-companionbar-item-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f2f2f5;
+}
+
+.rs-companionbar-item-row img {
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+.rs-companionbar-item-info {
+  flex: 1;
+}
+
+.rs-companionbar-item-title {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1d1d1f;
+}
+
+.rs-companionbar-item-qty {
+  font-size: 12px;
+  color: #86868b;
+}
+
+.rs-companionbar-item-price {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+.rs-companionbar-totals {
+  max-width: 320px;
+  margin-left: auto;
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rs-companionbar-line {
+  display: flex;
+  justify-content: space-between;
+}
+
+.rs-companionbar-line.total {
+  border-top: 1px solid #d2d2d7;
+  padding-top: 8px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+/* ── 2. Banner de Erro Oficial Apple ── */
+.rs-error-banner {
+  background-color: #fff2f2;
+  border: 1px solid #ffb3b3;
+  border-radius: 12px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 24px 0 16px;
+  color: #d70015;
+  font-size: 14px;
+}
+
+.rs-error-banner-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid #d70015;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+/* ── 3. Layout Principal e Títulos ── */
+.rs-checkout-main-wrap {
+  padding-top: 40px;
+}
+
+.rs-shipping-header-container {
+  margin-bottom: 36px;
+}
+
+.rs-shipping-header {
+  font-size: 40px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: #1d1d1f;
+  margin: 0;
+  line-height: 1.15;
+}
+
+.rf-form-layout-section-header h2 {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: #1d1d1f;
+  margin: 0 0 20px 0;
+}
+
+fieldset {
+  border: none;
+  padding: 0;
+  margin: 0 0 48px 0;
+}
+
+/* Grid de 2 Colunas (Campos à esquerda, lembretes à direita) */
+.rs-shipping-content-grid,
+.rs-shipping-contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 48px;
+  align-items: flex-start;
+}
+
+.rs-shipping-left-col {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.rs-shipping-right-col {
+  padding-top: 6px;
+}
+
+/* ── 4. Card Selectors (Endereço e Tributário) ── */
+.form-selector-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-selector {
+  border: 1px solid #d2d2d7;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 16px 20px;
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.form-selector.selected {
+  border-color: #0071e3;
+  box-shadow: 0 0 0 1px #0071e3;
+}
+
+.form-selector-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.form-selector-label {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  width: 100%;
+}
+
+.form-selector .row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.form-selector-left-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-selector-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+.form-label-small {
+  font-size: 13px;
+  color: #6e6e73;
+}
+
+.form-selector-right-col.nowrap {
+  font-size: 13px;
+  color: #86868b;
+}
+
+.rs-shippingedit-action {
+  margin: -4px 0 6px 4px;
+}
+
+.rs-shipping-editaddress-button {
+  font-size: 13px;
+}
+
+/* ── 5. Inputs com Floating Eyebrow Labels ── */
+.rs-shipping-newaddress-form,
+.rs-taxinfo-taxfields {
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.row-2-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.row-phone-cols {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 14px;
+}
+
+.form-textbox {
+  position: relative;
+  border: 1px solid #d2d2d7;
+  border-radius: 12px;
+  padding: 8px 14px 6px;
+  background: #ffffff;
+  box-sizing: border-box;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.form-textbox:focus-within {
+  border-color: #0071e3;
+  box-shadow: 0 0 0 1px #0071e3;
+}
+
+.form-textbox.disabled {
+  background: #f5f5f7;
+  border-color: #e5e5ea;
+}
+
+.form-textbox-label {
+  display: block;
+  font-size: 11px;
+  color: #86868b;
+  margin-bottom: 2px;
+}
+
+.form-textbox-input {
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  color: #1d1d1f;
+  background: transparent;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.form-dropdown {
+  position: relative;
+  border: 1px solid #d2d2d7;
+  border-radius: 12px;
+  padding: 8px 14px 6px;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.form-dropdown-label {
+  display: block;
+  font-size: 11px;
+  color: #86868b;
+  margin-bottom: 2px;
+}
+
+.form-dropdown-select {
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  color: #1d1d1f;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  font-family: inherit;
+}
+
+.form-dropdown-chevron {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-40%) rotate(45deg);
+  width: 6px;
+  height: 6px;
+  border-right: 2px solid #86868b;
+  border-bottom: 2px solid #86868b;
+  pointer-events: none;
+}
+
+/* Checkbox */
+.form-checkbox {
+  margin: 6px 0;
+}
+
+.form-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #1d1d1f;
+  cursor: pointer;
+}
+
+.form-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  accent-color: #0071e3;
+  cursor: pointer;
+}
+
+/* Notificação e Mensagens Suplementares */
+.rs-shipping-addressnotification {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #f2f2f5;
+}
+
+.rs-shipping-address-header-row {
+  font-size: 14px;
+  color: #1d1d1f;
+  margin-bottom: 6px;
+}
+
+.as-supplementalinfo {
+  font-size: 13px;
+  color: #6e6e73;
+  line-height: 1.5;
+  margin: 0 0 16px 0;
+}
+
+.rs-shipping-reminders ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 13px;
+  color: #6e6e73;
+  line-height: 1.6;
+}
+
+.rs-shipping-reminders li {
+  position: relative;
+  padding-left: 14px;
+  margin-bottom: 10px;
+}
+
+.rs-shipping-reminders li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: #86868b;
+}
+
+.icon-external {
+  color: #0071e3;
+  text-decoration: none;
+}
+
+.icon-external:hover {
+  text-decoration: underline;
+}
+
+/* ── 6. Botão de Continuar ── */
+.rs-shipping-continue {
+  padding: 32px 0 48px;
+  border-top: 1px solid #e5e5ea;
+}
+
+.rs-checkout-action-button-wrapper {
+  max-width: 380px;
+}
+
+.form-button {
+  width: 100%;
+  max-width: 380px;
+  height: 48px;
+  background-color: #0071e3;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-size: 17px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s;
+  text-decoration: none;
+  font-family: inherit;
+}
+
+.form-button:hover {
+  background-color: #0077ed;
+}
+
+.form-button:disabled {
+  background-color: #86868b;
+  cursor: default;
+}
+
+/* ── 7. Chat e Acordeão FAQ ── */
+.rs-checkout-chatfaq-wrapper {
+  padding: 40px 0;
+  border-top: 1px solid #e5e5ea;
+}
+
+.rs-chat {
+  text-align: center;
+  font-size: 14px;
+  margin-bottom: 40px;
+}
+
+.as-chat-button {
+  color: #0071e3;
+  text-decoration: underline;
+}
+
+.rc-accordion.rs-faq {
+  border-top: 1px solid #e5e5ea;
+  border-bottom: 1px solid #e5e5ea;
+  padding: 24px 0;
+}
+
+.rc-accordion-button {
+  width: 100%;
+  background: none;
+  border: none;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1d1d1f;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  padding: 12px 0;
+  font-family: inherit;
+  text-align: left;
+}
+
+.rc-accordion-compact {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+}
+
+.rc-accordion-item {
+  border-top: 1px solid #f2f2f5;
+}
+
+.rc-accordion-content {
+  padding: 0 0 16px;
+  font-size: 13px;
+  color: #6e6e73;
+  line-height: 1.55;
+}
+
+/* ── 8. Rodapé Legal ── */
+.as-globalfooter-sosumi {
+  text-align: center;
+  font-size: 12px;
+  color: #86868b;
+  padding: 40px 20px 20px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 840px) {
+  .rs-shipping-content-grid,
+  .rs-shipping-contact-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .row-2-cols,
+  .row-phone-cols {
+    grid-template-columns: 1fr;
+  }
+  .rs-shipping-header {
+    font-size: 28px;
+  }
+}

@@ -7,7 +7,11 @@ export async function POST(req: NextRequest) {
     console.log('[Shopee Webhook] Received payload:', body)
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ykgprfzfnffooqmfbeox.supabase.co'
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlrZ3ByZnpmbmZmb29xbWZiZW94Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4Njk0Mzc5MSwiZXhwIjoyMTAyNTE5NzkxfQ.mv6Asc4U7lVVFtTtBhWyVm_R5jW2ThKocGI7WTRXIts'
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!serviceRoleKey) {
+      console.error('[Shopee Webhook] SUPABASE_SERVICE_ROLE_KEY não configurada no ambiente.')
+      return NextResponse.json({ error: 'Configuração do servidor incompleta' }, { status: 500 })
+    }
     const supabase = createClient(supabaseUrl, serviceRoleKey)
 
     // Save notification

@@ -1,0 +1,792 @@
+/* ============================================================
+   MENU PICKER MODAL — Seletor Visual de Menus
+   ============================================================ */
+
+.mpicker-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(10px);
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: mpickerFade 0.2s ease-out;
+}
+
+@keyframes mpickerFade {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.mpicker-modal {
+  background: #ffffff;
+  width: 100%;
+  max-width: 1100px;
+  height: 88vh;
+  max-height: 860px;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* ── Header ── */
+.mpicker-header {
+  height: 56px;
+  background: #1d1d1f;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  flex-shrink: 0;
+}
+
+.mpicker-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mpicker-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mpicker-brand-icon {
+  font-size: 18px;
+  color: #ffffff;
+}
+
+.mpicker-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+/* ── Device Tabs ── */
+.mpicker-device-tabs {
+  display: flex;
+  gap: 4px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 3px;
+}
+
+.mpicker-device-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: rgba(255,255,255,0.65);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.mpicker-device-tab.active {
+  background: #ffffff;
+  color: #1d1d1f;
+}
+
+.mpicker-device-tab:not(.active):hover {
+  background: rgba(255,255,255,0.15);
+  color: #ffffff;
+}
+
+/* ── Close Button ── */
+.mpicker-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.mpicker-close:hover {
+  background: rgba(255,255,255,0.25);
+}
+
+/* ── Subbar (Group Pills) ── */
+.mpicker-subbar {
+  display: flex;
+  gap: 8px;
+  padding: 12px 20px;
+  background: #f5f5f7;
+  border-bottom: 1px solid #e5e5ea;
+  flex-shrink: 0;
+  overflow-x: auto;
+}
+
+.mpicker-group-pill {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1.5px solid #d2d2d7;
+  background: #ffffff;
+  color: #6e6e73;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+
+.mpicker-group-pill.active {
+  background: #1d1d1f;
+  border-color: #1d1d1f;
+  color: #ffffff;
+}
+
+/* ── Body ── */
+.mpicker-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  background: #f5f5f7;
+}
+
+/* ── Grid ── */
+.mpicker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.mpicker-grid.desktop {
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+/* ── Card ── */
+.mpicker-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.18s;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+
+.mpicker-card:hover {
+  border-color: #0071e3;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,113,227,0.15);
+}
+
+.mpicker-card.selected {
+  border-color: #0071e3;
+  box-shadow: 0 0 0 3px rgba(0,113,227,0.18);
+}
+
+.mpicker-card.desktop {
+  cursor: pointer;
+}
+
+/* ── Preview Area ── */
+.mpicker-preview {
+  height: 210px;
+  background: #f0f0f5;
+  overflow: hidden;
+  display: flex;
+  align-items: stretch;
+  position: relative;
+}
+
+.mpicker-preview.desktop {
+  height: 130px;
+}
+
+/* ── Card Footer ── */
+.mpicker-card-footer {
+  padding: 10px 12px 12px;
+}
+
+.mpicker-card-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin-bottom: 2px;
+}
+
+.mpicker-card-desc {
+  font-size: 11px;
+  color: #6e6e73;
+  line-height: 1.35;
+}
+
+.mpicker-card-group {
+  margin-top: 5px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #0071e3;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ── Selected Badge ── */
+.mpicker-selected-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #0071e3;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 12px;
+  z-index: 1;
+}
+
+/* ── Empty State (Tablet) ── */
+.mpicker-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  height: 100%;
+  min-height: 400px;
+  color: #86868b;
+  text-align: center;
+}
+
+.mpicker-empty-state h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin: 0;
+}
+
+.mpicker-empty-state p {
+  font-size: 14px;
+  color: #6e6e73;
+  max-width: 320px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ============================================================
+   PREVIEWS — Estilos dos mini menus nos cards
+   ============================================================ */
+
+/* ── Shared micro-preview variables ── */
+.mprev {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  font-size: 11px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── 1. Dark Drawer (Apple Classic) ── */
+.mprev.dark-drawer {
+  background: #161617;
+  padding: 12px 14px;
+  gap: 2px;
+}
+.mprev.dark-drawer .mprev-link {
+  font-size: 13px;
+  font-weight: 600;
+  color: #f5f5f7;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.mprev-footer-links {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+.mprev-footer-links span {
+  font-size: 11px;
+  color: #0071e3;
+}
+
+/* ── 2. Light Accordion ── */
+.mprev.light-accordion {
+  background: #f5f5f7;
+  padding: 0;
+}
+.mprev-cat-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 14px;
+  border-bottom: 1px solid #e5e5ea;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  color: #1d1d1f;
+}
+.mprev-cat-card.header {
+  background: #f0f0f5;
+  font-weight: 700;
+  font-size: 10px;
+  text-transform: uppercase;
+  color: #6e6e73;
+  letter-spacing: 0.05em;
+}
+.mprev-chevron { color: #c7c7cc; font-size: 14px; }
+
+/* ── 3. Dark Pro ── */
+.mprev.dark-pro {
+  background: #1a1a1c;
+  padding: 12px 14px;
+  gap: 3px;
+}
+.mprev-hero-text strong {
+  font-size: 13px;
+  color: #f5f5f7;
+  display: block;
+}
+.mprev-hero-text small {
+  font-size: 10px;
+  color: #86868b;
+  display: block;
+  margin-bottom: 8px;
+}
+.mprev-pro-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+  color: #a1a1a6;
+  font-size: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.mprev-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #0071e3;
+  flex-shrink: 0;
+}
+
+/* ── 4. Compact Grid ── */
+.mprev.grid-compact {
+  background: #1a1a1c;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  padding: 0;
+}
+.mprev-grid-card {
+  background: #2c2c2e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #f5f5f7;
+}
+
+/* ── 5. Blue Drawer ── */
+.mprev.blue-drawer {
+  background: #1a74e8;
+  padding: 10px 12px;
+}
+.mprev-profile-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 8px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid rgba(255,255,255,0.15);
+}
+.mprev-profile-row.dark {
+  border-bottom-color: #2e2e2e;
+}
+.mprev-profile-row.compact {
+  padding-bottom: 4px;
+  margin-bottom: 2px;
+}
+.mprev-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.mprev-avatar.blue { background: rgba(255,255,255,0.25); border: 1.5px solid rgba(255,255,255,0.5); }
+.mprev-avatar.purple { background: rgba(255,255,255,0.2); border: 1.5px solid rgba(255,255,255,0.4); }
+.mprev-avatar.violet { background: #e8e9f3; border: 1.5px solid #d2d2d7; }
+.mprev-avatar.dark { background: #2c2c2e; }
+.mprev-avatar.gray { background: #e5e5ea; }
+.mprev-avatar.large { width: 40px; height: 40px; background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.4); }
+.mprev-avatar.small { width: 22px; height: 22px; }
+.mprev-name { font-size: 11px; font-weight: 700; color: #ffffff; }
+.mprev-name.dark { color: #1d1d1f; }
+.mprev-name.light { color: #f5f5f7; }
+.mprev-name.small { font-size: 10px; }
+.mprev-email { font-size: 9px; color: rgba(255,255,255,0.65); }
+.mprev-email.dim { color: #86868b; }
+.mprev-email.tiny { font-size: 9px; color: #86868b; }
+.mprev-icon-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 11px;
+  color: #ffffff;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.mprev-icon-row.active-teal { background: rgba(0,198,167,0.85); border-radius: 4px; padding-left: 4px; }
+.mprev-icon-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.mprev-icon-dot.blue { background: rgba(255,255,255,0.5); }
+.mprev-icon-dot.purple { background: rgba(255,255,255,0.4); }
+.mprev-icon-dot.violet { background: #6264a7; }
+.mprev-icon-dot.dark { background: #3a3a3c; }
+.mprev-icon-dot.blue.small,
+.mprev-icon-dot.small { width: 6px; height: 6px; }
+
+/* ── 6. Purple Drawer ── */
+.mprev.purple-drawer {
+  background: #6c3fc8;
+  padding: 10px 12px;
+}
+.mprev-social-row {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255,255,255,0.15);
+}
+.mprev-social {
+  width: 20px;
+  height: 20px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+}
+
+/* ── 7. Fullscreen Overlay ── */
+.mprev.fullscreen {
+  background: rgba(90,80,200,0.9);
+  backdrop-filter: blur(8px);
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+}
+.mprev-overlay-profile {
+  text-align: center;
+  margin-bottom: 10px;
+}
+.mprev-overlay-link {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.9);
+  padding: 5px 16px;
+  border-radius: 6px;
+  text-align: center;
+  width: 100%;
+}
+.mprev-overlay-close {
+  margin-top: 8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: #ffffff;
+}
+
+/* ── 8. Dark Settings ── */
+.mprev.dark-settings {
+  background: #121214;
+  padding: 8px 12px;
+  gap: 1px;
+}
+.mprev-settings-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid #1e1e1e;
+  font-size: 11px;
+  color: #f5f5f7;
+}
+.mprev-chevron.dim { color: #3a3a3c; }
+.mprev-logout-btn {
+  margin-top: 6px;
+  padding: 7px;
+  border: 1.5px solid #2e2e2e;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: #ff3b30;
+}
+
+/* ── 9. Clean Light ── */
+.mprev.clean-light {
+  background: #f9f9fb;
+  padding: 8px 12px;
+}
+.mprev-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid #f0f0f5;
+  font-size: 11px;
+}
+.mprev-toggle-row .dark { color: #1d1d1f; flex: 1; }
+.mprev-toggle-on {
+  width: 26px;
+  height: 15px;
+  background: #34c759;
+  border-radius: 8px;
+  position: relative;
+  flex-shrink: 0;
+}
+.mprev-toggle-on::after {
+  content: '';
+  position: absolute;
+  right: 2px;
+  top: 2px;
+  width: 11px;
+  height: 11px;
+  background: #fff;
+  border-radius: 50%;
+}
+
+/* ── 10. Light Tabs ── */
+.mprev.light-tabs {
+  background: #ffffff;
+  padding: 0;
+}
+.mprev-tabs-row {
+  display: flex;
+  border-bottom: 1px solid #e5e5ea;
+  background: #f9f9fb;
+}
+.mprev-tab {
+  flex: 1;
+  padding: 6px 4px;
+  font-size: 9px;
+  font-weight: 600;
+  color: #86868b;
+  text-align: center;
+  border-bottom: 2px solid transparent;
+}
+.mprev-tab.active { color: #0071e3; border-bottom-color: #0071e3; background: #fff; }
+.mprev-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  flex: 1;
+}
+.mprev-icon-card {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  border-bottom: 1px solid #f0f0f5;
+  border-right: 1px solid #f0f0f5;
+  font-size: 10px;
+  color: #1d1d1f;
+  font-weight: 500;
+}
+.mprev-bottom-bar {
+  display: flex;
+  border-top: 1px solid #e5e5ea;
+  padding: 6px 0;
+}
+.mprev-bb-btn {
+  flex: 1;
+  text-align: center;
+  font-size: 14px;
+  color: #86868b;
+}
+.mprev-bb-btn.active { color: #0071e3; }
+
+/* ── 11. Tab Grid ── */
+.mprev.tab-grid {
+  background: #ffffff;
+}
+.mprev-3x2-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  flex: 1;
+  background: #e5e5ea;
+  gap: 1px;
+}
+.mprev-3x2-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 10px 4px;
+  background: #fff;
+  font-size: 9px;
+  font-weight: 600;
+  color: #1d1d1f;
+}
+.mprev-bottom-links {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 7px;
+  border-top: 1px solid #e5e5ea;
+  font-size: 10px;
+  color: #6e6e73;
+  font-weight: 600;
+}
+.mprev-bottom-links .danger { color: #ff3b30; }
+
+/* ── 12. Grouped Sections ── */
+.mprev.grouped {
+  background: #ffffff;
+  padding: 8px 12px;
+}
+.mprev-app-logo {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f0f0f5;
+}
+.mprev-logo-icon {
+  width: 22px;
+  height: 22px;
+  background: #1d1d1f;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 8px;
+  font-weight: 800;
+}
+.mprev-app-name { font-size: 11px; font-weight: 800; color: #1d1d1f; }
+.mprev-group-label {
+  font-size: 8px;
+  font-weight: 800;
+  color: #86868b;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin: 4px 0 2px;
+}
+.mprev-gs-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 6px;
+  font-size: 10px;
+  font-weight: 500;
+  color: #1d1d1f;
+  border-radius: 4px;
+}
+.mprev-gs-item.active { background: #f0f0f5; font-weight: 700; border-right: 2px solid #0071e3; }
+.mprev-gs-item span:first-child { flex: 1; }
+.mprev-badge {
+  background: #e5e5ea;
+  color: #1d1d1f;
+  font-size: 8px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 8px;
+}
+.mprev-user-bottom {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 6px;
+  border-top: 1px solid #e5e5ea;
+}
+
+/* ── Desktop Header Previews ── */
+.mprev-header {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.mprev-header.dark { background: #161617; }
+.mprev-header.light { background: #ffffff; border-bottom: 1px solid #e5e5ea; }
+.mprev-header.industrial { background: #000000; }
+.mprev-header.search { background: #1c1c1e; }
+
+.mprev-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  flex: 1;
+}
+.mprev-header-brand { font-size: 11px; font-weight: 700; color: #f5f5f7; display: flex; align-items: center; gap: 4px; }
+.mprev-header-brand.light { color: #1d1d1f; }
+.mprev-header-links { display: flex; gap: 8px; }
+.mprev-header-links span { font-size: 10px; color: rgba(255,255,255,0.75); }
+.mprev-header-links.light span { color: #424245; }
+.mprev-header-links.industrial span { color: rgba(255,255,255,0.7); }
+.mprev-header-icons { font-size: 11px; color: rgba(255,255,255,0.75); }
+.mprev-header-icons.light { color: #1d1d1f; }
+.mprev-header-tag {
+  padding: 6px 14px;
+  font-size: 9px;
+  font-weight: 600;
+  color: #86868b;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  text-align: center;
+  background: rgba(0,0,0,0.15);
+}
+.mprev-header-tag.light {
+  color: #86868b;
+  border-top-color: #e5e5ea;
+  background: #f9f9fb;
+}
+.mprev-search-bar {
+  flex: 1;
+  margin: 0 12px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 10px;
+  color: rgba(255,255,255,0.5);
+}
+
+/* ── Responsive ── */
+@media (max-width: 700px) {
+  .mpicker-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .mpicker-grid.desktop {
+    grid-template-columns: 1fr;
+  }
+  .mpicker-modal {
+    border-radius: 10px;
+    height: 95vh;
+  }
+}

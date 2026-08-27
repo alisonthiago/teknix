@@ -2,20 +2,27 @@ export interface Product {
   id: string
   name: string
   sku?: string
-  slug?: string
-  description?: string
-  price: number
-  promo_price?: number
-  cost?: number
-  stock?: number
+  brand?: string
+  model?: string
+  category?: string
   category_id?: string
-  segment?: string
+  slug?: string
+  price?: number
+  sell_price?: number
+  promo_price?: number
+  status?: string
+  notes?: string
   image_url?: string
   images?: string[]
-  featured?: boolean
-  active?: boolean
-  specifications?: Record<string, unknown>
-  mercadolivre_item_id?: string
+  stock?: number
+  cost_purchase?: number
+  weight?: number
+  height?: number
+  width?: number
+  length?: number
+  ean?: string
+  presentation_page_id?: string
+  user_id?: string
   created_at?: string
   updated_at?: string
 }

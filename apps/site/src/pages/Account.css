@@ -1,338 +1,831 @@
-.account-page {
-  padding: 100px 24px 80px;
+/* ==========================================================================
+   TEKNIX SITE — ACCOUNT HOME CSS (1:1 PADRÃO APPLE STORE)
+   Referência: https://secure8.store.apple.com/br/shop/account/home
+   ========================================================================== */
+
+.apple-account-page {
+  background-color: #ffffff;
+  color: #1d1d1f;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
   min-height: 100vh;
+  padding-bottom: 80px;
 }
 
-.account-container {
-  max-width: 1000px;
+.apple-account-container {
+  max-width: 980px;
   margin: 0 auto;
-  display: grid;
-  grid-template-columns: 240px 1fr;
-  gap: 40px;
+  padding: 0 20px;
+  box-sizing: border-box;
 }
 
-.account-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+/* ── 1. Local Nav Bar ── */
+.apple-account-localnav {
+  height: 52px;
+  border-bottom: 1px solid #d2d2d7;
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
-.account-user {
+.apple-account-localnav-inner {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 0 20px;
+  height: 100%;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 20px;
-  background: var(--tkn-gray-2);
-  border: 1px solid var(--tkn-border);
-  border-radius: var(--tkn-radius-md);
+  justify-content: space-between;
 }
 
-.user-avatar {
-  width: 44px;
-  height: 44px;
+.apple-account-localnav-title {
+  font-size: 21px;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin: 0;
+  letter-spacing: -0.015em;
+}
+
+.apple-account-localnav-action {
+  font-size: 12px;
+  color: #0071e3;
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  transition: opacity 0.15s;
+}
+
+.apple-account-localnav-action:hover {
+  text-decoration: underline;
+}
+
+/* ── 2. Hero Greeting ── */
+.apple-account-hero {
+  padding: 44px 0 32px;
+  background-color: #ffffff;
+}
+
+.apple-account-greeting {
+  font-size: 40px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: #1d1d1f;
+  margin: 0;
+}
+
+/* ── 3. Sections ── */
+.apple-account-section {
+  padding: 44px 0;
+}
+
+.apple-account-section.bg-primary {
+  background-color: #ffffff;
+}
+
+.apple-account-section.bg-secondary {
+  background-color: #f5f5f7;
+}
+
+.apple-section-title {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: #1d1d1f;
+  margin: 0 0 6px 0;
+}
+
+.apple-section-subtitle {
+  font-size: 14px;
+  color: #86868b;
+  margin: 0;
+}
+
+/* ── 4. Scroller de Aparelhos ── */
+.apple-devices-header-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.apple-devices-nav-arrows {
+  display: flex;
+  gap: 8px;
+}
+
+.apple-nav-arrow {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #f5f5f7;
+  border: 1px solid #d2d2d7;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--tkn-green);
-  color: var(--tkn-dark);
-  font-size: 1.1rem;
-  font-weight: 700;
-  border-radius: 50%;
+  color: #1d1d1f;
+  cursor: pointer;
+  transition: all 0.15s;
 }
 
-.user-info {
+.apple-nav-arrow:hover {
+  background: #e5e5ea;
+}
+
+.apple-devices-scroller {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 8px 4px 20px;
+  scrollbar-width: none;
+}
+
+.apple-devices-scroller::-webkit-scrollbar {
+  display: none;
+}
+
+.apple-device-card {
+  flex: 0 0 220px;
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid #e5e5ea;
+  padding: 20px;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.user-name {
-  font-size: 0.9rem;
-  font-weight: 600;
+.apple-device-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
-.user-email {
-  font-size: 0.75rem;
-  color: var(--tkn-text-dim);
+.apple-device-image-box {
+  width: 130px;
+  height: 130px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
 }
 
-.account-nav {
+.apple-device-image-box img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.apple-device-info {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.account-nav .nav-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
-  background: transparent;
-  border: none;
-  border-radius: var(--tkn-radius-sm);
-  color: var(--tkn-text-dim);
-  font-size: 0.85rem;
-  font-family: inherit;
-  cursor: pointer;
-  transition: all 0.2s;
-  text-align: left;
-}
-
-.account-nav .nav-item:hover {
-  background: var(--tkn-gray-2);
-  color: var(--tkn-text);
-}
-
-.account-nav .nav-item.active {
-  background: var(--tkn-green-dim);
-  color: var(--tkn-green);
-}
-
-.account-nav .nav-item-danger:hover {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
-}
-
-.account-main {
-  background: var(--tkn-gray-2);
-  border: 1px solid var(--tkn-border);
-  border-radius: var(--tkn-radius-md);
-  padding: 32px;
-}
-
-.account-overview h2 {
-  font-size: 1.4rem;
-  font-weight: 700;
-  margin-bottom: 4px;
-  letter-spacing: -0.01em;
-}
-
-.overview-subtitle {
-  color: var(--tkn-text-dim);
-  margin-bottom: 32px;
-  font-size: 0.9rem;
-}
-
-.overview-stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 32px;
-}
-
-.stat-card {
-  background: var(--tkn-dark);
-  border: 1px solid var(--tkn-border);
-  border-radius: var(--tkn-radius-sm);
-  padding: 20px;
-  text-align: center;
-}
-
-.stat-value {
-  display: block;
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--tkn-green);
-  line-height: 1;
-  margin-bottom: 4px;
-}
-
-.stat-label {
-  font-size: 0.8rem;
-  color: var(--tkn-text-dim);
-}
-
-.overview-recent h3 {
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--tkn-text-dim);
-  margin-bottom: 12px;
-}
-
-.account-orders h2,
-.account-addresses h2,
-.account-settings h2 {
-  font-size: 1.25rem;
+.apple-device-name {
+  font-size: 15px;
   font-weight: 600;
-  margin-bottom: 24px;
+  color: #1d1d1f;
+  margin: 0;
 }
 
-.section-header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-}
-
-.order-card {
-  background: var(--tkn-dark);
-  border: 1px solid var(--tkn-border);
-  border-radius: var(--tkn-radius-sm);
-  padding: 16px;
-  margin-bottom: 12px;
-}
-
-.order-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.order-id {
-  font-family: var(--tkn-mono);
-  font-size: 0.8rem;
-  color: var(--tkn-text-dim);
-}
-
-.order-status {
-  font-size: 0.7rem;
-  font-weight: 600;
-  padding: 4px 10px;
-  border-radius: 980px;
-}
-
-.status-pending { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
-.status-paid { background: var(--tkn-green-dim); color: var(--tkn-green); }
-.status-preparing { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
-.status-shipped { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
-.status-delivered { background: var(--tkn-green-dim); color: var(--tkn-green); }
-.status-cancelled { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
-
-.order-details {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.85rem;
-  color: var(--tkn-text-dim);
-}
-
-.order-total {
-  font-weight: 600;
-  color: var(--tkn-text);
-}
-
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  padding: 48px 0;
-  color: var(--tkn-text-dim);
-  text-align: center;
-}
-
-.addresses-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.address-card {
-  background: var(--tkn-dark);
-  border: 1px solid var(--tkn-border);
-  border-radius: var(--tkn-radius-sm);
-  padding: 16px;
-}
-
-.address-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.apple-device-model {
+  font-size: 13px;
+  color: #86868b;
   margin-bottom: 8px;
 }
 
-.address-label {
-  font-weight: 600;
+.apple-devices-footer-hint {
+  font-size: 12px;
+  color: #86868b;
+  margin-top: 16px;
 }
 
-.address-default {
-  font-size: 0.65rem;
-  background: var(--tkn-green-dim);
-  color: var(--tkn-green);
-  padding: 2px 8px;
-  border-radius: 980px;
+.apple-devices-footer-hint a {
+  color: #0071e3;
+  text-decoration: underline;
 }
 
-.address-text {
-  font-size: 0.85rem;
-  color: var(--tkn-text-dim);
-  line-height: 1.6;
+/* ── 5. Tiles 2x1 (Seus pedidos / Itens salvos) ── */
+.apple-tiles-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
 }
 
-.settings-section {
-  margin-bottom: 32px;
-}
-
-.settings-section h3 {
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--tkn-text-dim);
-  margin-bottom: 16px;
-}
-
-.settings-info {
-  background: var(--tkn-dark);
-  border: 1px solid var(--tkn-border);
-  border-radius: var(--tkn-radius-sm);
-  overflow: hidden;
-}
-
-.info-row {
+.apple-tile-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 32px 28px;
   display: flex;
-  justify-content: space-between;
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--tkn-border);
+  flex-direction: column;
+  align-items: flex-start;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
 }
 
-.info-row:last-child {
+.apple-tile-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin: 0 0 10px 0;
+  letter-spacing: -0.015em;
+}
+
+.apple-tile-desc {
+  font-size: 14px;
+  color: #6e6e73;
+  line-height: 1.5;
+  margin: 0 0 20px 0;
+  flex: 1;
+}
+
+.apple-link-more {
+  font-size: 14px;
+  color: #0071e3;
+  text-decoration: none;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.apple-link-more:hover {
+  text-decoration: underline;
+}
+
+/* ── 6. Ajustes da Conta (Grid Apple) ── */
+.apple-settings-main-title {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: #1d1d1f;
+  margin: 0 0 32px 0;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e5ea;
+}
+
+.apple-settings-row {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  padding: 24px 0;
+  border-bottom: 1px solid #e5e5ea;
+}
+
+.apple-settings-row:last-child {
   border-bottom: none;
 }
 
-.info-label {
-  color: var(--tkn-text-dim);
-  font-size: 0.85rem;
+.apple-settings-label-col h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #86868b;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
-.info-value {
-  font-size: 0.85rem;
+.apple-settings-content-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
 }
 
-.account-loading {
+.apple-settings-content-grid.three-cols {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.apple-settings-content-wide {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.apple-settings-box h5,
+.apple-settings-content-wide h5 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin: 0 0 8px 0;
+}
+
+.apple-settings-text {
+  font-size: 13px;
+  color: #6e6e73;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.apple-settings-text p {
+  margin: 0;
+}
+
+.apple-btn-link {
+  font-size: 13px;
+  color: #0071e3;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.apple-btn-link:hover {
+  opacity: 0.8;
+}
+
+.apple-settings-actions-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.apple-settings-actions-inline .divider {
+  color: #d2d2d7;
+}
+
+.apple-privacy-text,
+.apple-id-description {
+  font-size: 13px;
+  color: #6e6e73;
+  line-height: 1.5;
+  max-width: 680px;
+  margin: 0 0 10px 0;
+}
+
+.apple-link-external {
+  font-size: 13px;
+  color: #0071e3;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.apple-link-external:hover {
+  text-decoration: underline;
+}
+
+.apple-id-email {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin: 0 0 4px 0;
+}
+
+/* ══════════════════════════════════════════════════════════
+   7. MODAIS DE EDIÇÃO 1:1 OFICIAIS APPLE
+   ══════════════════════════════════════════════════════════ */
+
+.apple-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.48);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px 16px;
+  animation: appleBackdropFade 0.2s ease;
+}
+
+.apple-modal-card-apple {
+  width: 100%;
+  max-width: 580px;
+  max-height: 92vh;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
+  position: relative;
+  overflow-y: auto;
+  box-sizing: border-box;
+  animation: appleModalPop 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes appleModalPop {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.apple-overlay-close-btn {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #f5f5f7;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6e6e73;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.15s;
+}
+
+.apple-overlay-close-btn:hover {
+  background: #e5e5ea;
+  color: #1d1d1f;
+}
+
+.apple-overlay-inner {
+  padding: 44px 40px 36px;
+}
+
+.apple-overlay-heading {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: #1d1d1f;
+  margin: 0 0 12px 0;
+}
+
+.apple-overlay-desc {
+  font-size: 13px;
+  color: #6e6e73;
+  line-height: 1.5;
+  margin: 0 0 24px 0;
+}
+
+.apple-overlay-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ── Apple Official Floating Eyebrow Form Textbox ── */
+.form-textbox {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid #d2d2d7;
+  border-radius: 12px;
+  padding: 8px 14px 6px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.form-textbox:focus-within {
+  border-color: #0071e3;
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
+}
+
+.form-textbox.disabled {
+  background: #fbfbfd;
+  opacity: 0.8;
+}
+
+.form-textbox-label {
+  font-size: 11px;
+  color: #86868b;
+  line-height: 1.2;
+  margin-bottom: 2px;
+  font-weight: 400;
+}
+
+.form-textbox-input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 15px;
+  color: #1d1d1f;
+  font-family: inherit;
+  padding: 0;
+  margin: 0;
+}
+
+/* ── Apple Dropdown Select ── */
+.form-dropdown {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid #d2d2d7;
+  border-radius: 12px;
+  padding: 8px 14px 6px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-dropdown:focus-within {
+  border-color: #0071e3;
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
+}
+
+.form-dropdown-label {
+  font-size: 11px;
+  color: #86868b;
+  line-height: 1.2;
+  margin-bottom: 2px;
+}
+
+.form-dropdown-select {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 15px;
+  color: #1d1d1f;
+  font-family: inherit;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.form-dropdown-chevron {
+  position: absolute;
+  right: 14px;
+  bottom: 12px;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid #86868b;
+  border-bottom: 2px solid #86868b;
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+/* ── Side-by-side rows ── */
+.form-row-sidebyside {
+  display: flex;
+  gap: 12px;
+}
+
+.ddd-box {
+  width: 90px;
+  flex-shrink: 0;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.form-supplemental-info {
+  font-size: 12px;
+  color: #86868b;
+  line-height: 1.4;
+  margin-top: -4px;
+  margin-bottom: 6px;
+}
+
+/* ── Fieldsets ── */
+.apple-form-fieldset {
+  border: none;
+  padding: 0;
+  margin: 12px 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.apple-fieldset-legend {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin-bottom: 10px;
+}
+
+/* ── Card logo in input ── */
+.form-textbox.with-card-logo {
+  position: relative;
+}
+
+.card-badge-inline {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+}
+
+.mastercard-circle {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.mastercard-circle.red {
+  background: #eb001b;
+  margin-right: -6px;
+  z-index: 1;
+}
+
+.mastercard-circle.yellow {
+  background: #f79e1b;
+}
+
+/* ── Overlay Action Buttons (1:1 Apple) ── */
+.apple-overlay-actions {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
-  padding: 200px 0;
+  gap: 14px;
+  margin-top: 24px;
 }
 
-.account-loading p {
-  color: var(--tkn-text-dim);
+.apple-overlay-save-btn {
+  width: 100%;
+  height: 44px;
+  background-color: #0071e3;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-@media (max-width: 768px) {
-  .account-container {
+.apple-overlay-save-btn:hover {
+  background-color: #0077ed;
+}
+
+.apple-overlay-cancel-btn {
+  background: none;
+  border: none;
+  font-size: 14px;
+  color: #0071e3;
+  cursor: pointer;
+  font-family: inherit;
+  text-decoration: none;
+  transition: opacity 0.15s;
+}
+
+.apple-overlay-cancel-btn:hover {
+  text-decoration: underline;
+}
+
+/* ── Toast ── */
+.apple-account-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #1d1d1f;
+  color: #ffffff;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 1100;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.apple-account-toast.success {
+  border-left: 4px solid #10b981;
+}
+
+.apple-account-toast.error {
+  border-left: 4px solid #ef4444;
+}
+
+/* ── Visitor View ── */
+.visitor-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.apple-account-login-card {
+  max-width: 420px;
+  margin: 60px auto;
+  background: #ffffff;
+  border: 1px solid #e5e5ea;
+  border-radius: 18px;
+  padding: 40px 32px;
+  text-align: center;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+}
+
+.apple-account-login-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #f5f5f7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0071e3;
+  margin: 0 auto 16px;
+}
+
+.apple-account-login-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.02em;
+}
+
+.apple-account-login-subtitle {
+  font-size: 13px;
+  color: #86868b;
+  margin: 0 0 24px 0;
+  line-height: 1.5;
+}
+
+.apple-account-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  text-align: left;
+}
+
+.apple-account-login-divider {
+  margin: 20px 0;
+  position: relative;
+  text-align: center;
+}
+
+.apple-account-login-divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #e5e5ea;
+}
+
+.apple-account-login-divider span {
+  position: relative;
+  background: #ffffff;
+  padding: 0 12px;
+  font-size: 12px;
+  color: #86868b;
+}
+
+.apple-btn-demo {
+  width: 100%;
+  padding: 10px;
+  border-radius: 980px;
+  background: #f5f5f7;
+  border: 1px solid #d2d2d7;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1d1d1f;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.apple-btn-demo:hover {
+  background: #e5e5ea;
+}
+
+.apple-btn-primary.full-width {
+  width: 100%;
+  height: 42px;
+  border-radius: 12px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 840px) {
+  .apple-tiles-grid {
     grid-template-columns: 1fr;
   }
-
-  .account-sidebar {
-    order: -1;
-  }
-
-  .account-nav {
-    flex-direction: row;
-    overflow-x: auto;
-    gap: 8px;
-    padding-bottom: 8px;
-  }
-
-  .account-nav .nav-item {
-    white-space: nowrap;
-  }
-
-  .overview-stats {
+  .apple-settings-row {
     grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .apple-settings-content-grid,
+  .apple-settings-content-grid.three-cols {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .apple-overlay-inner {
+    padding: 36px 20px 24px;
   }
 }

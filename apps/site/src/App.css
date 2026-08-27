@@ -7,3 +7,17 @@
 .app main {
   flex: 1;
 }
+
+/* Page Builder Responsive Overrides */
+@media (min-width: 1025px) {
+  .hide-desktop { display: none !important; }
+}
+
+@media (max-width: 1024px) and (min-width: 769px) {
+  .hide-tablet { display: none !important; }
+}
+
+@media (max-width: 768px) {
+  .hide-tablet { display: none !important; } /* sometimes tablet implies mobile too unless strictly scoped, but let's just use mobile */
+  .hide-mobile { display: none !important; }
+}

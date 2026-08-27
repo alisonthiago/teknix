@@ -1,0 +1,102 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,300..900;1,6..12,300..900&display=swap');
+
+:root {
+  /* ── Typography Fonts ── */
+  --tk-font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --tk-font-mono: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  /* ── Font Sizes & Line Heights (FLOW Scale) ── */
+  --tk-font-size-h1: 22px;
+  --tk-line-height-h1: 1.25;
+
+  --tk-font-size-h2: 18px;
+  --tk-line-height-h2: 1.3;
+
+  --tk-font-size-h3: 15px;
+  --tk-line-height-h3: 1.35;
+
+  --tk-font-size-h4: 13.5px;
+  --tk-line-height-h4: 1.4;
+
+  --tk-font-size-body: 13.5px;
+  --tk-line-height-body: 1.45;
+
+  --tk-font-size-body-sm: 12.5px;
+  --tk-line-height-body-sm: 1.4;
+
+  --tk-font-size-caption: 11.5px;
+  --tk-line-height-caption: 1.35;
+
+  --tk-font-size-micro: 10.5px;
+
+  /* ── Font Weights ── */
+  --tk-font-weight-regular: 400;
+  --tk-font-weight-medium: 500;
+  --tk-font-weight-semibold: 600;
+  --tk-font-weight-bold: 700;
+
+  /* ── Colors (FLOW Palette) ── */
+  --tk-color-bg: #f5f5f5;
+  --tk-color-surface: #ffffff;
+  --tk-color-surface-hover: #f5f5f5;
+  --tk-color-surface-subtle: #fafafc;
+  
+  --tk-color-text-primary: #1f2328;     /* FLOW Main Text */
+  --tk-color-text-secondary: #666666;   /* FLOW Secondary Text */
+  --tk-color-text-tertiary: #999999;    /* FLOW Muted Text */
+  --tk-color-text-inverse: #ffffff;
+
+  /* Accent & Action (FLOW Obsidian Dark & FLOW Brand Green) */
+  --tk-color-primary: #1f2328;          /* FLOW Dark Button */
+  --tk-color-primary-hover: #111827;
+  --tk-color-primary-active: #000000;
+  --tk-color-primary-light: #f3f4f6;
+  --tk-color-primary-surface: #ffffff;
+
+  /* Brand Green / Lime (FLOW Brand Tokens) */
+  --tk-color-brand-green: #00a650;
+  --tk-color-brand-lime: #B5F500;
+  --tk-color-brand-green-light: #e6f4ea;
+
+  /* Borders */
+  --tk-color-border: #e6e6e6;           /* FLOW standard border */
+  --tk-color-border-dark: #d9d9d9;
+  --tk-color-border-subtle: #f0f0f0;
+  --tk-color-border-focus: #1f2328;
+
+  /* Semantic Status */
+  --tk-color-success: #00a650;
+  --tk-color-success-bg: #e6f4ea;
+  --tk-color-warning: #f59e0b;
+  --tk-color-warning-bg: #fffbeb;
+  --tk-color-danger: #f23d4f;
+  --tk-color-danger-bg: #fef2f2;
+  --tk-color-neutral-badge: #f1f3f4;
+
+  /* ── Spacing Scale ── */
+  --tk-space-1: 4px;
+  --tk-space-1-5: 6px;
+  --tk-space-2: 8px;
+  --tk-space-3: 12px;
+  --tk-space-4: 16px;
+  --tk-space-5: 20px;
+  --tk-space-6: 24px;
+  --tk-space-8: 32px;
+  --tk-space-10: 40px;
+
+  /* ── Layout Containers & Respiro ── */
+  --tk-content-max-width: 1200px;
+
+  /* ── Shape & Border Radius (FLOW Card Radius) ── */
+  --tk-radius-sm: 6px;
+  --tk-radius-btn: 8px;
+  --tk-radius-card: 14px;
+  --tk-radius-lg: 16px;
+  --tk-radius-pill: 980px;
+
+  /* ── Shadows ── */
+  --tk-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.02);
+  --tk-shadow-hover: 0 3px 10px rgba(0, 0, 0, 0.04);
+  --tk-shadow-modal: 0 16px 36px rgba(0, 0, 0, 0.12);
+  --tk-shadow-dropdown: 0 8px 24px rgba(0, 0, 0, 0.06);
+}

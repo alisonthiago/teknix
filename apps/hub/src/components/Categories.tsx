@@ -2,16 +2,17 @@ import { useState, useEffect } from 'react'
 import { getCategories } from '../services/products'
 import { useInView } from '../hooks/useInView'
 import type { Category } from '../types/database'
+import { Zap, Wrench, Hammer, Disc, Layers, Folder } from 'lucide-react'
 import './Categories.css'
 
-const categoryIcons: Record<string, string> = {
-  'ferramentas-eletricas': '⚡',
-  'ferramentas-manuais': '🔧',
-  'furadeiras': '🔩',
-  'parafusadeiras': '🛠️',
-  'serras': '⚙️',
-  'kits': '📦',
-  'acessorios': '🎯',
+const categoryIcons: Record<string, React.ReactNode> = {
+  'ferramentas-eletricas': <Zap size={22} />,
+  'ferramentas-manuais': <Wrench size={22} />,
+  'furadeiras': <Hammer size={22} />,
+  'parafusadeiras': <Wrench size={22} />,
+  'serras': <Disc size={22} />,
+  'kits': <Layers size={22} />,
+  'acessorios': <Folder size={22} />,
 }
 
 export default function Categories() {
@@ -55,7 +56,7 @@ export default function Categories() {
                 {category.image_url ? (
                   <img src={category.image_url} alt={category.name} />
                 ) : (
-                  <span>{categoryIcons[category.slug || ''] || '📦'}</span>
+                  <span>{categoryIcons[category.slug || ''] || <Folder size={22} />}</span>
                 )}
               </div>
               <h3 className="category-name">{category.name}</h3>

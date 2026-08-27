@@ -1,3 +1,4 @@
+import { Zap, Shield, Truck } from 'lucide-react'
 import './About.css'
 
 export default function About() {
@@ -20,21 +21,21 @@ export default function About() {
             </p>
             <div className="about-values">
               <div className="value-item">
-                <span className="value-icon">⚡</span>
+                <span className="value-icon"><Zap size={20} /></span>
                 <div>
                   <h4>Performance</h4>
                   <p>Equipamentos que entregam resultado</p>
                 </div>
               </div>
               <div className="value-item">
-                <span className="value-icon">🛡️</span>
+                <span className="value-icon"><Shield size={20} /></span>
                 <div>
                   <h4>Garantia</h4>
                   <p>Produtos com garantia real</p>
                 </div>
               </div>
               <div className="value-item">
-                <span className="value-icon">🚚</span>
+                <span className="value-icon"><Truck size={20} /></span>
                 <div>
                   <h4>Entrega</h4>
                   <p>Logística eficiente para todo Brasil</p>

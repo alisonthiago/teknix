@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { getThemes, createTheme, deleteTheme } from '../services/pageBuilder'
 import type { Theme } from '../types/pageBuilder'
+import { Palette } from 'lucide-react'
 import './ThemesList.css'
 
 export default function ThemesList() {
@@ -57,8 +58,8 @@ export default function ThemesList() {
     <div className="themes-list-page">
       <div className="page-header">
         <div className="header-info">
-          <h2>Temas</h2>
-          <p>{themes.length} tema{themes.length !== 1 ? 's' : ''}</p>
+          <h1>Temas</h1>
+          <p>Personalize cores, tipografia e design tokens da loja TEKNIX.</p>
         </div>
         <div className="header-actions">
           <button className="btn btn-primary" onClick={handleCreate}>
@@ -97,7 +98,9 @@ export default function ThemesList() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="empty-state">
-          <div className="empty-icon">🎨</div>
+          <div className="empty-icon">
+            <Palette size={48} />
+          </div>
           <h3>Nenhum tema encontrado</h3>
           <p>Comece criando seu primeiro tema</p>
           <button className="btn btn-primary" onClick={handleCreate}>

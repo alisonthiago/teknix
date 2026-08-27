@@ -1,0 +1,626 @@
+/* ============================================================
+   ELEMENTOR MEDIA LIBRARY MODAL (Inserir Mídia 1:1 Oficial)
+   ============================================================ */
+
+.elementor-media-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: mediaModalFadeIn 0.15s ease-out;
+}
+
+@keyframes mediaModalFadeIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.elementor-media-modal {
+  background: #ffffff;
+  width: 95vw;
+  max-width: 1200px;
+  height: 85vh;
+  max-height: 800px;
+  border-radius: 6px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: #2c3338;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+/* Modal Header */
+.elementor-media-modal-header {
+  height: 52px;
+  border-bottom: 1px solid #dcdcde;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  background: #ffffff;
+  flex-shrink: 0;
+}
+
+.elementor-media-modal-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1d2327;
+  margin: 0;
+}
+
+.elementor-media-modal-close {
+  background: transparent;
+  border: none;
+  color: #646970;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s;
+}
+
+.elementor-media-modal-close:hover {
+  background: #f0f0f1;
+  color: #d63638;
+}
+
+/* Modal Body */
+.elementor-media-modal-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Left Sidebar (Ações) */
+.elementor-media-modal-sidebar {
+  width: 200px;
+  background: #f6f7f7;
+  border-right: 1px solid #dcdcde;
+  padding: 16px 0;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.elementor-media-sidebar-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #8c8f94;
+  padding: 0 16px 8px;
+  letter-spacing: 0.5px;
+}
+
+.elementor-media-sidebar-nav {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.elementor-media-sidebar-nav-item {
+  padding: 10px 16px;
+  font-size: 13px;
+  color: #2c3338;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.12s;
+  border-left: 4px solid transparent;
+}
+
+.elementor-media-sidebar-nav-item:hover {
+  background: #f0f0f1;
+  color: #2271b1;
+}
+
+.elementor-media-sidebar-nav-item.active {
+  background: #ffffff;
+  color: #2271b1;
+  font-weight: 600;
+  border-left-color: #2271b1;
+}
+
+/* Main Content Area */
+.elementor-media-modal-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+/* Sub-header tabs & search */
+.elementor-media-sub-header {
+  height: 48px;
+  border-bottom: 1px solid #dcdcde;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  flex-shrink: 0;
+}
+
+.elementor-media-tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.elementor-media-tab-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: #50575e;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.12s;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.elementor-media-tab-btn:hover {
+  color: #2271b1;
+}
+
+.elementor-media-tab-btn.active {
+  color: #2271b1;
+  border-bottom-color: #2271b1;
+  font-weight: 600;
+}
+
+.elementor-media-search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.elementor-media-search-label {
+  font-size: 12px;
+  color: #646970;
+}
+
+.elementor-media-search-input {
+  border: 1px solid #8c8f94;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  width: 180px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.elementor-media-search-input:focus {
+  border-color: #2271b1;
+  box-shadow: 0 0 0 1px #2271b1;
+}
+
+/* Content Container (Grid + Details Pane) */
+.elementor-media-content-container {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* Media Grid */
+.elementor-media-grid-wrapper {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.elementor-media-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 12px;
+}
+
+.elementor-media-card {
+  position: relative;
+  background: #f0f0f1;
+  border: 1px solid #dcdcde;
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: pointer;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.12s;
+}
+
+.elementor-media-card:hover {
+  border-color: #2271b1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.elementor-media-card.selected {
+  outline: 3px solid #2271b1;
+  border-color: #2271b1;
+}
+
+.elementor-media-card-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.elementor-media-card-check {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  background: #2271b1;
+  color: #ffffff;
+  border-radius: 3px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.elementor-media-card.selected .elementor-media-card-check {
+  display: flex;
+}
+
+.elementor-media-card-caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 3px 6px;
+  font-size: 10.5px;
+  color: #1d2327;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-top: 1px solid #e0e0e0;
+  font-weight: 500;
+}
+
+/* Right Details Sidebar */
+.elementor-media-details-sidebar {
+  width: 280px;
+  background: #f6f7f7;
+  border-left: 1px solid #dcdcde;
+  padding: 16px;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.elementor-media-details-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #646970;
+  margin: 0 0 12px;
+}
+
+.elementor-media-details-preview {
+  width: 100%;
+  max-height: 150px;
+  object-fit: contain;
+  background: #ffffff;
+  border: 1px solid #dcdcde;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+
+.elementor-media-details-meta {
+  font-size: 12px;
+  color: #646970;
+  line-height: 1.5;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #dcdcde;
+  padding-bottom: 12px;
+}
+
+.elementor-media-details-meta strong {
+  color: #1d2327;
+  display: block;
+  word-break: break-all;
+}
+
+.elementor-media-details-form-group {
+  margin-bottom: 10px;
+}
+
+.elementor-media-details-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #50575e;
+  margin-bottom: 4px;
+}
+
+.elementor-media-details-input {
+  width: 100%;
+  border: 1px solid #8c8f94;
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 12px;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.elementor-media-details-input:focus {
+  border-color: #2271b1;
+  box-shadow: 0 0 0 1px #2271b1;
+}
+
+.elementor-media-delete-btn {
+  background: transparent;
+  border: none;
+  color: #d63638;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px 0;
+  text-decoration: underline;
+  margin-top: 8px;
+  display: inline-block;
+}
+
+.elementor-media-delete-btn:hover {
+  color: #b32d2e;
+}
+
+/* Upload Tab / Drop Zone */
+.elementor-media-upload-zone {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  margin: 20px;
+  border: 2px dashed #c3c4c7;
+  border-radius: 8px;
+  background: #fbfbfb;
+  text-align: center;
+  transition: all 0.15s;
+}
+
+.elementor-media-upload-zone.drag-active {
+  border-color: #2271b1;
+  background: #f0f6fc;
+}
+
+.elementor-media-upload-icon {
+  color: #8c8f94;
+  margin-bottom: 16px;
+}
+
+.elementor-media-upload-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1d2327;
+  margin: 0 0 8px;
+}
+
+.elementor-media-upload-sub {
+  font-size: 13px;
+  color: #646970;
+  margin: 0 0 20px;
+}
+
+.elementor-media-select-files-btn {
+  background: #f6f7f7;
+  border: 1px solid #2271b1;
+  color: #2271b1;
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.elementor-media-select-files-btn:hover {
+  background: #f0f6fc;
+  border-color: #135e96;
+  color: #135e96;
+}
+
+.elementor-media-upload-limit {
+  font-size: 11px;
+  color: #8c8f94;
+  margin-top: 24px;
+}
+
+/* Insert from URL Tab */
+.elementor-media-url-container {
+  padding: 32px;
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.elementor-media-url-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #1d2327;
+}
+
+.elementor-media-url-input-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.elementor-media-url-input {
+  flex: 1;
+  border: 1px solid #8c8f94;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 13px;
+  outline: none;
+}
+
+.elementor-media-url-preview-box {
+  background: #f0f0f1;
+  border: 1px solid #dcdcde;
+  border-radius: 6px;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.elementor-media-url-preview-img {
+  max-width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+}
+
+/* Modal Footer */
+.elementor-media-modal-footer {
+  height: 56px;
+  border-top: 1px solid #dcdcde;
+  background: #ffffff;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.elementor-media-footer-info {
+  font-size: 12px;
+  color: #646970;
+}
+
+.elementor-media-submit-btn {
+  background: #2271b1;
+  color: #ffffff;
+  border: 1px solid #2271b1;
+  border-radius: 4px;
+  padding: 7px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.elementor-media-submit-btn:hover {
+  background: #135e96;
+  border-color: #135e96;
+}
+
+.elementor-media-submit-btn:disabled {
+  background: #dcdcde;
+  border-color: #dcdcde;
+  color: #a7aaad;
+  cursor: not-allowed;
+}
+
+/* ============================================================
+   INSPECTOR MEDIA PREVIEW CONTROL (Print 2 1:1)
+   ============================================================ */
+.elementor-control-media-box {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.elementor-control-media__preview {
+  width: 100%;
+  height: 120px;
+  background: #2f343b;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #3c434d;
+  transition: border-color 0.15s ease;
+}
+
+.elementor-control-media__preview:hover {
+  border-color: #5890ff;
+}
+
+.elementor-control-media__empty-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.elementor-control-media__preview:hover .elementor-control-media__empty-btn {
+  background: #5890ff;
+  border-color: #5890ff;
+  transform: scale(1.08);
+}
+
+.elementor-control-media__filled {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.elementor-control-media__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.elementor-control-media__overlay-actions {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.elementor-control-media__filled:hover .elementor-control-media__overlay-actions {
+  display: flex;
+}
+
+.elementor-control-media__action-btn {
+  background: rgba(255, 255, 255, 0.9);
+  color: #1d2327;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.elementor-control-media__action-btn:hover {
+  background: #ffffff;
+  color: #2271b1;
+}
+
+.elementor-control-media__action-btn.delete:hover {
+  color: #d63638;
+}

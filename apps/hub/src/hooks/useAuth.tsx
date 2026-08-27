@@ -18,10 +18,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
-      setLoading(false)
-    })
+    async function initAuth() {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session?.user) {
+        setUser(session.user)
+        setLoading(false)
+      } else if (import.meta.env.VITE_DEMO_MODE === 'true' || localStorage.getItem('demo_user_active') === 'true') {
+        // Automatically establish real Supabase session for demo user
+        const { data: signInData, error } = await supabase.auth.signInWithPassword({
+          email: 'teste@teste.com',
+          password: '123456'
+        })
+        if (!error && signInData.user) {
+          setUser(signInData.user)
+        }
+        setLoading(false)
+      } else {
+        setUser(null)
+        setLoading(false)
+      }
+    }
+
+    initAuth()
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
@@ -46,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function signIn(email: string, password: string) {
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password
     })
@@ -54,10 +72,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) {
       return { error: error.message }
     }
+    localStorage.removeItem('demo_user_active')
+    setUser(data.user)
     return {}
   }
 
   async function signOut() {
+    localStorage.removeItem('demo_user_active')
+    setUser(null)
     await supabase.auth.signOut()
   }
 

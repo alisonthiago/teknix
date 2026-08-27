@@ -1,0 +1,263 @@
+/* ============================================================
+   PUBLISH SETTINGS / DISPLAY CONDITIONS MODAL (CLEAN LIGHT THEME)
+   ============================================================ */
+
+.publish-settings-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(6px);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+}
+
+.publish-settings-modal {
+  width: 760px;
+  max-width: 92vw;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.14);
+  border: 1px solid #e5e5ea;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: psModalFadeIn 0.18s ease-out;
+}
+
+@keyframes psModalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Header */
+.ps-header {
+  height: 48px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e5ea;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 18px;
+}
+
+.ps-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ps-icon-badge {
+  width: 24px;
+  height: 24px;
+  background: #fdf2f8;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #db468e;
+}
+
+.ps-header-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #1d1d1f;
+  text-transform: uppercase;
+}
+
+.ps-btn-close {
+  background: none;
+  border: none;
+  color: #86868b;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+
+.ps-btn-close:hover {
+  color: #1d1d1f;
+  background: #f5f5f7;
+}
+
+/* Body */
+.ps-body {
+  padding: 38px 44px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: #fbfbfd;
+}
+
+.ps-center-icon {
+  width: 60px;
+  height: 60px;
+  background: #fdf2f8;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+.ps-title {
+  font-size: 21px;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin: 0 0 8px;
+  letter-spacing: -0.01em;
+}
+
+.ps-description {
+  font-size: 13px;
+  color: #6e6e73;
+  line-height: 1.5;
+  margin: 0 0 28px;
+  max-width: 560px;
+}
+
+/* Conditions list */
+.ps-conditions-list {
+  width: 100%;
+  max-width: 620px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.ps-condition-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  background: #ffffff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #e5e5ea;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.ps-select {
+  background: #ffffff;
+  border: 1px solid #d2d2d7;
+  color: #1d1d1f;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 5px;
+  outline: none;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.ps-select:focus {
+  border-color: #db468e;
+}
+
+.ps-select-type {
+  width: 105px;
+  font-weight: 600;
+  color: #00875a;
+}
+
+.ps-select-type option[value="exclude"] {
+  color: #de350b;
+}
+
+.ps-select-target {
+  flex: 1;
+}
+
+.ps-select-subtarget {
+  flex: 1.2;
+}
+
+.ps-select-specific {
+  flex: 1.2;
+}
+
+.ps-btn-remove-row {
+  background: none;
+  border: none;
+  color: #86868b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+
+.ps-btn-remove-row:hover {
+  color: #de350b;
+  background: rgba(222, 53, 11, 0.08);
+}
+
+/* Add condition button */
+.ps-add-condition-wrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.ps-btn-add-condition {
+  background: #ffffff;
+  border: 1px solid #d2d2d7;
+  color: #1d1d1f;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.ps-btn-add-condition:hover {
+  background: #f5f5f7;
+  border-color: #b0b0b8;
+}
+
+/* Footer */
+.ps-footer {
+  height: 54px;
+  background: #ffffff;
+  border-top: 1px solid #e5e5ea;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 24px;
+}
+
+.ps-btn-save-close {
+  background: #db468e;
+  border: none;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.ps-btn-save-close:hover {
+  background: #ea569e;
+}

@@ -4,9 +4,11 @@
   "version": "0.0.0",
   "description": "Ecossistema TEKNIX — Monorepo",
   "scripts": {
+    "dev": "turbo run dev",
     "dev:flow": "pnpm --filter @teknix/flow dev",
     "dev:hub": "pnpm --filter @teknix/hub dev",
     "dev:site": "pnpm --filter @teknix/site dev",
+    "build": "turbo run build",
     "build:flow": "pnpm --filter @teknix/flow build",
     "build:hub": "pnpm --filter @teknix/hub build",
     "build:site": "pnpm --filter @teknix/site build"

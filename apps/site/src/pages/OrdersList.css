@@ -1,0 +1,597 @@
+/* ==========================================================================
+   TEKNIX SITE — ORDERS LIST CSS (1:1 PADRÃO APPLE STORE)
+   Referência: https://secure8.store.apple.com/br/shop/order/list
+   ========================================================================== */
+
+.apple-orders-page {
+  background-color: #ffffff;
+  color: #1d1d1f;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  min-height: 100vh;
+  padding-bottom: 80px;
+}
+
+.apple-orders-container {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+/* ── Breadcrumb ── */
+.apple-orders-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 0 12px;
+  font-size: 12px;
+  color: #86868b;
+}
+
+.breadcrumb-link {
+  color: #1d1d1f;
+  text-decoration: none;
+}
+
+.breadcrumb-link:hover {
+  color: #0071e3;
+  text-decoration: underline;
+}
+
+.breadcrumb-sep {
+  color: #d2d2d7;
+}
+
+.breadcrumb-current {
+  color: #86868b;
+}
+
+/* ── Header ── */
+.apple-orders-header {
+  padding: 24px 0 36px;
+  border-bottom: 1px solid #e5e5ea;
+}
+
+.apple-orders-title {
+  font-size: 40px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: #1d1d1f;
+  margin: 0 0 12px 0;
+}
+
+.apple-orders-subtitle {
+  font-size: 17px;
+  color: #1d1d1f;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ── Loading ── */
+.apple-orders-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+  color: #86868b;
+  gap: 12px;
+}
+
+.apple-spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #d2d2d7;
+  border-top-color: #0071e3;
+  border-radius: 50%;
+  animation: appleSpin 0.8s linear infinite;
+}
+
+@keyframes appleSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Lista de Pedidos ── */
+.apple-orders-list-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 32px 0 40px;
+  border-bottom: 1px solid #e5e5ea;
+}
+
+.apple-order-tile {
+  background: #ffffff;
+  border: 1px solid #e5e5ea;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+}
+
+.apple-order-tile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f2f2f5;
+  margin-bottom: 16px;
+}
+
+.tile-order-num {
+  font-size: 17px;
+  font-weight: 600;
+  color: #1d1d1f;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.tile-order-date {
+  font-size: 13px;
+  color: #86868b;
+}
+
+.tile-status-badge {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 980px;
+  background: #ecfdf5;
+  color: #10b981;
+}
+
+.tile-status-badge.delivered {
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+.tile-status-badge.pending {
+  background: #fffbeb;
+  color: #d97706;
+}
+
+.apple-order-tile-items {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.apple-order-product-row {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  padding: 20px 0;
+  border-bottom: 1px solid #f2f2f5;
+}
+
+.apple-order-product-row:last-child {
+  border-bottom: none;
+}
+
+.product-image-box {
+  width: 180px;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.product-image-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.product-info-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.product-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.product-qty-price-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.product-qty-selector {
+  font-size: 15px;
+  color: #1d1d1f;
+  cursor: pointer;
+}
+
+.product-price {
+  font-size: 17px;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin: 0;
+}
+
+.product-details-toggle {
+  background: none;
+  border: none;
+  color: #0071e3;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+  font-family: inherit;
+  text-decoration: none;
+}
+
+.product-details-toggle:hover {
+  text-decoration: underline;
+}
+
+.product-remove-btn {
+  background: none;
+  border: none;
+  color: #0071e3;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+  font-family: inherit;
+  text-decoration: none;
+}
+
+.product-remove-btn:hover {
+  text-decoration: underline;
+}
+
+.apple-order-tile-shipping {
+  padding: 16px 0;
+  border-top: 1px solid #f2f2f5;
+}
+
+.shipping-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #6e6e73;
+}
+
+.shipping-row strong {
+  color: #1d1d1f;
+  font-weight: 500;
+}
+
+.shipping-dates {
+  font-size: 13px;
+  color: #6e6e73;
+  margin: 4px 0 0 22px;
+}
+
+.shipping-dates strong {
+  color: #1d1d1f;
+}
+
+.apple-order-tile-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid #f2f2f5;
+  font-size: 14px;
+  gap: 16px;
+}
+
+.footer-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.footer-summary-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  font-size: 14px;
+  color: #6e6e73;
+}
+
+.footer-summary-row strong {
+  color: #1d1d1f;
+  font-weight: 600;
+}
+
+.footer-total {
+  color: #6e6e73;
+}
+
+.footer-total strong {
+  color: #1d1d1f;
+  font-size: 16px;
+}
+
+.tracking-info {
+  font-size: 13px;
+  color: #0071e3;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tracking-info code {
+  background: #f5f5f7;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid #d2d2d7;
+  font-family: inherit;
+  font-weight: 600;
+}
+
+/* ── Ajuda com o Pedido ── */
+.apple-order-help-section {
+  padding: 40px 0 32px;
+  border-bottom: 1px solid #e5e5ea;
+}
+
+.apple-help-heading {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: #1d1d1f;
+  margin: 0 0 20px 0;
+}
+
+.apple-help-find-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+
+.help-text {
+  color: #1d1d1f;
+}
+
+.apple-help-link {
+  font-size: 14px;
+  color: #0071e3;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.apple-help-link:hover {
+  opacity: 0.8;
+}
+
+.apple-help-account-box {
+  margin-bottom: 28px;
+}
+
+.account-email-info {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin: 0 0 6px 0;
+}
+
+.account-note {
+  font-size: 13px;
+  color: #6e6e73;
+  line-height: 1.5;
+  max-width: 680px;
+  margin: 0;
+}
+
+.apple-help-phone-box {
+  font-size: 14px;
+  color: #1d1d1f;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.phone-link {
+  font-weight: 600;
+}
+
+/* ── Perguntas Frequentes Accordion ── */
+.apple-faq-section {
+  padding: 32px 0 40px;
+}
+
+.apple-faq-main-accordion {
+  border-bottom: 1px solid #e5e5ea;
+}
+
+.apple-faq-main-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: none;
+  border: none;
+  padding: 16px 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.apple-faq-main-title {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: #1d1d1f;
+  margin: 0;
+}
+
+.apple-faq-chevron {
+  color: #86868b;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.apple-faq-chevron.open {
+  transform: rotate(180deg);
+}
+
+.apple-faq-items-list {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 16px;
+}
+
+.apple-faq-item {
+  border-top: 1px solid #f2f2f5;
+}
+
+.apple-faq-question-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: none;
+  border: none;
+  padding: 18px 0;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+}
+
+.faq-question-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+.apple-faq-item-chevron {
+  color: #86868b;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+  margin-left: 16px;
+}
+
+.apple-faq-item-chevron.open {
+  transform: rotate(180deg);
+}
+
+.apple-faq-answer {
+  padding: 0 0 18px 0;
+  font-size: 14px;
+  color: #6e6e73;
+  line-height: 1.6;
+}
+
+.apple-faq-answer p {
+  margin: 0;
+}
+
+/* ── Modal Localizar Pedido ── */
+.apple-search-result-box {
+  background: #f5f5f7;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #1d1d1f;
+  margin-top: 4px;
+}
+
+.apple-search-result-box p {
+  margin: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .apple-orders-title {
+    font-size: 28px;
+  }
+  .apple-order-tile {
+    padding: 16px;
+    border-radius: 12px;
+  }
+  .apple-order-tile-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .apple-order-product-row {
+    flex-direction: column;
+    align-items: center;
+    text-align: left;
+    padding: 16px 0;
+  }
+  .product-image-box {
+    width: 240px;
+    height: 240px;
+    background: none;
+    margin-bottom: 16px;
+    align-self: center;
+  }
+  .product-info-box {
+    width: 100%;
+    align-items: stretch;
+  }
+  .product-title {
+    text-align: left;
+    font-size: 17px;
+    margin-bottom: 4px;
+  }
+  .product-qty-price-row {
+    justify-content: flex-start;
+    width: 100%;
+    margin-bottom: 12px;
+  }
+  .product-qty-selector {
+    font-size: 15px;
+    margin-right: auto;
+  }
+  .product-price {
+    font-size: 17px;
+  }
+  .product-links-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+  .product-details-toggle {
+    text-align: left;
+  }
+  .product-remove-btn {
+    text-align: right;
+  }
+  .apple-order-tile-shipping {
+    text-align: left;
+    padding: 16px 0;
+  }
+  .apple-order-tile-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .footer-summary {
+    width: 100%;
+  }
+  .footer-summary-row {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .footer-actions {
+    width: 100%;
+  }
+  .tracking-info {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}

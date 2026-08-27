@@ -194,6 +194,7 @@ export interface PageSection {
   hide_on_desktop: boolean
   hide_on_tablet: boolean
   hide_on_mobile: boolean
+  responsive: Record<string, Record<string, string>>
 
   animation_type: string
   animation_duration: string
@@ -203,9 +204,36 @@ export interface PageSection {
   custom_css: string
   custom_class: string
 
+  is_global?: boolean
+  global_ref_id?: string
+
   containers?: PageContainer[]
   created_at: string
   updated_at: string
+}
+
+export interface TransformStyle {
+  translate_x?: string
+  translate_y?: string
+  scale?: number
+  rotate?: number
+  skew_x?: number
+  skew_y?: number
+}
+
+export interface EffectsStyle {
+  opacity?: number
+  blur?: string
+  grayscale?: number
+  brightness?: number
+  contrast?: number
+  transition?: string
+}
+
+export interface ElementStates {
+  hover?: Record<string, any>
+  focus?: Record<string, any>
+  active?: Record<string, any>
 }
 
 // ============================================================
@@ -214,7 +242,18 @@ export interface PageSection {
 export interface PageContainer {
   id: string
   section_id: string
+  parent_container_id?: string
+  type: string
   order: number
+
+  display_type?: 'flex' | 'grid' | 'block'
+  content_width?: 'boxed' | 'full'
+  content_width_value?: string
+  content_width_unit?: 'px' | '%' | 'vw'
+  grid_columns?: string
+  grid_rows?: string
+  grid_gap?: string
+  grid_auto_flow?: string
 
   direction: string
   gap: string
@@ -241,19 +280,31 @@ export interface PageContainer {
   padding_right: string
   margin_top: string
   margin_bottom: string
+  margin_left?: string
+  margin_right?: string
 
   border: string
   border_color: string
   border_radius: string
   box_shadow: string
 
+  transform?: TransformStyle
+  effects?: EffectsStyle
+  states?: ElementStates
+  global_classes?: string[]
+
   hide_on_desktop: boolean
   hide_on_tablet: boolean
   hide_on_mobile: boolean
+  responsive: Record<string, Record<string, string>>
 
   custom_css: string
   custom_class: string
 
+  is_global?: boolean
+  global_ref_id?: string
+
+  children?: PageContainer[]
   widgets?: PageWidget[]
   created_at: string
   updated_at: string
@@ -339,11 +390,20 @@ export interface PageWidget {
   // Advanced
   custom_css: string
   custom_class: string
-  html_id: string
-  aria_label: string
+  html_id?: string
+  aria_label?: string
 
   // Hover
-  hover: WidgetHover
+  hover?: WidgetHover
+
+  // Transform, Effects & States
+  transform?: TransformStyle
+  effects?: EffectsStyle
+  states?: ElementStates
+  global_classes?: string[]
+
+  is_global?: boolean
+  global_ref_id?: string
 
   created_at: string
   updated_at: string
@@ -687,79 +747,161 @@ export interface WidgetDefinition {
 
 export type WidgetCategory =
   | 'basic'
-  | 'layout'
-  | 'media'
-  | 'content'
+  | 'pro'
+  | 'general'
+  | 'site'
   | 'commerce'
-  | 'navigation'
-  | 'form'
-  | 'advanced'
+  | 'elementor-pro'
 
 export const WIDGET_CATEGORIES: { key: WidgetCategory; label: string }[] = [
-  { key: 'basic', label: 'Básicos' },
-  { key: 'layout', label: 'Layout' },
-  { key: 'media', label: 'Mídia' },
-  { key: 'content', label: 'Conteúdo' },
-  { key: 'commerce', label: 'E-commerce' },
-  { key: 'navigation', label: 'Navegação' },
-  { key: 'form', label: 'Formulários' },
-  { key: 'advanced', label: 'Avançado' },
+  { key: 'basic', label: 'Básico' },
+  { key: 'pro', label: 'Pro' },
+  { key: 'general', label: 'Geral' },
+  { key: 'site', label: 'Site & Header/Footer' },
+  { key: 'commerce', label: 'Loja TEKNIX / WooCommerce' },
+  { key: 'elementor-pro', label: 'Elementor Pro (Desbloqueado)' },
 ]
 
 export const WIDGET_DEFINITIONS: WidgetDefinition[] = [
-  // Basic
+  // ── BÁSICO (Elementor Core Basic) ──
   { type: 'heading', label: 'Título', icon: 'H', category: 'basic' },
-  { type: 'text', label: 'Texto', icon: 'T', category: 'basic' },
+  { type: 'text', label: 'Editor de Texto', icon: 'T', category: 'basic' },
+  { type: 'image', label: 'Imagem', icon: 'IMG', category: 'basic' },
+  { type: 'video', label: 'Vídeo', icon: '▶', category: 'basic' },
   { type: 'button', label: 'Botão', icon: '▣', category: 'basic' },
-  { type: 'icon', label: 'Ícone', icon: '★', category: 'basic' },
+  { type: 'starRating', label: 'Avaliação Estrelas', icon: '★', category: 'basic' },
   { type: 'divider', label: 'Divisor', icon: '—', category: 'basic' },
-  { type: 'spacer', label: 'Espaço', icon: '↕', category: 'basic' },
+  { type: 'spacer', label: 'Espaçador', icon: '↕', category: 'basic' },
+  { type: 'googleMaps', label: 'Google Maps', icon: 'MAP', category: 'basic' },
+  { type: 'icon', label: 'Ícone', icon: '✦', category: 'basic' },
 
-  // Layout
-  { type: 'columns', label: 'Colunas', icon: '▥', category: 'layout' },
-  { type: 'grid', label: 'Grid', icon: '⊞', category: 'layout' },
-  { type: 'tabs', label: 'Abas', icon: '☰', category: 'layout' },
-  { type: 'accordion', label: 'Accordion', icon: '≡', category: 'layout' },
-  { type: 'toggle', label: 'Toggle', icon: '◎', category: 'layout' },
+  // ── PRO (Elementor Pro Core) ──
+  { type: 'gallery', label: 'Galeria Pro', icon: 'GAL', category: 'pro' },
+  { type: 'form', label: 'Formulário Pro', icon: '▭', category: 'pro' },
+  { type: 'login', label: 'Login', icon: 'USR', category: 'pro' },
+  { type: 'animatedHeadline', label: 'Título Animado', icon: '✎', category: 'pro' },
+  { type: 'priceList', label: 'Lista de Preços', icon: '≡$', category: 'pro' },
+  { type: 'priceTable', label: 'Tabela de Preços', icon: '$', category: 'pro' },
+  { type: 'flipBox', label: 'Flip Box 3D', icon: '⇄', category: 'pro' },
+  { type: 'cta', label: 'Call to Action', icon: '◉', category: 'pro' },
+  { type: 'mediaCarousel', label: 'Carrossel de Mídia', icon: '❖', category: 'pro' },
+  { type: 'testimonialCarousel', label: 'Carrossel Depoimentos', icon: '❝', category: 'pro' },
+  { type: 'reviews', label: 'Avaliações / Reviews', icon: '★', category: 'pro' },
+  { type: 'tableOfContents', label: 'Índice de Conteúdo', icon: '≣', category: 'pro' },
+  { type: 'countdown', label: 'Contador Regressivo', icon: '00:00', category: 'pro' },
+  { type: 'shareButtons', label: 'Compartilhar', icon: '⇪', category: 'pro' },
+  { type: 'quote', label: 'Citação em Bloco', icon: '❝', category: 'pro' },
+  { type: 'lottie', label: 'Lottie Animação', icon: '✦', category: 'pro' },
+  { type: 'code', label: 'Code Highlight', icon: '{ }', category: 'pro' },
+  { type: 'videoPlaylist', label: 'Playlist de Vídeo', icon: '▶▶', category: 'pro' },
+  { type: 'hotspot', label: 'Hotspot Interativo', icon: '⊕', category: 'pro' },
 
-  // Media
-  { type: 'image', label: 'Imagem', icon: '🖼', category: 'media' },
-  { type: 'gallery', label: 'Galeria', icon: '🎨', category: 'media' },
-  { type: 'carousel', label: 'Carrossel', icon: '🎠', category: 'media' },
-  { type: 'video', label: 'Vídeo', icon: '▶', category: 'media' },
-  { type: 'imageText', label: 'Imagem + Texto', icon: '⇚', category: 'media' },
+  // ── GERAL (Elementor General) ──
+  { type: 'imageBox', label: 'Caixa de Imagem', icon: 'IMG', category: 'general' },
+  { type: 'iconBox', label: 'Caixa de Ícone', icon: '◫', category: 'general' },
+  { type: 'carousel', label: 'Carrossel de Imagens', icon: 'CAR', category: 'general' },
+  { type: 'list', label: 'Lista de Ícones', icon: '•', category: 'general' },
+  { type: 'counter', label: 'Contador', icon: '123', category: 'general' },
+  { type: 'progressBar', label: 'Barra de Progresso', icon: '▰▰', category: 'general' },
+  { type: 'testimonials', label: 'Depoimento', icon: '❝', category: 'general' },
+  { type: 'tabs', label: 'Abas / Tabs', icon: '☰', category: 'general' },
+  { type: 'accordion', label: 'Acordeão', icon: '≡', category: 'general' },
+  { type: 'toggle', label: 'Alternador / Toggle', icon: '◎', category: 'general' },
+  { type: 'alert', label: 'Alerta / Aviso', icon: '!', category: 'general' },
+  { type: 'features', label: 'Recursos / Features', icon: '★', category: 'general' },
+  { type: 'specifications', label: 'Especificações', icon: '☰', category: 'general' },
+  { type: 'comparison', label: 'Comparação', icon: 'VS', category: 'general' },
+  { type: 'table', label: 'Tabela Comparativa', icon: '▦', category: 'general' },
+  { type: 'steps', label: 'Passos / Steps', icon: '1-2', category: 'general' },
+  { type: 'html', label: 'HTML Customizado', icon: '<>', category: 'general' },
+  { type: 'embed', label: 'Embed de Mídia', icon: '⧉', category: 'general' },
 
-  // Content
-  { type: 'cta', label: 'CTA', icon: '◉', category: 'content' },
-  { type: 'banner', label: 'Banner', icon: '▬', category: 'content' },
-  { type: 'faq', label: 'FAQ', icon: '?', category: 'content' },
-  { type: 'testimonials', label: 'Depoimentos', icon: '❝', category: 'content' },
-  { type: 'specifications', label: 'Especificações', icon: '☰', category: 'content' },
-  { type: 'comparison', label: 'Comparação', icon: '⚖', category: 'content' },
-  { type: 'table', label: 'Tabela', icon: '▦', category: 'content' },
-  { type: 'list', label: 'Lista', icon: '•', category: 'content' },
-  { type: 'quote', label: 'Citação', icon: '❝', category: 'content' },
-  { type: 'steps', label: 'Passos', icon: '①', category: 'content' },
+  // ── SITE & NAVEGAÇÃO ──
+  { type: 'menu', label: 'Menu de Navegação', icon: '≡', category: 'site' },
+  { type: 'breadcrumb', label: 'Breadcrumb (Trilha)', icon: '›', category: 'site' },
+  { type: 'search', label: 'Busca ao Vivo', icon: 'SRC', category: 'site' },
+  { type: 'banner', label: 'Banner Promocional', icon: '▬', category: 'site' },
+  { type: 'newsletter', label: 'Newsletter / Leads', icon: '@', category: 'site' },
 
-  // Commerce
-  { type: 'product', label: 'Produto', icon: '▣', category: 'commerce' },
+  // ── LOJA TEKNIX / WOOCOMMERCE ──
+  { type: 'product', label: 'Card de Produto', icon: '▣', category: 'commerce' },
+  { type: 'productHero', label: 'Produto Destaque Hero', icon: '★', category: 'commerce' },
   { type: 'productGrid', label: 'Grade de Produtos', icon: '⊞', category: 'commerce' },
-  { type: 'productHero', label: 'Produto Hero', icon: '★', category: 'commerce' },
-  { type: 'categories', label: 'Categorias', icon: '▦', category: 'commerce' },
-  { type: 'price', label: 'Preço', icon: '$', category: 'commerce' },
-  { type: 'buyButton', label: 'Botão Comprar', icon: '🛒', category: 'commerce' },
+  { type: 'categories', label: 'Grade de Categorias', icon: '▦', category: 'commerce' },
+  { type: 'price', label: 'Preço Dinâmico', icon: '$', category: 'commerce' },
+  { type: 'buyButton', label: 'Botão Comprar / Checkout', icon: 'BUY', category: 'commerce' },
   { type: 'relatedProducts', label: 'Produtos Relacionados', icon: '↻', category: 'commerce' },
 
-  // Navigation
-  { type: 'menu', label: 'Menu', icon: '≡', category: 'navigation' },
-  { type: 'breadcrumb', label: 'Breadcrumb', icon: '›', category: 'navigation' },
+  // ── ELEMENTOR PRO (Desbloqueado — 70+ widgets) ──
+  // Layout & Structure
+  { type: 'containerPro', label: 'Container Pro', icon: '▢', category: 'elementor-pro' },
+  { type: 'nestedCarousel', label: 'Carrossel Aninhado', icon: '◈', category: 'elementor-pro' },
+  { type: 'loopGrid', label: 'Grid Dinâmico (Loop)', icon: '⊞', category: 'elementor-pro' },
 
-  // Form
-  { type: 'form', label: 'Formulário', icon: '▭', category: 'form' },
-  { type: 'newsletter', label: 'Newsletter', icon: '✉', category: 'form' },
+  // Navigation
+  { type: 'navMenu', label: 'Menu de Navegação Pro', icon: '☰', category: 'elementor-pro' },
+  { type: 'megaMenu', label: 'Mega Menu', icon: '⊞', category: 'elementor-pro' },
+  { type: 'breadcrumbsPro', label: 'Breadcrumb Pro', icon: '›', category: 'elementor-pro' },
+
+  // Posts & Content
+  { type: 'posts', label: 'Posts Dinâmicos', icon: '▦', category: 'elementor-pro' },
+  { type: 'portfolio', label: 'Portfólio', icon: '◫', category: 'elementor-pro' },
+  { type: 'slides', label: 'Slides / Slideshow', icon: '▶', category: 'elementor-pro' },
+  { type: 'imageGalleryPro', label: 'Galeria de Imagens Pro', icon: 'GAL', category: 'elementor-pro' },
+
+  // Theme Builder
+  { type: 'siteLogo', label: 'Logo do Site', icon: '◉', category: 'elementor-pro' },
+  { type: 'siteTitle', label: 'Título do Site', icon: 'H', category: 'elementor-pro' },
+  { type: 'pageTitle', label: 'Título da Página', icon: 'H', category: 'elementor-pro' },
+  { type: 'postTitle', label: 'Título do Post', icon: 'H', category: 'elementor-pro' },
+  { type: 'postContent', label: 'Conteúdo do Post', icon: 'T', category: 'elementor-pro' },
+  { type: 'postExcerpt', label: 'Resumo do Post', icon: '≡', category: 'elementor-pro' },
+  { type: 'featuredImage', label: 'Imagem Destaque', icon: 'IMG', category: 'elementor-pro' },
+  { type: 'postInfo', label: 'Info do Post (data/autor)', icon: 'i', category: 'elementor-pro' },
+  { type: 'postNavigation', label: 'Navegação entre Posts', icon: '⇄', category: 'elementor-pro' },
+  { type: 'authorBox', label: 'Box do Autor', icon: 'USR', category: 'elementor-pro' },
+  { type: 'searchForm', label: 'Formulário de Busca', icon: 'SRC', category: 'elementor-pro' },
+
+  // Forms & Login
+  { type: 'formPro', label: 'Formulário Pro (mais campos)', icon: '▭', category: 'elementor-pro' },
+  { type: 'loginPro', label: 'Login Pro', icon: 'USR', category: 'elementor-pro' },
+
+  // Social & Sharing
+  { type: 'socialIcons', label: 'Ícones Sociais', icon: '★', category: 'elementor-pro' },
+  { type: 'shareButtonsPro', label: 'Botões de Compartilhar', icon: '⇪', category: 'elementor-pro' },
+
+  // Media & Embed
+  { type: 'mediaCarouselPro', label: 'Carrossel de Mídia Pro', icon: '❖', category: 'elementor-pro' },
+  { type: 'testimonialCarouselPro', label: 'Carrossel de Depoimentos Pro', icon: '❝', category: 'elementor-pro' },
+  { type: 'postsCarousel', label: 'Carrossel de Posts', icon: '↻', category: 'elementor-pro' },
+
+  // Payments
+  { type: 'paypalButton', label: 'Botão PayPal', icon: '$', category: 'elementor-pro' },
+  { type: 'stripeButton', label: 'Botão Stripe', icon: '$', category: 'elementor-pro' },
 
   // Advanced
-  { type: 'html', label: 'HTML', icon: '<>', category: 'advanced' },
-  { type: 'embed', label: 'Embed', icon: '⧉', category: 'advanced' },
-  { type: 'code', label: 'Código', icon: '{ }', category: 'advanced' },
+  { type: 'offCanvas', label: 'Off Canvas', icon: '◧', category: 'elementor-pro' },
+  { type: 'sticky', label: 'Sticky (Fixo ao Scroll)', icon: 'PIN', category: 'elementor-pro' },
+  { type: 'progressTracker', label: 'Barra de Progresso Pro', icon: '▰', category: 'elementor-pro' },
+  { type: 'pageTransitions', label: 'Transições de Página', icon: '⟳', category: 'elementor-pro' },
+  { type: 'customCodePro', label: 'Código Customizado Pro', icon: '<>', category: 'elementor-pro' },
+  { type: 'customCssPro', label: 'CSS Customizado Pro', icon: '{}', category: 'elementor-pro' },
+  { type: 'displayConditions', label: 'Condições de Exibição', icon: 'EYE', category: 'elementor-pro' },
+  { type: 'floatingButtons', label: 'Botões Flutuantes', icon: 'MSG', category: 'elementor-pro' },
+  { type: 'linkInBio', label: 'Link in Bio', icon: 'LNK', category: 'elementor-pro' },
+  { type: 'tableOfContentsPro', label: 'Índice de Conteúdo Pro', icon: '≣', category: 'elementor-pro' },
+  { type: 'codeHighlightPro', label: 'Code Highlight Pro', icon: '{}', category: 'elementor-pro' },
+  { type: 'lottiePro', label: 'Lottie Pro', icon: '✦', category: 'elementor-pro' },
+  { type: 'googleMapsPro', label: 'Google Maps Pro', icon: 'MAP', category: 'elementor-pro' },
+  { type: 'countdownPro', label: 'Contador Regressivo Pro', icon: '00:00', category: 'elementor-pro' },
+  { type: 'ctaPro', label: 'Call to Action Pro', icon: '◉', category: 'elementor-pro' },
+  { type: 'flipBoxPro', label: 'Flip Box 3D Pro', icon: '⇄', category: 'elementor-pro' },
+  { type: 'priceTablePro', label: 'Tabela de Preços Pro', icon: '$', category: 'elementor-pro' },
+  { type: 'priceListPro', label: 'Lista de Preços Pro', icon: '≡$', category: 'elementor-pro' },
+  { type: 'animatedHeadlinePro', label: 'Título Animado Pro', icon: '✎', category: 'elementor-pro' },
+  { type: 'reviewsPro', label: 'Avaliações Pro', icon: '★', category: 'elementor-pro' },
+  { type: 'shareButtonsEl', label: 'Compartilhar Pro', icon: '⇪', category: 'elementor-pro' },
+  { type: 'subscribe', label: 'Inscreva-se / Subscribe', icon: '@', category: 'elementor-pro' },
+  { type: 'paypal', label: 'PayPal Checkout', icon: '$', category: 'elementor-pro' },
+  { type: 'stripe', label: 'Stripe Checkout', icon: 'CRD', category: 'elementor-pro' },
 ]

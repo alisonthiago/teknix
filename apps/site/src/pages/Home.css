@@ -1,0 +1,430 @@
+/* ==========================================================================
+   APPLE HOME CSS — 1:1 REPRODUÇÃO OFICIAL EDITORIAL
+   ========================================================================== */
+
+.apple-home-root {
+  background-color: #f5f5f7;
+  color: #1d1d1f;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* ── TOP ANNOUNCEMENT RIBBON ── */
+.section-ribbon {
+  background: #fbfbfd;
+  border-bottom: 1px solid #d2d2d7;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.4;
+  padding: 12px 16px;
+  color: #1d1d1f;
+}
+
+.ribbon-content-wrapper {
+  max-width: 1024px;
+  margin: 0 auto;
+}
+
+.ribbon-content span {
+  color: #1d1d1f;
+}
+
+.ribbon-link {
+  color: #0066cc;
+  text-decoration: none;
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+.ribbon-link:hover {
+  text-decoration: underline;
+}
+
+/* ── HERO SECTIONS (FULL BLEED HERO TILES) ── */
+.section-hero {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.tile-wrapper {
+  position: relative;
+  height: 650px;
+  overflow: hidden;
+  background-color: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: center;
+}
+
+.tile-hero-mac-mini {
+  background-color: #fbfbfd;
+  color: #1d1d1f;
+}
+
+.tile-hero-mac-studio {
+  background-color: #f5f5f7;
+  color: #1d1d1f;
+}
+
+.tile-hero-bts {
+  background-color: #fbfbfd;
+  color: #1d1d1f;
+}
+
+.tile-link-cover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+}
+
+.tile-content {
+  position: relative;
+  z-index: 3;
+  padding-top: 55px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.typography-hero-headline {
+  font-size: 56px;
+  line-height: 1.07143;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  margin: 0 0 6px;
+  color: inherit;
+}
+
+.typography-hero-subhead {
+  font-size: 28px;
+  line-height: 1.14286;
+  font-weight: 400;
+  letter-spacing: .007em;
+  margin: 0 0 8px;
+  max-width: 600px;
+  color: inherit;
+}
+
+.typography-hero-callout {
+  font-size: 19px;
+  line-height: 1.21053;
+  font-weight: 400;
+  color: #6e6e73;
+  margin: 0 0 16px;
+}
+
+.tile-ctas {
+  display: flex;
+  gap: 14px;
+  margin-top: 14px;
+  z-index: 4;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  line-height: 1.17648;
+  font-weight: 400;
+  letter-spacing: -0.022em;
+  padding: 8px 16px;
+  border-radius: 980px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.button-primary {
+  background-color: #0071e3;
+  color: #ffffff;
+  border: 1px solid transparent;
+}
+
+.button-primary:hover {
+  background-color: #0077ed;
+}
+
+.button-secondary {
+  background-color: transparent;
+  color: #0071e3;
+  border: 1px solid #0071e3;
+}
+
+.button-secondary:hover {
+  background-color: #0071e3;
+  color: #ffffff;
+}
+
+.tile-image-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.hero-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center bottom;
+}
+
+/* ── PROMO SECTION (2x2 GRID) ── */
+.section-promo {
+  max-width: 100%;
+  margin: 0 auto 12px;
+  padding: 0 12px;
+  box-sizing: border-box;
+}
+
+.promo-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.promo-tile {
+  height: 580px;
+  background-color: #ffffff;
+  color: #1d1d1f;
+  border-radius: 18px;
+  position: relative;
+  overflow: hidden;
+}
+
+.promo-tile.theme-dark {
+  background-color: #000000;
+  color: #f5f5f7;
+}
+
+.typography-promo-headline {
+  font-size: 40px;
+  line-height: 1.1;
+  font-weight: 600;
+  letter-spacing: -0.003em;
+  margin: 0 0 6px;
+  color: inherit;
+}
+
+.typography-promo-subhead {
+  font-size: 19px;
+  line-height: 1.21053;
+  font-weight: 400;
+  margin: 0 0 12px;
+  max-width: 380px;
+  color: inherit;
+  opacity: 0.9;
+}
+
+.promo-tile .tile-image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ── ENDLESS ENTERTAINMENT GALLERY ── */
+.section-endless-entertainment-gallery {
+  background-color: #ffffff;
+  padding: 60px 0 80px;
+  overflow: hidden;
+}
+
+.endless-entertainment-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.media-gallery-headline-container {
+  margin-bottom: 24px;
+}
+
+.media-gallery-headline {
+  font-size: 44px;
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #1d1d1f;
+  margin: 0;
+}
+
+.media-gallery-dotnav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.media-gallery-dotnav-items {
+  display: flex;
+  gap: 12px;
+}
+
+.media-gallery-dotnav-btn {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: none;
+  background-color: #d2d2d7;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.media-gallery-dotnav-btn.active {
+  width: 32px;
+  border-radius: 980px;
+  background-color: #1d1d1f;
+}
+
+.media-gallery-play-btn {
+  background: #f5f5f7;
+  border: 1px solid #d2d2d7;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #1d1d1f;
+  transition: background-color 0.2s;
+}
+
+.media-gallery-play-btn:hover {
+  background: #e8e8ed;
+}
+
+.entertainment-carousel-viewport {
+  overflow: hidden;
+  border-radius: 24px;
+  background-color: #000;
+}
+
+.entertainment-carousel-track {
+  display: flex;
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.entertainment-card-slide {
+  flex: 0 0 100%;
+  min-width: 100%;
+}
+
+.entertainment-card {
+  position: relative;
+  height: 520px;
+  display: flex;
+  align-items: flex-end;
+  padding: 48px;
+  box-sizing: border-box;
+}
+
+.entertainment-bg-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+.entertainment-overlay-scrim {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.85) 100%);
+  z-index: 2;
+}
+
+.entertainment-card-content {
+  position: relative;
+  z-index: 3;
+  color: #ffffff;
+  max-width: 600px;
+}
+
+.entertainment-badge {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #00ff88;
+  margin-bottom: 8px;
+}
+
+.entertainment-title {
+  font-size: 40px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 8px;
+}
+
+.entertainment-desc {
+  font-size: 17px;
+  line-height: 1.4;
+  opacity: 0.9;
+  margin: 0 0 20px;
+}
+
+.entertainment-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  color: #1d1d1f;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 24px;
+  border-radius: 980px;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.entertainment-cta-btn:hover {
+  opacity: 0.9;
+}
+
+/* ── RESPONSIVE DESIGN ── */
+@media (max-width: 900px) {
+  .promo-grid {
+    grid-template-columns: 1fr;
+  }
+  .typography-hero-headline {
+    font-size: 40px;
+  }
+  .typography-hero-subhead {
+    font-size: 21px;
+  }
+  .tile-wrapper {
+    height: 520px;
+  }
+  .promo-tile {
+    height: 480px;
+  }
+  .entertainment-card {
+    height: 440px;
+    padding: 24px;
+  }
+  .entertainment-title {
+    font-size: 28px;
+  }
+}

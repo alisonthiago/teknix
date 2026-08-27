@@ -1,0 +1,255 @@
+/* ============================================================
+   TEKNIX HUB — MEIOS DE PAGAMENTO (Nuvemshop-inspired layout)
+   ============================================================ */
+
+.payments-page-container {
+  min-height: 100vh;
+  background: #f5f5f7;
+  padding: 24px 20px 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.payments-wrapper {
+  width: 100%;
+  max-width: 820px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Header */
+.payments-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.payments-title {
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.payments-subtitle {
+  font-size: 0.88rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* Tabs */
+.payments-tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 2px;
+}
+
+.payment-tab-btn {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 8px 16px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s;
+}
+
+.payment-tab-btn:hover {
+  color: #111827;
+}
+
+.payment-tab-btn.active {
+  color: #111827;
+  border-bottom-color: #111827;
+}
+
+.tab-badge {
+  background: #e5e7eb;
+  color: #374151;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 10px;
+}
+
+/* Gateway Cards */
+.gateways-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.gateway-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 22px 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: border-color 0.15s;
+}
+
+.gateway-card:hover {
+  border-color: #d1d5db;
+}
+
+.gateway-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.gateway-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.gateway-logo-box {
+  width: 96px;
+  height: 38px;
+  border-radius: 6px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+.gateway-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.badge-featured {
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.badge-status {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.badge-status.active {
+  background: #e6f9f0;
+  color: #059669;
+}
+
+.badge-status.inactive {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+/* Features checklist */
+.gateway-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 0.8rem;
+  color: #4b5563;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Rates & Terms Table */
+.gateway-rates-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 4px;
+}
+
+.gateway-rates-table th {
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  padding: 6px 8px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.gateway-rates-table td {
+  padding: 8px;
+  font-size: 0.85rem;
+  color: #1f2937;
+  border-bottom: 1px solid #f9fafb;
+}
+
+.gateway-card-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 8px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.gateway-link {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #2563eb;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.gateway-link:hover {
+  text-decoration: underline;
+}
+
+.btn-activate {
+  padding: 8px 20px;
+  border-radius: 8px;
+  background: #111827;
+  color: #ffffff;
+  border: none;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-activate:hover {
+  background: #1f2937;
+}
+
+.btn-configure {
+  padding: 8px 18px;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-configure:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}

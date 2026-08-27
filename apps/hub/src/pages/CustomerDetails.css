@@ -1,0 +1,94 @@
+.customer-details-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.customer-title-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.customer-avatar-large {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #1a1a2e;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 24px;
+}
+
+.customer-title-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.customer-title-text h2 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.customer-since {
+  color: #666;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.btn-success {
+  background: #25d366;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-success:hover {
+  background: #128c7e;
+  transform: translateY(-1px);
+}
+
+/* Metrics Row */
+.metrics-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.metric-card {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e5e5e5;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.metric-title {
+  color: #666;
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metric-value {
+  color: #1a1a2e;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+/* Customer Grid */
+.customer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+  align-items: start;
+}

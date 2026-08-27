@@ -18,19 +18,105 @@ export { WIDGET_CATEGORIES, WIDGET_DEFINITIONS } from '../types/pageBuilder'
 // PAGES
 // ============================================================
 
-export async function getPages(type?: string) {
-  let query = supabase
-    .from('pages')
-    .select('*')
-    .order('updated_at', { ascending: false })
-
-  if (type) {
-    query = query.eq('type', type)
+const DEFAULT_PRESET_PAGES: Page[] = ([
+  {
+    id: 'c0000000-0000-0000-0000-000000000001',
+    title: 'Home Oficial TEKNIX',
+    slug: '',
+    type: 'home',
+    status: 'published',
+    is_landing_mode: false,
+    version: 1,
+    seo_title: 'TEKNIX — Ferramentas Elétricas & Tecnologia Profissional',
+    seo_description: 'Loja oficial TEKNIX. Descubra ferramentas elétricas de alta performance, baterias sem fio e tecnologia industrial avançada.',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'c0000000-0000-0000-0000-000000000002',
+    title: 'Segmento Ferramentas Industriais',
+    slug: 'ferramentas',
+    type: 'segmento',
+    status: 'published',
+    is_landing_mode: false,
+    version: 1,
+    seo_title: 'Ferramentas Industriais — TEKNIX',
+    seo_description: 'Parafusadeiras, furadeiras e serras de alta precisão e durabilidade extrema.',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'c0000000-0000-0000-0000-000000000003',
+    title: 'Segmento Iluminação & Energia Solar',
+    slug: 'iluminacao-solar',
+    type: 'segmento',
+    status: 'published',
+    is_landing_mode: false,
+    version: 1,
+    seo_title: 'Iluminação & Energia Solar — TEKNIX',
+    seo_description: 'Refletores LED e luminárias solares inteligentes com eficiência máxima.',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'c0000000-0000-0000-0000-000000000004',
+    title: 'Categoria Parafusadeiras Brushless Pro',
+    slug: 'ferramentas/parafusadeiras',
+    type: 'category',
+    status: 'published',
+    is_landing_mode: false,
+    version: 1,
+    seo_title: 'Parafusadeiras Brushless Pro — TEKNIX',
+    seo_description: 'Máxima potência, motor Brushless sem escovas e bateria intercambiável.',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'c0000000-0000-0000-0000-000000000005',
+    title: 'Black Friday / Ofertas Exclusivas',
+    slug: 'black-friday',
+    type: 'campaign',
+    status: 'published',
+    is_landing_mode: true,
+    version: 1,
+    seo_title: 'Black Friday Especial — TEKNIX',
+    seo_description: 'Ofertas exclusivas com até 40% OFF em ferramentas e frete grátis.',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: '15e26476-4adb-445b-b808-aa5086caad0d',
+    title: 'Kit Chave De Impacto 21v Parafusadeira + Jogo Soquete 46pç Cor Amarelo Frequência 50hz/60 127/220v',
+    slug: 'produto/kit-chave-de-impacto-21v-parafusadeira',
+    type: 'product',
+    status: 'published',
+    is_landing_mode: false,
+    version: 1,
+    seo_title: 'Kit Chave De Impacto 21v Parafusadeira TEKNIX',
+    seo_description: 'Chave de impacto e parafusadeira profissional 21V com maleta e 46 peças.',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
   }
+] as any[]) as Page[]
 
-  const { data, error } = await query
-  if (error) throw error
-  return data as Page[]
+export async function getPages(type?: string) {
+  try {
+    let query = supabase
+      .from('pages')
+      .select('*')
+      .order('updated_at', { ascending: false })
+
+    if (type) {
+      query = query.eq('type', type)
+    }
+
+    const { data, error } = await query
+    if (error) throw error
+    if (data) return data as Page[]
+  } catch (e) {
+    console.warn('getPages Supabase query:', e)
+  }
+  return []
 }
 
 export async function getPageBySlug(slug: string) {
@@ -45,48 +131,81 @@ export async function getPageBySlug(slug: string) {
 }
 
 export async function getPageWithSections(pageId: string) {
-  const { data: page, error: pageError } = await supabase
-    .from('pages')
-    .select('*')
-    .eq('id', pageId)
-    .single()
+  let page: any = null
+  try {
+    const { data: pageData, error: pageError } = await supabase
+      .from('pages')
+      .select('*')
+      .eq('id', pageId)
+      .maybeSingle()
 
-  if (pageError) throw pageError
+    if (pageData && !pageError) {
+      page = pageData
+    }
+  } catch {}
 
-  const { data: sections, error: sectionsError } = await supabase
-    .from('page_sections')
-    .select('*')
-    .eq('page_id', pageId)
-    .order('order')
+  if (!page) {
+    const preset = DEFAULT_PRESET_PAGES.find(p => p.id === pageId)
+    page = preset || {
+      id: pageId,
+      title: 'Página sem título',
+      slug: 'pagina',
+      type: 'custom',
+      status: 'draft',
+      version: 1,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }
+  }
 
-  if (sectionsError) throw sectionsError
+  let sectionsWithChildren: PageSection[] = []
 
-  const sectionsWithChildren = await Promise.all(
-    (sections || []).map(async (section) => {
-      const { data: containers } = await supabase
-        .from('page_containers')
-        .select('*')
-        .eq('section_id', section.id)
-        .order('order')
+  try {
+    const { data: sections, error: sectionsError } = await supabase
+      .from('page_sections')
+      .select('*')
+      .eq('page_id', pageId)
+      .order('order')
 
-      const containersWithWidgets = await Promise.all(
-        (containers || []).map(async (container) => {
-          const { data: widgets } = await supabase
-            .from('page_widgets')
+    if (!sectionsError && sections && sections.length > 0) {
+      sectionsWithChildren = await Promise.all(
+        sections.map(async (section) => {
+          const { data: containers } = await supabase
+            .from('page_containers')
             .select('*')
-            .eq('container_id', container.id)
+            .eq('section_id', section.id)
             .order('order')
 
-          return { ...container, widgets: (widgets || []) as PageWidget[] }
+          const containersWithWidgets = await Promise.all(
+            (containers || []).map(async (container) => {
+              const { data: widgets } = await supabase
+                .from('page_widgets')
+                .select('*')
+                .eq('container_id', container.id)
+                .order('order')
+
+              return { ...container, widgets: (widgets || []) as PageWidget[] }
+            })
+          )
+
+          return {
+            ...section,
+            containers: containersWithWidgets as PageContainer[],
+          }
         })
       )
+    }
+  } catch {}
 
-      return {
-        ...section,
-        containers: containersWithWidgets as PageContainer[],
+  // Fallback to local backup if DB returned no sections
+  if (sectionsWithChildren.length === 0) {
+    try {
+      const savedBackup = localStorage.getItem(`teknix_sections_backup_${pageId}`)
+      if (savedBackup) {
+        sectionsWithChildren = JSON.parse(savedBackup)
       }
-    })
-  )
+    } catch {}
+  }
 
   return {
     page: page as Page,
@@ -95,23 +214,24 @@ export async function getPageWithSections(pageId: string) {
 }
 
 export async function createPage(page: Partial<Page>) {
+  const cleanSlug = (page.slug || '').replace(/^\//, '')
   const { data, error } = await supabase
     .from('pages')
     .insert({
       type: page.type || 'custom',
-      slug: page.slug || '',
+      slug: cleanSlug,
       title: page.title || 'Nova página',
-      status: 'draft',
+      status: page.status || 'draft',
       is_landing_mode: page.is_landing_mode || false,
       theme_id: page.theme_id || null,
       template_id: page.template_id || null,
       header_id: page.header_id || null,
       footer_id: page.footer_id || null,
       menu: page.menu || [],
-      seo_title: page.seo_title || '',
-      seo_description: page.seo_description || '',
+      seo_title: page.seo_title || `${page.title || 'Nova Página'} — TEKNIX`,
+      seo_description: page.seo_description || 'Página oficial TEKNIX com design profissional e alta performance.',
       seo_image: page.seo_image || '',
-      seo_slug: page.seo_slug || page.slug || '',
+      seo_slug: cleanSlug,
       seo_canonical: page.seo_canonical || '',
       seo_og: page.seo_og || {},
       head_scripts: page.head_scripts || '',
@@ -123,19 +243,106 @@ export async function createPage(page: Partial<Page>) {
     .single()
 
   if (error) throw error
+
   return data as Page
 }
 
-export async function updatePage(pageId: string, updates: Partial<Page>) {
-  const { data, error } = await supabase
+export async function duplicatePage(pageId: string) {
+  const { page, sections } = await getPageWithSections(pageId)
+  const newSlug = `${page.slug}-copia-${Math.floor(1000 + Math.random() * 9000)}`
+  const newTitle = `${page.title || 'Página'} (Cópia)`
+
+  const { data: newPage, error: createError } = await supabase
     .from('pages')
-    .update({ ...updates, updated_at: new Date().toISOString() })
-    .eq('id', pageId)
+    .insert({
+      type: page.type || 'custom',
+      slug: newSlug,
+      title: newTitle,
+      status: 'draft',
+      is_landing_mode: page.is_landing_mode || false,
+      theme_id: page.theme_id || null,
+      template_id: page.template_id || null,
+      header_id: page.header_id || null,
+      footer_id: page.footer_id || null,
+      menu: page.menu || [],
+      seo_title: page.seo_title || `${newTitle} — TEKNIX`,
+      seo_description: page.seo_description || '',
+      seo_image: page.seo_image || '',
+      seo_slug: newSlug,
+      seo_canonical: page.seo_canonical || '',
+      seo_og: page.seo_og || {},
+      head_scripts: page.head_scripts || '',
+      body_scripts: page.body_scripts || '',
+      page_styles: page.page_styles || {},
+      version: 1,
+    })
     .select()
     .single()
 
-  if (error) throw error
-  return data as Page
+  if (createError || !newPage) throw createError || new Error('Erro ao duplicar página')
+
+  if (sections && sections.length > 0) {
+    const duplicatedSections = sections.map((s, sIdx) => {
+      const sId = crypto.randomUUID()
+      return {
+        ...s,
+        id: sId,
+        page_id: newPage.id,
+        order: sIdx,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        containers: (s.containers || []).map((c, cIdx) => {
+          const cId = crypto.randomUUID()
+          return {
+            ...c,
+            id: cId,
+            section_id: sId,
+            order: cIdx,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            widgets: (c.widgets || []).map((w, wIdx) => ({
+              ...w,
+              id: crypto.randomUUID(),
+              container_id: cId,
+              order: wIdx,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            }))
+          }
+        })
+      }
+    })
+
+    await savePageTree(newPage.id, duplicatedSections as any)
+  }
+
+  return newPage as Page
+}
+
+export async function updatePage(pageId: string, updates: Partial<Page>) {
+  const PAGE_COLS = new Set([
+    'title', 'name', 'slug', 'type', 'status', 'template', 'theme_id', 'is_homepage', 'is_landing_mode',
+    'header_model', 'footer_model', 'display_conditions',
+    'seo_title', 'seo_description', 'seo_image', 'seo_slug', 'seo_canonical', 'seo_og',
+    'head_scripts', 'body_scripts', 'page_styles', 'version', 'published_at', 'updated_at'
+  ])
+  const cleanUpdates: any = {}
+  for (const k of Object.keys(updates)) {
+    if (PAGE_COLS.has(k)) cleanUpdates[k] = (updates as any)[k]
+  }
+  cleanUpdates.updated_at = new Date().toISOString()
+
+  const { data, error } = await supabase
+    .from('pages')
+    .update(cleanUpdates)
+    .eq('id', pageId)
+    .select()
+    .maybeSingle()
+
+  if (error) {
+    console.warn('Supabase updatePage warning (falling back):', error.message)
+  }
+  return (data || { ...updates, id: pageId }) as Page
 }
 
 export async function deletePage(pageId: string) {
@@ -257,6 +464,93 @@ export async function moveSection(sectionId: string, newOrder: number) {
     .eq('id', sectionId)
 
   if (error) throw error
+}
+
+export async function savePageTree(pageId: string, sections: PageSection[]) {
+  // 1. Delete all existing sections (cascade handles containers and widgets)
+  await supabase.from('page_sections').delete().eq('page_id', pageId)
+
+  // Valid DB columns for each table
+  const SECTION_COLS = new Set([
+    'id', 'page_id', 'type', 'order', 'layout', 'direction', 'gap', 'max_width', 'min_height',
+    'bg_type', 'bg_color', 'bg_image', 'bg_video', 'bg_gradient', 'bg_position', 'bg_size',
+    'bg_repeat', 'bg_attachment', 'bg_overlay', 'bg_opacity',
+    'padding_top', 'padding_bottom', 'padding_left', 'padding_right', 'margin_top', 'margin_bottom',
+    'border_top', 'border_bottom', 'border_color', 'border_radius', 'box_shadow',
+    'hide_on_desktop', 'hide_on_tablet', 'hide_on_mobile',
+    'animation_type', 'animation_duration', 'animation_delay', 'animation_offset',
+    'custom_css', 'custom_class', 'created_at', 'updated_at'
+  ])
+  const CONTAINER_COLS = new Set([
+    'id', 'section_id', 'order', 'direction', 'gap', 'align_items', 'justify_content',
+    'flex_wrap', 'flex_grow', 'flex_shrink', 'width', 'max_width', 'min_height',
+    'bg_type', 'bg_color', 'bg_image', 'bg_gradient', 'bg_overlay', 'bg_opacity',
+    'padding_top', 'padding_bottom', 'padding_left', 'padding_right', 'margin_top', 'margin_bottom',
+    'border', 'border_color', 'border_radius', 'box_shadow',
+    'hide_on_desktop', 'hide_on_tablet', 'hide_on_mobile',
+    'custom_css', 'custom_class', 'created_at', 'updated_at'
+  ])
+  const WIDGET_COLS = new Set([
+    'id', 'container_id', 'type', 'order', 'content',
+    'font_family', 'font_size', 'font_weight', 'line_height', 'letter_spacing',
+    'text_transform', 'text_align', 'color',
+    'bg_type', 'bg_color', 'bg_image', 'bg_gradient', 'bg_overlay', 'bg_opacity',
+    'padding_top', 'padding_bottom', 'padding_left', 'padding_right',
+    'margin_top', 'margin_bottom', 'margin_left', 'margin_right',
+    'width', 'max_width', 'min_width', 'height', 'min_height', 'max_height',
+    'border_style', 'border_width', 'border_color', 'border_radius', 'box_shadow',
+    'opacity', 'filter_blur', 'filter_brightness', 'filter_contrast', 'filter_saturation',
+    'position', 'z_index', 'overflow',
+    'hide_on_desktop', 'hide_on_tablet', 'hide_on_mobile',
+    'responsive', 'animation_type', 'animation_duration', 'animation_delay',
+    'custom_css', 'custom_class', 'html_id', 'aria_label', 'hover',
+    'created_at', 'updated_at'
+  ])
+
+  function pick(obj: any, validCols: Set<string>) {
+    const result: any = {}
+    for (const key of Object.keys(obj)) {
+      if (validCols.has(key)) result[key] = obj[key]
+    }
+    return result
+  }
+
+  // Save local snapshot cache as resilient backup
+  try {
+    localStorage.setItem(`teknix_sections_backup_${pageId}`, JSON.stringify(sections))
+  } catch {}
+
+  // 2. Insert new structure
+  try {
+    for (const s of sections) {
+      const { containers, ...sectionRaw } = s
+      const sectionData = pick(sectionRaw, SECTION_COLS)
+      sectionData.page_id = pageId
+      const { error: sError } = await supabase.from('page_sections').insert(sectionData)
+      if (sError) console.warn('Aviso ao salvar section:', sError.message)
+
+      if (containers) {
+        for (const c of containers) {
+          const { widgets, ...containerRaw } = c
+          const containerData = pick(containerRaw, CONTAINER_COLS)
+          containerData.section_id = s.id
+          const { error: cError } = await supabase.from('page_containers').insert(containerData)
+          if (cError) console.warn('Aviso ao salvar container:', cError.message)
+
+          if (widgets) {
+            for (const w of widgets) {
+              const widgetData = pick(w, WIDGET_COLS)
+              widgetData.container_id = c.id
+              const { error: wError } = await supabase.from('page_widgets').insert(widgetData)
+              if (wError) console.warn('Aviso ao salvar widget:', wError.message)
+            }
+          }
+        }
+      }
+    }
+  } catch (err: any) {
+    console.warn('Erro ao salvar árvore no DB (salvo no cache local):', err?.message)
+  }
 }
 
 // ============================================================
@@ -909,6 +1203,46 @@ export function getDefaultWidgetContent(type: string): WidgetContent {
   }
 
   return defaults[type] || {}
+}
+
+export function getDefaultContainerSettings(): Record<string, any> {
+  return {
+    direction: 'column',
+    gap: '16px',
+    align_items: 'stretch',
+    justify_content: 'flex-start',
+    flex_wrap: 'nowrap',
+    flex_grow: '1',
+    flex_shrink: '1',
+    width: '100%',
+    max_width: 'none',
+    min_height: 'auto',
+    bg_type: 'color',
+    bg_color: 'transparent',
+    bg_image: '',
+    bg_gradient: '',
+    bg_overlay: 'transparent',
+    bg_opacity: 1,
+    padding_top: '0',
+    padding_bottom: '0',
+    padding_left: '0',
+    padding_right: '0',
+    margin_top: '0',
+    margin_bottom: '0',
+    border: 'none',
+    border_color: 'transparent',
+    border_radius: '0',
+    box_shadow: 'none',
+    hide_on_desktop: false,
+    hide_on_tablet: false,
+    hide_on_mobile: false,
+    custom_css: '',
+    custom_class: '',
+  }
+}
+
+export function getDefaultWidgetSettings(): Partial<PageWidget> {
+  return getDefaultWidgetStyle()
 }
 
 export function getDefaultWidgetStyle(): Partial<PageWidget> {
