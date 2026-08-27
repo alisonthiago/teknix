@@ -1029,14 +1029,53 @@
   transition: outline 0.12s ease;
 }
 
-.canvas-section:hover,
-.canvas-container:hover {
+.canvas-section {
+  position: relative;
+  transition: outline 0.12s ease;
+}
+
+.canvas-section:hover {
   outline: 1.5px solid #ea9cfb !important;
 }
 
-.canvas-section.selected,
-.canvas-container.selected {
+.canvas-section.selected {
   outline: 1.5px solid #ea9cfb !important;
+}
+
+.canvas-container {
+  position: relative;
+  transition: outline 0.12s ease;
+}
+
+.canvas-container:hover {
+  outline: 1px dashed #0071e3 !important;
+}
+
+.canvas-container.selected {
+  outline: 1.5px solid #0071e3 !important;
+}
+
+/* Identificador discreto de Coluna (Top-Left 1:1 Elementor) */
+.elementor-column-handle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 22px;
+  height: 20px;
+  background: #0071e3;
+  color: #ffffff;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0 0 4px 0;
+  cursor: pointer;
+  z-index: 50;
+  user-select: none;
+}
+
+.canvas-container:hover > .elementor-column-handle,
+.canvas-container.selected > .elementor-column-handle {
+  display: flex;
 }
 
 .elementor-editor-element-settings.elementor-editor-container-settings {
@@ -1063,9 +1102,7 @@
 }
 
 .canvas-section:hover > .elementor-editor-element-settings,
-.canvas-container:hover > .elementor-editor-element-settings,
-.canvas-section.selected > .elementor-editor-element-settings,
-.canvas-container.selected > .elementor-editor-element-settings {
+.canvas-section.selected > .elementor-editor-element-settings {
   display: flex;
 }
 

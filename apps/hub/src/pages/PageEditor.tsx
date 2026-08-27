@@ -2874,7 +2874,16 @@ function SectionBlock({
       </ul>
 
       <div className={`section-containers ${viewportMode === 'mobile' ? 'mobile-stack' : ''}`}
-        style={{ display: 'flex', gap: gap, flexDirection: direction === 'row' ? 'row' : 'column', flexWrap: 'wrap', margin: '0 auto' }}>
+        style={{
+          display: 'flex',
+          gap: gap || '16px',
+          flexDirection: direction === 'column' ? 'column' : 'row',
+          flexWrap: viewportMode === 'mobile' ? 'wrap' : 'nowrap',
+          width: '100%',
+          maxWidth: section.layout === 'full' ? '100%' : (section.max_width || '1200px'),
+          margin: '0 auto',
+          boxSizing: 'border-box'
+        }}>
         {(section.containers || []).sort((a: any, b: any) => a.order - b.order).map((container: PageContainer) => (
           <ContainerBlock
             key={container.id}
@@ -2905,9 +2914,16 @@ function ContainerBlock({ container, isSelected, selectedWidgetId, viewportMode,
   const [dragOver, setDragOver] = useState(false)
   const [dropIndicator, setDropIndicator] = useState<{ targetId: string | null; position: 'before' | 'after' } | null>(null)
 
+  const colWidth = container.width || '100%'
+
   const outerContainerStyle: React.CSSProperties = {
     ...computeContainerOuterStyles(container, viewportMode),
     position: 'relative',
+    flex: colWidth === '100%' ? '1 1 auto' : `0 0 ${colWidth}`,
+    maxWidth: colWidth,
+    width: colWidth,
+    minWidth: 0,
+    boxSizing: 'border-box'
   }
 
   const innerContentStyle: React.CSSProperties = computeContainerInnerStyles(container, viewportMode)
@@ -2964,44 +2980,15 @@ function ContainerBlock({ container, isSelected, selectedWidgetId, viewportMode,
       }}
       onDrop={(e) => handleDrop(e, null)}>
 
-      {/* Official Elementor Container Handle (1:1 Print 2) */}
-      <ul
-        className={`elementor-editor-element-settings elementor-editor-container-settings elementor-editor-element-overlay-settings ${isSelected ? 'selected' : ''}`}
-        onClick={(e) => e.stopPropagation()}
+      {/* Column Handle (Top-Left subtle column identifier) */}
+      <div
+        className={`elementor-column-handle ${isSelected ? 'selected' : ''}`}
+        onClick={(e) => { e.stopPropagation(); onSelect() }}
+        onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); onContextMenu(e, 'container', container.id, container.section_id) }}
+        title="Editar Coluna"
       >
-        <li
-          className="elementor-editor-element-setting elementor-editor-element-add"
-          title="Adicionar Contêiner"
-          aria-label="Adicionar Contêiner"
-          onClick={(e) => { e.stopPropagation(); onAddContainer && onAddContainer() }}
-        >
-          <Plus size={10} strokeWidth={2.5} />
-        </li>
-        <li
-          className="elementor-editor-element-setting elementor-editor-element-edit ui-sortable-handle"
-          title="Editar Contêiner"
-          aria-label="Editar Contêiner"
-          onClick={(e) => { e.stopPropagation(); onSelect() }}
-          onContextMenu={(e) => onContextMenu(e, 'container', container.id, container.section_id)}
-        >
-          <svg width="12" height="7" viewBox="0 0 12 7" fill="currentColor">
-            <circle cx="2" cy="1.5" r="1" />
-            <circle cx="6" cy="1.5" r="1" />
-            <circle cx="10" cy="1.5" r="1" />
-            <circle cx="2" cy="5.5" r="1" />
-            <circle cx="6" cy="5.5" r="1" />
-            <circle cx="10" cy="5.5" r="1" />
-          </svg>
-        </li>
-        <li
-          className="elementor-editor-element-setting elementor-editor-element-remove"
-          title="Excluir Contêiner"
-          aria-label="Excluir Contêiner"
-          onClick={(e) => { e.stopPropagation(); onDeleteContainer && onDeleteContainer() }}
-        >
-          <X size={10} strokeWidth={2.5} />
-        </li>
-      </ul>
+        <Columns size={11} />
+      </div>
 
       <div className="e-con-inner" style={innerContentStyle}>
         {widgets.length === 0 ? (
