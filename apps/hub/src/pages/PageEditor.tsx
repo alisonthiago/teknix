@@ -878,6 +878,10 @@ export default function PageEditor() {
     if (type === 'text') defaultContent.text = 'Novo texto'
     if (type === 'heading') defaultContent.text = 'Novo Título'
     if (type === 'button') defaultContent.label = 'Clique aqui'
+    if (type === 'video') {
+      defaultContent.url = 'https://www.youtube.com/watch?v=XHTrA56kH10'
+      defaultContent.provider = 'youtube'
+    }
 
     const newWidget = {
       id: wId, container_id: containerId, type, order: 99,
@@ -917,6 +921,10 @@ export default function PageEditor() {
     if (type === 'text') defaultContent.text = 'Novo texto'
     if (type === 'heading') defaultContent.text = 'Novo Título'
     if (type === 'button') defaultContent.label = 'Clique aqui'
+    if (type === 'video') {
+      defaultContent.url = 'https://www.youtube.com/watch?v=XHTrA56kH10'
+      defaultContent.provider = 'youtube'
+    }
 
     const newWidget = {
       id: wId, container_id: cId, type, order: 0,
@@ -3147,6 +3155,48 @@ function buildEditorWidgetStyle(widget: PageWidget, viewportMode: string = 'desk
   return computeWidgetStyles(widget, viewportMode as any)
 }
 
+function getEmbedUrl(rawUrl?: string): { isEmbed: boolean; url: string; isVideoFile: boolean } {
+  if (!rawUrl) {
+    return {
+      isEmbed: true,
+      url: 'https://www.youtube.com/embed/XHTrA56kH10',
+      isVideoFile: false
+    }
+  }
+
+  const ytMatch = rawUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/)
+  if (ytMatch) {
+    return {
+      isEmbed: true,
+      url: `https://www.youtube.com/embed/${ytMatch[1]}`,
+      isVideoFile: false
+    }
+  }
+
+  const vimeoMatch = rawUrl.match(/vimeo\.com\/(?:video\/)?([0-9]+)/)
+  if (vimeoMatch) {
+    return {
+      isEmbed: true,
+      url: `https://player.vimeo.com/video/${vimeoMatch[1]}`,
+      isVideoFile: false
+    }
+  }
+
+  if (rawUrl.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/i)) {
+    return {
+      isEmbed: false,
+      url: rawUrl,
+      isVideoFile: true
+    }
+  }
+
+  return {
+    isEmbed: true,
+    url: rawUrl,
+    isVideoFile: false
+  }
+}
+
 // ============================================================
 // WIDGET PREVIEW
 // ============================================================
@@ -3335,8 +3385,29 @@ function WidgetPreview({ widget, viewportMode = 'desktop' }: { widget: PageWidge
       return <div style={{ padding: 16, background: '#fffbeb', border: '1px solid #fef3c7', borderRadius: 8, color: '#b45309', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: 8, ...es }}>
         <AlertCircle size={18} /> <strong>Atenção:</strong> Mensagem informativa de alerta para os clientes.
       </div>
-    case 'video':
-      return <div style={{ aspectRatio: '16/9', background: '#f5f5f7', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#86868b', gap: 8, ...es }}><Video size={20} /> Player de Vídeo</div>
+    case 'video': {
+      const url = String(content?.url || content?.video_url || 'https://www.youtube.com/watch?v=XHTrA56kH10')
+      const embed = getEmbedUrl(url)
+      return (
+        <div style={{ width: '100%', aspectRatio: '16/9', borderRadius: 12, overflow: 'hidden', background: '#000', position: 'relative', ...es }}>
+          {embed.isVideoFile ? (
+            <video
+              src={embed.url}
+              controls
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+          ) : (
+            <iframe
+              src={embed.url}
+              title="Vídeo Preview"
+              style={{ width: '100%', height: '100%', border: 'none' }}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          )}
+        </div>
+      )
+    }
     case 'cta':
       return <div style={{ background: '#1d1d1f', color: '#fff', padding: '60px 32px', textAlign: 'center', borderRadius: 24, ...es }}>
         <h2 style={{ margin: '0 0 12px', fontSize: '2rem', fontWeight: 700, letterSpacing: '-0.03em', color: '#fff' }}>{String(content.cta_title || 'Pronto para Transformar sua Experiência?')}</h2>

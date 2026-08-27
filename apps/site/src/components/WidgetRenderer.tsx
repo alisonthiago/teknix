@@ -48,6 +48,48 @@ function formatPrice(price: number) {
   }).format(price)
 }
 
+function getEmbedUrl(rawUrl?: string): { isEmbed: boolean; url: string; isVideoFile: boolean } {
+  if (!rawUrl) {
+    return {
+      isEmbed: true,
+      url: 'https://www.youtube.com/embed/XHTrA56kH10',
+      isVideoFile: false
+    }
+  }
+
+  const ytMatch = rawUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/)
+  if (ytMatch) {
+    return {
+      isEmbed: true,
+      url: `https://www.youtube.com/embed/${ytMatch[1]}`,
+      isVideoFile: false
+    }
+  }
+
+  const vimeoMatch = rawUrl.match(/vimeo\.com\/(?:video\/)?([0-9]+)/)
+  if (vimeoMatch) {
+    return {
+      isEmbed: true,
+      url: `https://player.vimeo.com/video/${vimeoMatch[1]}`,
+      isVideoFile: false
+    }
+  }
+
+  if (rawUrl.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/i)) {
+    return {
+      isEmbed: false,
+      url: rawUrl,
+      isVideoFile: true
+    }
+  }
+
+  return {
+    isEmbed: true,
+    url: rawUrl,
+    isVideoFile: false
+  }
+}
+
 function buildInlineStyle(widget: any): React.CSSProperties {
   if (!widget) return {}
   const raw = (widget.style || {}) as Record<string, any>
@@ -265,12 +307,25 @@ export default function WidgetRenderer({ widget, product }: WidgetRendererProps)
       return <hr style={{ border: 'none', borderTop: '1px solid #e8e8ed', ...s }} />
 
     case 'video': {
-      const url = resolveDynamicValue(content.url || content.video_url, product) as string
-      return url ? (
-        <iframe src={url} style={{ width: '100%', aspectRatio: '16/9', border: 'none', borderRadius: 12, ...s }} allowFullScreen />
-      ) : (
-        <div style={{ background: '#f5f5f7', padding: 40, textAlign: 'center', borderRadius: 12, color: '#86868b', ...s }}>
-          Vídeo
+      const rawUrl = (resolveDynamicValue(content.url || content.video_url, product) as string) || 'https://www.youtube.com/watch?v=XHTrA56kH10'
+      const embed = getEmbedUrl(rawUrl)
+      return (
+        <div style={{ width: '100%', aspectRatio: '16/9', borderRadius: 12, overflow: 'hidden', background: '#000', ...s }}>
+          {embed.isVideoFile ? (
+            <video
+              src={embed.url}
+              controls
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+          ) : (
+            <iframe
+              src={embed.url}
+              title="Vídeo"
+              style={{ width: '100%', height: '100%', border: 'none' }}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          )}
         </div>
       )
     }
