@@ -1304,17 +1304,21 @@ export default function Inspector({
                             }}
                             style={{ flex: 1, accentColor: '#0071e3', cursor: 'pointer' }}
                           />
-                          <input
-                            type="text"
-                            style={{ width: '60px', textAlign: 'center' }}
-                            value={getVal('font_size', `16${fontSizeUnit}`)}
-                            onChange={e => {
-                              const v = e.target.value
-                              const formatted = v.includes('px') || v.includes('rem') || v.includes('em') || v.includes('vw') ? v : `${v}${fontSizeUnit}`
-                              updateResponsive('font_size', formatted)
-                              updateWidgetStyle('font_size', formatted)
-                            }}
-                          />
+                          <div style={{ width: '80px' }}>
+                            <StepperNumberInput
+                              value={getVal('font_size', `16${fontSizeUnit}`)}
+                              step={fontSizeUnit === 'rem' || fontSizeUnit === 'em' ? 0.1 : 1}
+                              min={1}
+                              max={300}
+                              onChange={v => {
+                                const cleanNum = String(v).replace(/[^0-9.-]/g, '')
+                                const formatted = cleanNum === '' ? '' : `${cleanNum}${fontSizeUnit}`
+                                updateResponsive('font_size', formatted)
+                                updateWidgetStyle('font_size', formatted)
+                              }}
+                              placeholder={`16${fontSizeUnit}`}
+                            />
+                          </div>
                         </div>
                       </div>
 
@@ -1447,17 +1451,21 @@ export default function Inspector({
                             }}
                             style={{ flex: 1, accentColor: '#0071e3', cursor: 'pointer' }}
                           />
-                          <input
-                            type="text"
-                            style={{ width: '60px', textAlign: 'center' }}
-                            value={obj.letter_spacing || obj.settings?.letter_spacing || '0px'}
-                            onChange={e => {
-                              const v = e.target.value
-                              const formatted = v.includes('px') || v.includes('em') ? v : `${v}px`
-                              update('letter_spacing', formatted)
-                              updateWidgetStyle('letter_spacing', formatted)
-                            }}
-                          />
+                          <div style={{ width: '80px' }}>
+                            <StepperNumberInput
+                              value={obj.letter_spacing || obj.settings?.letter_spacing || '0px'}
+                              step={0.5}
+                              min={-10}
+                              max={50}
+                              onChange={v => {
+                                const cleanNum = String(v).replace(/[^0-9.-]/g, '')
+                                const formatted = cleanNum === '' ? '' : `${cleanNum}px`
+                                update('letter_spacing', formatted)
+                                updateWidgetStyle('letter_spacing', formatted)
+                              }}
+                              placeholder="0px"
+                            />
+                          </div>
                         </div>
                       </div>
 
@@ -1484,17 +1492,21 @@ export default function Inspector({
                             }}
                             style={{ flex: 1, accentColor: '#0071e3', cursor: 'pointer' }}
                           />
-                          <input
-                            type="text"
-                            style={{ width: '60px', textAlign: 'center' }}
-                            value={obj.word_spacing || obj.settings?.word_spacing || '0em'}
-                            onChange={e => {
-                              const v = e.target.value
-                              const formatted = v.includes('em') || v.includes('px') ? v : `${v}em`
-                              update('word_spacing', formatted)
-                              updateWidgetStyle('word_spacing', formatted)
-                            }}
-                          />
+                          <div style={{ width: '80px' }}>
+                            <StepperNumberInput
+                              value={obj.word_spacing || obj.settings?.word_spacing || '0em'}
+                              step={0.1}
+                              min={0}
+                              max={20}
+                              onChange={v => {
+                                const cleanNum = String(v).replace(/[^0-9.-]/g, '')
+                                const formatted = cleanNum === '' ? '' : `${cleanNum}em`
+                                update('word_spacing', formatted)
+                                updateWidgetStyle('word_spacing', formatted)
+                              }}
+                              placeholder="0em"
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -3011,10 +3023,12 @@ function StepperNumberInput({
   step?: number
   placeholder?: string
 }) {
-  const numVal = parseFloat(String(value)) || 0
+  const cleanNumeric = String(value ?? '').replace(/[^0-9.-]/g, '')
+  const numVal = parseFloat(cleanNumeric) || 0
 
   const increment = (delta: number) => {
-    const next = Math.max(min, Math.min(max, numVal + delta))
+    const rawNext = numVal + delta
+    const next = Math.max(min, Math.min(max, Math.round(rawNext * 100) / 100))
     onChange(String(next))
   }
 
@@ -3033,10 +3047,13 @@ function StepperNumberInput({
       <input
         type="text"
         className={className}
-        value={value}
-        onChange={e => onChange(e.target.value)}
+        value={cleanNumeric}
+        onChange={e => {
+          const raw = e.target.value.replace(/[^0-9.-]/g, '')
+          onChange(raw)
+        }}
         onKeyDown={handleKeyDown}
-        placeholder={placeholder}
+        placeholder={placeholder ? placeholder.replace(/[^0-9.-]/g, '') : ''}
       />
       <div className="stepper-buttons-col">
         <button
