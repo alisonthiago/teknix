@@ -3215,16 +3215,48 @@ function WidgetPreview({ widget, viewportMode = 'desktop' }: { widget: PageWidge
     case 'image': {
       const src = (content?.image as string) || (content?.url as string)
       const imgAlign = align === 'center' ? 'center' : align === 'right' ? 'flex-end' : 'flex-start'
-      const customWidth = resolveResponsiveValue(widget, 'width', viewportMode as any, (widget as any).settings?.width || content?.width || '')
+      const customWidth = resolveResponsiveValue(widget, 'width', viewportMode as any, (widget as any).settings?.width || content?.width || '100%')
       const customHeight = resolveResponsiveValue(widget, 'height', viewportMode as any, (widget as any).settings?.height || content?.height || '')
-      const customMaxWidth = resolveResponsiveValue(widget, 'max_width', viewportMode as any, (widget as any).settings?.max_width || content?.max_width || '')
+      const customMaxWidth = resolveResponsiveValue(widget, 'max_width', viewportMode as any, (widget as any).settings?.max_width || content?.max_width || '100%')
       const objectFit = resolveResponsiveValue(widget, 'object_fit', viewportMode as any, (widget as any).settings?.object_fit || content?.object_fit || 'cover')
       const objectPosition = resolveResponsiveValue(widget, 'object_position', viewportMode as any, (widget as any).settings?.object_position || content?.object_position || 'center center')
       const opacity = resolveResponsiveValue(widget, 'opacity', viewportMode as any, (widget as any).settings?.opacity ?? content?.opacity ?? 1)
-      const borderRadius = resolveResponsiveValue(widget, 'border_radius', viewportMode as any, (widget as any).settings?.border_radius || '')
+      const borderRadius = resolveResponsiveValue(widget, 'border_radius', viewportMode as any, (widget as any).settings?.border_radius || 16)
       const boxShadow = resolveResponsiveValue(widget, 'box_shadow', viewportMode as any, (widget as any).settings?.box_shadow || '')
 
-      if (!src) return <div style={{ padding: 24, background: '#f5f5f7', borderRadius: 12, textAlign: 'center', color: '#86868b', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, ...es }}><ImageIcon size={18} /> Imagem</div>
+      if (!src) {
+        return (
+          <div style={{ width: '100%', display: 'flex', justifyContent: imgAlign }}>
+            <div
+              style={{
+                width: customWidth || '100%',
+                maxWidth: customMaxWidth || '100%',
+                aspectRatio: '1/1',
+                minHeight: 240,
+                background: 'linear-gradient(135deg, #fbfbfd 0%, #f5f5f7 100%)',
+                border: '1.5px dashed #d2d2d7',
+                borderRadius: borderRadius || 16,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 12,
+                color: '#86868b',
+                boxSizing: 'border-box',
+                padding: 24,
+                ...es
+              }}
+            >
+              <div style={{ width: 64, height: 64, borderRadius: 16, background: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+                <ImageIcon size={32} strokeWidth={1.5} color="#0071e3" />
+              </div>
+              <span style={{ fontSize: '0.95rem', fontWeight: 600, color: '#1d1d1f' }}>Imagem</span>
+              <span style={{ fontSize: '0.8rem', color: '#86868b', textAlign: 'center' }}>Clique para selecionar ou enviar no painel lateral</span>
+            </div>
+          </div>
+        )
+      }
+
       return (
         <div style={{ width: '100%', display: 'flex', justifyContent: imgAlign }}>
           <img
@@ -3236,10 +3268,11 @@ function WidgetPreview({ widget, viewportMode = 'desktop' }: { widget: PageWidge
               width: customWidth || es.width || '100%',
               maxWidth: customMaxWidth || es.maxWidth || '100%',
               height: customHeight || es.height || 'auto',
+              aspectRatio: (content?.aspect_ratio as string) || undefined,
               objectFit: (objectFit as any) || (es as any).objectFit || 'cover',
               objectPosition: (objectPosition as any) || (es as any).objectPosition || 'center center',
               opacity: opacity !== undefined && opacity !== '' ? Number(opacity) : 1,
-              borderRadius: borderRadius || es.borderRadius || 12,
+              borderRadius: borderRadius || es.borderRadius || 16,
               boxShadow: boxShadow || es.boxShadow || undefined,
               display: 'block',
               transition: 'all 0.2s ease',
@@ -3322,11 +3355,33 @@ function WidgetPreview({ widget, viewportMode = 'desktop' }: { widget: PageWidge
         <h4 style={{ margin: '0 0 4px', color: '#1d1d1f' }}>Caixa de Imagem</h4>
         <p style={{ margin: 0, fontSize: '0.85rem', color: '#6e6e73' }}>Legenda ou descrição da imagem.</p>
       </div>
-    case 'starRating':
-      return <div style={{ display: 'flex', gap: 4, color: '#f59e0b', alignItems: 'center', ...es }}>
-        {[1,2,3,4,5].map(i => <Star key={i} size={16} fill="#f59e0b" />)}
-        <span style={{ fontSize: '0.85rem', color: '#86868b', marginLeft: 6 }}>5.0 (128 avaliações)</span>
-      </div>
+    case 'starRating': {
+      const alignVal = align || (widget as any).settings?.text_align || (widget.content as any)?.align || (widget.content as any)?.text_align || (widget as any).style?.textAlign || 'left'
+      const flexJustify = alignVal === 'center' ? 'center' : alignVal === 'right' ? 'flex-end' : 'flex-start'
+      const starSize = Number(content?.star_size || (widget as any).settings?.star_size || 16)
+      const ratingVal = Number(content?.rating ?? 5)
+      const reviewCount = content?.review_count !== undefined ? String(content.review_count) : '128'
+      const showText = content?.show_text !== false
+      return (
+        <div style={{ width: '100%', display: 'flex', gap: 6, color: '#f59e0b', alignItems: 'center', justifyContent: flexJustify, textAlign: alignVal as any, ...es }}>
+          <div style={{ display: 'flex', gap: 3, alignItems: 'center' }}>
+            {[1, 2, 3, 4, 5].map(i => (
+              <Star
+                key={i}
+                size={starSize}
+                fill={i <= Math.round(ratingVal) ? '#f59e0b' : 'none'}
+                stroke="#f59e0b"
+              />
+            ))}
+          </div>
+          {showText && (
+            <span style={{ fontSize: '0.85rem', color: '#86868b', marginLeft: 4 }}>
+              {content?.text as string || `${ratingVal.toFixed(1)} (${reviewCount} avaliações)`}
+            </span>
+          )}
+        </div>
+      )
+    }
     case 'animatedHeadline':
       return <h2 style={{ margin: 0, color: '#1d1d1f', fontSize: '1.8rem', fontWeight: 700, ...es }}>
         Inovação <span style={{ color: '#00cc6a', borderBottom: '2px solid #00cc6a' }}>Extraordinária</span>

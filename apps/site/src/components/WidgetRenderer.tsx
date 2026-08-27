@@ -300,6 +300,34 @@ export default function WidgetRenderer({ widget, product }: WidgetRendererProps)
       )
     }
 
+    case 'starRating': {
+      const alignVal = (s.textAlign as string) || (content.align as string) || (content.text_align as string) || 'left'
+      const flexJustify = alignVal === 'center' ? 'center' : alignVal === 'right' ? 'flex-end' : 'flex-start'
+      const starSize = Number(content.star_size || (widget as any).settings?.star_size || 16)
+      const ratingVal = Number(content.rating ?? 5)
+      const reviewCount = content.review_count !== undefined ? String(content.review_count) : '128'
+      const showText = content.show_text !== false
+      return (
+        <div id={id} className={className} style={{ width: '100%', display: 'flex', gap: 6, color: '#f59e0b', alignItems: 'center', justifyContent: flexJustify, textAlign: alignVal as any, ...s }}>
+          <div style={{ display: 'flex', gap: 3, alignItems: 'center' }}>
+            {[1, 2, 3, 4, 5].map(i => (
+              <Star
+                key={i}
+                size={starSize}
+                fill={i <= Math.round(ratingVal) ? '#f59e0b' : 'none'}
+                stroke="#f59e0b"
+              />
+            ))}
+          </div>
+          {showText && (
+            <span style={{ fontSize: '0.85rem', color: '#86868b', marginLeft: 4 }}>
+              {String(content.text || `${ratingVal.toFixed(1)} (${reviewCount} avaliações)`)}
+            </span>
+          )}
+        </div>
+      )
+    }
+
     case 'spacer':
       return <div style={{ height: (content.height as number) || 50, ...s }} />
 

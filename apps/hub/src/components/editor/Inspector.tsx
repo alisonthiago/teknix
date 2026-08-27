@@ -750,6 +750,7 @@ export default function Inspector({
                       value={currentAlign}
                       onChange={v => {
                         updateResponsive('text_align', v)
+                        updateWidgetStyle('text_align', v)
                         updateWidgetContent('align', v)
                         updateWidgetContent('text_align', v)
                       }}
