@@ -15,89 +15,8 @@ import type {
 export { WIDGET_CATEGORIES, WIDGET_DEFINITIONS } from '../types/pageBuilder'
 
 // ============================================================
-// PAGES
+// PAGES — 100% SUPABASE FONTE DA VERDADE (SEM UUIDs FALSOS)
 // ============================================================
-
-const DEFAULT_PRESET_PAGES: Page[] = ([
-  {
-    id: 'c0000000-0000-0000-0000-000000000001',
-    title: 'Home Oficial TEKNIX',
-    slug: '',
-    type: 'home',
-    status: 'published',
-    is_landing_mode: false,
-    version: 1,
-    seo_title: 'TEKNIX — Ferramentas Elétricas & Tecnologia Profissional',
-    seo_description: 'Loja oficial TEKNIX. Descubra ferramentas elétricas de alta performance, baterias sem fio e tecnologia industrial avançada.',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: 'c0000000-0000-0000-0000-000000000002',
-    title: 'Segmento Ferramentas Industriais',
-    slug: 'ferramentas',
-    type: 'segmento',
-    status: 'published',
-    is_landing_mode: false,
-    version: 1,
-    seo_title: 'Ferramentas Industriais — TEKNIX',
-    seo_description: 'Parafusadeiras, furadeiras e serras de alta precisão e durabilidade extrema.',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: 'c0000000-0000-0000-0000-000000000003',
-    title: 'Segmento Iluminação & Energia Solar',
-    slug: 'iluminacao-solar',
-    type: 'segmento',
-    status: 'published',
-    is_landing_mode: false,
-    version: 1,
-    seo_title: 'Iluminação & Energia Solar — TEKNIX',
-    seo_description: 'Refletores LED e luminárias solares inteligentes com eficiência máxima.',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: 'c0000000-0000-0000-0000-000000000004',
-    title: 'Categoria Parafusadeiras Brushless Pro',
-    slug: 'ferramentas/parafusadeiras',
-    type: 'category',
-    status: 'published',
-    is_landing_mode: false,
-    version: 1,
-    seo_title: 'Parafusadeiras Brushless Pro — TEKNIX',
-    seo_description: 'Máxima potência, motor Brushless sem escovas e bateria intercambiável.',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: 'c0000000-0000-0000-0000-000000000005',
-    title: 'Black Friday / Ofertas Exclusivas',
-    slug: 'black-friday',
-    type: 'campaign',
-    status: 'published',
-    is_landing_mode: true,
-    version: 1,
-    seo_title: 'Black Friday Especial — TEKNIX',
-    seo_description: 'Ofertas exclusivas com até 40% OFF em ferramentas e frete grátis.',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: '15e26476-4adb-445b-b808-aa5086caad0d',
-    title: 'Kit Chave De Impacto 21v Parafusadeira + Jogo Soquete 46pç Cor Amarelo Frequência 50hz/60 127/220v',
-    slug: 'produto/kit-chave-de-impacto-21v-parafusadeira',
-    type: 'product',
-    status: 'published',
-    is_landing_mode: false,
-    version: 1,
-    seo_title: 'Kit Chave De Impacto 21v Parafusadeira TEKNIX',
-    seo_description: 'Chave de impacto e parafusadeira profissional 21V com maleta e 46 peças.',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  }
-] as any[]) as Page[]
 
 export async function getPages(type?: string) {
   try {
@@ -145,11 +64,10 @@ export async function getPageWithSections(pageId: string) {
   } catch {}
 
   if (!page) {
-    const preset = DEFAULT_PRESET_PAGES.find(p => p.id === pageId)
-    page = preset || {
+    page = {
       id: pageId,
-      title: 'Página sem título',
-      slug: 'pagina',
+      title: 'Nova Página',
+      slug: '',
       type: 'custom',
       status: 'draft',
       version: 1,
