@@ -1015,6 +1015,7 @@ export default function PageEditor() {
     setSections(prevSections => {
       let movedWidget: PageWidget | null = null
 
+      // 1. Remove widget from anywhere in the tree
       const sectionsWithoutWidget = prevSections.map(s => ({
         ...s,
         containers: (s.containers || []).map(c => {
@@ -1028,24 +1029,31 @@ export default function PageEditor() {
       }))
 
       if (!movedWidget) return prevSections
-      const targetWidget: PageWidget = movedWidget
-      const w: PageWidget = { ...(targetWidget as any), container_id: toContainerId }
+      const targetWidget: PageWidget = { ...(movedWidget as any), container_id: toContainerId }
 
+      // 2. Insert widget at exact position in destination container
       const finalSections = sectionsWithoutWidget.map(s => ({
         ...s,
         containers: (s.containers || []).map(c => {
-          if (c.id !== toContainerId) return c
+          if (c.id !== toContainerId) {
+            return {
+              ...c,
+              widgets: (c.widgets || []).map((ww, i) => ({ ...ww, order: i }))
+            }
+          }
+
           const widgets = [...(c.widgets || [])]
           if (insertBeforeId) {
             const idx = widgets.findIndex(ww => ww.id === insertBeforeId)
             if (idx >= 0) {
-              widgets.splice(idx, 0, w)
+              widgets.splice(idx, 0, targetWidget)
             } else {
-              widgets.push(w)
+              widgets.push(targetWidget)
             }
           } else {
-            widgets.push(w)
+            widgets.push(targetWidget)
           }
+
           return {
             ...c,
             widgets: widgets.map((ww, i) => ({ ...ww, order: i }))
@@ -2874,12 +2882,9 @@ function SectionBlock({
   )
 }
 
-// ============================================================
-// CONTAINER BLOCK (Elementor Outer Container + Inner Content)
-// ============================================================
 function ContainerBlock({ container, isSelected, selectedWidgetId, viewportMode, onSelect, onSelectWidget, onAddContainer, onDeleteContainer, onWidgetDrop, onWidgetMove, onWidgetReorder, onWidgetDelete, onWidgetDuplicate, onContextMenu }: any) {
   const [dragOver, setDragOver] = useState(false)
-  const [insertBeforeId, setInsertBeforeId] = useState<string | null>(null)
+  const [dropIndicator, setDropIndicator] = useState<{ targetId: string | null; position: 'before' | 'after' } | null>(null)
 
   const outerContainerStyle: React.CSSProperties = {
     ...computeContainerOuterStyles(container, viewportMode),
@@ -2888,11 +2893,11 @@ function ContainerBlock({ container, isSelected, selectedWidgetId, viewportMode,
 
   const innerContentStyle: React.CSSProperties = computeContainerInnerStyles(container, viewportMode)
 
-  function handleDrop(e: React.DragEvent, beforeId?: string) {
+  function handleDrop(e: React.DragEvent, beforeId?: string | null) {
     e.preventDefault()
     e.stopPropagation()
     setDragOver(false)
-    setInsertBeforeId(null)
+    setDropIndicator(null)
 
     let payload: any = _dragPayload
     if (!payload) {
@@ -2907,12 +2912,12 @@ function ContainerBlock({ container, isSelected, selectedWidgetId, viewportMode,
 
     if (payload.kind === 'widget-new' || payload.type === 'widget-new') {
       const widgetType = payload.widgetType || payload.type
-      onWidgetDrop(widgetType, beforeId)
+      onWidgetDrop(widgetType, beforeId || undefined)
     } else if (payload.kind === 'widget-move' || payload.type === 'widget-move') {
       if (payload.fromContainerId === container.id) {
         onWidgetReorder(payload.widgetId, beforeId || null)
       } else {
-        onWidgetMove(payload.widgetId, payload.fromContainerId, beforeId)
+        onWidgetMove(payload.widgetId, payload.fromContainerId, beforeId || undefined)
       }
     }
   }
@@ -2929,14 +2934,15 @@ function ContainerBlock({ container, isSelected, selectedWidgetId, viewportMode,
       onDragOver={(e) => {
         e.preventDefault()
         e.stopPropagation()
-        e.dataTransfer.dropEffect = 'copy'
+        e.dataTransfer.dropEffect = 'move'
         setDragOver(true)
       }}
       onDragLeave={(e) => {
         e.stopPropagation()
         setDragOver(false)
+        setDropIndicator(null)
       }}
-      onDrop={(e) => handleDrop(e)}>
+      onDrop={(e) => handleDrop(e, null)}>
 
       {/* Official Elementor Container Handle (1:1 Print 2) */}
       <ul
@@ -2985,96 +2991,108 @@ function ContainerBlock({ container, isSelected, selectedWidgetId, viewportMode,
             onDragOver={(e) => {
               e.preventDefault()
               e.stopPropagation()
-              e.dataTransfer.dropEffect = 'copy'
+              e.dataTransfer.dropEffect = 'move'
               setDragOver(true)
             }}
-            onDrop={(e) => handleDrop(e)}
+            onDrop={(e) => handleDrop(e, null)}
           >
             <Plus size={14} />
             <span>Arraste aqui</span>
           </div>
         ) : (
           <>
-            {widgets.map((widget: PageWidget) => (
-              <div
-                key={widget.id}
-                style={{
-                  width: container.display_type === 'grid' ? 'auto' : (dirVal === 'row' ? 'auto' : '100%'),
-                  position: 'relative'
-                }}
-              >
+            {widgets.map((widget: PageWidget, wIdx: number) => {
+              const isDropBefore = dropIndicator?.targetId === widget.id && dropIndicator.position === 'before'
+              const isDropAfter = dropIndicator?.targetId === widget.id && dropIndicator.position === 'after'
+
+              return (
                 <div
-                  className={`widget-insert-zone ${insertBeforeId === widget.id && dragOver ? 'active' : ''}`}
-                  onDragOver={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    e.dataTransfer.dropEffect = 'copy'
-                    setDragOver(true)
-                    setInsertBeforeId(widget.id)
-                  }}
-                  onDrop={(e) => handleDrop(e, widget.id)}
-                />
-                <div
-                  onDragOver={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    e.dataTransfer.dropEffect = 'copy'
-                    setDragOver(true)
-                    const rect = e.currentTarget.getBoundingClientRect()
-                    const isTopHalf = (e.clientY - rect.top) < (rect.height / 2)
-                    if (isTopHalf) {
-                      setInsertBeforeId(widget.id)
-                    } else {
-                      const idx = widgets.findIndex((w: any) => w.id === widget.id)
-                      setInsertBeforeId(idx + 1 < widgets.length ? widgets[idx + 1].id : null)
-                    }
-                  }}
-                  onDrop={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    const rect = e.currentTarget.getBoundingClientRect()
-                    const isTopHalf = (e.clientY - rect.top) < (rect.height / 2)
-                    if (isTopHalf) {
-                      handleDrop(e, widget.id)
-                    } else {
-                      const idx = widgets.findIndex((w: any) => w.id === widget.id)
-                      handleDrop(e, idx + 1 < widgets.length ? widgets[idx + 1].id : undefined)
-                    }
+                  key={widget.id}
+                  style={{
+                    width: container.display_type === 'grid' ? 'auto' : (dirVal === 'row' ? 'auto' : '100%'),
+                    position: 'relative'
                   }}
                 >
-                  <WidgetBlock
-                    widget={widget}
-                    viewportMode={viewportMode}
-                    isSelected={selectedWidgetId === widget.id}
-                    onSelect={() => onSelectWidget(widget.id)}
-                    onDelete={() => onWidgetDelete(widget.id)}
-                    onDuplicate={() => onWidgetDuplicate(widget.id)}
-                    onContextMenu={(e: any) => onContextMenu(e, 'widget', widget.id, undefined, container.id)}
-                    onDragStart={(e: any) => {
-                      const payload = { kind: 'widget-move' as const, widgetId: widget.id, fromContainerId: container.id }
-                      _dragPayload = payload as any
-                      if (e && e.dataTransfer) {
-                        try {
-                          e.dataTransfer.setData('text/plain', JSON.stringify(payload))
-                          e.dataTransfer.setData('application/json', JSON.stringify(payload))
-                        } catch {}
+                  {/* Linha Indicadora de Drop Acima do Elemento */}
+                  <div
+                    className={`elementor-drop-indicator-line ${isDropBefore ? 'active' : ''}`}
+                    onDragOver={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      e.dataTransfer.dropEffect = 'move'
+                      setDragOver(true)
+                      setDropIndicator({ targetId: widget.id, position: 'before' })
+                    }}
+                    onDrop={(e) => handleDrop(e, widget.id)}
+                  />
+
+                  {/* Bloco do Widget com detecção precisa de metade Superior / Inferior */}
+                  <div
+                    onDragOver={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      e.dataTransfer.dropEffect = 'move'
+                      setDragOver(true)
+                      const rect = e.currentTarget.getBoundingClientRect()
+                      const isTopHalf = (e.clientY - rect.top) < (rect.height / 2)
+                      if (isTopHalf) {
+                        setDropIndicator({ targetId: widget.id, position: 'before' })
+                      } else {
+                        setDropIndicator({ targetId: widget.id, position: 'after' })
                       }
                     }}
-                  />
+                    onDrop={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      const rect = e.currentTarget.getBoundingClientRect()
+                      const isTopHalf = (e.clientY - rect.top) < (rect.height / 2)
+                      if (isTopHalf) {
+                        handleDrop(e, widget.id)
+                      } else {
+                        const nextWidget = widgets[wIdx + 1]
+                        handleDrop(e, nextWidget ? nextWidget.id : null)
+                      }
+                    }}
+                  >
+                    <WidgetBlock
+                      widget={widget}
+                      viewportMode={viewportMode}
+                      isSelected={selectedWidgetId === widget.id}
+                      onSelect={() => onSelectWidget(widget.id)}
+                      onDelete={() => onWidgetDelete(widget.id)}
+                      onDuplicate={() => onWidgetDuplicate(widget.id)}
+                      onContextMenu={(e: any) => onContextMenu(e, 'widget', widget.id, undefined, container.id)}
+                      onDragStart={(e: any) => {
+                        const payload = { kind: 'widget-move' as const, widgetId: widget.id, fromContainerId: container.id }
+                        _dragPayload = payload as any
+                        if (e && e.dataTransfer) {
+                          e.dataTransfer.effectAllowed = 'move'
+                          try {
+                            e.dataTransfer.setData('text/plain', JSON.stringify(payload))
+                            e.dataTransfer.setData('application/json', JSON.stringify(payload))
+                          } catch {}
+                        }
+                      }}
+                    />
+                  </div>
+
+                  {/* Linha Indicadora de Drop Abaixo do Elemento (apenas no último item) */}
+                  {wIdx === widgets.length - 1 && (
+                    <div
+                      className={`elementor-drop-indicator-line ${isDropAfter ? 'active' : ''}`}
+                      onDragOver={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        e.dataTransfer.dropEffect = 'move'
+                        setDragOver(true)
+                        setDropIndicator({ targetId: widget.id, position: 'after' })
+                      }}
+                      onDrop={(e) => handleDrop(e, null)}
+                    />
+                  )}
                 </div>
-              </div>
-            ))}
-            <div
-              className={`widget-insert-zone ${dragOver && !insertBeforeId ? 'active' : ''}`}
-              onDragOver={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                e.dataTransfer.dropEffect = 'copy'
-                setDragOver(true)
-                setInsertBeforeId(null)
-              }}
-              onDrop={(e) => handleDrop(e)}
-            />
+              )
+            })}
           </>
         )}
       </div>
@@ -3092,7 +3110,7 @@ function WidgetBlock({ widget, viewportMode = 'desktop', isSelected, onSelect, o
       className={`canvas-widget ${isSelected ? 'selected' : ''}`}
       onClick={(e) => { e.stopPropagation(); onSelect() }}
       onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); onContextMenu(e) }}
-      draggable
+      draggable={true}
       onDragStart={(e) => {
         if (onDragStart) onDragStart(e)
         e.dataTransfer.effectAllowed = 'move'
@@ -3152,6 +3170,7 @@ function WidgetPreview({ widget, viewportMode = 'desktop' }: { widget: PageWidge
           <img
             src={src}
             alt={content?.alt as string || ''}
+            draggable={false}
             style={{
               ...es,
               width: customWidth || es.width || '100%',
