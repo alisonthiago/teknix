@@ -425,6 +425,12 @@ export async function savePageTree(pageId: string, sections: PageSection[]) {
     'created_at', 'updated_at'
   ])
 
+  function toValidUUID(id?: string): string {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+    if (id && uuidRegex.test(id)) return id
+    return crypto.randomUUID()
+  }
+
   function pick(obj: any, validCols: Set<string>) {
     const result: any = {}
     for (const key of Object.keys(obj)) {
@@ -438,36 +444,52 @@ export async function savePageTree(pageId: string, sections: PageSection[]) {
     localStorage.setItem(`teknix_sections_backup_${pageId}`, JSON.stringify(sections))
   } catch {}
 
-  // 2. Insert new structure
+  // 2. Insert new structure with guaranteed valid UUIDs
   try {
     for (const s of sections) {
+      const validSectionId = toValidUUID(s.id)
       const { containers, ...sectionRaw } = s
       const sectionData = pick(sectionRaw, SECTION_COLS)
+      sectionData.id = validSectionId
       sectionData.page_id = pageId
       const { error: sError } = await supabase.from('page_sections').insert(sectionData)
-      if (sError) console.warn('Aviso ao salvar section:', sError.message)
+      if (sError) {
+        console.error('Erro ao salvar section no Supabase:', sError)
+        throw new Error(`Erro ao salvar seção: ${sError.message}`)
+      }
 
-      if (containers) {
+      if (containers && containers.length > 0) {
         for (const c of containers) {
+          const validContainerId = toValidUUID(c.id)
           const { widgets, ...containerRaw } = c
           const containerData = pick(containerRaw, CONTAINER_COLS)
-          containerData.section_id = s.id
+          containerData.id = validContainerId
+          containerData.section_id = validSectionId
           const { error: cError } = await supabase.from('page_containers').insert(containerData)
-          if (cError) console.warn('Aviso ao salvar container:', cError.message)
+          if (cError) {
+            console.error('Erro ao salvar container no Supabase:', cError)
+            throw new Error(`Erro ao salvar container: ${cError.message}`)
+          }
 
-          if (widgets) {
+          if (widgets && widgets.length > 0) {
             for (const w of widgets) {
+              const validWidgetId = toValidUUID(w.id)
               const widgetData = pick(w, WIDGET_COLS)
-              widgetData.container_id = c.id
+              widgetData.id = validWidgetId
+              widgetData.container_id = validContainerId
               const { error: wError } = await supabase.from('page_widgets').insert(widgetData)
-              if (wError) console.warn('Aviso ao salvar widget:', wError.message)
+              if (wError) {
+                console.error('Erro ao salvar widget no Supabase:', wError)
+                throw new Error(`Erro ao salvar widget: ${wError.message}`)
+              }
             }
           }
         }
       }
     }
   } catch (err: any) {
-    console.warn('Erro ao salvar árvore no DB (salvo no cache local):', err?.message)
+    console.error('Erro ao salvar árvore no DB:', err?.message)
+    throw err
   }
 }
 
