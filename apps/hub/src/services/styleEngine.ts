@@ -225,13 +225,25 @@ export function computeSectionStyles(section: any, viewport: ViewportMode = 'des
 
 export function computeContainerOuterStyles(container: any, viewport: ViewportMode = 'desktop'): React.CSSProperties {
   const s: React.CSSProperties = {}
-  const contentWidthType = resolveResponsiveValue<string>(container, 'content_width', viewport, 'boxed')
-  const isFull = contentWidthType === 'full'
 
-  s.width = isFull ? (resolveResponsiveValue<string>(container, 'width', viewport, '100%')) : '100%'
+  // 1. Width & Flexbox Distribution (50/50, 33/33/33, 25/25/25/25, etc.)
+  const rawWidth = resolveResponsiveValue<string>(container, 'width', viewport, '')
+  const widthVal = rawWidth && rawWidth !== '' ? rawWidth : '100%'
+  s.width = widthVal
+  s.boxSizing = 'border-box'
+
+  if (widthVal && widthVal !== '100%') {
+    s.flex = `0 0 ${widthVal}`
+    s.maxWidth = widthVal
+  } else {
+    s.flex = '1 1 0%'
+    s.maxWidth = '100%'
+  }
 
   const minHeight = resolveResponsiveValue<string>(container, 'min_height', viewport, '')
-  if (minHeight && minHeight !== 'auto') s.minHeight = minHeight
+  if (minHeight && minHeight !== 'auto' && minHeight !== 'none') {
+    s.minHeight = minHeight
+  }
 
   // Background
   const bgType = resolveResponsiveValue<string>(container, 'bg_type', viewport, 'color')
