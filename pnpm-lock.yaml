@@ -163,6 +163,9 @@ importers:
       lottie-web:
         specifier: ^5.13.0
         version: 5.13.0
+      lucide-react:
+        specifier: ^1.34.0
+        version: 1.34.0(react@19.2.8)
       react:
         specifier: ^19.2.8
         version: 19.2.8
