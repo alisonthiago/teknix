@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import {
   Edit2,
   ExternalLink,
@@ -19,7 +19,14 @@ import {
   FolderTree,
   ShoppingCart,
   User,
-  FileText
+  FileText,
+  Sparkles,
+  X,
+  ArrowRight,
+  AlertCircle,
+  Layout,
+  Megaphone,
+  Layers
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import './PagesList.css'
@@ -51,6 +58,26 @@ const nativePages: [string, string, string?][] = [
 
 const siteOrigin = import.meta.env.VITE_SITE_URL || (import.meta.env.DEV ? 'http://localhost:5173' : '')
 
+const RESERVED_ROUTES = [
+  'contato',
+  'produtos',
+  'conta',
+  'pedidos',
+  'buscar-pedido',
+  'itens-salvos',
+  'sacola',
+  'checkout',
+  'login',
+  'cadastro',
+  'password',
+  'comparar',
+  'busca',
+  'blog',
+  'admin',
+  'hub',
+  'api'
+]
+
 interface Entry {
   id: string
   title: string
@@ -59,6 +86,17 @@ interface Entry {
   status: string
   kind: string
   pageId?: string
+}
+
+function slugify(text: string) {
+  return text
+    .toString()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
 }
 
 function getPageIcon(e: Entry) {
@@ -73,6 +111,7 @@ function getPageIcon(e: Entry) {
 }
 
 export default function PagesList() {
+  const navigate = useNavigate()
   const [entries, setEntries] = useState<Entry[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -81,9 +120,15 @@ export default function PagesList() {
   const [filter, setFilter] = useState('all')
   const [busy, setBusy] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<Entry | null>(null)
+
+  // Dialog State para Criar ou Duplicar
   const [dialog, setDialog] = useState<{ kind: 'create' | 'duplicate'; entry?: Entry } | null>(null)
   const [title, setTitle] = useState('')
   const [slug, setSlug] = useState('')
+  const [template, setTemplate] = useState<'standard' | 'landing' | 'blank'>('standard')
+  const [autoSlug, setAutoSlug] = useState(true)
+  const [formError, setFormError] = useState('')
+
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const request = useRef(0)
 
@@ -100,10 +145,191 @@ export default function PagesList() {
     }
   }
 
-  function openDialog(kind: 'create' | 'duplicate', entry?: Entry) {
-    setTitle(entry ? `${entry.title} — cópia` : '')
-    setSlug(entry ? `${entry.path}-copia` : '')
-    setDialog({ kind, entry })
+  function openCreateModal() {
+    setTitle('')
+    setSlug('')
+    setAutoSlug(true)
+    setTemplate('standard')
+    setFormError('')
+    setDialog({ kind: 'create' })
+  }
+
+  function openDuplicateModal(entry: Entry) {
+    const copyTitle = `${entry.title} — cópia`
+    const copySlug = `${entry.path.replace(/^\/+/, '')}-copia`
+    setTitle(copyTitle)
+    setSlug(`/${copySlug}`)
+    setAutoSlug(false)
+    setTemplate('standard')
+    setFormError('')
+    setDialog({ kind: 'duplicate', entry })
+  }
+
+  function handleTitleChange(val: string) {
+    setTitle(val)
+    setFormError('')
+    if (autoSlug && dialog?.kind === 'create') {
+      const generated = slugify(val)
+      setSlug(generated ? `/${generated}` : '')
+    }
+  }
+
+  function handleSlugChange(val: string) {
+    setAutoSlug(false)
+    setFormError('')
+    let cleaned = val.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-_/]/g, '')
+    if (cleaned && !cleaned.startsWith('/')) cleaned = `/${cleaned}`
+    setSlug(cleaned)
+  }
+
+  async function handleCreateOrDuplicate(e: React.FormEvent) {
+    e.preventDefault()
+    if (!title.trim()) {
+      setFormError('Por favor, informe o título da página.')
+      return
+    }
+
+    const finalSlug = (slug.trim() || `/${slugify(title)}`).replace(/^\/*/, '/')
+    if (finalSlug === '/' || finalSlug === '') {
+      setFormError('O endereço da página não pode ser vazio ou a raiz "/".')
+      return
+    }
+
+    const baseSlug = finalSlug.replace(/^\/+/, '').split('/')[0]
+    if (RESERVED_ROUTES.includes(baseSlug)) {
+      setFormError(`O endereço "${finalSlug}" é reservado pelo sistema da loja. Escolha outro endereço.`)
+      return
+    }
+
+    setBusy(true)
+    setFormError('')
+    try {
+      if (dialog?.kind === 'duplicate') {
+        const row = await duplicateEditorPage(dialog.entry!.pageId!, title, finalSlug)
+        setDialog(null)
+        navigate(`/hub/editor/page/${row.id}`)
+      } else {
+        // 1. Cria a página com status draft e slug sanitizado
+        const row = await createEditorPage(title, finalSlug)
+
+        // 2. Insere a estrutura inicial com base no modelo selecionado
+        try {
+          const { data: section } = await supabase.from('page_sections').insert({
+            page_id: row.id,
+            type: 'section',
+            order: 0,
+            layout: 'boxed',
+            direction: 'column',
+            max_width: '1200px',
+            padding_top: template === 'blank' ? '40px' : '70px',
+            padding_bottom: template === 'blank' ? '40px' : '70px',
+            bg_type: 'color',
+            bg_color: '#ffffff'
+          }).select().single()
+
+          if (section?.id) {
+            const { data: container } = await supabase.from('page_containers').insert({
+              section_id: section.id,
+              order: 0,
+              direction: 'column',
+              gap: '16px',
+              align_items: 'center',
+              justify_content: 'center',
+              width: '100%',
+              max_width: '1000px'
+            }).select().single()
+
+            if (container?.id) {
+              // Widget 1: Título principal
+              await supabase.from('page_widgets').insert({
+                container_id: container.id,
+                widget_type: 'heading',
+                order: 0,
+                content: {
+                  title: title.trim(),
+                  tag: 'h1',
+                  align: 'center'
+                },
+                style: {
+                  fontSize: '38px',
+                  fontWeight: '700',
+                  color: '#111827',
+                  textAlign: 'center',
+                  margin: '0 0 10px 0'
+                }
+              })
+
+              // Se for padrão: subtítulo de apresentação
+              if (template === 'standard') {
+                await supabase.from('page_widgets').insert({
+                  container_id: container.id,
+                  widget_type: 'text',
+                  order: 1,
+                  content: {
+                    text: 'Edite este texto e adicione novos blocos, produtos e imagens através do editor visual da Teknix.'
+                  },
+                  style: {
+                    fontSize: '16px',
+                    color: '#6b7280',
+                    textAlign: 'center',
+                    maxWidth: '680px',
+                    margin: '0 auto'
+                  }
+                })
+              }
+
+              // Se for landing: subtítulo chamativo + botão de conversão
+              if (template === 'landing') {
+                await supabase.from('page_widgets').insert({
+                  container_id: container.id,
+                  widget_type: 'text',
+                  order: 1,
+                  content: {
+                    text: 'Aproveite ofertas imperdíveis e condições exclusivas com alta performance e garantia.'
+                  },
+                  style: {
+                    fontSize: '18px',
+                    color: '#4b5563',
+                    textAlign: 'center',
+                    maxWidth: '640px',
+                    margin: '0 auto 16px auto'
+                  }
+                })
+
+                await supabase.from('page_widgets').insert({
+                  container_id: container.id,
+                  widget_type: 'button',
+                  order: 2,
+                  content: {
+                    text: 'Explorar Ofertas',
+                    link: '/produtos',
+                    variant: 'primary'
+                  },
+                  style: {
+                    background: '#0071e3',
+                    color: '#ffffff',
+                    padding: '12px 28px',
+                    borderRadius: '980px',
+                    fontWeight: '600',
+                    fontSize: '15px'
+                  }
+                })
+              }
+            }
+          }
+        } catch (structErr) {
+          console.warn('Erro ao criar estrutura inicial da página:', structErr)
+        }
+
+        setDialog(null)
+        // Redireciona imediatamente para o editor da nova página!
+        navigate(`/hub/editor/page/${row.id}`)
+      }
+    } catch (err: any) {
+      setFormError(err.message || 'Não foi possível criar a página. Verifique os dados informados.')
+    } finally {
+      setBusy(false)
+    }
   }
 
   async function load() {
@@ -172,6 +398,10 @@ export default function PagesList() {
     `${e.title} ${e.path}`.toLowerCase().includes(search.toLowerCase())
   )
 
+  const currentSlugClean = (slug || (dialog?.kind === 'create' ? `/${slugify(title)}` : '')).replace(/^\/+/, '')
+  const publicPreviewUrl = `${siteOrigin || 'http://localhost:5173'}/${currentSlugClean}`
+  const isReservedRoute = currentSlugClean ? RESERVED_ROUTES.includes(currentSlugClean.split('/')[0]) : false
+
   return (
     <div className="pages-page-container">
       <div className="pages-page-header">
@@ -182,7 +412,7 @@ export default function PagesList() {
         <button
           type="button"
           disabled={busy}
-          onClick={() => openDialog('create')}
+          onClick={openCreateModal}
           className="pages-primary-btn"
         >
           <Plus size={15} />
@@ -258,63 +488,355 @@ export default function PagesList() {
         </div>
       )}
 
+      {/* POPUP / MODAL DE CRIAR OU DUPLICAR PÁGINA */}
       {dialog && (
-        <div className="pages-confirm-overlay">
+        <div
+          className="pages-confirm-overlay"
+          onClick={e => {
+            if (e.target === e.currentTarget && !busy) setDialog(null)
+          }}
+        >
           <form
             className="pages-modal-card"
-            style={{ maxWidth: 460, padding: 24 }}
-            onSubmit={e => {
-              e.preventDefault()
-              action(async () => {
-                if (dialog.kind === 'duplicate') await duplicateEditorPage(dialog.entry!.pageId!, title, slug)
-                else await createEditorPage(title, slug)
-                setDialog(null)
-              })
+            style={{
+              maxWidth: 580,
+              background: '#ffffff',
+              borderRadius: 16,
+              boxShadow: '0 24px 60px rgba(0, 0, 0, 0.2)',
+              border: '1px solid rgba(0, 0, 0, 0.08)',
+              overflow: 'hidden'
             }}
+            onSubmit={handleCreateOrDuplicate}
           >
-            <h2 style={{ margin: '0 0 16px 0', fontSize: 17, fontWeight: 700, color: '#111827' }}>
-              {dialog.kind === 'create' ? 'Criar nova página' : 'Duplicar página'}
-            </h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <div>
-                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 4 }}>
-                  Título da página
-                </label>
-                <input
-                  required
-                  value={title}
-                  onChange={e => setTitle(e.target.value)}
-                  placeholder="Ex: Black Friday 2026"
-                  style={{ width: '100%', height: 38, padding: '0 12px', border: '1px solid #d1d5db', borderRadius: 6, fontSize: 13 }}
-                />
+            {/* Cabeçalho do Modal */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '20px 24px',
+              borderBottom: '1px solid #f0f0f2',
+              background: '#fafafc'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 10,
+                  background: '#e8f2ff',
+                  color: '#0071e3',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <Sparkles size={18} />
+                </div>
+                <div>
+                  <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: '#111827' }}>
+                    {dialog.kind === 'create' ? 'Criar Nova Página' : 'Duplicar Página'}
+                  </h2>
+                  <p style={{ margin: 0, fontSize: 12, color: '#6b7280' }}>
+                    {dialog.kind === 'create'
+                      ? 'Defina o nome e a URL pública da página. Você será redirecionado ao editor.'
+                      : 'Crie uma cópia independente com novo nome e endereço.'}
+                  </p>
+                </div>
               </div>
-              <div>
-                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 4 }}>
-                  Endereço público (slug)
-                </label>
-                <input
-                  required
-                  value={slug}
-                  onChange={e => setSlug(e.target.value)}
-                  placeholder="/campanha/oferta"
-                  style={{ width: '100%', height: 38, padding: '0 12px', border: '1px solid #d1d5db', borderRadius: 6, fontSize: 13, fontFamily: 'ui-monospace, monospace' }}
-                />
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 24 }}>
               <button
                 type="button"
                 onClick={() => setDialog(null)}
-                style={{ padding: '8px 16px', borderRadius: 6, border: '1px solid #d1d5db', background: '#f3f4f6', color: '#374151', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}
+                disabled={busy}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#86868b',
+                  cursor: 'pointer',
+                  padding: 6,
+                  borderRadius: 6,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+                title="Fechar"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Corpo do Formulário */}
+            <div style={{ padding: '22px 24px', display: 'flex', flexDirection: 'column', gap: 18 }}>
+              {/* Campo Título */}
+              <div>
+                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12.5, fontWeight: 600, color: '#1d1d1f', marginBottom: 6 }}>
+                  <span>Título da Página <span style={{ color: '#ef4444' }}>*</span></span>
+                  {dialog.kind === 'create' && autoSlug && (
+                    <span style={{ fontSize: 11, color: '#0071e3', fontWeight: 500 }}>
+                      Gerando URL automaticamente
+                    </span>
+                  )}
+                </label>
+                <input
+                  required
+                  autoFocus
+                  value={title}
+                  onChange={e => handleTitleChange(e.target.value)}
+                  placeholder="Ex: Black Friday 2026, Saldão de Ferramentas, Linha Titanium..."
+                  style={{
+                    width: '100%',
+                    height: 42,
+                    padding: '0 14px',
+                    border: '1px solid #d2d2d7',
+                    borderRadius: 8,
+                    fontSize: 14,
+                    color: '#1d1d1f',
+                    outline: 'none',
+                    transition: 'border-color 0.15s'
+                  }}
+                />
+              </div>
+
+              {/* Campo Slug / URL */}
+              <div>
+                <label style={{ display: 'block', fontSize: 12.5, fontWeight: 600, color: '#1d1d1f', marginBottom: 6 }}>
+                  Endereço Público (URL / Slug) <span style={{ color: '#ef4444' }}>*</span>
+                </label>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  border: isReservedRoute ? '1px solid #ef4444' : '1px solid #d2d2d7',
+                  borderRadius: 8,
+                  background: '#ffffff',
+                  overflow: 'hidden'
+                }}>
+                  <span style={{
+                    padding: '0 12px',
+                    height: 42,
+                    display: 'flex',
+                    alignItems: 'center',
+                    background: '#f5f5f7',
+                    color: '#6e6e73',
+                    fontSize: 13,
+                    fontFamily: 'ui-monospace, monospace',
+                    borderRight: '1px solid #e5e5ea',
+                    userSelect: 'none'
+                  }}>
+                    /
+                  </span>
+                  <input
+                    required
+                    value={slug.replace(/^\/+/, '')}
+                    onChange={e => handleSlugChange(e.target.value)}
+                    placeholder="exemplo-pagina"
+                    style={{
+                      flex: 1,
+                      height: 42,
+                      padding: '0 12px',
+                      border: 'none',
+                      outline: 'none',
+                      fontSize: 13,
+                      fontFamily: 'ui-monospace, monospace',
+                      color: '#1d1d1f'
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Card de Prévia da URL Oficial no SITE (Porta 5173) */}
+              <div style={{
+                padding: '12px 14px',
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: 10,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 10
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+                  <div style={{
+                    width: 30,
+                    height: 30,
+                    borderRadius: 8,
+                    background: '#e0f2fe',
+                    color: '#0284c7',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <Globe size={15} />
+                  </div>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: 10.5, fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      URL Pública no SITE:
+                    </div>
+                    <div style={{
+                      fontSize: 12.5,
+                      fontWeight: 600,
+                      color: '#0f172a',
+                      fontFamily: 'ui-monospace, monospace',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {publicPreviewUrl}
+                    </div>
+                  </div>
+                </div>
+                <span style={{
+                  fontSize: 10.5,
+                  fontWeight: 700,
+                  padding: '3px 8px',
+                  borderRadius: 6,
+                  background: '#e0f2fe',
+                  color: '#0369a1',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0
+                }}>
+                  Porta 5173
+                </span>
+              </div>
+
+              {/* Alerta de Rota Reservada ou Erro */}
+              {(isReservedRoute || formError) && (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: 10,
+                  padding: '10px 14px',
+                  borderRadius: 8,
+                  background: '#fef2f2',
+                  border: '1px solid #fecaca',
+                  color: '#b91c1c',
+                  fontSize: 12.5
+                }}>
+                  <AlertCircle size={16} style={{ flexShrink: 0, marginTop: 2 }} />
+                  <div>
+                    {formError || `O endereço "/${currentSlugClean}" é reservado pelo sistema da loja. Escolha outro endereço.`}
+                  </div>
+                </div>
+              )}
+
+              {/* Seleção de Modelo / Estrutura Inicial (apenas para criação) */}
+              {dialog.kind === 'create' && (
+                <div>
+                  <label style={{ display: 'block', fontSize: 12.5, fontWeight: 600, color: '#1d1d1f', marginBottom: 8 }}>
+                    Estrutura Inicial da Página
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+                    {[
+                      {
+                        id: 'standard',
+                        title: 'Padrão da Loja',
+                        desc: 'Cabeçalho oficial, container com título e rodapé oficial.',
+                        icon: Layout
+                      },
+                      {
+                        id: 'landing',
+                        title: 'Landing Page',
+                        desc: 'Hero de destaque, chamada para ação e botão de ofertas.',
+                        icon: Megaphone
+                      },
+                      {
+                        id: 'blank',
+                        title: 'Página em Branco',
+                        desc: 'Canvas limpo pronto para adicionar qualquer widget.',
+                        icon: Layers
+                      }
+                    ].map(item => {
+                      const isSelected = template === item.id
+                      const IconComp = item.icon
+                      return (
+                        <div
+                          key={item.id}
+                          onClick={() => setTemplate(item.id as any)}
+                          style={{
+                            padding: '12px 10px',
+                            borderRadius: 10,
+                            border: isSelected ? '2px solid #0071e3' : '1px solid #e5e5ea',
+                            background: isSelected ? '#f5f9ff' : '#ffffff',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 6
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <div style={{
+                              width: 26,
+                              height: 26,
+                              borderRadius: 6,
+                              background: isSelected ? '#0071e3' : '#f5f5f7',
+                              color: isSelected ? '#ffffff' : '#6e6e73',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}>
+                              <IconComp size={14} />
+                            </div>
+                            {isSelected && <Check size={14} color="#0071e3" />}
+                          </div>
+                          <div style={{ fontSize: 12, fontWeight: 600, color: isSelected ? '#0071e3' : '#1d1d1f' }}>
+                            {item.title}
+                          </div>
+                          <div style={{ fontSize: 10.5, color: '#86868b', lineHeight: 1.3 }}>
+                            {item.desc}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Rodapé de Ações */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+              gap: 10,
+              padding: '16px 24px',
+              background: '#fafafc',
+              borderTop: '1px solid #f0f0f2'
+            }}>
+              <button
+                type="button"
+                onClick={() => setDialog(null)}
+                disabled={busy}
+                style={{
+                  padding: '9px 16px',
+                  borderRadius: 8,
+                  border: '1px solid #d2d2d7',
+                  background: '#ffffff',
+                  color: '#1d1d1f',
+                  fontSize: 13,
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
               >
                 Cancelar
               </button>
               <button
                 type="submit"
-                disabled={busy}
+                disabled={busy || !title.trim() || !slug.trim() || isReservedRoute}
                 className="pages-primary-btn"
+                style={{
+                  padding: '9px 20px',
+                  fontSize: 13,
+                  fontWeight: 600,
+                  opacity: (busy || !title.trim() || !slug.trim() || isReservedRoute) ? 0.5 : 1,
+                  cursor: (busy || !title.trim() || !slug.trim() || isReservedRoute) ? 'not-allowed' : 'pointer'
+                }}
               >
-                <span>Salvar</span>
+                {busy ? (
+                  <span>Criando página…</span>
+                ) : (
+                  <>
+                    <span>{dialog.kind === 'create' ? 'Criar e Abrir no Editor' : 'Duplicar e Abrir no Editor'}</span>
+                    <ArrowRight size={14} />
+                  </>
+                )}
               </button>
             </div>
           </form>
@@ -430,7 +952,7 @@ export default function PagesList() {
                             disabled={busy || e.path === '/'}
                             title="Duplicar página"
                             aria-label="Duplicar página"
-                            onClick={() => openDialog('duplicate', e)}
+                            onClick={() => openDuplicateModal(e)}
                           >
                             <CopyPlus size={13} />
                           </button>
