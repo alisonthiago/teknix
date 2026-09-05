@@ -826,15 +826,17 @@ export default function PageEditor() {
       const targetPath = data.target ? findNodePath(layout, data.target) : []
       const targetNode = targetPath.length > 0 ? targetPath[targetPath.length - 1] : (data.target ? layout.nodes.find(n => matchNode(n, data.target)) : undefined)
 
+      const isContainerLike = (n?: CanvasNode) => !n ? false : (n.type === 'container' || n.type === 'grid' || n.type === 'layoutRegion' || Array.isArray(n.children) || !n.type)
       const isStructureWidget = type === 'container' || type === 'grid'
-      const targetIsContainer = targetNode?.type === 'container' || targetNode?.type === 'grid'
+      const targetIsContainer = isContainerLike(targetNode)
       const targetHasParentContainer = targetPath.length > 1
+      const isInside = !!data.inside || data.position === 'inside' || data.position === 'inside-start'
 
       let nodeToInsert = widgetNode
 
-      // Se o usuário arrastou um widget (imagem, título, botão, etc.) fora de um contêiner:
-      // Cria automaticamente o contêiner e insere o widget dentro, exatamente como no Elementor Pro
-      if (!isStructureWidget && !targetHasParentContainer && (!data.inside || !targetIsContainer)) {
+      // Se o usuário arrastou um widget fora de qualquer contêiner na raiz do layout:
+      // Cria automaticamente o contêiner e insere o widget dentro
+      if (!isStructureWidget && !targetHasParentContainer && (!isInside || !targetIsContainer)) {
         const autoContainer: CanvasNode = {
           id: crypto.randomUUID(),
           label: 'Contêiner',
@@ -847,7 +849,7 @@ export default function PageEditor() {
 
       layout.nodes.push(nodeToInsert)
       if (data.target) {
-        layout = moveCanvasNode(layout, nodeToInsert.id, data.target, !!data.inside, data.position)
+        layout = moveCanvasNode(layout, nodeToInsert.id, data.target, isInside, data.position || (isInside ? 'inside' : 'after'))
       }
       setSelected(widgetNode.id)
       setPanel('inspector')

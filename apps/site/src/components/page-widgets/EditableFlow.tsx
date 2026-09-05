@@ -1,6 +1,6 @@
 import {Children,isValidElement,useEffect,useMemo,useState,type ReactNode} from 'react'
 import {Editable,usePageWidgetState,useWidgetEdit} from './PageWidgets'
-import {type CanvasNode,type CanvasLayout,getHubOrigin} from '../../../../../packages/core/src/pageWidgets'
+import {type CanvasNode,type CanvasLayout,getHubOrigin,findNodePath,matchNode} from '../../../../../packages/core/src/pageWidgets'
 import CatalogWidget from './CatalogWidget'
 import WidgetRenderer from '../WidgetRenderer'
 import {Ads} from '../Ads'
@@ -78,7 +78,14 @@ export default function EditableFlow({
     id.startsWith('page-canvas-')
 
   const edit = useWidgetEdit(`layout:${id}`, globalKey)
-  const [dragTarget, setDragTarget] = useState<{ id: string; position: 'before' | 'after' | 'inside' } | null>(null)
+  interface DropTargetState {
+    id: string
+    targetContainerId?: string
+    inside: boolean
+    position: 'before' | 'after' | 'inside'
+    direction: 'row' | 'column'
+  }
+  const [dragTarget, setDragTarget] = useState<DropTargetState | null>(null)
   const [openAddSectionFor, setOpenAddSectionFor] = useState<string | null>(null)
   const entries = Children.toArray(children).filter(isValidElement)
   const sources = new Map(entries.map((node: any, i) => {
@@ -98,6 +105,105 @@ export default function EditableFlow({
     if (clientY < edge) window.scrollBy({ top: -18, behavior: 'auto' })
     else if (clientY > window.innerHeight - edge) window.scrollBy({ top: 18, behavior: 'auto' })
   }
+
+  function calculateDropTarget(clientX: number, clientY: number): DropTargetState | null {
+    if (typeof document === 'undefined') return null
+    const elements = document.elementsFromPoint(clientX, clientY)
+    if (!elements || elements.length === 0) return null
+
+    // 1. Prioridade A: Identificar widget folha (não container) sob o cursor
+    for (const el of elements) {
+      const canvasNodeId = el.getAttribute('data-canvas-node') || el.closest('[data-canvas-node]')?.getAttribute('data-canvas-node')
+      if (!canvasNodeId) continue
+
+      const path = findNodePath(layout, canvasNodeId)
+      if (!path || path.length === 0) continue
+
+      const targetNode = path[path.length - 1]
+      const isContainer = targetNode.type === 'container' || targetNode.type === 'grid'
+
+      if (!isContainer) {
+        const parentContainer = path.length > 1 ? path[path.length - 2] : null
+        const parentDirection = String(parentContainer?.content?.direction || 'column')
+        const isRow = parentDirection.startsWith('row')
+        const isReverse = parentDirection.includes('reverse')
+        const targetEl = document.querySelector(`[data-canvas-node="${targetNode.id}"]`) || el
+        const rect = targetEl.getBoundingClientRect()
+
+        let pos: 'before' | 'after' = 'after'
+        if (isRow) {
+          const midX = rect.left + rect.width / 2
+          pos = (clientX < midX) ? (isReverse ? 'after' : 'before') : (isReverse ? 'before' : 'after')
+          return { id: targetNode.id, targetContainerId: parentContainer?.id, inside: false, position: pos, direction: 'row' }
+        } else {
+          const midY = rect.top + rect.height / 2
+          pos = (clientY < midY) ? (isReverse ? 'after' : 'before') : (isReverse ? 'before' : 'after')
+          return { id: targetNode.id, targetContainerId: parentContainer?.id, inside: false, position: pos, direction: 'column' }
+        }
+      }
+    }
+
+    // 2. Prioridade B: Encontrar o CONTAINER MAIS PROFUNDO sob o cursor
+    for (const el of elements) {
+      const containerId = el.getAttribute('data-container-id') ||
+        el.getAttribute('data-canvas-node') ||
+        el.closest('[data-container-id]')?.getAttribute('data-container-id') ||
+        el.closest('[data-canvas-node]')?.getAttribute('data-canvas-node')
+
+      if (!containerId) continue
+
+      const path = findNodePath(layout, containerId)
+      if (!path || path.length === 0) continue
+
+      const targetNode = path[path.length - 1]
+      const isContainer = targetNode.type === 'container' || targetNode.type === 'grid' || Array.isArray(targetNode.children)
+
+      if (isContainer) {
+        // Se o container estiver VAZIO: aceita drop em TODA a sua área interna!
+        if (!targetNode.children || targetNode.children.length === 0) {
+          return { id: targetNode.id, targetContainerId: targetNode.id, inside: true, position: 'inside', direction: 'column' }
+        }
+
+        // Se o container JÁ POSSUI FILHOS: calcular a posição entre os filhos
+        const containerDir = String(targetNode.content?.direction || 'column')
+        const isRow = containerDir.startsWith('row')
+        const isReverse = containerDir.includes('reverse')
+        const children = targetNode.children
+
+        let closestChild = children[0]
+        let closestDist = Infinity
+        let closestPos: 'before' | 'after' = 'after'
+
+        for (const child of children) {
+          const childEl = document.querySelector(`[data-canvas-node="${child.id}"]`)
+          if (!childEl) continue
+          const r = childEl.getBoundingClientRect()
+          if (isRow) {
+            const centerX = r.left + r.width / 2
+            const dist = Math.abs(clientX - centerX)
+            if (dist < closestDist) {
+              closestDist = dist
+              closestChild = child
+              closestPos = (clientX < centerX) ? (isReverse ? 'after' : 'before') : (isReverse ? 'before' : 'after')
+            }
+          } else {
+            const centerY = r.top + r.height / 2
+            const dist = Math.abs(clientY - centerY)
+            if (dist < closestDist) {
+              closestDist = dist
+              closestChild = child
+              closestPos = (clientY < centerY) ? (isReverse ? 'after' : 'before') : (isReverse ? 'before' : 'after')
+            }
+          }
+        }
+
+        return { id: closestChild.id, targetContainerId: targetNode.id, inside: false, position: closestPos, direction: isRow ? 'row' : 'column' }
+      }
+    }
+
+    return null
+  }
+
   function drop(event: React.DragEvent, target?: string, inside = false, position: 'before' | 'after' | 'inside' = 'after') {
     if (!ctx?.preview) return
     event.preventDefault()
@@ -175,6 +281,8 @@ export default function EditableFlow({
       const isOpenAddSection = openAddSectionFor === node.id
       const isSelected = ctx?.preview && (ctx.selected === node.id || ctx.selected === node.source || (node.source && ctx.selected === `layout:${id}`))
       const flexStyle = computeNodeFlexStyle(node, parentLayout)
+      const isRowDirection = parentLayout?.direction?.startsWith('row') || dragTarget?.direction === 'row'
+      const dropLineClass = `editor-flow-drop-line ${isRowDirection ? 'is-vertical' : 'is-horizontal'}`
       return (
         <div key={node.id} style={{ display: 'contents' }}>
           {ctx?.preview && isOpenAddSection && (
@@ -206,7 +314,7 @@ export default function EditableFlow({
             </div>
           )}
           {ctx?.preview && isTarget && dragTarget.position === 'before' && (
-            <div className="editor-flow-drop-line" />
+            <div className={dropLineClass} />
           )}
           <div
             className={ctx?.preview ? 'editor-flow-node' : 'published-flow-node'}
@@ -221,31 +329,25 @@ export default function EditableFlow({
               event.stopPropagation()
               autoScroll(event.clientY)
               event.dataTransfer.dropEffect = 'copy'
-              const isContainer = node.type === 'container' || node.type === 'grid'
-              if (isContainer) {
-                setDragTarget({ id: node.id, position: 'inside' })
-                return
-              }
-              const rect = event.currentTarget.getBoundingClientRect()
-              const relY = event.clientY - rect.top
-              if (relY <= rect.height / 2) {
-                setDragTarget({ id: node.id, position: 'before' })
-              } else {
-                setDragTarget({ id: node.id, position: 'after' })
-              }
+              const target = calculateDropTarget(event.clientX, event.clientY)
+              if (target) setDragTarget(target)
             } : undefined}
             onDragLeave={ctx?.preview ? event => {
               if (!event.currentTarget.contains(event.relatedTarget as Node)) {
-                setDragTarget(null)
+                const rel = event.relatedTarget as HTMLElement
+                if (!rel || !rel.closest?.('[data-canvas-node], [data-container-id]')) {
+                  setDragTarget(null)
+                }
               }
             } : undefined}
             onDrop={event => {
               event.preventDefault()
               event.stopPropagation()
-              const isContainer = node.type === 'container' || node.type === 'grid'
-              const isInside = isContainer || (dragTarget?.id === node.id && dragTarget.position === 'inside')
-              const pos = isInside ? 'inside' : (dragTarget?.id === node.id ? dragTarget.position : 'after')
-              drop(event, node.id, isInside, pos)
+              const target = dragTarget || calculateDropTarget(event.clientX, event.clientY)
+              if (target) {
+                drop(event, target.id, target.inside, target.position)
+              }
+              setDragTarget(null)
             }}
             draggable={ctx?.preview}
             onDragStart={ctx?.preview ? event => {
@@ -342,10 +444,10 @@ export default function EditableFlow({
                 </button>
               </div>
             )}
-            {source ? source.element : (node.type === 'container' || node.type === 'grid') ? <ContainerNode node={node} regionId={id} globalKey={globalKey ? `global:${node.id}` : undefined} renderChildNodes={render} onDrop={drop} onChoose={action} preview={!!ctx?.preview} isDropActive={isTarget && dragTarget.position === 'inside'} parentLayout={parentLayout} /> : node.type === 'ads' ? <Ads position={String(node.content?.placement || 'middle_screen')} /> : <Editable widgetId={node.id} globalKey={globalKey ? `global:${node.id}` : undefined} label={node.label} widgetType={node.type} content={node.content || {}} renderContent={false}><FlowWidget node={node} globalKey={globalKey ? `global:${node.id}` : undefined} /></Editable>}
+            {source ? source.element : (node.type === 'container' || node.type === 'grid') ? <ContainerNode node={node} regionId={id} globalKey={globalKey ? `global:${node.id}` : undefined} renderChildNodes={render} onDrop={drop} onChoose={action} preview={!!ctx?.preview} isDropActive={dragTarget?.id === node.id && dragTarget.position === 'inside'} parentLayout={parentLayout} onCalculateDropTarget={calculateDropTarget} onSetDragTarget={setDragTarget} /> : node.type === 'ads' ? <Ads position={String(node.content?.placement || 'middle_screen')} /> : <Editable widgetId={node.id} globalKey={globalKey ? `global:${node.id}` : undefined} label={node.label} widgetType={node.type} content={node.content || {}} renderContent={false}><FlowWidget node={node} globalKey={globalKey ? `global:${node.id}` : undefined} /></Editable>}
           </div>
           {ctx?.preview && isTarget && dragTarget.position === 'after' && (
-            <div className="editor-flow-drop-line" />
+            <div className={dropLineClass} />
           )}
         </div>
       )
@@ -389,7 +491,7 @@ export default function EditableFlow({
   return Object.keys(regionStyle).length ? <div style={regionStyle}>{renderedContent}</div> : renderedContent
 }
 
-function ContainerNode({ node, globalKey, renderChildNodes, onDrop, onChoose, preview, isDropActive, parentLayout }: any) {
+function ContainerNode({ node, globalKey, renderChildNodes, onDrop, onChoose, preview, isDropActive, parentLayout, onCalculateDropTarget, onSetDragTarget }: any) {
   const ctx = usePageWidgetState()
   const edit = useWidgetEdit(node.id, globalKey)
   const content = { ...node.content, ...edit?.content }
@@ -496,13 +598,36 @@ function ContainerNode({ node, globalKey, renderChildNodes, onDrop, onChoose, pr
     >
       <Tag
         className={`editor-flow-container-wrap ${isDropActive ? 'editor-flow-container-drop-active' : ''}`}
+        data-container-id={node.id}
         style={{
           ...containerStyle,
           height: isChildOfRow ? '100%' : undefined,
           flex: isChildOfRow ? '1 1 auto' : undefined
         }}
-        onDragOver={(event: any) => { event.preventDefault(); event.stopPropagation(); event.dataTransfer.dropEffect = 'copy' }}
-        onDrop={(event: any) => onDrop(event, node.id, true, 'inside')}
+        onDragOver={(event: any) => {
+          if (!preview) return
+          event.preventDefault()
+          event.stopPropagation()
+          event.dataTransfer.dropEffect = 'copy'
+          const target = onCalculateDropTarget?.(event.clientX, event.clientY)
+          if (target) {
+            onSetDragTarget?.(target)
+          } else {
+            onSetDragTarget?.({ id: node.id, targetContainerId: node.id, inside: true, position: 'inside', direction: 'column' })
+          }
+        }}
+        onDrop={(event: any) => {
+          if (!preview) return
+          event.preventDefault()
+          event.stopPropagation()
+          const target = onCalculateDropTarget?.(event.clientX, event.clientY)
+          if (target) {
+            onDrop(event, target.id, target.inside, target.position)
+          } else {
+            onDrop(event, node.id, true, 'inside')
+          }
+          onSetDragTarget?.(null)
+        }}
       >
         {hasChildren ? (
           renderChildNodes(node.children, { direction: directionVal, gap: gapVal, type: node.type })
@@ -514,11 +639,13 @@ function ContainerNode({ node, globalKey, renderChildNodes, onDrop, onChoose, pr
                 e.preventDefault()
                 e.stopPropagation()
                 e.dataTransfer.dropEffect = 'copy'
+                onSetDragTarget?.({ id: node.id, targetContainerId: node.id, inside: true, position: 'inside', direction: 'column' })
               }}
               onDrop={(e: any) => {
                 e.preventDefault()
                 e.stopPropagation()
                 onDrop(e, node.id, true, 'inside')
+                onSetDragTarget?.(null)
               }}
               onClick={(e: any) => {
                 e.stopPropagation()

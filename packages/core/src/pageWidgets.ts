@@ -65,33 +65,45 @@ export function matchNode(n: CanvasNode, searchId: string): boolean {
 }
 
 /** Pure structural edits keep source/component/ADS identities intact. */
-export function moveCanvasNode(layout:CanvasLayout, id:string, target:string, inside=false, position:'before'|'after'|'inside'='after'):CanvasLayout {
-  const next=structuredClone(layout)
-  const find=(nodes:CanvasNode[],key:string):CanvasNode|undefined=>{
-    for(const n of nodes){
-      if(matchNode(n, key)) return n
-      const child=find(n.children||[],key)
-      if(child) return child
+export function moveCanvasNode(layout:CanvasLayout, id:string, target:string, inside=false, position:'before'|'after'|'inside'|'inside-start'='after'):CanvasLayout {
+  const next = structuredClone(layout)
+  const find = (nodes: CanvasNode[], key: string): CanvasNode | undefined => {
+    for (const n of nodes) {
+      if (matchNode(n, key)) return n
+      const child = find(n.children || [], key)
+      if (child) return child
     }
   }
-  const node=find(next.nodes,id),destination=find(next.nodes,target)
-  if(!node||!destination||id===target||find(node.children||[],target))return layout
-  if((inside || position==='inside') && destination.type!=='container' && destination.type!=='grid')return layout
-  const remove=(nodes:CanvasNode[]):boolean=>{
-    const index=nodes.findIndex(n=>matchNode(n, id))
-    if(index>=0){nodes.splice(index,1);return true}
-    return nodes.some(n=>remove(n.children||[]))
+  const node = find(next.nodes, id), destination = find(next.nodes, target)
+  if (!node || !destination || id === target || find(node.children || [], target)) return layout
+
+  const isDestinationContainer = destination.type === 'container' || destination.type === 'grid' || destination.type === 'layoutRegion' || Array.isArray(destination.children) || !destination.type
+  const isInsideAction = inside || position === 'inside' || position === 'inside-start'
+
+  if (isInsideAction && !isDestinationContainer) return layout
+
+  const remove = (nodes: CanvasNode[]): boolean => {
+    const index = nodes.findIndex(n => matchNode(n, id))
+    if (index >= 0) { nodes.splice(index, 1); return true }
+    return nodes.some(n => remove(n.children || []))
   }
   remove(next.nodes)
-  if(inside || position==='inside')(destination.children ||= []).push(node)
-  else {
-    const insert=(nodes:CanvasNode[]):boolean=>{
-      const index=nodes.findIndex(n=>matchNode(n, target))
-      if(index>=0){
-        nodes.splice(position==='before'?index:index+1,0,node)
+
+  if (isInsideAction) {
+    destination.children ||= []
+    if (position === 'inside-start') {
+      destination.children.unshift(node)
+    } else {
+      destination.children.push(node)
+    }
+  } else {
+    const insert = (nodes: CanvasNode[]): boolean => {
+      const index = nodes.findIndex(n => matchNode(n, target))
+      if (index >= 0) {
+        nodes.splice(position === 'before' ? index : index + 1, 0, node)
         return true
       }
-      return nodes.some(n=>insert(n.children||[]))
+      return nodes.some(n => insert(n.children || []))
     }
     insert(next.nodes)
   }

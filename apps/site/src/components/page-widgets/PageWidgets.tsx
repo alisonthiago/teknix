@@ -255,54 +255,6 @@ export function Editable({ as = 'div', widgetId, label, children, content, style
           kind: editorKind || 'widget',
           global: !!globalKey
         }, hubOrigin)
-      },
-      onDragOverCapture: (event: any) => {
-        event.preventDefault()
-        event.stopPropagation()
-        event.dataTransfer.dropEffect = 'copy'
-        const rect = event.currentTarget.getBoundingClientRect()
-        const relY = event.clientY - rect.top
-        const isContainer = widgetType === 'container' || editorKind === 'container'
-        if (isContainer && relY > rect.height * 0.25 && relY < rect.height * 0.75) {
-          setDropIndicator('inside')
-        } else if (relY <= rect.height / 2) {
-          setDropIndicator('before')
-        } else {
-          setDropIndicator('after')
-        }
-      },
-      onDragLeaveCapture: (event: any) => {
-        if (!event.currentTarget.contains(event.relatedTarget as Node)) {
-          setDropIndicator(null)
-        }
-      },
-      onDropCapture: (event: any) => {
-        event.preventDefault()
-        event.stopPropagation()
-        const pos = dropIndicator || 'after'
-        setDropIndicator(null)
-        let payload: any = {}
-        try {
-          const raw = event.dataTransfer.getData('application/teknix-widget')
-          if (raw) payload = JSON.parse(raw)
-        } catch {}
-        const activeType = payload.widgetType || (window as any).__teknixActiveDragWidget
-        if (!activeType && !payload.nodeId) return
-
-        window.parent.postMessage({
-          type: 'teknix:layout-action',
-          scope: ctx.scope,
-          action: payload.nodeId ? (payload.regionId === flow?.regionId ? 'move' : 'move-cross-region') : 'insert',
-          widgetType: activeType,
-          nodeId: payload.nodeId,
-          sourceRegionId: payload.regionId,
-          target: widgetId,
-          inside: pos === 'inside',
-          position: pos,
-          regionId: flow?.regionId,
-          globalKey: flow?.globalKey || globalKey
-        }, hubOrigin)
-        ;(window as any).__teknixActiveDragWidget = null
       }
     } : {}) }
   if (as === 'img' && edit?.content) {

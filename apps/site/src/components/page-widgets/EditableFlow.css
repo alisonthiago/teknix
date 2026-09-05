@@ -221,9 +221,7 @@
 /* Indicador Visual de Drop: ──── INSERIR AQUI ──── */
 .editor-flow-drop-line {
   position: relative;
-  height: 3px;
   background: #db468e;
-  margin: 6px 0;
   border-radius: 2px;
   z-index: 999;
   display: flex;
@@ -231,9 +229,18 @@
   justify-content: center;
   box-shadow: 0 0 10px rgba(219, 70, 142, 0.7);
   pointer-events: none;
+  transition: all 0.1s ease;
 }
 
-.editor-flow-drop-line::after {
+.editor-flow-drop-line.is-horizontal,
+.editor-flow-drop-line:not(.is-vertical) {
+  height: 3px;
+  width: 100%;
+  margin: 6px 0;
+}
+
+.editor-flow-drop-line.is-horizontal::after,
+.editor-flow-drop-line:not(.is-vertical)::after {
   content: "──── INSERIR AQUI ────";
   background: #db468e;
   color: #ffffff;
@@ -243,12 +250,43 @@
   padding: 2px 10px;
   border-radius: 4px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  white-space: nowrap;
+}
+
+.editor-flow-drop-line.is-vertical {
+  width: 3px;
+  min-height: 48px;
+  height: 100%;
+  align-self: stretch;
+  margin: 0 6px;
+}
+
+.editor-flow-drop-line.is-vertical::after {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #db468e;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .editor-flow-container-drop-active {
   outline: 2px dashed #db468e !important;
-  outline-offset: 2px;
-  background-color: rgba(219, 70, 142, 0.05) !important;
+  outline-offset: -2px !important;
+  background-color: rgba(219, 70, 142, 0.06) !important;
+  transition: outline 0.15s ease, background-color 0.15s ease;
+}
+
+.editor-flow-container-drop-active .elementor-empty-view {
+  border-color: #db468e !important;
+  background: rgba(219, 70, 142, 0.08) !important;
+}
+
+.editor-flow-container-drop-active .elementor-first-add {
+  transform: scale(1.12) !important;
+  border-color: #db468e !important;
+  color: #db468e !important;
+  box-shadow: 0 2px 12px rgba(219, 70, 142, 0.35) !important;
 }
 
 .elementor-bottom-drop-zone {
