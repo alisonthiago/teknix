@@ -6627,170 +6627,331 @@ export default function PageEditor() {
                         {widgetType === 'chrome:header' && (
                           <ElementorAccordion title="Estilo do Cabeçalho" icon={Palette} isOpen={openSections.reference_section_35 !== false} onToggle={() => toggleSection('reference_section_35')}>
                             {/* Cor de Fundo */}
-                            <div style={{ marginBottom: 16, paddingBottom: 14, borderBottom: '1px solid #e5e5ea' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-                                <span style={{ fontSize: 12, fontWeight: 600, color: '#1d1d1f' }}>Cor de Fundo do Cabeçalho</span>
-                                <span style={{ fontSize: 11, color: '#86868b', fontFamily: 'monospace', fontWeight: 600 }}>
-                                  {s.header_bg === 'transparent' ? 'Sem cor (Transparente)' : (s.header_bg || '#f7f7f7')}
-                                </span>
-                              </div>
-                              <p style={{ fontSize: 11, color: '#86868b', margin: '0 0 8px', lineHeight: 1.4 }}>
-                                Escolha uma cor para o cabeçalho ou clique no botão para deixar totalmente transparente.
-                              </p>
-                              <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 10 }}>
-                                <input
-                                  type="color"
-                                  value={s.header_bg === 'transparent' ? '#ffffff' : String(s.header_bg || '#f7f7f7')}
-                                  onChange={e => patch({ schema: { header_bg: e.target.value } })}
-                                  style={{ width: 44, height: 32, padding: 0, border: '1px solid #d2d2d7', borderRadius: 6, cursor: 'pointer' }}
-                                  title="Selecionar cor personalizada"
-                                />
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    patch({ schema: { header_bg: 'transparent' } })
-                                    showNotice('Cabeçalho definido como sem cor (transparente).')
-                                  }}
-                                  style={{
-                                    flex: 1,
-                                    padding: '7px 8px',
-                                    fontSize: 11,
-                                    fontWeight: 600,
-                                    background: s.header_bg === 'transparent' ? '#e8f2ff' : '#f5f5f7',
-                                    color: s.header_bg === 'transparent' ? '#0071e3' : '#1d1d1f',
-                                    border: s.header_bg === 'transparent' ? '1px solid #0071e3' : '1px solid #d2d2d7',
-                                    borderRadius: 6,
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: 4
-                                  }}
-                                  title="Zerar cor e deixar transparente"
-                                >
-                                  <span>🚫</span> Zerar (Sem cor)
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    const val = s.header_bg || 'transparent'
-                                    patchKey('chrome:header', { schema: { header_bg: val } }, true)
-                                    showNotice('Cor de fundo do cabeçalho salva como padrão da loja!')
-                                  }}
-                                  style={{
-                                    padding: '7px 10px',
-                                    fontSize: 11,
-                                    fontWeight: 600,
-                                    background: '#f5f5f7',
-                                    color: '#1d1d1f',
-                                    border: '1px solid #d2d2d7',
-                                    borderRadius: 6,
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 4
-                                  }}
-                                  title="Salvar esta cor como padrão para todo o site"
-                                >
-                                  <Star size={13} color="#f59e0b" /> Salvar padrão
-                                </button>
-                              </div>
+                            {/* Cor de Fundo do Cabeçalho (Design Moderno & Integrado) */}
+                            {(() => {
+                              const isTransparent = s.header_bg === 'transparent'
+                              const currentBg = isTransparent ? 'transparent' : String(s.header_bg || '#f7f7f7')
+                              return (
+                                <div style={{ marginBottom: 18, paddingBottom: 14, borderBottom: '1px solid #e5e5ea' }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                                    <span style={{ fontSize: 12, fontWeight: 600, color: '#1d1d1f' }}>Cor de Fundo do Cabeçalho</span>
+                                    <span style={{
+                                      fontSize: 10,
+                                      fontFamily: 'ui-monospace, monospace',
+                                      fontWeight: 600,
+                                      padding: '2px 6px',
+                                      borderRadius: 4,
+                                      background: isTransparent ? '#eff6ff' : '#f5f5f7',
+                                      color: isTransparent ? '#0071e3' : '#1d1d1f',
+                                      border: isTransparent ? '1px solid #bfdbfe' : '1px solid #d2d2d7'
+                                    }}>
+                                      {isTransparent ? 'Transparente' : currentBg.toUpperCase()}
+                                    </span>
+                                  </div>
 
-                              {/* Paleta rápida de cores oficiais */}
-                              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                                <span style={{ fontSize: 10, color: '#86868b', fontWeight: 600 }}>CORES PADRÃO:</span>
-                                {[
-                                  { label: 'Sem cor (Transparente)', color: 'transparent' },
-                                  { label: 'Branco', color: '#ffffff' },
-                                  { label: 'Cinza Original TEKNIX', color: '#f7f7f7' },
-                                  { label: 'Preto Oficial', color: '#111827' },
-                                  { label: 'TEKNIX Lime', color: '#a2e000' },
-                                  { label: 'Azul Apple', color: '#0071e3' }
-                                ].map(p => (
-                                  <button
-                                    key={p.label}
-                                    type="button"
-                                    onClick={() => {
-                                      patch({ schema: { header_bg: p.color } })
-                                      showNotice(`Cor ${p.label} aplicada ao cabeçalho.`)
-                                    }}
-                                    style={{
-                                      width: 20,
-                                      height: 20,
-                                      borderRadius: '50%',
-                                      border: s.header_bg === p.color ? '2px solid #0071e3' : '1px solid #d2d2d7',
-                                      background: p.color === 'transparent' ? 'repeating-conic-gradient(#ccc 0% 25%, #fff 0% 50%) 50% / 6px 6px' : p.color,
-                                      cursor: 'pointer'
-                                    }}
-                                    title={p.label}
-                                  />
-                                ))}
-                              </div>
-                            </div>
-
-                            {/* Cor da Borda */}
-                            <div style={{ marginBottom: 16, paddingBottom: 14, borderBottom: '1px solid #e5e5ea' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-                                <span style={{ fontSize: 12, fontWeight: 600, color: '#1d1d1f' }}>Cor da Borda Inferior</span>
-                                <span style={{ fontSize: 11, color: '#86868b', fontFamily: 'monospace', fontWeight: 600 }}>
-                                  {s.header_border_color === 'transparent' ? 'Sem borda' : (s.header_border_color || '#e5e7eb')}
-                                </span>
-                              </div>
-                              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                                <input
-                                  type="color"
-                                  value={s.header_border_color === 'transparent' ? '#e5e7eb' : String(s.header_border_color || '#e5e7eb')}
-                                  onChange={e => patch({ schema: { header_border_color: e.target.value } })}
-                                  style={{ width: 44, height: 32, padding: 0, border: '1px solid #d2d2d7', borderRadius: 6, cursor: 'pointer' }}
-                                  title="Selecionar cor da borda"
-                                />
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    patch({ schema: { header_border_color: 'transparent' } })
-                                    showNotice('Borda inferior removida.')
-                                  }}
-                                  style={{
-                                    flex: 1,
-                                    padding: '7px 8px',
-                                    fontSize: 11,
-                                    fontWeight: 600,
-                                    background: s.header_border_color === 'transparent' ? '#e8f2ff' : '#f5f5f7',
-                                    color: s.header_border_color === 'transparent' ? '#0071e3' : '#1d1d1f',
-                                    border: s.header_border_color === 'transparent' ? '1px solid #0071e3' : '1px solid #d2d2d7',
-                                    borderRadius: 6,
-                                    cursor: 'pointer'
-                                  }}
-                                  title="Remover borda inferior"
-                                >
-                                  🚫 Zerar (Sem borda)
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    const val = s.header_border_color || 'transparent'
-                                    patchKey('chrome:header', { schema: { header_border_color: val } }, true)
-                                    showNotice('Borda inferior salva como padrão da loja!')
-                                  }}
-                                  style={{
-                                    padding: '7px 10px',
-                                    fontSize: 11,
-                                    fontWeight: 600,
-                                    background: '#f5f5f7',
-                                    color: '#1d1d1f',
-                                    border: '1px solid #d2d2d7',
-                                    borderRadius: 6,
-                                    cursor: 'pointer',
+                                  {/* Caixa integrada de controle de cor */}
+                                  <div style={{
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: 4
-                                  }}
-                                  title="Salvar esta borda como padrão para todo o site"
-                                >
-                                  <Star size={13} color="#f59e0b" /> Salvar padrão
-                                </button>
-                              </div>
-                            </div>
+                                    gap: 8,
+                                    padding: '4px 6px',
+                                    background: '#ffffff',
+                                    border: '1px solid #d2d2d7',
+                                    borderRadius: 8,
+                                    boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+                                    marginBottom: 8
+                                  }}>
+                                    {/* Swatch de cor clicável */}
+                                    <div style={{ position: 'relative', width: 28, height: 28, flexShrink: 0 }}>
+                                      <div style={{
+                                        width: '100%',
+                                        height: '100%',
+                                        borderRadius: 6,
+                                        border: '1px solid rgba(0,0,0,0.12)',
+                                        background: isTransparent ? 'repeating-conic-gradient(#cbd5e1 0% 25%, #ffffff 0% 50%) 50% / 6px 6px' : currentBg,
+                                        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.3)'
+                                      }} />
+                                      <input
+                                        type="color"
+                                        value={isTransparent ? '#ffffff' : currentBg}
+                                        onChange={e => patch({ schema: { header_bg: e.target.value } })}
+                                        title="Clique para escolher uma cor personalizada"
+                                        style={{
+                                          position: 'absolute',
+                                          inset: 0,
+                                          width: '100%',
+                                          height: '100%',
+                                          opacity: 0,
+                                          cursor: 'pointer',
+                                          margin: 0,
+                                          padding: 0,
+                                          border: 'none'
+                                        }}
+                                      />
+                                    </div>
+
+                                    {/* Código de cor */}
+                                    <div style={{ flex: 1, minWidth: 0, fontSize: 11, fontWeight: 600, color: isTransparent ? '#86868b' : '#1d1d1f', fontFamily: 'ui-monospace, monospace' }}>
+                                      {isTransparent ? 'Sem cor (Transparente)' : currentBg}
+                                    </div>
+
+                                    {/* Botão Zerar (Transparente) */}
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        patch({ schema: { header_bg: 'transparent' } })
+                                        showNotice('Cabeçalho definido como transparente.')
+                                      }}
+                                      title="Zerar cor e deixar transparente"
+                                      style={{
+                                        padding: '5px 8px',
+                                        fontSize: 11,
+                                        fontWeight: 600,
+                                        borderRadius: 6,
+                                        border: isTransparent ? '1px solid #0071e3' : '1px solid #d2d2d7',
+                                        background: isTransparent ? '#e8f2ff' : '#f5f5f7',
+                                        color: isTransparent ? '#0071e3' : '#48484a',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 4,
+                                        transition: 'all 0.15s ease'
+                                      }}
+                                    >
+                                      <RotateCcw size={11} />
+                                      <span>Zerar</span>
+                                    </button>
+
+                                    {/* Botão Salvar Padrão */}
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const val = s.header_bg || 'transparent'
+                                        patchKey('chrome:header', { schema: { header_bg: val } }, true)
+                                        showNotice('Cor de fundo salva como padrão oficial da loja!')
+                                      }}
+                                      title="Salvar esta cor como padrão para toda a loja"
+                                      style={{
+                                        padding: '5px 8px',
+                                        fontSize: 11,
+                                        fontWeight: 600,
+                                        borderRadius: 6,
+                                        border: '1px solid #d2d2d7',
+                                        background: '#f5f5f7',
+                                        color: '#1d1d1f',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 4,
+                                        transition: 'all 0.15s ease'
+                                      }}
+                                    >
+                                      <Star size={11} color="#f59e0b" />
+                                      <span>Salvar padrão</span>
+                                    </button>
+                                  </div>
+
+                                  {/* Presets Rápidos de Cores */}
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '2px 0' }}>
+                                    <span style={{ fontSize: 10, color: '#86868b', fontWeight: 600, textTransform: 'uppercase' }}>Cores:</span>
+                                    {[
+                                      { label: 'Sem cor (Transparente)', color: 'transparent' },
+                                      { label: 'Branco', color: '#ffffff' },
+                                      { label: 'Cinza Original TEKNIX', color: '#f7f7f7' },
+                                      { label: 'Preto Oficial', color: '#111827' },
+                                      { label: 'TEKNIX Lime', color: '#a2e000' },
+                                      { label: 'Azul Apple', color: '#0071e3' }
+                                    ].map(p => {
+                                      const active = (p.color === 'transparent' && isTransparent) || (!isTransparent && currentBg.toLowerCase() === p.color.toLowerCase())
+                                      return (
+                                        <button
+                                          key={p.label}
+                                          type="button"
+                                          onClick={() => {
+                                            patch({ schema: { header_bg: p.color } })
+                                            showNotice(`Cor ${p.label} aplicada ao cabeçalho.`)
+                                          }}
+                                          title={p.label}
+                                          style={{
+                                            width: 20,
+                                            height: 20,
+                                            borderRadius: '50%',
+                                            padding: 0,
+                                            border: active ? '2px solid #0071e3' : '1px solid #d2d2d7',
+                                            outline: active ? '2px solid rgba(0, 113, 227, 0.25)' : 'none',
+                                            outlineOffset: 1,
+                                            background: p.color === 'transparent' ? 'repeating-conic-gradient(#cbd5e1 0% 25%, #ffffff 0% 50%) 50% / 6px 6px' : p.color,
+                                            cursor: 'pointer',
+                                            transition: 'all 0.15s ease',
+                                            transform: active ? 'scale(1.15)' : 'scale(1)'
+                                          }}
+                                        />
+                                      )
+                                    })}
+                                  </div>
+                                </div>
+                              )
+                            })()}
+
+                            {/* Cor da Borda Inferior (Design Moderno & Integrado) */}
+                            {(() => {
+                              const isTransparent = s.header_border_color === 'transparent'
+                              const currentBorder = isTransparent ? 'transparent' : String(s.header_border_color || '#e5e7eb')
+                              return (
+                                <div style={{ marginBottom: 18, paddingBottom: 14, borderBottom: '1px solid #e5e5ea' }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                                    <span style={{ fontSize: 12, fontWeight: 600, color: '#1d1d1f' }}>Cor da Borda Inferior</span>
+                                    <span style={{
+                                      fontSize: 10,
+                                      fontFamily: 'ui-monospace, monospace',
+                                      fontWeight: 600,
+                                      padding: '2px 6px',
+                                      borderRadius: 4,
+                                      background: isTransparent ? '#eff6ff' : '#f5f5f7',
+                                      color: isTransparent ? '#0071e3' : '#1d1d1f',
+                                      border: isTransparent ? '1px solid #bfdbfe' : '1px solid #d2d2d7'
+                                    }}>
+                                      {isTransparent ? 'Sem borda' : currentBorder.toUpperCase()}
+                                    </span>
+                                  </div>
+
+                                  {/* Caixa integrada da borda */}
+                                  <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 8,
+                                    padding: '4px 6px',
+                                    background: '#ffffff',
+                                    border: '1px solid #d2d2d7',
+                                    borderRadius: 8,
+                                    boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+                                    marginBottom: 8
+                                  }}>
+                                    <div style={{ position: 'relative', width: 28, height: 28, flexShrink: 0 }}>
+                                      <div style={{
+                                        width: '100%',
+                                        height: '100%',
+                                        borderRadius: 6,
+                                        border: '1px solid rgba(0,0,0,0.12)',
+                                        background: isTransparent ? 'repeating-conic-gradient(#cbd5e1 0% 25%, #ffffff 0% 50%) 50% / 6px 6px' : currentBorder,
+                                        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.3)'
+                                      }} />
+                                      <input
+                                        type="color"
+                                        value={isTransparent ? '#e5e7eb' : currentBorder}
+                                        onChange={e => patch({ schema: { header_border_color: e.target.value } })}
+                                        title="Clique para escolher a cor da borda"
+                                        style={{
+                                          position: 'absolute',
+                                          inset: 0,
+                                          width: '100%',
+                                          height: '100%',
+                                          opacity: 0,
+                                          cursor: 'pointer',
+                                          margin: 0,
+                                          padding: 0,
+                                          border: 'none'
+                                        }}
+                                      />
+                                    </div>
+
+                                    <div style={{ flex: 1, minWidth: 0, fontSize: 11, fontWeight: 600, color: isTransparent ? '#86868b' : '#1d1d1f', fontFamily: 'ui-monospace, monospace' }}>
+                                      {isTransparent ? 'Sem borda (Transparente)' : currentBorder}
+                                    </div>
+
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        patch({ schema: { header_border_color: 'transparent' } })
+                                        showNotice('Borda inferior removida.')
+                                      }}
+                                      title="Remover borda inferior"
+                                      style={{
+                                        padding: '5px 8px',
+                                        fontSize: 11,
+                                        fontWeight: 600,
+                                        borderRadius: 6,
+                                        border: isTransparent ? '1px solid #0071e3' : '1px solid #d2d2d7',
+                                        background: isTransparent ? '#e8f2ff' : '#f5f5f7',
+                                        color: isTransparent ? '#0071e3' : '#48484a',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 4,
+                                        transition: 'all 0.15s ease'
+                                      }}
+                                    >
+                                      <RotateCcw size={11} />
+                                      <span>Zerar</span>
+                                    </button>
+
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const val = s.header_border_color || 'transparent'
+                                        patchKey('chrome:header', { schema: { header_border_color: val } }, true)
+                                        showNotice('Cor da borda salva como padrão oficial da loja!')
+                                      }}
+                                      title="Salvar esta borda como padrão para todo o site"
+                                      style={{
+                                        padding: '5px 8px',
+                                        fontSize: 11,
+                                        fontWeight: 600,
+                                        borderRadius: 6,
+                                        border: '1px solid #d2d2d7',
+                                        background: '#f5f5f7',
+                                        color: '#1d1d1f',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 4,
+                                        transition: 'all 0.15s ease'
+                                      }}
+                                    >
+                                      <Star size={11} color="#f59e0b" />
+                                      <span>Salvar padrão</span>
+                                    </button>
+                                  </div>
+
+                                  {/* Presets de borda */}
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '2px 0' }}>
+                                    <span style={{ fontSize: 10, color: '#86868b', fontWeight: 600, textTransform: 'uppercase' }}>Bordas:</span>
+                                    {[
+                                      { label: 'Sem borda', color: 'transparent' },
+                                      { label: 'Cinza Suave', color: '#e5e7eb' },
+                                      { label: 'Cinza Escuro', color: '#9ca3af' },
+                                      { label: 'Preto', color: '#111827' }
+                                    ].map(p => {
+                                      const active = (p.color === 'transparent' && isTransparent) || (!isTransparent && currentBorder.toLowerCase() === p.color.toLowerCase())
+                                      return (
+                                        <button
+                                          key={p.label}
+                                          type="button"
+                                          onClick={() => {
+                                            patch({ schema: { header_border_color: p.color } })
+                                            showNotice(`Borda ${p.label} aplicada.`)
+                                          }}
+                                          title={p.label}
+                                          style={{
+                                            width: 20,
+                                            height: 20,
+                                            borderRadius: '50%',
+                                            padding: 0,
+                                            border: active ? '2px solid #0071e3' : '1px solid #d2d2d7',
+                                            outline: active ? '2px solid rgba(0, 113, 227, 0.25)' : 'none',
+                                            outlineOffset: 1,
+                                            background: p.color === 'transparent' ? 'repeating-conic-gradient(#cbd5e1 0% 25%, #ffffff 0% 50%) 50% / 6px 6px' : p.color,
+                                            cursor: 'pointer',
+                                            transition: 'all 0.15s ease',
+                                            transform: active ? 'scale(1.15)' : 'scale(1)'
+                                          }}
+                                        />
+                                      )
+                                    })}
+                                  </div>
+                                </div>
+                              )
+                            })()}
 
                             <ElementorSliderControl
                               label="Opacidade do Cabeçalho"
