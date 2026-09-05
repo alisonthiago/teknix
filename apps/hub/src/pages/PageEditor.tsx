@@ -100,6 +100,44 @@ const ELEMENTOR_STORE_WIDGETS = [
   { type: 'flashSaleSection', label: 'Oferta relâmpago', icon: Zap, desc: 'Contador e ofertas' },
 ]
 
+const PROMO_COLOR_PRESETS = [
+  { label: 'Verde Oferta', color: '#22c55e' },
+  { label: 'Vermelho Desconto', color: '#ef4444' },
+  { label: 'Azul Teknix', color: '#0071e3' },
+  { label: 'Laranja Black Friday', color: '#f97316' },
+  { label: 'Roxo VIP', color: '#8b5cf6' },
+  { label: 'Dourado Premium', color: '#d97706' },
+  { label: 'Dark Midnight', color: '#1d1d1f' },
+  { label: 'Ciano Tech', color: '#06b6d4' }
+]
+
+function RepeaterField({
+  label,
+  icon: Icon,
+  children,
+  description
+}: {
+  label: string
+  icon?: React.ComponentType<{ size?: number; className?: string; color?: string }>
+  children: React.ReactNode
+  description?: string
+}) {
+  return (
+    <div className="editor-repeater-field">
+      <label className="editor-repeater-field-label">
+        {Icon && <Icon size={12} color="#64748b" />}
+        {label}
+      </label>
+      {children}
+      {description && (
+        <span style={{ fontSize: 10, color: '#86868b', lineHeight: 1.3, marginTop: -1 }}>
+          {description}
+        </span>
+      )}
+    </div>
+  )
+}
+
 function initialWidgetContent(type: string): Record<string, any> {
   switch (type) {
     case 'heading': return { text: 'Título', tag: 'h2' }
@@ -5236,13 +5274,13 @@ export default function PageEditor() {
                                         canMoveUp={idx > 0}
                                         canMoveDown={idx < rawItems.length - 1}
                                       >
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                                          {/* Seletor Segmentado de Tipo de Card */}
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                          {/* Seletor Segmentado Apple iOS de Tipo de Card */}
                                           <div style={{
                                             display: 'grid',
                                             gridTemplateColumns: '1fr 1fr',
                                             gap: 4,
-                                            background: '#f0f0f2',
+                                            background: '#e5e5ea',
                                             padding: 3,
                                             borderRadius: 8
                                           }}>
@@ -5250,9 +5288,9 @@ export default function PageEditor() {
                                               type="button"
                                               onClick={() => updateItem(idx, { bgType: 'normal' })}
                                               style={{
-                                                padding: '6px 10px',
+                                                padding: '7px 10px',
                                                 fontSize: 11,
-                                                fontWeight: 600,
+                                                fontWeight: !isPromo ? 700 : 600,
                                                 border: 'none',
                                                 borderRadius: 6,
                                                 cursor: 'pointer',
@@ -5261,8 +5299,8 @@ export default function PageEditor() {
                                                 justifyContent: 'center',
                                                 gap: 6,
                                                 background: !isPromo ? '#ffffff' : 'transparent',
-                                                color: !isPromo ? '#0071e3' : '#6e6e73',
-                                                boxShadow: !isPromo ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                                                color: !isPromo ? '#0071e3' : '#64748b',
+                                                boxShadow: !isPromo ? '0 1px 4px rgba(0,0,0,0.12)' : 'none',
                                                 transition: 'all 0.15s ease'
                                               }}
                                             >
@@ -5272,9 +5310,9 @@ export default function PageEditor() {
                                               type="button"
                                               onClick={() => updateItem(idx, { bgType: 'promo' })}
                                               style={{
-                                                padding: '6px 10px',
+                                                padding: '7px 10px',
                                                 fontSize: 11,
-                                                fontWeight: 600,
+                                                fontWeight: isPromo ? 700 : 600,
                                                 border: 'none',
                                                 borderRadius: 6,
                                                 cursor: 'pointer',
@@ -5283,8 +5321,8 @@ export default function PageEditor() {
                                                 justifyContent: 'center',
                                                 gap: 6,
                                                 background: isPromo ? '#ffffff' : 'transparent',
-                                                color: isPromo ? '#0071e3' : '#6e6e73',
-                                                boxShadow: isPromo ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                                                color: isPromo ? '#0071e3' : '#64748b',
+                                                boxShadow: isPromo ? '0 1px 4px rgba(0,0,0,0.12)' : 'none',
                                                 transition: 'all 0.15s ease'
                                               }}
                                             >
@@ -5292,122 +5330,240 @@ export default function PageEditor() {
                                             </button>
                                           </div>
 
-                                          <ControlRow label="Nome / Rótulo do Card">
+                                          <RepeaterField label="Nome / Rótulo do Card" icon={Type}>
                                             <input
                                               type="text"
+                                              className="editor-repeater-input"
                                               placeholder="Ex: Macaco, Parafusadeira, Use: DESCONTO"
                                               value={String(item.name || '')}
                                               onChange={e => updateItem(idx, { name: e.target.value })}
                                             />
-                                          </ControlRow>
+                                          </RepeaterField>
 
-                                          <ControlRow label="Link de Destino (URL)">
+                                          <RepeaterField label="Link de Destino (URL)" icon={Link2}>
                                             <input
                                               type="text"
+                                              className="editor-repeater-input"
                                               placeholder="Ex: /produtos?q=ferramenta ou https://..."
                                               value={String(item.link || '')}
                                               onChange={e => updateItem(idx, { link: e.target.value })}
                                             />
-                                          </ControlRow>
+                                          </RepeaterField>
 
                                           {!isPromo ? (
                                             <>
-                                              <ControlRow label="Foto / Imagem do Card">
+                                              <RepeaterField label="Foto / Imagem do Card" icon={ImageIcon}>
                                                 <ImageMediaControl
                                                   value={String(item.iconUrl || item.image || item.src || '')}
                                                   onChange={url => updateItem(idx, { iconUrl: url, image: url })}
                                                 />
-                                              </ControlRow>
-                                              <ControlRow label="Ou URL Direta da Imagem">
+                                              </RepeaterField>
+                                              <RepeaterField label="Ou URL Direta da Imagem" icon={Link2}>
                                                 <input
                                                   type="text"
+                                                  className="editor-repeater-input"
                                                   placeholder="https://... ou /images/..."
                                                   value={String(item.iconUrl || item.image || item.src || '')}
                                                   onChange={e => updateItem(idx, { iconUrl: e.target.value, image: e.target.value })}
                                                 />
-                                              </ControlRow>
+                                              </RepeaterField>
                                               <label style={{
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 justifyContent: 'space-between',
-                                                padding: '8px 12px',
+                                                padding: '10px 12px',
                                                 background: '#ffffff',
-                                                border: '1px solid #e5e5ea',
+                                                border: '1px solid #e2e8f0',
                                                 borderRadius: 8,
                                                 cursor: 'pointer',
-                                                margin: '2px 0'
+                                                margin: '2px 0',
+                                                boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
                                               }}>
-                                                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                                  <span style={{ fontSize: 11, fontWeight: 600, color: '#1d1d1f' }}>Efeito 3D Recortado (Cutout)</span>
-                                                  <span style={{ fontSize: 10, color: '#86868b' }}>Remove fundo e destaca a foto com sombra</span>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+                                                  <div style={{
+                                                    width: 28,
+                                                    height: 28,
+                                                    borderRadius: 6,
+                                                    background: '#eff6ff',
+                                                    color: '#0071e3',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    flexShrink: 0
+                                                  }}>
+                                                    <Sparkles size={14} />
+                                                  </div>
+                                                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                    <span style={{ fontSize: 11, fontWeight: 600, color: '#1d1d1f' }}>Efeito 3D Recortado (Cutout)</span>
+                                                    <span style={{ fontSize: 10, color: '#64748b' }}>Remove fundo e destaca a foto com profundidade</span>
+                                                  </div>
                                                 </div>
-                                                <input
-                                                  type="checkbox"
-                                                  checked={item.is_cutout !== false}
-                                                  onChange={e => updateItem(idx, { is_cutout: e.target.checked })}
-                                                  style={{ width: 16, height: 16, cursor: 'pointer', accentColor: '#0071e3' }}
-                                                />
+                                                <div style={{
+                                                  width: 36,
+                                                  height: 20,
+                                                  borderRadius: 10,
+                                                  background: item.is_cutout !== false ? '#0071e3' : '#d1d5db',
+                                                  position: 'relative',
+                                                  transition: 'background 0.2s ease',
+                                                  flexShrink: 0
+                                                }}>
+                                                  <div style={{
+                                                    width: 16,
+                                                    height: 16,
+                                                    borderRadius: '50%',
+                                                    background: '#ffffff',
+                                                    position: 'absolute',
+                                                    top: 2,
+                                                    left: item.is_cutout !== false ? 18 : 2,
+                                                    transition: 'left 0.2s ease',
+                                                    boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
+                                                  }} />
+                                                  <input
+                                                    type="checkbox"
+                                                    checked={item.is_cutout !== false}
+                                                    onChange={e => updateItem(idx, { is_cutout: e.target.checked })}
+                                                    style={{ display: 'none' }}
+                                                  />
+                                                </div>
                                               </label>
                                             </>
                                           ) : (
                                             <>
-                                              {/* Prévia ao vivo do Selo Promocional */}
+                                              {/* Prévia ao vivo do Selo Promocional Realista */}
                                               <div style={{
                                                 display: 'flex',
                                                 alignItems: 'center',
-                                                gap: 12,
-                                                padding: '10px 12px',
-                                                background: '#ffffff',
-                                                border: '1px solid #e5e5ea',
-                                                borderRadius: 8
+                                                gap: 14,
+                                                padding: '12px 14px',
+                                                background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+                                                border: '1px solid #e2e8f0',
+                                                borderRadius: 10,
+                                                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)'
                                               }}>
                                                 <div style={{
-                                                  width: 48,
-                                                  height: 48,
-                                                  borderRadius: 10,
+                                                  width: 52,
+                                                  height: 52,
+                                                  borderRadius: 12,
                                                   background: item.promoBg || '#22c55e',
                                                   display: 'flex',
                                                   flexDirection: 'column',
                                                   alignItems: 'center',
                                                   justifyContent: 'center',
                                                   color: '#ffffff',
-                                                  boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
-                                                  flexShrink: 0
+                                                  boxShadow: `0 4px 14px ${(item.promoBg || '#22c55e')}45`,
+                                                  flexShrink: 0,
+                                                  transition: 'all 0.2s ease',
+                                                  padding: '2px 4px'
                                                 }}>
-                                                  <span style={{ fontSize: 11, fontWeight: 800, lineHeight: 1.1 }}>{item.badge || 'até 20%'}</span>
-                                                  <span style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', opacity: 0.9 }}>{item.badgeSub || 'OFF'}</span>
+                                                  <span style={{ fontSize: 12, fontWeight: 900, lineHeight: 1.1, textAlign: 'center' }}>
+                                                    {item.badge || 'até 20%'}
+                                                  </span>
+                                                  <span style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em', opacity: 0.95 }}>
+                                                    {item.badgeSub || 'OFF'}
+                                                  </span>
                                                 </div>
-                                                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                                  <span style={{ fontSize: 12, fontWeight: 600, color: '#1d1d1f' }}>Prévia do Selo Promocional</span>
-                                                  <span style={{ fontSize: 10, color: '#86868b' }}>Exibido com destaque no mosaico</span>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                    <span style={{ fontSize: 12, fontWeight: 700, color: '#0f172a' }}>Prévia do Selo Promo</span>
+                                                    <span style={{ fontSize: 9, fontWeight: 700, background: '#e0f2fe', color: '#0369a1', padding: '1px 5px', borderRadius: 4 }}>
+                                                      AO VIVO
+                                                    </span>
+                                                  </div>
+                                                  <span style={{ fontSize: 10.5, color: '#64748b' }}>
+                                                    Exibido com destaque e sombra volumétrica no mosaico
+                                                  </span>
                                                 </div>
                                               </div>
 
-                                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                                                <ControlRow label="Selo Principal">
+                                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                                                <RepeaterField label="Selo Principal" icon={Tag}>
                                                   <input
                                                     type="text"
+                                                    className="editor-repeater-input"
                                                     placeholder="Ex: até 20%"
                                                     value={String(item.badge || '')}
                                                     onChange={e => updateItem(idx, { badge: e.target.value })}
                                                   />
-                                                </ControlRow>
-                                                <ControlRow label="Sub-selo">
+                                                </RepeaterField>
+                                                <RepeaterField label="Sub-selo / Sufixo">
                                                   <input
                                                     type="text"
+                                                    className="editor-repeater-input"
                                                     placeholder="Ex: OFF"
                                                     value={String(item.badgeSub || '')}
                                                     onChange={e => updateItem(idx, { badgeSub: e.target.value })}
                                                   />
-                                                </ControlRow>
+                                                </RepeaterField>
                                               </div>
-                                              <ControlRow label="Cor de Fundo do Card Promo">
-                                                <input
-                                                  type="color"
-                                                  value={String(item.promoBg || '#22c55e')}
-                                                  onChange={e => updateItem(idx, { promoBg: e.target.value })}
-                                                />
-                                              </ControlRow>
+
+                                              {/* Seletor de Cores Promocionais com Paleta Rápida */}
+                                              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                                  <label style={{ fontSize: 11, fontWeight: 600, color: '#475569', display: 'flex', alignItems: 'center', gap: 5 }}>
+                                                    <Palette size={12} color="#64748b" /> Cor de Fundo do Selo Promo
+                                                  </label>
+                                                  <span style={{ fontSize: 10, fontFamily: 'monospace', fontWeight: 600, color: '#64748b', background: '#f1f5f9', padding: '1px 5px', borderRadius: 4 }}>
+                                                    {(item.promoBg || '#22c55e').toUpperCase()}
+                                                  </span>
+                                                </div>
+
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                                                  {PROMO_COLOR_PRESETS.map(preset => {
+                                                    const isSelected = (item.promoBg || '#22c55e').toLowerCase() === preset.color.toLowerCase()
+                                                    return (
+                                                      <button
+                                                        key={preset.color}
+                                                        type="button"
+                                                        title={preset.label}
+                                                        onClick={() => updateItem(idx, { promoBg: preset.color })}
+                                                        style={{
+                                                          width: 26,
+                                                          height: 26,
+                                                          borderRadius: '50%',
+                                                          background: preset.color,
+                                                          border: isSelected ? '2.5px solid #ffffff' : '1px solid rgba(0,0,0,0.1)',
+                                                          boxShadow: isSelected ? `0 0 0 2px #0071e3, 0 2px 5px rgba(0,0,0,0.2)` : '0 1px 2px rgba(0,0,0,0.08)',
+                                                          cursor: 'pointer',
+                                                          transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+                                                          transform: isSelected ? 'scale(1.12)' : 'scale(1)',
+                                                          padding: 0
+                                                        }}
+                                                      />
+                                                    )
+                                                  })}
+
+                                                  {/* Color Picker Personalizado Integrado */}
+                                                  <div style={{
+                                                    position: 'relative',
+                                                    width: 26,
+                                                    height: 26,
+                                                    borderRadius: '50%',
+                                                    overflow: 'hidden',
+                                                    border: '1px dashed #94a3b8',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    cursor: 'pointer',
+                                                    background: '#f8fafc'
+                                                  }} title="Escolher cor personalizada">
+                                                    <SlidersHorizontal size={11} color="#64748b" />
+                                                    <input
+                                                      type="color"
+                                                      value={String(item.promoBg || '#22c55e')}
+                                                      onChange={e => updateItem(idx, { promoBg: e.target.value })}
+                                                      style={{
+                                                        position: 'absolute',
+                                                        inset: 0,
+                                                        opacity: 0,
+                                                        cursor: 'pointer',
+                                                        width: '100%',
+                                                        height: '100%',
+                                                        border: 'none'
+                                                      }}
+                                                    />
+                                                  </div>
+                                                </div>
+                                              </div>
                                             </>
                                           )}
                                         </div>
@@ -9064,11 +9220,11 @@ function ElementorRepeaterItem({
       style={{
         background: '#ffffff',
         border: isOpen ? '1px solid #0071e3' : '1px solid #e5e5ea',
-        borderRadius: 8,
+        borderRadius: 10,
         marginBottom: 8,
         overflow: 'hidden',
         transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
-        boxShadow: isOpen ? '0 3px 12px rgba(0, 113, 227, 0.08)' : '0 1px 3px rgba(0, 0, 0, 0.02)'
+        boxShadow: isOpen ? '0 4px 16px rgba(0, 113, 227, 0.09)' : '0 1px 3px rgba(0, 0, 0, 0.02)'
       }}
     >
       <div
@@ -9078,7 +9234,7 @@ function ElementorRepeaterItem({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '8px 10px',
+          padding: '9px 12px',
           background: isOpen ? '#f8faff' : '#ffffff',
           cursor: 'pointer',
           userSelect: 'none',
@@ -9093,12 +9249,13 @@ function ElementorRepeaterItem({
             style={{
               fontSize: 10,
               fontWeight: 700,
-              padding: '2px 5px',
-              borderRadius: 4,
-              background: isOpen ? '#0071e3' : '#f0f0f2',
-              color: isOpen ? '#ffffff' : '#6e6e73',
+              padding: '2px 6px',
+              borderRadius: 5,
+              background: isOpen ? '#0071e3' : '#f1f5f9',
+              color: isOpen ? '#ffffff' : '#64748b',
               fontFamily: 'monospace, -apple-system, sans-serif',
-              flexShrink: 0
+              flexShrink: 0,
+              letterSpacing: '0.02em'
             }}
           >
             {String(index + 1).padStart(2, '0')}
@@ -9127,7 +9284,7 @@ function ElementorRepeaterItem({
             </div>
             {subtitle && (
               <span style={{
-                fontSize: 10,
+                fontSize: 10.5,
                 color: '#86868b',
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
@@ -9157,9 +9314,9 @@ function ElementorRepeaterItem({
                 padding: 4,
                 background: 'transparent',
                 border: 'none',
-                color: canMoveUp ? '#6e6e73' : '#d2d2d7',
+                color: canMoveUp ? '#64748b' : '#d2d2d7',
                 cursor: canMoveUp ? 'pointer' : 'not-allowed',
-                borderRadius: 4,
+                borderRadius: 5,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
@@ -9179,9 +9336,9 @@ function ElementorRepeaterItem({
                 padding: 4,
                 background: 'transparent',
                 border: 'none',
-                color: canMoveDown ? '#6e6e73' : '#d2d2d7',
+                color: canMoveDown ? '#64748b' : '#d2d2d7',
                 cursor: canMoveDown ? 'pointer' : 'not-allowed',
-                borderRadius: 4,
+                borderRadius: 5,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
@@ -9200,9 +9357,9 @@ function ElementorRepeaterItem({
                 padding: 4,
                 background: 'transparent',
                 border: 'none',
-                color: '#6e6e73',
+                color: '#64748b',
                 cursor: 'pointer',
-                borderRadius: 4,
+                borderRadius: 5,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
@@ -9221,9 +9378,9 @@ function ElementorRepeaterItem({
                 padding: 4,
                 background: 'transparent',
                 border: 'none',
-                color: '#ff3b30',
+                color: '#ef4444',
                 cursor: 'pointer',
-                borderRadius: 4,
+                borderRadius: 5,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
@@ -9241,9 +9398,9 @@ function ElementorRepeaterItem({
               padding: 4,
               background: 'transparent',
               border: 'none',
-              color: isOpen ? '#0071e3' : '#6e6e73',
+              color: isOpen ? '#0071e3' : '#64748b',
               cursor: 'pointer',
-              borderRadius: 4,
+              borderRadius: 5,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'
@@ -9255,12 +9412,12 @@ function ElementorRepeaterItem({
       </div>
       {isOpen && (
         <div style={{
-          padding: '12px 14px',
+          padding: '14px 16px',
           display: 'flex',
           flexDirection: 'column',
           gap: 12,
-          background: '#fafafa',
-          borderTop: '1px solid #f0f0f2'
+          background: '#fbfbfd',
+          borderTop: '1px solid #eef0f3'
         }}>
           {children}
         </div>
@@ -9513,17 +9670,20 @@ function ColorPickerControl({ id, label, child, description }: { id: string; lab
   )
 }
 
-function ControlRow({ label, children, description }: { label: string; children: React.ReactNode; description?: string }) {
+function ControlRow({ label, children, description, layout }: { label: string; children: React.ReactNode; description?: string; layout?: 'stacked' | 'inline' }) {
   const id = useId()
   const child: React.ReactElement<any> | null = Children.count(children) === 1 && isValidElement<any>(children) ? children as React.ReactElement<any> : null
-  const compact = child && (child.type === 'select' || child.type === 'input')
   const color = child?.type === 'input' && child.props.type === 'color'
 
   if (color && child) {
     return <ColorPickerControl id={id} label={label} child={child} description={description} />
   }
 
-  return <div className={`elementor-control-row ${compact ? 'editor-control-inline' : ''} ${color ? 'editor-control-color' : ''}`}>
+  const isTextInput = child && (child.type === 'textarea' || (child.type === 'input' && (child.props.type === 'text' || !child.props.type || child.props.type === 'url') && (Boolean(child.props.placeholder) || label.length > 18)))
+  const isStacked = layout === 'stacked' || (layout !== 'inline' && isTextInput)
+  const compact = !isStacked && child && (child.type === 'select' || child.type === 'input')
+
+  return <div className={`elementor-control-row ${compact ? 'editor-control-inline' : ''} ${isStacked ? 'editor-control-stacked' : ''} ${color ? 'editor-control-color' : ''}`}>
     <div className="elementor-control-header"><label htmlFor={id} className="elementor-control-title">{label}</label></div>
     {child && (child.type === 'input' || child.type === 'select' || child.type === 'textarea') ? cloneElement(child, { id, 'aria-label': label }) : children}
     {description && <span className="editor-control-description">{description}</span>}

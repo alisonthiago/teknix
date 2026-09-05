@@ -16,7 +16,9 @@ import {
   ShieldCheck,
   Tag,
   Copy,
-  Check
+  Check,
+  Globe,
+  EyeOff
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { createPage } from '../services/pageBuilder'
@@ -124,6 +126,22 @@ export default function ProductDetails() {
   const [editingPage, setEditingPage] = useState(false)
   const [togglingPublish, setTogglingPublish] = useState(false)
   const [copiedDesc, setCopiedDesc] = useState(false)
+  const [copiedId, setCopiedId] = useState(false)
+  const [copiedSku, setCopiedSku] = useState(false)
+
+  const copyId = (text: string) => {
+    if (!text) return
+    navigator.clipboard.writeText(text)
+    setCopiedId(true)
+    setTimeout(() => setCopiedId(false), 2000)
+  }
+
+  const copySku = (text: string) => {
+    if (!text) return
+    navigator.clipboard.writeText(text)
+    setCopiedSku(true)
+    setTimeout(() => setCopiedSku(false), 2000)
+  }
   const [salesInfo, setSalesInfo] = useState<{
     totalSold: number
     mlStatus: string
@@ -401,88 +419,139 @@ export default function ProductDetails() {
       </div>
 
       {/* ── Header Principal do Produto ── */}
-      <div className="product-details-header">
-        <div className="product-header-main">
-          <div className="product-header-thumb-wrap">
-            {imgUrl ? (
-              <img src={imgUrl} alt={product.name} className="product-header-thumb" />
-            ) : (
-              <Package size={32} color="#9ca3af" />
-            )}
-          </div>
-          <div className="product-header-info">
-            <div className="product-header-badges">
-              <span className={`product-pill ${isPublished ? 'published' : 'draft'}`}>
-                {isPublished ? '✓ Publicado no Site' : '○ Rascunho / Não Publicado'}
-              </span>
-              <span className="product-pill sales-history" title="Total acumulado de vendas já realizadas">
-                🔥 {salesInfo.totalSold} Vendidos no Total
-              </span>
-              <span className={`product-pill ml-status ${salesInfo.mlStatus === 'active' ? 'active' : 'paused'}`} title="Mesmo que o anúncio esteja pausado no Mercado Livre, o histórico de vendas permanece preservado no sistema.">
-                {salesInfo.mlStatus === 'active' ? '● ML: Anúncio Ativo' : '○ ML: Anúncio Pausado (Vendas Preservadas)'}
-              </span>
-              {product.sku && <span className="product-pill sku">SKU: {product.sku}</span>}
-              {product.brand && <span className="product-pill">{product.brand}</span>}
+      {(() => {
+        const siteBaseUrl = import.meta.env.VITE_SITE_URL || (import.meta.env.DEV ? 'http://localhost:5173' : (window.location.hostname.includes('teknixbrasil.com.br') ? 'https://www.teknixbrasil.com.br' : 'http://localhost:5173'))
+        const productPublicSlug = meta?.slug || product.slug || product.sku || product.id
+        const productPublicUrl = `${siteBaseUrl}/produtos/${productPublicSlug}`
+
+        return (
+          <div className="product-details-header">
+            <div className="product-header-main">
+              <div className="product-header-thumb-wrap">
+                {imgUrl ? (
+                  <img src={imgUrl} alt={product.name} className="product-header-thumb" />
+                ) : (
+                  <Package size={34} color="#94a3b8" />
+                )}
+              </div>
+              <div className="product-header-info">
+                <div className="product-header-badges">
+                  <span className={`product-pill ${isPublished ? 'published' : 'draft'}`}>
+                    <span className={`status-dot ${isPublished ? 'published' : 'draft'}`} />
+                    {isPublished ? 'Publicado no Site' : 'Rascunho / Oculto'}
+                  </span>
+                  {product.brand && (
+                    <span className="product-pill brand">
+                      {product.brand}
+                    </span>
+                  )}
+                  {product.sku && (
+                    <button
+                      type="button"
+                      onClick={() => copySku(product.sku)}
+                      className="product-pill sku-pill"
+                      title="Clique para copiar o SKU"
+                    >
+                      <span>SKU: {product.sku}</span>
+                      {copiedSku ? <Check size={11} color="#15803d" /> : <Copy size={11} className="copy-icon" />}
+                    </button>
+                  )}
+                  <span className="product-pill sales-history" title="Total acumulado de vendas já realizadas">
+                    🔥 {salesInfo.totalSold} vendas
+                  </span>
+                  <span
+                    className={`product-pill ml-status ${salesInfo.mlStatus === 'active' ? 'active' : 'paused'}`}
+                    title="Status no Mercado Livre (histórico preservado)"
+                  >
+                    ML: {salesInfo.mlStatus === 'active' ? 'Ativo' : 'Pausado'}
+                  </span>
+                </div>
+
+                <h1 className="product-header-title">{product.name}</h1>
+
+                <div className="product-header-subtext">
+                  <span className="product-meta-item">
+                    Categoria: <strong>{product.category || 'Geral'}</strong>
+                  </span>
+                  {product.model && (
+                    <>
+                      <span className="meta-separator">•</span>
+                      <span className="product-meta-item">
+                        Modelo: <strong>{product.model}</strong>
+                      </span>
+                    </>
+                  )}
+                  <span className="meta-separator">•</span>
+                  <button
+                    type="button"
+                    onClick={() => copyId(product.id)}
+                    className="product-id-chip"
+                    title="Clique para copiar o ID completo"
+                  >
+                    <span>ID: <code>{product.id ? `${product.id.slice(0, 8)}...` : ''}</code></span>
+                    {copiedId ? <Check size={11} color="#15803d" /> : <Copy size={11} />}
+                    {copiedId && <span className="copied-tag">Copiado!</span>}
+                  </button>
+                </div>
+              </div>
             </div>
-            <h1 className="product-header-title">{product.name}</h1>
-            <div className="product-header-subtext">
-              <span>ID: <code style={{ fontSize: 11 }}>{product.id}</code></span>
-              <span>•</span>
-              <span>Categoria: <strong>{product.category || 'Geral'}</strong></span>
-              {product.model && (
-                <>
-                  <span>•</span>
-                  <span>Modelo: <strong>{product.model}</strong></span>
-                </>
-              )}
+
+            {/* ── Ações no Topo ── */}
+            <div className="product-header-actions">
+              <button
+                type="button"
+                className={`btn-product-action ${isPublished ? 'unpublish' : 'publish'}`}
+                onClick={handleTogglePublish}
+                disabled={togglingPublish}
+                title="Alterar visibilidade do produto na loja pública"
+              >
+                {isPublished ? (
+                  <>
+                    <EyeOff size={15} />
+                    <span>Despublicar</span>
+                  </>
+                ) : (
+                  <>
+                    <Globe size={15} />
+                    <span>Publicar no Site</span>
+                  </>
+                )}
+              </button>
+
+              <a
+                href={productPublicUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="btn-product-action store"
+                title="Abrir página pública do produto na loja própria"
+              >
+                <ExternalLink size={15} />
+                <span>Ver na Loja</span>
+              </a>
+
+              <button
+                type="button"
+                className="btn-product-action pagebuilder"
+                onClick={handleEditPage}
+                disabled={editingPage}
+                title="Editar layout visual da página do produto no Page Builder"
+              >
+                <LayoutTemplate size={15} />
+                <span>{editingPage ? 'Abrindo...' : 'Page Builder'}</span>
+              </button>
+
+              <Link
+                to={`/hub/produtos/editar/${product.id}`}
+                className="btn-product-action primary"
+                title="Editar dados cadastrais, preços e estoque"
+              >
+                <Edit size={15} />
+                <span>Editar Cadastro</span>
+              </Link>
             </div>
           </div>
-        </div>
-
-        {/* ── Ações no Topo ── */}
-        <div className="product-header-actions">
-          <button
-            type="button"
-            className="btn-product-action"
-            onClick={handleTogglePublish}
-            disabled={togglingPublish}
-            title="Publicar ou ocultar produto da vitrine pública da loja"
-          >
-            {isPublished ? 'Despublicar do Site' : 'Publicar no Site'}
-          </button>
-
-          <a
-            href={`http://localhost:5173/produtos/${meta?.slug || product.slug || product.id}`}
-            target="_blank"
-            rel="noreferrer"
-            className="btn-product-action store"
-            title="Abrir página pública do produto na loja própria"
-          >
-            <Eye size={15} />
-            Ver na Loja
-          </a>
-
-          <button
-            type="button"
-            className="btn-product-action pagebuilder"
-            onClick={handleEditPage}
-            disabled={editingPage}
-            title="Editar layout visual da página do produto no Page Builder"
-          >
-            <LayoutTemplate size={15} />
-            {editingPage ? 'Abrindo editor...' : 'Page Builder'}
-          </button>
-
-          <Link
-            to={`/hub/produtos/editar/${product.id}`}
-            className="btn-product-action primary"
-            title="Editar dados cadastrais, preços e estoque"
-          >
-            <Edit size={15} />
-            Editar Cadastro
-          </Link>
-        </div>
-      </div>
+        )
+      })()}
 
       {/* ── Grid de Métricas Principais (5 Colunas) ── */}
       <div className="product-metrics-grid">

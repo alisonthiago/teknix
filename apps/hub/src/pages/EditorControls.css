@@ -181,23 +181,23 @@
 .editor-device-options button { display: grid; place-items: center; width: 28px; height: 28px; border: 0; background: white; cursor: pointer; }
 .editor-device-options button[aria-pressed="true"] { color: #0071e3; background: #edf5ff; }
 .editor-reference-repeater {
-  border-radius: 8px !important;
+  border-radius: 10px !important;
   border: 1px solid #e5e5ea !important;
   margin-bottom: 8px !important;
   background: #ffffff !important;
   overflow: hidden !important;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease !important;
 }
 .editor-reference-repeater:hover {
-  border-color: #c7cbd1 !important;
+  border-color: #cbd5e1 !important;
 }
 .editor-reference-repeater.is-open {
   border-color: #0071e3 !important;
-  box-shadow: 0 4px 14px rgba(0, 113, 227, 0.08) !important;
+  box-shadow: 0 4px 16px rgba(0, 113, 227, 0.09) !important;
 }
 .editor-reference-repeater > div:first-child {
-  min-height: 38px;
-  padding: 8px 10px !important;
+  min-height: 40px;
+  padding: 8px 12px !important;
   background: #ffffff;
 }
 .editor-reference-repeater.is-open > div:first-child {
@@ -213,21 +213,21 @@
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  color: #6e6e73 !important;
+  color: #64748b !important;
   background: transparent !important;
   transition: background 0.15s ease, color 0.15s ease !important;
   cursor: pointer !important;
 }
 .editor-reference-repeater > div:first-child button:hover:not(:disabled) {
-  background: #f0f0f2 !important;
-  color: #1d1d1f !important;
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
 }
 .editor-reference-repeater > div:first-child button.delete:hover:not(:disabled) {
   background: #fee2e2 !important;
   color: #dc2626 !important;
 }
 .editor-reference-repeater > div:first-child button:disabled {
-  opacity: 0.35 !important;
+  opacity: 0.3 !important;
   cursor: not-allowed !important;
 }
 .elementor-sidebar .editor-reference-section-body select.elementor-units-select { width: auto !important; max-width: 60px; height: 24px; padding: 0 2px !important; border: 0 !important; background: transparent !important; font-size: 10px !important; }
@@ -278,3 +278,135 @@
     transform: translateY(0) scale(1);
   }
 }
+
+/* ==============================================================
+   ESTILOS PREMIUM PARA REPEATERS, CAMPOS EMPILHADOS E CARDS
+   ============================================================== */
+
+.editor-repeater-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.editor-repeater-field-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  letter-spacing: 0.01em;
+  user-select: none;
+}
+
+.editor-repeater-input {
+  width: 100% !important;
+  height: 34px !important;
+  border-radius: 7px !important;
+  border: 1px solid #d2d2d7 !important;
+  padding: 0 10px !important;
+  font-size: 12px !important;
+  background: #ffffff !important;
+  color: #1d1d1f !important;
+  box-sizing: border-box !important;
+  transition: all 0.15s ease !important;
+}
+
+.editor-repeater-input:focus {
+  border-color: #0071e3 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.14) !important;
+}
+
+.editor-repeater-input::placeholder {
+  color: #94a3b8 !important;
+  font-size: 11.5px !important;
+}
+
+.editor-repeater-textarea {
+  width: 100% !important;
+  min-height: 64px !important;
+  border-radius: 7px !important;
+  border: 1px solid #d2d2d7 !important;
+  padding: 8px 10px !important;
+  font-size: 12px !important;
+  background: #ffffff !important;
+  color: #1d1d1f !important;
+  box-sizing: border-box !important;
+  resize: vertical !important;
+  transition: all 0.15s ease !important;
+}
+
+.editor-repeater-textarea:focus {
+  border-color: #0071e3 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.14) !important;
+}
+
+.editor-repeater-textarea::placeholder {
+  color: #94a3b8 !important;
+  font-size: 11.5px !important;
+}
+
+/* Campos empilhados para ControlRow quando o conteúdo requer largura total */
+.editor-control-stacked {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+  align-items: stretch !important;
+}
+
+.editor-control-stacked .elementor-control-header {
+  margin: 0 !important;
+}
+
+.editor-control-stacked .elementor-control-title {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  color: #475569 !important;
+}
+
+.editor-control-stacked input:not([type="color"]):not([type="checkbox"]):not([type="range"]),
+.editor-control-stacked select {
+  width: 100% !important;
+  height: 34px !important;
+  border-radius: 7px !important;
+  border: 1px solid #d2d2d7 !important;
+  padding: 6px 10px !important;
+  font-size: 12px !important;
+  background: #ffffff !important;
+  color: #1d1d1f !important;
+  box-sizing: border-box !important;
+  transition: all 0.15s ease !important;
+}
+
+.editor-control-stacked input:focus,
+.editor-control-stacked select:focus {
+  border-color: #0071e3 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.14) !important;
+}
+
+.editor-control-stacked textarea {
+  width: 100% !important;
+  min-height: 64px !important;
+  border-radius: 7px !important;
+  border: 1px solid #d2d2d7 !important;
+  padding: 8px 10px !important;
+  font-size: 12px !important;
+  background: #ffffff !important;
+  color: #1d1d1f !important;
+  box-sizing: border-box !important;
+  resize: vertical !important;
+  transition: all 0.15s ease !important;
+}
+
+.editor-control-stacked textarea:focus {
+  border-color: #0071e3 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.14) !important;
+}
+
