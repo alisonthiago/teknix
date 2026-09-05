@@ -429,81 +429,460 @@
   color: var(--tkn-dark-gray);
 }
 
-/* ── POPOVER DE CEP ── */
-.dsvia-cep-popover {
-  position: absolute;
-  top: 42px;
-  right: 0;
+/* ── MODAL E POPOVER DE CEP / ENDEREÇO DE ENTREGA ── */
+.dsvia-cep-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: dsviaFadeIn 0.2s ease;
+}
+
+.dsvia-cep-modal-panel {
+  position: relative !important;
+  top: auto !important;
+  right: auto !important;
+  width: 100%;
+  max-width: 440px;
+  max-height: 90vh;
+  overflow-y: auto;
   background: #ffffff;
-  border: 1px solid var(--tkn-border-color);
-  border-radius: 12px;
-  padding: var(--tkn-space-20, 20px);
-  box-shadow: 0 16px 36px rgba(0,0,0,0.14);
-  width: 320px;
-  z-index: 1500;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.22);
+  z-index: 10000;
+  animation: dsviaModalZoom 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: var(--cb-font, inherit);
+}
+
+@keyframes dsviaModalZoom {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.dsvia-cep-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.dsvia-cep-header-title-group {
+  flex: 1;
 }
 
 .dsvia-cep-popover-title {
-  font-size: var(--tkn-text-13);
-  font-weight: var(--tkn-weight-medium);
-  color: var(--tkn-black);
-  margin: 0 var(--tkn-space-24) var(--tkn-space-8) 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.3px;
 }
 
 .dsvia-cep-popover-desc {
-  font-size: var(--tkn-text-12);
-  color: var(--tkn-mid-gray);
-  margin: 0 0 var(--tkn-space-16) 0;
-  line-height: 1.5;
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.45;
 }
 
-.dsvia-cep-form {
+.dsvia-cep-close-btn {
+  background: #f3f4f6;
+  border: none;
+  font-size: 14px;
+  color: #4b5563;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
   display: flex;
-  gap: var(--tkn-space-8);
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.dsvia-cep-close-btn:hover {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+/* Card do CEP / Endereço Ativo */
+.dsvia-cep-active-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+}
+
+.dsvia-cep-active-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #e0f2fe;
+  color: #0284c7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dsvia-cep-active-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 2px;
+}
+
+.dsvia-cep-active-label {
+  font-size: 11px;
+  color: #64748b;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.dsvia-cep-active-value {
+  font-size: 14px;
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.dsvia-cep-active-badge {
+  font-size: 11px;
+  font-weight: 700;
+  background: #dcfce7;
+  color: #166534;
+  padding: 3px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+}
+
+/* Abas de Navegação */
+.dsvia-cep-tabs {
+  display: flex;
+  gap: 8px;
+  background: #f1f5f9;
+  padding: 4px;
+  border-radius: 10px;
+  margin-bottom: 18px;
+}
+
+.dsvia-cep-tab-btn {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.dsvia-cep-tab-btn.is-active {
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.dsvia-cep-tab-content {
+  margin-bottom: 16px;
+}
+
+/* Formulários */
+.dsvia-cep-quick-form,
+.dsvia-cep-full-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dsvia-cep-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dsvia-cep-input-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.dsvia-cep-form-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.dsvia-cep-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
 
 .dsvia-cep-input {
   flex: 1;
-  border: 1.5px solid var(--tkn-border-color);
+  width: 100%;
+  border: 1.5px solid #d1d5db;
   min-height: 44px;
   border-radius: 8px;
-  padding: var(--tkn-space-8) var(--tkn-space-12);
-  font-size: var(--tkn-text-13);
-  font-family: var(--cb-font);
+  padding: 8px 14px;
+  font-size: 14px;
+  font-family: inherit;
   outline: none;
+  background: #ffffff;
+  color: #111827;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .dsvia-cep-input:focus {
-  border-color: var(--tkn-black);
+  border-color: #0f172a;
+  box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.1);
 }
 
 .dsvia-cep-submit {
-  background: var(--tkn-black);
+  background: #0f172a;
   color: #ffffff;
   border: none;
-  min-width: 68px;
+  min-height: 44px;
   border-radius: 8px;
-  padding: var(--tkn-space-8) var(--tkn-space-12);
-  font-size: var(--tkn-text-12);
-  font-weight: var(--tkn-weight-medium);
+  padding: 0 18px;
+  font-size: 13px;
+  font-weight: 700;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: all 0.15s ease;
+  white-space: nowrap;
 }
 
-.dsvia-cep-submit:hover {
-  background: var(--tkn-dark-gray);
+.dsvia-cep-submit:hover:not(:disabled) {
+  background: #1e293b;
+  transform: translateY(-1px);
 }
 
-.dsvia-cep-close-btn {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: transparent;
-  border: none;
-  font-size: var(--tkn-text-16);
-  color: var(--tkn-light-gray);
+.dsvia-cep-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dsvia-cep-submit-full {
+  width: 100%;
+  padding: 12px;
+}
+
+.dsvia-cep-preview-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #065f46;
+}
+
+.dsvia-cep-preview-icon {
+  font-weight: 900;
+  color: #059669;
+}
+
+.dsvia-cep-preview-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1.35;
+}
+
+.dsvia-cep-error-msg {
+  font-size: 12px;
+  color: #b91c1c;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+.dsvia-cep-footer-links {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.dsvia-cep-link {
+  font-size: 12px;
+  color: #0284c7;
+  text-decoration: underline;
   cursor: pointer;
-  padding: 2px var(--tkn-space-8);
+}
+
+.dsvia-cep-link:hover {
+  color: #0369a1;
+}
+
+.dsvia-cep-form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.dsvia-cep-cancel-btn {
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  color: #374151;
+  padding: 0 16px;
+  border-radius: 8px;
+  min-height: 44px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.dsvia-cep-cancel-btn:hover {
+  background: #e5e7eb;
+}
+
+/* Lista de Endereços Salvos */
+.dsvia-cep-address-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.dsvia-cep-address-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.dsvia-cep-address-item:hover {
+  border-color: #0f172a;
+  background: #f8fafc;
+}
+
+.dsvia-cep-address-item.is-selected {
+  border-color: #0f172a;
+  background: #f8fafc;
+}
+
+.dsvia-cep-radio-indicator {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.dsvia-cep-address-item.is-selected .dsvia-cep-radio-indicator {
+  border-color: #0f172a;
+}
+
+.dsvia-cep-radio-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #0f172a;
+}
+
+.dsvia-cep-item-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dsvia-cep-item-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #0f172a;
+}
+
+.dsvia-cep-default-tag {
+  font-size: 10px;
+  font-weight: 700;
+  background: #e2e8f0;
+  color: #334155;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.dsvia-cep-item-text {
+  font-size: 12px;
+  color: #374151;
+  margin: 0;
+}
+
+.dsvia-cep-item-sub {
+  font-size: 11px;
+  color: #64748b;
+  margin: 0;
+}
+
+.dsvia-cep-empty-addresses,
+.dsvia-cep-loading-state {
+  text-align: center;
+  padding: 20px 10px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.dsvia-cep-mini-spinner {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.dsvia-cep-login-prompt {
+  border-top: 1px solid #f1f5f9;
+  padding-top: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.dsvia-cep-login-link {
+  font-weight: 700;
+  color: #0f172a;
+  text-decoration: underline;
 }
 .tkn-drawer-logo { display:inline-flex; align-items:center; height:24px; }
 .tkn-drawer-logo img { display:block; width:108px; height:auto; }

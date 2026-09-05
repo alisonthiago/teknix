@@ -7,6 +7,7 @@ import { useCart } from '../context/CartContext'
 import { useAuth } from '../hooks/useAuth'
 import { CORE_CATEGORIES } from '../services/categories'
 import { BoschLogo, MakitaLogo, DewaltLogo, PdrLogo, BovenauLogo, KarcherLogo } from './BrandLogos'
+import CepDeliveryModal from './CepDeliveryModal'
 import './CasasBahiaHeader.css'
 import './StorefrontResponsive.css'
 
@@ -54,10 +55,8 @@ export default function TeknixHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isCepOpen, setIsCepOpen] = useState(false)
   const [isAccountOpen, setIsAccountOpen] = useState(false)
-  const [cep, setCep] = useState(() => localStorage.getItem('teknix_user_cep') || '')
-  const [cepInput, setCepInput] = useState(cep)
+  const [cep, setCep] = useState(() => localStorage.getItem('teknix_user_cep') || '06700-510')
 
-  const cepPopoverRef = useRef<HTMLDivElement>(null)
   const accountPopoverRef = useRef<HTMLDivElement>(null)
 
   // Personalização da Logo e do Cabeçalho
@@ -75,9 +74,6 @@ export default function TeknixHeader() {
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (cepPopoverRef.current && !cepPopoverRef.current.contains(e.target as Node)) {
-        setIsCepOpen(false)
-      }
       if (accountPopoverRef.current && !accountPopoverRef.current.contains(e.target as Node)) {
         setIsAccountOpen(false)
       }
@@ -104,15 +100,13 @@ export default function TeknixHeader() {
     }
   }
 
-  const handleSaveCep = (e: React.FormEvent) => {
-    e.preventDefault()
-    const clean = cepInput.replace(/\D/g, '')
-    if (clean.length >= 8) {
-      const formatted = `${clean.slice(0, 5)}-${clean.slice(5, 8)}`
-      setCep(formatted)
-      localStorage.setItem('teknix_user_cep', formatted)
-      setIsCepOpen(false)
+  const handleSelectCep = (newCep: string, details?: { city?: string; state?: string; street?: string; neighborhood?: string }) => {
+    setCep(newCep)
+    localStorage.setItem('teknix_user_cep', newCep)
+    if (details) {
+      localStorage.setItem('teknix_user_location', JSON.stringify(details))
     }
+    window.dispatchEvent(new CustomEvent('teknix:cep-changed', { detail: { cep: newCep, ...details } }))
   }
 
   const handleSignOut = async () => {
@@ -224,7 +218,7 @@ export default function TeknixHeader() {
                 <Editable as="button" widgetId="chrome:header:cep" globalKey="chrome:header:cep" widgetType="button" label="Botão de CEP" renderContent={false}
                   type="button"
                   className="dsvia-cep-trigger"
-                  onClick={() => setIsCepOpen(!isCepOpen)}
+                  onClick={() => setIsCepOpen(true)}
                   aria-label="Informe seu CEP"
                 >
                   <Editable as="span" widgetId="chrome:header:cep-icon" globalKey="chrome:header:cep-icon" widgetType="icon" label="Ícone do CEP" renderContent={false}>
@@ -239,35 +233,13 @@ export default function TeknixHeader() {
                   <span>{cep ? `Entregar em: ${cep}` : 'Informe seu CEP'}</span>
                 </Editable>
 
-                {/* Popover CEP */}
-                {isCepOpen && (
-                  <div className="dsvia-cep-popover" ref={cepPopoverRef} role="dialog" aria-label="Informe seu CEP">
-                    <button
-                      type="button"
-                      className="dsvia-cep-close-btn"
-                      onClick={() => setIsCepOpen(false)}
-                      aria-label="Fechar"
-                    >
-                      ✕
-                    </button>
-                    <h4 className="dsvia-cep-popover-title">Estamos exibindo produtos para a sua região.</h4>
-                    <p className="dsvia-cep-popover-desc">Informe seu CEP para ter uma melhor experiência.</p>
-                    <form className="dsvia-cep-form" onSubmit={handleSaveCep}>
-                      <input
-                        type="text"
-                        className="dsvia-cep-input"
-                        placeholder="00000-000"
-                        aria-label="CEP de entrega"
-                        inputMode="numeric"
-                        maxLength={9}
-                        value={cepInput}
-                        onChange={(e) => setCepInput(e.target.value)}
-                        autoFocus
-                      />
-                      <button type="submit" className="dsvia-cep-submit">Salvar</button>
-                    </form>
-                  </div>
-                )}
+                {/* Modal Completo de CEP / Endereço de Entrega */}
+                <CepDeliveryModal
+                  isOpen={isCepOpen}
+                  onClose={() => setIsCepOpen(false)}
+                  currentCep={cep}
+                  onSelectCep={handleSelectCep}
+                />
               </Editable>
 
               {/* Cápsula Cinza: Acesse sua Conta */}
