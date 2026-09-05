@@ -28,7 +28,8 @@ import {
 } from '../services/elementorImporter'
 import {
   type WidgetEdits, type WidgetEdit, type WidgetDescriptor, type CanvasLayout, type CanvasNode,
-  moveCanvasNode, matchNode, findNodePath, duplicateCanvasNode, removeCanvasNode, mergeWidgetEdit, GLOBAL_EDITOR_SCOPE
+  moveCanvasNode, matchNode, findNodePath, duplicateCanvasNode, removeCanvasNode, mergeWidgetEdit, GLOBAL_EDITOR_SCOPE,
+  DEFAULT_FOOTER_SEARCHED_ITEMS, type FooterSearchedItem
 } from '../../../../packages/core/src/pageWidgets'
 import './PageEditor.css'
 import './EditorControls.css'
@@ -362,7 +363,16 @@ function initialWidgetContent(type: string): Record<string, any> {
     case 'storefrontCard': return { product_id: '', custom_title: '', custom_price: '', badge: 'Destaque' }
     case 'storefrontShelf': return { title: 'Mais Vendidos TEKNIX', category: '', limit: 4, layout: 'grid' }
     case 'chrome:header': return { title: 'Cabeçalho da Loja', link: '/', image: '' }
-    case 'chrome:footer': return { title: 'Rodapé da Loja', company_info: 'TEKNIX FERRAMENTAS LTDA • CNPJ: 63.623.515/0001-68', copyright: 'Todos os direitos reservados.', whatsapp: '(46) 99915-5875', email: 'sac@teknix.com.br' }
+    case 'chrome:footer': return {
+      title: 'Rodapé da Loja',
+      company_info: 'TEKNIX FERRAMENTAS LTDA • CNPJ: 63.623.515/0001-68',
+      copyright: 'Todos os direitos reservados.',
+      whatsapp: '(46) 99915-5875',
+      email: 'sac@teknix.com.br',
+      searched_heading: 'PRODUTOS MAIS BUSCADOS',
+      searched_columns: 7,
+      searched_items: DEFAULT_FOOTER_SEARCHED_ITEMS
+    }
     default: return { title: 'Novo Bloco TEKNIX', text: 'Descrição do bloco configurável no painel.' }
   }
 }
@@ -644,6 +654,20 @@ export default function PageEditor() {
     }
     const isGlobal = editScope === 'global'
     const key = isGlobal && descriptor?.globalKey ? descriptor.globalKey : selected
+
+    // Unificação oficial do rodapé: sincroniza o rodapé mestre e as seções filhas
+    const isFooter = selected === 'chrome:footer' || selected.startsWith('chrome:footer')
+    if (isFooter) {
+      patchKey('chrome:footer', nextPart, isGlobal)
+      if (key !== 'chrome:footer') {
+        patchKey(key, nextPart, isGlobal)
+      }
+      if (selected === 'chrome:footer' || selected === 'chrome:footer:searched') {
+        patchKey('chrome:footer:searched', nextPart, isGlobal)
+      }
+      return
+    }
+
     patchKey(key, nextPart, isGlobal)
   }
 
@@ -1371,8 +1395,8 @@ export default function PageEditor() {
       // Se for publicar para todo o site, sincroniza widgets globais (cabeçalho, rodapé, logo, etc.) no globalEdits
       const effectiveGlobalEdits: WidgetEdits = { ...globalEdits }
       if (savingGlobal) {
-        ['chrome:header', 'chrome:footer', 'chrome:header:logo', 'chrome:header:search', 'chrome:header:cart', 'chrome:header:favorites'].forEach(k => {
-          if (localEdits[k]) {
+        Object.keys(localEdits).forEach(k => {
+          if (k.startsWith('chrome:header') || k.startsWith('chrome:footer')) {
             effectiveGlobalEdits[k] = mergeWidgetEdit(effectiveGlobalEdits[k], localEdits[k])
           }
         })
@@ -1483,7 +1507,13 @@ export default function PageEditor() {
       case 'flashSaleSection': return 'Ofertas Relâmpago (com Cronômetro)'
       case 'ads': return 'Espaço de anúncio'
       case 'chrome:header': return 'Cabeçalho'
-      case 'chrome:footer': return 'Rodapé'
+      case 'chrome:footer': {
+        if (w.id === 'chrome:footer:searched') return 'Produtos Mais Buscados (Rodapé)'
+        if (w.id === 'chrome:footer:support') return 'Canais de Atendimento (Rodapé)'
+        if (w.id === 'chrome:footer:glossary') return 'Glossário (Rodapé)'
+        if (w.id === 'chrome:footer:details') return 'Diretório e Links (Rodapé)'
+        return 'Rodapé'
+      }
       default: return w.label || 'Elemento'
     }
   }
@@ -1540,7 +1570,17 @@ export default function PageEditor() {
   const responsiveSchema = viewport === 'desktop' ? {} : (baseSchema.responsive?.[viewport] || {})
   const s = { ...baseSchema, ...responsiveSchema }
   const defaultContent = initialWidgetContent(widgetType)
-  const c = { ...defaultContent, ...widget?.content, ...selectedEdit.content, ...(isContainer ? responsiveSchema : {}) }
+  const isFooterSelected = selected === 'chrome:footer' || selected.startsWith('chrome:footer')
+  const footerMergedContent = isFooterSelected
+    ? {
+        searched_items: DEFAULT_FOOTER_SEARCHED_ITEMS,
+        searched_heading: 'PRODUTOS MAIS BUSCADOS',
+        searched_columns: 7,
+        ...edits['chrome:footer']?.content,
+        ...edits['chrome:footer:searched']?.content
+      }
+    : {}
+  const c = { ...defaultContent, ...widget?.content, ...selectedEdit.content, ...footerMergedContent, ...(isContainer ? responsiveSchema : {}) }
 
   return (
     <EditorDeviceContext.Provider value={{ mode: viewport, select: setViewport }}><div className={`page-editor elementor-style-editor ${previewing ? 'preview-mode' : ''}`}>
@@ -4359,48 +4399,307 @@ export default function PageEditor() {
                           </>
                         )}
 
-                        {/* WIDGET: RODAPÉ */}
-                        {widgetType === 'chrome:footer' && (
-                          <>
-                            <ElementorAccordion title="Canais de Atendimento" icon={FileText} isOpen={openSections.reference_section_20 !== false} onToggle={() => toggleSection('reference_section_20')}>
-                              <ControlRow label="WhatsApp de Vendas">
-                                <input
-                                  type="text"
-                                  placeholder="(46) 99915-5875"
-                                  value={String(c.whatsapp || '')}
-                                  onChange={e => patch({ content: { whatsapp: e.target.value } })}
-                                />
-                              </ControlRow>
-                              <ControlRow label="E-mail de Suporte">
-                                <input
-                                  type="email"
-                                  placeholder="sac@teknix.com.br"
-                                  value={String(c.email || '')}
-                                  onChange={e => patch({ content: { email: e.target.value } })}
-                                />
-                              </ControlRow>
-                            </ElementorAccordion>
+                        {/* WIDGET: RODAPÉ OFICIAL UNIFICADO */}
+                        {widgetType === 'chrome:footer' && (() => {
+                          const rawList = c.searched_items
+                          const searchedList: FooterSearchedItem[] = Array.isArray(rawList) && rawList.length > 0
+                            ? rawList
+                            : DEFAULT_FOOTER_SEARCHED_ITEMS
+                          const isSearchedTarget = selected === 'chrome:footer:searched'
 
-                            <ElementorAccordion title="Informações da Empresa e Copyright" icon={Sliders} isOpen={openSections.reference_section_21 !== false} onToggle={() => toggleSection('reference_section_21')}>
-                              <ControlRow label="Razão Social / CNPJ">
-                                <input
-                                  type="text"
-                                  placeholder="TEKNIX FERRAMENTAS LTDA • CNPJ: 63.623.515/0001-68"
-                                  value={String(c.company_info || '')}
-                                  onChange={e => patch({ content: { company_info: e.target.value } })}
-                                />
-                              </ControlRow>
-                              <ControlRow label="Texto de Copyright">
-                                <input
-                                  type="text"
-                                  placeholder="Todos os direitos reservados."
-                                  value={String(c.copyright || '')}
-                                  onChange={e => patch({ content: { copyright: e.target.value } })}
-                                />
-                              </ControlRow>
-                            </ElementorAccordion>
-                          </>
-                        )}
+                          return (
+                            <>
+                              {/* SEÇÃO: PRODUTOS MAIS BUSCADOS */}
+                              <ElementorAccordion
+                                title="Produtos Mais Buscados"
+                                icon={Search}
+                                isOpen={isSearchedTarget || openSections.footer_searched !== false}
+                                onToggle={() => toggleSection('footer_searched')}
+                              >
+                                <ControlRow label="Visibilidade no Rodapé">
+                                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, cursor: 'pointer', fontWeight: 500 }}>
+                                    <input
+                                      type="checkbox"
+                                      checked={!c.hide_searched}
+                                      onChange={e => patch({ content: { hide_searched: !e.target.checked } })}
+                                    />
+                                    Exibir seção "Produtos Mais Buscados"
+                                  </label>
+                                </ControlRow>
+
+                                <ControlRow label="Título da Seção">
+                                  <input
+                                    type="text"
+                                    placeholder="PRODUTOS MAIS BUSCADOS"
+                                    value={String(c.searched_heading || c.searched_title || 'PRODUTOS MAIS BUSCADOS')}
+                                    onChange={e => patch({ content: { searched_heading: e.target.value, searched_title: e.target.value } })}
+                                  />
+                                </ControlRow>
+
+                                <ControlRow label="Quantidade de Colunas na Grade">
+                                  <select
+                                    value={Number(c.searched_columns || 7)}
+                                    onChange={e => patch({ content: { searched_columns: Number(e.target.value) } })}
+                                    style={{ width: '100%', padding: '7px 10px', borderRadius: 6, border: '1px solid #d2d2d7', fontSize: 12 }}
+                                  >
+                                    <option value={4}>4 Colunas</option>
+                                    <option value={5}>5 Colunas</option>
+                                    <option value={6}>6 Colunas</option>
+                                    <option value={7}>7 Colunas (Padrão TEKNIX)</option>
+                                    <option value={8}>8 Colunas</option>
+                                  </select>
+                                </ControlRow>
+
+                                {/* LISTA DE TERMOS DE BUSCA */}
+                                <div style={{ marginTop: 12 }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                                    <span style={{ fontSize: 11, fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                                      Termos Cadastrados ({searchedList.length})
+                                    </span>
+                                  </div>
+
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 380, overflowY: 'auto', paddingRight: 2, marginBottom: 8 }}>
+                                    {searchedList.map((item, idx) => (
+                                      <ElementorRepeaterItem
+                                        key={idx}
+                                        index={idx}
+                                        title={item.title || `Termo #${idx + 1}`}
+                                        subtitle={item.link}
+                                        isOpen={openRepeaterIndex[selected] === idx}
+                                        onToggle={() => setOpenRepeaterIndex(prev => ({ ...prev, [selected]: prev[selected] === idx ? -1 : idx }))}
+                                        onDuplicate={() => {
+                                          const next = [...searchedList.slice(0, idx + 1), { ...item }, ...searchedList.slice(idx + 1)]
+                                          patch({ content: { searched_items: next } })
+                                        }}
+                                        onDelete={() => {
+                                          const next = searchedList.filter((_, i) => i !== idx)
+                                          patch({ content: { searched_items: next } })
+                                        }}
+                                        onMoveUp={idx > 0 ? () => {
+                                          const next = [...searchedList]
+                                          const temp = next[idx - 1]
+                                          next[idx - 1] = next[idx]
+                                          next[idx] = temp
+                                          patch({ content: { searched_items: next } })
+                                          setOpenRepeaterIndex(prev => ({ ...prev, [selected]: idx - 1 }))
+                                        } : undefined}
+                                        onMoveDown={idx < searchedList.length - 1 ? () => {
+                                          const next = [...searchedList]
+                                          const temp = next[idx + 1]
+                                          next[idx + 1] = next[idx]
+                                          next[idx] = temp
+                                          patch({ content: { searched_items: next } })
+                                          setOpenRepeaterIndex(prev => ({ ...prev, [selected]: idx + 1 }))
+                                        } : undefined}
+                                        canMoveUp={idx > 0}
+                                        canMoveDown={idx < searchedList.length - 1}
+                                      >
+                                        <ControlRow label="Termo / Nome do Produto">
+                                          <input
+                                            type="text"
+                                            value={item.title || ''}
+                                            placeholder="Ex: Furadeira de impacto"
+                                            onChange={e => {
+                                              const val = e.target.value
+                                              const next = [...searchedList]
+                                              const prevAutoLink = `/produtos?q=${encodeURIComponent((item.title || '').toLowerCase().replace(/\s+/g, '+'))}`
+                                              const isAuto = !item.link || item.link === prevAutoLink || item.link.startsWith('/produtos?q=')
+                                              const newAutoLink = `/produtos?q=${encodeURIComponent(val.toLowerCase().replace(/\s+/g, '+'))}`
+                                              next[idx] = {
+                                                ...next[idx],
+                                                title: val,
+                                                link: isAuto ? newAutoLink : item.link
+                                              }
+                                              patch({ content: { searched_items: next } })
+                                            }}
+                                          />
+                                        </ControlRow>
+                                        <ControlRow label="Link de Destino" description="URL relativa ou de busca">
+                                          <input
+                                            type="text"
+                                            value={item.link || ''}
+                                            placeholder="/produtos?q=termo"
+                                            onChange={e => {
+                                              const next = [...searchedList]
+                                              next[idx] = { ...next[idx], link: e.target.value }
+                                              patch({ content: { searched_items: next } })
+                                            }}
+                                          />
+                                        </ControlRow>
+                                      </ElementorRepeaterItem>
+                                    ))}
+                                  </div>
+
+                                  <button
+                                    type="button"
+                                    style={{
+                                      width: '100%',
+                                      padding: '9px 12px',
+                                      background: '#0071e3',
+                                      color: '#fff',
+                                      border: 'none',
+                                      borderRadius: 6,
+                                      fontSize: 12,
+                                      fontWeight: 600,
+                                      cursor: 'pointer',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      gap: 6,
+                                      boxShadow: '0 2px 6px rgba(0,113,227,0.25)'
+                                    }}
+                                    onClick={() => {
+                                      const newItem: FooterSearchedItem = { title: 'Novo Termo', link: '/produtos?q=novo+termo' }
+                                      const next = [...searchedList, newItem]
+                                      patch({ content: { searched_items: next } })
+                                      setOpenRepeaterIndex(prev => ({ ...prev, [selected]: next.length - 1 }))
+                                    }}
+                                  >
+                                    <Plus size={14} /> Adicionar Novo Termo
+                                  </button>
+                                </div>
+
+                                {/* EDIÇÃO RÁPIDA EM MASSA */}
+                                <div style={{ marginTop: 14, padding: 10, background: '#f8fafc', borderRadius: 8, border: '1px solid #e2e8f0' }}>
+                                  <div style={{ fontSize: 11, fontWeight: 700, color: '#1e293b', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+                                    <Type size={13} color="#0071e3" /> Edição Rápida em Massa (Texto)
+                                  </div>
+                                  <div style={{ fontSize: 11, color: '#64748b', marginBottom: 6 }}>
+                                    Cole ou altere um termo por linha no formato: <code>Nome | /link</code>
+                                  </div>
+                                  <textarea
+                                    rows={7}
+                                    id="footer-bulk-searched-textarea"
+                                    key={searchedList.length}
+                                    defaultValue={searchedList.map(it => it.link && !it.link.startsWith('/produtos?q=') ? `${it.title} | ${it.link}` : it.title).join('\n')}
+                                    style={{ width: '100%', fontFamily: 'monospace', fontSize: 11, padding: 8, borderRadius: 6, border: '1px solid #cbd5e1', resize: 'vertical' }}
+                                  />
+                                  <button
+                                    type="button"
+                                    style={{
+                                      width: '100%',
+                                      padding: '7px 10px',
+                                      background: '#0f172a',
+                                      color: '#fff',
+                                      border: 'none',
+                                      borderRadius: 6,
+                                      fontSize: 11,
+                                      fontWeight: 600,
+                                      cursor: 'pointer',
+                                      marginTop: 6
+                                    }}
+                                    onClick={() => {
+                                      const el = document.getElementById('footer-bulk-searched-textarea') as HTMLTextAreaElement
+                                      if (!el) return
+                                      const lines = el.value.split('\n').map(l => l.trim()).filter(Boolean)
+                                      const parsed: FooterSearchedItem[] = lines.map(line => {
+                                        const parts = line.split('|').map(p => p.trim())
+                                        const title = parts[0] || ''
+                                        const link = parts[1] || `/produtos?q=${encodeURIComponent(title.toLowerCase().replace(/\s+/g, '+'))}`
+                                        return { title, link }
+                                      })
+                                      patch({ content: { searched_items: parsed } })
+                                      showNotice(`${parsed.length} termos de busca aplicados com sucesso!`)
+                                    }}
+                                  >
+                                    Aplicar Texto à Lista de Termos
+                                  </button>
+                                </div>
+
+                                {/* RESTAURAR PADRÕES */}
+                                <button
+                                  type="button"
+                                  style={{
+                                    width: '100%',
+                                    padding: '7px 10px',
+                                    background: '#ffffff',
+                                    color: '#64748b',
+                                    border: '1px solid #cbd5e1',
+                                    borderRadius: 6,
+                                    fontSize: 11,
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: 6,
+                                    marginTop: 10
+                                  }}
+                                  onClick={() => {
+                                    if (window.confirm('Restaurar os 42 termos originais padrão da TEKNIX?')) {
+                                      patch({ content: { searched_items: DEFAULT_FOOTER_SEARCHED_ITEMS, searched_heading: 'PRODUTOS MAIS BUSCADOS', searched_columns: 7 } })
+                                      showNotice('42 termos padrão da TEKNIX restaurados!')
+                                    }
+                                  }}
+                                >
+                                  <RotateCcw size={12} /> Restaurar 42 Termos Padrão da TEKNIX
+                                </button>
+                              </ElementorAccordion>
+
+                              {/* SEÇÃO: CANAIS DE ATENDIMENTO */}
+                              <ElementorAccordion title="Canais de Atendimento" icon={FileText} isOpen={openSections.reference_section_20 !== false} onToggle={() => toggleSection('reference_section_20')}>
+                                <ControlRow label="WhatsApp de Vendas">
+                                  <input
+                                    type="text"
+                                    placeholder="(46) 99915-5875"
+                                    value={String(c.whatsapp || '')}
+                                    onChange={e => patch({ content: { whatsapp: e.target.value } })}
+                                  />
+                                </ControlRow>
+                                <ControlRow label="E-mail de Suporte">
+                                  <input
+                                    type="email"
+                                    placeholder="sac@teknix.com.br"
+                                    value={String(c.email || '')}
+                                    onChange={e => patch({ content: { email: e.target.value } })}
+                                  />
+                                </ControlRow>
+                              </ElementorAccordion>
+
+                              {/* SEÇÃO: GLOSSÁRIO ALFABÉTICO */}
+                              <ElementorAccordion title="Glossário Alfabético" icon={List} isOpen={openSections.footer_glossary !== false} onToggle={() => toggleSection('footer_glossary')}>
+                                <ControlRow label="Exibir Glossário">
+                                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, cursor: 'pointer' }}>
+                                    <input
+                                      type="checkbox"
+                                      checked={!c.hide_glossary}
+                                      onChange={e => patch({ content: { hide_glossary: !e.target.checked } })}
+                                    />
+                                    Exibir linha alfabética A-Z no rodapé
+                                  </label>
+                                </ControlRow>
+                                <ControlRow label="Título do Glossário">
+                                  <input
+                                    type="text"
+                                    placeholder="GLOSSÁRIO"
+                                    value={String(c.glossary_heading || 'GLOSSÁRIO')}
+                                    onChange={e => patch({ content: { glossary_heading: e.target.value } })}
+                                  />
+                                </ControlRow>
+                              </ElementorAccordion>
+
+                              {/* SEÇÃO: INFORMAÇÕES DA EMPRESA E COPYRIGHT */}
+                              <ElementorAccordion title="Informações da Empresa e Copyright" icon={Sliders} isOpen={openSections.reference_section_21 !== false} onToggle={() => toggleSection('reference_section_21')}>
+                                <ControlRow label="Razão Social / CNPJ">
+                                  <input
+                                    type="text"
+                                    placeholder="TEKNIX FERRAMENTAS LTDA • CNPJ: 63.623.515/0001-68"
+                                    value={String(c.company_info || '')}
+                                    onChange={e => patch({ content: { company_info: e.target.value } })}
+                                  />
+                                </ControlRow>
+                                <ControlRow label="Texto de Copyright">
+                                  <input
+                                    type="text"
+                                    placeholder="Todos os direitos reservados."
+                                    value={String(c.copyright || '')}
+                                    onChange={e => patch({ content: { copyright: e.target.value } })}
+                                  />
+                                </ControlRow>
+                              </ElementorAccordion>
+                            </>
+                          )
+                        })()}
 
                         {/* WIDGET: GOOGLE MAPS */}
                         {(widgetType === 'googleMaps' || widgetType === 'googleMapsPro' || widgetType === 'google-maps') && (

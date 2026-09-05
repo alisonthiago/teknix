@@ -2,16 +2,43 @@ import { Editable, useWidgetEdit } from './page-widgets/PageWidgets'
 import EditableFlow from './page-widgets/EditableFlow'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { DEFAULT_FOOTER_SEARCHED_ITEMS, type FooterSearchedItem } from '../../../../packages/core/src/pageWidgets'
 import './CasasBahiaFooter.css'
 
 export default function TeknixFooter() {
   const [isGlossaryOpen, setIsGlossaryOpen] = useState(false)
   const footerEdit = useWidgetEdit('chrome:footer', 'chrome:footer')
-  const whatsapp = String(footerEdit?.content?.whatsapp || '(46) 99915-5875')
+  const searchedEdit = useWidgetEdit('chrome:footer:searched', 'chrome:footer:searched')
+
+  // Conteúdo unificado do rodapé (permite editar pelo rodapé ou clicando direto na seção)
+  const footerContent = {
+    ...footerEdit?.content,
+    ...searchedEdit?.content
+  }
+
+  const whatsapp = String(footerContent.whatsapp || '(46) 99915-5875')
   const whatsappClean = whatsapp.replace(/\D/g, '')
-  const email = String(footerEdit?.content?.email || 'sac@teknix.com.br')
+  const email = String(footerContent.email || 'sac@teknix.com.br')
   const footerBg = (footerEdit?.schema as any)?.footer_bg
   const textColor = (footerEdit?.schema as any)?.footer_text_color
+
+  // Configurações dinâmicas de Produtos Mais Buscados
+  const hideSearched = footerContent.hide_searched === true || searchedEdit?.hidden === true
+  const searchedHeading = String(footerContent.searched_heading || footerContent.searched_title || 'PRODUTOS MAIS BUSCADOS')
+  const rawSearchedItems = footerContent.searched_items
+  const searchedItems: FooterSearchedItem[] = (Array.isArray(rawSearchedItems) && rawSearchedItems.length > 0)
+    ? rawSearchedItems
+    : DEFAULT_FOOTER_SEARCHED_ITEMS
+  const colsCount = Math.max(1, Math.min(10, Number(footerContent.searched_columns || 7)))
+  const itemsPerCol = Math.ceil(searchedItems.length / colsCount)
+  const columns: FooterSearchedItem[][] = []
+  for (let i = 0; i < colsCount; i++) {
+    const start = i * itemsPerCol
+    const colItems = searchedItems.slice(start, start + itemsPerCol)
+    if (colItems.length > 0) {
+      columns.push(colItems)
+    }
+  }
 
   const alphabet = ['0-9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
 
@@ -87,70 +114,29 @@ export default function TeknixFooter() {
         </div>
       </Editable>
 
-      {/* ── SEÇÃO 1: PRODUTOS MAIS BUSCADOS (SEO TEKNIX EM 7 COLUNAS) ── */}
-      <Editable as="section" widgetId="chrome:footer:searched" globalKey="chrome:footer:searched" label="Produtos mais buscados" widgetType="container" editorKind="container" renderContent={false} className="cb-footer-searched-section" aria-label="Produtos Mais Buscados">
-        <div className="cb-footer-container">
-          <h2 className="cb-footer-heading">PRODUTOS MAIS BUSCADOS</h2>
-          <div className="cb-searched-columns-grid">
-            <div className="cb-searched-col">
-              <Link to="/produtos?q=furadeira+de+impacto">Furadeira de impacto</Link>
-              <Link to="/produtos?q=parafusadeira+bateria">Parafusadeira a bateria</Link>
-              <Link to="/produtos?q=serra+circular">Serra circular</Link>
-              <Link to="/produtos?q=serra+tico-tico">Serra tico-tico</Link>
-              <Link to="/produtos?q=esmerilhadeira+angular">Esmerilhadeira angular</Link>
-              <Link to="/produtos?q=martelete+perfurador">Martelete perfurador</Link>
-            </div>
-            <div className="cb-searched-col">
-              <Link to="/produtos?q=chave+de+impacto">Chave de impacto</Link>
-              <Link to="/produtos?q=jogo+de+ferramentas">Jogo de ferramentas</Link>
-              <Link to="/produtos?q=maleta+de+ferramentas">Maleta de ferramentas</Link>
-              <Link to="/produtos?q=nivel+laser">Nível laser</Link>
-              <Link to="/produtos?q=trena+laser">Trena a laser</Link>
-              <Link to="/produtos?q=lixadeira+orbital">Lixadeira orbital</Link>
-            </div>
-            <div className="cb-searched-col">
-              <Link to="/produtos?q=compressor+de+ar">Compressor de ar</Link>
-              <Link to="/produtos?q=inversora+de+solda">Inversora de solda</Link>
-              <Link to="/produtos?q=lavadora+alta+pressao">Lavadora alta pressão</Link>
-              <Link to="/produtos?q=aspirador+industrial">Aspirador profissional</Link>
-              <Link to="/produtos?q=politriz">Politriz automotiva</Link>
-              <Link to="/produtos?q=plaina+eletrica">Plaina elétrica</Link>
-            </div>
-            <div className="cb-searched-col">
-              <Link to="/produtos?q=bateria+20v">Bateria 20V Max</Link>
-              <Link to="/produtos?q=carregador+rapido">Carregador rápido</Link>
-              <Link to="/produtos?q=brocas+e+pontas">Brocas e pontas</Link>
-              <Link to="/produtos?q=disco+de+corte">Discos de corte</Link>
-              <Link to="/produtos?q=maleta+organizadora">Caixa organizadora</Link>
-              <Link to="/produtos?q=kit+marcenaria">Kit marcenaria</Link>
-            </div>
-            <div className="cb-searched-col">
-              <Link to="/produtos?q=ferramentas+a+bateria">Ferramentas a bateria</Link>
-              <Link to="/produtos?q=ferramentas+eletricas">Ferramentas elétricas</Link>
-              <Link to="/produtos?q=acessorios">Acessórios para ferramentas</Link>
-              <Link to="/produtos?q=equipamentos">Equipamentos industriais</Link>
-              <Link to="/produtos?q=kits+profissionais">Kits profissionais</Link>
-              <Link to="/produtos?q=bancada+de+trabalho">Bancadas de trabalho</Link>
-            </div>
-            <div className="cb-searched-col">
-              <Link to="/produtos?q=furadeira+12">Furadeira 1/2 Pol.</Link>
-              <Link to="/produtos?q=parafusadeira+12v">Parafusadeira 12V</Link>
-              <Link to="/produtos?q=parafusadeira+20v">Parafusadeira 20V Brushless</Link>
-              <Link to="/produtos?q=serra+esquadria">Serra de esquadria</Link>
-              <Link to="/produtos?q=soprador+termico">Soprador térmico</Link>
-              <Link to="/produtos?q=tupia+coluna">Tupia de coluna</Link>
-            </div>
-            <div className="cb-searched-col">
-              <Link to="/produtos?q=gerador+energia">Gerador de energia</Link>
-              <Link to="/produtos?q=multimetro">Multímetro digital</Link>
-              <Link to="/produtos?q=alicate+amperimetro">Alicate amperímetro</Link>
-              <Link to="/produtos?q=chave+combinada">Chaves combinadas</Link>
-              <Link to="/produtos?q=caixa+sanfonada">Caixa metálica sanfonada</Link>
-              <Link to="/produtos?q=torquimetro">Torquímetro profissional</Link>
+      {/* ── SEÇÃO 1: PRODUTOS MAIS BUSCADOS (SEO TEKNIX EM COLUNAS DINÂMICAS) ── */}
+      {!hideSearched && (
+        <Editable as="section" widgetId="chrome:footer:searched" globalKey="chrome:footer:searched" label="Produtos mais buscados" widgetType="container" editorKind="container" renderContent={false} className="cb-footer-searched-section" aria-label="Produtos Mais Buscados">
+          <div className="cb-footer-container">
+            <h2 className="cb-footer-heading">{searchedHeading}</h2>
+            <div className="cb-searched-columns-grid" style={{ gridTemplateColumns: `repeat(${colsCount}, minmax(0, 1fr))` }}>
+              {columns.map((col, colIdx) => (
+                <div key={colIdx} className="cb-searched-col">
+                  {col.map((item, itemIdx) => {
+                    const itemTitle = String(item.title || '')
+                    const itemLink = String(item.link || `/produtos?q=${encodeURIComponent(itemTitle.toLowerCase())}`)
+                    return (
+                      <Link key={itemIdx} to={itemLink}>
+                        {itemTitle}
+                      </Link>
+                    )
+                  })}
+                </div>
+              ))}
             </div>
           </div>
-        </div>
-      </Editable>
+        </Editable>
+      )}
 
       {/* ── SEÇÃO 2: GLOSSÁRIO ALFABÉTICO (A-Z) ── */}
       <Editable as="section" widgetId="chrome:footer:glossary" globalKey="chrome:footer:glossary" label="Glossário" widgetType="container" editorKind="container" renderContent={false} className="cb-footer-glossary-section" aria-label="Glossário">

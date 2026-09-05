@@ -160,3 +160,61 @@ export function canvasAdSlots(layout:CanvasLayout):Array<{placement:string;path:
   const visit=(nodes:CanvasNode[],prefix:string)=>nodes.forEach((node,i)=>{const path=`${prefix}${i+1}. ${node.label}`;if(node.adPlacement)result.push({placement:node.adPlacement,path});visit(node.children||[],path+' → ')})
   visit(layout.nodes,'');return result
 }
+
+export interface FooterSearchedItem {
+  title: string
+  link: string
+}
+
+export const DEFAULT_FOOTER_SEARCHED_ITEMS: FooterSearchedItem[] = [
+  // Coluna 1
+  { title: 'Furadeira de impacto', link: '/produtos?q=furadeira+de+impacto' },
+  { title: 'Parafusadeira a bateria', link: '/produtos?q=parafusadeira+bateria' },
+  { title: 'Serra circular', link: '/produtos?q=serra+circular' },
+  { title: 'Serra tico-tico', link: '/produtos?q=serra+tico-tico' },
+  { title: 'Esmerilhadeira angular', link: '/produtos?q=esmerilhadeira+angular' },
+  { title: 'Martelete perfurador', link: '/produtos?q=martelete+perfurador' },
+  // Coluna 2
+  { title: 'Chave de impacto', link: '/produtos?q=chave+de+impacto' },
+  { title: 'Jogo de ferramentas', link: '/produtos?q=jogo+de+ferramentas' },
+  { title: 'Maleta de ferramentas', link: '/produtos?q=maleta+de+ferramentas' },
+  { title: 'Nível laser', link: '/produtos?q=nivel+laser' },
+  { title: 'Trena a laser', link: '/produtos?q=trena+laser' },
+  { title: 'Lixadeira orbital', link: '/produtos?q=lixadeira+orbital' },
+  // Coluna 3
+  { title: 'Compressor de ar', link: '/produtos?q=compressor+de+ar' },
+  { title: 'Inversora de solda', link: '/produtos?q=inversora+de+solda' },
+  { title: 'Lavadora alta pressão', link: '/produtos?q=lavadora+alta+pressao' },
+  { title: 'Aspirador profissional', link: '/produtos?q=aspirador+industrial' },
+  { title: 'Politriz automotiva', link: '/produtos?q=politriz' },
+  { title: 'Plaina elétrica', link: '/produtos?q=plaina+eletrica' },
+  // Coluna 4
+  { title: 'Bateria 20V Max', link: '/produtos?q=bateria+20v' },
+  { title: 'Carregador rápido', link: '/produtos?q=carregador+rapido' },
+  { title: 'Brocas e pontas', link: '/produtos?q=brocas+e+pontas' },
+  { title: 'Discos de corte', link: '/produtos?q=disco+de+corte' },
+  { title: 'Caixa organizadora', link: '/produtos?q=maleta+organizadora' },
+  { title: 'Kit marcenaria', link: '/produtos?q=kit+marcenaria' },
+  // Coluna 5
+  { title: 'Ferramentas a bateria', link: '/produtos?q=ferramentas+a+bateria' },
+  { title: 'Ferramentas elétricas', link: '/produtos?q=ferramentas+eletricas' },
+  { title: 'Acessórios para ferramentas', link: '/produtos?q=acessorios' },
+  { title: 'Equipamentos industriais', link: '/produtos?q=equipamentos' },
+  { title: 'Kits profissionais', link: '/produtos?q=kits+profissionais' },
+  { title: 'Bancadas de trabalho', link: '/produtos?q=bancada+de+trabalho' },
+  // Coluna 6
+  { title: 'Furadeira 1/2 Pol.', link: '/produtos?q=furadeira+12' },
+  { title: 'Parafusadeira 12V', link: '/produtos?q=parafusadeira+12v' },
+  { title: 'Parafusadeira 20V Brushless', link: '/produtos?q=parafusadeira+20v' },
+  { title: 'Serra de esquadria', link: '/produtos?q=serra+esquadria' },
+  { title: 'Soprador térmico', link: '/produtos?q=soprador+termico' },
+  { title: 'Tupia de coluna', link: '/produtos?q=tupia+coluna' },
+  // Coluna 7
+  { title: 'Gerador de energia', link: '/produtos?q=gerador+energia' },
+  { title: 'Multímetro digital', link: '/produtos?q=multimetro' },
+  { title: 'Alicate amperímetro', link: '/produtos?q=alicate+amperimetro' },
+  { title: 'Chaves combinadas', link: '/produtos?q=chave+combinada' },
+  { title: 'Caixa metálica sanfonada', link: '/produtos?q=caixa+sanfonada' },
+  { title: 'Torquímetro profissional', link: '/produtos?q=torquimetro' }
+]
+
