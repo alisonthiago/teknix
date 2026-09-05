@@ -410,3 +410,74 @@
   box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.14) !important;
 }
 
+/* ==============================================================
+   REPEATER ITEM INNER CONTROLS (GARANTIA DE NUNCA FICAR ESPREMIDO)
+   ============================================================== */
+.editor-reference-repeater .elementor-control-row,
+.editor-repeater-content .elementor-control-row {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 5px !important;
+  margin-bottom: 8px !important;
+}
+
+.editor-reference-repeater .elementor-control-row .elementor-control-header,
+.editor-repeater-content .elementor-control-row .elementor-control-header {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin: 0 0 2px 0 !important;
+}
+
+.editor-reference-repeater .elementor-control-row .elementor-control-title,
+.editor-repeater-content .elementor-control-row .elementor-control-title {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  color: #475569 !important;
+  letter-spacing: 0.01em !important;
+}
+
+.editor-reference-repeater .elementor-control-row input:not([type="color"]):not([type="checkbox"]):not([type="range"]),
+.editor-reference-repeater .elementor-control-row select,
+.editor-repeater-content .elementor-control-row input:not([type="color"]):not([type="checkbox"]):not([type="range"]),
+.editor-repeater-content .elementor-control-row select {
+  width: 100% !important;
+  height: 34px !important;
+  border-radius: 7px !important;
+  border: 1px solid #d2d2d7 !important;
+  padding: 0 10px !important;
+  font-size: 12px !important;
+  background: #ffffff !important;
+  color: #1d1d1f !important;
+  box-sizing: border-box !important;
+  transition: all 0.15s ease !important;
+}
+
+.editor-reference-repeater .elementor-control-row textarea,
+.editor-repeater-content .elementor-control-row textarea {
+  width: 100% !important;
+  min-height: 64px !important;
+  border-radius: 7px !important;
+  border: 1px solid #d2d2d7 !important;
+  padding: 8px 10px !important;
+  font-size: 12px !important;
+  background: #ffffff !important;
+  color: #1d1d1f !important;
+  box-sizing: border-box !important;
+  resize: vertical !important;
+  transition: all 0.15s ease !important;
+}
+
+.editor-reference-repeater .elementor-control-row input:focus,
+.editor-reference-repeater .elementor-control-row select:focus,
+.editor-reference-repeater .elementor-control-row textarea:focus,
+.editor-repeater-content .elementor-control-row input:focus,
+.editor-repeater-content .elementor-control-row select:focus,
+.editor-repeater-content .elementor-control-row textarea:focus {
+  border-color: #0071e3 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.14) !important;
+}
+

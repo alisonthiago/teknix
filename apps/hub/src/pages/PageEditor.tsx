@@ -18,7 +18,7 @@ import {
   AlignVerticalJustifyStart, AlignVerticalJustifyCenter, AlignVerticalJustifyEnd, ChevronDown,
   Clock, Share2, MessageSquare, AlertCircle, Activity, PlusCircle, LayoutGrid, List,
   ClipboardList, Lock, PlaySquare, Table, Paintbrush, Download, FolderOpen, Upload, Sparkles,
-  ArrowUp, ArrowDown
+  ArrowUp, ArrowDown, CheckCircle2, DollarSign
 } from 'lucide-react'
 import { loadEditorTarget, saveEditorTarget, type EditorTarget } from '../services/widgetEditor'
 import {
@@ -3882,8 +3882,8 @@ export default function PageEditor() {
 
                           return (
                             <>
-                              <ElementorAccordion title="Itens da Sanfona / FAQ" icon={ChevronDown} isOpen={openSections.reference_section_9 !== false} onToggle={() => toggleSection('reference_section_9')}>
-                              <p style={{ fontSize: 11, color: '#a4afb7', margin: '0 0 12px' }}>
+                              <ElementorAccordion title={`Itens do FAQ (${items.length})`} icon={HelpCircle} isOpen={openSections.reference_section_9 !== false} onToggle={() => toggleSection('reference_section_9')}>
+                              <p style={{ fontSize: 11, color: '#64748b', margin: '0 0 10px' }}>
                                 Adicione perguntas e respostas que expandem e recolhem ao clicar:
                               </p>
 
@@ -3905,63 +3905,45 @@ export default function PageEditor() {
                                     patch({ content: { items: next } })
                                   }}
                                 >
-                                  <div>
-                                    <label style={{ fontSize: 11, fontWeight: 600, color: '#a4afb7', marginBottom: 4, display: 'block' }}>Título / Pergunta</label>
+                                  <RepeaterField label="Pergunta / Título do FAQ" icon={HelpCircle}>
                                     <input
                                       type="text"
+                                      className="editor-repeater-input"
                                       placeholder="Ex: Qual é o prazo de entrega?"
                                       value={item.title || item.text || ''}
-                                      style={{ width: '100%', padding: '7px 10px', background: '#ffffff', border: '1px solid #d2d2d7', borderRadius: 6, color: '#1d1d1f', fontSize: 12 }}
                                       onChange={e => {
                                         const next = [...items]
                                         next[idx] = { ...next[idx], title: e.target.value, text: e.target.value }
                                         patch({ content: { items: next } })
                                       }}
                                     />
-                                  </div>
-                                  <div>
-                                    <label style={{ fontSize: 11, fontWeight: 600, color: '#a4afb7', marginBottom: 4, display: 'block' }}>Conteúdo / Resposta</label>
+                                  </RepeaterField>
+                                  <RepeaterField label="Resposta / Conteúdo Detalhado" icon={FileText}>
                                     <textarea
                                       rows={3}
+                                      className="editor-repeater-textarea"
                                       placeholder="Ex: Entregamos em todo o Brasil com código de rastreio..."
                                       value={item.content || item.html || item.answer || ''}
-                                      style={{ width: '100%', padding: '7px 10px', background: '#ffffff', border: '1px solid #d2d2d7', borderRadius: 6, color: '#1d1d1f', fontSize: 12, resize: 'vertical' }}
                                       onChange={e => {
                                         const next = [...items]
                                         next[idx] = { ...next[idx], content: e.target.value, html: e.target.value, answer: e.target.value }
                                         patch({ content: { items: next } })
                                       }}
                                     />
-                                  </div>
+                                  </RepeaterField>
                                 </ElementorRepeaterItem>
                               ))}
 
                               <button
                                 type="button"
-                                style={{
-                                  width: '100%',
-                                  padding: '10px 14px',
-                                  background: '#0071e3',
-                                  color: '#fff',
-                                  border: 'none',
-                                  borderRadius: 6,
-                                  fontSize: 12,
-                                  fontWeight: 600,
-                                  cursor: 'pointer',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  gap: 6,
-                                  marginTop: 4,
-                                  boxShadow: '0 2px 6px rgba(0,113,227,0.3)'
-                                }}
+                                className="editor-add-item"
                                 onClick={() => {
                                   const next = [...items, { title: 'Nova Pergunta Frequente', content: 'Insira a resposta aqui detalhadamente.' }]
                                   patch({ content: { items: next } })
                                   setOpenRepeaterIndex(prev => ({ ...prev, [selected]: next.length - 1 }))
                                 }}
                               >
-                                <Plus size={14} /> Adicionar Nova Pergunta
+                                <Plus size={14} /> Adicionar Nova Pergunta ao FAQ
                               </button>
                             </ElementorAccordion>
 
@@ -4023,8 +4005,8 @@ export default function PageEditor() {
                           const openIdx = openRepeaterIndex[selected] !== undefined ? openRepeaterIndex[selected] : 0
 
                           return (
-                            <ElementorAccordion title="Abas de Conteúdo" icon={Layers} isOpen={openSections.reference_section_10 !== false} onToggle={() => toggleSection('reference_section_10')}>
-                              <p style={{ fontSize: 11, color: '#a4afb7', margin: '0 0 12px' }}>
+                            <ElementorAccordion title={`Abas de Conteúdo (${items.length})`} icon={Layers} isOpen={openSections.reference_section_10 !== false} onToggle={() => toggleSection('reference_section_10')}>
+                              <p style={{ fontSize: 11, color: '#64748b', margin: '0 0 10px' }}>
                                 Adicione abas de navegação com seus respectivos conteúdos:
                               </p>
 
@@ -4046,63 +4028,45 @@ export default function PageEditor() {
                                     patch({ content: { tabs: next, items: next } })
                                   }}
                                 >
-                                  <div>
-                                    <label style={{ fontSize: 11, fontWeight: 600, color: '#a4afb7', marginBottom: 4, display: 'block' }}>Título da Aba</label>
+                                  <RepeaterField label="Título da Aba" icon={Layers}>
                                     <input
                                       type="text"
+                                      className="editor-repeater-input"
                                       placeholder="Ex: Especificações Técnicas"
                                       value={item.title || item.text || ''}
-                                      style={{ width: '100%', padding: '7px 10px', background: '#ffffff', border: '1px solid #d2d2d7', borderRadius: 6, color: '#1d1d1f', fontSize: 12 }}
                                       onChange={e => {
                                         const next = [...items]
                                         next[idx] = { ...next[idx], title: e.target.value, text: e.target.value }
                                         patch({ content: { tabs: next, items: next } })
                                       }}
                                     />
-                                  </div>
-                                  <div>
-                                    <label style={{ fontSize: 11, fontWeight: 600, color: '#a4afb7', marginBottom: 4, display: 'block' }}>Conteúdo da Aba</label>
+                                  </RepeaterField>
+                                  <RepeaterField label="Conteúdo da Aba" icon={FileText}>
                                     <textarea
                                       rows={4}
+                                      className="editor-repeater-textarea"
                                       placeholder="Conteúdo exibido ao clicar nesta aba..."
                                       value={item.content || item.html || ''}
-                                      style={{ width: '100%', padding: '7px 10px', background: '#ffffff', border: '1px solid #d2d2d7', borderRadius: 6, color: '#1d1d1f', fontSize: 12, resize: 'vertical' }}
                                       onChange={e => {
                                         const next = [...items]
                                         next[idx] = { ...next[idx], content: e.target.value, html: e.target.value }
                                         patch({ content: { tabs: next, items: next } })
                                       }}
                                     />
-                                  </div>
+                                  </RepeaterField>
                                 </ElementorRepeaterItem>
                               ))}
 
                               <button
                                 type="button"
-                                style={{
-                                  width: '100%',
-                                  padding: '10px 14px',
-                                  background: '#0071e3',
-                                  color: '#fff',
-                                  border: 'none',
-                                  borderRadius: 6,
-                                  fontSize: 12,
-                                  fontWeight: 600,
-                                  cursor: 'pointer',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  gap: 6,
-                                  marginTop: 4,
-                                  boxShadow: '0 2px 6px rgba(0,113,227,0.3)'
-                                }}
+                                className="editor-add-item"
                                 onClick={() => {
                                   const next = [...items, { title: 'Nova Aba', content: 'Conteúdo da nova aba.' }]
                                   patch({ content: { tabs: next, items: next } })
                                   setOpenRepeaterIndex(prev => ({ ...prev, [selected]: next.length - 1 }))
                                 }}
                               >
-                                <Plus size={14} /> Adicionar Nova Aba
+                                <Plus size={14} /> Adicionar Nova Aba de Conteúdo
                               </button>
                             </ElementorAccordion>
                           )
@@ -4166,8 +4130,8 @@ export default function PageEditor() {
                           const openIdx = openRepeaterIndex[selected] !== undefined ? openRepeaterIndex[selected] : 0
 
                           return (
-                            <ElementorAccordion title="Lista de Ícones" icon={List} isOpen={openSections.reference_section_13 !== false} onToggle={() => toggleSection('reference_section_13')}>
-                              <p style={{ fontSize: 11, color: '#a4afb7', margin: '0 0 12px' }}>
+                            <ElementorAccordion title={`Lista de Itens & Recursos (${items.length})`} icon={List} isOpen={openSections.reference_section_13 !== false} onToggle={() => toggleSection('reference_section_13')}>
+                              <p style={{ fontSize: 11, color: '#64748b', margin: '0 0 10px' }}>
                                 Itens da lista com marcadores de verificação / ícone:
                               </p>
 
@@ -4191,51 +4155,33 @@ export default function PageEditor() {
                                       patch({ content: { items: next } })
                                     }}
                                   >
-                                    <div>
-                                      <label style={{ fontSize: 11, fontWeight: 600, color: '#a4afb7', marginBottom: 4, display: 'block' }}>Texto do Item</label>
+                                    <RepeaterField label="Texto do Benefício / Recurso" icon={CheckCircle2}>
                                       <input
                                         type="text"
+                                        className="editor-repeater-input"
                                         placeholder="Ex: Motor Brushless de Alto Torque"
                                         value={itemText}
-                                        style={{ width: '100%', padding: '7px 10px', background: '#ffffff', border: '1px solid #d2d2d7', borderRadius: 6, color: '#1d1d1f', fontSize: 12 }}
                                         onChange={e => {
                                           const next = [...items]
                                           next[idx] = typeof item === 'string' ? e.target.value : { ...next[idx], text: e.target.value }
                                           patch({ content: { items: next } })
                                         }}
                                       />
-                                    </div>
+                                    </RepeaterField>
                                   </ElementorRepeaterItem>
                                 )
                               })}
 
                               <button
                                 type="button"
-                                style={{
-                                  width: '100%',
-                                  padding: '10px 14px',
-                                  background: '#0071e3',
-                                  color: '#fff',
-                                  border: 'none',
-                                  borderRadius: 6,
-                                  fontSize: 12,
-                                  fontWeight: 600,
-                                  cursor: 'pointer',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  gap: 6,
-                                  marginTop: 4,
-                                  marginBottom: 12,
-                                  boxShadow: '0 2px 6px rgba(0,113,227,0.3)'
-                                }}
+                                className="editor-add-item"
                                 onClick={() => {
                                   const next = [...items, { text: 'Novo benefício ou recurso' }]
                                   patch({ content: { items: next } })
                                   setOpenRepeaterIndex(prev => ({ ...prev, [selected]: next.length - 1 }))
                                 }}
                               >
-                                <Plus size={14} /> Adicionar Novo Item
+                                <Plus size={14} /> Adicionar Novo Item à Lista
                               </button>
 
                               <ControlRow label="Cor do Marcador / Ícone">
@@ -4532,9 +4478,10 @@ export default function PageEditor() {
                                         canMoveUp={idx > 0}
                                         canMoveDown={idx < searchedList.length - 1}
                                       >
-                                        <ControlRow label="Termo / Nome do Produto">
+                                        <RepeaterField label="Termo / Nome do Produto" icon={Search}>
                                           <input
                                             type="text"
+                                            className="editor-repeater-input"
                                             value={item.title || ''}
                                             placeholder="Ex: Furadeira de impacto"
                                             onChange={e => {
@@ -4551,10 +4498,11 @@ export default function PageEditor() {
                                               patch({ content: { searched_items: next } })
                                             }}
                                           />
-                                        </ControlRow>
-                                        <ControlRow label="Link de Destino" description="URL relativa ou de busca">
+                                        </RepeaterField>
+                                        <RepeaterField label="Link de Destino (URL)" icon={Link2}>
                                           <input
                                             type="text"
+                                            className="editor-repeater-input"
                                             value={item.link || ''}
                                             placeholder="/produtos?q=termo"
                                             onChange={e => {
@@ -4563,29 +4511,14 @@ export default function PageEditor() {
                                               patch({ content: { searched_items: next } })
                                             }}
                                           />
-                                        </ControlRow>
+                                        </RepeaterField>
                                       </ElementorRepeaterItem>
                                     ))}
                                   </div>
 
                                   <button
                                     type="button"
-                                    style={{
-                                      width: '100%',
-                                      padding: '9px 12px',
-                                      background: '#0071e3',
-                                      color: '#fff',
-                                      border: 'none',
-                                      borderRadius: 6,
-                                      fontSize: 12,
-                                      fontWeight: 600,
-                                      cursor: 'pointer',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'center',
-                                      gap: 6,
-                                      boxShadow: '0 2px 6px rgba(0,113,227,0.25)'
-                                    }}
+                                    className="editor-add-item"
                                     onClick={() => {
                                       const newItem: FooterSearchedItem = { title: 'Novo Termo', link: '/produtos?q=novo+termo' }
                                       const next = [...searchedList, newItem]
@@ -4593,7 +4526,7 @@ export default function PageEditor() {
                                       setOpenRepeaterIndex(prev => ({ ...prev, [selected]: next.length - 1 }))
                                     }}
                                   >
-                                    <Plus size={14} /> Adicionar Novo Termo
+                                    <Plus size={14} /> Adicionar Novo Termo de Busca
                                   </button>
                                 </div>
 
@@ -4777,29 +4710,34 @@ export default function PageEditor() {
                         {(widgetType === 'gallery' || widgetType === 'basicGallery' || widgetType === 'imageCarousel' || widgetType === 'carousel') && (() => {
                           const images: string[] = Array.isArray(c.images) ? c.images.map((img: any) => typeof img === 'string' ? img : img.image || img.url || '') : []
                           return (
-                            <ElementorAccordion title={widgetType.toLowerCase().includes('carousel') ? 'Carrossel de Imagens' : 'Galeria de Imagens'} icon={ImageIcon} isOpen={openSections.reference_section_23 !== false} onToggle={() => toggleSection('reference_section_23')}>
-                              <p style={{ fontSize: 11, color: '#6e6e73', margin: '0 0 10px' }}>
+                            <ElementorAccordion title={widgetType.toLowerCase().includes('carousel') ? `Carrossel de Imagens (${images.length})` : `Galeria de Imagens (${images.length})`} icon={ImageIcon} isOpen={openSections.reference_section_23 !== false} onToggle={() => toggleSection('reference_section_23')}>
+                              <p style={{ fontSize: 11, color: '#64748b', margin: '0 0 10px' }}>
                                 Gerencie as imagens exibidas na {widgetType.toLowerCase().includes('carousel') ? 'apresentação' : 'galeria'}:
                               </p>
                               {images.map((imgUrl, idx) => (
-                                <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8, background: '#f5f5f7', padding: 6, borderRadius: 8, border: '1px solid #e5e5ea' }}>
-                                  <ImageMediaControl value={imgUrl} onChange={url => { const next = [...images]; next[idx] = url; patch({ content: { images: next } }) }} />
+                                <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, background: '#ffffff', padding: '8px 10px', borderRadius: 8, border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+                                  <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 5px', borderRadius: 4, background: '#f1f5f9', color: '#64748b', fontFamily: 'monospace' }}>
+                                    #{String(idx + 1).padStart(2, '0')}
+                                  </span>
+                                  <div style={{ flex: 1, minWidth: 0 }}>
+                                    <ImageMediaControl value={imgUrl} onChange={url => { const next = [...images]; next[idx] = url; patch({ content: { images: next } }) }} />
+                                  </div>
                                   <button
                                     type="button"
-                                    style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: 4 }}
+                                    style={{ background: '#fef2f2', border: '1px solid #fee2e2', color: '#ef4444', cursor: 'pointer', padding: 6, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                     onClick={() => {
                                       const next = images.filter((_, i) => i !== idx)
                                       patch({ content: { images: next } })
                                     }}
                                     title="Remover imagem"
                                   >
-                                    <Trash2 size={14} />
+                                    <Trash2 size={13} />
                                   </button>
                                 </div>
                               ))}
                               <button
                                 type="button"
-                                style={{ width: '100%', padding: '8px 12px', background: '#0071e3', color: '#fff', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 4, marginBottom: 12 }}
+                                className="editor-add-item"
                                 onClick={() => {
                                   const next = [...images, '']
                                   patch({ content: { images: next } })
@@ -4844,7 +4782,7 @@ export default function PageEditor() {
                           const openIdx = openRepeaterIndex[selected] !== undefined ? openRepeaterIndex[selected] : 0
 
                           return (
-                            <ElementorAccordion title="Lista de Preços" icon={List} isOpen={openSections.reference_section_24 !== false} onToggle={() => toggleSection('reference_section_24')}>
+                            <ElementorAccordion title={`Lista de Preços (${items.length})`} icon={List} isOpen={openSections.reference_section_24 !== false} onToggle={() => toggleSection('reference_section_24')}>
                               <ControlRow label="Título da Lista">
                                 <input
                                   type="text"
@@ -4853,13 +4791,14 @@ export default function PageEditor() {
                                 />
                               </ControlRow>
 
-                              <p style={{ fontSize: 11, color: '#a4afb7', margin: '8px 0 10px' }}>Itens com valores e especificações:</p>
+                              <p style={{ fontSize: 11, color: '#64748b', margin: '8px 0 10px' }}>Itens com valores e especificações:</p>
 
                               {items.map((item: any, idx: number) => (
                                 <ElementorRepeaterItem
                                   key={idx}
                                   index={idx}
                                   title={item.name || item.label || `Item #${idx + 1}`}
+                                  subtitle={item.price}
                                   isOpen={openIdx === idx}
                                   onToggle={() => setOpenRepeaterIndex(prev => ({ ...prev, [selected]: openIdx === idx ? -1 : idx }))}
                                   onDuplicate={() => {
@@ -4873,54 +4812,51 @@ export default function PageEditor() {
                                     patch({ content: { items: next } })
                                   }}
                                 >
-                                  <div>
-                                    <label style={{ fontSize: 11, fontWeight: 600, color: '#a4afb7', marginBottom: 4, display: 'block' }}>Nome do Item</label>
+                                  <RepeaterField label="Nome do Produto / Serviço" icon={Tag}>
                                     <input
                                       type="text"
+                                      className="editor-repeater-input"
                                       value={item.name || item.label || ''}
                                       placeholder="Ex: Parafusadeira Brushless"
-                                      style={{ width: '100%', padding: '7px 10px', background: '#ffffff', border: '1px solid #d2d2d7', borderRadius: 6, color: '#1d1d1f', fontSize: 12 }}
                                       onChange={e => {
                                         const next = [...items]
                                         next[idx] = { ...next[idx], name: e.target.value, label: e.target.value }
                                         patch({ content: { items: next } })
                                       }}
                                     />
-                                  </div>
-                                  <div>
-                                    <label style={{ fontSize: 11, fontWeight: 600, color: '#a4afb7', marginBottom: 4, display: 'block' }}>Preço</label>
+                                  </RepeaterField>
+                                  <RepeaterField label="Preço" icon={DollarSign}>
                                     <input
                                       type="text"
+                                      className="editor-repeater-input"
                                       value={item.price || ''}
                                       placeholder="Ex: R$ 489,90"
-                                      style={{ width: '100%', padding: '7px 10px', background: '#ffffff', border: '1px solid #d2d2d7', borderRadius: 6, color: '#1d1d1f', fontSize: 12 }}
                                       onChange={e => {
                                         const next = [...items]
                                         next[idx] = { ...next[idx], price: e.target.value }
                                         patch({ content: { items: next } })
                                       }}
                                     />
-                                  </div>
-                                  <div>
-                                    <label style={{ fontSize: 11, fontWeight: 600, color: '#a4afb7', marginBottom: 4, display: 'block' }}>Descrição</label>
+                                  </RepeaterField>
+                                  <RepeaterField label="Descrição / Especificações" icon={FileText}>
                                     <textarea
                                       rows={2}
+                                      className="editor-repeater-textarea"
                                       value={item.description || ''}
                                       placeholder="Detalhes ou especificações..."
-                                      style={{ width: '100%', padding: '7px 10px', background: '#ffffff', border: '1px solid #d2d2d7', borderRadius: 6, color: '#1d1d1f', fontSize: 12 }}
                                       onChange={e => {
                                         const next = [...items]
                                         next[idx] = { ...next[idx], description: e.target.value }
                                         patch({ content: { items: next } })
                                       }}
                                     />
-                                  </div>
+                                  </RepeaterField>
                                 </ElementorRepeaterItem>
                               ))}
 
                               <button
                                 type="button"
-                                style={{ width: '100%', padding: '10px 14px', background: '#0071e3', color: '#fff', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 4 }}
+                                className="editor-add-item"
                                 onClick={() => {
                                   const next = [...items, { name: 'Novo Equipamento TEKNIX', label: 'Novo Equipamento TEKNIX', price: 'R$ 199,00', description: 'Alta durabilidade e garantia oficial.' }]
                                   patch({ content: { items: next } })
@@ -5066,7 +5002,7 @@ export default function PageEditor() {
                           const openIdx = openRepeaterIndex[selected] !== undefined ? openRepeaterIndex[selected] : 0
 
                           return (
-                            <ElementorAccordion title="Menu de Navegação" icon={Menu} isOpen={openSections.reference_section_28 !== false} onToggle={() => toggleSection('reference_section_28')}>
+                            <ElementorAccordion title={`Menu de Navegação (${items.length})`} icon={Menu} isOpen={openSections.reference_section_28 !== false} onToggle={() => toggleSection('reference_section_28')}>
                               <ControlRow label="Título do Menu">
                                 <input
                                   type="text"
@@ -5074,7 +5010,7 @@ export default function PageEditor() {
                                   onChange={e => patch({ content: { title: e.target.value } })}
                                 />
                               </ControlRow>
-                              <p style={{ fontSize: 11, color: '#a4afb7', margin: '8px 0 10px' }}>Links de navegação do site:</p>
+                              <p style={{ fontSize: 11, color: '#64748b', margin: '8px 0 10px' }}>Links de navegação do site:</p>
                               {items.map((item: any, idx: number) => {
                                 const itemLabel = typeof item === 'string' ? item : item.label || item.text || `Link #${idx + 1}`
                                 const itemUrl = typeof item === 'string' ? '#' : item.url || item.link || '#'
@@ -5083,6 +5019,7 @@ export default function PageEditor() {
                                     key={idx}
                                     index={idx}
                                     title={itemLabel}
+                                    subtitle={itemUrl}
                                     isOpen={openIdx === idx}
                                     onToggle={() => setOpenRepeaterIndex(prev => ({ ...prev, [selected]: openIdx === idx ? -1 : idx }))}
                                     onDuplicate={() => {
@@ -5096,38 +5033,38 @@ export default function PageEditor() {
                                       patch({ content: { items: next } })
                                     }}
                                   >
-                                    <div>
-                                      <label style={{ fontSize: 11, fontWeight: 600, color: '#a4afb7', marginBottom: 4, display: 'block' }}>Rótulo do Link</label>
+                                    <RepeaterField label="Rótulo do Link" icon={Type}>
                                       <input
                                         type="text"
+                                        className="editor-repeater-input"
                                         value={itemLabel}
-                                        style={{ width: '100%', padding: '7px 10px', background: '#ffffff', border: '1px solid #d2d2d7', borderRadius: 6, color: '#1d1d1f', fontSize: 12 }}
+                                        placeholder="Ex: Ferramentas Elétricas"
                                         onChange={e => {
                                           const next = [...items]
                                           next[idx] = typeof item === 'string' ? { label: e.target.value, url: '#' } : { ...next[idx], label: e.target.value }
                                           patch({ content: { items: next } })
                                         }}
                                       />
-                                    </div>
-                                    <div>
-                                      <label style={{ fontSize: 11, fontWeight: 600, color: '#a4afb7', marginBottom: 4, display: 'block' }}>URL / Destino</label>
+                                    </RepeaterField>
+                                    <RepeaterField label="URL / Destino do Link" icon={Link2}>
                                       <input
                                         type="text"
+                                        className="editor-repeater-input"
                                         value={itemUrl}
-                                        style={{ width: '100%', padding: '7px 10px', background: '#ffffff', border: '1px solid #d2d2d7', borderRadius: 6, color: '#1d1d1f', fontSize: 12 }}
+                                        placeholder="Ex: /produtos/ferramentas"
                                         onChange={e => {
                                           const next = [...items]
                                           next[idx] = typeof item === 'string' ? { label: item, url: e.target.value } : { ...next[idx], url: e.target.value }
                                           patch({ content: { items: next } })
                                         }}
                                       />
-                                    </div>
+                                    </RepeaterField>
                                   </ElementorRepeaterItem>
                                 )
                               })}
                               <button
                                 type="button"
-                                style={{ width: '100%', padding: '10px 14px', background: '#0071e3', color: '#fff', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 4 }}
+                                className="editor-add-item"
                                 onClick={() => {
                                   const next = [...items, { label: 'Novo Link', url: '/novo-link' }]
                                   patch({ content: { items: next } })
@@ -5573,36 +5510,10 @@ export default function PageEditor() {
 
                                   <button
                                     type="button"
+                                    className="editor-add-item"
                                     onClick={addItem}
-                                    style={{
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'center',
-                                      gap: 8,
-                                      padding: '11px 16px',
-                                      background: '#f0f7ff',
-                                      color: '#0071e3',
-                                      border: '1.5px dashed #0071e3',
-                                      borderRadius: 8,
-                                      fontSize: 12,
-                                      fontWeight: 600,
-                                      cursor: 'pointer',
-                                      marginTop: 6,
-                                      transition: 'all 0.2s ease',
-                                      width: '100%'
-                                    }}
-                                    onMouseEnter={e => {
-                                      e.currentTarget.style.background = '#0071e3'
-                                      e.currentTarget.style.color = '#ffffff'
-                                      e.currentTarget.style.borderStyle = 'solid'
-                                    }}
-                                    onMouseLeave={e => {
-                                      e.currentTarget.style.background = '#f0f7ff'
-                                      e.currentTarget.style.color = '#0071e3'
-                                      e.currentTarget.style.borderStyle = 'dashed'
-                                    }}
                                   >
-                                    <Plus size={15} /> Adicionar Nova Categoria / Card
+                                    <Plus size={14} /> Adicionar Nova Categoria / Card
                                   </button>
                                 </div>
                               </ElementorAccordion>
@@ -9411,14 +9322,17 @@ function ElementorRepeaterItem({
         </div>
       </div>
       {isOpen && (
-        <div style={{
-          padding: '14px 16px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 12,
-          background: '#fbfbfd',
-          borderTop: '1px solid #eef0f3'
-        }}>
+        <div
+          className="editor-repeater-content"
+          style={{
+            padding: '14px 16px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 12,
+            background: '#ffffff',
+            borderTop: '1px solid #eef0f3'
+          }}
+        >
           {children}
         </div>
       )}
@@ -9902,12 +9816,92 @@ function SlideItemsControl({ content, onChange }: { content: Record<string, any>
   const [opened, setOpened] = useState<number | null>(null)
   const items = Array.isArray(content.slides) ? content.slides : [{ title: content.title || '', subtitle: content.subtitle || '', button_text: content.button_text || '', button_link: content.button_link || '', bg_color: content.bg_color || '#f5f5f7' }]
   const update = (index: number, values: Record<string, any>) => onChange({ slides: items.map((item: any, i: number) => i === index ? { ...item, ...values } : item) })
-  return <>{items.map((item: any, index: number) => <ElementorRepeaterItem key={index} index={index} title={item.title || `Slide #${index + 1}`} isOpen={opened === index} onToggle={() => setOpened(opened === index ? null : index)} onDuplicate={() => onChange({ slides: [...items.slice(0, index + 1), { ...item }, ...items.slice(index + 1)] })} onDelete={() => { onChange({ slides: items.filter((_: any, i: number) => i !== index) }); setOpened(null) }}>
-    <ControlRow label="Imagem"><ImageMediaControl value={item.image || ''} onChange={image => update(index, { image })} /></ControlRow>
-    <ControlRow label="Cor de fundo"><input type="color" value={item.bg_color || '#f5f5f7'} onChange={e => update(index, { bg_color: e.target.value })} /></ControlRow>
-    <ControlRow label="Título"><input value={item.title || ''} onChange={e => update(index, { title: e.target.value })} /></ControlRow>
-    <ControlRow label="Descrição"><textarea value={item.subtitle || ''} onChange={e => update(index, { subtitle: e.target.value })} /></ControlRow>
-    <ControlRow label="Texto do botão"><input value={item.button_text || ''} onChange={e => update(index, { button_text: e.target.value })} /></ControlRow>
-    <ControlRow label="Link"><input value={item.button_link || ''} onChange={e => update(index, { button_link: e.target.value })} /></ControlRow>
-  </ElementorRepeaterItem>)}<button type="button" className="editor-add-item" onClick={() => { onChange({ slides: [...items, { title: `Slide #${items.length + 1}` }] }); setOpened(items.length) }}><Plus size={14} /> Adicionar item</button></>
+
+  return (
+    <>
+      {items.map((item: any, index: number) => (
+        <ElementorRepeaterItem
+          key={index}
+          index={index}
+          title={item.title || `Slide #${index + 1}`}
+          subtitle={item.subtitle}
+          isOpen={opened === index}
+          onToggle={() => setOpened(opened === index ? null : index)}
+          onDuplicate={() => onChange({ slides: [...items.slice(0, index + 1), { ...item }, ...items.slice(index + 1)] })}
+          onDelete={() => { onChange({ slides: items.filter((_: any, i: number) => i !== index) }); setOpened(null) }}
+        >
+          <RepeaterField label="Imagem do Slide" icon={ImageIcon}>
+            <ImageMediaControl value={item.image || ''} onChange={image => update(index, { image })} />
+          </RepeaterField>
+
+          <RepeaterField label="Cor de Fundo do Slide" icon={Palette}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <input
+                type="color"
+                value={item.bg_color || '#f5f5f7'}
+                onChange={e => update(index, { bg_color: e.target.value })}
+                style={{ width: 34, height: 32, padding: 0, borderRadius: 6, border: '1px solid #d2d2d7', cursor: 'pointer' }}
+              />
+              <input
+                type="text"
+                className="editor-repeater-input"
+                value={item.bg_color || '#f5f5f7'}
+                onChange={e => update(index, { bg_color: e.target.value })}
+                style={{ flex: 1 }}
+              />
+            </div>
+          </RepeaterField>
+
+          <RepeaterField label="Título Principal" icon={Type}>
+            <input
+              type="text"
+              className="editor-repeater-input"
+              placeholder="Ex: Potência Extrema para o Seu Trabalho"
+              value={item.title || ''}
+              onChange={e => update(index, { title: e.target.value })}
+            />
+          </RepeaterField>
+
+          <RepeaterField label="Descrição / Subtítulo" icon={FileText}>
+            <textarea
+              rows={2}
+              className="editor-repeater-textarea"
+              placeholder="Ex: Conheça a linha completa de ferramentas sem fio com bateria 21V."
+              value={item.subtitle || ''}
+              onChange={e => update(index, { subtitle: e.target.value })}
+            />
+          </RepeaterField>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            <RepeaterField label="Texto do Botão" icon={MousePointerClick}>
+              <input
+                type="text"
+                className="editor-repeater-input"
+                placeholder="Ex: Comprar Agora"
+                value={item.button_text || ''}
+                onChange={e => update(index, { button_text: e.target.value })}
+              />
+            </RepeaterField>
+            <RepeaterField label="Link de Destino" icon={Link2}>
+              <input
+                type="text"
+                className="editor-repeater-input"
+                placeholder="/produtos"
+                value={item.button_link || ''}
+                onChange={e => update(index, { button_link: e.target.value })}
+              />
+            </RepeaterField>
+          </div>
+        </ElementorRepeaterItem>
+      ))}
+
+      <button
+        type="button"
+        className="editor-add-item"
+        onClick={() => { onChange({ slides: [...items, { title: `Slide #${items.length + 1}` }] }); setOpened(items.length) }}
+      >
+        <Plus size={14} /> Adicionar Novo Slide
+      </button>
+    </>
+  )
 }
