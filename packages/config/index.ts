@@ -1,3 +1,5 @@
+export * from './src/index'
+
 export const config = {
   whatsapp: {
     number: '5511999999999',

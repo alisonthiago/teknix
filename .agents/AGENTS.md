@@ -938,11 +938,18 @@ ESTA É UMA REGRA ABSOLUTA E IMUTÁVEL.
 NENHUMA IA, AGENTE, DESENVOLVEDOR OU FERRAMENTA PODE ALTERAR
 AS PORTAS ABAIXO SEM ORDEM EXPLÍCITA E DIRETA DO PROPRIETÁRIO.
 
-## Mapeamento oficial de portas:
+## Mapeamento oficial de domínios e portas:
 
-SITE   = http://localhost:5173  (porta PRINCIPAL do usuário final)
-HUB    = http://localhost:5174  (painel administrativo)
-FLOW   = http://localhost:5176  (sistema de marketplaces)
+| Domínio | Função | Ambiente Local / Porta |
+| :--- | :--- | :--- |
+| **teknixbrasil.com.br** | Site oficial / e-commerce da Teknix | `http://localhost:5173` |
+| **api.teknixbrasil.com.br** | API central — concentra as APIs e integrações do ecossistema | `http://localhost:3000/api` |
+| **auth.teknixbrasil.com.br** | Autenticação — login, sessão, tokens, 2FA e recuperação de acesso | `http://localhost:5173/login` |
+| **flow.teknixbrasil.com.br** | Teknix Flow — operação de marketplaces, pedidos, vendas, estoque etc. | `http://localhost:3000` |
+| **hub.teknixbrasil.com.br** | Teknix Hub — administração e gerenciamento da loja/site | `http://localhost:5174` |
+| **mail.teknixbrasil.com.br** | Serviço de e-mails transacionais e comunicações | `localhost` |
+| **play.teknixbrasil.com.br** | Teknix Play — checkout e fluxo de pagamento | `http://localhost:5173/checkout` |
+| **security.teknixbrasil.com.br** | Central de Segurança — segurança da conta e do ecossistema | `http://localhost:3000/api/security` |
 
 ## Regras das portas:
 
@@ -954,10 +961,12 @@ FLOW   = http://localhost:5176  (sistema de marketplaces)
    - vite.config.ts do HUB deve conter: port: 5174, strictPort: true
    - NUNCA remover strictPort do HUB.
 
-3. Todas as URLs públicas do projeto são baseadas em:
+3. O FLOW roda na porta 3000 (padrão Next.js).
+
+4. Todas as URLs públicas do projeto são baseadas em:
    http://localhost:5173/[rota]
 
-4. Exemplos de rotas oficiais:
+5. Exemplos de rotas oficiais:
    http://localhost:5173/                     → Home
    http://localhost:5173/checkout             → Checkout
    http://localhost:5173/sacola               → Sacola
@@ -969,7 +978,7 @@ FLOW   = http://localhost:5176  (sistema de marketplaces)
    http://localhost:5173/ferramentas          → Segmento Ferramentas
    http://localhost:5173/mac                  → Segmento Mac
 
-5. O HUB (administração) fica em:
+6. O HUB (administração) fica em:
    http://localhost:5174/
 
 ## NUNCA faça:

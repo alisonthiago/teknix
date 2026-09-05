@@ -53,3 +53,5 @@ package-lock.json
 # OS
 Thumbs.db
 
+.vercel
+.env*
