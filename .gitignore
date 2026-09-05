@@ -47,7 +47,7 @@ Sem Título/
 _backup/
 backups/
 apps/hub/backups/
-referencias/
+/referencias/
 package-lock.json
 
 # OS

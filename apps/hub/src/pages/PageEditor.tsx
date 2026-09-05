@@ -4892,6 +4892,13 @@ export default function PageEditor() {
                                             src={itemImage}
                                             alt={item.name || ''}
                                             style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                                            onError={(e) => {
+                                              const target = e.currentTarget
+                                              if (!target.dataset.triedFallback && target.src.startsWith(window.location.origin)) {
+                                                target.dataset.triedFallback = 'true'
+                                                target.src = target.src.replace(window.location.origin, 'https://www.teknixbrasil.com.br')
+                                              }
+                                            }}
                                           />
                                         ) : (
                                           <ImageIcon size={13} color="#a1a1a6" />
@@ -9238,7 +9245,21 @@ function ImageMediaControl({ value, onChange }: { value: string; onChange: (valu
   const [open, setOpen] = useState(false)
   return <div className="editor-media-control">
     <button type="button" className="editor-media-preview" onClick={() => setOpen(true)} aria-label={value ? 'Trocar imagem' : 'Escolher imagem'}>
-      {value ? <img src={value} alt="Imagem selecionada" /> : <ImageIcon size={32} strokeWidth={1} />}
+      {value ? (
+        <img
+          src={value}
+          alt="Imagem selecionada"
+          onError={(e) => {
+            const target = e.currentTarget
+            if (!target.dataset.triedFallback && target.src.startsWith(window.location.origin)) {
+              target.dataset.triedFallback = 'true'
+              target.src = target.src.replace(window.location.origin, 'https://www.teknixbrasil.com.br')
+            }
+          }}
+        />
+      ) : (
+        <ImageIcon size={32} strokeWidth={1} />
+      )}
       <span>{value ? 'Trocar imagem' : 'Escolher imagem'}</span>
     </button>
     {value && <button type="button" className="editor-media-remove" onClick={() => onChange('')} aria-label="Remover imagem"><Trash2 size={14} /></button>}
