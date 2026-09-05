@@ -16,14 +16,22 @@
       "destination": "/hub/assets/$1"
     },
     {
-      "source": "/:file((?!hub/).*\\.(?:svg|png|gif|ico|json|jpg|jpeg|webp))",
+      "source": "/assets/(.*)",
+      "destination": "/site/assets/$1"
+    },
+    {
+      "source": "/(.*\\.(?:svg|png|gif|ico|json|jpg|jpeg|webp|txt|xml))",
       "has": [
         {
           "type": "host",
           "value": "hub.teknixbrasil.com.br"
         }
       ],
-      "destination": "/hub/:file"
+      "destination": "/hub/$1"
+    },
+    {
+      "source": "/(.*\\.(?:svg|png|gif|ico|json|jpg|jpeg|webp|txt|xml))",
+      "destination": "/site/$1"
     },
     {
       "source": "/(.*)",
@@ -37,7 +45,7 @@
     },
     {
       "source": "/(.*)",
-      "destination": "/index.html"
+      "destination": "/site/index.html"
     }
   ]
 }

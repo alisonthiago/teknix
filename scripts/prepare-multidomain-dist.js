@@ -18,10 +18,12 @@ if (fs.existsSync(outputDir)) {
 }
 fs.mkdirSync(outputDir, { recursive: true })
 
-// 2. Copia todo o apps/site/dist para a raiz de dist_deploy
+// 2. Copia todo o apps/site/dist para dist_deploy/site
+const siteTarget = path.join(outputDir, 'site')
 if (fs.existsSync(siteDist)) {
-  console.log('Copiando build do SITE para dist_deploy...')
-  fs.cpSync(siteDist, outputDir, { recursive: true })
+  console.log('Copiando build do SITE para dist_deploy/site...')
+  fs.mkdirSync(siteTarget, { recursive: true })
+  fs.cpSync(siteDist, siteTarget, { recursive: true })
 } else {
   console.error('ERRO: Diretório apps/site/dist não encontrado!')
   process.exit(1)
@@ -38,4 +40,4 @@ if (fs.existsSync(hubDist)) {
   process.exit(1)
 }
 
-console.log('✓ Pasta dist_deploy pronta com SITE (raiz) e HUB (/hub)!')
+console.log('✓ Pasta dist_deploy pronta com SITE (/site) e HUB (/hub)!')
