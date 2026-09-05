@@ -1,9 +1,42 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": "vite",
-  "buildCommand": "pnpm --filter @teknix/site build",
-  "outputDirectory": "apps/site/dist",
+  "cleanUrls": true,
+  "buildCommand": "pnpm build:multidomain",
+  "outputDirectory": "dist_deploy",
   "rewrites": [
-    { "source": "/(.*)", "destination": "/" }
+    {
+      "source": "/assets/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "hub.teknixbrasil.com.br"
+        }
+      ],
+      "destination": "/hub/assets/$1"
+    },
+    {
+      "source": "/:file((?!hub/).*\\.(?:svg|png|gif|ico|json|jpg|jpeg|webp))",
+      "has": [
+        {
+          "type": "host",
+          "value": "hub.teknixbrasil.com.br"
+        }
+      ],
+      "destination": "/hub/:file"
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "hub.teknixbrasil.com.br"
+        }
+      ],
+      "destination": "/hub/index.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
   ]
 }
