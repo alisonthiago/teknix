@@ -8,9 +8,9 @@ import { useAuth } from '../hooks/useAuth'
 import { getAddressesByUserId, getCustomerByUserId } from '../services/customer'
 import { processCheckoutOrder, type CreatedOrderResult } from '../services/checkout'
 import { validateCoupon, registerCouponUse, type AppliedCoupon } from '../services/coupons'
-import pixIcon from '../../../../../bf_v6_pix.svg'
-import creditIcon from '../../../../../bf_v6_credito_noborde.svg'
-import boletoIcon from '../../../../../bf_v6_boleto_black_noborde.svg'
+import pixIcon from '../assets/bf_v6_pix.svg'
+import creditIcon from '../assets/bf_v6_credito_noborde.svg'
+import boletoIcon from '../assets/bf_v6_boleto_black_noborde.svg'
 import './CheckoutReference.css'
 
 const money = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
