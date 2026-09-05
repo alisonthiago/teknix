@@ -114,10 +114,10 @@ export default function SearchResults() {
       {/* ── CONTAINER PRINCIPAL ── */}
       <Editable as="div" widgetId="catalog-main" label="Conteúdo principal do catálogo" widgetType="container" editorKind="container" className="search-results-container" renderContent={false}>
         <Editable as="div" widgetId="catalog-columns" label="Colunas do catálogo" widgetType="container" editorKind="container" className="ui container" renderContent={false}>
-          <EditableFlow id="catalog-columns" label="Colunas do catálogo">
+          <EditableFlow id="catalog-columns" label="Colunas do catálogo" compact>
           {/* ── SIDEBAR DE FILTROS (ESQUERDA) ── */}
           <Editable as="aside" widgetId="catalog-filters" label="Filtros do catálogo" widgetType="container" editorKind="container" className="search-filters" renderContent={false}>
-            <EditableFlow id="catalog-filters" label="Grupos de filtros">
+            <EditableFlow id="catalog-filters" label="Grupos de filtros" compact>
             <Editable as="div" widgetId="catalog-filter-sort" label="Filtro de ordenação" widgetType="container" editorKind="container" className="filter-group" renderContent={false}>
               <Editable as="h3" widgetId="searchresults-1" className="filter-title">Ordenar</Editable>
               <div className="filter-options">
@@ -183,7 +183,7 @@ export default function SearchResults() {
 
           {/* ── GRID DE PRODUTOS (DIREITA) ── */}
           <Editable as="section" widgetId="catalog-results" label="Resultados do catálogo" widgetType="container" editorKind="container" className="search-results-content" renderContent={false}>
-            <EditableFlow id="catalog-results" label="Conteúdo dos resultados">
+            <EditableFlow id="catalog-results" label="Conteúdo dos resultados" compact>
             {isDemo && <Editable as="p" widgetId="searchresults-5" role="status">Demonstração local: produto, preços e condições ilustrativos. Compra e favoritos desativados; nenhum item foi cadastrado no catálogo real.</Editable>}
             <Editable as="div" widgetId="catalog-results-header" label="Cabeçalho dos resultados" widgetType="container" editorKind="container" className="results-header" renderContent={false}>
               <Editable as="h1" widgetId="searchresults-6">
@@ -203,7 +203,7 @@ export default function SearchResults() {
               </Editable>
             ) : sortedAndFilteredProducts.length > 0 ? (
               <Editable as="div" widgetId="catalog-products-grid" label="Grade de produtos" widgetType="grid" editorKind="container" className="products-grid" renderContent={false}>
-                <EditableFlow id="catalog-products" label="Produtos do catálogo">
+                <EditableFlow id="catalog-products" label="Produtos do catálogo" compact>
                 {sortedAndFilteredProducts.map((product) => (
                   <Editable as="div" key={product.id} widgetId={`catalog-product-${product.id}`} label={`Produto ${product.name}`} widgetType="storefrontCard" editorKind="container" style={{ display: 'contents' }} renderContent={false}>
                     <StorefrontProductCard

@@ -40,7 +40,7 @@ function NativePageCanvas({ children }: { children: React.ReactNode }) {
   const { pathname } = useLocation()
   const pageKey = pathname.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '') || 'home'
   return (
-    <EditableFlow id={`page-canvas-${pageKey}`} label={`Estrutura da página ${pathname}`}>
+    <EditableFlow id={`page-canvas-${pageKey}`} label={`Estrutura da página ${pathname}`} compact>
       <Editable
         as="div"
         widgetId={`page:${pageKey}:content`}

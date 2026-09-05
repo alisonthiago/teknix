@@ -646,3 +646,20 @@
 @keyframes teknix-headline-in { from { opacity: 0; transform: translateY(.2em); } to { opacity: 1; transform: translateY(0); } }
 @keyframes teknix-headline-draw { 0% { stroke-dashoffset: 1; } 20%, 100% { stroke-dashoffset: 0; } }
 @media (prefers-reduced-motion: reduce) { .elementor-headline-dynamic-text, .teknix-headline-shape path { animation: none !important; } }
+
+/* Salvaguarda permanente: #elementor-add-new-section NUNCA deve aparecer dentro de sub-regiões, colunas ou grades de produtos */
+.category-products-grid #elementor-add-new-section,
+.category-products-container > #elementor-add-new-section,
+.category-filters #elementor-add-new-section,
+.search-results-container #elementor-add-new-section,
+.search-filters #elementor-add-new-section,
+.products-grid #elementor-add-new-section,
+.cb-bag-layout #elementor-add-new-section,
+.cb-bag-items #elementor-add-new-section,
+.contact-grid #elementor-add-new-section,
+.contact-form #elementor-add-new-section,
+.info-card #elementor-add-new-section,
+.apple-saved-items-grid #elementor-add-new-section,
+.editor-flow-container-wrap #elementor-add-new-section:not(.elementor-inline-add-section-wrap #elementor-add-new-section) {
+  display: none !important;
+}

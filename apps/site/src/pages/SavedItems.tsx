@@ -56,7 +56,7 @@ export default function SavedItems() {
           </Editable>
         ) : (
           <Editable as="div" widgetId="saved-grid" label="Grade de itens salvos" widgetType="grid" editorKind="container" renderContent={false} className="apple-saved-items-grid">
-            <EditableFlow id="saved-items" label="Cards dos itens salvos">
+            <EditableFlow id="saved-items" label="Cards dos itens salvos" compact>
             {favorites.map(item => (
               <Editable as="div" key={item.id} widgetId={`saved-card-${item.id}`} productId={item.id} label={`Produto salvo: ${item.name}`} widgetType="storefrontCard" editorKind="container" renderContent={false} className="apple-saved-card">
                 <div className="apple-saved-card-thumb">

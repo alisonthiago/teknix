@@ -4,7 +4,7 @@ import {type CanvasNode,type CanvasLayout} from '../../../../../packages/core/sr
 import CatalogWidget from './CatalogWidget'
 import WidgetRenderer from '../WidgetRenderer'
 import {Ads} from '../Ads'
-import {FlowContext, type FlowContextValue} from './FlowContext'
+import {FlowContext, useFlowContext, type FlowContextValue} from './FlowContext'
 import ElementorAddSection from './ElementorAddSection'
 import './EditableFlow.css'
 import { computeWidgetStyles } from '../../services/styleEngine'
@@ -55,6 +55,26 @@ export default function EditableFlow({
   [key: string]: any
 }) {
   const ctx = usePageWidgetState()
+  const parentFlow = useFlowContext()
+
+  // Sub-regiões ou fluxos aninhados que nunca devem renderizar o seletor inferior de nova seção
+  const isSubRegion = compact ||
+    !!parentFlow ||
+    id.includes('-columns') ||
+    id.includes('-products') ||
+    id.includes('-items') ||
+    id.includes('-filters') ||
+    id.includes('-results') ||
+    id.includes('-cards') ||
+    id.includes('-fields') ||
+    id.includes('-row') ||
+    id.includes('-block') ||
+    id.includes('-actions') ||
+    id.includes('-navigation') ||
+    id.startsWith('header-') ||
+    id.startsWith('footer-') ||
+    id.startsWith('page-canvas-')
+
   const edit = useWidgetEdit(`layout:${id}`, globalKey)
   const [dragTarget, setDragTarget] = useState<{ id: string; position: 'before' | 'after' | 'inside' } | null>(null)
   const [openAddSectionFor, setOpenAddSectionFor] = useState<string | null>(null)
@@ -331,9 +351,9 @@ export default function EditableFlow({
   }
 
   const renderedContent = (
-    <FlowContext.Provider value={{ regionId: id, globalKey, action, drop }}>
+    <FlowContext.Provider value={{ regionId: id, globalKey, action, drop, depth: (parentFlow?.depth || 0) + 1 }}>
       {render(layout.nodes)}
-      {ctx?.preview && !compact && (
+      {ctx?.preview && !isSubRegion && (
         <ElementorAddSection
           isEmpty={layout.nodes.length === 0}
           onInsertContainer={(presetNode) => {

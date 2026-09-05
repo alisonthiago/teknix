@@ -26,15 +26,15 @@ export default function Contact() {
   return (
     <div className="contact-page">
       <EditableFlow id="contact-content" label="Conteúdo da página Contato">
-        <EditableFlow id="contact-header" label="Cabeçalho do contato" as="div" className="contact-header">
+        <EditableFlow id="contact-header" label="Cabeçalho do contato" as="div" className="contact-header" compact>
           <Editable as="h1" widgetId="contact-1">Contato</Editable>
           <Editable as="p" widgetId="contact-2">Fale com a Teknix. Estamos prontos para ajudar.</Editable>
         </EditableFlow>
 
         <Editable as="div" widgetId="contact-grid" label="Colunas de contato" widgetType="container" editorKind="container" className="contact-grid" renderContent={false}>
-          <EditableFlow id="contact-columns" label="Colunas do contato">
+          <EditableFlow id="contact-columns" label="Colunas do contato" compact>
             <Editable as="form" widgetId="contact-form" label="Formulário de contato" widgetType="container" editorKind="container" className="contact-form" onSubmit={handleSubmit} renderContent={false}>
-              <EditableFlow id="contact-form-fields" label="Campos do formulário">
+              <EditableFlow id="contact-form-fields" label="Campos do formulário" compact>
                 <Editable as="div" widgetId="contact-field-name" label="Campo Nome" widgetType="container" editorKind="container" className="form-group" renderContent={false}>
                   <Editable as="label" widgetId="contact-label-name" htmlFor="name">Nome</Editable>
                   <Editable
@@ -106,8 +106,8 @@ export default function Contact() {
             </Editable>
 
             <Editable as="div" widgetId="contact-info" label="Informações de contato" widgetType="container" editorKind="container" className="contact-info" renderContent={false}>
-              <EditableFlow id="contact-info-cards" label="Cartões de contato">
-                <EditableFlow id="contact-whatsapp-card" label="Card WhatsApp" as="div" className="info-card">
+              <EditableFlow id="contact-info-cards" label="Cartões de contato" compact>
+                <EditableFlow id="contact-whatsapp-card" label="Card WhatsApp" as="div" className="info-card" compact>
                   <Editable as="h3" widgetId="contact-3">WhatsApp</Editable>
                   <Editable as="p" widgetId="contact-4">(11) 99999-9999</Editable>
                   <Editable as="a" widgetId="contact-whatsapp-button" label="Botão Abrir WhatsApp" widgetType="button" href="https://wa.me/5511999999999" target="_blank" rel="noopener noreferrer" className="btn btn-outline">
@@ -115,12 +115,12 @@ export default function Contact() {
                   </Editable>
                 </EditableFlow>
 
-                <EditableFlow id="contact-email-card" label="Card Email" as="div" className="info-card">
+                <EditableFlow id="contact-email-card" label="Card Email" as="div" className="info-card" compact>
                   <Editable as="h3" widgetId="contact-5">Email</Editable>
                   <Editable as="p" widgetId="contact-6">contato@teknix.com.br</Editable>
                 </EditableFlow>
 
-                <EditableFlow id="contact-hours-card" label="Card Horário" as="div" className="info-card">
+                <EditableFlow id="contact-hours-card" label="Card Horário" as="div" className="info-card" compact>
                   <Editable as="h3" widgetId="contact-7">Horário</Editable>
                   <Editable as="p" widgetId="contact-8">Segunda a Sexta: 9h às 18h</Editable>
                   <Editable as="p" widgetId="contact-9">Sábado: 9h às 13h</Editable>

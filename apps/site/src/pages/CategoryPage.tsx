@@ -210,7 +210,7 @@ export default function CategoryPage() {
 
       <Editable as="section" widgetId="categorypage-4" label="Catálogo da categoria" widgetType="container" editorKind="container" renderContent={false} className="category-products-section">
         <div className="category-products-container">
-          <EditableFlow id="category-columns" label="Filtros e produtos">
+          <EditableFlow id="category-columns" label="Filtros e produtos" compact>
           {/* ── SIDEBAR DE FILTROS (ESQUERDA) ── */}
           <Editable as="aside" widgetId="category-filters" label="Filtros da categoria" widgetType="container" editorKind="container" renderContent={false} className={`category-filters ${mobileFiltersOpen?'mobile-open':''}`}>
             <div className="filter-group">
@@ -302,7 +302,7 @@ export default function CategoryPage() {
             {sortedAndFilteredProducts.length > 0 ? (
               <>
                 <div className={`category-products-grid ${viewMode==='list'?'list-view':''}`}>
-                  <EditableFlow id="category-products" label="Produtos da categoria">
+                  <EditableFlow id="category-products" label="Produtos da categoria" compact>
                   {paginatedProducts.map((product) => (
                     <Editable as="div" key={product.id} widgetId={`category-product-${product.id}`} productId={product.id} label={`Produto: ${product.name}`} widgetType="storefrontCard" editorKind="container" renderContent={false} style={{ display: 'contents' }}>
                       <StorefrontProductCard

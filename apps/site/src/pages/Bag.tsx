@@ -33,9 +33,9 @@ export default function Bag() {
           </Editable>
         ) : (
           <Editable as="div" widgetId="bag-layout" label="Produtos e resumo" widgetType="container" editorKind="container" renderContent={false} className="cb-bag-layout">
-            <EditableFlow id="bag-columns" label="Colunas da sacola">
+            <EditableFlow id="bag-columns" label="Colunas da sacola" compact>
             <Editable content={{}} as="section" widgetId="bag-7" className="cb-bag-items" aria-label="Produtos na sacola">
-              <EditableFlow id="bag-items" label="Produtos da sacola">
+              <EditableFlow id="bag-items" label="Produtos da sacola" compact>
               {items.map(item => {
                 const price = item.promo_price && item.promo_price > 0 ? item.promo_price : item.price
                 const productUrl = '/produtos/' + encodeURIComponent(item.id)
