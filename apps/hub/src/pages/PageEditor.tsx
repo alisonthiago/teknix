@@ -7874,10 +7874,10 @@ export default function PageEditor() {
                 className="topbar-publish-btn-pro"
                 disabled={!target || saving}
                 onClick={() => save(true)}
-                title={editScope === 'global' ? 'Publicar alterações em todo o site oficial' : 'Publicar alterações nesta página'}
+                title="Publicar"
                 style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0, paddingRight: 10 }}
               >
-                {saving ? 'Salvando…' : editScope === 'global' ? 'Publicar em todo o site' : 'Publicar nesta página'}
+                {saving ? 'Salvando…' : 'Publicar'}
               </button>
               <button
                 type="button"
