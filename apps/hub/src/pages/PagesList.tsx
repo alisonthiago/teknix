@@ -37,6 +37,7 @@ import {
   deleteEditorPage,
   setPublicationStatus
 } from '../services/widgetEditor'
+import { getSiteOrigin } from '../../../../packages/core/src/pageWidgets'
 
 const nativePages: [string, string, string?][] = [
   ['Página inicial', '/'],
@@ -56,7 +57,7 @@ const nativePages: [string, string, string?][] = [
   ['Comparar produtos', '/comparar']
 ]
 
-const siteOrigin = import.meta.env.VITE_SITE_URL || (import.meta.env.DEV ? 'http://localhost:5173' : '')
+const siteOrigin = getSiteOrigin(import.meta.env.VITE_SITE_URL)
 
 const RESERVED_ROUTES = [
   'contato',

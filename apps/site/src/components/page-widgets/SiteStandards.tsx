@@ -1,6 +1,6 @@
 import {createContext,useContext,useEffect,useState,type ReactNode} from 'react'
 import {supabase} from '../../lib/supabase'
-import {GLOBAL_EDITOR_SCOPE,readWidgetEdits,scopeSlug,type WidgetEdits} from '../../../../../packages/core/src/pageWidgets'
+import {GLOBAL_EDITOR_SCOPE,readWidgetEdits,scopeSlug,type WidgetEdits,isAllowedHubOrigin} from '../../../../../packages/core/src/pageWidgets'
 const Standards=createContext<WidgetEdits>({})
 export const useSiteStandards=()=>useContext(Standards)
 export default function SiteStandards({children}:{children:ReactNode}){
@@ -28,8 +28,7 @@ export default function SiteStandards({children}:{children:ReactNode}){
     return () => { cancelled = true }
   }, [])
  useEffect(()=>{
-  const origin=import.meta.env.VITE_HUB_URL || (import.meta.env.DEV?'http://localhost:5174':'')
-  const receive=(event:MessageEvent)=>{if(window.parent!==window&&event.origin===origin&&event.source===window.parent&&event.data?.type==='teknix:global-patches'&&event.data.scope===GLOBAL_EDITOR_SCOPE)setEdits(event.data.edits||{})}
+  const receive=(event:MessageEvent)=>{if(window.parent!==window&&isAllowedHubOrigin(event.origin)&&event.source===window.parent&&event.data?.type==='teknix:global-patches'&&event.data.scope===GLOBAL_EDITOR_SCOPE)setEdits(event.data.edits||{})}
   window.addEventListener('message',receive);return()=>window.removeEventListener('message',receive)
  },[])
  const tokens=edits['site:tokens']?.content || {}

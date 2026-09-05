@@ -29,14 +29,14 @@ import {
 import {
   type WidgetEdits, type WidgetEdit, type WidgetDescriptor, type CanvasLayout, type CanvasNode,
   moveCanvasNode, matchNode, findNodePath, duplicateCanvasNode, removeCanvasNode, mergeWidgetEdit, GLOBAL_EDITOR_SCOPE,
-  DEFAULT_FOOTER_SEARCHED_ITEMS, type FooterSearchedItem
+  DEFAULT_FOOTER_SEARCHED_ITEMS, type FooterSearchedItem, getSiteOrigin, isAllowedSiteOrigin
 } from '../../../../packages/core/src/pageWidgets'
 import './PageEditor.css'
 import './EditorControls.css'
 
 const EditorDeviceContext = createContext<{ mode: string; select: (mode: 'desktop' | 'tablet' | 'mobile') => void }>({ mode: 'desktop', select: () => {} })
 
-const siteOrigin = import.meta.env.VITE_SITE_URL || (import.meta.env.DEV ? 'http://localhost:5173' : '')
+const siteOrigin = getSiteOrigin(import.meta.env.VITE_SITE_URL)
 
 // Categorias Oficiais do Elementor
 const ELEMENTOR_LAYOUT_WIDGETS = [
@@ -563,7 +563,7 @@ export default function PageEditor() {
 
   useEffect(() => {
     const receive = (e: MessageEvent) => {
-      if (!target || !siteOrigin || e.origin !== new URL(siteOrigin).origin || e.source !== frame.current?.contentWindow || e.data?.scope !== target.scope) return
+      if (!target || !siteOrigin || !isAllowedSiteOrigin(e.origin) || e.source !== frame.current?.contentWindow || e.data?.scope !== target.scope) return
       if (e.data.type === 'teknix:widgets' && Array.isArray(e.data.widgets)) {
         const prevKey = widgetsRef.current.map(w => `${w.id}:${w.label}:${w.widgetType}`).join('|')
         const nextKey = e.data.widgets.map((w: any) => `${w.id}:${w.label}:${w.widgetType}`).join('|')

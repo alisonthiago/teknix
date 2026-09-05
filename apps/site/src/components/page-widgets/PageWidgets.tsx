@@ -2,12 +2,12 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { computeWidgetStyles, generateCompiledCSS } from '../../services/styleEngine'
 import {useSiteStandards} from './SiteStandards'
 import { supabase } from '../../lib/supabase'
-import { mergeWidgetEdit, readWidgetEdits, safeMediaUrl, safeStyle, scopeSlug, type WidgetDescriptor, type WidgetEdits } from '../../../../../packages/core/src/pageWidgets'
+import { mergeWidgetEdit, readWidgetEdits, safeMediaUrl, safeStyle, scopeSlug, type WidgetDescriptor, type WidgetEdits, getHubOrigin, isAllowedHubOrigin } from '../../../../../packages/core/src/pageWidgets'
 import { renderDynamicIcon } from '../IconPickerModal'
 import { useFlowContext } from './FlowContext'
 
 const Context = createContext<{ edits: WidgetEdits; register: (widget: WidgetDescriptor) => () => void; select: (id: string, global?:boolean) => void; preview: boolean; scope: string; width: number; selected: string } | null>(null)
-const hubOrigin = import.meta.env.VITE_HUB_URL || (import.meta.env.DEV ? 'http://localhost:5174' : '')
+const hubOrigin = getHubOrigin(import.meta.env.VITE_HUB_URL)
 export function PageWidgets({scope,children}:{scope:string;children:ReactNode}){const parent=useContext(Context);return parent?.scope===scope?<>{children}</>:<PageWidgetsProvider scope={scope}>{children}</PageWidgetsProvider>}
 function PageWidgetsProvider({ scope, children }: { scope: string; children: ReactNode }) {
   const [edits, setEdits] = useState<WidgetEdits>({})
@@ -15,7 +15,7 @@ function PageWidgetsProvider({ scope, children }: { scope: string; children: Rea
   const [selected,setSelected]=useState('')
   useEffect(() => { const resize = () => setWidth(window.innerWidth); window.addEventListener('resize', resize); return () => window.removeEventListener('resize', resize) }, [])
   const registry = useRef(new Map<string, WidgetDescriptor>())
-  const preview = !!hubOrigin && window.parent !== window && new URLSearchParams(window.location.search).get('widgetPreview') === '1'
+  const preview = typeof window !== 'undefined' && window.parent !== window && new URLSearchParams(window.location.search).get('widgetPreview') === '1'
   const sendTimerRef = useRef<any>(null)
   const lastPublishedSigRef = useRef<string>('')
 
@@ -29,7 +29,7 @@ function PageWidgetsProvider({ scope, children }: { scope: string; children: Rea
       const sig = widgets.map(w => `${w.id}:${w.label}:${w.widgetType}`).join('|')
       if (sig === lastPublishedSigRef.current) return
       lastPublishedSigRef.current = sig
-      window.parent.postMessage({ type: 'teknix:widgets', scope, widgets }, hubOrigin)
+      window.parent.postMessage({ type: 'teknix:widgets', scope, widgets }, hubOrigin || '*')
     }, 50)
   }, [preview, scope])
 
@@ -59,7 +59,7 @@ function PageWidgetsProvider({ scope, children }: { scope: string; children: Rea
   useEffect(() => {
     if (!preview) return
     const receive = (event: MessageEvent) => {
-      if (event.origin !== hubOrigin || event.source !== window.parent || event.data?.scope !== scope) return
+      if (!isAllowedHubOrigin(event.origin) || event.source !== window.parent || event.data?.scope !== scope) return
       if (event.data.type === 'teknix:patches') {
         const incoming = event.data.edits || {}
         setEdits(prev => (JSON.stringify(prev) === JSON.stringify(incoming) ? prev : incoming))

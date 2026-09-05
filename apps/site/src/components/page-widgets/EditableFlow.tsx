@@ -1,6 +1,6 @@
 import {Children,isValidElement,useEffect,useMemo,useState,type ReactNode} from 'react'
 import {Editable,usePageWidgetState,useWidgetEdit} from './PageWidgets'
-import {type CanvasNode,type CanvasLayout} from '../../../../../packages/core/src/pageWidgets'
+import {type CanvasNode,type CanvasLayout,getHubOrigin} from '../../../../../packages/core/src/pageWidgets'
 import CatalogWidget from './CatalogWidget'
 import WidgetRenderer from '../WidgetRenderer'
 import {Ads} from '../Ads'
@@ -11,6 +11,8 @@ import { computeWidgetStyles } from '../../services/styleEngine'
 
 export {FlowContext, type FlowContextValue}
 export {useFlowContext} from './FlowContext'
+
+const hubOrigin = getHubOrigin(import.meta.env.VITE_HUB_URL)
 
 // Sincronização global do tipo de widget arrastado a partir da sidebar do Hub
 let globalDraggedWidgetType: string | null = null
@@ -90,7 +92,7 @@ export default function EditableFlow({
   const initial = useMemo<CanvasLayout>(() => ({ nodes: JSON.parse(signature) }), [signature])
   const layout: CanvasLayout = edit?.tree || initial
   useEffect(() => ctx?.register({ id: `layout:${id}`, label, kind: 'container', widgetType: 'layoutRegion', globalKey, regionId: id, layout: initial, content: {} }), [ctx?.register, id, label, globalKey, initial])
-  function action(actionData: object) { if (ctx?.preview) window.parent.postMessage({ type: 'teknix:layout-action', scope: ctx.scope, regionId: id, globalKey, initial, ...actionData }, import.meta.env.VITE_HUB_URL || 'http://localhost:5174') }
+  function action(actionData: object) { if (ctx?.preview) window.parent.postMessage({ type: 'teknix:layout-action', scope: ctx.scope, regionId: id, globalKey, initial, ...actionData }, hubOrigin || '*') }
   function autoScroll(clientY: number) {
     const edge = 96
     if (clientY < edge) window.scrollBy({ top: -18, behavior: 'auto' })
@@ -273,7 +275,7 @@ export default function EditableFlow({
                 label: node.label,
                 kind: node.type === 'container' || node.type === 'grid' ? 'container' : 'widget',
                 global: !!globalKey
-              }, import.meta.env.VITE_HUB_URL || 'http://localhost:5174')
+              }, hubOrigin || '*')
             } : undefined}
           >
             {ctx?.preview && !compact && !id.includes('header') && !id.includes('footer') && !node.id.startsWith('chrome:') && (

@@ -218,3 +218,68 @@ export const DEFAULT_FOOTER_SEARCHED_ITEMS: FooterSearchedItem[] = [
   { title: 'Torquímetro profissional', link: '/produtos?q=torquimetro' }
 ]
 
+/**
+ * Resolução oficial de domínios e origens do ecossistema TEKNIX.
+ * Regra Permanente 44:
+ * - SITE SEMPRE roda na porta 5173 / https://www.teknixbrasil.com.br
+ * - HUB SEMPRE roda na porta 5174 / https://hub.teknixbrasil.com.br
+ */
+export function getSiteOrigin(envOverride?: string): string {
+  if (envOverride) return envOverride
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return 'http://localhost:5173'
+    }
+    if (hostname.endsWith('teknixbrasil.com.br')) {
+      return 'https://www.teknixbrasil.com.br'
+    }
+    if (hostname.startsWith('hub.')) {
+      return `${window.location.protocol}//www.${hostname.slice(4)}`
+    }
+    return window.location.origin
+  }
+  return 'https://www.teknixbrasil.com.br'
+}
+
+export function getHubOrigin(envOverride?: string): string {
+  if (envOverride) return envOverride
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return 'http://localhost:5174'
+    }
+    if (hostname.endsWith('teknixbrasil.com.br')) {
+      return 'https://hub.teknixbrasil.com.br'
+    }
+    return window.location.origin
+  }
+  return 'https://hub.teknixbrasil.com.br'
+}
+
+export function isAllowedHubOrigin(origin?: string | null, envOverride?: string): boolean {
+  if (!origin) return false
+  const target = getHubOrigin(envOverride)
+  if (origin === target) return true
+  try {
+    const u = new URL(origin)
+    if (u.hostname === 'localhost' || u.hostname === '127.0.0.1') return true
+    if (u.hostname.endsWith('teknixbrasil.com.br')) return true
+    if (u.hostname.endsWith('.vercel.app')) return true
+  } catch {}
+  return false
+}
+
+export function isAllowedSiteOrigin(origin?: string | null, envOverride?: string): boolean {
+  if (!origin) return false
+  const target = getSiteOrigin(envOverride)
+  if (origin === target) return true
+  try {
+    const u = new URL(origin)
+    if (u.hostname === 'localhost' || u.hostname === '127.0.0.1') return true
+    if (u.hostname.endsWith('teknixbrasil.com.br')) return true
+    if (u.hostname.endsWith('.vercel.app')) return true
+  } catch {}
+  return false
+}
+
