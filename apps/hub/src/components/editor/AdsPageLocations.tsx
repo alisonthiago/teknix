@@ -1,0 +1,9 @@
+import {useEffect,useState} from 'react'
+import {supabase} from '../../lib/supabase'
+import {canvasAdSlots,readWidgetEdits} from '../../../../../packages/core/src/pageWidgets'
+/** Reads the same published layout as SITE, so ADS positions cannot drift. */
+export default function AdsPageLocations(){
+ const [locations,setLocations]=useState<Array<{page:string;placement:string;path:string}>>([]),[error,setError]=useState('')
+ useEffect(()=>{let cancelled=false;async function load(){const found:Array<{page:string;placement:string;path:string}>=[];for(let start=0;;start+=500){const {data,error}=await supabase.from('pages').select('title,slug,page_styles').eq('status','published').order('id').range(start,start+499);if(error)throw error;for(const row of data||[]){const edits=readWidgetEdits(row.page_styles?.published_snapshot_v2?.page?.page_styles);for(const edit of Object.values(edits)){if(edit.tree?.nodes)for(const slot of canvasAdSlots(edit.tree))found.push({page:row.title||row.slug,...slot})}}if((data||[]).length<500)break}if(!cancelled)setLocations(found)}load().catch(e=>{if(!cancelled)setError(e.message)});return()=>{cancelled=true}},[])
+ return <details style={{margin:'16px 0',padding:16,border:'1px solid #e5e7eb',borderRadius:8}}><summary>Localização dos anúncios nas páginas publicadas</summary><p>O identificador do espaço acompanha o anúncio quando ele é movido no editor. A posição abaixo vem da mesma publicação exibida no site.</p>{error&&<p role="alert">Não foi possível carregar as posições: {error}</p>}{locations.length?<table><thead><tr><th>Página</th><th>Espaço ADS</th><th>Posição publicada</th></tr></thead><tbody>{locations.map((location,i)=><tr key={i}><td>{location.page}</td><td>{location.placement}</td><td>{location.path}</td></tr>)}</tbody></table>:!error&&<p>As páginas ainda usam as posições originais. Ao publicar uma reorganização, ela aparecerá aqui.</p>}</details>
+}

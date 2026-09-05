@@ -1,0 +1,187 @@
+/* ==========================================================================
+   TEKNIX TEMPLATE LIBRARY — HERO BANNER STYLES (MODELO SALVO)
+   ========================================================================== */
+
+.main-banner {
+  padding: var(--tkn-space-32) 0 var(--tkn-space-24);
+}
+
+.main-banner .ui.container {
+  max-width: 1440px;
+  width: 95%;
+  margin: 0 auto;
+}
+
+.hero-dark-frame {
+  position: relative;
+  background: #141414;
+  clip-path: polygon(0 24px, 24px 0, calc(100% - 75px) 0, 100% 75px, 100% calc(100% - 24px), calc(100% - 24px) 100%, 75px 100%, 0 calc(100% - 75px));
+  overflow: hidden;
+  color: #ffffff;
+  padding: var(--tkn-space-64) 70px var(--tkn-space-48);
+  min-height: 480px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.hero-dark-inner {
+  display: grid;
+  grid-template-columns: 1fr 1.25fr 1fr;
+  align-items: center;
+  gap: var(--tkn-space-32);
+}
+
+.hero-left-box .hero-tag-pill {
+  display: inline-block;
+  font-size: var(--tkn-text-13);
+  font-weight: var(--tkn-weight-semibold);
+  text-transform: uppercase;
+  color: var(--hagor-orange-main);
+  letter-spacing: 1px;
+  margin-bottom: var(--tkn-space-16);
+}
+
+.hero-left-box h2 {
+  font-size: var(--tkn-text-36);
+  font-weight: var(--tkn-weight-medium);
+  line-height: 1.15;
+  color: #ffffff;
+  margin: 0 0 var(--tkn-space-32);
+  letter-spacing: -0.5px;
+}
+
+.hero-btn-action {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--tkn-space-12) var(--tkn-space-32);
+  background: var(--hagor-pc);
+  color: #ffffff;
+  font-size: var(--tkn-text-14);
+  font-weight: var(--tkn-weight-semibold);
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.hero-btn-action:hover {
+  background: #8FCC00;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 81, 0, 0.35);
+}
+
+.hero-center-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hero-image-case {
+  max-height: 340px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  border-radius: 12px;
+  filter: drop-shadow(0 20px 40px rgba(0,0,0,0.6));
+  transition: transform 0.4s ease;
+}
+
+.hero-dark-frame:hover .hero-image-case {
+  transform: scale(1.03);
+}
+
+.hero-right-box {
+  padding-left: var(--tkn-space-24);
+}
+
+.hero-right-box p {
+  font-size: var(--tkn-text-18);
+  line-height: 1.5;
+  color: #dcdcdc;
+  margin: 0 0 var(--tkn-space-24);
+}
+
+.hero-right-box p strong {
+  color: var(--hagor-orange-main);
+}
+
+.hero-slide-badge {
+  display: inline-block;
+  padding: var(--tkn-space-8) var(--tkn-space-16);
+  border: 1px solid rgba(255, 140, 50, 0.4);
+  border-radius: 6px;
+  font-size: var(--tkn-text-13);
+  font-weight: var(--tkn-weight-semibold);
+  color: var(--hagor-orange-main);
+  background: rgba(255, 140, 50, 0.1);
+  letter-spacing: 0.5px;
+}
+
+.hero-slider-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--tkn-space-16);
+  margin-top: var(--tkn-space-24);
+}
+
+.hero-arrow-btn {
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--tkn-text-18);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hero-arrow-btn:hover {
+  background: rgba(255,255,255,0.25);
+}
+
+.hero-dots {
+  display: flex;
+  align-items: center;
+  gap: var(--tkn-space-8);
+}
+
+.hero-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.3);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.hero-dot.active {
+  background: var(--hagor-orange-main);
+  width: 24px;
+  border-radius: 4px;
+}
+
+/* Responsivo */
+@media (max-width: 992px) {
+  .hero-dark-inner {
+    grid-template-columns: 1fr;
+    gap: var(--tkn-space-24);
+    text-align: center;
+  }
+  .hero-left-box h2 {
+    font-size: var(--tkn-text-28);
+  }
+  .hero-right-box {
+    padding-left: 0;
+  }
+  .hero-dark-frame {
+    padding: var(--tkn-space-48) var(--tkn-space-24);
+    min-height: auto;
+  }
+}

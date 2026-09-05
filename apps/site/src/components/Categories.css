@@ -6,17 +6,17 @@
 .segments-header {
   max-width: var(--tkn-max-width);
   margin: 0 auto;
-  padding: 0 24px;
-  margin-bottom: 60px;
+  padding: 0 var(--tkn-space-24);
+  margin-bottom: var(--tkn-space-64);
 }
 
 .segments-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 16px;
+  gap: var(--tkn-space-16);
   max-width: var(--tkn-max-width);
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 var(--tkn-space-24);
 }
 
 .segments-grid.visible .segment-card {
@@ -74,31 +74,31 @@
 .segment-info {
   position: relative;
   z-index: 1;
-  padding: 28px;
+  padding: var(--tkn-space-32);
   background: linear-gradient(to top, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.8) 50%, transparent 100%);
 }
 
 .segment-info h3 {
-  font-size: 1.3rem;
-  font-weight: 600;
+  font-size: var(--tkn-text-20);
+  font-weight: var(--tkn-weight-medium);
   letter-spacing: -0.01em;
-  margin-bottom: 4px;
+  margin-bottom: var(--tkn-space-4);
   color: var(--tkn-text);
 }
 
 .segment-info p {
-  font-size: 0.85rem;
+  font-size: var(--tkn-text-14);
   color: var(--tkn-text-secondary);
   line-height: 1.4;
-  margin-bottom: 12px;
+  margin-bottom: var(--tkn-space-12);
 }
 
 .segment-link {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  gap: var(--tkn-space-8);
+  font-size: var(--tkn-text-13);
+  font-weight: var(--tkn-weight-medium);
   color: var(--tkn-green-dark);
   opacity: 0;
   transform: translateY(8px);
@@ -113,7 +113,7 @@
 @media (max-width: 640px) {
   .segments-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    gap: var(--tkn-space-12);
   }
 
   .segment-card {
@@ -121,11 +121,11 @@
   }
 
   .segment-info {
-    padding: 16px;
+    padding: var(--tkn-space-16);
   }
 
   .segment-info h3 {
-    font-size: 1rem;
+    font-size: var(--tkn-text-16);
   }
 
   .segment-info p {

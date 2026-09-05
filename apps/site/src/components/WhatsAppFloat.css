@@ -45,53 +45,53 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
+  padding: var(--tkn-space-16) var(--tkn-space-24);
   background: #25D366;
 }
 
 .whatsapp-popup-header h4 {
   color: white;
-  font-size: 0.9rem;
-  font-weight: 700;
+  font-size: var(--tkn-text-14);
+  font-weight: var(--tkn-weight-medium);
 }
 
 .whatsapp-popup-header span {
   color: rgba(255, 255, 255, 0.8);
-  font-size: 0.75rem;
+  font-size: var(--tkn-text-12);
 }
 
 .whatsapp-popup-header button {
   background: none;
   border: none;
   color: white;
-  font-size: 1.5rem;
+  font-size: var(--tkn-text-24);
   cursor: pointer;
   line-height: 1;
   padding: 0;
 }
 
 .whatsapp-popup-body {
-  padding: 16px;
+  padding: var(--tkn-space-16);
 }
 
 .whatsapp-popup-body p {
   color: var(--tkn-text-dim);
-  font-size: 0.85rem;
-  margin-bottom: 12px;
+  font-size: var(--tkn-text-14);
+  margin-bottom: var(--tkn-space-12);
 }
 
 .whatsapp-quick {
   display: block;
   width: 100%;
   text-align: left;
-  padding: 10px 12px;
+  padding: var(--tkn-space-12) var(--tkn-space-12);
   background: var(--tkn-gray-3);
   border: 1px solid var(--tkn-border);
   border-radius: var(--tkn-radius-sm);
   color: var(--tkn-text);
-  font-size: 0.8rem;
+  font-size: var(--tkn-text-13);
   cursor: pointer;
-  margin-bottom: 8px;
+  margin-bottom: var(--tkn-space-8);
   transition: all 0.2s;
   line-height: 1.4;
 }

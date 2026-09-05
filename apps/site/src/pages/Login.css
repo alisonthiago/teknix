@@ -1,293 +1,32 @@
-/* ==========================================================================
-   TEKNIX SITE — LOGIN & SIGN-IN CSS (1:1 PADRÃO APPLE STORE OFICIAL)
-   Referência: https://secure8.store.apple.com/br/shop/signIn
-   ========================================================================== */
-
-.apple-signin-page {
-  background-color: #ffffff;
-  color: #1d1d1f;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  min-height: 85vh;
-  padding: 60px 0 100px;
-}
-
-.apple-signin-container {
-  max-width: 980px;
-  margin: 0 auto;
-  padding: 0 20px;
-  box-sizing: border-box;
-}
-
-.apple-signin-header-wrap {
-  text-align: center;
-  margin-bottom: 64px;
-}
-
-.apple-signin-main-title {
-  font-size: 40px;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  color: #1d1d1f;
-  margin: 0;
-  line-height: 1.15;
-}
-
-/* Grid 2 Colunas Separadas por Linha Vertical */
-.apple-signin-grid {
-  display: grid;
-  grid-template-columns: 1fr 1px 1fr;
-  gap: 48px;
-  align-items: flex-start;
-  max-width: 860px;
-  margin: 0 auto;
-}
-
-.apple-signin-divider-line {
-  width: 1px;
-  height: 100%;
-  min-height: 280px;
-  background-color: #e5e5ea;
-}
-
-.apple-signin-col-left,
-.apple-signin-col-right {
-  display: flex;
-  flex-direction: column;
-}
-
-.apple-signin-section-heading {
-  font-size: 24px;
-  font-weight: 600;
-  letter-spacing: -0.015em;
-  color: #1d1d1f;
-  margin: 0 0 28px 0;
-  line-height: 1.25;
-  text-align: center;
-}
-
-.apple-signin-guest-desc {
-  font-size: 15px;
-  color: #1d1d1f;
-  margin: 0 0 28px 0;
-  line-height: 1.4;
-  text-align: center;
-}
-
-/* Form Styles */
-.apple-signin-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.apple-signin-error {
-  background-color: #fff2f2;
-  border: 1px solid #ffb3b3;
-  border-radius: 12px;
-  padding: 12px 16px;
-  color: #d70015;
-  font-size: 14px;
-  margin-bottom: 12px;
-}
-
-.apple-signin-success {
-  background-color: #f2fbf4;
-  border: 1px solid #b7ebc7;
-  border-radius: 12px;
-  padding: 12px 16px;
-  color: #1a7f37;
-  font-size: 14px;
-  margin-bottom: 12px;
-}
-
-/* Inputs com Floating Label */
-.form-textbox {
-  position: relative;
-  border: 1px solid #d2d2d7;
-  border-radius: 12px;
-  padding: 8px 14px 6px;
-  background: #ffffff;
-  box-sizing: border-box;
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-
-.form-textbox:focus-within {
-  border-color: #0071e3;
-  box-shadow: 0 0 0 1px #0071e3;
-}
-
-.form-textbox-label {
-  display: block;
-  font-size: 11px;
-  color: #86868b;
-  margin-bottom: 2px;
-}
-
-.form-textbox-input {
-  width: 100%;
-  border: none;
-  outline: none;
-  font-size: 16px;
-  color: #1d1d1f;
-  background: transparent;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: inherit;
-}
-
-.apple-input-highlight {
-  border-color: #f7d56e;
-  background: #fffdf5;
-}
-
-/* Grouped Inputs (Email em cima, Senha embaixo) */
-.apple-grouped-inputs {
-  display: flex;
-  flex-direction: column;
-}
-
-.form-textbox.grouped-top {
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-  border-bottom: 1px solid #e5e5ea;
-  cursor: pointer;
-}
-
-.form-textbox.grouped-bottom {
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-  border-color: #0071e3;
-  box-shadow: 0 0 0 1px #0071e3;
-}
-
-.with-arrow-btn {
-  padding-right: 48px;
-}
-
-.apple-input-arrow-btn {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 1px solid #0071e3;
-  background-color: transparent;
-  color: #0071e3;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background-color 0.15s, color 0.15s;
-}
-
-.apple-input-arrow-btn:hover {
-  background-color: #0071e3;
-  color: #ffffff;
-}
-
-/* Botões Pílula (Continuar com a senha & Chave-senha) */
-.apple-signin-buttons-row {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 6px;
-}
-
-.apple-pill-btn {
-  width: 100%;
-  height: 42px;
-  background-color: #f5f5f7;
-  color: #1d1d1f;
-  border: none;
-  border-radius: 12px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.15s;
-  font-family: inherit;
-}
-
-.apple-pill-btn:hover {
-  background-color: #e8e8ed;
-}
-
-.passkey-btn-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
-
-.passkey-subtext {
-  font-size: 11px;
-  color: #86868b;
-  text-align: center;
-}
-
-/* Lembrar e Links */
-.apple-signin-remember-wrap {
-  margin: 6px 0;
-}
-
-.form-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: #1d1d1f;
-  cursor: pointer;
-}
-
-.form-label input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  border-radius: 4px;
-  accent-color: #0071e3;
-}
-
-.apple-signin-footer-links {
-  margin-top: 8px;
-}
-
-.as-buttonlink {
-  background: none;
-  border: none;
-  color: #0071e3;
-  font-size: 14px;
-  cursor: pointer;
-  padding: 0;
-  text-decoration: none;
-  font-family: inherit;
-}
-
-.as-buttonlink:hover {
-  text-decoration: underline;
-}
-
-/* Botão Convidado Coluna Direita */
-.apple-guest-btn {
-  width: 100%;
-  height: 46px;
-  border-radius: 12px;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .apple-signin-grid {
-    grid-template-columns: 1fr;
-    gap: 36px;
-  }
-  .apple-signin-divider-line {
-    width: 100%;
-    height: 1px;
-    min-height: 1px;
-  }
-  .apple-signin-main-title {
-    font-size: 28px;
-  }
-}
+.identification-page { min-height: 100vh; background: #fff; color: #151922; }
+.identification-topbar { height: 72px; display: flex; align-items: center; padding: 0 clamp(24px, 8vw, 140px); border-top: 3px solid var(--hagor-pc, #b5f500); border-bottom: 1px solid #f0f1f3; background: #fafafa; }
+.identification-brand { padding: 0; border: 0; background: transparent; cursor: pointer; }
+.identification-brand img { display: block; width: 114px; height: auto; }
+.identification-content { width: min(100% - 48px, 920px); margin: 0 auto; padding: clamp(40px, 7vw, 82px) 0 96px; }
+.identification-back { display: inline-flex; align-items: center; gap: 8px; padding: 0; border: 0; background: transparent; color: #626a76; font: inherit; font-size: 14px; cursor: pointer; }
+.identification-back:hover, .identification-text-link:hover { color: #151922; text-decoration: underline; }
+.identification-content h1 { margin: 38px 0 72px; color: #151922; font-size: clamp(32px, 4vw, 48px); font-weight: 700; letter-spacing: -.035em; line-height: 1; }
+.identification-card { width: min(100%, 440px); margin: 0 auto; }
+.identification-card h2 { margin: 0 0 6px; color: #626262; font-size: clamp(26px, 3vw, 32px); font-weight: 700; letter-spacing: -.02em; line-height: 1.18; }
+.identification-card > p { margin: 0 0 34px; color: #64676d; font-size: 15px; font-weight: 600; line-height: 1.45; }
+.identification-card form { display: grid; gap: 8px; }
+.identification-card label { color: #656970; font-size: 13px; }
+.identification-card input { min-height: 52px; padding: 0 14px; border: 1px solid #c8ccd1; border-radius: 8px; color: #171b24; font: inherit; font-size: 16px; outline: 0; }
+.identification-card input:focus { border-color: #141b34; box-shadow: 0 0 0 3px rgba(181, 245, 0, .34); }
+.identification-card small { color: #72767d; font-size: 12px; line-height: 1.35; }
+.identification-continue { min-height: 48px; margin-top: 31px; border: 0; border-radius: 5px; background: var(--hagor-green, #b5f500); color: #111827; font: inherit; font-size: 15px; font-weight: 800; cursor: pointer; transition: background .18s ease, transform .18s ease; }
+.identification-continue:hover:not(:disabled) { background: #9cdd00; transform: translateY(-1px); }
+.identification-continue:disabled { background: #d1d3d5; color: #777a7e; cursor: not-allowed; }
+.identification-message { margin: -12px 0 20px; padding: 11px 12px; border-radius: 6px; background: #fff1f1; color: #a12a2a; font-size: 14px; }
+.identification-divider { display: flex; align-items: center; gap: 10px; margin: 30px 0; color: #676b72; font-size: 14px; font-weight: 700; }
+.identification-divider::before, .identification-divider::after { content: ''; flex: 1; height: 1px; background: #d4d6d9; }
+.identification-divider span { white-space: nowrap; }
+.identification-google { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 44px; margin: 0 auto; padding: 0 18px; border: 1px solid #d6d9de; border-radius: 5px; background: #fff; color: #30343b; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+.identification-google:hover { border-color: #aeb3bb; background: #fafafa; }
+.identification-google-logo { width:18px; height:18px; flex:0 0 auto; }
+.identification-text-link { justify-self: start; margin-top: 14px; padding: 0; border: 0; background: transparent; color: #333b4a; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+.identification-login-actions { display:flex; flex-wrap:wrap; gap:var(--tkn-space-16); }
+.recovery-code-row { display:grid; grid-template-columns:repeat(6, 1fr); gap:10px; }
+.recovery-code-row input { min-width:0; padding:0 !important; text-align:center; font-size:22px !important; font-weight:800; }
+.recovery-login-note { margin:24px 0 0 !important; font-size:14px !important; text-align:center; }.recovery-login-note a { color:#182bba; font-weight:700; text-decoration:none; }.recovery-login-note a:hover { text-decoration:underline; }
+@media (max-width: 640px) { .identification-topbar { height: 54px; padding: 0 16px; } .identification-brand img { width: 108px; } .identification-content { width: min(100% - 40px, 360px); padding: 14px 0 48px; } .identification-content h1 { margin: 20px 0 24px; font-size: 25px; } .identification-card { width: 100%; } .identification-card h2 { font-size: 21px; } .identification-card > p { margin-bottom: 24px; font-size: 13px; } .identification-card input { min-height: 48px; } .identification-continue { min-height: 46px; margin-top: 22px; } }

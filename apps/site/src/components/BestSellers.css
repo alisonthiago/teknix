@@ -6,20 +6,20 @@
 .bestsellers-inner {
   max-width: var(--tkn-max-width);
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 var(--tkn-space-24);
 }
 
 .bestsellers-header {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  margin-bottom: 60px;
+  margin-bottom: var(--tkn-space-64);
 }
 
 .bestsellers-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+  gap: var(--tkn-space-24);
 }
 
 @media (max-width: 1024px) {
@@ -32,12 +32,12 @@
   .bestsellers-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 16px;
-    margin-bottom: 32px;
+    gap: var(--tkn-space-16);
+    margin-bottom: var(--tkn-space-32);
   }
 
   .bestsellers-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    gap: var(--tkn-space-12);
   }
 }

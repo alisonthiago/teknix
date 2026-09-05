@@ -1,0 +1,254 @@
+/* ==========================================================================
+   TEKNIX SITE — CART TRAY (BANDEJA FIXA DE CARRINHO)
+   ========================================================================== */
+
+.teknix-cart-tray-wrap {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  max-width: 1920px;
+  margin: 0 auto;
+  background: #ffffff;
+  box-shadow: 0 -1px 6px rgba(0, 0, 0, 0.16);
+  z-index: 99999;
+}
+
+.teknix-cart-tray-more {
+  position: absolute;
+  left: 50%;
+  right: auto;
+  top: -36px;
+  transform: translateX(-50%);
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--tkn-space-8);
+  padding: 0 var(--tkn-space-16);
+  border: 1px solid #d8dde3;
+  border-bottom: 0;
+  border-radius: 10px 10px 0 0;
+  background: #ffffff;
+  color: #111827;
+  box-shadow: 0 -4px 12px rgba(15, 23, 42, .10);
+  font-size: var(--tkn-text-13);
+  font-weight: var(--tkn-weight-medium);
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.2s ease;
+}
+
+.teknix-cart-tray-more:hover {
+  background: #f8fafc;
+  color: #000;
+}
+
+.teknix-cart-tray-more span {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #111827;
+  color: #fff;
+  font: 700 12px/1 serif;
+}
+
+.teknix-cart-tray-caret {
+  transition: transform 0.3s ease;
+  margin-left: 2px;
+}
+
+.teknix-cart-tray-wrap.tray-open .teknix-cart-tray-caret {
+  transform: rotate(180deg);
+}
+
+.teknix-cart-tray-details {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--tkn-space-16);
+  padding: var(--tkn-space-12) var(--tkn-space-24);
+  border-top: 1px solid #eef0f2;
+  background: #f8fafc;
+  color: #56606e;
+  font-size: var(--tkn-text-12);
+}
+.teknix-cart-tray-details strong { color: #111827; }
+
+/* ── Corpo da bandeja (colapsa/expande, botão sempre visível) ── */
+.teknix-cart-tray-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--tkn-space-32);
+  padding: 0 var(--tkn-space-48);
+  flex-wrap: nowrap;
+}
+
+.teknix-cart-tray-wrap.tray-open .teknix-cart-tray-body {
+  max-height: 280px;
+  padding: var(--tkn-space-24) var(--tkn-space-48) var(--tkn-space-32);
+}
+
+/* Info lateral */
+.teknix-cart-tray-info {
+  text-align: left;
+  flex: 0 0 220px;
+}
+
+.teknix-cart-tray-title {
+  font-size: var(--tkn-text-20);
+  font-weight: var(--tkn-weight-medium);
+  color: #141414;
+  line-height: 1.2;
+}
+
+.teknix-cart-tray-sub {
+  font-size: var(--tkn-text-13);
+  color: #666;
+  margin-top: var(--tkn-space-4);
+}
+
+/* Lista de produtos */
+.teknix-cart-tray-list {
+  list-style: none;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: var(--tkn-space-24);
+  margin: 0;
+  padding: 0;
+  flex: 1;
+}
+
+.teknix-cart-tray-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--tkn-space-8);
+  width: 112px;
+}
+
+.teknix-cart-tray-has-item {
+  position: relative;
+  width: 112px;
+  height: 112px;
+}
+
+.teknix-cart-tray-remove {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.teknix-cart-tray-remove svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+.teknix-cart-tray-img {
+  width: 112px;
+  height: 112px;
+  object-fit: contain;
+  border: 1px solid #f0f0f0;
+  border-radius: 6px;
+  background: #fff;
+  padding: var(--tkn-space-4);
+}
+
+.teknix-cart-tray-img-placeholder {
+  width: 112px;
+  height: 112px;
+  border: 1px dashed #e0e0e0;
+  border-radius: 6px;
+  background: #fafafa;
+}
+
+.teknix-cart-tray-item-name {
+  font-size: var(--tkn-text-12);
+  font-weight: var(--tkn-weight-medium);
+  color: #141414;
+  text-align: center;
+  max-width: 112px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.teknix-cart-tray-item-empty {
+  width: 112px;
+  height: 112px;
+  border: 1px dashed #e0e0e0;
+  border-radius: 6px;
+  background: #fafafa;
+}
+
+/* Ações */
+.teknix-cart-tray-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tkn-space-8);
+  min-width: 140px;
+}
+
+.teknix-cart-tray-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--hagor-pc, #B5F500);
+  color: #141414;
+  font-size: var(--tkn-text-14);
+  font-weight: 700;
+  min-width: 190px;
+  min-height: 50px;
+  padding: var(--tkn-space-16) var(--tkn-space-32);
+  border-radius: 6px;
+  text-decoration: none;
+  text-align: center;
+  transition: background 0.2s ease;
+}
+
+.teknix-cart-tray-btn-primary:hover {
+  background: #8FCC00;
+  color: #141414;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .teknix-cart-tray-more{left:50%;right:auto;top:-36px}
+  .teknix-cart-tray-details{align-items:flex-start;flex-direction:column;gap: 3px}
+  .teknix-cart-tray-info {
+    display: none;
+  }
+  .teknix-cart-tray-body {
+    gap: var(--tkn-space-12);
+    padding: var(--tkn-space-8) var(--tkn-space-12) var(--tkn-space-16);
+    flex-wrap: wrap;
+  }
+  .teknix-cart-tray-item {
+    width: 70px;
+  }
+  .teknix-cart-tray-has-item,
+  .teknix-cart-tray-img,
+  .teknix-cart-tray-img-placeholder,
+  .teknix-cart-tray-item-empty {
+    width: 72px;
+    height: 72px;
+  }
+  .teknix-cart-tray-actions {
+    min-width: 100px;
+  }
+}

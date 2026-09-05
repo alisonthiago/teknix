@@ -5,15 +5,15 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: var(--tkn-space-12);
   background: var(--tkn-gray-3);
   color: var(--tkn-text-faint);
-  padding: 24px;
+  padding: var(--tkn-space-24);
   text-align: center;
 }
 
 .product-image-fallback span {
-  font-size: 0.8rem;
+  font-size: var(--tkn-text-13);
   max-width: 150px;
   overflow: hidden;
   text-overflow: ellipsis;

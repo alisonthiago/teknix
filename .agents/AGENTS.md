@@ -928,6 +928,56 @@ não colocar lógica administrativa no SITE.
 Se for compartilhado:
 considerar package compartilhado.
 
+
+# ==============================================================
+# REGRA PERMANENTE 44 — PORTAS DE DESENVOLVIMENTO (OFICIAL)
+# ==============================================================
+
+ESTA É UMA REGRA ABSOLUTA E IMUTÁVEL.
+
+NENHUMA IA, AGENTE, DESENVOLVEDOR OU FERRAMENTA PODE ALTERAR
+AS PORTAS ABAIXO SEM ORDEM EXPLÍCITA E DIRETA DO PROPRIETÁRIO.
+
+## Mapeamento oficial de portas:
+
+SITE   = http://localhost:5173  (porta PRINCIPAL do usuário final)
+HUB    = http://localhost:5174  (painel administrativo)
+FLOW   = http://localhost:5176  (sistema de marketplaces)
+
+## Regras das portas:
+
+1. O SITE SEMPRE roda na porta 5173.
+   - vite.config.ts do SITE deve conter: port: 5173, strictPort: true
+   - NUNCA remover strictPort do SITE.
+
+2. O HUB SEMPRE roda na porta 5174.
+   - vite.config.ts do HUB deve conter: port: 5174, strictPort: true
+   - NUNCA remover strictPort do HUB.
+
+3. Todas as URLs públicas do projeto são baseadas em:
+   http://localhost:5173/[rota]
+
+4. Exemplos de rotas oficiais:
+   http://localhost:5173/                     → Home
+   http://localhost:5173/checkout             → Checkout
+   http://localhost:5173/sacola               → Sacola
+   http://localhost:5173/conta                → Conta do Cliente
+   http://localhost:5173/pedidos              → Histórico de Pedidos
+   http://localhost:5173/login                → Login
+   http://localhost:5173/produto/:sku         → Produto (por SKU/ID)
+   http://localhost:5173/produto/:cat/:slug   → Produto (por categoria/slug)
+   http://localhost:5173/ferramentas          → Segmento Ferramentas
+   http://localhost:5173/mac                  → Segmento Mac
+
+5. O HUB (administração) fica em:
+   http://localhost:5174/
+
+## NUNCA faça:
+- Mudar port: 5173 para qualquer outro valor no site/vite.config.ts
+- Remover strictPort: true do site/vite.config.ts
+- Redirecionar rotas do SITE para outra porta
+- Criar um segundo servidor do SITE em porta diferente
+
 # ==============================================================
 # FIM DAS REGRAS OFICIAIS
 # ==============================================================

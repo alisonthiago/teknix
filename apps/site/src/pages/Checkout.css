@@ -6,7 +6,7 @@
 .rs-page-content {
   background-color: #ffffff;
   color: #1d1d1f;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: var(--tkn-font);
   min-height: 100vh;
   padding-bottom: 80px;
 }
@@ -14,7 +14,7 @@
 .as-l-container {
   max-width: 980px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 var(--tkn-space-24);
   box-sizing: border-box;
 }
 
@@ -41,8 +41,8 @@
 }
 
 .rs-checkout-headerbar-title {
-  font-size: 20px;
-  font-weight: 600;
+  font-size: var(--tkn-text-20);
+  font-weight: var(--tkn-weight-medium);
   color: #1d1d1f;
   letter-spacing: -0.015em;
 }
@@ -52,7 +52,7 @@
   background: none;
   border: none;
   color: #0071e3;
-  font-size: 14px;
+  font-size: var(--tkn-text-14);
   cursor: pointer;
   padding: 0;
   font-family: inherit;
@@ -68,7 +68,7 @@
 .rs-companionbar-drawer {
   background: #fbfbfd;
   border-bottom: 1px solid #e5e5ea;
-  padding: 24px 20px;
+  padding: var(--tkn-space-24) var(--tkn-space-24);
   animation: companionFade 0.2s ease;
 }
 
@@ -80,14 +80,14 @@
 .rs-companionbar-items {
   list-style: none;
   padding: 0;
-  margin: 0 0 16px 0;
+  margin: 0 0 var(--tkn-space-16) 0;
 }
 
 .rs-companionbar-item-row {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 8px 0;
+  gap: var(--tkn-space-16);
+  padding: var(--tkn-space-8) 0;
   border-bottom: 1px solid #f2f2f5;
 }
 
@@ -102,29 +102,29 @@
 
 .rs-companionbar-item-title {
   display: block;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--tkn-text-14);
+  font-weight: var(--tkn-weight-medium);
   color: #1d1d1f;
 }
 
 .rs-companionbar-item-qty {
-  font-size: 12px;
+  font-size: var(--tkn-text-12);
   color: #86868b;
 }
 
 .rs-companionbar-item-price {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--tkn-text-14);
+  font-weight: var(--tkn-weight-medium);
   color: #1d1d1f;
 }
 
 .rs-companionbar-totals {
   max-width: 320px;
   margin-left: auto;
-  font-size: 13px;
+  font-size: var(--tkn-text-13);
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--tkn-space-8);
 }
 
 .rs-companionbar-line {
@@ -134,9 +134,9 @@
 
 .rs-companionbar-line.total {
   border-top: 1px solid #d2d2d7;
-  padding-top: 8px;
-  font-size: 15px;
-  font-weight: 700;
+  padding-top: var(--tkn-space-8);
+  font-size: var(--tkn-text-14);
+  font-weight: var(--tkn-weight-medium);
 }
 
 /* ── 2. Banner de Erro Oficial Apple ── */
@@ -144,13 +144,13 @@
   background-color: #fff2f2;
   border: 1px solid #ffb3b3;
   border-radius: 12px;
-  padding: 14px 18px;
+  padding: var(--tkn-space-16) var(--tkn-space-16);
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin: 24px 0 16px;
+  gap: var(--tkn-space-12);
+  margin: var(--tkn-space-24) 0 var(--tkn-space-16);
   color: #d70015;
-  font-size: 14px;
+  font-size: var(--tkn-text-14);
 }
 
 .rs-error-banner-icon {
@@ -161,23 +161,23 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
+  font-weight: var(--tkn-weight-medium);
   font-size: 12px;
   flex-shrink: 0;
 }
 
 /* ── 3. Layout Principal e Títulos ── */
 .rs-checkout-main-wrap {
-  padding-top: 40px;
+  padding-top: var(--tkn-space-48);
 }
 
 .rs-shipping-header-container {
-  margin-bottom: 36px;
+  margin-bottom: var(--tkn-space-32);
 }
 
 .rs-shipping-header {
-  font-size: 40px;
-  font-weight: 700;
+  font-size: var(--tkn-text-40);
+  font-weight: var(--tkn-weight-medium);
   letter-spacing: -0.03em;
   color: #1d1d1f;
   margin: 0;
@@ -185,17 +185,17 @@
 }
 
 .rf-form-layout-section-header h2 {
-  font-size: 24px;
-  font-weight: 600;
+  font-size: var(--tkn-text-24);
+  font-weight: var(--tkn-weight-medium);
   letter-spacing: -0.015em;
   color: #1d1d1f;
-  margin: 0 0 20px 0;
+  margin: 0 0 var(--tkn-space-24) 0;
 }
 
 fieldset {
   border: none;
   padding: 0;
-  margin: 0 0 48px 0;
+  margin: 0 0 var(--tkn-space-48) 0;
 }
 
 /* Grid de 2 Colunas (Campos à esquerda, lembretes à direita) */
@@ -203,32 +203,32 @@ fieldset {
 .rs-shipping-contact-grid {
   display: grid;
   grid-template-columns: 1fr 340px;
-  gap: 48px;
+  gap: var(--tkn-space-48);
   align-items: flex-start;
 }
 
 .rs-shipping-left-col {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: var(--tkn-space-16);
 }
 
 .rs-shipping-right-col {
-  padding-top: 6px;
+  padding-top: var(--tkn-space-8);
 }
 
 /* ── 4. Card Selectors (Endereço e Tributário) ── */
 .form-selector-group {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--tkn-space-12);
 }
 
 .form-selector {
   border: 1px solid #d2d2d7;
   border-radius: 12px;
   background: #ffffff;
-  padding: 16px 20px;
+  padding: var(--tkn-space-16) var(--tkn-space-24);
   cursor: pointer;
   position: relative;
   transition: border-color 0.15s, box-shadow 0.15s;
@@ -261,22 +261,22 @@ fieldset {
 .form-selector-left-col {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--tkn-space-4);
 }
 
 .form-selector-title {
-  font-size: 17px;
-  font-weight: 600;
+  font-size: var(--tkn-text-16);
+  font-weight: var(--tkn-weight-medium);
   color: #1d1d1f;
 }
 
 .form-label-small {
-  font-size: 13px;
+  font-size: var(--tkn-text-13);
   color: #6e6e73;
 }
 
 .form-selector-right-col.nowrap {
-  font-size: 13px;
+  font-size: var(--tkn-text-13);
   color: #86868b;
 }
 
@@ -285,7 +285,7 @@ fieldset {
 }
 
 .rs-shipping-editaddress-button {
-  font-size: 13px;
+  font-size: var(--tkn-text-13);
 }
 
 /* ── 5. Inputs com Floating Eyebrow Labels ── */
@@ -294,27 +294,27 @@ fieldset {
   background: #ffffff;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  margin-top: 8px;
+  gap: var(--tkn-space-16);
+  margin-top: var(--tkn-space-8);
 }
 
 .row-2-cols {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px;
+  gap: var(--tkn-space-16);
 }
 
 .row-phone-cols {
   display: grid;
   grid-template-columns: 90px 1fr;
-  gap: 14px;
+  gap: var(--tkn-space-16);
 }
 
 .form-textbox {
   position: relative;
   border: 1px solid #d2d2d7;
   border-radius: 12px;
-  padding: 8px 14px 6px;
+  padding: var(--tkn-space-8) var(--tkn-space-16) var(--tkn-space-8);
   background: #ffffff;
   box-sizing: border-box;
   transition: border-color 0.15s, box-shadow 0.15s;
@@ -332,7 +332,7 @@ fieldset {
 
 .form-textbox-label {
   display: block;
-  font-size: 11px;
+  font-size: var(--tkn-text-12);
   color: #86868b;
   margin-bottom: 2px;
 }
@@ -341,7 +341,7 @@ fieldset {
   width: 100%;
   border: none;
   outline: none;
-  font-size: 15px;
+  font-size: var(--tkn-text-14);
   color: #1d1d1f;
   background: transparent;
   padding: 0;
@@ -353,14 +353,14 @@ fieldset {
   position: relative;
   border: 1px solid #d2d2d7;
   border-radius: 12px;
-  padding: 8px 14px 6px;
+  padding: var(--tkn-space-8) var(--tkn-space-16) var(--tkn-space-8);
   background: #ffffff;
   box-sizing: border-box;
 }
 
 .form-dropdown-label {
   display: block;
-  font-size: 11px;
+  font-size: var(--tkn-text-12);
   color: #86868b;
   margin-bottom: 2px;
 }
@@ -369,7 +369,7 @@ fieldset {
   width: 100%;
   border: none;
   outline: none;
-  font-size: 15px;
+  font-size: var(--tkn-text-14);
   color: #1d1d1f;
   background: transparent;
   padding: 0;
@@ -393,14 +393,14 @@ fieldset {
 
 /* Checkbox */
 .form-checkbox {
-  margin: 6px 0;
+  margin: var(--tkn-space-8) 0;
 }
 
 .form-label {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 14px;
+  gap: var(--tkn-space-12);
+  font-size: var(--tkn-text-14);
   color: #1d1d1f;
   cursor: pointer;
 }
@@ -415,37 +415,37 @@ fieldset {
 
 /* Notificação e Mensagens Suplementares */
 .rs-shipping-addressnotification {
-  margin-top: 14px;
-  padding-top: 14px;
+  margin-top: var(--tkn-space-16);
+  padding-top: var(--tkn-space-16);
   border-top: 1px solid #f2f2f5;
 }
 
 .rs-shipping-address-header-row {
-  font-size: 14px;
+  font-size: var(--tkn-text-14);
   color: #1d1d1f;
-  margin-bottom: 6px;
+  margin-bottom: var(--tkn-space-8);
 }
 
 .as-supplementalinfo {
-  font-size: 13px;
+  font-size: var(--tkn-text-13);
   color: #6e6e73;
   line-height: 1.5;
-  margin: 0 0 16px 0;
+  margin: 0 0 var(--tkn-space-16) 0;
 }
 
 .rs-shipping-reminders ul {
   list-style: none;
   padding: 0;
   margin: 0;
-  font-size: 13px;
+  font-size: var(--tkn-text-13);
   color: #6e6e73;
   line-height: 1.6;
 }
 
 .rs-shipping-reminders li {
   position: relative;
-  padding-left: 14px;
-  margin-bottom: 10px;
+  padding-left: var(--tkn-space-16);
+  margin-bottom: var(--tkn-space-12);
 }
 
 .rs-shipping-reminders li::before {
@@ -466,7 +466,7 @@ fieldset {
 
 /* ── 6. Botão de Continuar ── */
 .rs-shipping-continue {
-  padding: 32px 0 48px;
+  padding: var(--tkn-space-32) 0 var(--tkn-space-48);
   border-top: 1px solid #e5e5ea;
 }
 
@@ -482,8 +482,8 @@ fieldset {
   color: #ffffff;
   border: none;
   border-radius: 12px;
-  font-size: 17px;
-  font-weight: 500;
+  font-size: var(--tkn-text-16);
+  font-weight: var(--tkn-weight-semibold);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -504,14 +504,14 @@ fieldset {
 
 /* ── 7. Chat e Acordeão FAQ ── */
 .rs-checkout-chatfaq-wrapper {
-  padding: 40px 0;
+  padding: var(--tkn-space-48) 0;
   border-top: 1px solid #e5e5ea;
 }
 
 .rs-chat {
   text-align: center;
-  font-size: 14px;
-  margin-bottom: 40px;
+  font-size: var(--tkn-text-14);
+  margin-bottom: var(--tkn-space-48);
 }
 
 .as-chat-button {
@@ -522,21 +522,21 @@ fieldset {
 .rc-accordion.rs-faq {
   border-top: 1px solid #e5e5ea;
   border-bottom: 1px solid #e5e5ea;
-  padding: 24px 0;
+  padding: var(--tkn-space-24) 0;
 }
 
 .rc-accordion-button {
   width: 100%;
   background: none;
   border: none;
-  font-size: 20px;
-  font-weight: 600;
+  font-size: var(--tkn-text-20);
+  font-weight: var(--tkn-weight-semibold);
   color: #1d1d1f;
   display: flex;
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
-  padding: 12px 0;
+  padding: var(--tkn-space-12) 0;
   font-family: inherit;
   text-align: left;
 }
@@ -544,7 +544,7 @@ fieldset {
 .rc-accordion-compact {
   list-style: none;
   padding: 0;
-  margin: 12px 0 0;
+  margin: var(--tkn-space-12) 0 0;
 }
 
 .rc-accordion-item {
@@ -552,8 +552,8 @@ fieldset {
 }
 
 .rc-accordion-content {
-  padding: 0 0 16px;
-  font-size: 13px;
+  padding: 0 0 var(--tkn-space-16);
+  font-size: var(--tkn-text-13);
   color: #6e6e73;
   line-height: 1.55;
 }
@@ -561,9 +561,9 @@ fieldset {
 /* ── 8. Rodapé Legal ── */
 .as-globalfooter-sosumi {
   text-align: center;
-  font-size: 12px;
+  font-size: var(--tkn-text-12);
   color: #86868b;
-  padding: 40px 20px 20px;
+  padding: var(--tkn-space-48) var(--tkn-space-24) var(--tkn-space-24);
 }
 
 /* ── Responsive ── */
@@ -571,13 +571,51 @@ fieldset {
   .rs-shipping-content-grid,
   .rs-shipping-contact-grid {
     grid-template-columns: 1fr;
-    gap: 24px;
+    gap: var(--tkn-space-24);
   }
   .row-2-cols,
   .row-phone-cols {
     grid-template-columns: 1fr;
   }
   .rs-shipping-header {
-    font-size: 28px;
+    font-size: var(--tkn-text-28);
   }
+}
+
+/* ── 9. Sistema de Grid ── */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-left: -10px;
+  margin-right: -10px;
+}
+.row::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+.column {
+  padding-left: var(--tkn-space-12);
+  padding-right: var(--tkn-space-12);
+  box-sizing: border-box;
+  width: 100%;
+}
+
+@media (min-width: 841px) {
+  .large-12 { width: 100%; }
+  .large-10 { width: 83.33333%; }
+  .large-8 { width: 66.66667%; }
+  .large-6 { width: 50%; }
+  .large-4 { width: 33.33333%; }
+  .large-last { margin-left: auto; display: flex; justify-content: flex-end; }
+}
+
+@media (max-width: 840px) {
+  .small-12 { width: 100%; }
+  .small-7 { width: 58.33333%; }
+  .small-6 { width: 50%; }
+}
+
+.flex-1 {
+  flex: 1;
 }

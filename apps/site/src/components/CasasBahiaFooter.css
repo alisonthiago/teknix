@@ -1,0 +1,584 @@
+/* ==========================================================================
+   RODAPÉ OFICIAL TEKNIX — ESTRUTURA 1:1 CASAS BAHIA + IDENTIDADE TEKNIX
+   ========================================================================== */
+
+.cb-footer-root {
+  background: #f8f9fa;
+  font-family: var(--cb-font, 'Nunito', sans-serif);
+  color: #1f2937;
+  width: 100%;
+  border-top: 1px solid #e5e7eb;
+}
+
+.cb-footer-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--tkn-space-24);
+}
+
+/* ── SEÇÃO 0: CANAIS DE ATENDIMENTO (3 CAIXAS) ── */
+.cb-footer-support-section {
+  padding: var(--tkn-space-32) 0 var(--tkn-space-24);
+  background: #f8f9fa;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.cb-support-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--tkn-space-24);
+}
+
+.cb-support-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: var(--tkn-space-16) var(--tkn-space-24);
+  display: flex;
+  align-items: center;
+  gap: var(--tkn-space-16);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.cb-support-card:hover {
+  border-color: #111827;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.cb-support-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #f3f4f6;
+  color: #111827;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.cb-support-card:hover .cb-support-icon-wrap {
+  background: #111827;
+  color: #ffffff;
+}
+
+.cb-support-text-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.cb-support-title {
+  font-family: var(--cb-font, 'Nunito', sans-serif);
+  font-size: var(--tkn-text-13);
+  font-weight: var(--tkn-weight-medium);
+  color: #111827;
+  margin: 0 0 3px 0;
+  letter-spacing: 0.02em;
+}
+
+.cb-support-desc {
+  font-family: var(--cb-font, 'Nunito', sans-serif);
+  font-size: var(--tkn-text-12);
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ── SEÇÃO 1: PRODUTOS MAIS BUSCADOS (SEO) ── */
+.cb-footer-searched-section {
+  padding: var(--tkn-space-32) 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.cb-footer-heading {
+  font-family: var(--cb-font, 'Nunito', sans-serif);
+  font-size: var(--tkn-text-13);
+  font-weight: var(--tkn-weight-medium);
+  color: #111827;
+  margin: 0 0 var(--tkn-space-16) 0;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.cb-searched-columns-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: var(--tkn-space-12) var(--tkn-space-16);
+}
+
+.cb-searched-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tkn-space-8);
+}
+
+.cb-searched-col a {
+  font-family: var(--cb-font, 'Nunito', sans-serif);
+  font-size: var(--tkn-text-12);
+  color: #4b5563;
+  text-decoration: none;
+  line-height: 1.45;
+  letter-spacing: 0.01em;
+  transition: color 0.15s ease;
+}
+
+.cb-searched-col a:hover {
+  color: #111827;
+  text-decoration: underline;
+}
+
+/* ── SEÇÃO 2: GLOSSÁRIO ALFABÉTICO ── */
+.cb-footer-glossary-section {
+  padding: var(--tkn-space-24) 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.cb-glossary-alphabet-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--tkn-space-8) var(--tkn-space-16);
+  align-items: center;
+}
+
+.cb-glossary-letter {
+  font-family: var(--cb-font, 'Nunito', sans-serif);
+  font-size: var(--tkn-text-12);
+  font-weight: var(--tkn-weight-medium);
+  color: #4b5563;
+  text-decoration: none;
+  padding: 3px var(--tkn-space-8);
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.cb-glossary-letter:hover {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.cb-glossary-btn-wrap {
+  margin-top: var(--tkn-space-16);
+  display: flex;
+  justify-content: flex-start;
+}
+
+.cb-glossary-toggle-btn {
+  background: none;
+  border: none;
+  color: #111827;
+  font-family: var(--cb-font, 'Nunito', sans-serif);
+  font-size: var(--tkn-text-12);
+  font-weight: var(--tkn-weight-semibold);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--tkn-space-8);
+  padding: var(--tkn-space-4) 0;
+  letter-spacing: 0.02em;
+  transition: opacity 0.15s ease;
+}
+
+.cb-glossary-toggle-btn:hover {
+  opacity: 0.75;
+}
+
+/* ── SEÇÃO 3: DIRETÓRIO DE LINKS INSTITUCIONAIS ── */
+.cb-footer-nav-section {
+  padding: var(--tkn-space-32) 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.cb-footer-links-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--tkn-space-32);
+}
+
+.cb-links-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.cb-links-title {
+  font-family: var(--cb-font, 'Nunito', sans-serif);
+  font-size: var(--tkn-text-13);
+  font-weight: var(--tkn-weight-medium);
+  color: #111827;
+  margin: 0 0 var(--tkn-space-16) 0;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.cb-links-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--tkn-space-8);
+}
+
+.cb-links-list li a {
+  font-family: var(--cb-font, 'Nunito', sans-serif);
+  font-size: var(--tkn-text-12);
+  color: #4b5563;
+  text-decoration: none;
+  line-height: 1.45;
+  transition: color 0.15s ease;
+}
+
+.cb-links-list li a:hover {
+  color: #111827;
+  text-decoration: underline;
+}
+
+/* Coluna 5 Especial: Card Linha Pro */
+.cb-card-promo-col {
+  background: #111827;
+  color: #ffffff;
+  padding: var(--tkn-space-24) var(--tkn-space-24);
+  border-radius: 8px;
+}
+
+.cb-card-promo-col .cb-links-title {
+  color: var(--site-accent, #B5F500);
+  margin-bottom: var(--tkn-space-12);
+}
+
+.cb-card-subtext {
+  font-family: var(--cb-font, 'Nunito', sans-serif);
+  font-size: var(--tkn-text-12);
+  line-height: 1.5;
+  color: #d1d5db;
+  margin: 0 0 var(--tkn-space-16) 0;
+}
+
+.cb-card-btn-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--site-accent, #B5F500);
+  color: #0a0a0a;
+  padding: var(--tkn-space-12) var(--tkn-space-16);
+  border-radius: 6px;
+  font-size: var(--tkn-text-12);
+  font-weight: var(--tkn-weight-semibold);
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.cb-card-btn-link:hover {
+  background: var(--site-accent, #a2e000);
+  transform: translateY(-1px);
+}
+
+/* ── SEÇÃO 4: FORMAS DE PAGAMENTOS ── */
+.cb-footer-payment-section {
+  padding: var(--tkn-space-32) 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.cb-payment-methods-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--tkn-space-24);
+}
+
+.cb-payment-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tkn-space-12);
+}
+
+.cb-payment-sub {
+  font-family: var(--cb-font, 'Nunito', sans-serif);
+  font-size: var(--tkn-text-12);
+  font-weight: var(--tkn-weight-medium);
+  color: #4b5563;
+  margin: 0;
+}
+
+.cb-badges-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--tkn-space-8);
+}
+
+.cb-payment-badge {
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: var(--tkn-space-4) var(--tkn-space-12);
+  font-size: var(--tkn-text-12);
+  font-weight: var(--tkn-weight-semibold);
+  color: #374151;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.cb-payment-badge.pix {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #047857;
+}
+
+.cb-payment-badge.brand-tkn {
+  background: #111827;
+  color: var(--site-accent, #B5F500);
+  border-color: #111827;
+}
+
+/* ── SEÇÃO 5: REDES SOCIAIS, CANAIS DIGITAIS & CERTIFICADOS ── */
+.cb-footer-social-apps-section {
+  padding: var(--tkn-space-32) 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.cb-social-apps-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1.4fr 1.2fr;
+  gap: var(--tkn-space-32);
+  align-items: center;
+}
+
+.cb-social-col,
+.cb-apps-col,
+.cb-certs-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tkn-space-12);
+}
+
+.cb-social-title {
+  font-family: var(--cb-font, 'Nunito', sans-serif);
+  font-size: var(--tkn-text-12);
+  font-weight: var(--tkn-weight-medium);
+  color: #111827;
+  margin: 0;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.cb-social-icons-row {
+  display: flex;
+  align-items: center;
+  gap: var(--tkn-space-12);
+}
+
+.cb-social-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.cb-social-icon:hover {
+  background: #111827;
+  color: #ffffff;
+  border-color: #111827;
+}
+
+.cb-app-buttons-row {
+  display: flex;
+  align-items: center;
+  gap: var(--tkn-space-12);
+}
+
+.cb-app-badge-btn {
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: var(--tkn-space-8) var(--tkn-space-16);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--tkn-space-8);
+  color: #111827;
+  font-size: var(--tkn-text-12);
+  font-weight: var(--tkn-weight-semibold);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.cb-app-badge-btn:hover {
+  background: #111827;
+  color: #ffffff;
+  border-color: #111827;
+}
+
+.cb-certs-col {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--tkn-space-16);
+}
+
+.cb-cert-badge-box {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: var(--tkn-space-8) var(--tkn-space-12);
+  display: flex;
+  align-items: center;
+  gap: var(--tkn-space-12);
+}
+
+.cb-cert-icon {
+  font-size: 18px;
+}
+
+.cb-cert-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.cb-cert-text strong {
+  font-size: var(--tkn-text-12);
+  color: #111827;
+}
+
+.cb-cert-text span {
+  font-size: var(--tkn-text-12);
+  color: #6b7280;
+}
+
+/* ── SEÇÃO 6: FAIXA INFERIOR SLATE DARK TEKNIX ── */
+.cb-footer-legal-bottom-bar {
+  background: #000;
+  color: #94a3b8;
+  padding: var(--tkn-space-24) 0 var(--tkn-space-32);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.cb-legal-disclaimer {
+  font-family: var(--cb-font, 'Nunito', sans-serif);
+  font-size: var(--tkn-text-12);
+  line-height: 1.55;
+  margin: 0 0 var(--tkn-space-8) 0;
+  text-align: center;
+  color: #94a3b8;
+}
+
+.cb-legal-company {
+  font-family: var(--cb-font, 'Nunito', sans-serif);
+  font-size: var(--tkn-text-12);
+  line-height: 1.55;
+  margin: 0;
+  text-align: center;
+  color: #64748b;
+}
+
+/* ==========================================================================
+   RESPONSIVIDADE OFICIAL (1920px, 1440px, 1024px, 768px, 430px, 390px, 360px)
+   ========================================================================== */
+
+@media (max-width: 1024px) {
+  .cb-searched-columns-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .cb-footer-links-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--tkn-space-24);
+  }
+
+  .cb-card-promo-col {
+    grid-column: span 3;
+  }
+
+  .cb-social-apps-grid {
+    grid-template-columns: 1fr;
+    gap: var(--tkn-space-24);
+  }
+}
+
+@media (max-width: 768px) {
+  .cb-footer-container {
+    padding: 0 var(--tkn-space-16);
+  }
+
+  .cb-support-grid {
+    grid-template-columns: 1fr;
+    gap: var(--tkn-space-12);
+  }
+
+  .cb-support-card {
+    padding: var(--tkn-space-16) var(--tkn-space-16);
+  }
+
+  .cb-searched-columns-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--tkn-space-12) var(--tkn-space-16);
+  }
+
+  .cb-footer-links-grid {
+    grid-template-columns: 1fr;
+    gap: var(--tkn-space-24);
+  }
+
+  .cb-card-promo-col {
+    grid-column: span 1;
+  }
+
+  .cb-payment-methods-grid {
+    grid-template-columns: 1fr;
+    gap: var(--tkn-space-16);
+  }
+
+  .cb-social-icons-row {
+    justify-content: flex-start;
+  }
+
+  .cb-app-buttons-row {
+    flex-wrap: wrap;
+  }
+
+  .cb-certs-col {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .cb-legal-disclaimer,
+  .cb-legal-company {
+    text-align: left;
+  }
+}
+
+@media (max-width: 430px) {
+  .cb-footer-container {
+    padding: 0 var(--tkn-space-12);
+  }
+
+  .cb-support-card {
+    gap: var(--tkn-space-12);
+    padding: var(--tkn-space-12) var(--tkn-space-16);
+  }
+
+  .cb-support-title {
+    font-size: var(--tkn-text-12);
+  }
+
+  .cb-support-desc {
+    font-size: var(--tkn-text-12);
+  }
+
+  .cb-glossary-letter {
+    font-size: var(--tkn-text-12);
+    padding: 2px var(--tkn-space-4);
+  }
+}

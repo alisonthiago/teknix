@@ -1,3 +1,5 @@
+import { Editable } from '../components/page-widgets/PageWidgets'
+import EditableFlow from '../components/page-widgets/EditableFlow'
 import { useState } from 'react'
 import './Contact.css'
 
@@ -23,88 +25,111 @@ export default function Contact() {
 
   return (
     <div className="contact-page">
-      <div className="contact-header">
-        <h1>Contato</h1>
-        <p>Fale com a Teknix. Estamos prontos para ajudar.</p>
-      </div>
+      <EditableFlow id="contact-content" label="Conteúdo da página Contato">
+        <EditableFlow id="contact-header" label="Cabeçalho do contato" as="div" className="contact-header">
+          <Editable as="h1" widgetId="contact-1">Contato</Editable>
+          <Editable as="p" widgetId="contact-2">Fale com a Teknix. Estamos prontos para ajudar.</Editable>
+        </EditableFlow>
 
-      <div className="contact-grid">
-        <form className="contact-form" onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="name">Nome</label>
-            <input
-              type="text"
-              id="name"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              required
-            />
-          </div>
+        <Editable as="div" widgetId="contact-grid" label="Colunas de contato" widgetType="container" editorKind="container" className="contact-grid" renderContent={false}>
+          <EditableFlow id="contact-columns" label="Colunas do contato">
+            <Editable as="form" widgetId="contact-form" label="Formulário de contato" widgetType="container" editorKind="container" className="contact-form" onSubmit={handleSubmit} renderContent={false}>
+              <EditableFlow id="contact-form-fields" label="Campos do formulário">
+                <Editable as="div" widgetId="contact-field-name" label="Campo Nome" widgetType="container" editorKind="container" className="form-group" renderContent={false}>
+                  <Editable as="label" widgetId="contact-label-name" htmlFor="name">Nome</Editable>
+                  <Editable
+                    as="input"
+                    widgetId="contact-input-name"
+                    label="Input Nome"
+                    widgetType="input"
+                    content={{ input_type: 'text', placeholder: '' }}
+                    type="text"
+                    id="name"
+                    value={form.name}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({ ...form, name: e.target.value })}
+                    required
+                  />
+                </Editable>
 
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              required
-            />
-          </div>
+                <Editable as="div" widgetId="contact-field-email" label="Campo Email" widgetType="container" editorKind="container" className="form-group" renderContent={false}>
+                  <Editable as="label" widgetId="contact-label-email" htmlFor="email">Email</Editable>
+                  <Editable
+                    as="input"
+                    widgetId="contact-input-email"
+                    label="Input Email"
+                    widgetType="input"
+                    content={{ input_type: 'email', placeholder: '' }}
+                    type="email"
+                    id="email"
+                    value={form.email}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({ ...form, email: e.target.value })}
+                    required
+                  />
+                </Editable>
 
-          <div className="form-group">
-            <label htmlFor="phone">Telefone</label>
-            <input
-              type="tel"
-              id="phone"
-              value={form.phone}
-              onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              required
-            />
-          </div>
+                <Editable as="div" widgetId="contact-field-phone" label="Campo Telefone" widgetType="container" editorKind="container" className="form-group" renderContent={false}>
+                  <Editable as="label" widgetId="contact-label-phone" htmlFor="phone">Telefone</Editable>
+                  <Editable
+                    as="input"
+                    widgetId="contact-input-phone"
+                    label="Input Telefone"
+                    widgetType="input"
+                    content={{ input_type: 'tel', placeholder: '' }}
+                    type="tel"
+                    id="phone"
+                    value={form.phone}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({ ...form, phone: e.target.value })}
+                    required
+                  />
+                </Editable>
 
-          <div className="form-group">
-            <label htmlFor="message">Mensagem</label>
-            <textarea
-              id="message"
-              rows={5}
-              value={form.message}
-              onChange={(e) => setForm({ ...form, message: e.target.value })}
-              required
-            />
-          </div>
+                <Editable as="div" widgetId="contact-field-message" label="Campo Mensagem" widgetType="container" editorKind="container" className="form-group" renderContent={false}>
+                  <Editable as="label" widgetId="contact-label-message" htmlFor="message">Mensagem</Editable>
+                  <Editable
+                    as="textarea"
+                    widgetId="contact-input-message"
+                    label="Input Mensagem"
+                    widgetType="input"
+                    content={{ input_type: 'textarea', placeholder: '' }}
+                    id="message"
+                    rows={5}
+                    value={form.message}
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setForm({ ...form, message: e.target.value })}
+                    required
+                  />
+                </Editable>
 
-          <button type="submit" className="btn btn-primary btn-full">
-            Enviar via WhatsApp
-          </button>
-        </form>
+                <Editable as="button" widgetId="contact-submit" label="Botão Enviar via WhatsApp" widgetType="button" type="submit" className="btn btn-primary btn-full">
+                  Enviar via WhatsApp
+                </Editable>
+              </EditableFlow>
+            </Editable>
 
-        <div className="contact-info">
-          <div className="info-card">
-            <h3>WhatsApp</h3>
-            <p>(11) 99999-9999</p>
-            <a
-              href="https://wa.me/5511999999999"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-outline"
-            >
-              Abrir WhatsApp
-            </a>
-          </div>
+            <Editable as="div" widgetId="contact-info" label="Informações de contato" widgetType="container" editorKind="container" className="contact-info" renderContent={false}>
+              <EditableFlow id="contact-info-cards" label="Cartões de contato">
+                <EditableFlow id="contact-whatsapp-card" label="Card WhatsApp" as="div" className="info-card">
+                  <Editable as="h3" widgetId="contact-3">WhatsApp</Editable>
+                  <Editable as="p" widgetId="contact-4">(11) 99999-9999</Editable>
+                  <Editable as="a" widgetId="contact-whatsapp-button" label="Botão Abrir WhatsApp" widgetType="button" href="https://wa.me/5511999999999" target="_blank" rel="noopener noreferrer" className="btn btn-outline">
+                    Abrir WhatsApp
+                  </Editable>
+                </EditableFlow>
 
-          <div className="info-card">
-            <h3>Email</h3>
-            <p>contato@teknix.com.br</p>
-          </div>
+                <EditableFlow id="contact-email-card" label="Card Email" as="div" className="info-card">
+                  <Editable as="h3" widgetId="contact-5">Email</Editable>
+                  <Editable as="p" widgetId="contact-6">contato@teknix.com.br</Editable>
+                </EditableFlow>
 
-          <div className="info-card">
-            <h3>Horário</h3>
-            <p>Segunda a Sexta: 9h às 18h</p>
-            <p>Sábado: 9h às 13h</p>
-          </div>
-        </div>
-      </div>
+                <EditableFlow id="contact-hours-card" label="Card Horário" as="div" className="info-card">
+                  <Editable as="h3" widgetId="contact-7">Horário</Editable>
+                  <Editable as="p" widgetId="contact-8">Segunda a Sexta: 9h às 18h</Editable>
+                  <Editable as="p" widgetId="contact-9">Sábado: 9h às 13h</Editable>
+                </EditableFlow>
+              </EditableFlow>
+            </Editable>
+          </EditableFlow>
+        </Editable>
+      </EditableFlow>
     </div>
   )
 }

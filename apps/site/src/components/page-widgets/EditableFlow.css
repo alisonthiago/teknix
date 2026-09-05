@@ -1,0 +1,648 @@
+@import '../../styles/elementor/elementor-core-widgets.css';
+@import '../../styles/elementor/elementor-pro-widgets.css';
+
+.published-flow-node {
+  display: contents;
+}
+
+.editor-flow-node {
+  position: relative;
+  min-width: 0;
+  transition: outline 0.12s ease;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.editor-flow-node:hover {
+  outline: 1.5px solid #db468e !important;
+  outline-offset: -1px;
+  cursor: pointer;
+}
+
+.editor-flow-node[data-editor-selected="true"] {
+  outline: 2px solid #db468e !important;
+  outline-offset: -1px;
+}
+
+/* ==========================================================================
+   ABA / HANDLE SUPERIOR DA SEÇÃO (PADRÃO ELEMENTOR PINK OFICIAL - 1:1)
+   ========================================================================== */
+.elementor-section-handle-tab {
+  position: absolute;
+  top: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 26px;
+  background: #f4b4df;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 16px;
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  clip-path: polygon(9px 0%, calc(100% - 9px) 0%, 100% 100%, 0% 100%);
+  border-radius: 6px 6px 0 0;
+  box-shadow: 0 -2px 8px rgba(219, 70, 142, 0.25);
+  cursor: default;
+}
+
+.editor-flow-node > .elementor-section-handle-tab {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.editor-flow-node:hover > .elementor-section-handle-tab,
+.editor-flow-node[data-editor-selected="true"] > .elementor-section-handle-tab,
+.editor-flow-node > .elementor-section-handle-tab.is-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.elementor-section-handle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: transparent;
+  border: none;
+  color: #111827;
+  border-radius: 3px;
+  cursor: pointer;
+  padding: 0;
+  transition: background-color 0.12s ease, transform 0.1s ease;
+}
+
+.elementor-section-handle-btn:hover {
+  background-color: rgba(0, 0, 0, 0.12);
+}
+
+.elementor-section-handle-btn.elementor-section-handle-drag {
+  cursor: grab;
+  width: 24px;
+}
+
+.elementor-section-handle-btn.elementor-section-handle-drag:active {
+  cursor: grabbing;
+}
+
+.elementor-inline-add-section-wrap {
+  width: 100%;
+  margin: 16px 0;
+  animation: elementorFadeIn 0.2s ease-out;
+}
+
+@keyframes elementorFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.editor-flow-container-wrap {
+  position: relative;
+  transition: outline 0.15s ease;
+}
+
+.editor-flow-container-wrap:hover {
+  outline: 1px solid #db468e !important;
+  outline-offset: 1px;
+}
+
+/* Área vazia de contêiner ou página (Padrão Elementor com botões circulares) */
+.elementor-empty-container-drop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 48px;
+  padding: 14px 16px;
+  box-sizing: border-box;
+  border: 1.5px dashed rgba(219, 70, 142, 0.4);
+  border-radius: 6px;
+  background: rgba(219, 70, 142, 0.02);
+  margin: 6px 0;
+  transition: all 0.15s ease;
+}
+
+.elementor-empty-container-drop:hover {
+  border-color: #db468e;
+  background: rgba(219, 70, 142, 0.06);
+}
+
+/* Preserve the real flex layout while the header's movable nodes are outlined. */
+.dsvia-row-top > div > .editor-flow-node,
+.dsvia-actions-right > div > .editor-flow-node,
+.dsvia-row-bottom > div > .editor-flow-node {
+  display: contents;
+}
+
+.tkn-checkout-grid > div > .editor-flow-node {
+  display: contents;
+}
+
+.category-products-container > div > .editor-flow-node,
+.category-products-grid > div > .editor-flow-node,
+.products-grid > div > .editor-flow-node {
+  display: contents;
+}
+
+.apple-saved-items-grid > div > .editor-flow-node {
+  display: contents;
+}
+
+.elementor-empty-hint-text {
+  font: 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #db468e;
+  font-weight: 500;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.elementor-container-append-drop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  width: 100%;
+  border: 1px dashed rgba(219, 70, 142, 0.4);
+  border-radius: 4px;
+  background: rgba(219, 70, 142, 0.03);
+  color: #db468e;
+  font: 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  box-sizing: border-box;
+  margin-top: 8px;
+  transition: all 0.15s ease;
+}
+
+.elementor-container-append-drop:hover {
+  background: rgba(219, 70, 142, 0.08);
+  border-color: #db468e;
+}
+
+.editor-flow-drop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1.5px dashed #cbd5e1;
+  background: #f8fafc;
+  color: #475569;
+  padding: 14px;
+  width: 100%;
+  font: 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 6px;
+  box-sizing: border-box;
+  margin-top: 6px;
+  transition: all 0.15s ease;
+}
+
+.editor-flow-drop:hover {
+  background: #eff6ff;
+  border-color: #2563eb;
+  color: #1d4ed8;
+}
+
+/* Indicador Visual de Drop: ──── INSERIR AQUI ──── */
+.editor-flow-drop-line {
+  position: relative;
+  height: 3px;
+  background: #db468e;
+  margin: 6px 0;
+  border-radius: 2px;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 10px rgba(219, 70, 142, 0.7);
+  pointer-events: none;
+}
+
+.editor-flow-drop-line::after {
+  content: "──── INSERIR AQUI ────";
+  background: #db468e;
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 2px 10px;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.editor-flow-container-drop-active {
+  outline: 2px dashed #db468e !important;
+  outline-offset: 2px;
+  background-color: rgba(219, 70, 142, 0.05) !important;
+}
+
+.elementor-bottom-drop-zone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  margin: 14px 0;
+  border: 1.5px dashed rgba(219, 70, 142, 0.35);
+  border-radius: 6px;
+  background: rgba(219, 70, 142, 0.02);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.elementor-bottom-drop-zone:hover {
+  border-color: #db468e;
+  background: rgba(219, 70, 142, 0.07);
+  box-shadow: 0 0 10px rgba(219, 70, 142, 0.2);
+}
+
+.elementor-bottom-drop-hint {
+  font: 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #db468e;
+  font-weight: 600;
+  user-select: none;
+}
+
+/* ==========================================================================
+   ELEMENTOR OFFICIAL ADD SECTION & CONTAINER STYLES
+   ========================================================================== */
+
+.elementor-add-section {
+  position: relative;
+  width: 100%;
+  max-width: 1140px;
+  margin: 30px auto;
+  box-sizing: border-box;
+  background: #ffffff;
+  border: 2px dashed #d5dade;
+  border-radius: 4px;
+  padding: 24px 20px;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.elementor-add-section:hover {
+  border-color: #a4afb7;
+}
+
+.elementor-add-section-inner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.elementor-add-section-close,
+.elementor-add-section-back {
+  position: absolute;
+  top: -12px;
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  color: #a4afb7;
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.15s ease;
+  z-index: 10;
+}
+
+.elementor-add-section-close {
+  right: 0;
+}
+
+.elementor-add-section-back {
+  left: 0;
+}
+
+.elementor-add-section-close:hover,
+.elementor-add-section-back:hover {
+  color: #556068;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.elementor-add-new-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.elementor-add-new-section-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.elementor-add-section-area-button {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.elementor-add-section-area-button:hover {
+  transform: scale(1.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.elementor-add-section-button {
+  background: #db468e;
+  color: #ffffff;
+}
+
+.elementor-add-template-button {
+  background: #6d7882;
+  color: #ffffff;
+}
+
+.elementskit-add-template-button {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #ff2c54;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.elementskit-add-template-button:hover {
+  transform: scale(1.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.elementskit-add-template-button img {
+  width: 22px;
+  height: 22px;
+  filter: brightness(0) invert(1);
+}
+
+.e-ai-layout-button {
+  background: #c084fc;
+  color: #ffffff;
+  position: relative;
+}
+
+.elementor-add-section-drag-title {
+  font: 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #a4afb7;
+  font-weight: 500;
+  margin-top: 6px;
+  text-align: center;
+}
+
+/* Seleção de Tipo: Flexbox vs Grade */
+.e-con-select-type {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.e-con-select-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  position: relative;
+  width: 100%;
+}
+
+.e-con-select-type__title {
+  font: 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #6d7882;
+  font-weight: 600;
+  margin: 0 0 20px 0;
+  text-align: center;
+}
+
+.e-con-select-preset__title {
+  font: 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #6d7882;
+  font-weight: 600;
+  margin: 0;
+  text-align: center;
+}
+
+.e-con-type-toggle {
+  display: inline-flex;
+  align-items: center;
+  background: #f1f3f5;
+  border-radius: 6px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.e-con-toggle-btn {
+  border: none;
+  background: transparent;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font: 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.e-con-toggle-btn:hover {
+  color: #1e293b;
+}
+
+.e-con-toggle-btn.active {
+  background: #ffffff;
+  color: #db468e;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.e-con-select-type__icons {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  width: 100%;
+}
+
+.e-con-select-type__icons__icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  border: 1px solid #d5dade;
+  border-radius: 4px;
+  padding: 16px 20px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  min-width: 120px;
+}
+
+.e-con-select-type__icons__icon:hover {
+  border-color: #db468e;
+  box-shadow: 0 4px 14px rgba(219, 70, 142, 0.15);
+  transform: translateY(-2px);
+}
+
+.e-con-select-type__icons__icon__subtitle {
+  font: 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-weight: 600;
+  color: #6d7882;
+  margin-top: 10px;
+}
+
+/* Grade de Presets Flexbox e Grade */
+.e-con-select-preset__list {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+  max-width: 760px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .e-con-select-preset__list {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.e-con-preset {
+  background: #ffffff;
+  border: 1px solid #d5dade;
+  border-radius: 3px;
+  padding: 8px 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.e-con-preset svg {
+  width: 100%;
+  max-width: 85px;
+  height: auto;
+  display: block;
+}
+
+.e-con-preset:hover {
+  border-color: #db468e;
+  background: rgba(219, 70, 142, 0.04);
+  transform: translateY(-1px);
+}
+
+.e-con-preset:hover rect {
+  fill: #db468e !important;
+}
+
+.e-con-preset:hover path {
+  fill: #ffffff !important;
+  stroke: #db468e !important;
+}
+
+/* ==========================================================================
+   ELEMENTOR EMPTY VIEW & OUTLINE STYLES (MATCHING USER SCREENSHOT)
+   ========================================================================== */
+
+.elementor-empty-view {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 110px;
+  flex: 1 1 auto;
+  padding: 24px 16px;
+  box-sizing: border-box;
+  border: 1.5px dashed #d5dade;
+  border-radius: 4px;
+  background: transparent;
+  transition: all 0.18s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.elementor-empty-view:hover {
+  border-color: #db468e;
+  background: rgba(219, 70, 142, 0.03);
+}
+
+.elementor-first-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  color: #9da5ae;
+  border: 1px solid #d5dade;
+  border-radius: 4px;
+  background: #ffffff;
+  transition: all 0.18s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  pointer-events: none;
+}
+
+.elementor-first-add * {
+  pointer-events: none;
+}
+
+.elementor-empty-view:hover .elementor-first-add {
+  color: #db468e;
+  border-color: #db468e;
+  transform: scale(1.08);
+  box-shadow: 0 2px 8px rgba(219, 70, 142, 0.25);
+}
+
+/* Grid Outline Visual */
+.e-grid-outline {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: grid;
+  gap: 8px;
+  padding: 8px;
+  pointer-events: none;
+}
+
+.e-grid-outline-item {
+  border: 1px dashed #d5dade;
+  border-radius: 3px;
+}
+@keyframes teknix-headline-in { from { opacity: 0; transform: translateY(.2em); } to { opacity: 1; transform: translateY(0); } }
+@keyframes teknix-headline-draw { 0% { stroke-dashoffset: 1; } 20%, 100% { stroke-dashoffset: 0; } }
+@media (prefers-reduced-motion: reduce) { .elementor-headline-dynamic-text, .teknix-headline-shape path { animation: none !important; } }

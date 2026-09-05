@@ -48,77 +48,109 @@
   left: 10px;
   background: var(--tkn-green);
   color: var(--tkn-dark);
-  font-size: 0.65rem;
-  font-weight: 700;
-  padding: 3px 8px;
+  font-size: var(--tkn-text-12);
+  font-weight: var(--tkn-weight-medium);
+  padding: 3px var(--tkn-space-8);
   border-radius: 980px;
 }
 
 .product-card-body {
-  padding: 16px;
+  padding: var(--tkn-space-16);
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--tkn-space-8);
 }
 
 .product-card-cat {
-  font-size: 0.6rem;
-  font-weight: 600;
+  font-size: var(--tkn-text-12);
+  font-weight: var(--tkn-weight-medium);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--tkn-text-tertiary);
 }
 
 .product-card-name {
-  font-size: 0.9rem;
-  font-weight: 600;
+  font-family: var(--tkn-font-heading);
+  font-size: var(--tkn-text-14);
+  font-weight: var(--tkn-weight-medium);
   color: var(--tkn-text);
-  line-height: 1.3;
+  line-height: 1.35;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  letter-spacing: -0.01em;
 }
 
 .product-card-prices {
   display: flex;
   align-items: baseline;
-  gap: 8px;
+  gap: var(--tkn-space-8);
   margin-top: auto;
 }
 
 .product-card-prices .price-old {
-  font-size: 0.8rem;
+  font-size: var(--tkn-text-13);
   color: var(--tkn-text-tertiary);
   text-decoration: line-through;
 }
 
 .product-card-prices .price-current {
-  font-size: 1.05rem;
-  font-weight: 700;
+  font-size: var(--tkn-text-16);
+  font-weight: var(--tkn-weight-medium);
   color: var(--tkn-text);
 }
 
 .product-card-stock {
-  font-size: 0.7rem;
-  font-weight: 500;
+  font-size: var(--tkn-text-12);
+  font-weight: var(--tkn-weight-medium);
   color: #f59e0b;
 }
 
 .product-card-cta {
-  margin: 0 12px 12px;
-  padding: 10px;
+  margin: 0 var(--tkn-space-12) var(--tkn-space-12);
+  padding: var(--tkn-space-12);
   background: var(--tkn-dark);
   border: none;
   color: #fff;
   border-radius: 980px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: var(--tkn-text-13);
+  font-weight: var(--tkn-weight-semibold);
   cursor: pointer;
   transition: all 0.25s ease;
 }
 
 .product-card-cta:hover {
   background: #333;
+}
+
+.product-card-compare {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #6b7280;
+  transition: all 0.2s;
+  z-index: 5;
+}
+
+.product-card-compare:hover {
+  background: #fff;
+  color: #111827;
+  border-color: #111827;
+}
+
+.product-card-compare.active {
+  background: #111827;
+  color: #fff;
+  border-color: #111827;
 }

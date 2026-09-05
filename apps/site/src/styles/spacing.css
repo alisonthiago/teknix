@@ -1,0 +1,69 @@
+/* Shared spacing for the public SITE. Geometry, logos and published layouts stay independent. */
+:root {
+  --tkn-space-4: 4px;
+  --tkn-space-8: 8px;
+  --tkn-space-12: 12px;
+  --tkn-space-16: 16px;
+  --tkn-space-24: 24px;
+  --tkn-space-32: 32px;
+  --tkn-space-48: 48px;
+  --tkn-space-64: 64px;
+  --tkn-content-gutter: 32px;
+  --tkn-card-padding: 24px;
+  --tkn-layout-gap: 32px;
+  --tkn-section-gap: 64px;
+  --tkn-control-height: 48px;
+  --tkn-surface: #ffffff;
+  --tkn-surface-muted: #fafafa;
+  --tkn-border-subtle: #e7e7e7;
+  --tkn-shadow-soft: 0 8px 24px rgb(0 0 0 / 0.05);
+}
+#root :is(.cb-bag-container, .teknix-orders-container, .apple-saved-container,
+  .apple-lookup-container, .apple-signin-container, .as-l-container) {
+  padding-inline: var(--tkn-content-gutter);
+  box-sizing: border-box;
+}
+#root :is(.cb-account-detail-content, .cb-bag-summary) { padding: var(--tkn-card-padding); }
+#root :is(.cb-bag-layout, .product-detail-page-root .details-product-row) { gap: var(--tkn-layout-gap); }
+#root .product-detail-page-root :is(.product-editorial, .description-section) { padding-block: var(--tkn-section-gap); }
+/* Informações de apoio não devem disputar atenção com produto, preço e ação. */
+#root :is(.cb-bag-heading p, .cb-bag-summary > p, .cb-bag-summary-note,
+  .cb-account-main-subtitle, .cb-account-card-desc, .cb-profile-intro,
+  .tkn-checkout-safe, .tkn-checkout-product p, .tkn-checkout-shipping p) {
+  font-size: var(--tkn-text-13);
+  line-height: 1.5;
+}
+
+/* Base serena: controles amplos, contraste moderado e foco sempre visível. */
+#root :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea) {
+  min-height: var(--tkn-control-height);
+  border-color: var(--tkn-border-subtle);
+  border-radius: 10px;
+  box-shadow: none;
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+#root :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea):focus {
+  border-color: #2474e8;
+  box-shadow: 0 0 0 3px rgb(36 116 232 / .12);
+  outline: 0;
+}
+#root :is(.cb-bag-items, .cb-bag-summary, .tkn-checkout-card, .tkn-checkout-summary,
+  .cb-account-detail-content, .cb-account-card, .teknix-order-card) {
+  border-color: var(--tkn-border-subtle);
+}
+#root :is(.cb-bag-primary, .tkn-checkout-primary, .cb-account-support-btn) {
+  min-height: var(--tkn-control-height);
+  border-radius: 10px;
+}
+#root :is(.cb-bag-item-name, .tkn-checkout-product a, .ml-pdp-title) {
+  text-wrap: pretty;
+}
+@media (max-width: 1023px) {
+  :root { --tkn-content-gutter: 24px; --tkn-layout-gap: 24px; --tkn-section-gap: 48px; }
+}
+@media (max-width: 767px) {
+  :root { --tkn-content-gutter: 16px; --tkn-card-padding: 16px; --tkn-layout-gap: 24px; --tkn-section-gap: 32px; }
+  #root .cb-account-wrapper { width: calc(100% - 32px); }
+  #root :is(.cb-bag-items, .teknix-order-card-body) { padding-inline: var(--tkn-card-padding); }
+  #root :is(.cb-modal-form, .cb-account-cards-grid) { gap: var(--tkn-space-16); }
+}

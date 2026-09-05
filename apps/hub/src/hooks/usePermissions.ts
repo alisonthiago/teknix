@@ -24,7 +24,6 @@ export function usePermissions() {
         setRole(currentProfile.role)
         setIsMaster(!!currentProfile.is_master)
 
-        // Se for ADMIN ou MASTER, todas as permissões são concedidas
         if (currentProfile.role === 'ADMIN' || currentProfile.is_master) {
           const allGranted: Record<string, boolean> = {}
           HUB_PERMISSIONS_CATALOG.forEach(p => {
@@ -32,7 +31,6 @@ export function usePermissions() {
           })
           setPermissions(allGranted)
         } else {
-          // Carrega permissões individuais do colaborador
           const userPerms = await PermissionsService.getUserPermissions(currentProfile.id)
           const basePreset = ROLE_PRESET_PERMISSIONS[currentProfile.role] || []
           
@@ -47,7 +45,6 @@ export function usePermissions() {
           setPermissions(merged)
         }
       } else {
-        // Fallback default admin
         setRole('ADMIN')
         setIsMaster(true)
         const allGranted: Record<string, boolean> = {}
@@ -73,25 +70,16 @@ export function usePermissions() {
     return () => window.removeEventListener('permissions_updated', handleUpdate)
   }, [loadCurrentPermissions])
 
-  /**
-   * Verifica se o usuário atual tem permissão para uma ação específica
-   */
   const can = useCallback((permissionCode: string): boolean => {
     if (isMaster || role === 'ADMIN') return true
     return !!permissions[permissionCode]
   }, [isMaster, role, permissions])
 
-  /**
-   * Verifica se tem pelo menos UMA das permissões
-   */
   const canAny = useCallback((codes: string[]): boolean => {
     if (isMaster || role === 'ADMIN') return true
     return codes.some(c => !!permissions[c])
   }, [isMaster, role, permissions])
 
-  /**
-   * Mapeamento de rotas do HUB para permissões necessárias
-   */
   const canAccessRoute = useCallback((pathname: string): boolean => {
     if (isMaster || role === 'ADMIN') return true
 
@@ -105,9 +93,6 @@ export function usePermissions() {
     if (pathname.startsWith('/hub/mercado-livre') || pathname.startsWith('/hub/shopee') || pathname.startsWith('/hub/amazon') || pathname.startsWith('/hub/magalu') || pathname.startsWith('/hub/integracoes')) {
       return can('integrations.view')
     }
-    if (pathname.startsWith('/hub/paginas') || pathname.startsWith('/editor/page')) return can('pages.view')
-    if (pathname.startsWith('/hub/temas') || pathname.startsWith('/hub/theme-builder') || pathname.startsWith('/editor/theme-builder')) return can('themes.view')
-    if (pathname.startsWith('/hub/media')) return can('media.view')
     if (pathname.startsWith('/hub/usuarios')) return can('users.view')
     if (pathname.startsWith('/hub/configuracoes')) return can('settings.view')
     if (pathname.startsWith('/hub/estatisticas')) return can('stats.view')

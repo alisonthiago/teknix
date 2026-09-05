@@ -1,0 +1,1088 @@
+/* ==========================================================================
+   HEADER TEKNIX — IDENTIDADE PRÓPRIA
+   Branco + Preto + Cinzas como base
+   Verde TEKNIX (var(--site-accent, #B5F500)) apenas como assinatura
+   ========================================================================== */
+
+:root {
+  --tkn-accent: var(--site-accent, #B5F500);
+  --tkn-accent-dark: var(--site-accent, #a2e000);
+  --cb-font: 'Nunito', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --tkn-black: #111827;
+  --tkn-dark-gray: #374151;
+  --tkn-mid-gray: #6b7280;
+  --tkn-light-gray: #9ca3af;
+  --tkn-border-color: #e5e7eb;
+  --tkn-bg-header: #ffffff;
+}
+
+/* Linha verde no topo — assinatura visual TEKNIX */
+.dsvia-top-red-line {
+  height: 3px;
+  background: var(--tkn-accent);
+  width: 100%;
+}
+
+/* Header Container */
+.dsvia-header-root {
+  background: var(--tkn-bg-header, #f7f7f7);
+  font-family: var(--cb-font) !important;
+  border-bottom: 0;
+  box-shadow: none;
+  width: 100%;
+  position: relative;
+  z-index: 1260;
+}
+
+.dsvia-header-inner {
+  margin-left: auto !important;
+  margin-right: auto !important;
+  max-width: calc(1352px + 48px) !important;
+  padding-left: var(--tkn-space-24) !important;
+  padding-right: var(--tkn-space-24) !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  display: flex;
+  flex-direction: column;
+  gap: var(--tkn-space-12);
+  padding-top: var(--tkn-space-12) !important;
+  padding-bottom: var(--tkn-space-12) !important;
+}
+
+@media (max-width: 991px) {
+  .dsvia-header-inner {
+    max-width: calc(1352px + 32px) !important;
+    padding-left: var(--tkn-space-16) !important;
+    padding-right: var(--tkn-space-16) !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .dsvia-header-inner {
+    max-width: calc(1352px + 16px) !important;
+    padding-left: var(--tkn-space-8) !important;
+    padding-right: var(--tkn-space-8) !important;
+  }
+}
+
+/* ── LINHA 1: LOGO, BUSCA, CEP, CONTA, FAVORITOS, CARRINHO ── */
+.dsvia-row-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--tkn-space-16);
+  width: 100%;
+}
+
+/* Bloco Marca */
+.dsvia-brand-block {
+  display: flex;
+  align-items: center;
+  gap: var(--tkn-space-12);
+  flex-shrink: 0;
+}
+
+.dsvia-brand-logo {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  /* SVG herda esta cor via fill atual */
+  color: #111827;
+  /* Garante máxima nitidez do logo */
+  -webkit-font-smoothing: antialiased;
+  transition: opacity 0.15s ease;
+}
+
+.dsvia-brand-logo:hover {
+  opacity: 0.8;
+}
+
+/* SVG do logo TEKNIX — preto, sem filtro adicional */
+.dsvia-brand-logo svg {
+  display: block;
+  /* Leve aumento de contraste para pressar a marca */
+  filter: contrast(1.05);
+}
+
+.dsvia-accessibility-skip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--tkn-space-8);
+  border: 1.5px solid var(--tkn-border-color);
+  border-radius: 4px;
+  padding: var(--tkn-space-8) var(--tkn-space-12);
+  background: #ffffff;
+  color: var(--tkn-dark-gray);
+  font-size: var(--tkn-text-12);
+  font-weight: var(--tkn-weight-semibold);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.dsvia-accessibility-skip-btn:hover {
+  border-color: var(--tkn-black);
+  color: var(--tkn-black);
+}
+
+.dsvia-account-user-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+  text-align: left;
+}
+.dsvia-account-avatar { width:24px; height:24px; flex:0 0 auto; border-radius:50%; object-fit:cover; box-shadow:0 0 0 2px var(--hagor-green, var(--site-accent, #B5F500)); }
+
+.dsvia-account-greeting {
+  font-size: var(--tkn-text-12);
+  font-weight: var(--tkn-weight-medium);
+  color: var(--tkn-black);
+}
+
+.dsvia-account-subtext {
+  font-size: var(--tkn-text-12);
+  font-weight: var(--tkn-weight-regular);
+  color: var(--tkn-mid-gray);
+}
+
+/* Atalhos principais da conta seguem o azul de navegação da referência. */
+.dsvia-actions-right .dsvia-cep-trigger,
+.dsvia-actions-right .dsvia-account-capsule,
+.dsvia-actions-right .dsvia-icon-action { color: #123bd1; }
+
+.dsvia-actions-right .dsvia-account-greeting { color: inherit; font-weight: var(--tkn-weight-semibold); }
+
+/* Conta, favoritos e sacola usam ícones pretos; somente o CEP permanece azul. */
+.dsvia-actions-right .dsvia-account-capsule,
+.dsvia-actions-right .dsvia-icon-action { color: #111827; }
+
+.dsvia-actions-right .dsvia-cep-trigger { color: #111827; }
+
+/* Barra de Busca Central */
+.dsvia-search-box {
+  flex: 1;
+  max-width: 580px;
+}
+
+.dsvia-search-form {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1.5px solid var(--tkn-border-color);
+  border-radius: 4px;
+  height: 42px;
+  padding: 0 var(--tkn-space-12) 0 var(--tkn-space-16);
+  transition: all 0.2s ease;
+}
+
+.dsvia-search-form:focus-within {
+  border-color: var(--tkn-black);
+  box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.06);
+}
+
+.dsvia-search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: var(--tkn-text-14);
+  font-weight: var(--tkn-weight-regular);
+  line-height: 150%;
+  letter-spacing: 0.02em;
+  color: var(--tkn-black);
+  background: transparent;
+  font-family: var(--cb-font);
+  padding: 0;
+}
+
+.dsvia-search-input::placeholder {
+  color: var(--tkn-light-gray);
+}
+
+.dsvia-search-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--tkn-mid-gray);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--tkn-space-4);
+  transition: color 0.15s ease;
+}
+
+.dsvia-search-btn:hover {
+  color: var(--tkn-black);
+}
+
+/* Lado Direito da Linha 1 */
+.dsvia-actions-right {
+  display: flex;
+  align-items: center;
+  gap: var(--tkn-space-16);
+  flex-shrink: 0;
+}
+
+/* Botão CEP */
+.dsvia-cep-trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--tkn-space-8);
+  background: none;
+  border: none;
+  color: var(--tkn-dark-gray);
+  font-size: var(--tkn-text-13);
+  font-weight: var(--tkn-weight-medium);
+  cursor: pointer;
+  font-family: var(--cb-font);
+  padding: var(--tkn-space-8) var(--tkn-space-8);
+  border-radius: 4px;
+  transition: background 0.15s ease;
+}
+
+
+/* Cápsula "Acesse sua conta" */
+.dsvia-account-capsule {
+  display: flex;
+  align-items: center;
+  gap: var(--tkn-space-8);
+  background: #f3f4f6;
+  border-radius: 6px;
+  padding: var(--tkn-space-8) var(--tkn-space-16);
+  color: var(--tkn-black);
+  text-decoration: none;
+  font-size: var(--tkn-text-13);
+  font-weight: var(--tkn-weight-medium);
+  font-family: var(--cb-font);
+  transition: background 0.15s ease;
+}
+.dsvia-account-menu { position:relative; }
+.dsvia-account-popover { position:absolute; z-index:100; top:calc(100% + 8px); right:0; width:184px; padding:var(--tkn-space-8); border:1px solid #e2e2e2; border-radius:10px; background:#fff; box-shadow:0 12px 28px rgb(0 0 0 / .12); }
+.dsvia-account-popover :is(a,button) { display:block; width:100%; box-sizing:border-box; padding:10px 12px; border:0; border-radius:6px; background:transparent; color:#202020; font:inherit; font-size:var(--tkn-text-13); text-align:left; text-decoration:none; cursor:pointer; }
+.dsvia-account-popover :is(a,button):hover,.dsvia-account-popover :is(a,button):focus-visible { background:#f3f3f3; outline:0; }
+.dsvia-account-popover button { margin-top:var(--tkn-space-4); border-top:1px solid #ececec; border-radius:0; color:#a43a2e; }
+
+/* Menu de entrada: aparece apenas ao passar o mouse ou navegar pelo teclado. */
+.dsvia-guest-popover { position:absolute; z-index:100; top:calc(100% + 6px); right:0; display:none; width:230px; padding:16px; border:1px solid #e2e5ea; border-radius:0 0 8px 8px; background:#fff; box-shadow:0 10px 22px rgb(10 25 60 / .2); }
+.dsvia-guest-popover::before { content:''; position:absolute; top:-7px; right:40px; width:13px; height:13px; border-top:1px solid #e2e5ea; border-left:1px solid #e2e5ea; background:#fff; transform:rotate(45deg); }
+.dsvia-account-menu:hover .dsvia-guest-popover, .dsvia-account-menu:focus-within .dsvia-guest-popover { display:block; }
+.dsvia-guest-popover a { position:relative; display:block; padding:13px 4px; border-bottom:1px solid #d7d9de; color:#6b6e75; font-size:var(--tkn-text-14); text-decoration:none; }
+.dsvia-guest-popover a:last-child { border-bottom:0; }
+.dsvia-guest-popover a:not(.dsvia-guest-popover-cta):hover, .dsvia-guest-popover a:not(.dsvia-guest-popover-cta):focus-visible { color:#111827; }
+.dsvia-guest-popover-cta { margin-bottom:9px; padding:13px 16px !important; border:0 !important; border-radius:4px; background:var(--hagor-green, var(--site-accent, #b5f500)); color:#111827 !important; font-weight:var(--tkn-weight-semibold); text-align:center; }
+.dsvia-guest-popover-cta:hover, .dsvia-guest-popover-cta:focus-visible { background:#9cdd00; color:#111827; }
+
+
+/* Ícones de Favorito e Carrinho */
+.dsvia-icon-action {
+  color: var(--tkn-dark-gray);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--tkn-space-8);
+  text-decoration: none;
+  position: relative;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+/* Mesma resposta visual nos atalhos principais, sem deslocar o layout. */
+.dsvia-header-inner :is(.dsvia-cep-trigger, .dsvia-account-capsule, .dsvia-icon-action) {
+  border-radius: 6px;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+.dsvia-header-inner :is(.dsvia-cep-trigger, .dsvia-account-capsule, .dsvia-icon-action):is(:hover, :focus-visible) {
+  background-color: var(--tkn-green, var(--site-accent, #b5f500));
+  color: #000000;
+}
+.dsvia-account-capsule:is(:hover, :focus-visible) :is(.dsvia-account-greeting, .dsvia-account-subtext) {
+  color: #000000;
+}
+.dsvia-header-inner :is(.dsvia-cep-trigger, .dsvia-account-capsule, .dsvia-icon-action):focus-visible {
+  outline: 2px solid #000000;
+  outline-offset: 3px;
+}
+.dsvia-icon-action:is(:hover, :focus-visible) .dsvia-cart-count-badge {
+  background: #000000;
+  color: var(--tkn-green, var(--site-accent, #b5f500));
+}
+@media (prefers-reduced-motion: reduce) {
+  .dsvia-header-inner :is(.dsvia-cep-trigger, .dsvia-account-capsule, .dsvia-icon-action) {
+    transition: none;
+  }
+}
+
+/* Badge do carrinho — verde TEKNIX como assinatura */
+.dsvia-cart-count-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: var(--tkn-accent);
+  color: #111827;
+  font-size: var(--tkn-text-12);
+  font-weight: var(--tkn-weight-semibold);
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid #ffffff;
+}
+
+/* ── LINHA 2: DEPARTAMENTOS, CATEGORIAS, CUPOM E SERVIÇOS ── */
+.dsvia-row-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding-top: 2px;
+  font-size: var(--tkn-text-12);
+}
+
+/* Lado Esquerdo */
+.dsvia-nav-left {
+  display: flex;
+  align-items: center;
+  gap: var(--tkn-space-16);
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+/* Botão Departamentos */
+.dsvia-dept-trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--tkn-space-8);
+  background: none;
+  border: none;
+  color: var(--tkn-black);
+  font-size: var(--tkn-text-14);
+  font-weight: var(--tkn-weight-medium);
+  cursor: pointer;
+  font-family: var(--cb-font);
+  line-height: 150%;
+  letter-spacing: 0.02em;
+  padding: 0;
+  transition: opacity 0.15s ease;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.dsvia-dept-trigger:hover {
+  opacity: 0.7;
+}
+
+/* Links de Categoria */
+.dsvia-nav-link {
+  color: var(--tkn-dark-gray);
+  text-decoration: none;
+  font-family: var(--cb-font);
+  font-size: var(--tkn-text-14);
+  font-weight: var(--tkn-weight-medium);
+  line-height: 150%;
+  letter-spacing: 0.02em;
+  transition: color 0.15s ease;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.dsvia-nav-link:hover {
+  color: var(--tkn-black);
+  text-decoration: underline;
+}
+
+/* Badge verde "Cupom" — assinatura TEKNIX */
+.dsvia-coupon-badge {
+  background: var(--tkn-accent);
+  color: #111827;
+  padding: 2px var(--tkn-space-12);
+  border-radius: 12px;
+  font-weight: var(--tkn-weight-semibold);
+  font-size: var(--tkn-text-12);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  letter-spacing: 0.02em;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.dsvia-coupon-badge:hover {
+  transform: scale(1.05);
+  opacity: 0.85;
+}
+
+/* Lado Direito Linha 2 */
+.dsvia-nav-right {
+  display: flex;
+  align-items: center;
+  gap: var(--tkn-space-16);
+}
+
+.dsvia-nav-right .dsvia-nav-link {
+  color: var(--tkn-mid-gray);
+  font-size: var(--tkn-text-12);
+}
+
+.dsvia-nav-right .dsvia-nav-link:hover {
+  color: var(--tkn-dark-gray);
+}
+
+/* ── POPOVER DE CEP ── */
+.dsvia-cep-popover {
+  position: absolute;
+  top: 42px;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid var(--tkn-border-color);
+  border-radius: 12px;
+  padding: var(--tkn-space-20, 20px);
+  box-shadow: 0 16px 36px rgba(0,0,0,0.14);
+  width: 320px;
+  z-index: 1500;
+}
+
+.dsvia-cep-popover-title {
+  font-size: var(--tkn-text-13);
+  font-weight: var(--tkn-weight-medium);
+  color: var(--tkn-black);
+  margin: 0 var(--tkn-space-24) var(--tkn-space-8) 0;
+}
+
+.dsvia-cep-popover-desc {
+  font-size: var(--tkn-text-12);
+  color: var(--tkn-mid-gray);
+  margin: 0 0 var(--tkn-space-16) 0;
+  line-height: 1.5;
+}
+
+.dsvia-cep-form {
+  display: flex;
+  gap: var(--tkn-space-8);
+}
+
+.dsvia-cep-input {
+  flex: 1;
+  border: 1.5px solid var(--tkn-border-color);
+  min-height: 44px;
+  border-radius: 8px;
+  padding: var(--tkn-space-8) var(--tkn-space-12);
+  font-size: var(--tkn-text-13);
+  font-family: var(--cb-font);
+  outline: none;
+}
+
+.dsvia-cep-input:focus {
+  border-color: var(--tkn-black);
+}
+
+.dsvia-cep-submit {
+  background: var(--tkn-black);
+  color: #ffffff;
+  border: none;
+  min-width: 68px;
+  border-radius: 8px;
+  padding: var(--tkn-space-8) var(--tkn-space-12);
+  font-size: var(--tkn-text-12);
+  font-weight: var(--tkn-weight-medium);
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.dsvia-cep-submit:hover {
+  background: var(--tkn-dark-gray);
+}
+
+.dsvia-cep-close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  font-size: var(--tkn-text-16);
+  color: var(--tkn-light-gray);
+  cursor: pointer;
+  padding: 2px var(--tkn-space-8);
+}
+.tkn-drawer-logo { display:inline-flex; align-items:center; height:24px; }
+.tkn-drawer-logo img { display:block; width:108px; height:auto; }
+
+/* ── DRAWER MENU LATERAL ── */
+.dsvia-drawer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 9998;
+  backdrop-filter: blur(2px);
+  animation: dsviaFadeIn 0.2s ease;
+}
+
+.dsvia-drawer-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 365px;
+  max-width: 90vw;
+  height: 100vh;
+  background: #ffffff;
+  z-index: 9999;
+  box-shadow: 6px 0 28px rgba(0, 0, 0, 0.16);
+  display: flex;
+  flex-direction: column;
+  animation: dsviaSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: var(--cb-font);
+  overflow: hidden;
+}
+
+@keyframes dsviaSlideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes dsviaFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ── Topo do Drawer (Tem na TEKNIX + Fechar) ── */
+.tkn-drawer-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--tkn-space-16) var(--tkn-space-24) var(--tkn-space-16) var(--tkn-space-24);
+  border-bottom: 1px solid #f1f1f1;
+  background: #ffffff;
+  position: relative;
+}
+
+.tkn-drawer-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tkn-drawer-title {
+  font-size: var(--tkn-text-18);
+  font-weight: var(--tkn-weight-medium);
+  color: #222222;
+  letter-spacing: -0.3px;
+}
+
+.tkn-drawer-greeting {
+  font-size: var(--tkn-text-12);
+  color: #737373;
+  font-weight: var(--tkn-weight-medium);
+}
+
+.tkn-drawer-close-btn {
+  background: transparent;
+  border: none;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #555555;
+  border-radius: 50%;
+  transition: all 0.15s ease;
+}
+
+.tkn-drawer-close-btn:hover {
+  background: #f1f1f1;
+  color: #222222;
+}
+
+/* ── Banner Usuário / Minha Conta ── */
+.tkn-drawer-user-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: var(--tkn-space-12) var(--tkn-space-16) var(--tkn-space-4) var(--tkn-space-16);
+  padding: var(--tkn-space-12) var(--tkn-space-12);
+  background: #f8f8f8;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  gap: var(--tkn-space-8);
+}
+
+.tkn-drawer-user-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--tkn-space-8);
+  font-size: var(--tkn-text-12);
+  font-weight: var(--tkn-weight-medium);
+  color: #555555;
+}
+
+.tkn-drawer-user-meta svg {
+  color: #242424;
+  flex-shrink: 0;
+}
+.tkn-drawer-user-avatar { width:28px; height:28px; flex:0 0 auto; border-radius:50%; object-fit:cover; }
+
+.tkn-drawer-user-action {
+  font-size: var(--tkn-text-12);
+  font-weight: var(--tkn-weight-medium);
+  color: #242424;
+  text-decoration: none;
+  padding: var(--tkn-space-4) var(--tkn-space-12);
+  border-radius: 6px;
+  background: #f5f5f5;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.tkn-drawer-user-action:hover {
+  background: #eeeeee;
+  color: #111111;
+}
+
+/* ── Corpo Rolável ── */
+.tkn-drawer-scroll-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--tkn-space-8) 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.tkn-drawer-scroll-body::-webkit-scrollbar {
+  width: 5px;
+}
+
+.tkn-drawer-scroll-body::-webkit-scrollbar-thumb {
+  background: #cccccc;
+  border-radius: 4px;
+}
+
+/* ── Seções de Conteúdo ── */
+.tkn-drawer-section {
+  padding: var(--tkn-space-16) var(--tkn-space-16);
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.tkn-drawer-section:last-child {
+  border-bottom: none;
+}
+
+.tkn-drawer-section-title {
+  font-size: var(--tkn-text-13);
+  font-weight: var(--tkn-weight-medium);
+  color: #292929;
+  margin: 0 0 var(--tkn-space-12) 0;
+  letter-spacing: -0.2px;
+  text-transform: none;
+}
+
+.tkn-drawer-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tkn-drawer-item {
+  margin: 0;
+  padding: 0;
+}
+
+.tkn-drawer-link {
+  display: flex;
+  align-items: center;
+  gap: var(--tkn-space-12);
+  padding: var(--tkn-space-8) var(--tkn-space-8);
+  border-radius: 8px;
+  text-decoration: none;
+  color: #444444;
+  font-size: var(--tkn-text-13);
+  font-weight: var(--tkn-weight-medium);
+  transition: all 0.15s ease;
+}
+
+.tkn-drawer-link:hover {
+  background: #f8f8f8;
+  color: #242424;
+}
+
+.tkn-drawer-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #737373;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  transition: color 0.15s ease;
+}
+
+.tkn-drawer-link:hover .tkn-drawer-icon-wrap {
+  color: #242424;
+}
+
+.tkn-drawer-item-text {
+  flex: 1;
+  line-height: 1.3;
+}
+
+/* Card especial: "Todos os departamentos ›" */
+.tkn-drawer-all-card-item {
+  margin-top: var(--tkn-space-8);
+}
+
+.tkn-drawer-all-card-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--tkn-space-12) var(--tkn-space-16);
+  background: #f8f8f8;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: var(--tkn-text-13);
+  font-weight: var(--tkn-weight-medium);
+  color: #292929;
+  transition: all 0.15s ease;
+}
+
+.tkn-drawer-all-card-link svg {
+  color: #737373;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.tkn-drawer-all-card-link:hover {
+  border-color: #242424;
+  background: #f5f5f5;
+  color: #242424;
+}
+
+.tkn-drawer-all-card-link:hover svg {
+  color: #242424;
+  transform: translateX(2px);
+}
+
+/* ── Marcas com Badges Circulares ── */
+.tkn-drawer-brand-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--tkn-text-12);
+  font-weight: var(--tkn-weight-semibold);
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.brand-bosch {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.brand-makita {
+  background: #0d9488;
+  color: #ffffff;
+}
+
+.brand-dewalt {
+  background: #facc15;
+  color: #18181b;
+}
+
+.brand-teknix {
+  background: #242424;
+  color: #ffffff;
+}
+
+/* Links de Navegação com Chevron (Todas as marcas, categorias, etc.) */
+.tkn-drawer-nav-chevron-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--tkn-space-8) var(--tkn-space-8);
+  font-size: var(--tkn-text-13);
+  font-weight: var(--tkn-weight-medium);
+  color: #444444;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.tkn-drawer-nav-chevron-link svg {
+  color: #888888;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.tkn-drawer-nav-chevron-link:hover {
+  color: #242424;
+  background: #f8f8f8;
+}
+
+.tkn-drawer-nav-chevron-link:hover svg {
+  color: #242424;
+  transform: translateX(2px);
+}
+
+/* Links Simples de Serviços */
+.tkn-drawer-plain-link {
+  display: block;
+  padding: var(--tkn-space-8) var(--tkn-space-8);
+  font-size: var(--tkn-text-13);
+  color: #555555;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.tkn-drawer-plain-link:hover {
+  color: #242424;
+  background: #f8f8f8;
+}
+
+/* ── Rodapé Fixo com os 2 Botões TEKNIX Blue ── */
+.tkn-drawer-footer {
+  padding: var(--tkn-space-16) var(--tkn-space-16) var(--tkn-space-24) var(--tkn-space-16);
+  border-top: 1px solid #e5e5e5;
+  background: #ffffff;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.03);
+}
+
+/* Botão 1: Sólido Azul TEKNIX (#242424) */
+.tkn-drawer-btn-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--tkn-space-8);
+  width: 100%;
+  height: 48px;
+  background: #242424;
+  color: #ffffff;
+  border-radius: 8px;
+  font-size: var(--tkn-text-14);
+  font-weight: var(--tkn-weight-semibold);
+  text-decoration: none;
+  box-shadow: none;
+  margin-bottom: var(--tkn-space-8);
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.tkn-drawer-btn-primary:hover {
+  background: #111111;
+  color: #ffffff;
+}
+
+.tkn-drawer-btn-primary:active {
+  transform: scale(0.99);
+}
+
+/* Botão 2: Outline Azul TEKNIX (borda e texto #242424) */
+.tkn-drawer-btn-outline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--tkn-space-8);
+  width: 100%;
+  height: 48px;
+  background: transparent;
+  border: 1.5px solid #242424;
+  color: #242424;
+  border-radius: 8px;
+  font-size: var(--tkn-text-14);
+  font-weight: var(--tkn-weight-semibold);
+  text-decoration: none;
+  margin-bottom: var(--tkn-space-12);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.tkn-drawer-btn-outline:hover {
+  background: #f5f5f5;
+  color: #111111;
+  border-color: #111111;
+}
+
+.tkn-drawer-btn-outline:active {
+  transform: scale(0.99);
+}
+
+/* Informações de Suporte e Horário */
+.tkn-drawer-support-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 2px;
+}
+
+.tkn-drawer-phone-label {
+  font-size: var(--tkn-text-12);
+  font-weight: var(--tkn-weight-semibold);
+  color: #555555;
+}
+
+.tkn-drawer-schedule-label {
+  font-size: var(--tkn-text-12);
+  color: #888888;
+  line-height: 1.3;
+}
+
+/* ── BOTÃO HAMBURGUER MOBILE ── */
+.tkn-drawer-brands-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--tkn-space-8); }
+.tkn-drawer-brands-list .tkn-drawer-item:has(.tkn-drawer-nav-chevron-link) { grid-column: 1 / -1; }
+.tkn-drawer-brand-link { display: flex; align-items: center; justify-content: center; height: 60px; padding: var(--tkn-space-12); border: 1px solid #e8e8e8; border-radius: 8px; background: #fff; }
+.tkn-drawer-brand-link:hover { background: #f5f5f5; }
+.tkn-drawer-brand-link svg { width: 100%; max-width: 105px; }
+.tkn-drawer-scroll-body { min-height: 0; }
+.tkn-drawer-footer { flex-shrink: 0; box-shadow: none; }
+.tkn-drawer-footer [class*="-label"] { text-transform: none; letter-spacing: 0; }
+.tkn-drawer-user-action { background: #242424; color: white; padding: var(--tkn-space-8) var(--tkn-space-12); font-weight: var(--tkn-weight-medium); }
+.tkn-drawer-user-action:hover { background: #444; color: white; }
+.dsvia-drawer-panel :is(a, button):focus-visible { outline: 2px solid #555; outline-offset: 3px; }
+
+.dsvia-mobile-hamburger-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  color: var(--tkn-dark-gray);
+  cursor: pointer;
+  padding: var(--tkn-space-4);
+  align-items: center;
+  justify-content: center;
+}
+
+.dsvia-mobile-subbar {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--tkn-space-8) var(--tkn-space-12);
+  background: #ffffff;
+  border-top: 1px solid var(--tkn-border-color);
+}
+
+.dsvia-mobile-cep-trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--tkn-space-8);
+  background: transparent;
+  border: none;
+  color: var(--tkn-dark-gray);
+  font-size: var(--tkn-text-12);
+  font-weight: var(--tkn-weight-medium);
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+}
+
+.dsvia-mobile-accessibility-btn {
+  background: transparent;
+  border: none;
+  color: var(--tkn-dark-gray);
+  cursor: pointer;
+  padding: var(--tkn-space-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── RESPONSIVO ── */
+@media (max-width: 1024px) {
+  .dsvia-row-top {
+    flex-wrap: wrap;
+    gap: var(--tkn-space-12);
+    padding: var(--tkn-space-12) var(--tkn-space-16);
+  }
+  .dsvia-search-box {
+    order: 3;
+    max-width: 100%;
+    width: 100%;
+    margin: 0;
+  }
+  .dsvia-row-bottom {
+    overflow-x: auto;
+    padding-bottom: var(--tkn-space-4);
+  }
+}
+
+@media (max-width: 768px) {
+  .dsvia-top-red-line {
+    height: 3px;
+    background: var(--tkn-accent);
+  }
+
+  .dsvia-row-top {
+    display: flex;
+    flex-direction: column;
+    padding: var(--tkn-space-8) var(--tkn-space-12) var(--tkn-space-4) var(--tkn-space-12);
+    gap: var(--tkn-space-8);
+    position: relative;
+  }
+
+  .dsvia-brand-block {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: var(--tkn-space-8);
+  }
+
+  .dsvia-mobile-hamburger-btn {
+    display: flex;
+  }
+
+  .dsvia-accessibility-btn.desktop-only {
+    display: none !important;
+  }
+
+  .dsvia-brand-logo img {
+    height: 18px;
+    width: auto;
+  }
+
+  .dsvia-actions-right {
+    position: absolute;
+    right: 12px;
+    top: 8px;
+    gap: var(--tkn-space-12);
+  }
+
+  .dsvia-account-user-text {
+    display: none;
+  }
+
+  .dsvia-account-capsule {
+    background: transparent;
+    padding: 0;
+  }
+
+  .dsvia-guest-popover { display: none !important; }
+
+  .dsvia-cep-trigger {
+    display: none;
+  }
+
+  .dsvia-search-box {
+    width: 100%;
+    order: 2;
+  }
+
+  .dsvia-search-input {
+    height: 38px;
+    font-size: var(--tkn-text-13);
+    border-radius: 4px;
+  }
+
+  .dsvia-mobile-subbar {
+    display: flex;
+  }
+
+  .dsvia-row-bottom {
+    display: none;
+  }
+}

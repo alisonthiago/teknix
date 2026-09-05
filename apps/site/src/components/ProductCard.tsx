@@ -1,7 +1,12 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { config } from '../config'
 import ProductImage from './ProductImage'
+import { useCompare } from '../context/CompareContext'
 import type { Product } from '../types/database'
+import { productPricing } from '../../../../packages/core/src/productCommerce'
+import { commerceSignals } from '../services/storefrontCommerce'
+import ProductSignals from './ProductSignals'
 import './ProductCard.css'
 
 interface ProductCardProps {
@@ -16,7 +21,17 @@ function formatPrice(price: number) {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const hasDiscount = Boolean(product.price != null && product.promo_price && product.promo_price < product.price)
+  const [hovered, setHovered] = useState(false)
+  const [now, setNow] = useState(Date.now)
+  useEffect(() => {
+    if (!product.commerce?.offerEnabled) return
+    const timer = window.setInterval(() => setNow(Date.now()), 1000)
+    return () => window.clearInterval(timer)
+  }, [product.commerce?.offerEnabled])
+  const pricing = productPricing(product.price, product.promo_price, product.commerce, now)
+  const hasDiscount = pricing.discount > 0
+  const alternate = product.images?.find(src => src !== product.image_url)
+  const { addToCompare, removeFromCompare, isInCompare } = useCompare()
 
   function openWhatsApp(e: React.MouseEvent) {
     e.preventDefault()
@@ -29,11 +44,31 @@ export default function ProductCard({ product }: ProductCardProps) {
     window.open(`${config.whatsapp.link}?text=${message}`, '_blank')
   }
 
+  function handleCompare(e: React.MouseEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+    if (isInCompare(product.id)) {
+      removeFromCompare(product.id)
+    } else {
+      addToCompare({
+        id: product.id,
+        name: product.name,
+        sku: product.sku || '',
+        slug: product.slug || '',
+        image_url: product.image_url || '',
+        price: product.price || 0,
+        promo_price: product.promo_price,
+        brand: product.brand,
+        category: product.category_id
+      })
+    }
+  }
+
   return (
     <Link to={`/produtos/${product.slug || product.id}`} className="product-card">
-      <div className="product-card-image">
+      <div className="product-card-image" onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
         {product.image_url ? (
-          <ProductImage src={product.image_url} alt={product.name} />
+          <ProductImage src={hovered && alternate ? alternate : product.image_url} alt={product.name} />
         ) : (
           <div className="product-card-placeholder">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" width="28" height="28">
@@ -43,11 +78,17 @@ export default function ProductCard({ product }: ProductCardProps) {
             </svg>
           </div>
         )}
-        {hasDiscount && product.price != null && (
-          <span className="product-card-discount">
-            -{Math.round(((product.price - (product.promo_price || 0)) / product.price) * 100)}%
-          </span>
-        )}
+        <ProductSignals overlay data={commerceSignals(product, now)} />
+        <button
+          className={`product-card-compare ${isInCompare(product.id) ? 'active' : ''}`}
+          onClick={handleCompare}
+          aria-label={isInCompare(product.id) ? 'Remover da comparação' : 'Adicionar à comparação'}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+        </button>
       </div>
 
       <div className="product-card-body">
@@ -57,15 +98,15 @@ export default function ProductCard({ product }: ProductCardProps) {
         <h3 className="product-card-name">{product.name}</h3>
         <div className="product-card-prices">
           {hasDiscount && product.price != null && (
-            <span className="price-old">{formatPrice(product.price)}</span>
+            <span className="price-old">{formatPrice(pricing.base)}</span>
           )}
           <span className="price-current">
-            {formatPrice((hasDiscount ? product.promo_price : product.price) || 0)}
+            {formatPrice(pricing.pix)}
           </span>
         </div>
-        {product.stock !== undefined && product.stock <= 5 && product.stock > 0 && (
-          <span className="product-card-stock">Últimas unidades</span>
-        )}
+        <small>No Pix{hasDiscount ? ` · ${pricing.discount}% OFF` : ''}</small>
+        {pricing.commerce.installments > 1 && <small>{pricing.commerce.installments}x de {formatPrice(pricing.installment)} sem juros</small>}
+        {pricing.commerce.freeShipping && <span className="product-free-shipping">Frete grátis</span>}
       </div>
 
       <button className="product-card-cta" onClick={openWhatsApp}>

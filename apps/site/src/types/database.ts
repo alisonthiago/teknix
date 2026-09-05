@@ -1,8 +1,12 @@
+import type { ProductCommerce } from '../../../../packages/core/src/productCommerce'
 export interface Product {
+  commerce?: ProductCommerce
+  manage_stock?: boolean
   id: string
   name: string
   sku?: string
   brand?: string
+  brand_logo?: string
   model?: string
   category?: string
   category_id?: string
@@ -21,10 +25,27 @@ export interface Product {
   width?: number
   length?: number
   ean?: string
+  video_url?: string
   presentation_page_id?: string
   user_id?: string
   created_at?: string
   updated_at?: string
+
+  // Campos vindos de product_store_metadata (loja própria)
+  description?: string
+  short_description?: string
+  specifications?: string[]
+  store_meta?: {
+    commercial_settings?: ProductCommerce
+    slug?: string
+    published?: boolean
+    featured?: boolean
+    short_description?: string
+    store_description?: string
+    specifications?: string[]
+    segment_id?: string
+    category_id?: string
+  }
 }
 
 export interface Category {

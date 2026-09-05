@@ -1,0 +1,164 @@
+/* ── Badges e Selos 1:1 Mercado Livre ── */
+.product-signals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--tkn-space-8);
+  align-items: center;
+  margin: var(--tkn-space-8) 0;
+}
+
+.product-signals-demo {
+  color: #657064;
+  font-size: var(--tkn-text-12);
+}
+
+.product-signals > .product-signals-demo {
+  flex-basis: 100%;
+}
+
+.cb-card-body > .product-signals-demo {
+  margin-bottom: var(--tkn-space-8);
+}
+
+/* ── OFERTA RELÂMPAGO com Countdown (Amarelo Degradê com Laranja 1:1 ML) ── */
+.offer-countdown {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--tkn-space-8);
+  background: linear-gradient(90deg, #ff9900 0%, #ffbb00 45%, #ffcc00 100%);
+  color: #111111;
+  padding: 3px var(--tkn-space-8);
+  border-radius: 3px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  white-space: nowrap;
+}
+
+.offer-countdown-title {
+  font-style: italic;
+  font-weight: var(--tkn-weight-medium);
+  font-size: var(--tkn-text-12);
+  color: #111111;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+}
+
+.offer-countdown-boxes {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.offer-countdown-box {
+  background: rgba(255, 248, 225, 0.95);
+  color: #111111;
+  font-weight: var(--tkn-weight-medium);
+  font-size: var(--tkn-text-12);
+  padding: 1.5px var(--tkn-space-4);
+  border-radius: 3px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.offer-countdown-sep {
+  color: #111111;
+  font-weight: var(--tkn-weight-medium);
+  font-size: var(--tkn-text-12);
+  margin: 0 1px;
+}
+
+/* ── Badges Gerais do Mercado Livre ── */
+.product-signal {
+  border-radius: 3px;
+  padding: 3px var(--tkn-space-8);
+  font-size: var(--tkn-text-12);
+  font-weight: var(--tkn-weight-semibold);
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--tkn-space-4);
+}
+
+/* MAIS VENDIDO (Laranja Oficial 1:1 ML) */
+.product-signal.bestseller {
+  background: #f97316;
+  color: #ffffff;
+}
+
+/* OFERTA IMPERDÍVEL (Azul Oficial 1:1 ML) */
+.product-signal.special {
+  background: #1e6dff;
+  color: #ffffff;
+}
+
+.product-signal-icon {
+  flex-shrink: 0;
+}
+
+/* OFERTA DO DIA (Verde Esmeralda TEKNIX) */
+.product-signal.offer {
+  background: #059669;
+  color: #ffffff;
+}
+
+.product-signal.last-unit {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+.cb-card-img-wrap {
+  position: relative;
+}
+
+.product-free-shipping {
+  display: inline-block;
+  color: #059669;
+  background: #ecfdf5;
+  border: 1px solid #d1fae5;
+  padding: 3px var(--tkn-space-8);
+  border-radius: 4px;
+  font-size: var(--tkn-text-12);
+  font-weight: var(--tkn-weight-medium);
+}
+
+.image-signals {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  right: auto;
+  margin: 0;
+  gap: var(--tkn-space-4);
+  align-items: flex-start;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.image-signals .product-signal {
+  padding: 3px var(--tkn-space-8);
+  font-size: var(--tkn-text-12);
+}
+.rating-summary { display:inline-flex; flex-wrap:wrap; gap: var(--tkn-space-4); align-items:center; font-size: var(--tkn-text-12); color:#555; text-decoration:none; }
+.rating-summary > span,.reviews-average > span,.review-comment-meta > span { color:#df7c0b; }
+.product-reviews { padding-top: var(--tkn-space-48)!important; padding-bottom: var(--tkn-space-48)!important; scroll-margin-top:120px; }
+.product-reviews h2 { font-size: var(--tkn-text-24); margin: 0 0 var(--tkn-space-12); }
+.reviews-demo-note { font-size: var(--tkn-text-12); color:#657064; margin-bottom: var(--tkn-space-24); }
+.reviews-layout { display:grid; grid-template-columns:minmax(220px,1fr) 2fr; gap: var(--tkn-space-48); }
+.reviews-average { font-size: var(--tkn-text-36); }.reviews-overview p { color:#666; font-size: var(--tkn-text-12); }
+.review-distribution { display:flex; align-items:center; gap: var(--tkn-space-12); margin: var(--tkn-space-12) 0; font-size: var(--tkn-text-12); }
+.review-distribution progress { flex:1; min-width:0; height:7px; accent-color:#80ac00; }
+.review-distribution progress { appearance:none; border:0; border-radius:8px; overflow:hidden; background:#e9ece5; }
+.review-distribution progress::-webkit-progress-bar { background:#e9ece5; border-radius:8px; }
+.review-distribution progress::-webkit-progress-value { background:#80ac00; border-radius:8px; }
+.review-distribution progress::-moz-progress-bar { background:#80ac00; border-radius:8px; }
+.review-distribution > span { width:36px; }
+.review-recommendation { background:#f5f9ec; border-radius:8px; padding: var(--tkn-space-16); margin-top: var(--tkn-space-24); display:flex; flex-direction:column; gap: var(--tkn-space-4); font-size: var(--tkn-text-12); }
+.review-recommendation strong { font-size: var(--tkn-text-24); }
+.reviews-sort { display:flex; align-items:center; justify-content:flex-end; gap: var(--tkn-space-12); font-size: var(--tkn-text-12); }
+.reviews-sort select { padding: var(--tkn-space-8); border:1px solid #ddd; border-radius:6px; background:white; }
+.review-comment { padding: var(--tkn-space-24) 0; border-bottom:1px solid #eee; font-size: var(--tkn-text-13); }
+.review-comment-meta { display:flex; gap: var(--tkn-space-12); align-items:center; margin: var(--tkn-space-8) 0; }.review-comment-meta time { font-size: var(--tkn-text-12); color:#777; }
+.review-comment p { line-height:1.6; color:#555; }
+@media(max-width:768px) { .reviews-layout { grid-template-columns:1fr; gap: var(--tkn-space-24); } .product-reviews h2 { font-size: var(--tkn-text-20); } }

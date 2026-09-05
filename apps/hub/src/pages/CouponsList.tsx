@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Plus, Search, SlidersHorizontal, ArrowUpDown, Trash2 } from 'lucide-react'
+import { supabase } from '../lib/supabase'
 import './Discounts.css'
 
 interface Coupon {
@@ -14,38 +15,8 @@ interface Coupon {
 }
 
 export default function CouponsList() {
-  const [coupons, setCoupons] = useState<Coupon[]>([
-    {
-      id: '1',
-      code: 'PRIMEIRACOMPRA',
-      discount: '10% OFF',
-      freeShipping: false,
-      validity: 'Indeterminado',
-      uses: 48,
-      limit: '1 por cliente',
-      status: 'active'
-    },
-    {
-      id: '2',
-      code: 'TEKNIX100',
-      discount: 'R$ 100,00',
-      freeShipping: true,
-      validity: 'Até 31/12/2026',
-      uses: 12,
-      limit: 'Compras > R$ 500',
-      status: 'active'
-    },
-    {
-      id: '3',
-      code: 'BLACKFRIDAY',
-      discount: '25% OFF',
-      freeShipping: true,
-      validity: 'Expirado',
-      uses: 350,
-      limit: 'Sem limite',
-      status: 'expired'
-    }
-  ])
+  const [coupons, setCoupons] = useState<Coupon[]>([])
+  const [notice, setNotice] = useState('')
 
   const [search, setSearch] = useState('')
   const [showModal, setShowModal] = useState(false)
@@ -57,24 +28,26 @@ export default function CouponsList() {
     minAmount: 0
   })
 
-  function handleCreateCoupon() {
+  const formatCoupon = (coupon: any): Coupon => ({
+    id: coupon.id, code: coupon.code, discount: coupon.discount_type === 'percentage' ? `${coupon.discount_value}% OFF` : `R$ ${Number(coupon.discount_value).toFixed(2).replace('.', ',')}`,
+    freeShipping: Boolean(coupon.free_shipping), validity: coupon.ends_at ? `Até ${new Date(coupon.ends_at).toLocaleDateString('pt-BR')}` : 'Indeterminado', uses: Number(coupon.used_count || 0),
+    limit: coupon.min_order_amount > 0 ? `Compras > R$ ${coupon.min_order_amount}` : 'Sem limite', status: coupon.active ? 'active' : 'expired'
+  })
+
+  useEffect(() => { supabase.from('coupons').select('*').order('created_at', { ascending: false }).then(({ data, error }) => { if (error) setNotice('Aplique a migração de cupons para ativar esta área.'); else setCoupons((data || []).map(formatCoupon)) }) }, [])
+
+  async function handleCreateCoupon() {
     if (!newCoupon.code.trim()) return
-    const coupon: Coupon = {
-      id: Date.now().toString(),
-      code: newCoupon.code.toUpperCase().replace(/\s+/g, ''),
-      discount: newCoupon.discountType === 'percentage' ? `${newCoupon.discountValue}% OFF` : `R$ ${newCoupon.discountValue},00`,
-      freeShipping: newCoupon.freeShipping,
-      validity: 'Indeterminado',
-      uses: 0,
-      limit: newCoupon.minAmount > 0 ? `Compras > R$ ${newCoupon.minAmount}` : 'Sem limite',
-      status: 'active'
-    }
-    setCoupons([coupon, ...coupons])
+    const { data, error } = await supabase.from('coupons').insert({ code: newCoupon.code.toUpperCase().replace(/\s+/g, ''), discount_type: newCoupon.discountType, discount_value: newCoupon.discountValue, free_shipping: newCoupon.freeShipping, min_order_amount: newCoupon.minAmount, active: true }).select().single()
+    if (error || !data) { setNotice('Não foi possível salvar o cupom.'); return }
+    setCoupons([formatCoupon(data), ...coupons])
     setShowModal(false)
     setNewCoupon({ code: '', discountType: 'percentage', discountValue: 10, freeShipping: false, minAmount: 0 })
   }
 
-  function handleDeleteCoupon(id: string) {
+  async function handleDeleteCoupon(id: string) {
+    const { error } = await supabase.from('coupons').update({ active: false, updated_at: new Date().toISOString() }).eq('id', id)
+    if (error) { setNotice('Não foi possível remover o cupom.'); return }
     setCoupons(coupons.filter(c => c.id !== id))
   }
 
@@ -113,6 +86,7 @@ export default function CouponsList() {
           <button className="filter-btn-pill"><SlidersHorizontal size={13} /> Filtrar</button>
           <button className="filter-btn-pill"><ArrowUpDown size={13} /> A-Z</button>
         </div>
+        {notice && <p role="status">{notice}</p>}
 
         {/* Table */}
         <div className="discounts-card-table">

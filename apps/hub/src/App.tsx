@@ -1,3 +1,4 @@
+import PageEditor from './pages/PageEditor'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './hooks/useAuth'
 import HubLayout from './components/HubLayout'
@@ -5,8 +6,7 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import ProductsList from './pages/ProductsList'
 import ProductForm from './pages/ProductForm'
-import PagesList from './pages/PagesList'
-import PageEditor from './pages/PageEditor'
+import ProductDetails from './pages/ProductDetails'
 import OrdersList from './pages/OrdersList'
 import OrderDetails from './pages/OrderDetails'
 import ShippingSettings from './pages/ShippingSettings'
@@ -27,12 +27,16 @@ import MarketingHub from './pages/MarketingHub'
 import WhatsAppHub from './pages/WhatsAppHub'
 import MercadoLivreHub from './pages/MercadoLivreHub'
 import MarketplaceChannelHub from './pages/MarketplaceChannelHub'
-import MediaLibrary from './pages/MediaLibrary'
-import ThemesList from './pages/ThemesList'
-import ThemeEditor from './pages/ThemeEditor'
 import IntegrationsHub from './pages/IntegrationsHub'
-import ThemeBuilderPage from './pages/ThemeBuilderPage'
 import PlaceholderPage from './pages/PlaceholderPage'
+import PagesList from './pages/PagesList'
+import BlogList from './pages/BlogList'
+import BlogEditor from './pages/BlogEditor'
+import BlogAnalytics from './pages/BlogAnalytics'
+import BlogSeo from './pages/BlogSeo'
+import AdsList from './pages/AdsList'
+import AdsForm from './pages/AdsForm'
+import AdsAnalytics from './pages/AdsAnalytics'
 
 import LoadingScreen from './components/ui/LoadingScreen'
 
@@ -52,7 +56,6 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<Navigate to="/hub" />} />
-          <Route path="/paginas" element={<Navigate to="/hub/paginas" />} />
           <Route path="/produtos" element={<Navigate to="/hub/produtos" />} />
           <Route path="/pedidos" element={<Navigate to="/hub/pedidos" />} />
           
@@ -65,6 +68,7 @@ function App() {
             <Route path="/hub/produtos" element={<ProductsList />} />
             <Route path="/hub/produtos/novo" element={<ProductForm />} />
             <Route path="/hub/produtos/editar/:id" element={<ProductForm />} />
+            <Route path="/hub/produtos/:id" element={<ProductDetails />} />
             <Route path="/hub/inventario" element={<ProductsList />} />
             <Route path="/hub/categorias" element={<CategoriesList />} />
             <Route path="/hub/tabelas-de-precos" element={<PriceTables />} />
@@ -91,21 +95,21 @@ function App() {
             <Route path="/hub/integracoes" element={<IntegrationsHub />} />
             <Route path="/hub/configuracoes" element={<SettingsHub />} />
             <Route path="/hub/estatisticas" element={<StatsOverview />} />
+            <Route path="/hub/editor/:kind/:id?" element={<PageEditor />} />
+            <Route path="/editor/page/:id" element={<PageEditor />} />
+            <Route path="/hub/paginas/editar/:id" element={<PageEditor />} />
             <Route path="/hub/paginas" element={<PagesList />} />
-            <Route path="/hub/temas" element={<ThemesList />} />
-            <Route path="/hub/temas/novo" element={<ThemeEditor />} />
-            <Route path="/hub/temas/editar/:id" element={<ThemeEditor />} />
-            <Route path="/hub/media" element={<MediaLibrary />} />
+            <Route path="/hub/blog" element={<BlogList />} />
+            <Route path="/hub/blog/add" element={<BlogEditor />} />
+            <Route path="/hub/blog/editar/:id" element={<BlogEditor />} />
+            <Route path="/hub/blog/analytics" element={<BlogAnalytics />} />
+            <Route path="/hub/blog/seo" element={<BlogSeo />} />
+            <Route path="/hub/ads" element={<AdsList />} />
+            <Route path="/hub/ads/add" element={<AdsForm />} />
+            <Route path="/hub/ads/edit/:id" element={<AdsForm />} />
+            <Route path="/hub/ads/analytics" element={<AdsAnalytics />} />
+            <Route path="/hub/ads/analitcs" element={<Navigate to="/hub/ads/analytics" replace />} />
           </Route>
-        
-        {/* Rota isolada do Construtor de Temas (Theme Builder Full Screen) */}
-        <Route element={<PrivateRoute><ThemeBuilderPage /></PrivateRoute>} path="/hub/theme-builder" />
-        <Route element={<PrivateRoute><ThemeBuilderPage /></PrivateRoute>} path="/editor/theme-builder" />
-
-        {/* Rota isolada do Editor de Páginas (Full Screen) */}
-        <Route element={<PrivateRoute><PageEditor /></PrivateRoute>} path="/editor/page/:id" />
-        <Route element={<PrivateRoute><PageEditor /></PrivateRoute>} path="/hub/paginas/editar/:id" />
-        <Route element={<PrivateRoute><PageEditor /></PrivateRoute>} path="/hub/produtos/:id/apresentacao" />
         
         </Routes>
       </BrowserRouter>

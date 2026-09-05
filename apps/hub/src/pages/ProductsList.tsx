@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { createPage } from '../services/pageBuilder'
 import type { Product } from '../types/database'
 import {
   Search,
@@ -13,9 +14,18 @@ import {
   Trash2,
   GripVertical,
   ExternalLink,
-  ListFilter
+  ListFilter,
+  LayoutTemplate,
+  Eye,
+  MoreVertical,
+  Edit,
+  Package
 } from 'lucide-react'
 import './ProductsList.css'
+
+function formatMoney(value: number) {
+  return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+}
 
 export default function ProductsList() {
   const navigate = useNavigate()
@@ -24,6 +34,15 @@ export default function ProductsList() {
   const [search, setSearch] = useState('')
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [inlinePrices, setInlinePrices] = useState<Record<string, { price: string; promo: string }>>({})
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null)
+
+  useEffect(() => {
+    function handleClickOutside() {
+      setOpenMenuId(null)
+    }
+    window.addEventListener('click', handleClickOutside)
+    return () => window.removeEventListener('click', handleClickOutside)
+  }, [])
 
   useEffect(() => {
     fetchProducts()
@@ -33,7 +52,7 @@ export default function ProductsList() {
     try {
       const { data, error } = await supabase
         .from('products')
-        .select('*')
+        .select('*, store_meta:product_store_metadata(*)')
         .order('created_at', { ascending: false })
 
       if (!error && data && data.length > 0) {
@@ -116,6 +135,42 @@ export default function ProductsList() {
     }
   }
 
+  async function toggleProductPublish(productId: string, willPublish: boolean) {
+    try {
+      const { data: existing } = await supabase
+        .from('product_store_metadata')
+        .select('id')
+        .eq('product_id', productId)
+        .maybeSingle()
+
+      if (existing?.id) {
+        await supabase
+          .from('product_store_metadata')
+          .update({ published: willPublish, updated_at: new Date().toISOString() })
+          .eq('id', existing.id)
+      } else {
+        await supabase
+          .from('product_store_metadata')
+          .insert({
+            product_id: productId,
+            published: willPublish,
+            updated_at: new Date().toISOString()
+          })
+      }
+
+      setProducts(prev => prev.map(p => {
+        if (p.id !== productId) return p
+        const currentMeta = Array.isArray((p as any).store_meta) ? (p as any).store_meta[0] : (p as any).store_meta
+        return {
+          ...p,
+          store_meta: { ...(currentMeta || {}), published: willPublish }
+        }
+      }))
+    } catch (e) {
+      console.error('Erro ao alternar publicação:', e)
+    }
+  }
+
   async function handleDelete(id: string) {
     if (confirm('Deseja realmente excluir este produto?')) {
       try {
@@ -155,6 +210,72 @@ export default function ProductsList() {
         { ...product, id: Date.now().toString(), name: duplicatedName },
         ...products
       ])
+    }
+  }
+
+  const [editingPageId, setEditingPageId] = useState<string | null>(null)
+
+  async function handleEditProductPage(product: Product) {
+    setEditingPageId(product.id)
+    try {
+      // 1. Verifica se o produto já tem página vinculada
+      const { data: productRow } = await supabase
+        .from('products')
+        .select('id, slug, name, presentation_page_id')
+        .eq('id', product.id)
+        .maybeSingle()
+
+      if (productRow?.presentation_page_id) {
+        const { data: linkedPage } = await supabase
+          .from('pages')
+          .select('id')
+          .eq('id', productRow.presentation_page_id)
+          .maybeSingle()
+
+        if (linkedPage?.id) {
+          window.open(`/editor/page/${linkedPage.id}`, '_blank', 'noopener,noreferrer')
+          setEditingPageId(null)
+          return
+        }
+      }
+
+      // 2. Busca página existente pelo slug do produto
+      const productSlug = (productRow?.slug || product.slug || `produto-${product.id}`).replace(/^\/+/, '')
+      const targetSlug = `produto/${productSlug}`
+
+      const { data: existingPage } = await supabase
+        .from('pages')
+        .select('id')
+        .or(`slug.eq.${targetSlug},slug.eq./${targetSlug}`)
+        .maybeSingle()
+
+      if (existingPage?.id) {
+        // Vincula a página encontrada ao produto
+        await supabase.from('products').update({ presentation_page_id: existingPage.id }).eq('id', product.id)
+        window.open(`/editor/page/${existingPage.id}`, '_blank', 'noopener,noreferrer')
+        setEditingPageId(null)
+        return
+      }
+
+      // 3. Cria nova página de produto (template padrão)
+      const newPage = await createPage({
+        title: (productRow?.name || product.name) + ' — Página do Produto',
+        slug: targetSlug,
+        type: 'product',
+        status: 'published',
+        seo_title: `${productRow?.name || product.name} — TEKNIX`,
+        seo_description: ''
+      })
+
+      // 4. Vincula ao produto via presentation_page_id
+      await supabase.from('products').update({ presentation_page_id: newPage.id }).eq('id', product.id)
+
+      window.open(`/editor/page/${newPage.id}`, '_blank', 'noopener,noreferrer')
+    } catch (e) {
+      console.error('Erro ao abrir editor do produto:', e)
+      alert('Não foi possível abrir o editor. Tente novamente.')
+    } finally {
+      setEditingPageId(null)
     }
   }
 
@@ -242,6 +363,7 @@ export default function ProductsList() {
             <div>Estoque</div>
             <div>Preço</div>
             <div>Promocional</div>
+            <div>Publicação (Loja)</div>
             <div>Ações</div>
           </div>
 
@@ -255,8 +377,13 @@ export default function ProductsList() {
             </div>
           ) : (
             filteredProducts.map(product => {
-              const currentPrices = inlinePrices[product.id] || { price: product.price?.toString() || '0', promo: product.promo_price?.toString() || '' }
-              const imgUrl = (product.images && product.images[0]) || (product as any).main_image || ''
+              const storeMeta = Array.isArray((product as any).store_meta) ? (product as any).store_meta[0] : (product as any).store_meta
+              const rawPrice = storeMeta?.sale_price ?? (product as any).sell_price ?? product.price ?? 0
+              const salePrice = Number(rawPrice)
+              const rawPromo = storeMeta?.promotional_price ?? product.promo_price ?? null
+              const promoPrice = (rawPromo && Number(rawPromo) > 0) ? Number(rawPromo) : null
+              const imgUrl = (product.images && product.images[0]) || product.image_url || (product as any).main_image || ''
+              const isPub = Boolean(storeMeta?.published ?? (product as any).published)
 
               return (
                 <div key={product.id} className="products-table-row">
@@ -271,11 +398,25 @@ export default function ProductsList() {
                   <div className="product-cell-main">
                     <GripVertical size={16} className="product-drag-dots" />
                     {imgUrl ? (
-                      <img src={imgUrl} alt={product.name} className="product-thumb" />
-                    ) : (
-                      <div className="product-thumb">SEM FOTO</div>
-                    )}
-                    <Link to={`/hub/produtos/editar/${product.id}`} className="product-name-link">
+                      <img
+                        src={imgUrl}
+                        alt={product.name}
+                        className="product-thumb"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none'
+                          const next = e.currentTarget.nextElementSibling as HTMLElement
+                          if (next) next.style.display = 'flex'
+                        }}
+                      />
+                    ) : null}
+                    <div
+                      className="product-thumb-placeholder"
+                      style={{ display: imgUrl ? 'none' : 'flex' }}
+                      title="Sem foto cadastrada"
+                    >
+                      <Package size={18} color="#9ca3af" />
+                    </div>
+                    <Link to={`/hub/produtos/${product.id}`} className="product-name-link" title="Ver visão geral do produto no HUB">
                       {product.name}
                     </Link>
                   </div>
@@ -285,52 +426,128 @@ export default function ProductsList() {
                   </div>
 
                   <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <span style={{ fontSize: '0.8rem', color: '#6b7280', fontWeight: 700 }}>R$</span>
-                      <input
-                        type="text"
-                        className="inline-price-input"
-                        value={currentPrices.price}
-                        onChange={(e) => handleUpdateInlinePrice(product.id, 'price', e.target.value)}
-                      />
-                    </div>
+                    <span className="product-price-text">
+                      {salePrice > 0 ? formatMoney(salePrice) : 'R$ 0,00'}
+                    </span>
                   </div>
 
                   <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <span style={{ fontSize: '0.8rem', color: '#6b7280', fontWeight: 700 }}>R$</span>
-                      <input
-                        type="text"
-                        className="inline-price-input"
-                        placeholder="—"
-                        value={currentPrices.promo}
-                        onChange={(e) => handleUpdateInlinePrice(product.id, 'promo', e.target.value)}
-                      />
-                    </div>
+                    <span className={promoPrice ? "product-promo-text" : "product-no-promo-text"}>
+                      {promoPrice ? formatMoney(promoPrice) : '—'}
+                    </span>
+                  </div>
+
+                  <div>
+                    <button
+                      type="button"
+                      className={`product-status-badge ${isPub ? 'published' : 'draft'}`}
+                      onClick={() => toggleProductPublish(product.id, !isPub)}
+                      title={isPub ? "Publicado no site. Clique para despublicar da vitrine pública." : "Rascunho. Clique para publicar na vitrine oficial da loja."}
+                    >
+                      <span className="status-badge-dot" />
+                      {isPub ? 'Publicado' : 'Rascunho'}
+                    </button>
                   </div>
 
                   <div className="product-actions-cell">
-                    <button
-                      className="product-action-circle"
-                      title="Compartilhar / Canais"
-                      onClick={() => alert(`Link público: https://teknix.com.br/produtos/${product.slug}`)}
-                    >
-                      <Share2 size={14} />
-                    </button>
-                    <button
-                      className="product-action-circle"
-                      title="Duplicar produto"
-                      onClick={() => handleDuplicate(product)}
-                    >
-                      <Copy size={14} />
-                    </button>
-                    <button
-                      className="product-action-circle delete"
-                      title="Excluir produto"
-                      onClick={() => handleDelete(product.id)}
-                    >
-                      <Trash2 size={14} />
-                    </button>
+                    <div className="product-dropdown-wrapper">
+                      <button
+                        type="button"
+                        className={`product-dots-btn ${openMenuId === product.id ? 'active' : ''}`}
+                        title="Mais opções"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setOpenMenuId(openMenuId === product.id ? null : product.id)
+                        }}
+                      >
+                        <MoreVertical size={16} />
+                      </button>
+
+                      {openMenuId === product.id && (
+                        <div className="product-action-dropdown-menu" onClick={(e) => e.stopPropagation()}>
+                          <Link
+                            to={`/hub/produtos/${product.id}`}
+                            className="product-dropdown-item"
+                            onClick={() => setOpenMenuId(null)}
+                          >
+                            <Package size={15} color="#4b5563" />
+                            <span>Ver Visão Geral no HUB</span>
+                          </Link>
+
+                          <Link
+                            to={`/hub/produtos/editar/${product.id}`}
+                            className="product-dropdown-item"
+                            onClick={() => setOpenMenuId(null)}
+                          >
+                            <Edit size={15} color="#2563eb" />
+                            <span>Editar Cadastro</span>
+                          </Link>
+
+                          <button
+                            type="button"
+                            className="product-dropdown-item"
+                            disabled={editingPageId === product.id}
+                            onClick={() => {
+                              setOpenMenuId(null)
+                              handleEditProductPage(product)
+                            }}
+                          >
+                            <LayoutTemplate size={15} color="#6366f1" />
+                            <span>{editingPageId === product.id ? 'Abrindo...' : 'Editar Página (Page Builder)'}</span>
+                          </button>
+
+                          <a
+                            className="product-dropdown-item"
+                            href={`http://localhost:5173/produtos/${product.slug || product.id}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            onClick={() => setOpenMenuId(null)}
+                          >
+                            <Eye size={15} color="#16a34a" />
+                            <span>Ver na Loja Pública</span>
+                          </a>
+
+                          <button
+                            type="button"
+                            className="product-dropdown-item"
+                            onClick={() => {
+                              setOpenMenuId(null)
+                              navigator.clipboard?.writeText(`http://localhost:5173/produtos/${product.slug || product.id}`)
+                              alert('Link público do produto copiado!')
+                            }}
+                          >
+                            <Share2 size={15} color="#8b5cf6" />
+                            <span>Copiar Link / Compartilhar</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            className="product-dropdown-item"
+                            onClick={() => {
+                              setOpenMenuId(null)
+                              handleDuplicate(product)
+                            }}
+                          >
+                            <Copy size={15} color="#6b7280" />
+                            <span>Duplicar Produto</span>
+                          </button>
+
+                          <div className="product-dropdown-divider" />
+
+                          <button
+                            type="button"
+                            className="product-dropdown-item delete"
+                            onClick={() => {
+                              setOpenMenuId(null)
+                              handleDelete(product.id)
+                            }}
+                          >
+                            <Trash2 size={15} color="#dc2626" />
+                            <span>Excluir Produto</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               )

@@ -169,7 +169,7 @@ export async function fetchHomeData(): Promise<HomeData> {
   try {
     const [productsResult, categoriesResult] = await Promise.allSettled([
       getProducts({ limit: 12 }),
-      supabase.from('store_categories').select('*').order('display_order', { ascending: true }),
+      supabase.from('categories').select('*').eq('is_active', true).order('sort_order', { ascending: true }),
     ])
 
     const allProducts: Product[] = productsResult.status === 'fulfilled' && Array.isArray(productsResult.value) && productsResult.value.length > 0

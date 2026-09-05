@@ -1,283 +1,101 @@
-/* ==========================================================================
-   TEKNIX SITE — LOGIN & SIGN-IN OFICIAL (1:1 PADRÃO APPLE STORE SIGN-IN)
-   Referência: https://secure8.store.apple.com/br/shop/signIn
-   Layout: 2 Colunas com Step 1 (E-mail + Botão Continuar com a senha) e
-   Step 2 (Senha agrupada com botão circular ➔) + Coluna Convidado
-   ========================================================================== */
-
+import { Editable } from '../components/page-widgets/PageWidgets'
 import React, { useState } from 'react'
+import { ArrowLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
-import { ArrowRight, User } from 'lucide-react'
 import './Login.css'
 
-export default function Login({ onGuestContinue, customTitle }: { onGuestContinue?: () => void; customTitle?: string }) {
+export default function Login({ customTitle }: { onGuestContinue?: () => void; customTitle?: string }) {
   const { signIn } = useAuth()
   const navigate = useNavigate()
-
-  const [step, setStep] = useState<'email' | 'password'>('email')
-  const [email, setEmail] = useState('alisonsilvathiago@gmail.com')
+  const [step, setStep] = useState<'identify' | 'password'>('identify')
+  const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('')
-  const [rememberMe, setRememberMe] = useState(false)
   const [loading, setLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
-  const [resetSent, setResetSent] = useState(false)
 
-  // Step 1: Avançar para senha
-  const handleProceedToPassword = (e?: React.FormEvent) => {
-    if (e) e.preventDefault()
+  const email = identifier.trim().toLowerCase()
+  const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+  const digits = identifier.replace(/\D/g, '')
+  const isDocument = digits.length === 11 || digits.length === 14
+
+  function handleIdentify(event: React.FormEvent) {
+    event.preventDefault()
     setErrorMsg(null)
-
-    if (!email.trim() || !email.includes('@')) {
-      setErrorMsg('Insira um e-mail ou número de telefone válido.')
-      return
-    }
-
-    setStep('password')
+    if (isEmail) return setStep('password')
+    if (isDocument) return navigate(`/cadastro?document=${encodeURIComponent(digits)}`)
+    setErrorMsg('Informe um e-mail válido, CPF ou CNPJ.')
   }
 
-  // Step 2: Submeter autenticação
-  const handlePasswordSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  async function handleSignIn(event: React.FormEvent) {
+    event.preventDefault()
+    if (!password) return setErrorMsg('Informe sua senha para continuar.')
     setErrorMsg(null)
-
-    if (!password) {
-      setErrorMsg('Insira sua senha.')
-      return
-    }
-
     setLoading(true)
     try {
       const result = await signIn(email, password)
-      if (result?.error) {
-        if (email.includes('alison') || email.includes('demo') || email.includes('teste')) {
-          navigate('/conta')
-        } else {
-          setErrorMsg(result.error || 'Sua senha está incorreta. Tente novamente.')
-        }
-      } else {
-        navigate('/conta')
+      if (result.error) {
+        setErrorMsg('Não encontramos uma conta com esses dados. Você pode criar sua conta agora.')
+        return
       }
+      navigate('/conta')
     } catch {
-      if (email.includes('alison') || email.includes('demo') || email.includes('teste')) {
-        navigate('/conta')
-      } else {
-        setErrorMsg('Sua senha está incorreta. Tente novamente.')
-      }
+      setErrorMsg('Não foi possível entrar. Confira seus dados e tente novamente.')
     } finally {
       setLoading(false)
     }
   }
 
-  // Esqueci a senha
-  const handleForgotPassword = async () => {
-    if (!email) {
-      setErrorMsg('Informe seu e-mail para receber as instruções de recuperação.')
-      setStep('email')
-      return
-    }
-
-    setLoading(true)
-    try {
-      await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/password`
-      })
-      setResetSent(true)
-    } catch {
-      setResetSent(true)
-    } finally {
-      setLoading(false)
-    }
+  async function handleGoogleSignIn() {
+    setErrorMsg(null)
+    const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: `${window.location.origin}/conta` } })
+    if (error) setErrorMsg('O login com Google não está disponível no momento.')
   }
 
   return (
-    <div className="apple-signin-page">
-      <div className="as-l-container apple-signin-container">
-        
-        {/* Título Principal 1:1 Apple */}
-        <div className="apple-signin-header-wrap">
-          <h1 className="apple-signin-main-title">
-            {customTitle || 'Inicie sessão para finalizar a compra com rapidez.'}
-          </h1>
-        </div>
-
-        {/* Grid 2 Colunas */}
-        <div className="apple-signin-grid">
-          
-          {/* ════════════════════════════════════════════════════════
-             COLUNA ESQUERDA: INICIAR SESSÃO CONTA APPLE
-             ════════════════════════════════════════════════════════ */}
-          <div className="apple-signin-col-left">
-            <h2 className="apple-signin-section-heading">
-              Finalizar a compra usando sua<br />Conta Apple
-            </h2>
-
-            {errorMsg && (
-              <div className="apple-signin-error">
-                {errorMsg}
+    <main className="identification-page">
+      <header className="identification-topbar">
+        <button type="button" className="identification-brand" onClick={() => navigate('/')} aria-label="Ir para a página inicial">
+          <Editable as="img" widgetId="login-1" src="/teknix-logo.svg" alt="TEKNIX" />
+        </button>
+      </header>
+      <div className="identification-content">
+        <button type="button" className="identification-back" onClick={() => step === 'password' ? setStep('identify') : navigate(-1)}>
+          <ArrowLeft size={16} aria-hidden="true" /> Voltar
+        </button>
+        <Editable content={{}} as="h1" widgetId="login-2">{customTitle || 'Identificação'}</Editable>
+        <Editable content={{}} as="section" widgetId="login-3" className="identification-card" aria-labelledby="identification-form-title">
+          <Editable content={{}} as="h2" widgetId="login-4" id="identification-form-title">{step === 'identify' ? 'Entre ou cadastre-se' : 'Digite sua senha'}</Editable>
+          <Editable content={{}} as="p" widgetId="login-5">{step === 'identify' ? 'Para começar, digite seu CPF, CNPJ ou e-mail no campo abaixo.' : `Entre com a senha da conta ${email}.`}</Editable>
+          {errorMsg && <div className="identification-message" role="alert">{errorMsg}</div>}
+          {step === 'identify' ? (
+            <form onSubmit={handleIdentify}>
+              <label htmlFor="identifier">CPF, CNPJ ou e-mail</label>
+              <input id="identifier" value={identifier} onChange={(event) => setIdentifier(event.target.value)} placeholder="Digite seu CPF, CNPJ ou e-mail" autoComplete="username" autoFocus />
+              <small>Exemplo: 123.456.789-00 ou nome@exemplo.com</small>
+              <button className="identification-continue" type="submit" disabled={!identifier.trim()}>Continuar</button>
+            </form>
+          ) : (
+            <form onSubmit={handleSignIn}>
+              <label htmlFor="password">Senha</label>
+              <input id="password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" autoFocus />
+              <button className="identification-continue" type="submit" disabled={!password || loading}>{loading ? 'Entrando...' : 'Entrar'}</button>
+              <div className="identification-login-actions">
+                <button type="button" className="identification-text-link" onClick={() => navigate('/password')}>Esqueceu a senha?</button>
+                {errorMsg && <button type="button" className="identification-text-link" onClick={() => navigate(`/cadastro?email=${encodeURIComponent(email)}`)}>Criar uma conta</button>}
               </div>
-            )}
-
-            {resetSent && (
-              <div className="apple-signin-success">
-                Enviamos as instruções de redefinição para <strong>{email}</strong>.
-              </div>
-            )}
-
-            {step === 'email' ? (
-              /* ETAPA 1: DIGITAR E-MAIL */
-              <form onSubmit={handleProceedToPassword} className="apple-signin-form">
-                <div className="form-textbox apple-input-highlight">
-                  <label className="form-textbox-label">E-mail ou número de telefone</label>
-                  <input
-                    type="email"
-                    className="form-textbox-input"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    required
-                    autoFocus
-                  />
-                </div>
-
-                <div className="apple-signin-buttons-row">
-                  <button
-                    type="submit"
-                    className="apple-pill-btn"
-                  >
-                    Continuar com a senha
-                  </button>
-
-                  <div className="passkey-btn-wrap">
-                    <button
-                      type="button"
-                      className="apple-pill-btn passkey"
-                      onClick={() => handleProceedToPassword()}
-                    >
-                      <User size={15} style={{ display: 'inline', marginRight: '6px' }} />
-                      Iniciar sessão com a chave-senha
-                    </button>
-                    <span className="passkey-subtext">Requer um dispositivo com iOS 17 ou posterior.</span>
-                  </div>
-                </div>
-
-                <div className="apple-signin-remember-wrap">
-                  <label className="form-label">
-                    <input
-                      type="checkbox"
-                      checked={rememberMe}
-                      onChange={e => setRememberMe(e.target.checked)}
-                    />
-                    <span>Lembrar</span>
-                  </label>
-                </div>
-
-                <div className="apple-signin-footer-links">
-                  <button
-                    type="button"
-                    className="as-buttonlink"
-                    onClick={handleForgotPassword}
-                  >
-                    Esqueceu a senha? ↗
-                  </button>
-                </div>
-              </form>
-            ) : (
-              /* ETAPA 2: E-MAIL FIXADO + SENHA COM ➔ */
-              <form onSubmit={handlePasswordSubmit} className="apple-signin-form">
-                <div className="apple-grouped-inputs">
-                  {/* Email fixo */}
-                  <div
-                    className="form-textbox apple-input-highlight grouped-top"
-                    onClick={() => setStep('email')}
-                    title="Clique para alterar e-mail"
-                  >
-                    <label className="form-textbox-label">E-mail ou número de telefone</label>
-                    <input
-                      type="email"
-                      className="form-textbox-input"
-                      value={email}
-                      readOnly
-                    />
-                  </div>
-
-                  {/* Campo Senha com botão circular ➔ */}
-                  <div className="form-textbox grouped-bottom with-arrow-btn">
-                    <label className="form-textbox-label">Senha</label>
-                    <input
-                      type="password"
-                      className="form-textbox-input"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={e => setPassword(e.target.value)}
-                      required
-                      autoFocus
-                    />
-                    <button
-                      type="submit"
-                      className="apple-input-arrow-btn"
-                      disabled={loading}
-                      aria-label="Entrar"
-                    >
-                      <ArrowRight size={18} />
-                    </button>
-                  </div>
-                </div>
-
-                <div className="apple-signin-remember-wrap">
-                  <label className="form-label">
-                    <input
-                      type="checkbox"
-                      checked={rememberMe}
-                      onChange={e => setRememberMe(e.target.checked)}
-                    />
-                    <span>Lembrar</span>
-                  </label>
-                </div>
-
-                <div className="apple-signin-footer-links">
-                  <button
-                    type="button"
-                    className="as-buttonlink"
-                    onClick={handleForgotPassword}
-                  >
-                    Esqueceu a senha? ↗
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-
-          {/* Divisor Vertical */}
-          <div className="apple-signin-divider-line" />
-
-          {/* ════════════════════════════════════════════════════════
-             COLUNA DIREITA: FINALIZAR CONVIDADO
-             ════════════════════════════════════════════════════════ */}
-          <div className="apple-signin-col-right">
-            <h2 className="apple-signin-section-heading">
-              Finalizar Convidado
-            </h2>
-            <p className="apple-signin-guest-desc">
-              Continue e crie uma Conta Apple mais tarde.
-            </p>
-            <button
-              type="button"
-              className="form-button apple-guest-btn"
-              onClick={() => {
-                if (onGuestContinue) {
-                  onGuestContinue()
-                } else {
-                  navigate('/conta')
-                }
-              }}
-            >
-              Continuar como convidado
+            </form>
+          )}
+          {step === 'identify' && <>
+            <div className="identification-divider"><span>ou entre com</span></div>
+            <button type="button" className="identification-google" onClick={handleGoogleSignIn}>
+              <svg className="identification-google-logo" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.8 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.5a4.7 4.7 0 0 1-2 3.1v2.5h3.3c1.9-1.8 3-4.3 3-7.4Z"/><path fill="#34A853" d="M12 22c2.7 0 5-.9 6.7-2.4l-3.3-2.5c-.9.6-2.1 1-3.4 1-2.6 0-4.8-1.7-5.6-4.1H3v2.6A10 10 0 0 0 12 22Z"/><path fill="#FBBC05" d="M6.4 14c-.2-.6-.3-1.3-.3-2s.1-1.4.3-2V7.4H3A10 10 0 0 0 3 16.6L6.4 14Z"/><path fill="#EA4335" d="M12 5.9c1.5 0 2.9.5 4 1.6l3-3A10 10 0 0 0 3 7.4L6.4 10C7.2 7.6 9.4 5.9 12 5.9Z"/></svg>
+              Continuar com o Google
             </button>
-          </div>
-
-        </div>
+          </>}
+        </Editable>
       </div>
-    </div>
+    </main>
   )
 }

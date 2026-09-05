@@ -1,1042 +1,721 @@
-/* ==========================================================================
-   TEKNIX SITE — PÁGINA DE CONTA OFICIAL (1:1 PADRÃO APPLE STORE ACCOUNT HOME)
-   Referência: https://secure8.store.apple.com/br/shop/account/home
-   Totalmente Integrado: Supabase Auth + Pedidos Reais + Endereços + Perfil + Favoritos
-   ========================================================================== */
-
-import { useState, useEffect, useRef } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Editable } from '../components/page-widgets/PageWidgets'
+import React, { useEffect, useState } from 'react'
+import { getCustomerByUserId, createOrUpdateCustomer, getAddressesByUserId, createAddress, updateAddress } from '../services/customer'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
-import {
-  getCustomerByUserId,
-  getOrdersByUserId,
-  getAddressesByUserId,
-  type Customer,
-  type Order
-} from '../services/customer'
-import {
-  ChevronRight, ChevronLeft, ExternalLink, Check, AlertCircle,
-  X
-} from 'lucide-react'
+import { supabase } from '../lib/supabase'
+import { Eye, EyeOff } from 'lucide-react'
 import './Account.css'
-import Login from './Login'
 
 export default function Account() {
-  const { user, signOut } = useAuth()
+  const { user, signOut, loading: authLoading } = useAuth()
   const navigate = useNavigate()
 
-  const [customer, setCustomer] = useState<Customer | null>(null)
-  const [orders, setOrders] = useState<Order[]>([])
-  const [loading, setLoading] = useState(true)
-  const [toastMsg, setToastMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  // Nome do usuário (se autenticado ou padrão Alison)
+  const userName = user?.user_metadata?.first_name || user?.user_metadata?.name || 'Cliente'
 
-  // Modais de Edição 1:1 Apple
-  const [activeModal, setActiveModal] = useState<'shippingAddress' | 'shippingContact' | 'billingAll' | null>(null)
+  const { pathname } = useLocation()
+  const sectionRoutes = { cadastro: '/conta/dados-cadastrais', enderecos: '/conta/enderecos', seguranca: '/conta/seguranca', help: '/conta/atendimento' }
+  const activeModal = Object.entries(sectionRoutes).find(([, route]) => route === pathname)?.[0] || null
+  const isOverview = ['/conta', '/minha-conta', '/account'].includes(pathname)
+  const setActiveModal = (section: keyof typeof sectionRoutes | null) => navigate(section ? sectionRoutes[section] : '/conta')
 
-  // Scroller ref para aparelhos
-  const devicesScrollRef = useRef<HTMLDivElement>(null)
+  // Estado dos dados cadastrais
+  const [cadastroData, setCadastroData] = useState({
+    nome: '', cpf: '', email: user?.email || '', telefone: '', dataNascimento: '',
+  })
+  const profileName = cadastroData.nome.trim() || userName
+  const profileInitials = profileName.split(/\s+/).filter(Boolean).slice(0, 2).map((part: string) => part[0]).join('').toUpperCase() || 'TC'
+  const [profileAvatar, setProfileAvatar] = useState('')
 
-  // Formulário: Endereço de Envio (1:1 Apple)
-  const [shippingForm, setShippingForm] = useState({
-    firstName: 'alison',
-    lastName: 'thiago',
-    street: 'Estrada do Atalaia 55',
-    street2: '',
-    district: 'Jardim Atalaia',
-    city: 'Cotia',
-    state: 'São Paulo',
-    postalCode: '06700-510',
-    countryCode: 'Brasil'
+  // Estado dos endereços
+  const [editingProfile, setEditingProfile] = useState(false)
+  const [profileSnapshot, setProfileSnapshot] = useState(cadastroData)
+  const [profileNotice, setProfileNotice] = useState('')
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
+
+  const handleAvatarChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file || !user || uploadingAvatar) return
+    if (!file.type.startsWith('image/') || file.size > 5 * 1024 * 1024) {
+      setProfileNotice('Escolha uma imagem de até 5 MB.')
+      return
+    }
+    const previousAvatar = profileAvatar
+    setUploadingAvatar(true)
+    setProfileNotice('Enviando foto…')
+    try {
+      const extension = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+      const path = `${user.id}-${Date.now()}.${extension}`
+      const { error: uploadError } = await supabase.storage.from('user-avatars').upload(path, file, { upsert: false })
+      if (uploadError) throw uploadError
+      const { data } = supabase.storage.from('user-avatars').getPublicUrl(path)
+      if (!data.publicUrl) throw new Error('url')
+      const { error: profileError } = await supabase.auth.updateUser({ data: { ...user.user_metadata, avatar_url: data.publicUrl } })
+      if (profileError) throw profileError
+      setProfileAvatar(data.publicUrl)
+      setProfileNotice('Foto atualizada.')
+    } catch {
+      setProfileAvatar(previousAvatar)
+      setProfileNotice('Não foi possível enviar a foto. Tente novamente.')
+    } finally { setUploadingAvatar(false) }
+  }
+
+  const startEditingProfile = () => {
+    setProfileSnapshot({ ...cadastroData })
+    setProfileNotice('')
+    setEditingProfile(true)
+  }
+  const cancelEditingProfile = () => {
+    setCadastroData(profileSnapshot)
+    setEditingProfile(false)
+  }
+  const saveProfile = async (event: React.FormEvent) => {
+    event.preventDefault()
+    if (!user || saving) return
+    setSaving(true)
+    setProfileNotice('')
+    try {
+      const saved = await createOrUpdateCustomer(user, { name: cadastroData.nome.trim(), phone: cadastroData.telefone.trim() })
+      if (!saved) throw new Error('save')
+      setEditingProfile(false)
+      setProfileNotice('Dados salvos na sua conta.')
+    } catch { setProfileNotice('Não foi possível salvar. Seus dados continuam no formulário para tentar novamente.') }
+    finally { setSaving(false) }
+  }
+
+  const [addressData, setAddressData] = useState({
+    cep: '', rua: '', bairro: '', cidade: '', estado: '', numero: '', complemento: '',
   })
 
-  // Formulário: Informações de Contato (1:1 Apple)
-  const [contactForm, setContactForm] = useState({
-    emailAddress: 'alisonsilvathiago@gmail.com',
-    mobilePhoneAreaCode: '11',
-    mobilePhone: '975662930'
-  })
-
-  // Formulário: Pagamento Completo (Contato, Endereço de Cobrança, Cartão)
-  const [billingForm, setBillingForm] = useState({
-    firstName: 'Alison',
-    lastName: 'Thiago',
-    daytimePhoneAreaCode: '11',
-    daytimePhone: '975662930',
-    mobilePhoneAreaCode: '11',
-    mobilePhone: '975662930',
-    countryCode: 'Brasil',
-    street: 'Estrada do Atalaia 55',
-    street2: '',
-    city: 'Cotia',
-    district: 'Jardim Atalaia',
-    state: 'São Paulo',
-    postalCode: '06700-510',
-    cardNumber: '•••• •••• •••• 3185',
-    expiration: '11/33',
-    cardBrand: 'MASTERCARD'
-  })
-
-  // Modo visitante
-  const [isDemoMode, setIsDemoMode] = useState(false)
+  const [editingAddress, setEditingAddress] = useState(false)
+  const [addressSnapshot, setAddressSnapshot] = useState(addressData)
+  const [addressNotice, setAddressNotice] = useState('')
+  const [addressId, setAddressId] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [accountLoading, setAccountLoading] = useState(true)
+  const [accountError, setAccountError] = useState('')
+  const [addressError, setAddressError] = useState('')
 
   useEffect(() => {
-    if (!user && !isDemoMode) {
-      setLoading(false)
-      return
-    }
-    if (user) {
-      loadData()
-    } else if (isDemoMode) {
-      loadDemoData()
-    }
-  }, [user, isDemoMode])
-
-  function showToast(text: string, type: 'success' | 'error' = 'success') {
-    setToastMsg({ type, text })
-    setTimeout(() => setToastMsg(null), 3500)
-  }
-
-  function loadDemoData() {
-    setLoading(true)
-    setTimeout(() => {
-      setCustomer({
-        id: 'demo-cust',
-        user_id: 'demo-user',
-        name: 'alison thiago',
-        email: 'alisonsilvathiago@gmail.com',
-        phone: '11 975662930',
-        document: '384.920.182-04',
-        created_at: new Date().toISOString()
+    let active = true
+    setAccountLoading(true)
+    setAccountError('')
+    setAddressError('')
+    setEditingProfile(false)
+    setEditingAddress(false)
+    if (!user) { setAccountLoading(false); return }
+    Promise.all([getCustomerByUserId(user.id), getAddressesByUserId(user.id).catch(() => {
+      if (active) setAddressError('O serviço de endereços está indisponível. Tente novamente mais tarde.')
+      return []
+    })])
+      .then(([customer, addresses]) => {
+        if (!active) return
+        setCadastroData({ nome: customer?.name || user.user_metadata?.name || '', cpf: customer?.document || customer?.cpf_cnpj || '', email: user.email || '', telefone: customer?.phone || '', dataNascimento: customer?.birth_date || '' })
+        const address = addresses[0]
+        setAddressId(address?.id || null)
+        setAddressData({ cep: address?.zip_code || '', rua: address?.street || '', bairro: address?.neighborhood || '', cidade: address?.city || '', estado: address?.state || '', numero: address?.number || '', complemento: address?.complement || '' })
       })
-      setLoading(false)
-    }, 200)
-  }
+      .catch(() => { if (active) setAccountError('Não foi possível carregar sua conta. Atualize a página para tentar novamente.') })
+      .finally(() => { if (active) setAccountLoading(false) })
+    return () => { active = false }
+  }, [user])
 
-  async function loadData() {
-    if (!user) return
-    setLoading(true)
+  useEffect(() => {
+    setProfileAvatar(typeof user?.user_metadata?.avatar_url === 'string' ? user.user_metadata.avatar_url : '')
+  }, [user])
+
+  const saveAddress = async (event: React.FormEvent) => {
+    event.preventDefault()
+    if (!user || saving) return
+    setSaving(true)
+    setAddressNotice('')
     try {
-      const [cust, ords, adds] = await Promise.all([
-        getCustomerByUserId(user.id),
-        getOrdersByUserId(user.id),
-        getAddressesByUserId(user.id)
-      ])
-      setCustomer(cust)
-      setOrders(ords)
-
-      if (cust) {
-        const parts = (cust.name || '').split(' ')
-        setShippingForm(prev => ({
-          ...prev,
-          firstName: parts[0] || prev.firstName,
-          lastName: parts.slice(1).join(' ') || prev.lastName
-        }))
-        setContactForm(prev => ({
-          ...prev,
-          emailAddress: cust.email || prev.emailAddress
-        }))
-        setBillingForm(prev => ({
-          ...prev,
-          firstName: parts[0] || prev.firstName,
-          lastName: parts.slice(1).join(' ') || prev.lastName
-        }))
+      const payload = { street: addressData.rua.trim(), number: addressData.numero.trim(), complement: addressData.complemento.trim(), neighborhood: addressData.bairro.trim(), city: addressData.cidade.trim(), state: addressData.estado.trim().toUpperCase(), zip_code: addressData.cep.trim() }
+      if (addressId) {
+        if (!await updateAddress(addressId, user.id, payload)) throw new Error('save')
+      } else {
+        const saved = await createAddress({ ...payload, user_id: user.id, label: 'Entrega', is_default: false })
+        if (!saved) throw new Error('save')
+        setAddressId(saved.id)
       }
-
-      if (adds.length > 0) {
-        const def = adds.find(a => a.is_default) || adds[0]
-        setShippingForm(prev => ({
-          ...prev,
-          street: `${def.street} ${def.number || ''}`.trim(),
-          complement: def.complement || '',
-          district: def.neighborhood || '',
-          city: def.city || 'Cotia',
-          state: def.state || 'São Paulo',
-          postalCode: def.zip_code || '06700-510'
-        }))
-      }
-    } catch (err) {
-      console.error('Erro ao carregar dados:', err)
-    } finally {
-      setLoading(false)
-    }
+      setEditingAddress(false)
+      setAddressNotice('Endereço salvo na sua conta.')
+    } catch { setAddressNotice('Não foi possível salvar. Seus dados continuam no formulário para tentar novamente.') }
+    finally { setSaving(false) }
   }
 
-  const handleSignOut = async () => {
-    if (isDemoMode) {
-      setIsDemoMode(false)
-      navigate('/')
-      return
+  // Estado de segurança
+  const [securityData, setSecurityData] = useState({
+    senhaAtual: '',
+    novaSenha: '',
+    confirmarSenha: '',
+  })
+  const [showSecurityPasswords, setShowSecurityPasswords] = useState(false)
+
+  const [savedSuccess, setSavedSuccess] = useState(false)
+
+  const handleLogout = async () => {
+    try {
+      await signOut()
+    } catch {
+      // ignore
     }
-    await signOut()
     navigate('/')
   }
 
-
-
-  const scrollDevices = (direction: 'left' | 'right') => {
-    if (devicesScrollRef.current) {
-      const scrollAmount = direction === 'left' ? -320 : 320
-      devicesScrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' })
-    }
+  const handleSave = (e: React.FormEvent) => {
+    e.preventDefault()
+    setSavedSuccess(true)
+    setTimeout(() => {
+      setSavedSuccess(false)
+      setActiveModal(null)
+    }, 1200)
   }
 
-  const userEmail = customer?.email || user?.email || (isDemoMode ? 'alisonsilvathiago@gmail.com' : '')
-  const firstName = customer?.name?.split(' ')[0] || user?.user_metadata?.first_name || (isDemoMode ? 'alison' : 'cliente')
+  if (authLoading || accountLoading) return <div className="cb-account-wrapper" role="status">Carregando sua conta…</div>
+  if (!user) return <div className="cb-account-wrapper"><Link to="/login">Entre para acessar sua conta</Link></div>
+  if (accountError) return <div className="cb-account-wrapper" role="alert">{accountError} <Link to="/conta">Voltar à conta</Link></div>
+  if (activeModal === 'enderecos' && addressError) return <div className="cb-account-wrapper" role="alert">{addressError} <Link to="/conta">Voltar à conta</Link></div>
 
-  // Lista de aparelhos base oficiais (Apple CDN)
-  const baseDevices = [
-    {
-      id: 'dev-1',
-      name: `iMac de ${firstName}`,
-      model: 'iMac 21.5″',
-      image: 'https://appleid.cdn-apple.com/static/deviceImages-13.0/iMac/iMac14,1/online-infobox__3x.png',
-      productUrl: '/produtos'
-    },
-    {
-      id: 'dev-2',
-      name: `iMac de ${firstName}`,
-      model: 'iMac 21.5″',
-      image: 'https://appleid.cdn-apple.com/static/deviceImages-14.0/iMac/iMac14,1/online-infobox__3x.png',
-      productUrl: '/produtos'
-    },
-    {
-      id: 'dev-3',
-      name: `Mac mini de ${firstName}`,
-      model: 'Mac mini',
-      image: 'https://appleid.cdn-apple.com/static/deviceImages-13.0/Macmini/Macmini6,1/online-infobox__3x.png',
-      productUrl: '/mac'
-    },
-    {
-      id: 'dev-4',
-      name: `${firstName}’s MacBook Pro`,
-      model: 'MacBook Pro 13″',
-      image: 'https://appleid.cdn-apple.com/static/deviceImages-14.0/MacBookPro/MacBookPro15,4-e1e1df/online-infobox__3x.png',
-      productUrl: '/mac'
-    },
-    {
-      id: 'dev-5',
-      name: `iPhone de ${firstName}`,
-      model: 'iPhone 17 Pro Max',
-      image: 'https://appleid.cdn-apple.com/static/deviceImages-15.0/iPhone/iPhone18,2-3b3b3c-47ade5/online-infobox__3x.png',
-      productUrl: '/iphone'
-    }
-  ]
-
-  // Aparelhos comprados pelo cliente em seus pedidos
-  const purchasedDevices = orders.flatMap(ord =>
-    (ord.items || []).map((item, idx) => ({
-      id: `purchased-${ord.id}-${idx}`,
-      name: `${firstName}’s ${item.product_name.split('—')[0].trim()}`,
-      model: item.product_name,
-      image: item.product_image || 'https://appleid.cdn-apple.com/static/deviceImages-15.0/iPhone/iPhone18,2-3b3b3c-47ade5/online-infobox__3x.png',
-      productUrl: `/produto/${item.product_id}`
-    }))
-  )
-
-  const allUserDevices = [...purchasedDevices, ...baseDevices]
-
-  const brazilianStates = [
-    'Acre', 'Alagoas', 'Amapá', 'Amazonas', 'Bahia', 'Ceará', 'Distrito Federal do Brasil',
-    'Espírito Santo', 'Goiás', 'Maranhão', 'Mato Grosso', 'Mato Grosso do sul', 'Minas Gerais',
-    'Pará', 'Paraíba', 'Paraná', 'Pernambuco', 'Piauí', 'Rio de Janeiro', 'Rio Grande do norte',
-    'Rio Grande do sul', 'Rondônia', 'Roraima', 'Santa Catarina', 'São Paulo', 'Sergipe', 'Tocantins'
-  ]
-
-  if (loading) {
-    return (
-      <div className="apple-account-page loading-view">
-        <div className="apple-account-loading-box">
-          <div className="apple-spinner" />
-          <p>Carregando sua conta...</p>
-        </div>
-      </div>
-    )
-  }
-
-  // ── TELA DE LOGIN / VISITANTE (1:1 APPLE STORE OFICIAL) ──
-  if (!user && !isDemoMode) {
-    return (
-      <div className="apple-account-page visitor-page">
-        {/* Local Nav Header */}
-        <div className="apple-account-localnav">
-          <div className="apple-account-localnav-inner">
-            <h1 className="apple-account-localnav-title">Sua conta</h1>
-            <Link to="/login" className="apple-account-localnav-action">
-              Iniciar sessão
-            </Link>
-          </div>
-        </div>
-
-        <Login
-          customTitle="Inicie sessão para finalizar a compra com rapidez."
-          onGuestContinue={() => {
-            setIsDemoMode(true)
-            loadDemoData()
-          }}
-        />
-      </div>
-    )
-  }
-
-  // ── TELA OFICIAL 1:1 APPLE ACCOUNT HOME ──
   return (
-    <div className="apple-account-page">
-      {/* Toast de Notificação */}
-      {toastMsg && (
-        <div className={`apple-account-toast ${toastMsg.type}`}>
-          {toastMsg.type === 'success' ? <Check size={16} /> : <AlertCircle size={16} />}
-          <span>{toastMsg.text}</span>
+    <div className="cb-account-wrapper">
+      {/* ── NAVEGAÇÃO DA CONTA ── */}
+      <aside className="cb-account-sidebar">
+        <div className="cb-account-greeting">
+          <Editable as="p" widgetId="account-1" className="cb-account-greeting-prefix">Boas-vindas,</Editable>
+          <Editable content={{}} as="h2" widgetId="account-2" className="cb-account-greeting-name">{profileName}</Editable>
         </div>
-      )}
 
-      {/* ── 1. LOCAL NAV BAR (Sua conta | Encerrar sessão) ── */}
-      <div className="apple-account-localnav">
-        <div className="apple-account-localnav-inner">
-          <h1 className="apple-account-localnav-title">Sua conta</h1>
-          <button
-            type="button"
-            className="apple-account-localnav-action"
-            onClick={handleSignOut}
+        <nav className="cb-account-nav-list" aria-label="Minha conta">
+          <Link to="/pedidos" className="cb-account-nav-item">
+            <span className="cb-account-nav-icon">
+              {/* Ícone Caixa */}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                <line x1="12" y1="22.08" x2="12" y2="12" />
+              </svg>
+            </span>
+            <span>Meus pedidos</span>
+          </Link>
+
+
+<Link to="/conta/enderecos" className="cb-account-nav-item">
+            <span className="cb-account-nav-icon">
+              {/* Ícone Localização */}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                <circle cx="12" cy="10" r="3" />
+              </svg>
+            </span>
+            <span>Endereços</span>
+          </Link>
+
+<Link to="/conta/dados-cadastrais" className="cb-account-nav-item">
+            <span className="cb-account-nav-icon">
+              {/* Ícone Usuário */}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            </span>
+            <span>Dados cadastrais</span>
+          </Link>
+
+
+
+          <Link to="/salvos" className="cb-account-nav-item">
+            <span className="cb-account-nav-icon">
+              {/* Ícone Presente */}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="20 12 20 22 4 22 4 12" />
+                <rect x="2" y="7" width="20" height="5" />
+                <line x1="12" y1="22" x2="12" y2="7" />
+                <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" />
+                <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
+              </svg>
+            </span>
+            <span>Lista de presentes</span>
+          </Link>
+
+<Link to="/conta/seguranca" className="cb-account-nav-item">
+            <span className="cb-account-nav-icon">
+              {/* Ícone Cadeado */}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+            </span>
+            <span>Segurança</span>
+          </Link>
+
+<Link to="/conta/garantias" className="cb-account-nav-item">
+            <span className="cb-account-nav-icon">
+              {/* Ícone Escudo */}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              </svg>
+            </span>
+            <span>Garantias e seguros</span>
+          </Link>
+
+          <a
+            href="https://wa.me/5546999155875?text=Ol%C3%A1,%20gostaria%20de%20atendimento%20TEKNIX"
+            target="_blank"
+            rel="noreferrer"
+            className="cb-account-nav-item"
           >
-            Encerrar sessão
+            <span className="cb-account-nav-icon">
+              {/* Ícone WhatsApp */}
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.699c.97.53 1.871.815 2.796.815 3.183 0 5.769-2.586 5.77-5.766.001-3.181-2.585-5.769-5.77-5.769zm3.376 8.21c-.144.405-.837.774-1.17.824-.312.045-.694.075-2.023-.474-1.697-.703-2.766-2.451-2.85-2.564-.084-.112-.686-.913-.686-1.741 0-.829.434-1.237.588-1.405.155-.168.337-.21.45-.21.112 0 .225.001.324.006.104.005.244-.04.382.291.144.344.492 1.2.535 1.287.043.088.072.19.014.303-.058.112-.087.183-.173.283-.087.1-.183.224-.261.3-.087.085-.178.177-.077.35.101.173.45 1.08 1.155 1.706.911.81 1.68 1.06 1.919 1.178.239.118.379.099.521-.065.141-.164.606-.706.768-.948.162-.242.324-.202.544-.121.22.08 1.393.657 1.632.776.239.119.398.178.456.277.058.1.058.577-.086.982z" />
+              </svg>
+            </span>
+            <span>Me Chama no Zap</span>
+          </a>
+        </nav>
+
+        <div className="cb-account-logout-wrap">
+          <button type="button" className="cb-account-logout-btn" onClick={handleLogout}>
+            Desconectar
           </button>
         </div>
-      </div>
+      </aside>
 
-      {/* ── 2. HERO GREETING (Oi, [Nome].) ── */}
-      <div className="apple-account-hero">
-        <div className="apple-account-container">
-          <h2 className="apple-account-greeting">Oi, {firstName}.</h2>
+      {/* ── ÁREA PRINCIPAL DIREITA ── */}
+      {isOverview && <Editable content={{}} as="section" widgetId="account-3" className="cb-account-main" aria-labelledby="account-title">
+        <Editable as="h1" widgetId="account-4" id="account-title" className="cb-account-main-title">Minha conta</Editable>
+        <Editable as="p" widgetId="account-5" className="cb-account-main-subtitle">Pedidos, dados e preferências.</Editable>
+
+        {/* ── GRID 2x2 DE CARDS PRINCIPAIS ── */}
+        <div className="cb-account-cards-grid">
+          {/* Card 1: Meus Pedidos */}
+          <Link to="/pedidos" className="cb-account-card">
+            <div className="cb-account-card-icon-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                <line x1="12" y1="22.08" x2="12" y2="12" />
+              </svg>
+            </div>
+            <div className="cb-account-card-content">
+              <Editable as="h3" widgetId="account-6" className="cb-account-card-title">Meus pedidos</Editable>
+              <Editable as="p" widgetId="account-7" className="cb-account-card-desc">Detalhes, status e histórico.</Editable>
+            </div>
+          </Link>
+
+          {/* Card 2: Dados Cadastrais */}
+<Link to="/conta/dados-cadastrais" className="cb-account-card">
+            <div className="cb-account-card-icon-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            </div>
+            <div className="cb-account-card-content">
+              <Editable as="h3" widgetId="account-8" className="cb-account-card-title">Dados cadastrais</Editable>
+              <Editable as="p" widgetId="account-9" className="cb-account-card-desc">Atualize suas informações pessoais.</Editable>
+            </div>
+          </Link>
+
+          {/* Card 3: Endereços */}
+<Link to="/conta/enderecos" className="cb-account-card">
+            <div className="cb-account-card-icon-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                <circle cx="12" cy="10" r="3" />
+              </svg>
+            </div>
+            <div className="cb-account-card-content">
+              <Editable as="h3" widgetId="account-10" className="cb-account-card-title">Endereços</Editable>
+              <Editable as="p" widgetId="account-11" className="cb-account-card-desc">Cadastre ou altere seu endereço.</Editable>
+            </div>
+          </Link>
+
+          {/* Card 4: Segurança */}
+<Link to="/conta/seguranca" className="cb-account-card">
+            <div className="cb-account-card-icon-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+            </div>
+            <div className="cb-account-card-content">
+              <Editable as="h3" widgetId="account-12" className="cb-account-card-title">Segurança</Editable>
+              <Editable as="p" widgetId="account-13" className="cb-account-card-desc">Senha, dispositivos e biometria.</Editable>
+            </div>
+          </Link>
         </div>
-      </div>
 
-      {/* ── 3. SEÇÃO SEUS APARELHOS (Carrossel Horizontal) ── */}
-      <section className="apple-account-section bg-primary">
-        <div className="apple-account-container">
-          <div className="apple-devices-header-row">
-            <div>
-              <h3 className="apple-section-title">Seus aparelhos</h3>
-              <p className="apple-section-subtitle">
-                Você iniciou sessão em {allUserDevices.length} aparelhos com {userEmail}.
-              </p>
-            </div>
-            <div className="apple-devices-nav-arrows">
-              <button
-                type="button"
-                className="apple-nav-arrow"
-                onClick={() => scrollDevices('left')}
-                title="Aparelho anterior"
-              >
-                <ChevronLeft size={20} />
-              </button>
-              <button
-                type="button"
-                className="apple-nav-arrow"
-                onClick={() => scrollDevices('right')}
-                title="Próximo aparelho"
-              >
-                <ChevronRight size={20} />
-              </button>
-            </div>
+        {/* ── LINHA DIVISÓRIA ── */}
+        <div className="cb-account-divider" />
+
+        {/* ── SEÇÃO ATENDIMENTO ── */}
+        <Editable as="section" widgetId="account-14" className="cb-account-support-section">
+          <div>
+            <Editable as="h2" widgetId="account-15">Precisa de ajuda?</Editable>
+            <Editable as="p" widgetId="account-16" className="cb-account-support-desc">Conte com a gente para tirar suas dúvidas.</Editable>
           </div>
+          <button
+            type="button"
+            className="cb-account-support-btn"
+            onClick={() => setActiveModal('help')}
+          >
+            Falar com atendimento
+          </button>
+        </Editable>
+      </Editable>}
 
-          {/* Scroller de Aparelhos */}
-          <div className="apple-devices-scroller" ref={devicesScrollRef}>
-            {allUserDevices.map(device => (
-              <div key={device.id} className="apple-device-card">
-                <Link to={device.productUrl || '/produtos'} className="apple-device-image-box" title={device.name}>
-                  <img src={device.image} alt={device.name} />
-                </Link>
-                <div className="apple-device-info">
-                  <Link to={device.productUrl || '/produtos'} className="apple-device-name-link">
-                    <h4 className="apple-device-name">{device.name}</h4>
-                  </Link>
-                  <span className="apple-device-model">{device.model}</span>
-                  <a
-                    href="https://getsupport.apple.com"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="apple-link-more"
-                  >
-                    Obter suporte &gt;
-                  </a>
+      {!isOverview && <Editable content={{}} as="section" widgetId="account-17" className="cb-account-detail">
+        <Link to="/conta" className="cb-account-back">← Voltar para minha conta</Link>
+        {pathname === '/conta/lojas-fisicas' && <div className="cb-account-detail-content cb-account-legacy-help">
+          <Editable as="h1" widgetId="account-18" className="cb-account-main-title">Meus pedidos lojas físicas</Editable>
+          <Editable as="p" widgetId="account-19">Para consultar uma compra feita em loja física, fale com nossa equipe e tenha o número do pedido ou comprovante em mãos.</Editable>
+          <Link className="cb-account-support-btn" to="/contato">Consultar uma compra</Link>
+        </div>}
+        {pathname === '/conta/garantias' && <>
+          <Editable as="h1" widgetId="account-20" className="cb-account-main-title">Garantias e seguros</Editable>
+          <Editable as="p" widgetId="account-21">Precisa de suporte para um produto? Consulte seu pedido ou entre em contato com nossa equipe para receber orientação.</Editable>
+          <div className="cb-modal-actions">
+            <Link className="cb-account-support-btn" to="/pedidos">Ver meus pedidos</Link>
+            <Link className="cb-account-support-btn" to="/contato">Falar com atendimento</Link>
+          </div>
+        </>}
+
+      {/* ── MODAL: DADOS CADASTRAIS ── */}
+      {activeModal === 'cadastro' && (
+        <div className="cb-account-detail-content">
+        <div className="cb-account-form-panel">
+            <div className="cb-modal-header">
+              <div className="cb-profile-heading">
+                <label className="cb-profile-avatar-upload" title="Alterar foto de perfil">
+                  <span className="cb-profile-avatar">{profileAvatar ? <Editable as="img" widgetId="account-22" src={profileAvatar} alt="Foto de perfil" /> : profileInitials}</span>
+                  <span className="cb-profile-avatar-action">{uploadingAvatar ? 'Enviando' : 'Alterar foto'}</span>
+                  <input type="file" accept="image/png,image/jpeg,image/webp" onChange={handleAvatarChange} disabled={uploadingAvatar} />
+                </label>
+                <div>
+                <Editable as="h1" widgetId="account-23" className="cb-account-main-title">Dados cadastrais</Editable>
+                <Editable as="p" widgetId="account-24" className="cb-profile-intro">Suas informações pessoais, sempre à mão.</Editable>
                 </div>
               </div>
-            ))}
-          </div>
-
-          <div className="apple-devices-footer-hint">
-            Seu aparelho não aparece aqui? Para vincular um aparelho ou fazer alterações, acesse os{' '}
-            <a href="https://account.apple.com" target="_blank" rel="noreferrer">
-              ajustes da Conta TEKNIX
-            </a>.
-          </div>
-        </div>
-      </section>
-
-      {/* ── 4. SEÇÃO TILES 2x1 (Seus pedidos / Itens salvos) ── */}
-      <section className="apple-account-section bg-secondary">
-        <div className="apple-account-container">
-          <div className="apple-tiles-grid">
-            {/* Tile 1: Seus pedidos */}
-            <div className="apple-tile-card">
-              <h3 className="apple-tile-title">Seus pedidos</h3>
-              <p className="apple-tile-desc">
-                Acompanhe, modifique e cancele pedidos ou faça uma devolução.
-              </p>
-              <Link
-                to="/pedidos"
-                className="apple-link-more"
-              >
-                Ver histórico de pedidos &gt;
-              </Link>
+              {!editingProfile && <button type="button" className="cb-account-support-btn" onClick={startEditingProfile}>Editar dados</button>}
             </div>
 
-            {/* Tile 2: Itens salvos */}
-            <div className="apple-tile-card">
-              <h3 className="apple-tile-title">Itens salvos</h3>
-              <p className="apple-tile-desc">
-                Seja nas compras online ou em uma Loja TEKNIX, você pode salvar facilmente os produtos do seu interesse e acompanhar seu progresso aqui.
-              </p>
-              <Link
-                to="/salvos"
-                className="apple-link-more"
-              >
-                Ver Itens salvos &gt;
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+            {profileNotice && <Editable content={{}} as="p" widgetId="account-25" className="cb-profile-notice" role="status">{profileNotice}</Editable>}
+            {!editingProfile ? <dl className="cb-profile-summary">
+              <div><dt>Nome completo</dt><dd>{cadastroData.nome || 'Não informado'}</dd></div>
+              <div><dt>CPF</dt><dd>{cadastroData.cpf || 'Não informado'}</dd></div>
+              <div><dt>E-mail</dt><dd>{cadastroData.email || 'Não informado'}</dd></div>
+              <div><dt>Telefone celular</dt><dd>{cadastroData.telefone || 'Não informado'}</dd></div>
+            </dl> : <form onSubmit={saveProfile} className="cb-modal-form">
+              <Editable as="p" widgetId="account-26" className="cb-profile-notice">O e-mail de acesso e o documento não são alterados neste formulário.</Editable>
+              <div className="cb-form-group">
+                <label htmlFor="profile-name">Nome Completo</label>
+                <input
+                  id="profile-name"
+                  type="text"
+                  className="cb-form-input"
+                  value={cadastroData.nome}
+                  onChange={(e) => setCadastroData({ ...cadastroData, nome: e.target.value })}
+                  required
+                />
+              </div>
 
-      {/* ── 5. SEÇÃO AJUSTES DA CONTA (Grid Oficial) ── */}
-      <section className="apple-account-section bg-primary">
-        <div className="apple-account-container">
-          <h3 className="apple-settings-main-title">Ajustes da conta</h3>
+              <div className="cb-form-group">
+                <label htmlFor="profile-cpf">CPF</label>
+                <input
+                  id="profile-cpf"
+                  type="text"
+                  className="cb-form-input"
+                  value={cadastroData.cpf}
+                  disabled
+                />
+              </div>
 
-          {/* Linha 1: Envio */}
-          <div className="apple-settings-row">
-            <div className="apple-settings-label-col">
-              <h4>Envio</h4>
-            </div>
-            <div className="apple-settings-content-grid">
-              {/* Endereço de envio */}
-              <div className="apple-settings-box">
-                <h5>Endereço de envio</h5>
-                <div className="apple-settings-text">
-                  <p>{shippingForm.firstName} {shippingForm.lastName}</p>
-                  <p>{shippingForm.street} {shippingForm.street2}</p>
-                  <p>{shippingForm.city}, {shippingForm.state}</p>
-                  <p>{shippingForm.postalCode}</p>
-                  <p>{shippingForm.countryCode}</p>
-                </div>
-                <button
-                  type="button"
-                  className="apple-btn-link"
-                  onClick={() => setActiveModal('shippingAddress')}
-                >
-                  Editar
+              <div className="cb-form-group">
+                <label htmlFor="profile-email">E-mail</label>
+                <input
+                  id="profile-email"
+                  readOnly
+                  type="email"
+                  className="cb-form-input"
+                  value={cadastroData.email}
+                  onChange={(e) => setCadastroData({ ...cadastroData, email: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="cb-form-group">
+                <label htmlFor="profile-phone">Telefone Celular</label>
+                <input
+                  id="profile-phone"
+                  type="text"
+                  className="cb-form-input"
+                  value={cadastroData.telefone}
+                  onChange={(e) => setCadastroData({ ...cadastroData, telefone: e.target.value })}
+                  required
+                />
+              </div>
+
+              {savedSuccess && (
+                <Editable as="p" widgetId="account-27" style={{ color: '#047857', fontWeight: 'var(--tkn-weight-medium)', margin: 0 }}>
+                  ✓ Dados atualizados com sucesso!
+                </Editable>
+              )}
+
+              <div className="cb-modal-actions">
+                <button type="button" className="cb-btn-cancel" disabled={saving} onClick={cancelEditingProfile}>
+                  Cancelar
+                </button>
+                <button type="submit" className="cb-btn-save" disabled={saving}>
+                  Salvar alterações
                 </button>
               </div>
+            </form>}
+          </div>
+        </div>
+      )}
 
-              {/* Informações de contato */}
-              <div className="apple-settings-box">
-                <h5>Informações de contato</h5>
-                <div className="apple-settings-text">
-                  <p>{contactForm.emailAddress}</p>
-                  <p>{contactForm.mobilePhoneAreaCode ? `${contactForm.mobilePhoneAreaCode} ${contactForm.mobilePhone}` : ''}</p>
+      {/* ── MODAL: ENDEREÇOS ── */}
+      {activeModal === 'enderecos' && (
+        <div className="cb-account-detail-content">
+        <div className="cb-account-form-panel">
+            <div className="cb-modal-header">
+              <Editable as="h1" widgetId="account-28" className="cb-account-main-title">Endereço de entrega</Editable>
+              {!editingAddress && <button type="button" className="cb-account-support-btn" onClick={() => {
+                setAddressSnapshot(addressData)
+                setAddressNotice('')
+                setEditingAddress(true)
+              }}>Editar endereço</button>}
+            </div>
+
+            {addressNotice && <Editable content={{}} as="p" widgetId="account-29" className="cb-profile-notice" role="status">{addressNotice}</Editable>}
+            {!editingAddress ? <dl className="cb-profile-summary">
+              <div><dt>CEP</dt><dd>{addressData.cep}</dd></div>
+              <div><dt>Logradouro / Rua</dt><dd>{addressData.rua}</dd></div>
+              <div><dt>Número</dt><dd>{addressData.numero}</dd></div>
+              <div><dt>Complemento</dt><dd>{addressData.complemento || 'Não informado'}</dd></div>
+              <div><dt>Bairro</dt><dd>{addressData.bairro}</dd></div>
+              <div><dt>Cidade / Estado</dt><dd>{addressData.cidade} / {addressData.estado}</dd></div>
+            </dl> : <form onSubmit={saveAddress} className="cb-modal-form">
+              <div className="cb-form-group">
+                <label>CEP</label>
+                <input
+                  type="text"
+                  className="cb-form-input"
+                  value={addressData.cep}
+                  onChange={(e) => setAddressData({ ...addressData, cep: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="cb-form-group">
+                <label>Logradouro / Rua</label>
+                <input
+                  type="text"
+                  className="cb-form-input"
+                  value={addressData.rua}
+                  onChange={(e) => setAddressData({ ...addressData, rua: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '12px' }}>
+                <div className="cb-form-group">
+                  <label>Número</label>
+                  <input
+                    type="text"
+                    className="cb-form-input"
+                    value={addressData.numero}
+                    onChange={(e) => setAddressData({ ...addressData, numero: e.target.value })}
+                    required
+                  />
                 </div>
-                <button
-                  type="button"
-                  className="apple-btn-link"
-                  onClick={() => setActiveModal('shippingContact')}
-                >
-                  Editar
+                <div className="cb-form-group">
+                  <label>Complemento</label>
+                  <input
+                    type="text"
+                    className="cb-form-input"
+                    value={addressData.complemento}
+                    onChange={(e) => setAddressData({ ...addressData, complemento: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div className="cb-form-group">
+                  <label>Cidade</label>
+                  <input
+                    type="text"
+                    className="cb-form-input"
+                    value={addressData.cidade}
+                    onChange={(e) => setAddressData({ ...addressData, cidade: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="cb-form-group">
+                  <label>Estado</label>
+                  <input
+                    type="text"
+                    className="cb-form-input"
+                    value={addressData.estado}
+                    onChange={(e) => setAddressData({ ...addressData, estado: e.target.value })}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="cb-form-group">
+                <label htmlFor="address-neighborhood">Bairro</label>
+                <input id="address-neighborhood" className="cb-form-input" value={addressData.bairro} onChange={(event) => setAddressData({ ...addressData, bairro: event.target.value })} required />
+              </div>
+
+              <div className="cb-modal-actions">
+                <button type="button" className="cb-btn-cancel" disabled={saving} onClick={() => { setAddressData(addressSnapshot); setEditingAddress(false) }}>
+                  Cancelar
+                </button>
+                <button type="submit" className="cb-btn-save" disabled={saving}>
+                  {saving ? 'Salvando…' : 'Salvar endereço'}
                 </button>
               </div>
-            </div>
+            </form>}
           </div>
+        </div>
+      )}
 
-          {/* Linha 2: Pagamento */}
-          <div className="apple-settings-row">
-            <div className="apple-settings-label-col">
-              <h4>Pagamento</h4>
+      {/* ── MODAL: SEGURANÇA ── */}
+      {activeModal === 'seguranca' && (
+        <div className="cb-account-detail-content">
+        <div className="cb-account-form-panel">
+            <div className="cb-modal-header">
+              <Editable as="h3" widgetId="account-30">Segurança da Conta</Editable>
+              <button
+                type="button"
+                className="cb-modal-close-btn"
+                onClick={() => setActiveModal(null)}
+              >
+                ✕
+              </button>
             </div>
-            <div className="apple-settings-content-grid three-cols">
-              {/* Contato para cobrança */}
-              <div className="apple-settings-box">
-                <h5>Contato para cobrança</h5>
-                <div className="apple-settings-text">
-                  <p>{billingForm.firstName} {billingForm.lastName}</p>
-                  <p>{billingForm.daytimePhoneAreaCode} {billingForm.daytimePhone}</p>
-                </div>
-                <div className="apple-settings-actions-inline">
-                  <button type="button" className="apple-btn-link" onClick={() => setActiveModal('billingAll')}>
-                    Editar
-                  </button>
-                  <span className="divider">|</span>
-                  <button type="button" className="apple-btn-link" onClick={() => showToast('Contato de cobrança atualizado')}>
-                    Remover
-                  </button>
-                </div>
+
+            <form onSubmit={handleSave} className="cb-modal-form">
+              <div className="cb-form-group cb-password-group">
+                <label>Senha Atual</label>
+                <input
+                  type={showSecurityPasswords ? 'text' : 'password'}
+                  className="cb-form-input"
+                  value={securityData.senhaAtual}
+                  onChange={(e) => setSecurityData({ ...securityData, senhaAtual: e.target.value })}
+                  placeholder="••••••••"
+                  required
+                />
+                <button type="button" className="cb-password-toggle" onClick={() => setShowSecurityPasswords(open => !open)} aria-label={showSecurityPasswords ? 'Ocultar senhas' : 'Mostrar senhas'}>{showSecurityPasswords ? <EyeOff size={18} /> : <Eye size={18} />}</button>
               </div>
 
-              {/* Endereço de cobrança */}
-              <div className="apple-settings-box">
-                <h5>Endereço de cobrança</h5>
-                <div className="apple-settings-text">
-                  <p>{billingForm.street}</p>
-                  <p>{billingForm.city}, {billingForm.state}</p>
-                  <p>{billingForm.postalCode}</p>
-                  <p>{billingForm.countryCode}</p>
-                </div>
-                <div className="apple-settings-actions-inline">
-                  <button type="button" className="apple-btn-link" onClick={() => setActiveModal('billingAll')}>
-                    Editar
-                  </button>
-                  <span className="divider">|</span>
-                  <button type="button" className="apple-btn-link" onClick={() => showToast('Endereço de cobrança resetado')}>
-                    Remover
-                  </button>
-                </div>
+              <div className="cb-form-group cb-password-group">
+                <label>Nova Senha</label>
+                <input
+                  type={showSecurityPasswords ? 'text' : 'password'}
+                  className="cb-form-input"
+                  value={securityData.novaSenha}
+                  onChange={(e) => setSecurityData({ ...securityData, novaSenha: e.target.value })}
+                  placeholder="No mínimo 8 caracteres"
+                  required
+                />
+                <button type="button" className="cb-password-toggle" onClick={() => setShowSecurityPasswords(open => !open)} aria-label={showSecurityPasswords ? 'Ocultar senhas' : 'Mostrar senhas'}>{showSecurityPasswords ? <EyeOff size={18} /> : <Eye size={18} />}</button>
               </div>
 
-              {/* Método de pagamento */}
-              <div className="apple-settings-box">
-                <h5>Método de pagamento</h5>
-                <div className="apple-settings-text">
-                  <p><strong>{billingForm.cardBrand}</strong></p>
-                  <p>{billingForm.cardNumber}</p>
-                  <p>{billingForm.expiration}</p>
-                </div>
-                <div className="apple-settings-actions-inline">
-                  <button type="button" className="apple-btn-link" onClick={() => setActiveModal('billingAll')}>
-                    Editar
-                  </button>
-                  <span className="divider">|</span>
-                  <button type="button" className="apple-btn-link" onClick={() => showToast('Método de pagamento removido')}>
-                    Remover
-                  </button>
-                </div>
+              <div className="cb-form-group cb-password-group">
+                <label>Confirmar Nova Senha</label>
+                <input
+                  type={showSecurityPasswords ? 'text' : 'password'}
+                  className="cb-form-input"
+                  value={securityData.confirmarSenha}
+                  onChange={(e) => setSecurityData({ ...securityData, confirmarSenha: e.target.value })}
+                  placeholder="Repita a nova senha"
+                  required
+                />
+                <button type="button" className="cb-password-toggle" onClick={() => setShowSecurityPasswords(open => !open)} aria-label={showSecurityPasswords ? 'Ocultar senhas' : 'Mostrar senhas'}>{showSecurityPasswords ? <EyeOff size={18} /> : <Eye size={18} />}</button>
               </div>
-            </div>
+
+              {savedSuccess && (
+                <Editable as="p" widgetId="account-31" style={{ color: '#047857', fontWeight: 'var(--tkn-weight-medium)', margin: 0 }}>
+                  ✓ Senha atualizada com sucesso!
+                </Editable>
+              )}
+
+              <div className="cb-modal-actions">
+                <button type="button" className="cb-btn-cancel" onClick={() => setActiveModal(null)}>
+                  Cancelar
+                </button>
+                <button type="submit" className="cb-btn-save">
+                  Alterar senha
+                </button>
+              </div>
+            </form>
           </div>
+        </div>
+      )}
 
-          {/* Linha 3: Privacidade */}
-          <div className="apple-settings-row">
-            <div className="apple-settings-label-col">
-              <h4>Privacidade</h4>
+      {/* ── MODAL: ATENDIMENTO ── */}
+      {activeModal === 'help' && (
+        <div className="cb-account-detail-content">
+        <div className="cb-account-form-panel">
+            <div className="cb-modal-header">
+              <Editable as="h3" widgetId="account-32">Central de Atendimento TEKNIX</Editable>
+              <button
+                type="button"
+                className="cb-modal-close-btn"
+                onClick={() => setActiveModal(null)}
+              >
+                ✕
+              </button>
             </div>
-            <div className="apple-settings-content-wide">
-              <h5>Informações pessoais</h5>
-              <p className="apple-privacy-text">
-                Você controla suas informações pessoais e pode gerenciar seus dados ou excluir sua conta a qualquer momento. A TEKNIX tem o compromisso de proteger sua privacidade.
-              </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '12px 0' }}>
+              <Editable as="p" widgetId="account-33" style={{ color: '#4b5563', margin: 0, lineHeight: 1.5 }}>
+                Estamos à disposição para te ajudar de segunda a sexta-feira, das 8h30 às 18h.
+              </Editable>
+
+              <div style={{ background: '#f8f9fa', padding: '16px', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
+                <Editable as="p" widgetId="account-34" style={{ margin: '0 0 6px 0', fontWeight: 'var(--tkn-weight-medium)', color: '#0033c6' }}>
+                  📱 WhatsApp Oficial
+                </Editable>
+                <Editable as="p" widgetId="account-35" style={{ margin: 0, color: '#1f2937', fontSize: '15px' }}>
+                  (46) 99915-5875
+                </Editable>
+              </div>
+
+              <div style={{ background: '#f8f9fa', padding: '16px', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
+                <Editable as="p" widgetId="account-36" style={{ margin: '0 0 6px 0', fontWeight: 'var(--tkn-weight-medium)', color: '#0033c6' }}>
+                  ✉️ E-mail SAC
+                </Editable>
+                <Editable as="p" widgetId="account-37" style={{ margin: 0, color: '#1f2937', fontSize: '15px' }}>
+                  sac@teknix.com.br
+                </Editable>
+              </div>
+            </div>
+
+            <div className="cb-modal-actions">
+              <button type="button" className="cb-btn-cancel" onClick={() => setActiveModal(null)}>
+                Fechar
+              </button>
               <a
-                href="https://www.apple.com/br/privacy"
+                href="https://wa.me/5546999155875?text=Ol%C3%A1,%20gostaria%20de%20atendimento%20TEKNIX"
                 target="_blank"
                 rel="noreferrer"
-                className="apple-link-external"
+                className="cb-btn-save"
+                style={{ textDecoration: 'none' }}
               >
-                Gerenciar minhas informações pessoais
-                <ExternalLink size={12} />
+                Chamar no WhatsApp
               </a>
             </div>
           </div>
-
-          {/* Linha 4: ID TEKNIX */}
-          <div className="apple-settings-row">
-            <div className="apple-settings-label-col">
-              <h4>ID TEKNIX</h4>
-            </div>
-            <div className="apple-settings-content-wide">
-              <p className="apple-id-email">{userEmail}</p>
-              <a
-                href="https://appleid.apple.com"
-                target="_blank"
-                rel="noreferrer"
-                className="apple-link-external"
-              >
-                Gerenciar Conta TEKNIX
-                <ExternalLink size={12} />
-              </a>
-              <p className="apple-id-description">
-                Sua Conta TEKNIX é o endereço de e-mail que você usa para acessar os serviços TEKNIX, como Store, TEKNIX Music, iCloud, iMessage, FaceTime e muito mais.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════════════════════
-          MODAIS DE EDIÇÃO 1:1 PADRÃO OFICIAL APPLE
-         ══════════════════════════════════════════════════════════ */}
-
-      {/* MODAL 1: EDITE O ENDEREÇO DE ENVIO (1:1 APPLE) */}
-      {activeModal === 'shippingAddress' && (
-        <div className="apple-modal-overlay" onClick={() => setActiveModal(null)}>
-          <div className="apple-modal-card-apple" onClick={e => e.stopPropagation()}>
-            <button
-              type="button"
-              className="apple-overlay-close-btn"
-              onClick={() => setActiveModal(null)}
-              aria-label="Fechar"
-            >
-              <X size={18} />
-            </button>
-
-            <div className="apple-overlay-inner">
-              <h2 className="apple-overlay-heading">Edite o endereço de envio.</h2>
-
-              <form
-                onSubmit={e => {
-                  e.preventDefault()
-                  setActiveModal(null)
-                  showToast('Endereço de envio salvo com sucesso!')
-                }}
-                className="apple-overlay-form"
-              >
-                <div className="form-textbox">
-                  <label className="form-textbox-label form-textbox-eyebrow-label">Primeiro nome</label>
-                  <input
-                    type="text"
-                    className="form-textbox-input form-textbox-entered"
-                    value={shippingForm.firstName}
-                    onChange={e => setShippingForm({ ...shippingForm, firstName: e.target.value })}
-                    required
-                  />
-                </div>
-
-                <div className="form-textbox">
-                  <label className="form-textbox-label form-textbox-eyebrow-label">Sobrenome</label>
-                  <input
-                    type="text"
-                    className="form-textbox-input form-textbox-entered"
-                    value={shippingForm.lastName}
-                    onChange={e => setShippingForm({ ...shippingForm, lastName: e.target.value })}
-                    required
-                  />
-                </div>
-
-                <div className="form-textbox">
-                  <label className="form-textbox-label form-textbox-eyebrow-label">Rua (Av, Pça, etc.) e número</label>
-                  <input
-                    type="text"
-                    className="form-textbox-input form-textbox-entered"
-                    value={shippingForm.street}
-                    onChange={e => setShippingForm({ ...shippingForm, street: e.target.value })}
-                    required
-                  />
-                </div>
-
-                <div className="form-textbox">
-                  <label className="form-textbox-label">apto, bloco, prédio (opcional)</label>
-                  <input
-                    type="text"
-                    className="form-textbox-input"
-                    value={shippingForm.street2}
-                    onChange={e => setShippingForm({ ...shippingForm, street2: e.target.value })}
-                  />
-                </div>
-
-                <div className="form-textbox">
-                  <label className="form-textbox-label">Bairro</label>
-                  <input
-                    type="text"
-                    className="form-textbox-input"
-                    value={shippingForm.district}
-                    onChange={e => setShippingForm({ ...shippingForm, district: e.target.value })}
-                    required
-                  />
-                </div>
-
-                <div className="form-textbox">
-                  <label className="form-textbox-label form-textbox-eyebrow-label">Cidade/Município</label>
-                  <input
-                    type="text"
-                    className="form-textbox-input form-textbox-entered"
-                    value={shippingForm.city}
-                    onChange={e => setShippingForm({ ...shippingForm, city: e.target.value })}
-                    required
-                  />
-                </div>
-
-                <div className="form-dropdown">
-                  <label className="form-dropdown-label">Estado</label>
-                  <select
-                    className="form-dropdown-select"
-                    value={shippingForm.state}
-                    onChange={e => setShippingForm({ ...shippingForm, state: e.target.value })}
-                    required
-                  >
-                    <option value="">Selecionar um</option>
-                    {brazilianStates.map(st => (
-                      <option key={st} value={st}>{st}</option>
-                    ))}
-                  </select>
-                  <span className="form-dropdown-chevron" />
-                </div>
-
-                <div className="form-textbox">
-                  <label className="form-textbox-label form-textbox-eyebrow-label">CEP (xxxxx-xxx)</label>
-                  <input
-                    type="text"
-                    className="form-textbox-input form-textbox-entered"
-                    value={shippingForm.postalCode}
-                    onChange={e => setShippingForm({ ...shippingForm, postalCode: e.target.value })}
-                    required
-                  />
-                </div>
-
-                <div className="form-textbox disabled">
-                  <label className="form-textbox-label form-textbox-eyebrow-label">País/Região</label>
-                  <input
-                    type="text"
-                    className="form-textbox-input form-textbox-entered"
-                    value="Brasil"
-                    disabled
-                  />
-                </div>
-
-                <div className="apple-overlay-actions">
-                  <button type="submit" className="apple-overlay-save-btn">
-                    Salvar
-                  </button>
-                  <button
-                    type="button"
-                    className="apple-overlay-cancel-btn"
-                    onClick={() => setActiveModal(null)}
-                  >
-                    Cancelar
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
         </div>
       )}
-
-      {/* MODAL 2: EDITE AS INFORMAÇÕES DE CONTATO (1:1 APPLE) */}
-      {activeModal === 'shippingContact' && (
-        <div className="apple-modal-overlay" onClick={() => setActiveModal(null)}>
-          <div className="apple-modal-card-apple" onClick={e => e.stopPropagation()}>
-            <button
-              type="button"
-              className="apple-overlay-close-btn"
-              onClick={() => setActiveModal(null)}
-              aria-label="Fechar"
-            >
-              <X size={18} />
-            </button>
-
-            <div className="apple-overlay-inner">
-              <h2 className="apple-overlay-heading">Edite as informações de contato.</h2>
-              <p className="apple-overlay-desc">
-                O Contato para cobrança receberá notificações sobre envio automaticamente por e-mail. Para enviar notificações a um e-mail secundário, insira o e-mail abaixo. Para receber atualizações sobre o envio por mensagem de texto, insira um número de celular abaixo.
-              </p>
-
-              <form
-                onSubmit={e => {
-                  e.preventDefault()
-                  setActiveModal(null)
-                  showToast('Informações de contato atualizadas!')
-                }}
-                className="apple-overlay-form"
-              >
-                <div className="form-textbox">
-                  <label className="form-textbox-label form-textbox-eyebrow-label">E-mail (opcional)</label>
-                  <input
-                    type="email"
-                    className="form-textbox-input form-textbox-entered"
-                    value={contactForm.emailAddress}
-                    onChange={e => setContactForm({ ...contactForm, emailAddress: e.target.value })}
-                  />
-                </div>
-
-                <div className="form-row-sidebyside">
-                  <div className="form-textbox ddd-box">
-                    <label className="form-textbox-label">DDD</label>
-                    <input
-                      type="tel"
-                      className="form-textbox-input"
-                      value={contactForm.mobilePhoneAreaCode}
-                      onChange={e => setContactForm({ ...contactForm, mobilePhoneAreaCode: e.target.value })}
-                      required
-                    />
-                  </div>
-                  <div className="form-textbox flex-1">
-                    <label className="form-textbox-label">Celular</label>
-                    <input
-                      type="tel"
-                      className="form-textbox-input"
-                      value={contactForm.mobilePhone}
-                      onChange={e => setContactForm({ ...contactForm, mobilePhone: e.target.value })}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="form-supplemental-info">
-                  Verifique se o número de telefone está correto. Não é possível alterá-lo depois de fazer o pedido.
-                </div>
-
-                <div className="apple-overlay-actions">
-                  <button type="submit" className="apple-overlay-save-btn">
-                    Salvar
-                  </button>
-                  <button
-                    type="button"
-                    className="apple-overlay-cancel-btn"
-                    onClick={() => setActiveModal(null)}
-                  >
-                    Cancelar
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL 3: EDITE SUAS INFORMAÇÕES DE PAGAMENTO (1:1 APPLE) */}
-      {activeModal === 'billingAll' && (
-        <div className="apple-modal-overlay" onClick={() => setActiveModal(null)}>
-          <div className="apple-modal-card-apple" onClick={e => e.stopPropagation()}>
-            <button
-              type="button"
-              className="apple-overlay-close-btn"
-              onClick={() => setActiveModal(null)}
-              aria-label="Fechar"
-            >
-              <X size={18} />
-            </button>
-
-            <div className="apple-overlay-inner">
-              <h2 className="apple-overlay-heading">Edite suas informações de pagamento.</h2>
-              <p className="apple-overlay-desc">
-                As alterações feitas nas informações de pagamento serão aplicadas à sua conta da Apple e afetarão suas compras no site da Apple.
-              </p>
-
-              <form
-                onSubmit={e => {
-                  e.preventDefault()
-                  setActiveModal(null)
-                  showToast('Informações de pagamento atualizadas!')
-                }}
-                className="apple-overlay-form"
-              >
-                {/* Fieldset 1: Contato para cobrança */}
-                <fieldset className="apple-form-fieldset">
-                  <legend className="apple-fieldset-legend">Contato para cobrança</legend>
-
-                  <div className="form-textbox">
-                    <label className="form-textbox-label form-textbox-eyebrow-label">Primeiro nome</label>
-                    <input
-                      type="text"
-                      className="form-textbox-input form-textbox-entered"
-                      value={billingForm.firstName}
-                      onChange={e => setBillingForm({ ...billingForm, firstName: e.target.value })}
-                      required
-                    />
-                  </div>
-
-                  <div className="form-textbox">
-                    <label className="form-textbox-label form-textbox-eyebrow-label">Sobrenome</label>
-                    <input
-                      type="text"
-                      className="form-textbox-input form-textbox-entered"
-                      value={billingForm.lastName}
-                      onChange={e => setBillingForm({ ...billingForm, lastName: e.target.value })}
-                      required
-                    />
-                  </div>
-
-                  <div className="form-row-sidebyside">
-                    <div className="form-textbox ddd-box">
-                      <label className="form-textbox-label form-textbox-eyebrow-label">DDD</label>
-                      <input
-                        type="tel"
-                        className="form-textbox-input form-textbox-entered"
-                        value={billingForm.daytimePhoneAreaCode}
-                        onChange={e => setBillingForm({ ...billingForm, daytimePhoneAreaCode: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div className="form-textbox flex-1">
-                      <label className="form-textbox-label form-textbox-eyebrow-label">Telefone</label>
-                      <input
-                        type="tel"
-                        className="form-textbox-input form-textbox-entered"
-                        value={billingForm.daytimePhone}
-                        onChange={e => setBillingForm({ ...billingForm, daytimePhone: e.target.value })}
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div className="form-supplemental-info">
-                    Verifique se o número de telefone está correto. Não é possível alterá-lo depois de fazer o pedido.
-                  </div>
-
-                  <div className="form-row-sidebyside">
-                    <div className="form-textbox ddd-box">
-                      <label className="form-textbox-label">DDD</label>
-                      <input
-                        type="tel"
-                        className="form-textbox-input"
-                        value={billingForm.mobilePhoneAreaCode}
-                        onChange={e => setBillingForm({ ...billingForm, mobilePhoneAreaCode: e.target.value })}
-                      />
-                    </div>
-                    <div className="form-textbox flex-1">
-                      <label className="form-textbox-label">Celular</label>
-                      <input
-                        type="tel"
-                        className="form-textbox-input"
-                        value={billingForm.mobilePhone}
-                        onChange={e => setBillingForm({ ...billingForm, mobilePhone: e.target.value })}
-                      />
-                    </div>
-                  </div>
-                  <div className="form-supplemental-info">
-                    Verifique se o número de telefone está correto. Não é possível alterá-lo depois de fazer o pedido.
-                  </div>
-                </fieldset>
-
-                {/* Fieldset 2: Endereço de cobrança */}
-                <fieldset className="apple-form-fieldset">
-                  <legend className="apple-fieldset-legend">Endereço de cobrança</legend>
-
-                  <div className="form-textbox disabled">
-                    <label className="form-textbox-label form-textbox-eyebrow-label">País/Região</label>
-                    <input
-                      type="text"
-                      className="form-textbox-input form-textbox-entered"
-                      value="Brasil"
-                      disabled
-                    />
-                  </div>
-
-                  <div className="form-textbox">
-                    <label className="form-textbox-label form-textbox-eyebrow-label">Rua (Av, Pça, etc.) e número</label>
-                    <input
-                      type="text"
-                      className="form-textbox-input form-textbox-entered"
-                      value={billingForm.street}
-                      onChange={e => setBillingForm({ ...billingForm, street: e.target.value })}
-                      required
-                    />
-                  </div>
-
-                  <div className="form-textbox">
-                    <label className="form-textbox-label">apto, bloco, prédio (opcional)</label>
-                    <input
-                      type="text"
-                      className="form-textbox-input"
-                      value={billingForm.street2}
-                      onChange={e => setBillingForm({ ...billingForm, street2: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="form-row-sidebyside">
-                    <div className="form-textbox flex-1">
-                      <label className="form-textbox-label form-textbox-eyebrow-label">Cidade/Município</label>
-                      <input
-                        type="text"
-                        className="form-textbox-input form-textbox-entered"
-                        value={billingForm.city}
-                        onChange={e => setBillingForm({ ...billingForm, city: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div className="form-textbox flex-1">
-                      <label className="form-textbox-label">Bairro</label>
-                      <input
-                        type="text"
-                        className="form-textbox-input"
-                        value={billingForm.district}
-                        onChange={e => setBillingForm({ ...billingForm, district: e.target.value })}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form-dropdown">
-                    <label className="form-dropdown-label">Estado</label>
-                    <select
-                      className="form-dropdown-select"
-                      value={billingForm.state}
-                      onChange={e => setBillingForm({ ...billingForm, state: e.target.value })}
-                      required
-                    >
-                      <option value="">Selecionar um</option>
-                      {brazilianStates.map(st => (
-                        <option key={st} value={st}>{st}</option>
-                      ))}
-                    </select>
-                    <span className="form-dropdown-chevron" />
-                  </div>
-
-                  <div className="form-textbox">
-                    <label className="form-textbox-label form-textbox-eyebrow-label">CEP (xxxxx-xxx)</label>
-                    <input
-                      type="text"
-                      className="form-textbox-input form-textbox-entered"
-                      value={billingForm.postalCode}
-                      onChange={e => setBillingForm({ ...billingForm, postalCode: e.target.value })}
-                      required
-                    />
-                  </div>
-                </fieldset>
-
-                {/* Fieldset 3: Método de pagamento */}
-                <fieldset className="apple-form-fieldset">
-                  <legend className="apple-fieldset-legend">Método de pagamento</legend>
-
-                  <div className="form-textbox with-card-logo">
-                    <label className="form-textbox-label form-textbox-eyebrow-label">Número do cartão de crédito</label>
-                    <input
-                      type="text"
-                      className="form-textbox-input form-textbox-entered"
-                      value={billingForm.cardNumber}
-                      onChange={e => setBillingForm({ ...billingForm, cardNumber: e.target.value })}
-                      required
-                    />
-                    <div className="card-badge-inline">
-                      <span className="mastercard-circle red" />
-                      <span className="mastercard-circle yellow" />
-                    </div>
-                  </div>
-
-                  <div className="form-textbox">
-                    <label className="form-textbox-label form-textbox-eyebrow-label">Validade (MM/AA)</label>
-                    <input
-                      type="text"
-                      className="form-textbox-input form-textbox-entered"
-                      placeholder="MM/AA"
-                      value={billingForm.expiration}
-                      onChange={e => setBillingForm({ ...billingForm, expiration: e.target.value })}
-                      required
-                    />
-                  </div>
-                </fieldset>
-
-                <div className="apple-overlay-actions">
-                  <button type="submit" className="apple-overlay-save-btn">
-                    Salvar
-                  </button>
-                  <button
-                    type="button"
-                    className="apple-overlay-cancel-btn"
-                    onClick={() => setActiveModal(null)}
-                  >
-                    Cancelar
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
+      </Editable>}
     </div>
   )
 }

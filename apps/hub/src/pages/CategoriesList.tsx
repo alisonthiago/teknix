@@ -1,205 +1,30 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { Plus, GripVertical, MoreVertical, Copy, Trash2, Edit2, ExternalLink, Sparkles } from 'lucide-react'
+import { Plus, GripVertical, MoreVertical, Copy, Trash2, Edit2, ExternalLink, Zap } from 'lucide-react'
 import './Categories.css'
 
-interface Category {
-  id: string
-  name: string
-  slug: string
-  product_count?: number
-}
+type Rules = { brand?: string; name?: string; min_price?: number; max_price?: number; in_stock?: boolean }
+interface Category { id:string;name:string;slug:string;description?:string;parent_id?:string|null;category_type?:'manual'|'smart';rules?:Rules;product_count?:number;is_active?:boolean;show_in_menu?:boolean }
+type Product = { id:string;name?:string;brand?:string;category_id?:string;category?:string;price?:number;sale_price?:number;stock?:number;stock_quantity?:number }
+const blank={name:'',slug:'',description:'',parent_id:'',category_type:'manual' as 'manual'|'smart',brand:'',productName:'',minPrice:'',maxPrice:'',inStock:false,showInMenu:true}
+const slugify=(v:string)=>v.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')
+const CORE:Category[]=[['eletricas','Ferramentas Elétricas','ferramentas-eletricas'],['construcao','Construção e Obra','construcao-e-obra'],['automotivos','Equipamentos Automotivos','equipamentos-automotivos'],['pneumatica','Linha Pneumática','linha-pneumatica'],['bancada','Ferramentas Manuais e Bancada','ferramentas-manuais-e-bancada'],['lavagem','Lavagem e Limpeza','lavagem-e-limpeza'],['pintura','Pintura e Repintura','pintura-e-repintura'],['jardim','Jardim e Paisagismo','jardim-e-paisagismo'],['cargas','Movimentação de Cargas','movimentacao-de-cargas']].map(([id,name,slug])=>({id:`core-${id}`,name,slug,category_type:'manual',is_active:true,show_in_menu:true}))
 
-export default function CategoriesList() {
-  const [categories, setCategories] = useState<Category[]>([])
-  const [, setLoading] = useState(true)
-  const [showModal, setShowModal] = useState(false)
-  const [newCat, setNewCat] = useState({ name: '', slug: '', description: '' })
-  const [activeMenuId, setActiveMenuId] = useState<string | null>(null)
-
-  useEffect(() => {
-    fetchCategories()
-  }, [])
-
-  async function fetchCategories() {
-    try {
-      const { data } = await supabase.from('categories').select('*').order('name')
-      if (data && data.length > 0) {
-        setCategories(data)
-      } else {
-        // Mock fallback if DB empty
-        setCategories([
-          { id: '1', name: 'Ferramentas Elétricas', slug: 'ferramentas-eletricas', product_count: 24 },
-          { id: '2', name: 'Ferramentas Manuais', slug: 'ferramentas-manuais', product_count: 18 },
-          { id: '3', name: 'Iluminação & LEDs', slug: 'iluminacao-leds', product_count: 32 },
-          { id: '4', name: 'Acessórios & Discos', slug: 'acessorios-discos', product_count: 15 },
-          { id: '5', name: 'EPIs & Segurança', slug: 'epis-seguranca', product_count: 9 },
-        ])
-      }
-    } catch (e) {
-      console.error(e)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  async function handleCreateCategory() {
-    if (!newCat.name.trim()) return
-    const slug = newCat.slug || newCat.name.toLowerCase().replace(/\s+/g, '-')
-    try {
-      const { data, error } = await supabase.from('categories').insert({ name: newCat.name, slug, active: true }).select().single()
-      if (error) throw error
-      if (data) {
-        setCategories([...categories, data])
-      }
-    } catch (e) {
-      // Fallback
-      setCategories([...categories, { id: Date.now().toString(), name: newCat.name, slug, product_count: 0 }])
-    }
-    setShowModal(false)
-    setNewCat({ name: '', slug: '', description: '' })
-  }
-
-  function handleDeleteCategory(id: string) {
-    if (confirm('Deseja realmente excluir esta categoria?')) {
-      setCategories(categories.filter(c => c.id !== id))
-    }
-  }
-
-  return (
-    <div className="categories-page-container">
-      <div className="categories-wrapper">
-        
-        {/* Header */}
-        <div className="page-header">
-          <div className="header-info">
-            <h1>Categorias</h1>
-            <p>Para organizar seus produtos, crie categorias e subcategorias que aparecerão no menu da loja.</p>
-          </div>
-          <div className="header-actions">
-            <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-              <Plus size={16} /> Criar categoria
-            </button>
-          </div>
-        </div>
-
-        {/* Categories Tree */}
-        <div className="category-tree-card">
-          {categories.map(cat => (
-            <div key={cat.id} className="category-tree-item">
-              <div className="category-tree-left">
-                <GripVertical size={16} className="category-drag-handle" />
-                <span className="category-name">{cat.name}</span>
-                <span className="category-product-count">{cat.product_count || 0} produtos</span>
-              </div>
-
-              <div className="category-tree-right" style={{ position: 'relative' }}>
-                <button
-                  className="category-action-btn"
-                  title="Duplicar categoria"
-                  onClick={() => setCategories([...categories, { ...cat, id: Date.now().toString(), name: `${cat.name} (Cópia)` }])}
-                >
-                  <Copy size={15} />
-                </button>
-                <button
-                  className="category-action-btn"
-                  onClick={() => setActiveMenuId(activeMenuId === cat.id ? null : cat.id)}
-                  title="Opções"
-                >
-                  <MoreVertical size={15} />
-                </button>
-
-                {activeMenuId === cat.id && (
-                  <div
-                    style={{
-                      position: 'absolute',
-                      right: 0,
-                      top: 36,
-                      background: '#ffffff',
-                      border: '1px solid #e5e7eb',
-                      borderRadius: 8,
-                      boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
-                      zIndex: 100,
-                      width: 170,
-                      overflow: 'hidden'
-                    }}
-                  >
-                    <button
-                      style={{ width: '100%', padding: '8px 12px', border: 'none', background: 'none', textAlign: 'left', fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
-                      onClick={() => { setActiveMenuId(null); alert(`Editar ${cat.name}`) }}
-                    >
-                      <Edit2 size={13} /> Editar categoria
-                    </button>
-                    <button
-                      style={{ width: '100%', padding: '8px 12px', border: 'none', background: 'none', textAlign: 'left', fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
-                      onClick={() => { setActiveMenuId(null); setShowModal(true) }}
-                    >
-                      <Plus size={13} /> Criar subcategoria
-                    </button>
-                    <button
-                      style={{ width: '100%', padding: '8px 12px', border: 'none', background: 'none', textAlign: 'left', fontSize: '0.82rem', cursor: 'pointer', color: '#ef4444', display: 'flex', alignItems: 'center', gap: 6 }}
-                      onClick={() => { setActiveMenuId(null); handleDeleteCategory(cat.id) }}
-                    >
-                      <Trash2 size={13} /> Excluir
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div style={{ textAlign: 'center', marginTop: 10 }}>
-          <a href="#" style={{ fontSize: '0.82rem', color: '#2563eb', textDecoration: 'none', fontWeight: 600 }}>
-            Mais sobre criar e organizar as categorias <ExternalLink size={12} style={{ verticalAlign: 'middle' }} />
-          </a>
-        </div>
-
-      </div>
-
-      {/* Modal Criar Categoria */}
-      {showModal && (
-        <div className="modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 460 }}>
-            <div className="modal-header">
-              <h3 style={{ margin: 0, fontSize: '1.1rem' }}>Criar Nova Categoria</h3>
-            </div>
-            <div className="modal-body" style={{ gap: 14 }}>
-              <div className="form-group">
-                <label style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  Nome da Categoria *
-                  <button type="button" className="btn-ai-generate" onClick={() => setNewCat({ ...newCat, name: 'Ferramentas de Alta Performance' })}>
-                    <Sparkles size={12} /> Gerar com IA
-                  </button>
-                </label>
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="Ex: Parafusadeiras"
-                  value={newCat.name}
-                  onChange={(e) => setNewCat({ ...newCat, name: e.target.value })}
-                />
-              </div>
-
-              <div className="form-group">
-                <label>URL amigável (Slug)</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="parafusadeiras"
-                  value={newCat.slug}
-                  onChange={(e) => setNewCat({ ...newCat, slug: e.target.value })}
-                />
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 10 }}>
-                <button type="button" className="btn-secondary-action" onClick={() => setShowModal(false)}>Cancelar</button>
-                <button type="button" className="btn-primary-action" onClick={handleCreateCategory}>Salvar Categoria</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  )
+export default function CategoriesList(){
+  const [categories,setCategories]=useState<Category[]>([]); const [products,setProducts]=useState<Product[]>([]); const [loading,setLoading]=useState(true)
+  const [showModal,setShowModal]=useState(false); const [editingId,setEditingId]=useState<string|null>(null); const [form,setForm]=useState(blank); const [activeMenuId,setActiveMenuId]=useState<string|null>(null); const [saving,setSaving]=useState(false)
+  useEffect(()=>{void fetchData()},[])
+  async function fetchData(){setLoading(true);let [cats,prods]=await Promise.all([supabase.from('categories').select('*').order('sort_order',{ascending:true}),supabase.from('products').select('id,name,brand,category_id,category,price,sale_price,stock,stock_quantity')]);if(cats.error)cats=await supabase.from('categories').select('*').order('name');if(prods.error)prods=await supabase.from('products').select('*');const stored=(cats.data||[]) as Category[];setCategories([...stored,...CORE.filter(core=>!stored.some(cat=>cat.slug===core.slug))]);setProducts((prods.data||[]) as Product[]);setLoading(false)}
+  function matches(cat:Category,p:Product){if(cat.category_type!=='smart')return p.category_id===cat.id||slugify(p.category||'')===cat.slug;const r=cat.rules||{};const price=Number(p.sale_price??p.price??0);return(!r.brand||(p.brand||'').toLowerCase().includes(r.brand.toLowerCase()))&&(!r.name||(p.name||'').toLowerCase().includes(r.name.toLowerCase()))&&(r.min_price==null||price>=r.min_price)&&(r.max_price==null||price<=r.max_price)&&(!r.in_stock||Number(p.stock??p.stock_quantity??0)>0)}
+  const rows=useMemo(()=>categories.map(c=>({...c,product_count:products.filter(p=>matches(c,p)).length})),[categories,products])
+  function openCreate(parentId=''){setEditingId(null);setForm({...blank,parent_id:parentId});setShowModal(true)}
+  function openEdit(c:Category){const r=c.rules||{};setEditingId(c.id);setForm({name:c.name,slug:c.slug,description:c.description||'',parent_id:c.parent_id||'',category_type:c.category_type||'manual',brand:r.brand||'',productName:r.name||'',minPrice:r.min_price?.toString()||'',maxPrice:r.max_price?.toString()||'',inStock:Boolean(r.in_stock),showInMenu:c.show_in_menu!==false});setShowModal(true);setActiveMenuId(null)}
+  async function save(){if(!form.name.trim())return;setSaving(true);const rules:Rules={};if(form.brand)rules.brand=form.brand;if(form.productName)rules.name=form.productName;if(form.minPrice)rules.min_price=Number(form.minPrice);if(form.maxPrice)rules.max_price=Number(form.maxPrice);if(form.inStock)rules.in_stock=true;const payload={name:form.name.trim(),slug:form.slug||slugify(form.name),description:form.description,parent_id:form.parent_id||null,category_type:form.category_type,rules,active:true,is_active:true,show_in_menu:form.showInMenu,updated_at:new Date().toISOString()};const isStoredEdit=Boolean(editingId&&!editingId.startsWith('core-'));let result=isStoredEdit?await supabase.from('categories').update(payload).eq('id',editingId).select().single():await supabase.from('categories').insert({...payload,created_at:new Date().toISOString()}).select().single();if(result.error?.message.includes('schema cache')){const base={name:payload.name,slug:payload.slug,active:true};result=isStoredEdit?await supabase.from('categories').update(base).eq('id',editingId).select().single():await supabase.from('categories').insert(base).select().single()}setSaving(false);if(result.error)return alert(`Erro ao salvar categoria: ${result.error.message}`);await fetchData();setShowModal(false)}
+  async function remove(c:Category){if(c.id.startsWith('core-'))return alert('Esta é uma categoria-base da loja. Edite-a para gravá-la no banco antes de alterar sua estrutura.');if(!confirm(`Excluir a categoria “${c.name}”? Os produtos não serão excluídos.`))return;const {error}=await supabase.from('categories').delete().eq('id',c.id);if(error)return alert(`Erro ao excluir: ${error.message}`);setCategories(v=>v.filter(x=>x.id!==c.id));setActiveMenuId(null)}
+  async function duplicate(c:Category){const {id:_,product_count:__,...copy}=c;const {error}=await supabase.from('categories').insert({...copy,name:`${c.name} (Cópia)`,slug:`${c.slug}-copia-${Date.now()}`,show_in_menu:false});if(error)return alert(`Erro ao duplicar: ${error.message}`);await fetchData()}
+  const smartPreview:Category={id:editingId||'',name:form.name,slug:form.slug,category_type:'smart',rules:{brand:form.brand||undefined,name:form.productName||undefined,min_price:form.minPrice?Number(form.minPrice):undefined,max_price:form.maxPrice?Number(form.maxPrice):undefined,in_stock:form.inStock}}
+  return <div className="categories-page-container"><div className="categories-wrapper"><div className="page-header"><div className="header-info"><h1>Categorias</h1><p>Uma única origem organiza menu, filtros, busca, breadcrumbs e vitrines da loja.</p></div><div className="header-actions"><button className="btn btn-primary" onClick={()=>openCreate()}><Plus size={16}/> Criar categoria</button></div></div>
+  <div className="category-tree-card">{loading?<div className="categories-loading">Carregando categorias…</div>:rows.map(cat=><div key={cat.id} className="category-tree-item"><div className="category-tree-left"><GripVertical size={16} className="category-drag-handle"/><span className="category-name">{cat.name}</span><span className={`category-mode ${cat.category_type==='smart'?'smart':''}`}>{cat.category_type==='smart'?<><Zap size={11}/> Inteligente</>:'Manual'}</span><span className="category-product-count">{cat.product_count||0} produtos</span><code className="category-id">ID {cat.id.slice(0,8)}</code></div><div className="category-tree-right"><button className="category-action-btn" title="Duplicar categoria" onClick={()=>void duplicate(cat)}><Copy size={15}/></button><button className="category-action-btn" onClick={()=>setActiveMenuId(activeMenuId===cat.id?null:cat.id)}><MoreVertical size={15}/></button>{activeMenuId===cat.id&&<div className="category-menu"><button onClick={()=>openEdit(cat)}><Edit2 size={13}/> Editar categoria</button><button onClick={()=>openCreate(cat.id)}><Plus size={13}/> Criar subcategoria</button><button className="danger" onClick={()=>void remove(cat)}><Trash2 size={13}/> Excluir</button></div>}</div></div>)}</div>
+  <div className="categories-help"><a href="https://developers.google.com/search/docs/appearance/structured-data/product" target="_blank" rel="noreferrer">Mais sobre organizar categorias <ExternalLink size={12}/></a></div></div>
+  {showModal&&<div className="modal-overlay" onClick={()=>setShowModal(false)}><div className="modal category-editor-modal" onClick={e=>e.stopPropagation()}><div className="modal-header"><div><h3>{editingId?'Editar categoria':'Criar categoria'}</h3><p>A mesma categoria será usada em toda a loja.</p></div></div><div className="modal-body category-form"><label>Nome *<input className="form-input" value={form.name} onChange={e=>setForm({...form,name:e.target.value,slug:editingId?form.slug:slugify(e.target.value)})}/></label><label>URL amigável<input className="form-input" value={form.slug} onChange={e=>setForm({...form,slug:slugify(e.target.value)})}/></label><label>Categoria superior<select className="form-input" value={form.parent_id} onChange={e=>setForm({...form,parent_id:e.target.value})}><option value="">Nenhuma (categoria principal)</option>{categories.filter(c=>c.id!==editingId).map(c=><option value={c.id} key={c.id}>{c.name}</option>)}</select></label><label>Tipo<select className="form-input" value={form.category_type} onChange={e=>setForm({...form,category_type:e.target.value as 'manual'|'smart'})}><option value="manual">Manual — produtos vinculados pelo ID</option><option value="smart">Inteligente — produtos incluídos por regras</option></select></label>{form.category_type==='smart'&&<fieldset className="smart-rules"><legend>Regras automáticas</legend><label>Marca contém<input className="form-input" value={form.brand} onChange={e=>setForm({...form,brand:e.target.value})} placeholder="Ex: Makita"/></label><label>Nome contém<input className="form-input" value={form.productName} onChange={e=>setForm({...form,productName:e.target.value})} placeholder="Ex: furadeira"/></label><div><label>Preço mínimo<input type="number" className="form-input" value={form.minPrice} onChange={e=>setForm({...form,minPrice:e.target.value})}/></label><label>Preço máximo<input type="number" className="form-input" value={form.maxPrice} onChange={e=>setForm({...form,maxPrice:e.target.value})}/></label></div><label className="check"><input type="checkbox" checked={form.inStock} onChange={e=>setForm({...form,inStock:e.target.checked})}/> Somente produtos em estoque</label><p>Prévia: {products.filter(p=>matches(smartPreview,p)).length} produtos atendem às regras.</p></fieldset>}<label className="check"><input type="checkbox" checked={form.showInMenu} onChange={e=>setForm({...form,showInMenu:e.target.checked})}/> Exibir no menu principal</label><div className="category-modal-actions"><button className="btn-secondary-action" onClick={()=>setShowModal(false)}>Cancelar</button><button className="btn-primary-action" onClick={()=>void save()} disabled={saving}>{saving?'Salvando…':'Salvar categoria'}</button></div></div></div></div>}</div>
 }

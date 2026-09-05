@@ -31,6 +31,9 @@ const icons: Record<string, React.ReactElement> = {
   palette: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="20" height="20"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12" r="2.5"/><path d="M12 2C6.49 2 2 6.49 2 12s4.49 10 10 10 10-4.49 10-10S17.51 2 12 2z"/></svg>,
   media: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="20" height="20"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>,
   template: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="20" height="20"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="3" x2="9" y2="21"/></svg>,
+  search: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="20" height="20"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
+  blog: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="20" height="20"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>,
+  ads: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="20" height="20"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>,
   // Logos oficiais em SVG
   mercadoLivreLogo: <MercadoLivreLogo size={22} />,
   shopeeLogo: <ShopeeLogo size={22} />,
@@ -42,7 +45,7 @@ const icons: Record<string, React.ReactElement> = {
 
 // ─── Componente principal ──────────────────────────────────────────────────
 export default function HubLayout() {
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [showUserDropdown, setShowUserDropdown] = useState(false)
   const location = useLocation()
 
@@ -140,8 +143,8 @@ export default function HubLayout() {
       section: 'Conteúdo',
       items: [
         { icon: 'layout', label: 'Páginas', path: '/hub/paginas', perm: 'pages.view' },
-        { icon: 'palette', label: 'Temas', path: '/hub/temas', perm: 'themes.view' },
-        { icon: 'media', label: 'Mídia', path: '/hub/media', perm: 'media.view' },
+        { icon: 'blog', label: 'Blog', path: '/hub/blog', perm: 'pages.view' },
+        { icon: 'ads', label: 'Ads', path: '/hub/ads', perm: 'pages.view' },
       ]
     },
     {
@@ -185,7 +188,8 @@ export default function HubLayout() {
           <button
             className="sidebar-toggle"
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            aria-label="Toggle sidebar"
+            aria-label={sidebarOpen ? 'Recolher menu' : 'Expandir menu'}
+            aria-expanded={sidebarOpen}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" width="18" height="18">
               {sidebarOpen ? <path d="M15 18l-6-6 6-6"/> : <path d="M9 18l6-6-6-6"/>}
@@ -350,12 +354,10 @@ function getPageTitle(pathname: string): string {
   if (pathname.includes('/usuarios')) return 'Usuários'
   if (pathname.includes('/configuracoes')) return 'Configurações'
   if (pathname.includes('/estatisticas')) return 'Estatísticas'
-  if (pathname.includes('/paginas/editar')) return 'Editor de página'
-  if (pathname.includes('/paginas/nova')) return 'Nova página'
   if (pathname.includes('/paginas')) return 'Páginas'
-  if (pathname.includes('/temas/editar')) return 'Editor de tema'
-  if (pathname.includes('/temas/novo')) return 'Novo tema'
-  if (pathname.includes('/temas')) return 'Temas'
-  if (pathname.includes('/media')) return 'Biblioteca de Mídia'
+  if (pathname.includes('/blog/add')) return 'Novo post'
+  if (pathname.includes('/blog/editar')) return 'Editar post'
+  if (pathname.includes('/blog')) return 'Blog'
+  if (pathname.includes('/ads')) return 'Anúncios & Banners'
   return 'HUB'
 }

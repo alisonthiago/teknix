@@ -1,0 +1,10 @@
+alter table if exists public.categories add column if not exists description text;
+alter table if exists public.categories add column if not exists parent_id uuid references public.categories(id) on delete set null;
+alter table if exists public.categories add column if not exists category_type text not null default 'manual' check (category_type in ('manual','smart'));
+alter table if exists public.categories add column if not exists rules jsonb not null default '{}'::jsonb;
+alter table if exists public.categories add column if not exists is_active boolean not null default true;
+alter table if exists public.categories add column if not exists show_in_menu boolean not null default true;
+alter table if exists public.categories add column if not exists sort_order integer not null default 0;
+alter table if exists public.categories add column if not exists updated_at timestamptz not null default now();
+create unique index if not exists categories_slug_unique_idx on public.categories(slug);
+create index if not exists categories_parent_idx on public.categories(parent_id,sort_order);

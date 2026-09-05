@@ -1,0 +1,143 @@
+.ads-editor-page{max-width:1180px;margin:0 auto;color:#111827}.ads-editor-header{display:flex;justify-content:space-between;gap:24px;align-items:flex-start;margin-bottom:24px}.ads-editor-header h1{font-size:26px;margin:4px 0}.ads-editor-header p,.ads-card-heading p{color:#6b7280;margin:0}.ads-editor-kicker{font-size:11px;font-weight:800;color:#83b700;letter-spacing:.12em}.ads-editor-actions{display:flex;gap:10px}.ads-btn{border:0;border-radius:9px;padding:11px 18px;font-weight:700;cursor:pointer}.ads-btn.primary{background:#111827;color:#fff}.ads-btn.secondary{background:#fff;border:1px solid #d1d5db}.ads-editor-form{display:grid;gap:18px}.ads-editor-card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:24px}.ads-editor-card h2{font-size:18px;margin:0 0 18px}.ads-fields{display:grid;gap:16px}.ads-fields.two{grid-template-columns:1fr 1fr}.ads-fields.three{grid-template-columns:1fr 1fr 1fr}.ads-fields label{display:grid;gap:7px;font-size:13px;font-weight:700}.ads-fields input,.ads-fields select{height:44px;border:1px solid #d1d5db;border-radius:8px;padding:0 12px;font:inherit;background:#fff}.ads-size-guide{margin-top:18px;border-radius:10px;background:#f7f8fa;padding:14px;display:grid;grid-template-columns:1.5fr repeat(3,1fr);gap:10px;align-items:center}.ads-size-guide>div{display:grid;gap:3px}.ads-size-guide span{font-size:11px;color:#6b7280}.ads-size-guide b{font-size:13px}.ads-card-heading{display:flex;justify-content:space-between;gap:20px}.ads-type-tabs{display:flex;background:#f3f4f6;border-radius:9px;padding:4px}.ads-type-tabs button{border:0;background:transparent;border-radius:7px;padding:9px 13px;font-weight:700;cursor:pointer}.ads-type-tabs button.active{background:#111827;color:#fff}.ads-interval{display:flex;align-items:center;gap:8px;margin:18px 0;font-size:13px;font-weight:700}.ads-interval input{width:70px;height:38px;border:1px solid #d1d5db;border-radius:7px;padding:0 8px}.ads-slide{border:1px solid #e5e7eb;border-radius:12px;padding:18px;margin-top:16px}.ads-slide-title{display:flex;justify-content:space-between;margin-bottom:14px}.ads-slide-title button{border:0;background:none;color:#dc2626;cursor:pointer}.ads-device-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}.ads-device-card{border:1px solid #dfe3e8;border-radius:10px;padding:12px}.ads-device-head{display:flex;justify-content:space-between;gap:8px;margin-bottom:9px;font-size:12px}.ads-device-head span{color:#6b7280}.ads-upload{width:100%;height:145px;border:1px dashed #b5f500;background:#fafcf2;border-radius:8px;overflow:hidden;cursor:pointer}.ads-upload img{width:100%;height:100%;object-fit:contain}.ads-upload span{font-weight:700;color:#4b5563}.ads-device-toggle{display:flex;align-items:center;gap:7px;margin-top:10px;font-size:12px}.ads-add-slide{width:100%;margin-top:14px;padding:12px;border:1px dashed #9ca3af;background:#fafafa;border-radius:9px;font-weight:700;cursor:pointer}.ads-active-toggle{display:flex!important;align-items:center;align-self:end;height:44px}.ads-active-toggle input{height:auto!important}
+@media(max-width:800px){.ads-editor-header{display:block}.ads-editor-actions{margin-top:16px}.ads-editor-actions .ads-btn{flex:1}.ads-fields.two,.ads-fields.three,.ads-device-grid{grid-template-columns:1fr}.ads-size-guide{grid-template-columns:1fr}.ads-card-heading{display:block}.ads-type-tabs{margin-top:14px}.ads-editor-card{padding:16px}.ads-upload{height:180px}}
+.ads-editor-page{width:100%;min-width:0;box-sizing:border-box}.ads-editor-page *{box-sizing:border-box}
+.ads-promo-settings{margin-bottom:18px}.ads-promo-settings>p{margin:-8px 0 18px;color:#6b7280}.ads-promo-settings input[type=color]{padding:4px;cursor:pointer}
+.ads-carousel-options{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin:18px 0;padding:14px;background:#f7f8fa;border:1px solid #e5e7eb;border-radius:10px}.ads-carousel-options>label{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:700}.ads-carousel-options .ads-interval{margin:0}.ads-carousel-options select{height:38px;border:1px solid #d1d5db;border-radius:7px;background:#fff;padding:0 9px}.ads-carousel-options input[type=checkbox]{accent-color:#111827}
+
+/* Validação de tamanho no card de dispositivo */
+.ads-device-card.has-error { border-color: #ef4444; background: #fffafa; }
+.ads-device-card.has-error .ads-upload { border-color: #ef4444; background: #fef2f2; }
+.ads-device-alert { margin-top: 8px; padding: 8px 10px; border-radius: 7px; font-size: 11px; line-height: 1.4; }
+.ads-device-alert.error { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+.ads-device-alert.success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; font-weight: 600; }
+.ads-device-alert.warning { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+.ads-device-alert .alert-badge { font-weight: 800; margin-bottom: 3px; display: flex; align-items: center; gap: 4px; }
+.ads-device-alert .alert-details { display: flex; flex-direction: column; gap: 2px; margin: 4px 0; }
+.ads-device-alert .alert-action { margin: 4px 0 0; font-weight: 700; color: #b91c1c; }
+.ads-device-hint { margin-top: 6px; font-size: 11px; color: #64748b; text-align: center; }
+.ads-upload-wrapper { position: relative; width: 100%; }
+.ads-remove-image-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #ef4444;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  transition: all 0.15s ease;
+  z-index: 5;
+}
+.ads-remove-image-btn:hover {
+  background: #dc2626;
+  transform: scale(1.05);
+}
+
+/* Botão Publicado & Toast inferior */
+.ads-btn.published { background: #15803d !important; color: #ffffff !important; }
+.ads-bottom-toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #0f172a;
+  color: #ffffff;
+  padding: 14px 20px;
+  border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  z-index: 99999;
+  animation: toastSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+@keyframes toastSlideUp {
+  from { opacity: 0; transform: translate(-50%, 20px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+.ads-toast-content { display: flex; align-items: center; gap: 12px; }
+.ads-toast-icon { color: #83b700; flex-shrink: 0; }
+.ads-toast-content strong { display: block; font-size: 14px; color: #ffffff; }
+.ads-toast-content p { margin: 2px 0 0; font-size: 12px; color: #94a3b8; }
+.ads-toast-actions { display: flex; align-items: center; gap: 8px; margin-left: 8px; }
+.ads-toast-btn { background: rgba(255, 255, 255, 0.15); border: none; color: #ffffff; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+.ads-toast-btn:hover { background: rgba(255, 255, 255, 0.25); }
+.ads-toast-close { background: transparent; border: none; color: #94a3b8; cursor: pointer; display: flex; align-items: center; padding: 4px; }
+.ads-toast-close:hover { color: #ffffff; }
+
+/* Container dos 3 Blocos do Meio da Tela */
+.ads-middle-blocks-intro {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.ads-middle-blocks-intro h3 { margin: 0 0 4px; font-size: 15px; color: #0f172a; }
+.ads-middle-blocks-intro p { margin: 0; font-size: 12px; color: #64748b; }
+.ads-middle-blocks-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+@media (max-width: 1080px) {
+  .ads-middle-blocks-grid { grid-template-columns: 1fr; }
+}
+.ads-middle-block-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+.ads-middle-block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+.ads-middle-block-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ads-block-pill {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+.ads-block-pill.pos-1 { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+.ads-block-pill.pos-2 { background: #f7fee7; color: #4d7c0f; border: 1px solid #d9f99d; }
+.ads-block-pill.pos-3 { background: #f5f3ff; color: #6d28d9; border: 1px solid #ddd6fe; }
+.ads-middle-block-card .ads-device-grid {
+  grid-template-columns: 1fr;
+}
+.ads-middle-block-card .ads-upload {
+  height: 120px;
+}
+
+.ads-upload video{width:100%;height:100%;object-fit:contain;background:#111}
+.ads-field-error{color:#b42318;font-size:11px;font-weight:600}.ads-fields input[aria-invalid=true]{border-color:#ef4444;box-shadow:0 0 0 3px rgba(239,68,68,.1)}
+.ads-placement-preview{display:grid;grid-template-columns:230px 1fr;gap:16px;align-items:center;margin-top:18px;padding:14px;border:1px solid #e2e8f0;border-radius:10px;background:#f8fafc}.ads-placement-preview p{margin:4px 0 0;color:#64748b;font-size:12px}.ads-preview-browser{display:grid;gap:3px;padding:7px;border:1px solid #cbd5e1;border-radius:7px;background:#fff}.ads-preview-browser span{display:grid;place-items:center;min-height:16px;border-radius:3px;background:#eef1f4;color:#64748b;font-size:8px}.ads-preview-browser .ads-preview-slot{background:#b5f500;color:#111827;font-weight:800;min-height:24px}.preview-home-hero .ads-preview-slot,.preview-global-header .ads-preview-slot{grid-row:2}.preview-home-middle .ads-preview-slot,.preview-middle_screen .ads-preview-slot,.preview-product-middle .ads-preview-slot,.preview-blog-middle .ads-preview-slot{grid-row:3}.preview-home-footer .ads-preview-slot,.preview-product-footer .ads-preview-slot,.preview-blog-footer .ads-preview-slot,.preview-global-footer .ads-preview-slot{grid-row:5}.ads-width-mode{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:14px;padding:12px 14px;border:1px solid #e5e7eb;border-radius:9px}.ads-width-mode label{display:flex;align-items:center;gap:6px;font-size:12px}.ads-width-mode span{color:#6b7280;font-size:11px}
+@media(max-width:700px){.ads-placement-preview{grid-template-columns:1fr}.ads-preview-browser{max-width:280px}}
+
+

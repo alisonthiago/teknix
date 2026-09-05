@@ -1,381 +1,811 @@
+import { Editable } from '../components/page-widgets/PageWidgets'
 /* ==========================================================================
-   TEKNIX SITE — PÁGINA DE PEDIDOS OFICIAL (1:1 PADRÃO APPLE STORE ORDER LIST)
-   Referência: https://secure8.store.apple.com/br/shop/order/list
+   TEKNIX SITE — HISTÓRICO DE PEDIDOS OFICIAL (1:1 PADRÃO APPLE STORE)
+   Referência de design: Identidade Oficial TEKNIX / Apple Store
+   Integrado a auth, Supabase orders, tracking, NF-e e CartContext
    ========================================================================== */
 
-import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useEffect, useMemo } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
-import { getOrdersByUserId, type Order } from '../services/customer'
+import { getOrdersByUserId, type Order as DbOrder } from '../services/customer'
 import {
-  ExternalLink, ChevronDown, Truck, X, Search
+  Package,
+  Truck,
+  CheckCircle2,
+  Clock,
+  ChevronDown,
+  ChevronUp,
+  Search,
+  Copy,
+  Check,
+  FileText,
+  HelpCircle,
+  ShoppingBag,
+  ExternalLink,
+  MapPin,
+  CreditCard,
+  X,
+  MessageSquare
 } from 'lucide-react'
 import './OrdersList.css'
 
-export default function OrdersList() {
-  const { user } = useAuth()
-  const [orders, setOrders] = useState<Order[]>([])
-  const [loading, setLoading] = useState(true)
-  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null)
-  const [faqSectionOpen, setFaqSectionOpen] = useState(true)
-  const [showFindOrderModal, setShowFindOrderModal] = useState(false)
-  const [findOrderNumber, setFindOrderNumber] = useState('')
-  const [findOrderEmail, setFindOrderEmail] = useState('')
-  const [searchResultMsg, setSearchResultMsg] = useState<string | null>(null)
+interface OrderItemDisplay {
+  id: string
+  title: string
+  sku: string
+  price: number
+  quantity: number
+  img: string
+  link: string
+}
 
+interface OrderDisplay {
+  id: string
+  orderNumber: string
+  date: string
+  timestamp: number
+  status: 'delivered' | 'in_transit' | 'preparing' | 'canceled'
+  statusLabel: string
+  statusMessage: string
+  progressStep: number // 1: recebido, 2: pago/preparando, 3: em transporte, 4: entregue
+  trackingCode?: string
+  trackingUrl?: string
+  nfeKey?: string
+  carrierName?: string
+  shippingAddress: {
+    name: string
+    street: string
+    number: string
+    neighborhood: string
+    city: string
+    state: string
+    cep: string
+  }
+  payment: {
+    method: string
+    subtotal: number
+    shipping: number
+    discount: number
+    total: number
+  }
+  items: OrderItemDisplay[]
+}
+
+
+function formatCurrency(val: number) {
+  return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+}
+
+export default function OrdersList() {
+  const { user, loading: authLoading } = useAuth()
+  const navigate = useNavigate()
+
+  const [orders, setOrders] = useState<OrderDisplay[]>([])
+  const [loadError, setLoadError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [activeTab, setActiveTab] = useState<'all' | 'in_transit' | 'delivered' | 'canceled'>('all')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [expandedOrders, setExpandedOrders] = useState<Record<string, boolean>>({})
+
+  // Modais de Nota Fiscal e Suporte
+  const [activeNfeKey, setActiveNfeKey] = useState<string | null>(null)
+  const [showHelpModal, setShowHelpModal] = useState<OrderDisplay | null>(null)
+  const [copiedKey, setCopiedKey] = useState(false)
+  const [copiedTracking, setCopiedTracking] = useState<string | null>(null)
+
+  // Carrega pedidos reais do usuário do Supabase
   useEffect(() => {
-    loadOrders()
+    setOrders([])
+    setLoadError('')
+    if (!user) { setLoading(false); return }
+    let isMounted = true
+    setLoading(true)
+
+    getOrdersByUserId(user.id)
+      .then((dbOrders: DbOrder[]) => {
+        if (!isMounted) return
+        if (dbOrders && dbOrders.length > 0) {
+          const mapped: OrderDisplay[] = dbOrders.map((o) => {
+            const rawStatus = (o.status || 'pending').toLowerCase()
+            let status: OrderDisplay['status'] = 'preparing'
+            let statusLabel = 'Processando'
+            let statusMessage = 'Aguardando confirmação do pedido.'
+            let progressStep = 1
+            if (['paid', 'preparing', 'processing'].includes(rawStatus)) {
+              statusMessage = 'Seu pedido está sendo preparado para envio.'
+              progressStep = 2
+            }
+
+            if (rawStatus === 'delivered') {
+              status = 'delivered'
+              statusLabel = 'Entregue'
+              statusMessage = 'Entrega finalizada com sucesso.'
+              progressStep = 4
+            } else if (rawStatus === 'shipped' || rawStatus === 'in_transit') {
+              status = 'in_transit'
+              statusLabel = 'A caminho'
+              statusMessage = o.delivery_estimate ? `Previsão: ${o.delivery_estimate}` : 'Pacote em trânsito para o seu endereço.'
+              progressStep = 3
+            } else if (rawStatus === 'canceled' || rawStatus === 'cancelled') {
+              status = 'canceled'
+              statusLabel = 'Cancelado'
+              statusMessage = 'Este pedido foi cancelado.'
+              progressStep = 1
+            }
+
+            const items: OrderItemDisplay[] = (o.items || []).map((it, idx) => ({
+              id: it.id || `item-${idx}`,
+              title: it.product_name || 'Produto TEKNIX',
+              sku: it.product_sku || 'Não informado',
+              price: Number(it.price || 0),
+              quantity: Number(it.quantity || 1),
+              img: it.product_image || '',
+              link: it.product_id ? `/produtos/${encodeURIComponent(it.product_id)}` : '/produtos'
+            }))
+
+            const dateStr = o.created_at
+              ? new Date(o.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })
+              : 'Recente'
+
+            return {
+              id: o.order_number || o.id,
+              orderNumber: o.order_number || o.id,
+              date: dateStr,
+              timestamp: o.created_at ? new Date(o.created_at).getTime() : Date.now(),
+              status,
+              statusLabel,
+              statusMessage,
+              progressStep,
+              trackingCode: o.tracking_code || undefined,
+              trackingUrl: o.tracking_code ? `https://rastreamento.correios.com.br` : undefined,
+              shippingAddress: {
+                name: o.customer_name || user.user_metadata?.full_name || 'Cliente TEKNIX',
+                street: o.shipping_address?.street || o.delivery_address || 'Endereço não informado',
+                number: o.shipping_address?.number || '',
+                neighborhood: o.shipping_address?.neighborhood || '',
+                city: o.shipping_address?.city || '',
+                state: o.shipping_address?.state || '',
+                cep: o.shipping_address?.zip_code || ''
+              },
+              payment: {
+                method: o.payment_method === 'pix' ? 'Pix' : o.payment_method === 'credit_card' ? 'Cartão de Crédito' : 'Pagamento Online',
+                subtotal: Number(o.subtotal ?? o.total ?? 0),
+                shipping: Number(o.shipping_cost ?? o.shipping ?? 0),
+                discount: Number(o.discount || 0),
+                total: Number(o.total || 0)
+              },
+              items
+            }
+          })
+
+          setOrders(mapped)
+        }
+      })
+      .catch((err) => {
+        if (isMounted) setLoadError('Não foi possível carregar seus pedidos. Tente novamente mais tarde.')
+        console.warn('Erro ao carregar pedidos do usuário:', err)
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false)
+      })
+
+    return () => {
+      isMounted = false
+    }
   }, [user])
 
-  async function loadOrders() {
-    setLoading(true)
-    if (user) {
-      try {
-        const ords = await getOrdersByUserId(user.id)
-        setOrders(ords)
-      } catch (err) {
-        console.error('Erro ao carregar pedidos:', err)
-      } finally {
-        setLoading(false)
+  // Filtragem por tab e busca
+  const filteredOrders = useMemo(() => {
+    return orders.filter((order) => {
+      // Filtro de tab
+      if (activeTab === 'in_transit' && order.status !== 'in_transit' && order.status !== 'preparing') {
+        return false
       }
-    } else {
-      // Modo demonstração com dados de exemplo
-      setTimeout(() => {
-        setOrders([
-          {
-            id: 'W849204128',
-            user_id: 'demo-user',
-            customer_name: 'Alison Thiago',
-            total: 14999.00,
-            status: 'paid',
-            payment_method: 'credit_card',
-            payment_status: 'approved',
-            tracking_code: 'BR948291048TK',
-            created_at: '2026-08-25T14:32:00Z',
-            items: [
-              {
-                id: 'item-1',
-                order_id: 'W849204128',
-                product_id: 'prod-1',
-                product_name: 'TEKNIX Pro Master Max — 256GB Grafite',
-                product_image: 'https://store.storeimages.cdn-apple.com/1/as-images.apple.com/is/iphone-16-pro-finish-select-202409-6-9inch-blacktitanium?wid=5120&hei=2880&fmt=p-jpg&qlt=80',
-                quantity: 1,
-                price: 14999.00
-              }
-            ]
-          },
-          {
-            id: 'W719402849',
-            user_id: 'demo-user',
-            customer_name: 'Alison Thiago',
-            total: 4599.00,
-            status: 'delivered',
-            payment_method: 'pix',
-            payment_status: 'approved',
-            tracking_code: 'BR719402849TK',
-            created_at: '2026-07-12T10:15:00Z',
-            items: [
-              {
-                id: 'item-2',
-                order_id: 'W719402849',
-                product_id: 'prod-2',
-                product_name: 'TEKNIX AirPods Pro 3 Max',
-                product_image: 'https://store.storeimages.cdn-apple.com/1/as-images.apple.com/is/airpods-pro-2-hero-select-202409?wid=5120&hei=2880&fmt=p-jpg&qlt=80',
-                quantity: 1,
-                price: 4599.00
-              }
-            ]
-          }
-        ])
-        setLoading(false)
-      }, 200)
+      if (activeTab === 'delivered' && order.status !== 'delivered') {
+        return false
+      }
+      if (activeTab === 'canceled' && order.status !== 'canceled') {
+        return false
+      }
+
+      // Filtro de busca
+      if (!searchTerm.trim()) return true
+      const term = searchTerm.toLowerCase().trim()
+      const matchNumber = order.orderNumber.toLowerCase().includes(term)
+      const matchTracking = order.trackingCode?.toLowerCase().includes(term)
+      const matchItem = order.items.some((i) => i.title.toLowerCase().includes(term) || i.sku.toLowerCase().includes(term))
+      return matchNumber || matchTracking || matchItem
+    })
+  }, [orders, activeTab, searchTerm])
+
+  const toggleOrder = (orderId: string) => {
+    setExpandedOrders((prev) => ({
+      ...prev,
+      [orderId]: !prev[orderId]
+    }))
+  }
+
+  const handleCopyNfe = (key: string) => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(key)
+      setCopiedKey(true)
+      setTimeout(() => setCopiedKey(false), 2200)
     }
   }
 
-  // Mascarar e-mail no formato Apple (ex: a•••••••••••••••o@gmail.com)
-  const rawEmail = user?.email || 'alisonsilvathiago@gmail.com'
-  const emailParts = rawEmail.split('@')
-  const maskedEmail = emailParts.length === 2
-    ? `${emailParts[0].charAt(0)}•••••••••••••••${emailParts[0].slice(-1)}@${emailParts[1]}`
-    : rawEmail
+  const handleCopyTracking = (code: string) => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(code)
+      setCopiedTracking(code)
+      setTimeout(() => setCopiedTracking(null), 2200)
+    }
+  }
 
-  const faqs = [
-    {
-      question: 'Quando receberei meus produtos?',
-      answer: 'O e-mail de confirmação do pedido informa a data de chegada, e o e-mail de notificação de envio informa o número de rastreamento.'
-    },
-    {
-      question: 'Como posso rastrear meu pedido?',
-      answer: 'Sempre que um item sai de nosso depósito, enviamos um e-mail incluindo o nome da transportadora e o número de rastreamento do seu pedido. Você pode usar o link do e-mail para acompanhar o pedido ou clicar em “Acompanhar envio” nos detalhes do pedido.'
-    },
-    {
-      question: 'Preciso assinar quando receber meu pacote?',
-      answer: 'Cabe à transportadora decidir se um pedido requer assinatura na entrega. Entre em contato com ela para obter mais detalhes.'
-    },
-    {
-      question: 'Como posso cancelar ou editar meu pedido?',
-      answer: 'Para cancelar, clique em “Cancelar item” enquanto seu pedido está sendo processado. Se cancelar um item que está sendo enviado para um endereço, você não será cobrado. Iniciaremos o processo de reembolso assim que você enviar a solicitação de cancelamento. Se o pedido estiver qualificado, você pode editar a mensagem de presente, a gravação ou o endereço de envio.'
-    },
-    {
-      question: 'Como posso devolver um produto?',
-      answer: 'Se você quiser devolver algum item, clique em “Iniciar uma devolução” para enviá-lo de volta. O processo de reembolso será iniciado assim que recebermos o produto devolvido.'
-    },
-    {
-      question: 'Quando recebo notificações por mensagem de texto?',
-      answer: 'Caso tenha solicitado o recebimento de notificações por mensagem de texto, enviaremos um SMS quando seus itens forem enviados ou quando estiverem prontos para retirada. Também poderemos entrar em contato com você se houver um problema com o pedido. As mensagens são enviadas entre as 8h e as 21h em seu horário local.'
-    },
-    {
-      question: 'Como posso alterar minhas preferências de mensagens de texto?',
-      answer: 'Para editar seu número de telefone celular a qualquer momento, acesse sua conta e edite as preferências de notificação de envio ou de retirada de pedido. Para cancelar as notificações, responda a mensagem de texto com a palavra “STOP”.'
-    }
-  ]
-
-  const handleFindOrderSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!findOrderNumber || !findOrderEmail) {
-      setSearchResultMsg('Por favor, informe o número do pedido e o e-mail.')
-      return
-    }
-    const found = orders.find(o => o.id.toLowerCase().includes(findOrderNumber.toLowerCase()))
-    if (found) {
-      setSearchResultMsg(`Pedido ${found.id} localizado! Status: ${found.status === 'paid' ? 'Pagamento Aprovado' : found.status === 'delivered' ? 'Entregue' : 'Processando'}.`)
-    } else {
-      setSearchResultMsg(`Nenhum pedido encontrado com o número "${findOrderNumber}" associado ao e-mail informado.`)
-    }
+  const handleBuyAgain = (item: OrderItemDisplay) => {
+    navigate(item.link)
   }
 
   return (
-    <div className="apple-orders-page">
-      {/* ── Breadcrumb Apple Oficial ── */}
-      <div className="apple-orders-container">
-        <div className="apple-orders-breadcrumb">
-          <Link to="/conta" className="breadcrumb-link">Sua conta</Link>
-          <span className="breadcrumb-sep">&gt;</span>
-          <span className="breadcrumb-current">Lista de produtos dos pedidos</span>
+    <div className="teknix-orders-page">
+      {/* ── LOCAL NAV OFICIAL ESTILO APPLE STORE ── */}
+      <div className="teknix-orders-localnav">
+        <div className="teknix-orders-container">
+          <div className="teknix-orders-localnav-inner">
+            <Link to="/conta" className="teknix-orders-localnav-title">Minha conta</Link>
+            <nav className="teknix-orders-localnav-links" aria-label="Navegação da conta">
+              <Link to="/conta" className="teknix-orders-localnav-link">Visão Geral</Link>
+              <Link to="/pedidos" className="teknix-orders-localnav-link active" aria-current="page">Pedidos</Link>
+              <Link to="/itens-salvos" className="teknix-orders-localnav-link">Itens Salvos</Link>
+              <Link to="/buscar-pedido" className="teknix-orders-localnav-link">Rastrear</Link>
+            </nav>
+          </div>
         </div>
       </div>
 
-      <div className="apple-orders-container">
-        {/* ── Header Principal 1:1 Apple ── */}
-        <header className="apple-orders-header">
-          <h1 className="apple-orders-title">Produtos que você pediu.</h1>
-          <p className="apple-orders-subtitle">
-            Somente as compras realizadas nos últimos 18 meses são exibidas aqui.
-          </p>
-        </header>
-
-        {/* ── Lista de Pedidos ── */}
-        {loading ? (
-          <div className="apple-orders-loading">
-            <div className="apple-spinner" />
-            <p>Carregando seus pedidos...</p>
+      <div className="teknix-orders-container">
+        {/* ── HEADER PRINCIPAL EDITORIAL ── */}
+        <header className="teknix-orders-header">
+          <div className="teknix-orders-header-text">
+            <Editable as="h1" widgetId="orderslist-1" className="teknix-orders-title">Seus pedidos</Editable>
           </div>
-        ) : orders.length > 0 ? (
-          <div className="apple-orders-list-section">
-            {orders.map(order => (
-              <div key={order.id} className="apple-order-tile">
-                <div className="apple-order-tile-header">
-                  <div className="tile-header-left">
-                    <span className="tile-order-num">Pedido nº {order.id}</span>
-                    <span className="tile-order-date">
-                      Realizado em {order.created_at ? new Date(order.created_at).toLocaleDateString('pt-BR') : ''}
-                    </span>
-                  </div>
-                  <div className="tile-header-right">
-                    <span className={`tile-status-badge ${order.status}`}>
-                      {order.status === 'paid' ? 'Pagamento Aprovado' : order.status === 'delivered' ? 'Entregue' : 'Em Processamento'}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="apple-order-tile-items">
-                  {(order.items || []).map((item, idx) => (
-                    <div key={idx} className="apple-order-product-row">
-                      <div className="product-image-box">
-                        <img src={item.product_image || 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-16-pro-finish-select-202409-6-9inch-blacktitanium?wid=5120&hei=2880&fmt=p-jpg&qlt=80'} alt={item.product_name} />
-                      </div>
-                      <div className="product-info-box">
-                        <h3 className="product-title">{item.product_name}</h3>
-                        <div className="product-qty-price-row">
-                          <span className="product-qty-selector">{item.quantity} ▾</span>
-                          <span className="product-price">
-                            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.price)}
-                          </span>
-                        </div>
-                        <div className="product-links-row">
-                          <button className="product-details-toggle">Mostrar detalhes do produto ▾</button>
-                          <button className="product-remove-btn">Remover</button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="apple-order-tile-shipping">
-                  <div className="shipping-row">
-                    <Truck size={14} />
-                    <span>Faça seu pedido. Entrega em <strong>{order.tracking_code ? '04707-900' : '—'}</strong> ▾</span>
-                  </div>
-                  <p className="shipping-dates">21 Set. — 28 Set. — <strong>Grátis</strong></p>
-                </div>
-
-                <div className="apple-order-tile-footer">
-                  <div className="footer-summary">
-                    <div className="footer-summary-row">
-                      <span>Subtotal</span>
-                      <span>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(order.total)}</span>
-                    </div>
-                    <div className="footer-summary-row">
-                      <span>Envio</span>
-                      <span><strong>GRÁTIS</strong></span>
-                    </div>
-                  </div>
-                  <div className="footer-actions">
-                    {order.tracking_code && (
-                      <span className="tracking-info">
-                        <Truck size={14} /> Rastreamento: <code>{order.tracking_code}</code>
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : null}
-
-        {/* ── Ajuda com o Pedido 1:1 Apple ── */}
-        <section className="apple-order-help-section">
-          <h2 className="apple-help-heading">Ajuda com o pedido</h2>
-
-          <div className="apple-help-find-box">
-            <span className="help-text">Não está encontrando seu pedido?</span>
-            <Link
-              to="/order/link/verify"
-              className="apple-help-link"
-            >
-              <span>Localizar agora</span>
-              <ExternalLink size={12} />
+          <div className="teknix-orders-header-action">
+            <Link to="/buscar-pedido" className="teknix-orders-lookup-btn">
+              <Search size={15} />
+              Localizar pedido
             </Link>
           </div>
+        </header>
 
-          <div className="apple-help-account-box">
-            <p className="account-email-info">Você iniciou sessão como {maskedEmail}</p>
-            <p className="account-note">
-              Alguns usuários têm mais de uma Conta TEKNIX. Talvez seja o seu caso. Se você tiver outra conta, encerre a sessão e faça login novamente com outro e-mail ou telefone.
-            </p>
-          </div>
-
-          <div className="apple-help-phone-box">
-            <span>Precisa de mais ajuda?</span>
-            <span className="phone-link">Ligue para 0800-761-0867.</span>
-          </div>
-        </section>
-
-        {/* ── Perguntas Frequentes (FAQ Accordion 1:1 Apple) ── */}
-        <section className="apple-faq-section">
-          <div className="apple-faq-main-accordion">
+        {/* ── BARRA DE CONTROLE: ABAS + CAMPO DE BUSCA ── */}
+        <div className="teknix-orders-toolbar">
+          <div className="teknix-orders-tabs" role="tablist">
             <button
               type="button"
-              className="apple-faq-main-toggle"
-              onClick={() => setFaqSectionOpen(!faqSectionOpen)}
-              aria-expanded={faqSectionOpen}
+              role="tab"
+              aria-selected={activeTab === 'all'}
+              className={`teknix-orders-tab ${activeTab === 'all' ? 'active' : ''}`}
+              onClick={() => setActiveTab('all')}
             >
-              <h2 className="apple-faq-main-title">Perguntas frequentes</h2>
-              <ChevronDown
-                size={22}
-                className={`apple-faq-chevron ${faqSectionOpen ? 'open' : ''}`}
-              />
+              Todos <span className="order-tab-count">{orders.length}</span>
             </button>
-
-            {faqSectionOpen && (
-              <div className="apple-faq-items-list">
-                {faqs.map((faq, idx) => {
-                  const isOpen = openFaqIndex === idx
-                  return (
-                    <div key={idx} className="apple-faq-item">
-                      <button
-                        type="button"
-                        className="apple-faq-question-btn"
-                        onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
-                        aria-expanded={isOpen}
-                      >
-                        <span className="faq-question-text">{faq.question}</span>
-                        <ChevronDown
-                          size={18}
-                          className={`apple-faq-item-chevron ${isOpen ? 'open' : ''}`}
-                        />
-                      </button>
-                      {isOpen && (
-                        <div className="apple-faq-answer">
-                          <p>{faq.answer}</p>
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            )}
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'in_transit'}
+              className={`teknix-orders-tab ${activeTab === 'in_transit' ? 'active' : ''}`}
+              onClick={() => setActiveTab('in_transit')}
+            >
+              Em transporte <span className="order-tab-count">{orders.filter(o => o.status === 'in_transit' || o.status === 'preparing').length}</span>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'delivered'}
+              className={`teknix-orders-tab ${activeTab === 'delivered' ? 'active' : ''}`}
+              onClick={() => setActiveTab('delivered')}
+            >
+              Entregues <span className="order-tab-count">{orders.filter(o => o.status === 'delivered').length}</span>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'canceled'}
+              className={`teknix-orders-tab ${activeTab === 'canceled' ? 'active' : ''}`}
+              onClick={() => setActiveTab('canceled')}
+            >
+              Cancelados <span className="order-tab-count">{orders.filter(o => o.status === 'canceled').length}</span>
+            </button>
           </div>
-        </section>
-      </div>
 
-      {/* ── Modal Localizar Pedido ── */}
-      {showFindOrderModal && (
-        <div className="apple-modal-overlay" onClick={() => setShowFindOrderModal(false)}>
-          <div className="apple-modal-card" onClick={e => e.stopPropagation()}>
-            <div className="apple-modal-header">
-              <h3>Localizar um pedido</h3>
+          <div className="teknix-orders-search-box">
+            <Search size={16} className="teknix-orders-search-icon" />
+            <input
+              type="text"
+              placeholder="Buscar por pedido ou produto..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="teknix-orders-search-input"
+              aria-label="Buscar pedidos"
+            />
+            {searchTerm && (
               <button
                 type="button"
-                className="apple-modal-close"
-                onClick={() => setShowFindOrderModal(false)}
+                className="teknix-orders-search-clear"
+                onClick={() => setSearchTerm('')}
+                aria-label="Limpar busca"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* ── LISTAGEM DOS CARDS DE PEDIDO ── */}
+        {loading || authLoading ? (
+          <div className="teknix-orders-loading">
+            <div className="teknix-orders-spinner" />
+            <Editable as="p" widgetId="orderslist-2">Carregando histórico de pedidos...</Editable>
+          </div>
+        ) : loadError ? <Editable content={{}} as="p" widgetId="orderslist-3" role="alert" className="teknix-orders-empty">{loadError}</Editable> : !user ? <div className="teknix-orders-empty teknix-orders-login-empty"><Editable as="h2" widgetId="orderslist-4">Entre para ver seus pedidos</Editable><Link to="/login" className="teknix-orders-empty-cta">Entrar na minha conta</Link></div> : filteredOrders.length === 0 ? (
+          <div className="teknix-orders-empty">
+            <div className="teknix-orders-empty-icon">
+              <Package size={48} strokeWidth={1.2} />
+            </div>
+            <Editable as="h2" widgetId="orderslist-5" className="teknix-orders-empty-title">Nenhum pedido encontrado</Editable>
+            <Editable content={{}} as="p" widgetId="orderslist-6" className="teknix-orders-empty-desc">
+              {searchTerm
+                ? 'Nenhum pedido corresponde aos critérios de pesquisa digitados.'
+                : 'Você ainda não possui pedidos com esse status.'}
+            </Editable>
+            <Link to="/produtos" className="teknix-orders-empty-cta">
+              Explorar Catálogo de Produtos TEKNIX →
+            </Link>
+          </div>
+        ) : (
+          <div className="teknix-orders-list">
+            {filteredOrders.map((order) => {
+              const isExpanded = expandedOrders[order.id] === true
+
+              return (
+                <article className="teknix-order-card" key={order.id}>
+                  {/* Cabeçalho do Card */}
+                  <div className="teknix-order-card-header">
+                    <div className="teknix-order-card-meta">
+                      <div className="meta-block">
+                        <span className="meta-label">Data</span>
+                        <span className="meta-value">{order.date}</span>
+                      </div>
+                      <div className="meta-block">
+                        <span className="meta-label">Total</span>
+                        <span className="meta-value total-highlight">{formatCurrency(order.payment.total)}</span>
+                      </div>
+                      <div className="meta-block">
+                        <span className="meta-label">Número do pedido</span>
+                        <div className="meta-order-id">
+                          <span className="meta-value id-code">{order.orderNumber}</span>
+                          <button
+                            type="button"
+                            className="btn-copy-id"
+                            title="Copiar número do pedido"
+                            onClick={() => {
+                              navigator.clipboard.writeText(order.orderNumber)
+                            }}
+                          >
+                            <Copy size={13} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="teknix-order-card-status-badge-wrap">
+                      <span className={`status-pill status-${order.status}`}>
+                        {order.status === 'delivered' && <CheckCircle2 size={14} />}
+                        {order.status === 'in_transit' && <Truck size={14} />}
+                        {order.status === 'preparing' && <Clock size={14} />}
+                        {order.statusLabel}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Corpo do Card */}
+                  <div className="teknix-order-card-body">
+                    {/* Barra de Progresso / Stepper Estilo Apple */}
+                    <div className="teknix-order-stepper">
+                      <div className="stepper-track">
+                        <div
+                          className="stepper-fill"
+                          style={{
+                            width:
+                              order.progressStep === 1
+                                ? '15%'
+                                : order.progressStep === 2
+                                ? '45%'
+                                : order.progressStep === 3
+                                ? '75%'
+                                : '100%'
+                          }}
+                        />
+                      </div>
+                      <div className="stepper-steps">
+                        <div className={`step-node ${order.progressStep >= 1 ? 'completed' : ''}`}>
+                          <span className="step-dot" />
+                          <span className="step-text">Recebido</span>
+                        </div>
+                        <div className={`step-node ${order.progressStep >= 2 ? 'completed' : ''}`}>
+                          <span className="step-dot" />
+                          <span className="step-text">Confirmado</span>
+                        </div>
+                        <div className={`step-node ${order.progressStep >= 3 ? 'completed' : ''}`}>
+                          <span className="step-dot" />
+                          <span className="step-text">Em transporte</span>
+                        </div>
+                        <div className={`step-node ${order.progressStep >= 4 ? 'completed' : ''}`}>
+                          <span className="step-dot" />
+                          <span className="step-text">Entregue</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Mensagem de Status em Destaque */}
+                    <div className="teknix-order-status-banner">
+                      <div className="status-banner-content">
+                        {order.status === 'delivered' ? (
+                          <CheckCircle2 size={20} className="status-banner-icon success" />
+                        ) : order.status === 'in_transit' ? (
+                          <Truck size={20} className="status-banner-icon info" />
+                        ) : (
+                          <Clock size={20} className="status-banner-icon warning" />
+                        )}
+                        <div>
+                          <strong className="status-banner-title">{order.statusMessage}</strong>
+                          {order.trackingCode && (
+                            <p className="status-banner-tracking">
+                              Rastreio:{' '}
+                              <span className="tracking-code">{order.trackingCode}</span>
+                              <button
+                                type="button"
+                                className="btn-copy-code"
+                                onClick={() => handleCopyTracking(order.trackingCode!)}
+                                title="Copiar código"
+                              >
+                                {copiedTracking === order.trackingCode ? <Check size={13} color="#059669" /> : <Copy size={13} />}
+                              </button>
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      {order.trackingCode && (
+                        <a
+                          href={`https://rastreamento.correios.com.br/app/index.php?codigo=${order.trackingCode}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="btn-track-external"
+                        >
+                          Rastrear envio
+                          <ExternalLink size={13} />
+                        </a>
+                      )}
+                    </div>
+
+                    {/* Lista de Itens do Pedido */}
+                    <div className="teknix-order-items-list">
+                      {order.items.map((item) => (
+                        <div className="teknix-order-item" key={item.id}>
+                          <Link to={item.link} className="item-thumbnail" aria-label={`Ver ${item.title}`}>
+                            {item.img ? <img src={item.img} alt={item.title} /> : <Package size={32} aria-label="Imagem indisponível" />}
+                          </Link>
+                          <div className="item-info">
+                            <Link to={item.link} className="item-title">
+                              {item.title}
+                            </Link>
+                            <div className="item-subinfo">
+                              <span>SKU: {item.sku}</span>
+                              <span className="bullet">•</span>
+                              <span>Qtd: {item.quantity} {item.quantity === 1 ? 'unidade' : 'unidades'}</span>
+                            </div>
+                          </div>
+                          <div className="item-actions">
+                            <span className="item-price">{formatCurrency(item.price)}</span>
+                            <button
+                              type="button"
+                              className="btn-buy-again"
+                              onClick={() => handleBuyAgain(item)}
+                              title="Colocar na sacola novamente"
+                            >
+                              <ShoppingBag size={14} />
+                              Comprar novamente
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Alternador de Detalhes Completo */}
+                    <button
+                      type="button"
+                      className="btn-toggle-details"
+                      onClick={() => toggleOrder(order.id)}
+                    >
+                      <span>{isExpanded ? 'Ocultar detalhes' : 'Ver detalhes'}</span>
+                      {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                    </button>
+
+                    {/* Painel Expandido: Endereço, Pagamento e Nota Fiscal */}
+                    {isExpanded && (
+                      <div className="teknix-order-expanded-panel">
+                        <div className="detail-col">
+                          <h4 className="detail-title">
+                            <MapPin size={15} />
+                            Endereço de entrega
+                          </h4>
+                          <p className="detail-text bold">{order.shippingAddress.name}</p>
+                          <p className="detail-text">{order.shippingAddress.street} {order.shippingAddress.number}</p>
+                          {order.shippingAddress.neighborhood && (
+                            <p className="detail-text">{order.shippingAddress.neighborhood}</p>
+                          )}
+                          <p className="detail-text">
+                            {order.shippingAddress.city} {order.shippingAddress.state && `- ${order.shippingAddress.state}`}
+                          </p>
+                          {order.shippingAddress.cep && <p className="detail-text cep">{order.shippingAddress.cep}</p>}
+                        </div>
+
+                        <div className="detail-col">
+                          <h4 className="detail-title">
+                            <CreditCard size={15} />
+                            Pagamento & Valores
+                          </h4>
+                          <p className="detail-text bold">{order.payment.method}</p>
+                          <div className="payment-summary-rows">
+                            <div className="summary-row">
+                              <span>Subtotal</span>
+                              <span>{formatCurrency(order.payment.subtotal)}</span>
+                            </div>
+                            <div className="summary-row">
+                              <span>Frete</span>
+                              <span className="free-badge">{order.payment.shipping === 0 ? 'Grátis' : formatCurrency(order.payment.shipping)}</span>
+                            </div>
+                            {order.payment.discount > 0 && (
+                              <div className="summary-row discount">
+                                <span>Desconto</span>
+                                <span>-{formatCurrency(order.payment.discount)}</span>
+                              </div>
+                            )}
+                            <div className="summary-row total">
+                              <span>Total</span>
+                              <span>{formatCurrency(order.payment.total)}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="detail-col">
+                          <h4 className="detail-title">
+                            <FileText size={15} />
+                            Documento Fiscal & Ajuda
+                          </h4>
+                          {order.nfeKey ? (
+                            <div className="nfe-box">
+                              <span className="nfe-label">Nota Fiscal Eletrônica (NF-e)</span>
+                              <div className="nfe-key-row">
+                                <span className="nfe-key-text">{order.nfeKey.slice(0, 18)}...{order.nfeKey.slice(-6)}</span>
+                                <button
+                                  type="button"
+                                  className="btn-copy-nfe"
+                                  onClick={() => handleCopyNfe(order.nfeKey!)}
+                                  title="Copiar chave de acesso completa"
+                                >
+                                  {copiedKey ? <Check size={13} color="#059669" /> : <Copy size={13} />}
+                                </button>
+                              </div>
+                              <button
+                                type="button"
+                                className="btn-view-nfe"
+                                onClick={() => setActiveNfeKey(order.nfeKey!)}
+                              >
+                                Visualizar DANFE / NF-e
+                              </button>
+                            </div>
+                          ) : (
+                            <p className="detail-text muted">NF-e será gerada após emissão na transportadora.</p>
+                          )}
+
+                          <button
+                            type="button"
+                            className="btn-help-order"
+                            onClick={() => setShowHelpModal(order)}
+                          >
+                            <HelpCircle size={14} />
+                            Preciso de atendimento neste pedido
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </article>
+              )
+            })}
+          </div>
+        )}
+
+        {/* ── BANNER DE SUPORTE OFICIAL TEKNIX ── */}
+        <Editable as="section" widgetId="orderslist-7" className="teknix-orders-support-card">
+          <div className="support-card-content">
+            <div className="support-icon-wrap">
+              <MessageSquare size={28} />
+            </div>
+            <div className="support-text">
+              <Editable as="h3" widgetId="orderslist-8">Precisa de ajuda?</Editable>
+              <Editable as="p" widgetId="orderslist-9">Fale com a equipe TEKNIX.</Editable>
+            </div>
+          </div>
+          <div className="support-actions">
+            <a
+              href="https://wa.me/5546999155875?text=Olá!%20Gostaria%20de%20ajuda%20com%20meu%20pedido%20TEKNIX"
+              target="_blank"
+              rel="noreferrer"
+              className="btn-support-whatsapp"
+            >
+              Falar no WhatsApp
+            </a>
+            <Link to="/contato" className="btn-support-contact">
+              Central de Atendimento
+            </Link>
+          </div>
+        </Editable>
+      </div>
+
+      {/* ── MODAL: ESPELHO DA NOTA FISCAL (DANFE) ── */}
+      {activeNfeKey && (
+        <div className="teknix-modal-backdrop" onClick={() => setActiveNfeKey(null)}>
+          <div className="teknix-modal-container" onClick={(e) => e.stopPropagation()}>
+            <div className="teknix-modal-header">
+              <div className="modal-title-group">
+                <FileText size={20} className="modal-title-icon" />
+                <Editable as="h3" widgetId="orderslist-10">Nota Fiscal Eletrônica (NF-e)</Editable>
+              </div>
+              <button
+                type="button"
+                className="btn-modal-close"
+                onClick={() => setActiveNfeKey(null)}
+                aria-label="Fechar modal"
               >
                 <X size={18} />
               </button>
             </div>
-            <div className="apple-modal-body">
-              <form onSubmit={handleFindOrderSubmit} className="apple-form-grid">
-                <div className="apple-form-group full">
-                  <label>Número do Pedido (Ex: W849204128)</label>
-                  <input
-                    type="text"
-                    placeholder="W123456789"
-                    value={findOrderNumber}
-                    onChange={e => setFindOrderNumber(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="apple-form-group full">
-                  <label>E-mail utilizado na compra</label>
-                  <input
-                    type="email"
-                    placeholder="nome@exemplo.com"
-                    value={findOrderEmail}
-                    onChange={e => setFindOrderEmail(e.target.value)}
-                    required
-                  />
-                </div>
 
-                {searchResultMsg && (
-                  <div className="apple-search-result-box full">
-                    <p>{searchResultMsg}</p>
+            <div className="teknix-modal-body">
+              <div className="nfe-preview-card">
+                <div className="nfe-preview-top">
+                  <div>
+                    <strong>TEKNIX FERRAMENTAS & TECNOLOGIA LTDA.</strong>
+                    <Editable as="p" widgetId="orderslist-11">CNPJ: 45.129.890/0001-32 • Inscrição Estadual: 083.412.980</Editable>
+                    <Editable as="p" widgetId="orderslist-12">Rodovia Governador Mário Covas, Km 281 • Cariacica - ES</Editable>
                   </div>
-                )}
+                  <div className="danfe-badge">
+                    <span>DANFE</span>
+                    <small>Documento Auxiliar</small>
+                  </div>
+                </div>
 
-                <div className="apple-form-actions">
+                <div className="nfe-preview-key">
+                  <span>Chave de Acesso Oficial da Receita Federal:</span>
+                  <code>{activeNfeKey}</code>
                   <button
                     type="button"
-                    className="apple-btn-secondary"
-                    onClick={() => setShowFindOrderModal(false)}
+                    className="btn-copy-full-key"
+                    onClick={() => handleCopyNfe(activeNfeKey)}
                   >
-                    Fechar
-                  </button>
-                  <button type="submit" className="apple-btn-primary">
-                    <Search size={14} style={{ marginRight: 6 }} />
-                    Buscar Pedido
+                    {copiedKey ? '✓ Chave Copiada!' : 'Copiar Chave Completa'}
                   </button>
                 </div>
-              </form>
+
+                <Editable as="p" widgetId="orderslist-13" className="nfe-notice">
+                  A consulta completa da validade e autenticidade jurídica deste documento pode ser efetuada no Portal Nacional da NF-e (www.nfe.fazenda.gov.br) ou junto à SEFAZ autorizadora.
+                </Editable>
+              </div>
+            </div>
+
+            <div className="teknix-modal-footer">
+              <a
+                href={`https://www.nfe.fazenda.gov.br/portal/consultaRecaptcha.aspx?tipoConsulta=completa&tipoConteudo=XbSeqxE8pl8=&nfe=${activeNfeKey}`}
+                target="_blank"
+                rel="noreferrer"
+                className="btn-modal-primary"
+              >
+                Consultar na SEFAZ Nacional
+                <ExternalLink size={14} />
+              </a>
+              <button
+                type="button"
+                className="btn-modal-secondary"
+                onClick={() => setActiveNfeKey(null)}
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL: SUPORTE & ATENDIMENTO DO PEDIDO ── */}
+      {showHelpModal && (
+        <div className="teknix-modal-backdrop" onClick={() => setShowHelpModal(null)}>
+          <div className="teknix-modal-container" onClick={(e) => e.stopPropagation()}>
+            <div className="teknix-modal-header">
+              <div className="modal-title-group">
+                <HelpCircle size={20} className="modal-title-icon" />
+                <Editable content={{}} as="h3" widgetId="orderslist-14">Ajuda com o Pedido {showHelpModal.orderNumber}</Editable>
+              </div>
+              <button
+                type="button"
+                className="btn-modal-close"
+                onClick={() => setShowHelpModal(null)}
+                aria-label="Fechar"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="teknix-modal-body">
+              <Editable as="p" widgetId="orderslist-15" className="help-intro">
+                Selecione o canal de sua preferência para atendimento prioritário sobre o pedido <strong>{showHelpModal.orderNumber}</strong>:
+              </Editable>
+
+              <div className="help-options-grid">
+                <a
+                  href={`https://wa.me/5546999155875?text=Olá!%20Preciso%20de%20ajuda%20com%20meu%20pedido%20${showHelpModal.orderNumber}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="help-tile"
+                >
+                  <div className="help-tile-icon whatsapp">
+                    <MessageSquare size={22} />
+                  </div>
+                  <div className="help-tile-text">
+                    <strong>Atendimento WhatsApp</strong>
+                    <span>Resposta média em até 5 minutos em horário comercial</span>
+                  </div>
+                </a>
+
+                <Link
+                  to="/contato"
+                  className="help-tile"
+                  onClick={() => setShowHelpModal(null)}
+                >
+                  <div className="help-tile-icon return">
+                    <Package size={22} />
+                  </div>
+                  <div className="help-tile-text">
+                    <strong>Trocas e Devoluções</strong>
+                    <span>Garantia de 7 dias para devolução e suporte técnico</span>
+                  </div>
+                </Link>
+
+                <Link
+                  to="/contato"
+                  className="help-tile"
+                  onClick={() => setShowHelpModal(null)}
+                >
+                  <div className="help-tile-icon mail">
+                    <FileText size={22} />
+                  </div>
+                  <div className="help-tile-text">
+                    <strong>Abrir Chamado por E-mail</strong>
+                    <span>Envie fotos, documentos ou relatos para a equipe TEKNIX</span>
+                  </div>
+                </Link>
+              </div>
+            </div>
+
+            <div className="teknix-modal-footer">
+              <button
+                type="button"
+                className="btn-modal-secondary"
+                onClick={() => setShowHelpModal(null)}
+              >
+                Voltar aos pedidos
+              </button>
             </div>
           </div>
         </div>

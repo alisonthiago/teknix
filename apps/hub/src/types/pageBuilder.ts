@@ -123,6 +123,42 @@ export interface Template {
 // ============================================================
 // PAGE
 // ============================================================
+export interface PageSeoConfig {
+  seo_title: string
+  seo_description: string
+  seo_image: string
+  seo_slug: string
+  seo_canonical: string
+  seo_og: Record<string, unknown>
+  seo_robots_index: boolean
+  seo_robots_follow: boolean
+  seo_twitter_card: 'summary' | 'summary_large_image'
+  seo_twitter_title: string
+  seo_twitter_description: string
+  seo_twitter_image: string
+  seo_schema: Record<string, unknown>
+  seo_keywords: string[]
+  seo_priority: number
+}
+
+export interface PageVisibilityConfig {
+  visibility: 'active' | 'paused' | 'redirect'
+  paused_behavior: '404' | '410' | 'redirect'
+  redirect_url: string
+  redirect_status: 301 | 302
+  page_expires_at: string
+  page_expires_redirect: string
+}
+
+export interface PageAnalyticsConfig {
+  track_views: boolean
+  track_clicks: boolean
+  track_add_to_cart: boolean
+  track_checkout: boolean
+  track_search: boolean
+  conversion_goals: Array<{ label: string; url_pattern: string }>
+}
+
 export interface Page {
   id: string
   type: string
@@ -130,6 +166,16 @@ export interface Page {
   title: string
   status: 'draft' | 'published'
   is_landing_mode: boolean
+  is_home?: boolean
+  is_locked?: boolean
+  hide_header?: boolean
+  hide_footer?: boolean
+  header_is_local_only?: boolean
+  footer_is_local_only?: boolean
+  header_model?: string
+  footer_model?: string
+  header_settings?: Record<string, unknown>
+  footer_settings?: Record<string, unknown>
   theme_id?: string
   template_id?: string
   header_id?: string
@@ -149,6 +195,34 @@ export interface Page {
   created_at: string
   updated_at: string
   published_at?: string
+  seo_robots_index?: boolean
+  seo_robots_follow?: boolean
+  seo_twitter_card?: 'summary' | 'summary_large_image'
+  seo_twitter_title?: string
+  seo_twitter_description?: string
+  seo_twitter_image?: string
+  seo_schema?: Record<string, unknown>
+  seo_keywords?: string[]
+  seo_priority?: number
+  visibility?: 'active' | 'paused' | 'redirect'
+  paused_behavior?: '404' | '410' | 'redirect'
+  redirect_url?: string
+  redirect_status?: 301 | 302
+  page_expires_at?: string
+  page_expires_redirect?: string
+  track_views?: boolean
+  track_clicks?: boolean
+  track_add_to_cart?: boolean
+  track_checkout?: boolean
+  track_search?: boolean
+  conversion_goals?: Array<{ label: string; url_pattern: string }>
+  display_conditions?: Array<{
+    id: string
+    type: 'include' | 'exclude'
+    target: 'entire_site' | 'archives' | 'singular'
+    subTarget?: string
+    specificId?: string
+  }>
 }
 
 // ============================================================
@@ -703,6 +777,9 @@ export interface MediaItem {
   folder: string
   uploaded_by?: string
   created_at: string
+  updated_at?: string
+  width?: number
+  height?: number
 }
 
 // ============================================================
@@ -785,6 +862,7 @@ export const WIDGET_DEFINITIONS: WidgetDefinition[] = [
   { type: 'flipBox', label: 'Flip Box 3D', icon: '⇄', category: 'pro' },
   { type: 'cta', label: 'Call to Action', icon: '◉', category: 'pro' },
   { type: 'mediaCarousel', label: 'Carrossel de Mídia', icon: '❖', category: 'pro' },
+  { type: 'entertainmentGallery', label: 'Endless Entertainment', icon: '▶', category: 'pro' },
   { type: 'testimonialCarousel', label: 'Carrossel Depoimentos', icon: '❝', category: 'pro' },
   { type: 'reviews', label: 'Avaliações / Reviews', icon: '★', category: 'pro' },
   { type: 'tableOfContents', label: 'Índice de Conteúdo', icon: '≣', category: 'pro' },
@@ -817,6 +895,7 @@ export const WIDGET_DEFINITIONS: WidgetDefinition[] = [
   { type: 'embed', label: 'Embed de Mídia', icon: '⧉', category: 'general' },
 
   // ── SITE & NAVEGAÇÃO ──
+  { type: 'chapterNav', label: 'Modelos / Categorias', icon: '', category: 'site' },
   { type: 'menu', label: 'Menu de Navegação', icon: '≡', category: 'site' },
   { type: 'breadcrumb', label: 'Breadcrumb (Trilha)', icon: '›', category: 'site' },
   { type: 'search', label: 'Busca ao Vivo', icon: 'SRC', category: 'site' },
@@ -831,6 +910,11 @@ export const WIDGET_DEFINITIONS: WidgetDefinition[] = [
   { type: 'price', label: 'Preço Dinâmico', icon: '$', category: 'commerce' },
   { type: 'buyButton', label: 'Botão Comprar / Checkout', icon: 'BUY', category: 'commerce' },
   { type: 'relatedProducts', label: 'Produtos Relacionados', icon: '↻', category: 'commerce' },
+  { type: 'productLineupGallery', label: 'Carrossel Produtos', icon: '◈', category: 'commerce' },
+  { type: 'cards', label: 'Cards (Diferenciais)', icon: '🂠', category: 'commerce' },
+  { type: 'carrossel', label: 'Carrossel Ofertas', icon: '◈', category: 'commerce' },
+  { type: 'featureCardsGallery', label: 'Carrossel Destaques', icon: '▦', category: 'commerce' },
+  { type: 'appleImageAccordion', label: 'FAQ com Imagem', icon: '≡', category: 'general' },
 
   // ── ELEMENTOR PRO (Desbloqueado — 70+ widgets) ──
   // Layout & Structure

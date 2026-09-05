@@ -1,27 +1,34 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import './elementor/elementor-core-widgets.css';
+@import './elementor/elementor-pro-widgets.css';
 
 :root {
-  --tkn-green: #00ff88;
-  --tkn-green-dark: #00cc6a;
-  --tkn-dark: #1d1d1f;
-  --tkn-gray: #6e6e73;
+  --tkn-green: #B5F500;
+  --tkn-green-dark: #a2e000;
+  --tkn-dark: #000000;
+  --tkn-gray: #707070;
   --tkn-gray-light: #86868b;
   --tkn-gray-lighter: #d2d2d7;
   --tkn-border: #e8e8ed;
   --tkn-bg: #ffffff;
-  --tkn-bg-alt: #f5f5f7;
+  --tkn-bg-alt: #ffffff;
   --tkn-bg-card: #ffffff;
-  --tkn-text: #1d1d1f;
-  --tkn-text-secondary: #6e6e73;
-  --tkn-text-tertiary: #86868b;
+  --tkn-text: #000000;
+  --tkn-text-secondary: #666666;
+  --tkn-text-tertiary: #858585;
   --tkn-radius-sm: 12px;
   --tkn-radius-md: 18px;
   --tkn-radius-lg: 24px;
   --tkn-radius-xl: 36px;
-  --tkn-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --tkn-font: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --tkn-font-heading: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --cb-font: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --tkn-max-width: 1200px;
   --tkn-section-pad: 160px;
   --tkn-section-pad-sm: 100px;
+  /* Uma única régua horizontal para toda a loja. O max-width inclui o
+     respiro interno, preservando fundos e faixas em largura total. */
+  --tkn-site-container-max: 1440px;
+  --tkn-site-gutter: clamp(48px, 4.5vw, 72px);
 }
 
 *, *::before, *::after {
@@ -34,21 +41,131 @@ html {
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #ffffff !important;
 }
 
-body {
+body, #root, .app, .site-layout-wrapper {
   font-family: var(--tkn-font);
-  background-color: var(--tkn-bg);
+  background-color: #ffffff !important;
   color: var(--tkn-text);
   min-height: 100vh;
-  line-height: 1.65;
+  line-height: 1.55;
+  letter-spacing: 0;
+}
+
+/* Títulos sóbrios, sem terminais arredondados e com peso leve. */
+#root :is(h1, h2, h3, h4, h5, h6, .cb-shelf-title, .flash-sale-title) {
+  font-family: var(--tkn-font-heading);
+  font-weight: var(--tkn-weight-medium);
+  letter-spacing: -0.015em;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--tkn-font-heading);
   letter-spacing: -0.01em;
+}
+
+h1 {
+  font-size: clamp(36px, 5vw, 60px);
+  font-weight: var(--tkn-weight-medium);
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+h2 {
+  font-size: clamp(28px, 3.5vw, 40px);
+  font-weight: var(--tkn-weight-medium);
+  letter-spacing: -0.025em;
+  line-height: 1.12;
+}
+
+h3 {
+  font-size: clamp(20px, 2.5vw, 28px);
+  font-weight: var(--tkn-weight-medium);
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+}
+
+h4 {
+  font-size: clamp(17px, 1.8vw, 22px);
+  font-weight: var(--tkn-weight-medium);
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+h5 {
+  font-size: var(--tkn-text-16);
+  font-weight: var(--tkn-weight-medium);
+  line-height: 1.35;
+}
+
+h6 {
+  font-size: var(--tkn-text-14);
+  font-weight: var(--tkn-weight-medium);
+  line-height: 1.4;
+}
+
+p {
+  font-family: var(--tkn-font);
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--tkn-text-secondary);
+}
+
+/* ── Ações diretas, sem peso visual excessivo ── */
+button, .btn, [role="button"] {
+  font-family: var(--tkn-font);
+  font-weight: var(--tkn-weight-semibold);
+  letter-spacing: -0.01em;
+}
+
+/* ── Labels discretos ── */
+.label, .tag, .badge, .chip, [class*="label"], [class*="tag-"] {
+  font-family: var(--tkn-font-heading);
+  font-weight: var(--tkn-weight-semibold);
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
 }
 
 #root {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+/* ── CONTAINER GLOBAL DA LOJA ────────────────────────────────────────────
+   As seções externas permanecem full-width; somente o conteúdo interno
+   segue esta régua. A lista cobre os poucos layouts legados que ainda não
+   usam `.ui.container`. */
+#root .ui.container:not(.fluid),
+#root .category-products-container,
+#root .category-hero-inner,
+#root .institutional-shell,
+#root .institutional-header__inner,
+#root .corporate-footer__main,
+#root .corporate-footer__signature,
+#root .product-sticky-inner,
+#root .pdp-sticky-nav-inner {
+  width: 100% !important;
+  max-width: var(--tkn-site-container-max) !important;
+  margin-inline: auto !important;
+  padding-inline: var(--tkn-site-gutter) !important;
+  box-sizing: border-box;
+}
+
+#root .ui.container.fluid {
+  width: 100% !important;
+  max-width: none !important;
+  margin-inline: 0 !important;
+  padding-inline: 0 !important;
+}
+
+@media (max-width: 1023px) {
+  :root { --tkn-site-gutter: clamp(24px, 3.5vw, 36px); }
+}
+
+@media (max-width: 767px) {
+  :root { --tkn-site-gutter: 16px; }
 }
 
 main {
@@ -93,10 +210,10 @@ img {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  padding: 14px 28px;
+  gap: var(--tkn-space-8);
+  font-weight: var(--tkn-weight-semibold);
+  font-size: var(--tkn-text-14);
+  padding: var(--tkn-space-16) var(--tkn-space-32);
   border-radius: 980px;
   border: none;
   cursor: pointer;
@@ -149,7 +266,7 @@ img {
 .btn-whatsapp {
   background: #25D366;
   color: white;
-  font-weight: 700;
+  font-weight: var(--tkn-weight-semibold);
 }
 
 .btn-whatsapp:hover {
@@ -172,30 +289,31 @@ img {
 .section-container {
   max-width: var(--tkn-max-width);
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 var(--tkn-space-24);
 }
 
 .section-eyebrow {
-  font-size: 0.72rem;
-  font-weight: 600;
+  font-size: var(--tkn-text-12);
+  font-weight: var(--tkn-weight-medium);
   letter-spacing: 0.15em;
   text-transform: uppercase;
   color: var(--tkn-green-dark);
-  margin-bottom: 16px;
+  margin-bottom: var(--tkn-space-16);
   display: block;
 }
 
 .section-headline {
-  font-size: clamp(2.2rem, 5vw, 3.5rem);
-  font-weight: 700;
+  font-family: var(--tkn-font-heading);
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: var(--tkn-weight-medium);
   letter-spacing: -0.035em;
   line-height: 1.08;
   color: var(--tkn-text);
-  margin-bottom: 20px;
+  margin-bottom: var(--tkn-space-24);
 }
 
 .section-subtext {
-  font-size: 1.15rem;
+  font-size: var(--tkn-text-18);
   color: var(--tkn-text-secondary);
   line-height: 1.6;
   max-width: 520px;
@@ -230,7 +348,123 @@ img {
     --tkn-section-pad: 100px;
   }
   .btn {
-    padding: 12px 20px;
-    font-size: 0.85rem;
+    padding: var(--tkn-space-12) var(--tkn-space-24);
+    font-size: var(--tkn-text-14);
   }
 }
+
+/* ============================================================ */
+/* TEKNIX PAGE BUILDER GLOBAL RUNTIME & MOTION EFFECTS          */
+/* ============================================================ */
+
+/* Layout & Container Flexbox */
+.section-containers, .section-containers-wrap {
+  display: flex;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 767px) {
+  .section-containers, .section-containers-wrap, [data-section-id] > .section-containers, [data-section-id] > div:first-child {
+    flex-direction: column !important;
+    flex-wrap: wrap !important;
+  }
+  .e-con, [data-container-id] {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 1 1 100% !important;
+  }
+  .mobile-stack {
+    flex-direction: column !important;
+    flex-wrap: wrap !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  .section-containers, .section-containers-wrap {
+    flex-wrap: wrap !important;
+  }
+}
+
+/* TEKNIX Motion Effects & Keyframes */
+@keyframes teknixFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes teknixFadeInUp { from { opacity: 0; transform: translate3d(0, 40px, 0); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
+@keyframes teknixFadeInDown { from { opacity: 0; transform: translate3d(0, -40px, 0); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
+@keyframes teknixFadeInLeft { from { opacity: 0; transform: translate3d(-40px, 0, 0); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
+@keyframes teknixFadeInRight { from { opacity: 0; transform: translate3d(40px, 0, 0); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
+@keyframes teknixSlideInUp { from { transform: translate3d(0, 100%, 0); visibility: visible; } to { transform: translate3d(0, 0, 0); } }
+@keyframes teknixSlideInDown { from { transform: translate3d(0, -100%, 0); visibility: visible; } to { transform: translate3d(0, 0, 0); } }
+@keyframes teknixSlideInLeft { from { transform: translate3d(-100%, 0, 0); visibility: visible; } to { transform: translate3d(0, 0, 0); } }
+@keyframes teknixSlideInRight { from { transform: translate3d(100%, 0, 0); visibility: visible; } to { transform: translate3d(0, 0, 0); } }
+@keyframes teknixZoomIn { from { opacity: 0; transform: scale3d(0.7, 0.7, 0.7); } 50% { opacity: 1; } to { transform: scale3d(1, 1, 1); } }
+@keyframes teknixZoomOut { from { opacity: 1; } 50% { opacity: 0; transform: scale3d(0.3, 0.3, 0.3); } to { opacity: 0; } }
+@keyframes teknixBounceIn {
+  from, 20%, 40%, 60%, 80%, to { animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1); }
+  0% { opacity: 0; transform: scale3d(0.3, 0.3, 0.3); }
+  20% { transform: scale3d(1.1, 1.1, 1.1); }
+  40% { transform: scale3d(0.9, 0.9, 0.9); }
+  60% { opacity: 1; transform: scale3d(1.03, 1.03, 1.03); }
+  80% { transform: scale3d(0.97, 0.97, 0.97); }
+  to { opacity: 1; transform: scale3d(1, 1, 1); }
+}
+@keyframes teknixRotateIn { from { transform: rotate3d(0, 0, 1, -200deg); opacity: 0; } to { transform: translate3d(0, 0, 0); opacity: 1; } }
+@keyframes teknixFlipInX {
+  from { transform: perspective(400px) rotate3d(1, 0, 0, 90deg); animation-timing-function: ease-in; opacity: 0; }
+  40% { transform: perspective(400px) rotate3d(1, 0, 0, -20deg); animation-timing-function: ease-in; }
+  60% { transform: perspective(400px) rotate3d(1, 0, 0, 10deg); opacity: 1; }
+  80% { transform: perspective(400px) rotate3d(1, 0, 0, -5deg); }
+  to { transform: perspective(400px); }
+}
+@keyframes teknixFlipInY {
+  from { transform: perspective(400px) rotate3d(0, 1, 0, 90deg); animation-timing-function: ease-in; opacity: 0; }
+  40% { transform: perspective(400px) rotate3d(0, 1, 0, -20deg); animation-timing-function: ease-in; }
+  60% { transform: perspective(400px) rotate3d(0, 1, 0, 10deg); opacity: 1; }
+  80% { transform: perspective(400px) rotate3d(0, 1, 0, -5deg); }
+  to { transform: perspective(400px); }
+}
+@keyframes teknixRollIn { from { opacity: 0; transform: translate3d(-100%, 0, 0) rotate3d(0, 0, 1, -120deg); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
+@keyframes teknixBlurFadeIn { from { opacity: 0; filter: blur(12px); transform: translate3d(0, 24px, 0); } to { opacity: 1; filter: blur(0px); transform: translate3d(0, 0, 0); } }
+@keyframes teknixFramerSpringUp {
+  0% { opacity: 0; transform: translate3d(0, 50px, 0) scale(0.92); }
+  65% { opacity: 1; transform: translate3d(0, -6px, 0) scale(1.02); }
+  100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+@keyframes teknixAppleReveal { 0% { opacity: 0; transform: scale(0.94); filter: blur(4px); } 100% { opacity: 1; transform: scale(1); filter: blur(0px); } }
+@keyframes teknixElasticPop { 0% { opacity: 0; transform: scale(0.4); } 70% { opacity: 1; transform: scale(1.08); } 100% { opacity: 1; transform: scale(1); } }
+@keyframes teknixGlowPulse {
+  0% { opacity: 0; filter: drop-shadow(0 0 0px rgba(0, 113, 227, 0)); }
+  50% { opacity: 1; filter: drop-shadow(0 0 18px rgba(0, 113, 227, 0.65)); }
+  100% { opacity: 1; filter: drop-shadow(0 0 0px rgba(0, 113, 227, 0)); }
+}
+@keyframes teknixFloatBob { 0% { opacity: 0; transform: translateY(16px); } 50% { opacity: 1; transform: translateY(-4px); } 100% { opacity: 1; transform: translateY(0); } }
+@keyframes teknixRevealSlide { 0% { opacity: 0; clip-path: inset(0 100% 0 0); } 100% { opacity: 1; clip-path: inset(0 0 0 0); } }
+
+.teknix-animated { animation-fill-mode: both; }
+.teknix-anim-fadeIn { animation-name: teknixFadeIn; }
+.teknix-anim-fadeInUp { animation-name: teknixFadeInUp; }
+.teknix-anim-fadeInDown { animation-name: teknixFadeInDown; }
+.teknix-anim-fadeInLeft { animation-name: teknixFadeInLeft; }
+.teknix-anim-fadeInRight { animation-name: teknixFadeInRight; }
+.teknix-anim-slideInUp { animation-name: teknixSlideInUp; }
+.teknix-anim-slideInDown { animation-name: teknixSlideInDown; }
+.teknix-anim-slideInLeft { animation-name: teknixSlideInLeft; }
+.teknix-anim-slideInRight { animation-name: teknixSlideInRight; }
+.teknix-anim-zoomIn { animation-name: teknixZoomIn; }
+.teknix-anim-zoomOut { animation-name: teknixZoomOut; }
+.teknix-anim-bounceIn { animation-name: teknixBounceIn; }
+.teknix-anim-rotateIn { animation-name: teknixRotateIn; }
+.teknix-anim-flipInX { animation-name: teknixFlipInX; }
+.teknix-anim-flipInY { animation-name: teknixFlipInY; }
+.teknix-anim-rollIn { animation-name: teknixRollIn; }
+.teknix-anim-blurFadeIn { animation-name: teknixBlurFadeIn; }
+.teknix-anim-framerSpringUp { animation-name: teknixFramerSpringUp; }
+.teknix-anim-appleReveal { animation-name: teknixAppleReveal; }
+.teknix-anim-elasticPop { animation-name: teknixElasticPop; }
+.teknix-anim-glowPulse { animation-name: teknixGlowPulse; }
+.teknix-anim-floatBob { animation-name: teknixFloatBob; }
+.teknix-anim-revealSlide { animation-name: teknixRevealSlide; }
+
+/* Responsive Visibility Helpers */
+@media (min-width: 1025px) { .teknix-hide-desktop { display: none !important; } }
+@media (min-width: 768px) and (max-width: 1024px) { .teknix-hide-tablet { display: none !important; } }
+@media (max-width: 767px) { .teknix-hide-mobile { display: none !important; } }

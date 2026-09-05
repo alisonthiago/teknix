@@ -1,15 +1,18 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { createPage } from '../services/pageBuilder'
 import {
   ChevronLeft, Upload, Trash2, Video, Globe,
   CheckCircle, Plus, Eye,
-  Percent, Tag, DollarSign, Package, Layers, Sparkles
+  Percent, Tag, DollarSign, Package, Layers, Sparkles,
+  X, ExternalLink, Check, Play, Loader2, Film
 } from 'lucide-react'
 import './ProductForm.css'
+import './ProductCommerce.css'
+import { DEFAULT_COMMERCE, normalizeCommerce, validateCommerce, productPricing, type ProductCommerce } from '../../../../packages/core/src/productCommerce'
 
 interface FormData {
+  commerce: ProductCommerce
   id?: string
   name: string
   slug: string
@@ -46,11 +49,13 @@ interface FormData {
   origin: string
   cest: string
   status: 'active' | 'draft' | 'inactive'
+  published: boolean
   featured: boolean
   free_shipping: boolean
 }
 
 const initialForm: FormData = {
+  commerce: DEFAULT_COMMERCE,
   name: '',
   slug: '',
   description: '',
@@ -86,6 +91,7 @@ const initialForm: FormData = {
   origin: '0',
   cest: '',
   status: 'active',
+  published: false,
   featured: false,
   free_shipping: false
 }
@@ -102,6 +108,15 @@ export default function ProductForm() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [newCategoryName, setNewCategoryName] = useState('')
   const [showAddCategory, setShowAddCategory] = useState(false)
+  const [showPublishModal, setShowPublishModal] = useState(false)
+  const [publishedSlug, setPublishedSlug] = useState('')
+
+  // Estados para Upload de Fotos e Vídeo
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isUploadingMedia, setIsUploadingMedia] = useState(false)
+  const [uploadStatus, setUploadStatus] = useState('')
+  const [isDragging, setIsDragging] = useState(false)
+  const [previewVideoModal, setPreviewVideoModal] = useState<string | null>(null)
 
   useEffect(() => {
     fetchCategories()
@@ -176,25 +191,43 @@ export default function ProductForm() {
       const { data, error } = await supabase.from('products').select('*').eq('id', productId).single()
       if (error) throw error
       if (data) {
+        const { data: store } = await supabase.from('product_store_metadata').select('*').eq('product_id', productId).maybeSingle()
+        const specs = store?.specifications || {}
+        const commerceObj = store?.seo?.commerce || (specs && typeof specs === 'object' && !Array.isArray(specs) ? specs.commerce : null) || store?.commercial_settings || {}
+        const freeShippingVal = store?.seo?.freeShipping ?? (specs && typeof specs === 'object' && !Array.isArray(specs) ? specs.freeShipping : null) ?? Boolean(data.free_shipping)
+
+        const conditionVal = commerceObj?.condition || data.condition || 'Novo'
+        const soldCountVal = commerceObj?.soldCount || data.sold_count || store?.seo?.sold_count || '+10 mil vendidos'
+
         setForm({
+          commerce: normalizeCommerce({
+            freeShipping: freeShippingVal,
+            condition: conditionVal,
+            soldCount: soldCountVal,
+            ...commerceObj
+          }),
+          free_shipping: freeShippingVal,
+          published: store?.published ?? (data.status === 'active'),
           id: data.id,
           name: data.name || '',
-          slug: data.slug || '',
-          description: data.description || '',
-          short_description: data.short_description || '',
-          images: data.images || (data.main_image ? [data.main_image] : []),
-          main_image: data.main_image || '',
-          video_url: data.video_url || '',
-          sell_price: data.sell_price || data.price || 0,
-          has_promo: Boolean(data.promo_price && data.promo_price > 0),
-          promo_price: data.promo_price || 0,
-          cost_price: data.cost_price || 0,
+          slug: store?.slug || data.slug || '',
+          description: data.notes || data.description || store?.store_description || '',
+          short_description: store?.short_description || data.short_description || '',
+          images: Array.isArray(specs.gallery_images) && specs.gallery_images.length
+            ? specs.gallery_images
+            : (data.main_image || data.image_url ? [data.main_image || data.image_url] : []),
+          main_image: data.main_image || data.image_url || '',
+          video_url: data.video_url || (typeof specs === 'object' && !Array.isArray(specs) ? specs.video_url : null) || store?.seo?.video_url || commerceObj?.video_url || '',
+          sell_price: store?.sale_price ?? data.sell_price ?? data.price ?? (data.cost_purchase ? Number((data.cost_purchase * 1.6).toFixed(2)) : 0),
+          has_promo: Boolean((store ? store.promotional_price : data.promo_price) > 0),
+          promo_price: (store ? store.promotional_price : data.promo_price) ?? 0,
+          cost_price: data.cost_purchase || data.cost_price || 0,
           product_type: data.product_type || 'physical',
           manage_stock: data.manage_stock !== false,
-          stock_quantity: data.stock_quantity ?? data.stock ?? 0,
-          stock_min: data.stock_min || 0,
+          stock_quantity: data.stock ?? data.stock_quantity ?? 0,
+          stock_min: data.min_stock || data.stock_min || 0,
           sku: data.sku || '',
-          barcode: data.barcode || '',
+          barcode: data.ean || data.barcode || '',
           weight: data.weight || 0,
           length: data.length || 0,
           width: data.width || 0,
@@ -202,19 +235,18 @@ export default function ProductForm() {
           gender: data.gender || 'unisex',
           age_group: data.age_group || 'adult',
           condition: data.condition || 'new',
-          category_id: data.category_id || '',
+          category_id: store?.category_id || data.category_id || '',
           brand: data.brand || 'TEKNIX',
-          tags: Array.isArray(data.tags) ? data.tags.join(', ') : (data.tags || ''),
-          variations: data.variations || [],
-          seo_title: data.seo_title || data.name || '',
-          seo_description: data.seo_description || '',
-          seo_slug: data.seo_slug || data.slug || '',
-          ncm: data.ncm || '',
-          origin: data.origin || '0',
-          cest: data.cest || '',
+          tags: Array.isArray(data.tags) ? data.tags.join(', ') : (data.tags || specs.tags || ''),
+          variations: data.variations || specs.variations || [],
+          seo_title: store?.seo?.title || data.seo_title || data.name || '',
+          seo_description: store?.seo?.description || data.seo_description || '',
+          seo_slug: store?.slug || data.seo_slug || data.slug || '',
+          ncm: data.ncm || specs.ncm || '',
+          origin: data.origin || specs.origin || '0',
+          cest: data.cest || specs.cest || '',
           status: data.status || 'active',
-          featured: Boolean(data.featured),
-          free_shipping: Boolean(data.free_shipping)
+          featured: Boolean(store?.featured || data.featured)
         })
       }
     } catch (e: any) {
@@ -268,6 +300,119 @@ export default function ProductForm() {
     setForm(prev => ({ ...prev, main_image: url }))
   }
 
+  function getYoutubeVideoId(url?: string): string | null {
+    if (!url) return null
+    const match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)
+    return match ? match[1] : null
+  }
+
+  async function handleUploadFiles(files: FileList | File[]) {
+    if (!files || files.length === 0) return
+    setIsUploadingMedia(true)
+    setUploadStatus('Processando mídias...')
+
+    const fileArray = Array.from(files)
+    const newImages: string[] = []
+
+    for (const file of fileArray) {
+      if (file.type.startsWith('video/')) {
+        setUploadStatus(`Enviando vídeo: ${file.name}...`)
+        try {
+          const ext = file.name.split('.').pop() || 'mp4'
+          const path = `products/videos/${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${ext}`
+
+          let videoUrl = ''
+          const { error: uploadError } = await supabase.storage.from('media').upload(path, file, {
+            upsert: true,
+            contentType: file.type
+          })
+
+          if (!uploadError) {
+            const { data: urlData } = supabase.storage.from('media').getPublicUrl(path)
+            videoUrl = urlData.publicUrl
+          } else {
+            const { error: uploadError2 } = await supabase.storage.from('uploads').upload(path, file, {
+              upsert: true,
+              contentType: file.type
+            })
+            if (!uploadError2) {
+              const { data: urlData2 } = supabase.storage.from('uploads').getPublicUrl(path)
+              videoUrl = urlData2.publicUrl
+            } else {
+              videoUrl = URL.createObjectURL(file)
+            }
+          }
+
+          if (videoUrl) {
+            setForm(prev => ({ ...prev, video_url: videoUrl }))
+          }
+        } catch (err) {
+          console.warn('Erro no upload do vídeo, usando blob URL fallback:', err)
+          const blobUrl = URL.createObjectURL(file)
+          setForm(prev => ({ ...prev, video_url: blobUrl }))
+        }
+      } else if (file.type.startsWith('image/')) {
+        setUploadStatus(`Enviando foto: ${file.name}...`)
+        try {
+          const ext = file.name.split('.').pop() || 'jpg'
+          const path = `products/images/${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${ext}`
+
+          let imgUrl = ''
+          const { error: uploadError } = await supabase.storage.from('media').upload(path, file, {
+            upsert: true,
+            contentType: file.type
+          })
+
+          if (!uploadError) {
+            const { data: urlData } = supabase.storage.from('media').getPublicUrl(path)
+            imgUrl = urlData.publicUrl
+          } else {
+            const { error: uploadError2 } = await supabase.storage.from('uploads').upload(path, file, {
+              upsert: true,
+              contentType: file.type
+            })
+            if (!uploadError2) {
+              const { data: urlData2 } = supabase.storage.from('uploads').getPublicUrl(path)
+              imgUrl = urlData2.publicUrl
+            } else {
+              imgUrl = await new Promise<string>((resolve) => {
+                const reader = new FileReader()
+                reader.onload = () => resolve(reader.result as string)
+                reader.readAsDataURL(file)
+              })
+            }
+          }
+
+          if (imgUrl) {
+            newImages.push(imgUrl)
+          }
+        } catch (err) {
+          console.warn('Erro no upload da foto, usando FileReader:', err)
+          const dataUrl = await new Promise<string>((resolve) => {
+            const reader = new FileReader()
+            reader.onload = () => resolve(reader.result as string)
+            reader.readAsDataURL(file)
+          })
+          if (dataUrl) newImages.push(dataUrl)
+        }
+      }
+    }
+
+    if (newImages.length > 0) {
+      setForm(prev => {
+        const combined = [...prev.images, ...newImages]
+        return {
+          ...prev,
+          images: combined,
+          main_image: prev.main_image || combined[0]
+        }
+      })
+    }
+
+    setIsUploadingMedia(false)
+    setUploadStatus('')
+  }
+
   async function handleCreateCategory() {
     if (!newCategoryName.trim()) return
     try {
@@ -306,7 +451,80 @@ export default function ProductForm() {
     setForm(prev => ({ ...prev, variations: prev.variations.filter((_, i) => i !== index) }))
   }
 
-  async function handleSubmit(e?: React.FormEvent) {
+  /**
+   * Sincroniza o vínculo automático do produto com a publicação da loja.
+   * Cria/atualiza a linha em product_store_metadata, que é a fonte usada
+   * pelo SITE para exibir o produto na vitrine pública.
+   */
+  async function syncStoreMetadata(productId: string, isPublished: boolean) {
+    try {
+      const { data: existing } = await supabase
+        .from('product_store_metadata')
+        .select('id, specifications, seo')
+        .eq('product_id', productId)
+        .maybeSingle()
+
+      const existingSpecs = (existing?.specifications && typeof existing.specifications === 'object' && !Array.isArray(existing.specifications))
+        ? existing.specifications
+        : {}
+
+      const existingSeo = (existing?.seo && typeof existing.seo === 'object' && !Array.isArray(existing.seo))
+        ? existing.seo
+        : {}
+
+      const meta: any = {
+        product_id: productId,
+        category_id: form.category_id || null,
+        sale_price: form.sell_price ? Number(form.sell_price) : null,
+        promotional_price: (form.has_promo && form.promo_price) ? Number(form.promo_price) : null,
+        slug: form.seo_slug || form.slug || `produto-${productId}`,
+        published: isPublished,
+        featured: Boolean(form.featured),
+        short_description: form.short_description || '',
+        store_description: form.description || '',
+        specifications: {
+          ...existingSpecs,
+          gallery_images: form.images.filter(Boolean),
+          video_url: form.video_url || null,
+          variations: form.variations || [],
+          tags: form.tags || ''
+        },
+        seo: {
+          ...existingSeo,
+          title: form.seo_title || form.name,
+          description: form.seo_description || form.short_description,
+          commerce: {
+            ...form.commerce,
+            video_url: form.video_url || null
+          },
+          video_url: form.video_url || null,
+          freeShipping: Boolean(form.free_shipping)
+        },
+        updated_at: new Date().toISOString()
+      }
+
+      if (existing?.id) {
+        const { error } = await supabase
+          .from('product_store_metadata')
+          .update(meta)
+          .eq('id', existing.id)
+        if (error) {
+          console.warn('Aviso ao atualizar product_store_metadata:', error.message)
+        }
+      } else {
+        const { error } = await supabase
+          .from('product_store_metadata')
+          .insert(meta)
+        if (error) {
+          console.warn('Aviso ao inserir product_store_metadata:', error.message)
+        }
+      }
+    } catch (err: any) {
+      console.warn('Erro ao salvar metadados da loja:', err)
+    }
+  }
+
+  async function handleSubmit(e?: React.FormEvent, forcePublish?: boolean) {
     if (e) e.preventDefault()
     if (!form.name.trim()) {
       setMessage({ type: 'error', text: 'Por favor, informe o nome do produto.' })
@@ -316,207 +534,86 @@ export default function ProductForm() {
     setSaving(true)
     setMessage(null)
 
+    const willPublish = forcePublish !== undefined ? forcePublish : form.published
+
+    const commerceError = validateCommerce(form.commerce, form.sell_price, form.has_promo ? form.promo_price : null)
+    if (commerceError) { setMessage({ type: 'error', text: commerceError }); setSaving(false); return }
+
     try {
+      // Envia estritamente as colunas reais existentes na tabela products do Supabase
       const payload: any = {
-        name: form.name,
-        slug: form.slug || form.seo_slug,
-        description: form.description,
-        short_description: form.short_description,
-        price: form.sell_price,
-        sell_price: form.sell_price,
-        promo_price: form.has_promo ? form.promo_price : null,
-        cost_price: form.cost_price,
-        images: form.images,
-        main_image: form.main_image || form.images[0] || '',
-        video_url: form.video_url,
-        product_type: form.product_type,
-        manage_stock: form.manage_stock,
-        stock_quantity: form.stock_quantity,
-        stock: form.stock_quantity,
-        stock_min: form.stock_min,
-        sku: form.sku,
-        barcode: form.barcode,
-        weight: form.weight,
-        length: form.length,
-        width: form.width,
-        height: form.height,
-        gender: form.gender,
-        age_group: form.age_group,
-        condition: form.condition,
-        category_id: form.category_id || null,
-        brand: form.brand,
-        tags: form.tags.split(',').map(t => t.trim()).filter(Boolean),
-        variations: form.variations,
-        seo_title: form.seo_title,
-        seo_description: form.seo_description,
-        seo_slug: form.seo_slug,
-        ncm: form.ncm,
-        origin: form.origin,
-        cest: form.cest,
-        status: form.status,
-        featured: form.featured,
-        free_shipping: form.free_shipping,
+        name: form.name.trim(),
+        sku: form.sku?.trim() || null,
+        brand: form.brand || 'TEKNIX',
+        model: (form as any).model || null,
+        ean: form.barcode || null,
+        category: form.category_id || 'Geral',
+        cost_purchase: form.cost_price ? Number(form.cost_price) : 0,
+        weight: form.weight ? Number(form.weight) : null,
+        length: form.length ? Number(form.length) : null,
+        width: form.width ? Number(form.width) : null,
+        height: form.height ? Number(form.height) : null,
+        stock: form.manage_stock === false ? 999 : Number(form.stock_quantity || 0),
+        min_stock: Number(form.stock_min || 0),
+        status: willPublish ? 'active' : (form.status || 'draft'),
+        notes: form.description || form.short_description || null,
+        image_url: form.main_image || (form.images && form.images[0]) || null,
         updated_at: new Date().toISOString()
       }
 
-      if (isEditing && id) {
-        const { error } = await supabase.from('products').update(payload).eq('id', id)
-        if (error) throw error
-        setMessage({ type: 'success', text: 'Produto atualizado com sucesso!' })
+      const savedId = form.id || (isEditing ? id : undefined)
+      if (savedId) {
+        const resPrimary = await supabase.from('products').update({ ...payload, video_url: form.video_url || null }).eq('id', savedId)
+        if (resPrimary.error) {
+          const resFallback = await supabase.from('products').update(payload).eq('id', savedId)
+          if (resFallback.error) throw resFallback.error
+        }
+        // Sincroniza o vínculo com a publicação da loja
+        await syncStoreMetadata(savedId, willPublish)
+        setForm(prev => ({ ...prev, published: willPublish, status: willPublish ? 'active' : prev.status }))
+        if (willPublish) {
+          setPublishedSlug(form.seo_slug || form.slug || savedId)
+          setShowPublishModal(true)
+        }
+        setMessage({
+          type: 'success',
+          text: willPublish
+            ? '✓ Publicação atualizada com sucesso! O produto está ativo na vitrine oficial.'
+            : '✓ Produto salvo no catálogo TEKNIX! (Mantido como NÃO publicado na vitrine pública)'
+        })
       } else {
         payload.created_at = new Date().toISOString()
         const { data, error } = await supabase.from('products').insert(payload).select().single()
         if (error) throw error
-        setMessage({ type: 'success', text: 'Produto criado com sucesso!' })
         if (data) {
-          setTimeout(() => navigate(`/hub/produtos/editar/${data.id}`), 800)
+          setForm(prev => ({ ...prev, id: data.id, published: willPublish }))
+          // Sincroniza o vínculo com a publicação da loja
+          await syncStoreMetadata(data.id, willPublish)
+          if (willPublish) {
+            setPublishedSlug(form.seo_slug || form.slug || data.id)
+            setShowPublishModal(true)
+          }
+          setMessage({
+            type: 'success',
+            text: willPublish
+              ? '✓ Produto cadastrado e PUBLICADO na loja com sucesso!'
+              : '✓ Produto cadastrado com sucesso no catálogo! (Não publicado na vitrine pública)'
+          })
+          if (!willPublish) {
+            setTimeout(() => navigate(`/hub/produtos/editar/${data.id}`), 800)
+          }
         }
       }
     } catch (err: any) {
       console.error(err)
-      setMessage({ type: 'error', text: 'Erro ao salvar produto: ' + (err.message || 'Verifique os dados.') })
+      setMessage({ type: 'error', text: 'Erro ao salvar produto: ' + (err.message || 'Verifique os dados e tente novamente.') })
     } finally {
       setSaving(false)
     }
   }
 
-  async function handleOpenVisualEditor() {
-    if (!id) return
-    try {
-      // 1. Check if a page already exists for this product
-      const productSlug = form.slug || `produto-${id}`
-      const targetSlug = `/produto/${productSlug}`
-      const { data: existingPage } = await supabase
-        .from('pages')
-        .select('id')
-        .or(`slug.eq.${targetSlug},slug.eq.${productSlug},slug.eq./${productSlug}`)
-        .maybeSingle()
-
-      if (existingPage?.id) {
-        window.open(`/editor/page/${existingPage.id}`, '_blank', 'noopener,noreferrer')
-        return
-      }
-
-      // 2. Create presentation page for this product with TEKNIX Product layout
-      const newPage = await createPage({
-        title: form.name || 'Apresentação do Produto',
-        slug: targetSlug,
-        type: 'product',
-        status: 'published',
-        seo_title: `${form.name || 'Produto'} — TEKNIX`,
-        seo_description: form.short_description || form.description?.substring(0, 160) || ''
-      })
-
-      // Add Product Showcase Section
-      const { data: section } = await supabase.from('page_sections').insert({
-        page_id: newPage.id,
-        order: 0,
-        layout: 'boxed',
-        direction: 'row',
-        max_width: '1200px',
-        padding_top: '60px',
-        padding_bottom: '60px',
-        bg_type: 'color',
-        bg_color: '#ffffff'
-      }).select().single()
-
-      if (section) {
-        // Left Column: Product Image
-        const { data: colLeft } = await supabase.from('page_containers').insert({
-          section_id: section.id,
-          order: 0,
-          direction: 'column',
-          width: '50%',
-          align_items: 'center',
-          gap: '16px'
-        }).select().single()
-
-        if (colLeft) {
-          await supabase.from('page_widgets').insert({
-            container_id: colLeft.id,
-            type: 'image',
-            order: 0,
-            content: { image: form.main_image || form.images?.[0] || 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=800&auto=format&fit=crop&q=80', alt: form.name },
-            border_radius: '16px',
-            width: '100%'
-          })
-        }
-
-        // Right Column: Product Details
-        const { data: colRight } = await supabase.from('page_containers').insert({
-          section_id: section.id,
-          order: 1,
-          direction: 'column',
-          width: '50%',
-          align_items: 'flex-start',
-          gap: '16px'
-        }).select().single()
-
-        if (colRight) {
-          await supabase.from('page_widgets').insert([
-            {
-              container_id: colRight.id,
-              type: 'text',
-              order: 0,
-              content: { text: 'TEKNIX PROFISSIONAL', tag: 'span' },
-              font_size: '12px',
-              font_weight: '700',
-              color: '#00cc6a',
-              letter_spacing: '0.12em',
-              text_transform: 'uppercase'
-            },
-            {
-              container_id: colRight.id,
-              type: 'heading',
-              order: 1,
-              content: { text: form.name || 'Produto TEKNIX', tag: 'h1' },
-              font_size: '36px',
-              font_weight: '800',
-              color: '#1d1d1f',
-              line_height: '1.15'
-            },
-            {
-              container_id: colRight.id,
-              type: 'heading',
-              order: 2,
-              content: { text: `R$ ${(form.sell_price || 0).toFixed(2).replace('.', ',')}`, tag: 'h2' },
-              font_size: '30px',
-              font_weight: '800',
-              color: '#1d1d1f'
-            },
-            {
-              container_id: colRight.id,
-              type: 'text',
-              order: 3,
-              content: { text: form.description || form.short_description || 'Produto profissional de alta performance e durabilidade garantida TEKNIX.', tag: 'p' },
-              font_size: '16px',
-              color: '#6e6e73',
-              line_height: '1.6'
-            },
-            {
-              container_id: colRight.id,
-              type: 'button',
-              order: 4,
-              content: { label: 'Comprar Agora', button_link: '/checkout' },
-              bg_type: 'color',
-              bg_color: '#00cc6a',
-              color: '#ffffff',
-              border_radius: '980px',
-              padding_top: '16px',
-              padding_bottom: '16px',
-              padding_left: '36px',
-              padding_right: '36px',
-              font_weight: '700'
-            }
-          ])
-        }
-      }
-
-      window.open(`/editor/page/${newPage.id}`, '_blank', 'noopener,noreferrer')
-    } catch (e) {
-      console.warn('Fallback to editor:', e)
-      window.open('/editor/page/new', '_blank', 'noopener,noreferrer')
-    }
+  function handleOpenVisualEditor() {
+    if (id) window.open(`/hub/editor/product/${encodeURIComponent(id)}`, '_blank', 'noopener,noreferrer')
   }
 
   // Margem e lucro calculados
@@ -544,10 +641,12 @@ export default function ProductForm() {
             <button className="btn-back" onClick={() => navigate('/hub/produtos')} title="Voltar aos produtos">
               <ChevronLeft size={20} />
             </button>
-            <h1 className="product-form-title">
-              {form.name || (isEditing ? 'Editar Produto' : 'Novo Produto')}
-              <span className={`product-status-pill ${form.status === 'active' ? 'active' : 'draft'}`}>
-                {form.status === 'active' ? 'Ativo' : 'Rascunho'}
+            <h1 className="product-form-title" title={form.name || ''}>
+              <span className="product-title-text">
+                {form.name || (isEditing ? 'Editar Produto' : 'Novo Produto')}
+              </span>
+              <span className={`product-status-pill ${form.published ? 'published' : form.status === 'active' ? 'active' : 'draft'}`}>
+                {form.published ? 'Publicado' : form.status === 'active' ? 'Ativo' : 'Rascunho'}
               </span>
             </h1>
           </div>
@@ -563,11 +662,31 @@ export default function ProductForm() {
                 <Sparkles size={14} color="#e91e63" /> Editor Visual
               </button>
             )}
-            <button className="btn-secondary-action" onClick={() => navigate('/hub/produtos')}>
-              Cancelar
+            <button
+              type="button"
+              className="btn-secondary-action"
+              onClick={() => handleSubmit(undefined, false)}
+              disabled={saving}
+              title="Salva no catálogo interno TEKNIX sem exibir na vitrine pública"
+              style={{ fontWeight: 600 }}
+            >
+              Salvar Catálogo
             </button>
-            <button className="btn-primary-action" onClick={() => handleSubmit()} disabled={saving}>
-              {saving ? 'Salvando...' : isEditing ? 'Salvar Alterações' : 'Publicar Produto'}
+            <button
+              type="button"
+              className="btn-primary-action"
+              onClick={() => handleSubmit(undefined, true)}
+              disabled={saving}
+              style={{
+                background: form.published ? '#059669' : '#111827',
+                borderColor: form.published ? '#059669' : '#111827',
+                color: '#ffffff',
+                fontWeight: 600,
+                transition: 'all 0.2s ease'
+              }}
+              title={form.published ? 'Atualizar publicação na vitrine oficial da loja' : 'Publicar produto imediatamente na vitrine oficial da loja'}
+            >
+              {saving ? 'Salvando...' : form.published ? '✓ Atualizar Publicação' : 'Publicar'}
             </button>
           </div>
         </div>
@@ -640,25 +759,86 @@ export default function ProductForm() {
         {/* 2. FOTOS E VÍDEOS */}
         <div className="form-card">
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <h2 className="card-title" style={{ margin: 0 }}>Fotos e vídeos</h2>
-            <span style={{ background: '#eff6ff', color: '#2563eb', fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: 10 }}>
-              Vídeo em Beta
+            <h2 className="card-title" style={{ margin: 0 }}>Fotos e vídeos do produto</h2>
+            <span style={{ background: '#ecfdf5', color: '#059669', fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', borderRadius: 10 }}>
+              Suporta Fotos e Vídeo
             </span>
           </div>
           <p className="card-subtitle">
-            Arraste e solte, ou selecione fotos e vídeo do produto. Tamanho mínimo recomendado: 1280px (WEBP, PNG, JPEG, GIF).
+            Arraste e solte, ou selecione fotos e vídeo do produto. Tamanho mínimo recomendado: 1280px (WEBP, PNG, JPEG, GIF) e Vídeos (MP4, WEBM ou link do YouTube).
           </p>
 
-          <div className="upload-dropzone" onClick={() => {
-            const url = prompt('Cole a URL da imagem (ou hospede via Nuvem/Supabase):')
-            if (url) handleAddImageUrl(url)
-          }}>
-            <Upload size={28} className="upload-icon" />
-            <div className="upload-prompt">Arraste e solte, ou selecione fotos e vídeo do produto</div>
-            <div className="upload-subprompt">Tamanho mínimo recomendado: 1280px / Formatos: WEBP, PNG, JPEG, GIF</div>
+          {/* Input de Arquivos Oculto (Imagens e Vídeos) */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*,video/mp4,video/webm,video/quicktime"
+            multiple
+            style={{ display: 'none' }}
+            onChange={(e) => {
+              if (e.target.files && e.target.files.length > 0) {
+                handleUploadFiles(e.target.files)
+                e.target.value = ''
+              }
+            }}
+          />
+
+          <div
+            className={`upload-dropzone ${isDragging ? 'is-dragging' : ''} ${isUploadingMedia ? 'is-uploading' : ''}`}
+            onClick={() => fileInputRef.current?.click()}
+            onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
+            onDragLeave={() => setIsDragging(false)}
+            onDrop={(e) => {
+              e.preventDefault()
+              setIsDragging(false)
+              if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                handleUploadFiles(e.dataTransfer.files)
+              }
+            }}
+          >
+            {isUploadingMedia ? (
+              <>
+                <Loader2 size={30} className="upload-icon spinner-icon" />
+                <div className="upload-prompt">{uploadStatus || 'Enviando arquivos...'}</div>
+                <div className="upload-subprompt">Aguarde o processamento das mídias</div>
+              </>
+            ) : (
+              <>
+                <Upload size={28} className="upload-icon" />
+                <div className="upload-prompt">Arraste e solte, ou selecione fotos e vídeo do produto</div>
+                <div className="upload-subprompt">Fotos (WEBP, PNG, JPG) e Vídeo (.MP4, .WEBM, .MOV) ou use os botões abaixo</div>
+                <div className="upload-actions-row" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    type="button"
+                    className="btn-upload-file"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Upload size={13} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                    Subir Fotos / Vídeo
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-upload-link"
+                    onClick={() => {
+                      const url = prompt('Cole a URL de uma imagem ou vídeo:')
+                      if (url) {
+                        if (url.match(/\.(mp4|webm|mov|m4v)(\?.*)?$/i) || getYoutubeVideoId(url)) {
+                          setForm(f => ({ ...f, video_url: url }))
+                        } else {
+                          handleAddImageUrl(url)
+                        }
+                      }
+                    }}
+                  >
+                    Adicionar por Link
+                  </button>
+                </div>
+              </>
+            )}
           </div>
 
-          {form.images.length > 0 && (
+          {/* Grid de Fotos e Vídeos Cadastrados */}
+          {(form.images.length > 0 || Boolean(form.video_url)) && (
             <div className="photos-grid">
               {form.images.map((img, idx) => (
                 <div key={idx} className={`photo-card ${form.main_image === img ? 'is-main' : ''}`} onClick={() => handleSetMainImage(img)}>
@@ -674,15 +854,64 @@ export default function ProductForm() {
                   </button>
                 </div>
               ))}
+
+              {/* Card do Vídeo (YouTube ou MP4 enviado) */}
+              {form.video_url && (
+                <div className="photo-card is-video">
+                  {getYoutubeVideoId(form.video_url) ? (
+                    <div className="video-thumb-container" onClick={() => window.open(form.video_url, '_blank')} title="Clique para assistir no YouTube">
+                      <img
+                        src={`https://img.youtube.com/vi/${getYoutubeVideoId(form.video_url)}/hqdefault.jpg`}
+                        alt="Vídeo do Produto YouTube"
+                      />
+                      <div className="video-play-overlay">
+                        <Play size={24} fill="#ffffff" color="#ffffff" />
+                      </div>
+                      <span className="photo-badge-video youtube">
+                        ▶ YouTube
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="video-thumb-container" onClick={() => setPreviewVideoModal(form.video_url)} title="Clique para pré-visualizar vídeo">
+                      <video src={form.video_url} className="video-thumb-player" muted preload="metadata" />
+                      <div className="video-play-overlay">
+                        <Play size={24} fill="#ffffff" color="#ffffff" />
+                      </div>
+                      <span className="photo-badge-video mp4">
+                        ▶ Vídeo MP4
+                      </span>
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    className="photo-delete-btn"
+                    onClick={(e) => { e.stopPropagation(); setForm(prev => ({ ...prev, video_url: '' })) }}
+                    title="Remover vídeo do produto"
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
-          <div className="form-group" style={{ marginTop: 8 }}>
-            <label><Video size={15} style={{ verticalAlign: 'middle', marginRight: 4 }} /> Link para vídeo externo</label>
+          <div className="form-group" style={{ marginTop: 12 }}>
+            <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span><Video size={15} style={{ verticalAlign: 'middle', marginRight: 4 }} /> Link para vídeo externo (YouTube ou Vimeo)</span>
+              {form.video_url && (
+                <button
+                  type="button"
+                  style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}
+                  onClick={() => setForm(prev => ({ ...prev, video_url: '' }))}
+                >
+                  Remover Vídeo
+                </button>
+              )}
+            </label>
             <input
               type="text"
               className="form-input"
-              placeholder="Cole um link do YouTube ou do Vimeo sobre o seu produto"
+              placeholder="Cole um link do YouTube (ex: https://youtube.com/watch?v=...) ou Vimeo"
               value={form.video_url}
               onChange={(e) => setForm({ ...form, video_url: e.target.value })}
             />
@@ -695,7 +924,7 @@ export default function ProductForm() {
           
           <div className="form-row">
             <div className="form-group">
-              <label>Preço de venda (R$) *</label>
+              <label>Preço original / de venda (R$) *</label>
               <input
                 type="number"
                 step="0.01"
@@ -729,6 +958,56 @@ export default function ProductForm() {
             />
             Exibir o preço promocional na loja
           </label>
+
+          <div className="commerce-settings">
+            <h3>Ofertas e condições na loja</h3>
+            <p className="field-hint">Os selos aparecem na imagem do card e na página do produto. O desconto é calculado pelos preços acima.</p>
+            <label className="toggle-switch-label"><input type="checkbox" checked={form.commerce.offerEnabled} onChange={e=>setForm({...form,commerce:{...form.commerce,offerEnabled:e.target.checked}})} />Ativar oferta com contagem regressiva</label>
+            {form.commerce.offerEnabled && <label className="form-group">Término da oferta (horário local)<input className="form-input" type="datetime-local" value={form.commerce.offerEndsAt ? new Date(Date.parse(form.commerce.offerEndsAt) - new Date(form.commerce.offerEndsAt).getTimezoneOffset()*60000).toISOString().slice(0,16) : ''} onChange={e=>setForm({...form,commerce:{...form.commerce,offerEndsAt:e.target.value ? new Date(e.target.value).toISOString() : null}})} /></label>}
+            <div className="form-row">
+              <label className="form-group">Selo na imagem<select className="form-input" value={form.commerce.badge} onChange={e=>setForm({...form,commerce:{...form.commerce,badge:e.target.value as ProductCommerce['badge']}})}><option value="none">Sem selo</option><option value="daily">Oferta do dia</option><option value="special">Oferta imperdível</option><option value="bestseller">Mais vendido</option></select><span className="field-hint">Use “Mais vendido” somente quando houver vendas que sustentem a informação.</span></label>
+              <label className="form-group">Parcelas sem juros<input className="form-input" type="number" min="1" max="24" step="1" value={form.commerce.installments} onChange={e=>setForm({...form,commerce:{...form.commerce,installments:Number(e.target.value)}})} /></label>
+              <label className="form-group">Desconto adicional no Pix (%)<input className="form-input" type="number" min="0" max="99.99" step="0.01" value={form.commerce.pixDiscountPercent} onChange={e=>setForm({...form,commerce:{...form.commerce,pixDiscountPercent:Number(e.target.value)}})} /></label>
+            </div>
+            <div className="form-row" style={{ marginTop: 8 }}>
+              <label className="form-group">
+                Condição do Produto (Loja)
+                <select
+                  className="form-input"
+                  value={form.commerce.condition || form.condition || 'Novo'}
+                  onChange={e => setForm({
+                    ...form,
+                    condition: e.target.value,
+                    commerce: { ...form.commerce, condition: e.target.value }
+                  })}
+                >
+                  <option value="Novo">Novo</option>
+                  <option value="Recondicionado">Recondicionado</option>
+                  <option value="Usado">Usado</option>
+                </select>
+                <span className="field-hint">Exibido no topo do produto (ex: Novo | +10 mil vendidos)</span>
+              </label>
+
+              <label className="form-group">
+                Total de Vendas Exibido
+                <input
+                  className="form-input"
+                  type="text"
+                  placeholder="ex: +10 mil vendidos ou +500 vendidos"
+                  value={form.commerce.soldCount ?? '+10 mil vendidos'}
+                  onChange={e => setForm({
+                    ...form,
+                    commerce: { ...form.commerce, soldCount: e.target.value }
+                  })}
+                />
+                <span className="field-hint">Ex: +10 mil vendidos, +500 vendidos, +1000 vendidos</span>
+              </label>
+            </div>
+
+            <label className="toggle-switch-label"><input type="checkbox" checked={form.commerce.showLastUnit} onChange={e=>setForm({...form,commerce:{...form.commerce,showLastUnit:e.target.checked}})} />Mostrar “Última unidade” automaticamente quando o estoque controlado for 1</label>
+            <label className="toggle-switch-label"><input type="checkbox" checked={form.free_shipping} onChange={e=>setForm({...form,free_shipping:e.target.checked})} />Frete grátis para este produto</label>
+            <p className="commerce-preview">Prévia: {productPricing(form.sell_price,form.has_promo?form.promo_price:null,form.commerce).pix.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})} no Pix · {form.commerce.installments}x sem juros. {form.commerce.condition || form.condition || 'Novo'} | {form.commerce.soldCount || '+10 mil vendidos'}</p>
+          </div>
 
           <div className="form-row" style={{ marginTop: 6 }}>
             <div className="form-group">
@@ -1277,11 +1556,36 @@ export default function ProductForm() {
           </div>
         </div>
 
-        {/* 13. VISIBILIDADE E FRETE */}
+        {/* 13. VISIBILIDADE, PUBLICAÇÃO NA LOJA E FRETE */}
         <div className="form-card">
-          <h2 className="card-title">Visibilidade</h2>
-          <p className="card-subtitle">Defina como o produto aparece na loja.</p>
+          <h2 className="card-title">Publicação na Loja Oficial (SITE)</h2>
+          <p className="card-subtitle">Controle a exibição deste produto na vitrine pública do site de forma independente do catálogo geral.</p>
           
+          <div style={{
+            background: form.published ? '#f0fdf4' : '#f8fafc',
+            border: `1.5px solid ${form.published ? '#86efac' : '#e2e8f0'}`,
+            borderRadius: 10,
+            padding: '16px',
+            marginBottom: 20,
+            transition: 'all 0.2s ease'
+          }}>
+            <label className="toggle-switch-label" style={{ fontWeight: 700, fontSize: '0.95rem', color: '#0f172a', display: 'flex', alignItems: 'center', gap: 10 }}>
+              <input
+                type="checkbox"
+                className="toggle-switch-input"
+                checked={form.published}
+                onChange={(e) => setForm({ ...form, published: e.target.checked })}
+              />
+              Publicar este produto na Loja Oficial TEKNIX (SITE)
+            </label>
+            <p style={{ margin: '8px 0 0 28px', fontSize: '0.82rem', lineHeight: 1.4, color: form.published ? '#15803d' : '#64748b' }}>
+              {form.published
+                ? '✓ PRODUTO PUBLICADO: Fica visível para os clientes na vitrine do site, busca, categorias e checkout.'
+                : '✕ NÃO PUBLICADO NA LOJA: Fica salvo no catálogo e integrado aos marketplaces (FLOW / Mercado Livre), mas oculto na vitrine pública da loja.'}
+            </p>
+          </div>
+
+          <h3 className="card-title" style={{ fontSize: '1rem', marginBottom: 6 }}>Status Operacional</h3>
           <div className="radio-group" style={{ marginBottom: 14 }}>
             <label className={`radio-card ${form.status === 'active' ? 'active' : ''}`}>
               <input
@@ -1291,8 +1595,8 @@ export default function ProductForm() {
                 onChange={() => setForm({ ...form, status: 'active' })}
               />
               <div>
-                <strong>Visível</strong>
-                <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>Aparece na loja, buscadores e canais</div>
+                <strong>Ativo</strong>
+                <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>Disponível para operações</div>
               </div>
             </label>
 
@@ -1304,8 +1608,8 @@ export default function ProductForm() {
                 onChange={() => setForm({ ...form, status: 'draft' })}
               />
               <div>
-                <strong>Não listado</strong>
-                <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>Acessível somente via link direto</div>
+                <strong>Rascunho</strong>
+                <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>Em edição interna</div>
               </div>
             </label>
 
@@ -1317,8 +1621,8 @@ export default function ProductForm() {
                 onChange={() => setForm({ ...form, status: 'inactive' })}
               />
               <div>
-                <strong>Oculto</strong>
-                <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>Indisponível para clientes</div>
+                <strong>Pausado / Oculto</strong>
+                <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>Indisponível temporariamente</div>
               </div>
             </label>
           </div>
@@ -1340,13 +1644,125 @@ export default function ProductForm() {
           <button type="button" className="btn-secondary-action" onClick={() => navigate('/hub/produtos')}>
             Cancelar
           </button>
-          <button type="button" className="btn-primary-action" onClick={() => handleSubmit()} disabled={saving}>
-            {saving ? 'Salvando...' : isEditing ? 'Salvar Alterações' : 'Publicar Produto'}
+          <button
+            type="button"
+            className="btn-secondary-action"
+            onClick={() => handleSubmit(undefined, false)}
+            disabled={saving}
+            title="Salva no catálogo e marketplaces sem publicar na loja própria"
+            style={{ fontWeight: 600 }}
+          >
+            Salvar no Catálogo
+          </button>
+          <button
+            type="button"
+            className="btn-primary-action"
+            onClick={() => handleSubmit(undefined, true)}
+            disabled={saving}
+            style={{
+              background: form.published ? '#059669' : '#111827',
+              borderColor: form.published ? '#059669' : '#111827',
+              color: '#ffffff',
+              fontWeight: 600,
+              transition: 'all 0.2s ease'
+            }}
+            title={form.published ? 'Atualizar publicação na loja oficial TEKNIX' : 'Publicar imediatamente na loja oficial TEKNIX'}
+          >
+            {saving ? 'Salvando...' : form.published ? '✓ Atualizar Publicação' : 'Publicar'}
           </button>
         </div>
 
       </div>
+
+      {/* ── Modal de Confirmação de Publicação — Design Fino HUB ── */}
+      {showPublishModal && (
+        <div className="product-publish-modal-overlay" onClick={() => setShowPublishModal(false)}>
+          <div className="product-publish-modal" onClick={e => e.stopPropagation()}>
+            <button
+              type="button"
+              className="publish-modal-close-btn"
+              onClick={() => setShowPublishModal(false)}
+              title="Fechar"
+            >
+              <X size={16} />
+            </button>
+
+            <div className="publish-modal-header">
+              <div className="publish-modal-icon">
+                <Check size={18} strokeWidth={2.5} />
+              </div>
+              <div className="publish-modal-title-wrap">
+                <h3>Publicação Atualizada</h3>
+                <p>O produto está ativo e sincronizado na vitrine oficial da TEKNIX.</p>
+              </div>
+            </div>
+
+            <div className="publish-modal-product-box">
+              {form.main_image || (form.images && form.images[0]) ? (
+                <img src={form.main_image || form.images[0]} alt={form.name} className="publish-modal-thumb" />
+              ) : (
+                <div className="publish-modal-thumb-placeholder">
+                  <Package size={18} color="#94a3b8" />
+                </div>
+              )}
+              <div className="publish-modal-product-info">
+                <div className="publish-modal-sku-row">
+                  <span className="publish-modal-sku">SKU: {form.sku || 'TKN-PROD'}</span>
+                  <span className="publish-modal-status-badge">● No Ar</span>
+                </div>
+                <span className="publish-modal-name" title={form.name}>{form.name}</span>
+                <span className="publish-modal-price">
+                  {form.has_promo && form.promo_price
+                    ? `R$ ${Number(form.promo_price).toFixed(2).replace('.', ',')} (de R$ ${Number(form.sell_price).toFixed(2).replace('.', ',')})`
+                    : `R$ ${Number(form.sell_price || 0).toFixed(2).replace('.', ',')}`}
+                </span>
+              </div>
+            </div>
+
+            <div className="publish-modal-actions">
+              <a
+                href={`http://localhost:5173/produtos/${publishedSlug || form.seo_slug || form.slug || id}`}
+                target="_blank"
+                rel="noreferrer"
+                className="btn-modal-view-store"
+                onClick={() => setShowPublishModal(false)}
+              >
+                <ExternalLink size={14} />
+                Ver na Loja Oficial
+              </a>
+              <button
+                type="button"
+                className="btn-modal-continue"
+                onClick={() => setShowPublishModal(false)}
+              >
+                Continuar Editando
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal de Prévia de Vídeo do Produto ── */}
+      {previewVideoModal && (
+        <div className="product-publish-modal-overlay" onClick={() => setPreviewVideoModal(null)}>
+          <div className="product-publish-modal" style={{ maxWidth: 640, padding: 20 }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: 12 }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#0f172a' }}>Prévia do Vídeo do Produto</h3>
+              <button
+                type="button"
+                className="publish-modal-close-btn"
+                style={{ position: 'static' }}
+                onClick={() => setPreviewVideoModal(null)}
+              >
+                <X size={16} />
+              </button>
+            </div>
+            <div style={{ width: '100%', borderRadius: 8, overflow: 'hidden', background: '#000' }}>
+              <video src={previewVideoModal} controls autoPlay style={{ width: '100%', maxHeight: 380, display: 'block' }} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
-

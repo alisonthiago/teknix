@@ -1,925 +1,208 @@
-/* ==========================================================================
-   TEKNIX SITE — PÁGINA OFICIAL DE CHECKOUT (1:1 PADRÃO APPLE STORE)
-   Referência:
-   - Etapa 1: https://secure8.store.apple.com/br/shop/checkout?_s=Shipping-init
-   - Etapa 2: https://secure8.store.apple.com/br/shop/checkout?_s=Billing-init
-   ========================================================================== */
-
-import React, { useState, useEffect } from 'react'
+import { Editable } from '../components/page-widgets/PageWidgets'
+import EditableFlow from '../components/page-widgets/EditableFlow'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
+import { MapPin, Truck, ShieldCheck, Package, ArrowLeft, CheckCircle2, ChevronDown, ChevronUp, Ticket, X } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../hooks/useAuth'
-import { processCheckoutOrder } from '../services/checkout'
-import { ChevronDown, ChevronUp, CheckCircle2 } from 'lucide-react'
-import './Checkout.css'
+import { getAddressesByUserId, getCustomerByUserId } from '../services/customer'
+import { processCheckoutOrder, type CreatedOrderResult } from '../services/checkout'
+import { validateCoupon, registerCouponUse, type AppliedCoupon } from '../services/coupons'
+import pixIcon from '../../../../../bf_v6_pix.svg'
+import creditIcon from '../../../../../bf_v6_credito_noborde.svg'
+import boletoIcon from '../../../../../bf_v6_boleto_black_noborde.svg'
+import './CheckoutReference.css'
+
+const money = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+const emptyAddress = { name: '', street: '', number: '', complement: '', neighborhood: '', city: '', state: '', zipCode: '' }
 
 export default function Checkout() {
-  const { items: cartItems, totalPrice, clearCart } = useCart()
-  const { user } = useAuth()
-
-  // Checkout Step: 'shipping' (Para onde enviar?) | 'billing' (Como deseja pagar?)
-  const [checkoutStep, setCheckoutStep] = useState<'shipping' | 'billing'>('shipping')
-
-  // Companion Bar Summary Drawer
-  const [showOrderSummary, setShowOrderSummary] = useState(false)
-
-  // Address Selection ('saved' | 'new')
-  const [addressChoice, setAddressChoice] = useState<'saved' | 'new'>('saved')
-  const [savedAddress, setSavedAddress] = useState({
-    name: 'alison thiago',
-    street: 'Estrada do Atalaia 55',
-    district: 'Jardim Atalaia',
-    city: 'Cotia',
-    state: 'São Paulo',
-    zipCode: '06700-510'
-  })
-
-  // New Address Form Data
-  const [newAddress, setNewAddress] = useState({
-    firstName: '',
-    lastName: '',
-    street: '',
-    street2: '',
-    zipCode: '',
-    district: '',
-    city: '',
-    state: 'São Paulo',
-    country: 'Brasil',
-    isBusiness: false,
-    saveToAddressBook: true
-  })
-
-  // Contact Info
-  const [contactEmail, setContactEmail] = useState(user?.email || 'alisonsilvathiago@gmail.com')
-  const [ddd, setDdd] = useState('11')
-  const [phone, setPhone] = useState('975662930')
-  const [noMobile] = useState(false)
-
-  // Tax Info ('CPF' | 'CNPJ')
+  const { items, totalPrice, clearCart } = useCart()
+  const { user, signOut } = useAuth()
+  const [address, setAddress] = useState(emptyAddress)
+  const [draft, setDraft] = useState(emptyAddress)
+  const [editingAddress, setEditingAddress] = useState(true)
+  const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
+  const [document, setDocument] = useState('')
   const [taxType, setTaxType] = useState<'CPF' | 'CNPJ'>('CPF')
-  const [cpf, setCpf] = useState('384.920.182-36')
-  const [cnpj, setCnpj] = useState('')
-  const [companyName, setCompanyName] = useState('')
-  const [useShippingTaxInfo, setUseShippingTaxInfo] = useState(true)
-
-  // Billing Step: Payment Method ('SAVED_CARD' | 'CREDIT' | 'APPLE_PAY' | 'BOLETO')
-  const [selectedBillingOption, setSelectedBillingOption] = useState<'SAVED_CARD' | 'CREDIT' | 'APPLE_PAY' | 'BOLETO'>('SAVED_CARD')
-
-  // Validation / Error / Submitting
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [orderComplete, setOrderComplete] = useState<{ id: string; orderNumber: string } | null>(null)
-
-  // FAQ Accordion
-  const [openFaq, setOpenFaq] = useState<number | null>(null)
-
+  const [company, setCompany] = useState('')
+  const [accountName, setAccountName] = useState('')
+  const [payment, setPayment] = useState<'pix' | 'credit_card' | 'boleto'>('pix')
+  const [coupon, setCoupon] = useState<AppliedCoupon | null>(null)
+  const [couponCode, setCouponCode] = useState('')
+  const [couponNotice, setCouponNotice] = useState('')
+  const [couponOpen, setCouponOpen] = useState(false)
+  const [summaryOpen, setSummaryOpen] = useState(false)
+  const [error, setError] = useState('')
+  const [loadNotice, setLoadNotice] = useState('')
+  const [cepNotice, setCepNotice] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [complete, setComplete] = useState<CreatedOrderResult | null>(null)
+  // Mantém o valor usado pela integração anterior; a cotação dinâmica é uma integração separada.
+  const shippingCost = 0
+  const total = Math.max(0, totalPrice + shippingCost - (coupon?.discount || 0))
   useEffect(() => {
-    if (user) {
-      if (user.email) setContactEmail(user.email)
-      const name = user.user_metadata?.name || user.user_metadata?.full_name
-      if (name) {
-        setSavedAddress(prev => ({ ...prev, name }))
-      }
-    }
+    let active = true
+    if (!user) return
+    setLoading(true)
+    setEmail(user.email || '')
+    Promise.all([getAddressesByUserId(user.id), getCustomerByUserId(user.id)])
+      .then(([addresses, customer]) => {
+        if (!active) return
+        const saved = addresses[0]
+        const name = customer?.name || user.user_metadata?.name || ''
+        const value = saved ? { name: saved.recipient_name || name, street: saved.street, number: saved.number, complement: saved.complement || '', neighborhood: saved.neighborhood, city: saved.city, state: saved.state, zipCode: saved.zip_code } : { ...emptyAddress, name }
+        setAddress(value); setDraft(value); setEditingAddress(!saved)
+        setAccountName(name)
+        setPhone(customer?.phone || '')
+        const id = (customer?.cpf_cnpj || customer?.document || '').replace(/\D/g, '')
+        setDocument(id); setTaxType(id.length > 11 ? 'CNPJ' : 'CPF')
+      })
+      .catch(() => { if (active) setLoadNotice('Não foi possível carregar o cadastro. Você pode preencher os dados abaixo.') })
+      .finally(() => { if (active) setLoading(false) })
+    return () => { active = false }
   }, [user])
 
-  const formatPrice = (val: number) => {
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val)
-  }
-
-  // Format CPF helper
-  const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let val = e.target.value.replace(/\D/g, '')
-    if (val.length > 11) val = val.slice(0, 11)
-    val = val.replace(/(\d{3})(\d)/, '$1.$2')
-    val = val.replace(/(\d{3})(\d)/, '$1.$2')
-    val = val.replace(/(\d{3})(\d{1,2})$/, '$1-$2')
-    setCpf(val)
-  }
-
-  // Format CNPJ helper
-  const handleCnpjChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let val = e.target.value.replace(/\D/g, '')
-    if (val.length > 14) val = val.slice(0, 14)
-    val = val.replace(/^(\d{2})(\d)/, '$1.$2')
-    val = val.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
-    val = val.replace(/\.(\d{3})(\d)/, '.$1/$2')
-    val = val.replace(/(\d{4})(\d)/, '$1-$2')
-    setCnpj(val)
-  }
-
-  // CEP Auto-Fill helper
-  const handleCepChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    let val = e.target.value.replace(/\D/g, '')
-    if (val.length > 8) val = val.slice(0, 8)
-    const formatted = val.replace(/^(\d{5})(\d)/, '$1-$2')
-    setNewAddress(prev => ({ ...prev, zipCode: formatted }))
-
-    if (val.length === 8) {
-      try {
-        const res = await fetch(`https://viacep.com.br/ws/${val}/json/`)
-        const data = await res.json()
-        if (!data.erro) {
-          setNewAddress(prev => ({
-            ...prev,
-            street: data.logradouro || prev.street,
-            district: data.bairro || prev.district,
-            city: data.localidade || prev.city,
-            state: data.uf === 'SP' ? 'São Paulo' : data.uf
-          }))
-        }
-      } catch (err) {
-        console.warn('Erro ao consultar CEP:', err)
-      }
-    }
-  }
-
-  // Avançar da Etapa 1 (Shipping) para a Etapa 2 (Billing)
-  const handleContinueToPaymentStep = () => {
-    setErrorMessage(null)
-
-    if (addressChoice === 'new') {
-      if (!newAddress.firstName || !newAddress.lastName || !newAddress.street || !newAddress.zipCode) {
-        setErrorMessage('Por favor, preencha todos os campos obrigatórios do endereço.')
-        window.scrollTo({ top: 100, behavior: 'smooth' })
-        return
-      }
-    }
-
-    if (taxType === 'CPF') {
-      const cleanCpf = cpf.replace(/\D/g, '')
-      if (cleanCpf.length < 11) {
-        setErrorMessage('Por favor, insira um CPF válido para emissão da nota fiscal.')
-        window.scrollTo({ top: 300, behavior: 'smooth' })
-        return
-      }
-    } else {
-      const cleanCnpj = cnpj.replace(/\D/g, '')
-      if (cleanCnpj.length < 14 || !companyName) {
-        setErrorMessage('Por favor, informe o CNPJ e a Razão Social da empresa.')
-        window.scrollTo({ top: 300, behavior: 'smooth' })
-        return
-      }
-    }
-
-    setCheckoutStep('billing')
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
-  // Finalizar compra na Etapa 2 (Billing)
-  const handleFinalOrderSubmit = async () => {
-    setErrorMessage(null)
-    setIsSubmitting(true)
-
+  const validAddress = (value: typeof address) => value.name.trim() && value.street.trim() && value.number.trim() && value.neighborhood.trim() && value.city.trim() && /^[A-Za-z]{2}$/.test(value.state.trim()) && value.zipCode.replace(/\D/g, '').length === 8
+  const lookupCep = async (value = draft.zipCode) => {
+    const cep = value.replace(/\D/g, '')
+    if (cep.length !== 8) return
+    setCepNotice('Consultando CEP…')
     try {
-      const customerData = {
-        name: addressChoice === 'saved' ? savedAddress.name : `${newAddress.firstName} ${newAddress.lastName}`,
-        email: contactEmail,
-        document: taxType === 'CPF' ? cpf : cnpj,
-        phone: noMobile ? '' : `${ddd}${phone}`,
-        street: addressChoice === 'saved' ? savedAddress.street : newAddress.street,
-        number: addressChoice === 'saved' ? '55' : 'S/N',
-        complement: addressChoice === 'saved' ? '' : newAddress.street2,
-        neighborhood: addressChoice === 'saved' ? savedAddress.district : newAddress.district,
-        city: addressChoice === 'saved' ? savedAddress.city : newAddress.city,
-        state: addressChoice === 'saved' ? 'SP' : newAddress.state,
-        zipCode: addressChoice === 'saved' ? savedAddress.zipCode : newAddress.zipCode
-      }
-
-      const res = await processCheckoutOrder({
-        items: cartItems,
-        customer: customerData,
-        shippingCost: 0,
-        shippingMethod: 'sedex',
-        discount: selectedBillingOption === 'BOLETO' ? totalPrice * 0.1 : 0,
-        paymentMethod: selectedBillingOption === 'BOLETO' ? 'pix' : 'credit_card',
-        userId: user?.id
+      const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`)
+      if (!response.ok) throw new Error('CEP')
+      const data = await response.json()
+      if (data.erro) throw new Error('CEP')
+      setDraft(previous => previous.zipCode.replace(/\D/g, '') === cep ? {
+        ...previous, street: data.logradouro || previous.street, neighborhood: data.bairro || previous.neighborhood,
+        city: data.localidade || previous.city, state: data.uf || previous.state
+      } : previous)
+      setCepNotice('Confira o número e o complemento do endereço.')
+    } catch { setCepNotice('Não foi possível consultar o CEP. Preencha o endereço manualmente.') }
+  }
+  const confirmAddress = () => {
+    if (!validAddress(draft)) { setError('Preencha nome, CEP, rua, número, bairro, cidade e UF do endereço.'); return }
+    setAddress({ ...draft, state: draft.state.toUpperCase() }); setEditingAddress(false); setError('')
+  }
+  const submit = async (event: FormEvent) => {
+    event.preventDefault()
+    if (busy || !items.length) return
+    const selected = editingAddress ? draft : address
+    if (!validAddress(selected)) { setError('Confira os campos do endereço antes de continuar.'); return }
+    if (document.length !== (taxType === 'CPF' ? 11 : 14) || (taxType === 'CNPJ' && !company.trim())) { setError('Confira o documento e os dados de faturamento.'); return }
+    if (phone.replace(/\D/g, '').length < 10) { setError('Informe o telefone com DDD.'); return }
+    setBusy(true); setError('')
+    try {
+      const result = await processCheckoutOrder({
+        items, customer: { ...selected, name: taxType === 'CNPJ' ? company.trim() : selected.name, email, phone, document },
+        shippingCost, shippingMethod: 'sedex', discount: coupon?.discount || 0, paymentMethod: payment, userId: user?.id
       })
-
-      if (res.success && res.orderId) {
-        clearCart()
-        setOrderComplete({
-          id: res.orderId,
-          orderNumber: res.orderNumber || ''
-        })
-      } else {
-        setErrorMessage(res.error || 'Erro ao processar pedido. Tente novamente.')
-      }
-    } catch (e: any) {
-      setErrorMessage(e?.message || 'Erro inesperado ao finalizar compra.')
-    } finally {
-      setIsSubmitting(false)
-    }
+      if (!result.success || !result.orderId) { setError(result.error || 'Não foi possível continuar. Tente novamente.'); return }
+      await registerCouponUse(coupon?.id)
+      setComplete(result); clearCart()
+    } catch { setError('Não foi possível continuar. Tente novamente mais tarde.') }
+    finally { setBusy(false) }
   }
-
-  const faqsShipping = [
-    {
-      q: 'Quando receberei meus produtos?',
-      a: 'Ao inserir o código postal, você receberá datas de entrega estimadas dos itens. Só depois de fazer o pedido você verá a data de entrega final. Todas as datas estimadas variam de acordo com a disponibilidade do produto e a opção de entrega que você escolher.'
-    },
-    {
-      q: 'Quanto custa o envio?',
-      a: 'O frete padrão é grátis para todos os pedidos online na TEKNIX Store.'
-    },
-    {
-      q: 'É possível enviar para um lugar que não seja minha casa?',
-      a: 'Sim. Você pode informar o endereço comercial ou residencial desejado na finalização da compra.'
-    },
-    {
-      q: 'Como faço para rastrear minha entrega?',
-      a: 'Vamos enviar uma notificação quando cada produto for despachado. Você também pode acessar a página de status do pedido para acompanhar em tempo real.'
-    },
-    {
-      q: 'Quando recebo notificações por mensagem de texto?',
-      a: 'Insira o número do seu celular na finalização da compra para receber mensagens de texto quando seus produtos forem enviados ou se houver algum problema. Só enviamos mensagens entre 8h e 21h.'
-    },
-    {
-      q: 'E se eu não estiver presente no momento da entrega?',
-      a: 'O e-mail de confirmação de envio informará se você precisa assinar a entrega. Se não estiver, a transportadora deixará uma notificação e agendará uma nova tentativa.'
-    }
-  ]
-
-  const faqsPayment = [
-    {
-      q: 'Quais são as opções de pagamento?',
-      a: 'Aceitamos Apple Pay, boleto bancário, Pix e a maioria dos cartões de crédito e débito. Algumas opções podem não estar disponíveis para todos os produtos.'
-    },
-    {
-      q: 'Quais são as opções de financiamento?',
-      a: 'Você pode pagar em parcelas com seu cartão de crédito. Na página de finalização da compra, selecione as opções na seção de pagamento.'
-    },
-    {
-      q: 'Como o imposto sobre vendas é calculado?',
-      a: 'Os impostos indicados nas páginas da sacola e de pagamento são estimativas. Sua nota fiscal vai apresentar o imposto total.'
-    },
-    {
-      q: 'A TEKNIX oferece descontos para a área de educação?',
-      a: 'Sim. Oferecemos preços especiais para estudantes, professores e instituições de ensino.'
-    },
-    {
-      q: 'Onde insiro meu CNPJ/CPF?',
-      a: 'Você deve informar seu CNPJ/CPF na finalização da compra. O documento será impresso na sua nota fiscal.'
-    }
-  ]
-
-  // Se o pedido foi concluído com sucesso
-  if (orderComplete) {
-    return (
-      <div className="rs-checkout-success as-l-container">
-        <div className="success-icon-wrap">
-          <CheckCircle2 size={64} color="#34c759" />
-        </div>
-        <h1 className="typography-headline">Obrigado pelo seu pedido!</h1>
-        <p className="success-order-num">Número do pedido: <strong>#{orderComplete.orderNumber}</strong></p>
-        <p className="success-desc">
-          Enviamos uma confirmação detalhada para <strong>{contactEmail}</strong> e o pedido já está sendo preparado pela nossa equipe de logística.
-        </p>
-        <div className="success-actions">
-          <Link to={`/pedidos`} className="form-button">
-            Ver meus pedidos
-          </Link>
-          <Link to="/" className="form-button-secondary">
-            Continuar comprando
-          </Link>
-        </div>
-      </div>
-    )
+  const safePaymentUrl = complete?.checkoutUrl?.startsWith('https://') ? complete.checkoutUrl : null
+  const displayName = accountName || String(user?.user_metadata?.name || user?.email?.split('@')[0] || 'Minha conta')
+  const initials = displayName.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toUpperCase() || 'TC'
+  const avatarUrl = typeof user?.user_metadata?.avatar_url === 'string' ? user.user_metadata.avatar_url : ''
+  const applyCoupon = async () => {
+    setCouponNotice('')
+    const result = await validateCoupon(couponCode, totalPrice)
+    if (!result.coupon) { setCouponNotice(result.error || 'Não foi possível aplicar o cupom.'); return }
+    setCoupon(result.coupon); setCouponNotice(`Cupom ${result.coupon.code} aplicado.`); setCouponOpen(false)
   }
-
-  return (
-    <div id="checkout-container" className="rs-page-content" role="main">
-      <div className="rs-checkout">
-
-        {/* ── 1. COMPANION STICKY BAR (Pagar + Resumo do Pedido) ── */}
-        <div className="rs-checkout-headerbar rs-companionbar-sticky">
-          <div className="rs-checkout-headerbar-content row as-l-container">
-            <div className="column large-6">
-              <div className="rs-checkout-headerbar-title typography-label">Pagar</div>
-            </div>
-            <div className="column small-6 large-last rs-companionbar-button typography-body-reduced">
-              <button
-                type="button"
-                id="companionbar-button"
-                className="as-buttonlink"
-                onClick={() => setShowOrderSummary(!showOrderSummary)}
-                aria-expanded={showOrderSummary}
-              >
-                <span className="rs-companionbar-button-label">Mostrar resumo do pedido: </span>
-                <span className="rs-companionbar-button-amount">{formatPrice(totalPrice)}</span>
-                {showOrderSummary ? <ChevronUp size={14} style={{ display: 'inline', marginLeft: '4px' }} /> : <ChevronDown size={14} style={{ display: 'inline', marginLeft: '4px' }} />}
-              </button>
-            </div>
+  return <div id="checkout-container" className="tkn-checkout">
+    <Editable as="header" widgetId="checkout-header" label="Cabeçalho do checkout" widgetType="container" editorKind="container" renderContent={false} className="tkn-checkout-top"><div className="tkn-checkout-shell">
+      <Link to="/" aria-label="TEKNIX início"><Editable as="img" widgetId="checkout-1" src="/teknix-logo.svg" alt="TEKNIX" width="122" /></Link>
+      <nav aria-label="Ajuda e conta">
+        {user ? <details className="tkn-checkout-account-menu">
+          <summary aria-label={`Abrir menu de ${displayName}`}>
+            <span className="tkn-checkout-avatar">{avatarUrl ? <Editable as="img" widgetId="checkout-2" src={avatarUrl} alt="" /> : initials}</span>
+            <span className="tkn-checkout-account-name">{displayName}</span><ChevronDown size={15} aria-hidden="true" />
+          </summary>
+          <div className="tkn-checkout-account-popover">
+            <div className="tkn-checkout-account-identity"><span className="tkn-checkout-avatar">{avatarUrl ? <Editable as="img" widgetId="checkout-3" src={avatarUrl} alt="" /> : initials}</span><span><strong>{displayName}</strong><small>{user.email}</small></span></div>
+            <Link to="/conta">Minha conta</Link><Link to="/pedidos">Meus pedidos</Link><Link to="/conta/enderecos">Endereços</Link>
+            <button type="button" onClick={() => { void signOut() }}>Sair</button>
           </div>
-        </div>
-
-        {/* ── 2. DRAWER DE RESUMO FLUTUANTE (Companion Bar Drawer) ── */}
-        {showOrderSummary && (
-          <div className="rs-companionbar-drawer as-l-container">
-            <div className="drawer-inner">
-              <div className="drawer-header">
-                <h3>Resumo da Sacola ({cartItems.length} {cartItems.length === 1 ? 'item' : 'itens'})</h3>
-                <Link to="/sacola" className="as-buttonlink">Editar sacola</Link>
+        </details> : <Link to="/login">Entrar</Link>}
+        <Link to="/contato">Contato</Link>
+      </nav>
+    </div></Editable>
+    <main className="tkn-checkout-shell tkn-checkout-main">
+      <EditableFlow id="checkout-main" label="Estrutura do checkout">
+      <Editable as="div" widgetId="checkout-main-content" label="Conteúdo do checkout" widgetType="container" editorKind="container" renderContent={false} style={{ display: 'contents' }}>
+      {complete ? <Editable content={{}} as="section" widgetId="checkout-4" className="tkn-checkout-empty">
+        <CheckCircle2 size={40} /><Editable as="h1" widgetId="checkout-5">Pedido recebido</Editable><Editable content={{}} as="p" widgetId="checkout-6">Pedido {complete.orderNumber}. O pagamento ainda precisa ser confirmado.</Editable>
+        {safePaymentUrl ? <a className="tkn-checkout-primary" href={safePaymentUrl}>Continuar no pagamento</a> : <Editable as="p" widgetId="checkout-7">Consulte o status e as instruções de pagamento em seus pedidos.</Editable>}
+        <Link to="/pedidos" className="tkn-checkout-link">Ver meus pedidos</Link>
+      </Editable> : !items.length ? <Editable as="section" widgetId="checkout-8" className="tkn-checkout-empty">
+        <Package size={40} /><Editable as="h1" widgetId="checkout-9">Sua sacola está vazia</Editable><Editable as="p" widgetId="checkout-10">Adicione um produto para finalizar sua compra.</Editable><Link to="/produtos" className="tkn-checkout-primary">Explorar produtos</Link>
+      </Editable> : <>
+        <Link to="/sacola" className="tkn-checkout-back"><ArrowLeft size={15} /> Voltar à sacola</Link>
+        <Editable as="form" widgetId="checkout-form" label="Formulário do checkout" widgetType="container" editorKind="container" renderContent={false} id="tkn-checkout-form" className="tkn-checkout-grid" onSubmit={submit}>
+          <EditableFlow id="checkout-columns" label="Colunas do checkout" compact>
+          <Editable as="fieldset" widgetId="checkout-fields" label="Dados de entrega e pagamento" widgetType="container" editorKind="container" renderContent={false} className="tkn-checkout-content" disabled={busy || loading}>
+            <Editable as="h1" widgetId="checkout-11">Finalize sua compra</Editable>
+            <div className="tkn-checkout-products">{items.map(item => <article key={item.id} className="tkn-checkout-product">
+              <div className="tkn-checkout-thumb">{item.image ? <img src={item.image} alt={item.name} /> : <Package size={24} />}</div>
+              <div><Link to={'/produtos/' + encodeURIComponent(item.id)}>{item.name}</Link><p>Quantidade: <strong>{item.quantity}</strong> · {money((item.promo_price && item.promo_price > 0 ? item.promo_price : item.price) * item.quantity)}</p></div>
+            </article>)}</div>
+            {loading && <Editable as="p" widgetId="checkout-12" role="status">Carregando seus dados…</Editable>}
+            {loadNotice && <Editable content={{}} as="p" widgetId="checkout-13" className="tkn-checkout-notice" role="status">{loadNotice}</Editable>}
+            <Editable content={{}} as="section" widgetId="checkout-14" className="tkn-checkout-card" aria-labelledby="delivery-title">
+              <Editable as="h2" widgetId="checkout-15" id="delivery-title">Forma de entrega</Editable>
+              <div className="tkn-checkout-delivery-type"><Truck size={20} /><span>Enviar para meu endereço</span></div>
+              {!editingAddress ? <div className="tkn-checkout-address">
+                <MapPin size={19} /><div><strong>{address.street}, {address.number}</strong><Editable content={{}} as="p" widgetId="checkout-16">{address.complement && address.complement + ' · '}{address.neighborhood} · {address.city} / {address.state}<br />CEP {address.zipCode} · {address.name}</Editable><button className="tkn-checkout-link" type="button" onClick={() => { setDraft(address); setEditingAddress(true) }}>Alterar endereço</button></div>
+              </div> : <div className="tkn-checkout-fields">
+                {([
+                  ['name', 'Nome de quem recebe', 'name'], ['zipCode', 'CEP', 'postal-code'],
+                  ['street', 'Rua / Avenida', 'address-line1'], ['number', 'Número', 'off'],
+                  ['complement', 'Complemento (opcional)', 'address-line2'], ['neighborhood', 'Bairro', 'off'],
+                  ['city', 'Cidade', 'address-level2'], ['state', 'UF', 'address-level1']
+                ] as const).map(([key, title, autoComplete]) => <label key={key} className={key === 'name' || key === 'street' ? 'tkn-checkout-wide' : ''}>{title}<input autoComplete={autoComplete} value={draft[key]} required={key !== 'complement'} inputMode={key === 'zipCode' ? 'numeric' : undefined} onBlur={key === 'zipCode' ? () => { void lookupCep() } : undefined} maxLength={key === 'state' ? 2 : key === 'zipCode' ? 9 : undefined} onChange={event => { const value = event.target.value; setDraft({ ...draft, [key]: value }); if (key === 'zipCode' && value.replace(/\D/g, '').length === 8) void lookupCep(value) }} /></label>)}
+                {cepNotice && <Editable content={{}} as="p" widgetId="checkout-17" className="tkn-checkout-wide tkn-checkout-cep-note" role="status">{cepNotice}</Editable>}
+                <div className="tkn-checkout-wide tkn-checkout-edit-actions"><button type="button" className="tkn-checkout-secondary" onClick={confirmAddress}>Usar este endereço</button>{validAddress(address) && <button type="button" className="tkn-checkout-link" onClick={() => setEditingAddress(false)}>Cancelar</button>}</div>
+              </div>}
+              <div className="tkn-checkout-shipping"><Editable as="h3" widgetId="checkout-18">Envio</Editable><div><span>Entrega padrão</span><strong>{money(shippingCost)}</strong></div><Editable as="p" widgetId="checkout-19">O prazo de entrega será informado no acompanhamento do pedido.</Editable></div>
+            </Editable>
+            <Editable content={{}} as="section" widgetId="checkout-20" className="tkn-checkout-card" aria-labelledby="payment-title">
+              <Editable as="h2" widgetId="checkout-21" id="payment-title">Meios de pagamento</Editable>
+              {([{id:'pix',name:'Pix',detail:'Pagamento com QR Code',icon:pixIcon},{id:'credit_card',name:'Cartão de crédito',detail:'Continue no ambiente de pagamento',icon:creditIcon},{id:'boleto',name:'Boleto bancário',detail:'Sujeito à confirmação do pagamento',icon:boletoIcon}] as const).map(({id,name,detail,icon}) => <label key={id} className={'tkn-checkout-payment ' + (payment === id ? 'is-selected' : '')}><input type="radio" name="payment" value={id} checked={payment === id} onChange={() => setPayment(id)} /><img className="tkn-checkout-payment-icon" src={icon} alt="" /><span>{name}<small>{detail}</small></span></label>)}
+            </Editable>
+            <Editable as="section" widgetId="checkout-22" className="tkn-checkout-card" aria-labelledby="billing-title">
+              <Editable as="h2" widgetId="checkout-23" id="billing-title">Faturamento e contato</Editable>
+              <div className="tkn-checkout-fields">
+                <label>E-mail<input type="email" autoComplete="email" required value={email} onChange={e => setEmail(e.target.value)} /></label>
+                <label>Celular com DDD<input type="tel" autoComplete="tel" required value={phone} onChange={e => setPhone(e.target.value)} /></label>
+                <label>Tipo de pessoa<select value={taxType} onChange={e => { setTaxType(e.target.value as 'CPF' | 'CNPJ'); setDocument('') }}><option value="CPF">Pessoa física</option><option value="CNPJ">Pessoa jurídica</option></select></label>
+                <label>{taxType}<input inputMode="numeric" required value={document} maxLength={taxType === 'CPF' ? 11 : 14} onChange={e => setDocument(e.target.value.replace(/\D/g, ''))} /></label>
+                {taxType === 'CNPJ' && <label className="tkn-checkout-wide">Razão social<input required value={company} onChange={e => setCompany(e.target.value)} /></label>}
               </div>
-              <ul className="drawer-items-list">
-                {cartItems.map(item => (
-                  <li key={item.id} className="drawer-item-row">
-                    <img src={item.image || 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-16-pro-finish-select-202409-6-9inch-blacktitanium?wid=5120&hei=2880&fmt=p-jpg&qlt=80'} alt={item.name} className="drawer-thumb" />
-                    <div className="drawer-item-info">
-                      <span className="drawer-item-name">{item.name}</span>
-                      <span className="drawer-item-qty">Qtd: {item.quantity}</span>
-                    </div>
-                    <span className="drawer-item-price">{formatPrice(item.price * item.quantity)}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="drawer-totals">
-                <div className="drawer-total-line">
-                  <span>Subtotal</span>
-                  <span>{formatPrice(totalPrice)}</span>
-                </div>
-                <div className="drawer-total-line">
-                  <span>Envio</span>
-                  <span className="text-free">GRÁTIS</span>
-                </div>
-                <div className="drawer-total-line total-main">
-                  <span>Total</span>
-                  <span>{formatPrice(totalPrice)}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ── 3. MAIN CONTENT CONTAINER ── */}
-        <div className="as-l-container rs-checkout-main-content">
-          
-          {/* Mensagem de Erro */}
-          {errorMessage && (
-            <div className="rs-error-message" role="alert">
-              {errorMessage}
-            </div>
-          )}
-
-          {/* ══════════════════════════════════════════════════════════════
-             ETAPA 1: ENVIO / SHIPPING (Para onde devemos enviar seu pedido?)
-             ══════════════════════════════════════════════════════════════ */}
-          {checkoutStep === 'shipping' && (
-            <div className="rs-shipping-step">
-              <div className="rs-shipping-header-container">
-                <h1 id="rs-checkout-header" className="rs-shipping-header typography-headline-reduced">
-                  Para onde devemos enviar seu pedido?
-                </h1>
-              </div>
-
-              {/* SEÇÃO 1: SELEÇÃO DE ENDEREÇO */}
-              <div className="rs-shipping-section">
-                <div className="row">
-                  <div className="column large-6 small-12">
-                    <h2 className="rs-shipping-address-title typography-label">Selecione um endereço:</h2>
-
-                    {/* Card 1: Endereço Salvo Padrão */}
-                    <div className={`form-selector ${addressChoice === 'saved' ? 'selected' : ''}`}>
-                      <input
-                        type="radio"
-                        id="addressChoiceSaved"
-                        name="addressChoice"
-                        value="saved"
-                        checked={addressChoice === 'saved'}
-                        onChange={() => setAddressChoice('saved')}
-                        className="form-selector-input"
-                      />
-                      <label htmlFor="addressChoiceSaved" className="form-selector-label">
-                        <span className="row">
-                          <span className="form-selector-left-col large-8">
-                            <span className="form-selector-title">{savedAddress.name}</span>
-                            <span className="form-label-small">
-                              {savedAddress.street}, {savedAddress.district}, {savedAddress.city} – {savedAddress.state}, {savedAddress.zipCode}
-                            </span>
-                          </span>
-                          <span className="form-selector-right-col large-4">
-                            <span className="badge-default">Padrão</span>
-                          </span>
-                        </span>
-                      </label>
-                    </div>
-
-                    {/* Card 2: Usar um Novo Endereço */}
-                    <div className={`form-selector ${addressChoice === 'new' ? 'selected' : ''}`}>
-                      <input
-                        type="radio"
-                        id="addressChoiceNew"
-                        name="addressChoice"
-                        value="new"
-                        checked={addressChoice === 'new'}
-                        onChange={() => setAddressChoice('new')}
-                        className="form-selector-input"
-                      />
-                      <label htmlFor="addressChoiceNew" className="form-selector-label">
-                        <span className="row">
-                          <span className="form-selector-left-col large-12">
-                            <span className="form-selector-title">Usar um novo endereço</span>
-                          </span>
-                        </span>
-                      </label>
-                    </div>
-
-                    {/* Formulário Expandido de Novo Endereço */}
-                    {addressChoice === 'new' && (
-                      <div className="rs-new-address-form">
-                        <div className="form-row-sidebyside">
-                          <div className="form-textbox flex-1">
-                            <label className="form-textbox-label">Primeiro nome</label>
-                            <input
-                              type="text"
-                              className="form-textbox-input"
-                              value={newAddress.firstName}
-                              onChange={e => setNewAddress({ ...newAddress, firstName: e.target.value })}
-                              required
-                            />
-                          </div>
-                          <div className="form-textbox flex-1">
-                            <label className="form-textbox-label">Sobrenome</label>
-                            <input
-                              type="text"
-                              className="form-textbox-input"
-                              value={newAddress.lastName}
-                              onChange={e => setNewAddress({ ...newAddress, lastName: e.target.value })}
-                              required
-                            />
-                          </div>
-                        </div>
-
-                        <div className="form-textbox">
-                          <label className="form-textbox-label">Rua (Av, Pça, etc.) e número</label>
-                          <input
-                            type="text"
-                            className="form-textbox-input"
-                            value={newAddress.street}
-                            onChange={e => setNewAddress({ ...newAddress, street: e.target.value })}
-                            required
-                          />
-                        </div>
-
-                        <div className="form-textbox">
-                          <label className="form-textbox-label">apto, bloco, prédio (opcional)</label>
-                          <input
-                            type="text"
-                            className="form-textbox-input"
-                            value={newAddress.street2}
-                            onChange={e => setNewAddress({ ...newAddress, street2: e.target.value })}
-                          />
-                        </div>
-
-                        <div className="form-row-sidebyside">
-                          <div className="form-textbox flex-1">
-                            <label className="form-textbox-label">CEP (00000-000)</label>
-                            <input
-                              type="text"
-                              className="form-textbox-input"
-                              value={newAddress.zipCode}
-                              onChange={handleCepChange}
-                              maxLength={9}
-                              required
-                            />
-                          </div>
-                          <div className="form-textbox flex-1">
-                            <label className="form-textbox-label">Bairro</label>
-                            <input
-                              type="text"
-                              className="form-textbox-input"
-                              value={newAddress.district}
-                              onChange={e => setNewAddress({ ...newAddress, district: e.target.value })}
-                              required
-                            />
-                          </div>
-                        </div>
-
-                        <div className="form-row-sidebyside">
-                          <div className="form-textbox flex-1">
-                            <label className="form-textbox-label">Cidade</label>
-                            <input
-                              type="text"
-                              className="form-textbox-input"
-                              value={newAddress.city}
-                              onChange={e => setNewAddress({ ...newAddress, city: e.target.value })}
-                              required
-                            />
-                          </div>
-                          <div className="form-dropdown flex-1">
-                            <label className="form-dropdown-label">Estado</label>
-                            <select
-                              className="form-dropdown-select"
-                              value={newAddress.state}
-                              onChange={e => setNewAddress({ ...newAddress, state: e.target.value })}
-                            >
-                              {['São Paulo', 'Rio de Janeiro', 'Minas Gerais', 'Paraná', 'Santa Catarina', 'Rio Grande do Sul', 'Bahia', 'Distrito Federal'].map(st => (
-                                <option key={st} value={st}>{st}</option>
-                              ))}
-                            </select>
-                            <span className="form-dropdown-chevron" />
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Coluna Direita: Lembretes de Envio */}
-                  <div className="column large-6 small-12">
-                    <div className="rs-shipping-reminders">
-                      <h3 className="rs-shipping-reminder-header typography-label">Tenha em mente as seguintes observações:</h3>
-                      <ul className="rs-shipping-policy-list">
-                        <li>Pode haver cobrança de impostos adicionais dependendo do destino de entrega.</li>
-                        <li>O endereço informado aqui será incluído na nota fiscal.</li>
-                        <li>Não realizamos envios para caixas postais.</li>
-                        <li>Precisa de ajuda com o endereço? <a href="https://buscacepinter.correios.com.br/app/endereco/index.php" target="_blank" rel="noreferrer" className="as-buttonlink">Busca CEP ↗</a></li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* SEÇÃO 2: INFORMAÇÕES DE CONTATO */}
-              <div className="rs-shipping-section">
-                <div className="row">
-                  <div className="column large-6 small-12">
-                    <h2 className="rs-shipping-contact-title typography-label">Quais são suas informações de contato?</h2>
-
-                    <div className="form-textbox">
-                      <label className="form-textbox-label">E-mail</label>
-                      <input
-                        type="email"
-                        className="form-textbox-input"
-                        value={contactEmail}
-                        onChange={e => setContactEmail(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div className="as-supplementalinfo">Enviaremos o recibo e atualizações do pedido para este e-mail.</div>
-
-                    <div className="form-row-sidebyside" style={{ marginTop: '16px' }}>
-                      <div className="form-textbox ddd-box">
-                        <label className="form-textbox-label">DDD</label>
-                        <input
-                          type="tel"
-                          className="form-textbox-input"
-                          value={ddd}
-                          onChange={e => setDdd(e.target.value.replace(/\D/g, '').slice(0, 2))}
-                          maxLength={2}
-                          required={!noMobile}
-                          disabled={noMobile}
-                        />
-                      </div>
-                      <div className="form-textbox flex-1">
-                        <label className="form-textbox-label">Celular</label>
-                        <input
-                          type="tel"
-                          className="form-textbox-input"
-                          value={phone}
-                          onChange={e => setPhone(e.target.value.replace(/\D/g, '').slice(0, 9))}
-                          maxLength={9}
-                          required={!noMobile}
-                          disabled={noMobile}
-                        />
-                      </div>
-                    </div>
-                    <div className="as-supplementalinfo">
-                      Caso haja algum problema com a entrega, a transportadora usará esse número para enviar atualizações por SMS ou ligar para você.
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* SEÇÃO 3: INFORMAÇÕES TRIBUTÁRIAS */}
-              <div className="rs-shipping-section">
-                <div className="row">
-                  <div className="column large-6 small-12">
-                    <h2 className="rs-taxinfo-header typography-label">Informações tributárias</h2>
-
-                    <div className="rs-taxinfo-toggle-row">
-                      <div className={`form-selector compact ${taxType === 'CPF' ? 'selected' : ''}`}>
-                        <input
-                          type="radio"
-                          id="taxTypeCpf"
-                          name="taxType"
-                          checked={taxType === 'CPF'}
-                          onChange={() => setTaxType('CPF')}
-                          className="form-selector-input"
-                        />
-                        <label htmlFor="taxTypeCpf" className="form-selector-label">
-                          <span className="form-selector-title">Pessoa Física (CPF)</span>
-                        </label>
-                      </div>
-
-                      <div className={`form-selector compact ${taxType === 'CNPJ' ? 'selected' : ''}`}>
-                        <input
-                          type="radio"
-                          id="taxTypeCnpj"
-                          name="taxType"
-                          checked={taxType === 'CNPJ'}
-                          onChange={() => setTaxType('CNPJ')}
-                          className="form-selector-input"
-                        />
-                        <label htmlFor="taxTypeCnpj" className="form-selector-label">
-                          <span className="form-selector-title">Pessoa Jurídica (CNPJ)</span>
-                        </label>
-                      </div>
-                    </div>
-
-                    {taxType === 'CPF' ? (
-                      <div className="form-textbox">
-                        <label className="form-textbox-label">CPF (000.000.000-00)</label>
-                        <input
-                          type="text"
-                          className="form-textbox-input"
-                          value={cpf}
-                          onChange={handleCpfChange}
-                          maxLength={14}
-                          required
-                        />
-                      </div>
-                    ) : (
-                      <>
-                        <div className="form-textbox">
-                          <label className="form-textbox-label">CNPJ (00.000.000/0000-00)</label>
-                          <input
-                            type="text"
-                            className="form-textbox-input"
-                            value={cnpj}
-                            onChange={handleCnpjChange}
-                            maxLength={18}
-                            required
-                          />
-                        </div>
-                        <div className="form-textbox" style={{ marginTop: '12px' }}>
-                          <label className="form-textbox-label">Razão Social</label>
-                          <input
-                            type="text"
-                            className="form-textbox-input"
-                            value={companyName}
-                            onChange={e => setCompanyName(e.target.value)}
-                            required
-                          />
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* BOTÃO DA ETAPA 1: CONTINUAR PARA O PAGAMENTO */}
-              <div className="rs-checkout-action">
-                <div className="row">
-                  <div className="column large-6 small-12 rs-checkout-action-button-wrapper">
-                    <button
-                      id="rs-checkout-continue-button-bottom"
-                      type="button"
-                      className="form-button"
-                      onClick={handleContinueToPaymentStep}
-                    >
-                      <span>Continuar para o pagamento</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ══════════════════════════════════════════════════════════════
-             ETAPA 2: PAGAMENTO / BILLING (Como você deseja pagar?)
-             ══════════════════════════════════════════════════════════════ */}
-          {checkoutStep === 'billing' && (
-            <div className="rs-billing-step">
-              <div className="rs-payment-header-container">
-                <h1 id="rs-checkout-header" className="rs-payment-header typography-headline-reduced">
-                  Como você deseja pagar?
-                </h1>
-              </div>
-
-              <div className="rs-payment-options">
-                <fieldset className="rs-payment-section">
-                  <legend className="visuallyhidden"><h2>Opções de pagamento</h2></legend>
-                  
-                  <div className="rf-paymentoptions">
-                    <div className="rf-paymentoptions-group rf-paymentoptions-group-paymentmethod">
-                      <div className="rf-paymentoptions-legend large-6 small-12">
-                        <h3 className="rf-paymentoptions-header typography-label">Método de pagamento.</h3>
-                      </div>
-
-                      {/* Opção 1: Cartão Salvo */}
-                      <div className="rf-paymentoptions-item rf-paymentoptions-item-savedcard">
-                        <div className="row rf-paymentoptions-item-container">
-                          <div className="column large-6 small-12">
-                            <div className={`form-selector ${selectedBillingOption === 'SAVED_CARD' ? 'selected' : ''}`}>
-                              <input
-                                className="form-selector-input"
-                                id="billing_saved_card"
-                                type="radio"
-                                value="SAVED_CARD"
-                                name="billingOption"
-                                checked={selectedBillingOption === 'SAVED_CARD'}
-                                onChange={() => setSelectedBillingOption('SAVED_CARD')}
-                              />
-                              <label htmlFor="billing_saved_card" className="form-selector-label">
-                                <span className="row">
-                                  <span className="form-selector-left-col large-6 small-7">
-                                    <span className="form-selector-title">Mastercard 3185</span>
-                                    <span className="form-label-small">11/33</span>
-                                  </span>
-                                  <span className="form-selector-right-col">
-                                    <span>Cartão salvo</span>
-                                  </span>
-                                </span>
-                              </label>
-                            </div>
-                          </div>
-                          <div className="column large-6 small-12">
-                            <div className="as-supplementalinfo typography-body-reduced">
-                              Você pode alterar o cartão salvo com sua Conta Apple após a conclusão da compra.
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Opção 2: Novo Cartão de Crédito */}
-                      <div className="rf-paymentoptions-item rf-paymentoptions-item-creditcard">
-                        <div className="row rf-paymentoptions-item-container">
-                          <div className="column large-6 small-12">
-                            <div className={`form-selector ${selectedBillingOption === 'CREDIT' ? 'selected' : ''}`}>
-                              <input
-                                className="form-selector-input"
-                                id="billing_credit"
-                                type="radio"
-                                value="CREDIT"
-                                name="billingOption"
-                                checked={selectedBillingOption === 'CREDIT'}
-                                onChange={() => setSelectedBillingOption('CREDIT')}
-                              />
-                              <label htmlFor="billing_credit" className="form-selector-label">
-                                <span className="row">
-                                  <span className="form-selector-left-col large-10">
-                                    <span className="form-selector-title">Novo cartão de crédito</span>
-                                    <span className="form-label-small">Visa, Mastercard, American Express</span>
-                                  </span>
-                                </span>
-                              </label>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Opção 3: TEKNIX Pay / Apple Pay */}
-                      <div className="rf-paymentoptions-item rf-paymentoptions-item-applepay">
-                        <div className="row rf-paymentoptions-item-container">
-                          <div className="column large-6 small-12">
-                            <div className={`form-selector ${selectedBillingOption === 'APPLE_PAY' ? 'selected' : ''}`}>
-                              <input
-                                className="form-selector-input"
-                                id="billing_applepay"
-                                type="radio"
-                                value="APPLE_PAY"
-                                name="billingOption"
-                                checked={selectedBillingOption === 'APPLE_PAY'}
-                                onChange={() => setSelectedBillingOption('APPLE_PAY')}
-                              />
-                              <label htmlFor="billing_applepay" className="form-selector-label">
-                                <span className="row">
-                                  <span className="form-selector-left-col large-6 small-7">
-                                    <span className="form-selector-title">Apple Pay / TEKNIX Pay</span>
-                                  </span>
-                                  <span className="form-selector-right-col">
-                                    <span className="badge-default">Configuração necessária</span>
-                                  </span>
-                                </span>
-                              </label>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Opção 4: Boleto Bancário / Pix */}
-                      <div className="rf-paymentoptions-item rf-paymentoptions-item-boleto">
-                        <div className="row rf-paymentoptions-item-container">
-                          <div className="column large-6 small-12">
-                            <div className={`form-selector ${selectedBillingOption === 'BOLETO' ? 'selected' : ''}`}>
-                              <input
-                                className="form-selector-input"
-                                id="billing_boleto"
-                                type="radio"
-                                value="BOLETO"
-                                name="billingOption"
-                                checked={selectedBillingOption === 'BOLETO'}
-                                onChange={() => setSelectedBillingOption('BOLETO')}
-                              />
-                              <label htmlFor="billing_boleto" className="form-selector-label">
-                                <span className="row">
-                                  <span className="form-selector-left-col large-10">
-                                    <span className="form-selector-title">Boleto bancário / Pix</span>
-                                    <span className="form-label-small">10% de desconto para pagamento à vista</span>
-                                  </span>
-                                </span>
-                              </label>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                    </div>
-                  </div>
-                </fieldset>
-              </div>
-
-              {/* Informações Tributárias Reutilizadas */}
-              <div className="row rs-taxinfo">
-                <fieldset className="rs-taxinfo-section column large-6 small-12">
-                  <legend><h3 className="rs-taxinfo-header typography-label">Informações tributárias</h3></legend>
-                  <div className="form-checkbox" style={{ marginBottom: '12px' }}>
-                    <label className="form-label">
-                      <input
-                        type="checkbox"
-                        checked={useShippingTaxInfo}
-                        onChange={e => setUseShippingTaxInfo(e.target.checked)}
-                      />
-                      <span>Usar número de identificação fiscal informado com o endereço de envio.</span>
-                    </label>
-                  </div>
-                  <div className="rs-taxinfo-cpffields">
-                    <span className="rs-taxinfo-label">CPF: </span>
-                    <span className="rs-taxinfo-value">••••••••••••36</span>
-                  </div>
-                </fieldset>
-              </div>
-
-              {/* BOTÃO DA ETAPA 2: REVISAR / FAZER O PEDIDO */}
-              <div className="rs-checkout-action">
-                <div className="row">
-                  <div className="column large-6 small-12 rs-checkout-action-button-wrapper">
-                    <button
-                      id="rs-checkout-continue-button-bottom"
-                      type="button"
-                      className="form-button"
-                      disabled={isSubmitting}
-                      onClick={handleFinalOrderSubmit}
-                    >
-                      <span>{isSubmitting ? 'Processando pedido...' : 'Revisar o pedido'}</span>
-                    </button>
-                    <button
-                      type="button"
-                      className="as-buttonlink"
-                      style={{ marginTop: '16px', display: 'block', textAlign: 'center' }}
-                      onClick={() => setCheckoutStep('shipping')}
-                    >
-                      ← Voltar para o endereço de envio
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ── 4. CHAT E ACORDEÃO FAQ ── */}
-          <div className="rs-checkout-chatfaq-wrapper">
-            <div className="as-chat rs-chat">
-              <div className="as-l-container rs-chat-content">
-                <div>Precisa de mais ajuda? <a href="https://wa.me/5511975662930" target="_blank" rel="noreferrer" className="as-chat-button">Entre no chat ↗</a> ou ligue para <span>0800-761-0867</span>.</div>
-              </div>
-            </div>
-
-            <div className="rc-accordion rs-faq">
-              <div className="rc-accordion-item">
-                <h2 className="faq-title-main">
-                  {checkoutStep === 'shipping' ? 'Perguntas frequentes sobre o envio' : 'Perguntas frequentes sobre pagamento'}
-                </h2>
-                <ul className="faq-questions-list">
-                  {(checkoutStep === 'shipping' ? faqsShipping : faqsPayment).map((f, idx) => (
-                    <li key={idx} className="faq-question-item">
-                      <button
-                        type="button"
-                        className="faq-question-btn"
-                        onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
-                        aria-expanded={openFaq === idx}
-                      >
-                        <span className="faq-question-text">{f.q}</span>
-                        {openFaq === idx ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                      </button>
-                      {openFaq === idx && (
-                        <div className="faq-answer-panel">
-                          <p>{f.a}</p>
-                        </div>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          {/* ── 5. RODAPÉ DE CRIPTOGRAFIA ── */}
-          <div className="rs-checkout-footer-legal">
-            <p>A TEKNIX utiliza a criptografia padrão do setor para proteger a confidencialidade dos seus dados pessoais.</p>
-          </div>
-
-        </div>
-      </div>
-    </div>
-  )
+            </Editable>
+          </Editable>
+          <Editable as="aside" widgetId="checkout-summary" label="Resumo da compra" widgetType="container" editorKind="container" renderContent={false} className="tkn-checkout-summary" aria-label="Resumo da compra">
+            <Editable as="h2" widgetId="checkout-24">Resumo da compra</Editable>
+            <button className="tkn-checkout-coupon" type="button" onClick={() => { setCouponNotice(''); setCouponOpen(true) }}><Ticket size={16} /> {coupon ? `Cupom ${coupon.code}` : 'Inserir código do cupom'}</button>
+            <dl><div><dt>Produtos</dt><dd>{money(totalPrice)}</dd></div><div><dt>Frete</dt><dd>{money(shippingCost)}</dd></div>{coupon && <div><dt>Desconto</dt><dd>- {money(coupon.discount)}</dd></div>}<div className="tkn-checkout-total"><dt><button type="button" onClick={() => setSummaryOpen(true)}>Total <ChevronUp size={14} /></button></dt><dd>{money(total)}</dd></div></dl>
+            {error && <Editable content={{}} as="p" widgetId="checkout-25" role="alert" className="tkn-checkout-error">{error}</Editable>}
+            <button className="tkn-checkout-primary" type="submit" disabled={busy || loading}>{busy ? 'Processando…' : 'Continuar para pagamento'}</button>
+            <Editable as="p" widgetId="checkout-26" className="tkn-checkout-safe"><ShieldCheck size={16} /> Confira os dados antes de continuar.</Editable>
+            <Link className="tkn-checkout-link" to="/sacola">Editar sacola</Link>
+          </Editable>
+          </EditableFlow>
+        </Editable>
+      </>}
+      </Editable>
+      </EditableFlow>
+    </main>
+    {summaryOpen && <div className="tkn-checkout-overlay andes-bottom-sheet__overlay" role="dialog" aria-modal="true" aria-label="Resumo da compra"><Editable as="section" widgetId="checkout-27" className="tkn-checkout-sheet tkn-checkout-full-summary"><button className="tkn-checkout-close" type="button" onClick={() => setSummaryOpen(false)} aria-label="Fechar resumo"><X size={20} /></button><Editable as="h2" widgetId="checkout-28">Resumo da compra</Editable><dl><div><dt>Produtos</dt><dd>{money(totalPrice)}</dd></div>{coupon && <div className="tkn-summary-discount"><dt>Desconto do produto</dt><dd>- {money(coupon.discount)}</dd></div>}<div><dt>Frete</dt><dd>{money(shippingCost)}</dd></div></dl><button className="tkn-sheet-coupon" type="button" onClick={() => { setSummaryOpen(false); setCouponOpen(true) }}><Ticket size={16} /> Inserir código do cupom</button><dl><div><dt>Subtotal</dt><dd>{money(total)}</dd></div><div><dt>Você pagará</dt><dd>{money(total)}<small>{payment === 'pix' ? 'Pix' : payment === 'boleto' ? 'Boleto' : 'Cartão de crédito'}</small></dd></div><div className="tkn-checkout-total"><dt>Total</dt><dd>{money(total)}</dd></div></dl><button className="tkn-checkout-primary" type="submit" form="tkn-checkout-form">Continuar para pagamento</button></Editable></div>}
+    {couponOpen && <div className="tkn-checkout-overlay andes-bottom-sheet__overlay" role="dialog" aria-modal="true" aria-label="Cupons"><Editable content={{}} as="section" widgetId="checkout-29" className="tkn-checkout-sheet tkn-checkout-coupon-sheet"><button className="tkn-checkout-close" type="button" onClick={() => setCouponOpen(false)} aria-label="Fechar cupons"><X size={20} /></button><Editable as="h2" widgetId="checkout-30">Cupons</Editable><Editable as="p" widgetId="checkout-31">Insira um código cadastrado para aplicá-lo a esta compra.</Editable><div className="tkn-checkout-coupon-form"><input autoFocus value={couponCode} placeholder="Insira seu código aqui" onChange={e => setCouponCode(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') void applyCoupon() }} /><button type="button" onClick={() => void applyCoupon()}>Inserir</button></div>{couponNotice && <Editable content={{}} as="p" widgetId="checkout-32" className="tkn-checkout-coupon-notice" role="status">{couponNotice}</Editable>}</Editable></div>}
+    <Editable as="footer" widgetId="checkout-footer" label="Rodapé do checkout" widgetType="container" editorKind="container" renderContent={false} className="tkn-checkout-footer"><div className="tkn-checkout-shell"><Link to="/contato">Contato e atendimento</Link><Link to="/sacola">Minha sacola</Link><span>TEKNIX · Todos os direitos reservados.</span></div></Editable>
+  </div>
 }

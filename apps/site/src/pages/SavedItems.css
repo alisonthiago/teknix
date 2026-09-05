@@ -6,15 +6,15 @@
 .apple-saved-page {
   background-color: #ffffff;
   color: #1d1d1f;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  min-height: 100vh;
+  font-family: var(--tkn-font, sans-serif);
+  min-height: 60vh;
   padding-bottom: 80px;
 }
 
 .apple-saved-container {
-  max-width: 980px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 var(--tkn-space-24);
   box-sizing: border-box;
 }
 
@@ -37,8 +37,8 @@
 }
 
 .apple-saved-localnav-title {
-  font-size: 21px;
-  font-weight: 600;
+  font-size: var(--tkn-text-20);
+  font-weight: var(--tkn-weight-medium);
   color: #1d1d1f;
   margin: 0;
   letter-spacing: -0.015em;
@@ -48,9 +48,9 @@
 .apple-saved-breadcrumb {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 24px 0 12px;
-  font-size: 12px;
+  gap: var(--tkn-space-8);
+  padding: var(--tkn-space-24) 0 var(--tkn-space-12);
+  font-size: var(--tkn-text-12);
   color: #86868b;
 }
 
@@ -74,31 +74,35 @@
 
 /* ── Header ── */
 .apple-saved-header {
-  padding: 32px 0 44px;
-  text-align: center;
-  max-width: 720px;
+  padding: var(--tkn-space-24) 0 var(--tkn-space-32);
+  text-align: left;
+  max-width: none;
   margin: 0 auto;
   border-bottom: 1px solid #e5e5ea;
 }
 
 .apple-saved-title {
-  font-size: 44px;
-  font-weight: 700;
+  font-size: var(--tkn-text-36);
+  font-weight: var(--tkn-weight-medium);
   letter-spacing: -0.03em;
   color: #1d1d1f;
-  margin: 0 0 16px 0;
+  margin: 0 0 var(--tkn-space-16) 0;
 }
 
 .apple-saved-desc {
-  font-size: 17px;
-  color: #1d1d1f;
+  font-size: var(--tkn-text-14);
+  color: #747474;
   line-height: 1.45;
   margin: 0;
 }
 
 /* ── Empty State ── */
 .apple-saved-empty-view {
-  padding: 80px 0 100px;
+  padding: var(--tkn-space-48) var(--tkn-space-24);
+  margin-top: var(--tkn-space-32);
+  border: 1px solid #e8e8e8;
+  border-radius: 18px;
+  background: #f8f8f8;
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -106,48 +110,61 @@
 }
 
 .apple-saved-empty-icon {
-  color: #86868b;
-  margin-bottom: 24px;
+  color: #535353;
+  margin-bottom: var(--tkn-space-24);
+  background: #eeeeee;
+  width: 72px;
+  height: 72px;
+  border-radius: 22px;
+  display: grid;
+  place-items: center;
 }
 
 .apple-saved-empty-heading {
-  font-size: 21px;
-  font-weight: 600;
+  font-size: var(--tkn-text-20);
+  font-weight: var(--tkn-weight-medium);
   letter-spacing: -0.015em;
   color: #1d1d1f;
-  margin: 0 0 12px 0;
+  margin: 0 0 var(--tkn-space-12) 0;
 }
 
 .apple-saved-empty-shop-link {
-  font-size: 14px;
-  color: #0071e3;
+  font-size: var(--tkn-text-14);
+  color: #262626;
+  background: #b5f500;
+  padding: var(--tkn-space-12) var(--tkn-space-24);
+  border-radius: 9px;
+  font-weight: var(--tkn-weight-medium);
   text-decoration: none;
   display: inline-flex;
   align-items: center;
 }
 
 .apple-saved-empty-shop-link:hover {
-  text-decoration: underline;
+  background: #a6e100;
 }
+
+.apple-saved-empty-desc { max-width: 430px; font-size: var(--tkn-text-14); margin: 0 0 var(--tkn-space-24); color: #737373; }
+.apple-saved-page :is(a, button):focus-visible { outline: 2px solid #555555; outline-offset: 4px; }
 
 /* ── Grid de Itens Salvos ── */
 .apple-saved-items-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-  padding: 40px 0;
+  gap: var(--tkn-space-24);
+  padding: var(--tkn-space-48) 0;
 }
 
 .apple-saved-card {
   background: #ffffff;
   border: 1px solid #e5e5ea;
   border-radius: 18px;
-  padding: 24px;
+  padding: var(--tkn-space-24);
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  box-shadow: none;
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
@@ -157,9 +174,12 @@
 }
 
 .apple-saved-card-thumb {
-  width: 140px;
-  height: 140px;
-  margin-bottom: 16px;
+  width: 100%;
+  height: 190px;
+  background: #f8f8f8;
+  border-radius: 12px;
+  padding: var(--tkn-space-16);
+  margin-bottom: var(--tkn-space-16);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -179,10 +199,10 @@
 }
 
 .apple-saved-card-title {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: var(--tkn-text-16);
+  font-weight: var(--tkn-weight-medium);
   color: #1d1d1f;
-  margin: 0 0 6px 0;
+  margin: 0 0 var(--tkn-space-8) 0;
   line-height: 1.3;
   min-height: 42px;
   display: -webkit-box;
@@ -192,37 +212,38 @@
 }
 
 .apple-saved-card-price {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: var(--tkn-text-14);
+  font-weight: var(--tkn-weight-medium);
   color: #1d1d1f;
-  margin: 0 0 16px 0;
+  margin: 0 0 var(--tkn-space-16) 0;
 }
 
 .apple-saved-card-actions {
   display: flex;
-  gap: 8px;
+  gap: var(--tkn-space-8);
   width: 100%;
   align-items: center;
 }
 
 .apple-saved-btn-buy {
   flex: 1;
-  background-color: #0071e3;
-  color: #ffffff;
+  background-color: var(--hagor-pc, #b5f500);
+  color: #141414;
   border: none;
-  border-radius: 980px;
-  padding: 8px 16px;
-  font-size: 13px;
-  font-weight: 500;
+  border-radius: 12px;
+  padding: var(--tkn-space-12) var(--tkn-space-16);
+  font-size: var(--tkn-text-13);
+  font-weight: var(--tkn-weight-semibold);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.15s;
+  transition: all 0.2s ease;
 }
 
 .apple-saved-btn-buy:hover {
-  background-color: #0077ed;
+  background-color: #a3dc00;
+  transform: translateY(-1px);
 }
 
 .apple-saved-btn-remove {
@@ -257,6 +278,6 @@
     grid-template-columns: 1fr;
   }
   .apple-saved-title {
-    font-size: 32px;
+    font-size: var(--tkn-text-32);
   }
 }

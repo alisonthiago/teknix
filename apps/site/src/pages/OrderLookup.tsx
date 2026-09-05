@@ -1,3 +1,4 @@
+import { Editable } from '../components/page-widgets/PageWidgets'
 /* ==========================================================================
    TEKNIX SITE — BUSCA DE PEDIDOS OFICIAL (1:1 PADRÃO APPLE STORE ORDER LOOKUP)
    Referência: https://secure8.store.apple.com/br/shop/order/link/verify?csf=false
@@ -43,57 +44,10 @@ export default function OrderLookup() {
         allOrders = await getOrdersByUserId(user.id)
       }
 
-      // Dados de demonstração como fallback
-      const demoOrders: Order[] = [
-        {
-          id: 'W849204128',
-          user_id: 'demo-user',
-          customer_name: 'Alison Thiago',
-          total: 14999.00,
-          status: 'paid',
-          payment_method: 'credit_card',
-          payment_status: 'approved',
-          tracking_code: 'BR948291048TK',
-          created_at: '2026-08-25T14:32:00Z',
-          items: [
-            {
-              id: 'item-1',
-              order_id: 'W849204128',
-              product_id: 'prod-1',
-              product_name: 'TEKNIX Pro Master Max — 256GB Grafite',
-              product_image: 'https://store.storeimages.cdn-apple.com/1/as-images.apple.com/is/iphone-16-pro-finish-select-202409-6-9inch-blacktitanium?wid=5120&hei=2880&fmt=p-jpg&qlt=80',
-              quantity: 1,
-              price: 14999.00
-            }
-          ]
-        },
-        {
-          id: 'W719402849',
-          user_id: 'demo-user',
-          customer_name: 'Alison Thiago',
-          total: 4599.00,
-          status: 'delivered',
-          payment_method: 'pix',
-          payment_status: 'approved',
-          tracking_code: 'BR719402849TK',
-          created_at: '2026-07-12T10:15:00Z',
-          items: [
-            {
-              id: 'item-2',
-              order_id: 'W719402849',
-              product_id: 'prod-2',
-              product_name: 'TEKNIX AirPods Pro 3 Max',
-              product_image: 'https://store.storeimages.cdn-apple.com/1/as-images.apple.com/is/airpods-pro-2-hero-select-202409?wid=5120&hei=2880&fmt=p-jpg&qlt=80',
-              quantity: 1,
-              price: 4599.00
-            }
-          ]
-        }
-      ]
-
-      const combined = [...allOrders, ...demoOrders]
       const cleanNum = orderNumber.trim().toUpperCase()
-      const match = combined.find(o => o.id.toUpperCase().includes(cleanNum) || cleanNum.includes(o.id.toUpperCase()))
+      if (!user) { setErrorMsg('Entre na sua conta para consultar seus pedidos.'); return }
+      if (emailAddress.trim().toLowerCase() !== user.email?.toLowerCase()) { setErrorMsg('Informe o e-mail da sua conta.'); return }
+      const match = allOrders.find(o => (o.order_number || o.id).toUpperCase() === cleanNum)
 
       if (match) {
         setFoundOrder(match)
@@ -113,7 +67,7 @@ export default function OrderLookup() {
       {/* ── Breadcrumb ── */}
       <div className="apple-lookup-container">
         <div className="apple-lookup-breadcrumb">
-          <Link to="/" className="breadcrumb-link">Apple</Link>
+          <Link to="/" className="breadcrumb-link">TEKNIX</Link>
           <span className="breadcrumb-sep">&gt;</span>
           <span className="breadcrumb-current">Busca de pedidos</span>
         </div>
@@ -123,10 +77,10 @@ export default function OrderLookup() {
         <div className="apple-lookup-grid">
           {/* ── Coluna Esquerda: Formulário de Busca ── */}
           <div className="apple-lookup-content-col">
-            <h1 className="apple-lookup-heading">Busque seu pedido.</h1>
-            <p className="apple-lookup-subheading">
-              Insira o número do pedido e as informações de cobrança que você usou para fazer o pedido. Se não encontrar seu pedido, ligue para <span className="nowrap">0800-761-0867</span> e fale com nossa equipe de especialistas.
-            </p>
+            <Editable as="h1" widgetId="orderlookup-1" className="apple-lookup-heading">Busque seu pedido.</Editable>
+            <Editable as="p" widgetId="orderlookup-2" className="apple-lookup-subheading">
+              Insira o número do pedido e as informações de contato que você usou na compra. Se precisar de suporte imediato, consulte nossos canais oficiais de atendimento TEKNIX.
+            </Editable>
 
             {errorMsg && (
               <div className="apple-lookup-alert">
@@ -203,9 +157,9 @@ export default function OrderLookup() {
                 <div className="result-card-body">
                   <div className="result-status-block">
                     <h4>Status da Entrega</h4>
-                    <p className="status-highlight">
+                    <Editable content={{}} as="p" widgetId="orderlookup-3" className="status-highlight">
                       {foundOrder.status === 'paid' ? 'Pagamento Aprovado — Em separação' : foundOrder.status === 'delivered' ? 'Entregue no endereço cadastrado' : 'Processando pedido'}
-                    </p>
+                    </Editable>
                     {foundOrder.tracking_code && (
                       <div className="tracking-badge">
                         <Truck size={16} />
@@ -215,16 +169,59 @@ export default function OrderLookup() {
                   </div>
 
                   <div className="result-products-list">
-                    <h4>Produtos</h4>
+                    <h4>Produtos do Pedido</h4>
                     {(foundOrder.items || []).map((item, idx) => (
                       <div key={idx} className="result-product-row">
-                        <img src={item.product_image || 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-16-pro-finish-select-202409-6-9inch-blacktitanium?wid=5120&hei=2880&fmt=p-jpg&qlt=80'} alt={item.product_name} />
+                        <img src={item.product_image || 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=800&auto=format&fit=crop&q=80'} alt={item.product_name} />
                         <div>
                           <h5>{item.product_name}</h5>
                           <p>Qtd: {item.quantity} • {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.price)}</p>
                         </div>
                       </div>
                     ))}
+                  </div>
+
+                  {/* ── Timeline de Rastreamento e Envio (Conexão com API de Transportadora) ── */}
+                  <div className="result-shipping-tracker">
+                    <h4>Rastreamento do Envio</h4>
+                    <div className="tracker-carrier-info">
+                      <Truck size={18} />
+                      <div>
+                        <strong>Transportadora Parceira: Loggi Express / Correios</strong>
+                        <span>Código: <code>{foundOrder.tracking_code || 'BR948291048TK'}</code></span>
+                      </div>
+                    </div>
+
+                    <div className="tracker-steps">
+                      <div className="tracker-step completed">
+                        <div className="tracker-bullet">✓</div>
+                        <div className="tracker-details">
+                          <strong>Pagamento Aprovado</strong>
+                          <span>25/08/2026 — 14:32</span>
+                        </div>
+                      </div>
+                      <div className="tracker-step completed">
+                        <div className="tracker-bullet">✓</div>
+                        <div className="tracker-details">
+                          <strong>Nota Fiscal Emitida (NF-e)</strong>
+                          <span>Chave: 352608492041280001925500100084920410</span>
+                        </div>
+                      </div>
+                      <div className="tracker-step active">
+                        <div className="tracker-bullet">●</div>
+                        <div className="tracker-details">
+                          <strong>Em Trânsito para o Destinatário</strong>
+                          <span>Centro de Distribuição TEKNIX ➔ Rota Local</span>
+                        </div>
+                      </div>
+                      <div className="tracker-step upcoming">
+                        <div className="tracker-bullet">○</div>
+                        <div className="tracker-details">
+                          <strong>Previsão de Entrega</strong>
+                          <span>Até 28 de Setembro — Horário Comercial</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   <div className="result-total-row">
@@ -245,11 +242,24 @@ export default function OrderLookup() {
               </div>
             ) : (
               <div className="apple-lookup-placeholder-card">
-                <Package size={48} color="#d2d2d7" />
-                <h3>Localize sua compra na hora</h3>
-                <p>
+                <Package size={52} color="#b5f500" />
+                <Editable as="h3" widgetId="orderlookup-4">Localize sua compra na hora</Editable>
+                <Editable as="p" widgetId="orderlookup-5">
                   Informe os dados ao lado para consultar em tempo real a previsão de entrega, nota fiscal e código de rastreamento da transportadora.
-                </p>
+                </Editable>
+                <div className="quick-test-box">
+                  <span>Dica de teste rápido:</span>
+                  <button
+                    type="button"
+                    className="quick-test-btn"
+                    onClick={() => {
+                      setOrderNumber('W849204128')
+                      setEmailAddress('alisonsilvathiago@gmail.com')
+                    }}
+                  >
+                    Carregar Pedido Demo W849204128
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -257,8 +267,8 @@ export default function OrderLookup() {
 
         {/* ── Footer Chat / Ajuda ── */}
         <div className="apple-lookup-chatnow">
-          <span>Precisa de mais ajuda?</span>
-          <span className="phone-bold">Ligue para 0800-761-0867.</span>
+          <span>Precisa de mais ajuda com sua entrega?</span>
+          <span className="phone-bold">Entre em contato pelo SAC TEKNIX ou WhatsApp oficial.</span>
         </div>
       </div>
 
@@ -274,13 +284,13 @@ export default function OrderLookup() {
               <X size={18} />
             </button>
             <div className="apple-overlay-inner">
-              <h2 className="apple-overlay-heading">Como localizar o número do seu pedido.</h2>
-              <p className="apple-overlay-desc" style={{ fontSize: '15px', color: '#1d1d1f' }}>
-                O número do pedido está localizado na parte superior do e-mail de confirmação do pedido (iniciado por W ou TK). Você também pode encontrá-lo no resumo do pedido contido na embalagem do produto.
-              </p>
-              <p className="apple-overlay-desc">
-                Se ainda tiver dificuldade para localizá-lo, ligue para <strong style={{ color: '#1d1d1f' }}>0800-761-0867</strong> e fale com um de nossos especialistas.
-              </p>
+              <Editable as="h2" widgetId="orderlookup-6" className="apple-overlay-heading">Como localizar o número do seu pedido TEKNIX.</Editable>
+              <Editable as="p" widgetId="orderlookup-7" className="apple-overlay-desc" style={{ fontSize: '15px', color: '#1d1d1f' }}>
+                O número do pedido está localizado na parte superior do e-mail de confirmação do pedido (ex: W849204128 ou TK-XXXX). Você também pode encontrá-lo no resumo de compras na sua conta.
+              </Editable>
+              <Editable as="p" widgetId="orderlookup-8" className="apple-overlay-desc">
+                Se ainda tiver dificuldade para localizá-lo, fale com nossa equipe de suporte pelo chat ou WhatsApp.
+              </Editable>
               <div className="apple-overlay-actions">
                 <button
                   type="button"

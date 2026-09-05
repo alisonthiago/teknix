@@ -1,0 +1,205 @@
+/* ==========================================================================
+   TEKNIX HUB — ANÚNCIOS (ADS)
+   ========================================================================== */
+
+.ads-page-container {
+  padding: 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.ads-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ads-empty {
+  background: #ffffff;
+  border: 1px dashed #d2d2d7;
+  border-radius: 12px;
+  padding: 48px;
+  text-align: center;
+  color: #666666;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+}
+
+.ads-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ad-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #ffffff;
+  border: 1px solid #e6e6e6;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.ad-card-image {
+  width: 160px;
+  height: 90px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f5f5f7;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ad-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ad-card-placeholder {
+  font-size: 28px;
+}
+
+.ad-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ad-card-info h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+
+.ad-card-slot {
+  display: inline-block;
+  font-size: 11px;
+  color: #666666;
+  background: #f1f3f5;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-bottom: 4px;
+}
+
+.ad-card-link {
+  display: block;
+  font-size: 12px;
+  color: #2563eb;
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ad-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.ad-status-btn {
+  border: 1px solid #e6e6e6;
+  background: #f5f5f7;
+  color: #666666;
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.ad-status-btn.active {
+  background: #e6f7ee;
+  color: #00a650;
+  border-color: #b7e4c7;
+}
+
+.ad-action-btn {
+  width: 34px;
+  height: 34px;
+  border: 1px solid #e6e6e6;
+  background: #ffffff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #333333;
+  text-decoration: none;
+}
+
+.ad-action-btn.danger {
+  color: #ef4444;
+}
+
+/* Form */
+.ad-form {
+  background: #ffffff;
+  border: 1px solid #e6e6e6;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333333;
+}
+
+.form-group input,
+.form-group select {
+  padding: 10px 12px;
+  border: 1px solid #e6e6e6;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #2563eb;
+}
+
+.ad-preview {
+  margin-top: 8px;
+  border-radius: 8px;
+  overflow: hidden;
+  max-width: 400px;
+}
+
+.ad-preview img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.form-message {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.form-message.success {
+  background: #e6f7ee;
+  color: #00a650;
+}
+
+.form-message.error {
+  background: #fee2e2;
+  color: #dc2626;
+}

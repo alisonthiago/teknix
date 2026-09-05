@@ -1,0 +1,332 @@
+/* ============================================================
+   ELEMENTOR IMAGE EDITOR MODAL (Editar Imagem 1:1 Oficial)
+   ============================================================ */
+
+.image-editor-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.82);
+  backdrop-filter: blur(6px);
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: imageEditorFadeIn 0.15s ease-out;
+}
+
+@keyframes imageEditorFadeIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.image-editor-modal {
+  background: #ffffff;
+  width: 98vw;
+  max-width: 1300px;
+  height: 90vh;
+  max-height: 850px;
+  border-radius: 8px;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  color: #1d2327;
+}
+
+/* Header */
+.image-editor-header {
+  height: 52px;
+  border-bottom: 1px solid #dcdcde;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  background: #ffffff;
+  flex-shrink: 0;
+}
+
+.image-editor-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1d2327;
+  margin: 0;
+}
+
+.image-editor-close-btn {
+  background: transparent;
+  border: none;
+  color: #646970;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s;
+}
+
+.image-editor-close-btn:hover {
+  background: #f0f0f1;
+  color: #d63638;
+}
+
+/* Top Toolbar */
+.image-editor-toolbar {
+  background: #f6f7f7;
+  border-bottom: 1px solid #dcdcde;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.image-editor-tool-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.image-editor-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #2271b1;
+  background: #ffffff;
+  border: 1px solid #2271b1;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.image-editor-btn:hover:not(:disabled) {
+  background: #f0f6fc;
+}
+
+.image-editor-btn.active {
+  background: #2271b1;
+  color: #ffffff;
+}
+
+.image-editor-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  border-color: #dcdcde;
+  color: #8c8f94;
+}
+
+.image-editor-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #50575e;
+  background: #ffffff;
+  border: 1px solid #c3c4c7;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.image-editor-btn-secondary:hover:not(:disabled) {
+  background: #f6f7f7;
+  color: #1d2327;
+  border-color: #8c8f94;
+}
+
+.image-editor-btn-secondary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.image-editor-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffffff;
+  background: #0071e3;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.image-editor-btn-primary:hover:not(:disabled) {
+  background: #0077ed;
+  box-shadow: 0 2px 6px rgba(0, 113, 227, 0.35);
+}
+
+.image-editor-btn-primary:disabled {
+  background: #c3c4c7;
+  cursor: not-allowed;
+}
+
+.image-editor-dropdown {
+  position: relative;
+}
+
+.image-editor-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdcde;
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  padding: 4px;
+  z-index: 100;
+  min-width: 200px;
+}
+
+.image-editor-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 10px;
+  font-size: 12px;
+  background: none;
+  border: none;
+  text-align: left;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #1d2327;
+}
+
+.image-editor-dropdown-item:hover {
+  background: #f0f6fc;
+  color: #0071e3;
+}
+
+/* Main Body */
+.image-editor-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  background: #f0f0f1;
+}
+
+/* Canvas Area */
+.image-editor-canvas-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  overflow: auto;
+  position: relative;
+}
+
+.image-editor-canvas-box {
+  background-image: repeating-conic-gradient(#e1e1e1 0% 25%, #ffffff 0% 50%);
+  background-size: 16px 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border-radius: 2px;
+  position: relative;
+  max-width: 100%;
+  max-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.image-editor-preview-img {
+  display: block;
+  max-width: 100%;
+  max-height: 65vh;
+  object-fit: contain;
+  user-select: none;
+}
+
+/* Right Sidebar (Scale & Adjustments) */
+.image-editor-sidebar {
+  width: 320px;
+  background: #ffffff;
+  border-left: 1px solid #dcdcde;
+  padding: 20px;
+  overflow-y: auto;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.image-editor-panel-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #50575e;
+  margin: 0 0 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.image-editor-meta-text {
+  font-size: 12px;
+  color: #646970;
+  margin-bottom: 12px;
+}
+
+.image-editor-scale-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.image-editor-input-dim {
+  width: 80px;
+  padding: 6px 8px;
+  border: 1px solid #8c8f94;
+  border-radius: 4px;
+  font-size: 12px;
+  text-align: center;
+}
+
+.image-editor-slider-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.image-editor-slider-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 600;
+  color: #2c3338;
+}
+
+.image-editor-slider {
+  accent-color: #0071e3;
+  cursor: pointer;
+  width: 100%;
+}
+
+/* Footer Bar */
+.image-editor-footer {
+  height: 54px;
+  background: #ffffff;
+  border-top: 1px solid #dcdcde;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  flex-shrink: 0;
+}

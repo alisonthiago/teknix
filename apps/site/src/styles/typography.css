@@ -1,0 +1,42 @@
+/* Public storefront typography. Published editorial layouts keep their hierarchy. */
+:root {
+  --tkn-weight-regular: 400;
+  --tkn-weight-medium: 500;
+  --tkn-weight-semibold: 600;
+  --tkn-text-12: 12px;
+  --tkn-text-13: 13px;
+  --tkn-text-14: 14px;
+  --tkn-text-16: 16px;
+  --tkn-text-18: 18px;
+  --tkn-text-20: 20px;
+  --tkn-text-24: 24px;
+  --tkn-text-28: 28px;
+  --tkn-text-32: 32px;
+  --tkn-text-36: 36px;
+  --tkn-text-40: 40px;
+  --tkn-text-48: 48px;
+  --tkn-text-56: 56px;
+  --tkn-text-64: 64px;
+  --tkn-text-72: 72px;
+  --tkn-text-80: 80px;
+  --tkn-text-96: 96px;
+  --tkn-page-title: clamp(28px, 2.4vw, 36px);
+  --tkn-section-title: clamp(24px, 2vw, 28px);
+  --tkn-product-title: clamp(26px, 2.2vw, 34px);
+}
+body { font-weight: var(--tkn-weight-regular); font-size: var(--tkn-text-16); }
+input, select, textarea { font-family: var(--tkn-font); font-weight: var(--tkn-weight-regular); }
+#root :is(strong, b) { font-weight: var(--tkn-weight-semibold); }
+#root :is([class$="-price"], [class$="-price"] strong, .cb-bag-item-total, .cb-bag-total dd) {
+  font-weight: var(--tkn-weight-medium);
+}
+#root :is(button, .btn, [role="button"], a[class*="-btn"], a[class*="-cta"],
+  .cb-bag-primary, .cb-account-support-btn) { font-weight: var(--tkn-weight-semibold); }
+#root :is(.cb-account-main-title, .cb-bag-heading h1, .teknix-orders-title,
+  .apple-saved-title, .apple-lookup-heading, .apple-signin-main-title) {
+  font-size: var(--tkn-page-title);
+  font-weight: var(--tkn-weight-medium);
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+#root .ml-pdp-title { font-size: var(--tkn-product-title); font-weight: var(--tkn-weight-medium); }

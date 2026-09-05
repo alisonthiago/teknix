@@ -83,38 +83,20 @@ export interface Address {
   created_at?: string
 }
 
-export async function getCustomerByUserId(userId: string, userEmail?: string): Promise<Customer | null> {
+export async function getCustomerByUserId(userId: string): Promise<Customer | null> {
   // 1. Tentar por user_id
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('customers')
     .select('*')
     .eq('user_id', userId)
     .maybeSingle()
 
-  if (data) return data as Customer
-
-  // 2. Tentar por email
-  if (userEmail) {
-    const { data: byEmail } = await supabase
-      .from('customers')
-      .select('*')
-      .eq('email', userEmail)
-      .maybeSingle()
-
-    if (byEmail) {
-      // Vincular user_id se ainda não estiver vinculado
-      if (!byEmail.user_id) {
-        await supabase.from('customers').update({ user_id: userId }).eq('id', byEmail.id)
-      }
-      return byEmail as Customer
-    }
-  }
-
-  return null
+  if (error) throw error
+  return data as Customer | null
 }
 
 export async function createOrUpdateCustomer(user: User, customerData: Partial<Customer>): Promise<Customer | null> {
-  const existing = await getCustomerByUserId(user.id, user.email)
+  const existing = await getCustomerByUserId(user.id)
   
   if (existing) {
     const { data, error } = await supabase
@@ -125,6 +107,7 @@ export async function createOrUpdateCustomer(user: User, customerData: Partial<C
         updated_at: new Date().toISOString()
       })
       .eq('id', existing.id)
+      .eq('user_id', user.id)
       .select()
       .single()
 
@@ -141,7 +124,6 @@ export async function createOrUpdateCustomer(user: User, customerData: Partial<C
         name: customerData.name || user.user_metadata?.name || user.email?.split('@')[0] || 'Cliente',
         email: user.email,
         phone: customerData.phone || '',
-        document: customerData.document || customerData.cpf_cnpj || '',
         ...customerData,
         created_at: new Date().toISOString()
       })
@@ -156,16 +138,17 @@ export async function createOrUpdateCustomer(user: User, customerData: Partial<C
   }
 }
 
-export async function getOrdersByUserId(userId: string, userEmail?: string): Promise<Order[]> {
+export async function getOrdersByUserId(userId: string): Promise<Order[]> {
   try {
     // 1. Buscar customer_id associado
     let customerId: string | null = null
-    const { data: cust } = await supabase
+    const { data: cust, error: customerError } = await supabase
       .from('customers')
       .select('id')
-      .or(`user_id.eq.${userId}${userEmail ? `,email.eq.${userEmail}` : ''}`)
+      .eq('user_id', userId)
       .maybeSingle()
 
+    if (customerError) throw customerError
     if (cust) customerId = cust.id
 
     // 2. Query de pedidos por user_id ou customer_id
@@ -182,18 +165,18 @@ export async function getOrdersByUserId(userId: string, userEmail?: string): Pro
 
     const { data: orders, error } = await query
 
-    if (error || !orders) {
-      return []
-    }
+    if (error) throw error
+    if (!orders) return []
 
     // 3. Buscar os itens de cada pedido
     const orderIds = orders.map(o => o.id)
     if (orderIds.length > 0) {
-      const { data: items } = await supabase
+      const { data: items, error: itemsError } = await supabase
         .from('order_items')
         .select('*, products(name, image_url, images, sku)')
         .in('order_id', orderIds)
 
+      if (itemsError) throw itemsError
       const itemsByOrder: Record<string, OrderItem[]> = {}
       if (items) {
         items.forEach((item: any) => {
@@ -224,7 +207,7 @@ export async function getOrdersByUserId(userId: string, userEmail?: string): Pro
     return orders as Order[]
   } catch (e) {
     console.error('Erro ao buscar pedidos:', e)
-    return []
+    throw e
   }
 }
 
@@ -237,7 +220,7 @@ export async function getAddressesByUserId(userId: string): Promise<Address[]> {
 
   if (error) {
     console.error('Error fetching addresses:', error)
-    return []
+    throw error
   }
 
   return data as Address[]
@@ -268,18 +251,20 @@ export async function updateAddress(addressId: string, userId: string, updates: 
     await supabase.from('addresses').update({ is_default: false }).eq('user_id', userId)
   }
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('addresses')
     .update(updates)
     .eq('id', addressId)
     .eq('user_id', userId)
+    .select('id')
+    .single()
 
   if (error) {
     console.error('Error updating address:', error)
     return false
   }
 
-  return true
+  return !!data
 }
 
 export async function setDefaultAddress(addressId: string, userId: string): Promise<boolean> {

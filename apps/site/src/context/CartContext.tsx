@@ -21,7 +21,7 @@ interface CartContextType {
   items: CartItem[]
   totalItems: number
   totalPrice: number
-  addToCart: (item: Omit<CartItem, 'quantity'>) => void
+  addToCart: (item: Omit<CartItem, 'quantity'> & { quantity?: number }) => void
   removeFromCart: (id: string) => void
   updateQuantity: (id: string, qty: number) => void
   clearCart: () => void
@@ -63,20 +63,21 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return sum + price * i.quantity
   }, 0)
 
-  function addToCart(item: Omit<CartItem, 'quantity'>) {
+  function addToCart(item: Omit<CartItem, 'quantity'> & { quantity?: number }) {
+    const quantityToAdd = item.quantity && item.quantity > 0 ? item.quantity : 1
     let updatedItem: CartItem
     setItems(prev => {
       const existing = prev.find(i => i.id === item.id)
       if (existing) {
-        const nextQty = existing.quantity + 1
-        if (existing.stock && existing.quantity >= existing.stock) return prev
+        const nextQty = existing.quantity + quantityToAdd
+        if (existing.stock && nextQty > existing.stock) return prev
         updatedItem = { ...existing, quantity: nextQty }
         return prev.map(i => i.id === item.id ? updatedItem : i)
       }
-      updatedItem = { ...item, quantity: 1 }
+      updatedItem = { ...item, quantity: quantityToAdd }
       return [...prev, updatedItem]
     })
-    setLastAddedItem({ ...item, quantity: 1 })
+    setLastAddedItem({ ...item, quantity: quantityToAdd, stock: item.stock })
     setIsOpen(true) // Abre automaticamente o flyout/drawer
   }
 

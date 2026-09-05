@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import PageRenderer from '../components/PageRenderer'
 import { getProducts } from '../services/products'
@@ -16,21 +16,33 @@ interface PageData {
 
 export default function SegmentPage() {
   const { segmento } = useParams<{ segmento: string }>()
+  const [searchParams] = useSearchParams()
   const [page, setPage] = useState<PageData | null>(null)
+  const [segmentName, setSegmentName] = useState<string | null>(null)
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
-  const [notFound, setNotFound] = useState(false)
+
+  const searchTerm = searchParams.get('q') || searchParams.get('search') || searchParams.get('marca') || searchParams.get('brand') || ''
 
   useEffect(() => {
     window.scrollTo(0, 0)
     if (!segmento) return
     setLoading(true)
-    setNotFound(false)
 
     async function load() {
       const cleanSlug = (segmento || '').replace(/^\//, '')
       const possibleSlugs = [`/${cleanSlug}`, cleanSlug]
 
+      // 1. Nome do segmento (store_segments) — usado no hero
+      const { data: segData } = await supabase
+        .from('store_segments')
+        .select('name, slug')
+        .eq('slug', cleanSlug)
+        .eq('status', 'active')
+        .maybeSingle()
+      if (segData) setSegmentName(segData.name)
+
+      // 2. Página própria do segmento (se o usuário criou no HUB)
       const { data: pageData } = await supabase
         .from('pages')
         .select('id, title, slug, status, type')
@@ -39,21 +51,23 @@ export default function SegmentPage() {
         .limit(1)
         .maybeSingle()
 
-      if (!pageData) {
-        setNotFound(true)
-        setLoading(false)
-        return
-      }
+      // 3. Se não houver página própria, o segmento renderiza apenas o
+      //    hero + grade de produtos (sem dependência do Page Builder).
+      setPage(pageData || null)
 
-      setPage(pageData)
-
-      const segmentProducts = await getProducts({ segment: segmento, limit: 20 })
+      // 4. Produtos do segmento
+      const segmentProducts = await getProducts({
+        segment: cleanSlug,
+        brand: searchTerm || undefined,
+        search: searchTerm || undefined,
+        limit: 20
+      })
       setProducts(segmentProducts)
       setLoading(false)
     }
 
     load()
-  }, [segmento])
+  }, [segmento, searchTerm])
 
   if (loading) {
     return (
@@ -63,31 +77,21 @@ export default function SegmentPage() {
     )
   }
 
-  if (notFound) {
-    return (
-      <div className="segment-not-found">
-        <h1>404</h1>
-        <p>Segmento não encontrado</p>
-        <Link to="/" className="btn-back">Voltar ao início</Link>
-      </div>
-    )
-  }
+  const heroTitle = segmentName || page?.title || ''
 
   return (
     <div className="segment-page">
-      {page && page.type === 'segment' && (
+      {heroTitle && (
         <div className="segment-hero">
           <div className="segment-hero-inner">
-            <h1 className="segment-title">{page.title}</h1>
+            <h1 className="segment-title">{heroTitle}</h1>
           </div>
         </div>
       )}
 
-      {page && (
-        <PageRenderer pageId={page.id} />
-      )}
+      {page && <PageRenderer pageId={page.id} />}
 
-      {page?.type === 'segment' && products.length > 0 && (
+      {products.length > 0 && (
         <section className="segment-products">
           <div className="segment-products-inner">
             <h2 className="segment-section-title">Produtos</h2>

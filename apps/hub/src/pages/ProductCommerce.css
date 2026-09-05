@@ -1,0 +1,7 @@
+.commerce-settings { margin:20px 0; padding:20px; border:1px solid #e5e7eb; border-radius:10px; background:#fafbf8; }
+.commerce-settings h3 { margin:0 0 8px; font-size:15px; }
+.commerce-settings .form-group { display:flex; flex-direction:column; gap:8px; font-size:13px; }
+.commerce-settings .form-row { margin-top:16px; }
+.commerce-settings .toggle-switch-label { margin:16px 0; }
+.commerce-settings input[type="checkbox"] { accent-color:#91bf00; }
+.commerce-preview { padding:12px; margin-bottom:0; background:#eef5df; font-size:12px; border-radius:6px; line-height:1.6; }

@@ -159,12 +159,12 @@ export async function processCheckoutOrder(params: CreateOrderParams): Promise<C
 
     await supabase.from('order_items').insert(orderItemsPayload)
 
-    // 5. BAIXA DE ESTOQUE
+    // 5. BAIXA DE ESTOQUE BLINDADA (SINCRONIZAÇÃO COMPARTILHADA COM FLOW E MARKETPLACES)
     for (const item of items) {
       try {
         const { data: prod } = await supabase
           .from('products')
-          .select('stock, stock_quantity')
+          .select('id, sku, stock, stock_quantity')
           .eq('id', item.id)
           .single()
 
@@ -172,6 +172,7 @@ export async function processCheckoutOrder(params: CreateOrderParams): Promise<C
           const currentStock = prod.stock ?? prod.stock_quantity ?? 0
           const newStock = Math.max(0, currentStock - item.quantity)
 
+          // Atualiza o estoque mestre compartilhado
           await supabase
             .from('products')
             .update({
@@ -180,6 +181,33 @@ export async function processCheckoutOrder(params: CreateOrderParams): Promise<C
               updated_at: new Date().toISOString()
             })
             .eq('id', item.id)
+
+          // Registra movimentação de estoque para rastreabilidade auditável
+          try {
+            await supabase.from('stock_movements').insert({
+              product_id: item.id,
+              type: 'VENDA',
+              quantity: -item.quantity,
+              order_ref: orderNumber,
+              notes: `Venda Loja Própria TEKNIX — Pedido #${orderNumber}`
+            })
+          } catch (mErr) {
+            // Tabela opcional dependendo das migrações ativas
+            console.debug('Registro de stock_movements:', mErr)
+          }
+
+          // Atualiza também os anúncios vinculados de marketplaces para sincronização imediata
+          try {
+            await supabase
+              .from('marketplace_listings')
+              .update({
+                stock: newStock,
+                updated_at: new Date().toISOString()
+              })
+              .eq('product_id', item.id)
+          } catch (mpErr) {
+            console.debug('Sincronização de marketplace_listings:', mpErr)
+          }
         }
       } catch (stockErr) {
         console.warn(`Aviso de estoque para ${item.id}:`, stockErr)

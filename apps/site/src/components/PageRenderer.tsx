@@ -1,3 +1,4 @@
+import { PageWidgets, Editable, useWidgetEdit, usePageWidgetState } from './page-widgets/PageWidgets'
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import WidgetRenderer from './WidgetRenderer'
@@ -10,6 +11,8 @@ import {
   generateCompiledCSS,
   initMotionEffectsRuntime,
 } from '../services/styleEngine'
+import { evaluateDisplayConditions, type DisplayCondition } from '../services/displayConditions'
+
 
 export interface PageData {
   id: string
@@ -18,8 +21,11 @@ export interface PageData {
   status: string
   type?: string
   theme_id?: string
+  hide_header?: boolean
+  hide_footer?: boolean
   meta_title?: string
   meta_description?: string
+  display_conditions?: DisplayCondition[]
 }
 
 interface SectionData {
@@ -191,93 +197,75 @@ interface WidgetData {
   aria_label: string
   hover: Record<string, unknown>
   style?: Record<string, unknown>
+  display_conditions?: Array<{
+    id: string
+    type: 'include' | 'exclude'
+    target: 'entire_site' | 'archives' | 'singular'
+    subTarget?: string
+    specificId?: string
+  }>
 }
 
 interface PageRendererProps {
   pageId: string
+  previewData?: any
   product?: Product
   className?: string
+  disablePageHeaderFooter?: boolean
 }
 
-export default function PageRenderer({ pageId, product, className }: PageRendererProps) {
-  const [sections, setSections] = useState<SectionData[]>([])
-  const [containers, setContainers] = useState<Record<string, ContainerData[]>>({})
-  const [widgets, setWidgets] = useState<Record<string, WidgetData[]>>({})
+function ExistingWidget({ widget, ...props }: any) {
+  const edit = useWidgetEdit(widget.id)
+  const merged = { ...widget, ...edit?.schema, style: { ...widget.style, ...edit?.schema?.style, ...edit?.style }, content: { ...widget.content, ...edit?.content } }
+  return <Editable renderContent={false} widgetId={widget.id} label={widget.type} content={widget.content} style={{ display: 'contents' }}><WidgetRenderer widget={merged} {...props} /></Editable>
+}
+export default function PageRenderer(props: PageRendererProps) {
+  return <PageWidgets key={props.pageId} scope={`page:${props.pageId}`}><PageRendererContent {...props} /></PageWidgets>
+}
+function PageRendererContent({ pageId, product, className, previewData }: PageRendererProps) {
+  const [sourceSections, setSections] = useState<SectionData[]>([])
+  const [sourceContainers, setContainers] = useState<Record<string, ContainerData[]>>({})
+  const [sourceWidgets, setWidgets] = useState<Record<string, WidgetData[]>>({})
   const [pageStyles, setPageStyles] = useState<string>('')
   const [loading, setLoading] = useState(true)
+  const [loadError,setLoadError]=useState('')
+  const presentation=usePageWidgetState()
+  const viewport=presentation && presentation.width<=767?'mobile':presentation && presentation.width<=1024?'tablet':'desktop'
+  const merge=(row:any)=>{const edit=presentation?.edits[row.id];return {...row,...edit?.schema,content:row.content,...(edit?.hidden && !presentation?.preview ? {hide_on_desktop:true,hide_on_tablet:true,hide_on_mobile:true}: {})}}
+  const sections=sourceSections.map(merge)
+  const containers=Object.fromEntries(Object.entries(sourceContainers).map(([id,rows])=>[id,rows.map(merge)]))
+  const widgets=Object.fromEntries(Object.entries(sourceWidgets).map(([id,rows])=>[id,rows.map(merge)]))
 
   useEffect(() => {
     if (!pageId) return
-    setLoading(true)
+    setLoading(true);setLoadError('')
 
+    let cancelled = false
     async function loadPage() {
-      // 1. Load page meta/styles
-      const { data: pageMeta } = await supabase
-        .from('pages')
-        .select('page_styles')
-        .eq('id', pageId)
-        .maybeSingle()
-
-      if (pageMeta?.page_styles && typeof pageMeta.page_styles === 'object') {
-        const customCss = (pageMeta.page_styles as any).custom_css || ''
-        setPageStyles(customCss)
-      }
-
-      // 2. Load sections
-      const { data: sectionsData } = await supabase
-        .from('page_sections')
-        .select('*')
-        .eq('page_id', pageId)
-        .order('order')
-
-      if (!sectionsData) {
-        setLoading(false)
-        return
-      }
-
-      setSections(sectionsData)
-
-      // 3. Load containers
-      const sectionIds = sectionsData.map((s) => s.id)
-      const { data: containersData } = await supabase
-        .from('page_containers')
-        .select('*')
-        .in('section_id', sectionIds)
-        .order('order')
-
-      if (!containersData) {
-        setLoading(false)
-        return
-      }
-
-      const containerMap: Record<string, ContainerData[]> = {}
-      for (const c of containersData) {
-        if (!containerMap[c.section_id]) containerMap[c.section_id] = []
-        containerMap[c.section_id].push(c)
-      }
-      setContainers(containerMap)
-
-      // 4. Load widgets
-      const containerIds = containersData.map((c) => c.id)
-      const { data: widgetsData } = await supabase
-        .from('page_widgets')
-        .select('*')
-        .in('container_id', containerIds)
-        .order('order')
-
-      const widgetMap: Record<string, WidgetData[]> = {}
-      if (widgetsData) {
-        for (const w of widgetsData) {
-          if (!widgetMap[w.container_id]) widgetMap[w.container_id] = []
-          widgetMap[w.container_id].push(w)
+      try {
+        let tree = previewData
+        if (!tree) {
+          const {data,error} = await supabase.from('pages').select('page_styles').eq('id',pageId).eq('status','published').maybeSingle()
+          if(error) throw error
+          tree = data?.page_styles?.published_snapshot_v2
         }
-      }
-      setWidgets(widgetMap)
-      setLoading(false)
+        if(cancelled) return
+        setSections([]);setContainers({});setWidgets({});setPageStyles('')
+        if(!tree) return
+        const conditions = tree.page?.display_conditions as DisplayCondition[] | undefined
+        if(conditions?.length && !evaluateDisplayConditions(conditions,{pathname:window.location.pathname,pageType:tree.page.type,pageId,product:product as any})) return
+        setPageStyles(tree.page?.page_styles?.custom_css || '')
+        setSections(tree.sections || [])
+        setContainers((tree.containers || []).reduce((map:any,c:any) => {(map[c.section_id] ||= []).push(c);return map},{}))
+        setWidgets((tree.widgets || []).reduce((map:any,w:any) => {(map[w.container_id] ||= []).push(w);return map},{}))
+      } catch(error) {
+        if(!cancelled) {setSections([]);setContainers({});setWidgets({});setLoadError('Não foi possível carregar a publicação. Atualize a página para tentar novamente.');console.error('Erro carregando a publicação:',error)}
+      } finally {if(!cancelled)setLoading(false)}
     }
 
     loadPage()
-  }, [pageId])
+    return () => { cancelled = true }
+  }, [pageId, product, previewData])
 
   // Initialize runtime motion effects after rendering
   useEffect(() => {
@@ -287,17 +275,16 @@ export default function PageRenderer({ pageId, product, className }: PageRendere
     }
   }, [loading, sections, widgets])
 
+  if(loadError)return <p role="alert" style={{padding:32}}>{loadError}</p>
   if (loading) {
     return (
-      <div className="page-renderer-loading" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
-        <div className="spinner" />
-      </div>
+      <div className="page-renderer-seamless-loading" style={{ minHeight: '100vh', background: '#000000', opacity: 0, transition: 'opacity 0.2s ease' }} />
     )
   }
 
   if (sections.length === 0) {
     return (
-      <div className="page-renderer-empty" style={{ textAlign: 'center', padding: '80px 24px' }}>
+      <div className="page-renderer-empty" style={{ textAlign: 'center', padding: '120px 24px', minHeight: '50vh' }}>
         <p style={{ color: '#6e6e73', fontSize: 16 }}>Nenhum conteúdo configurado para esta página.</p>
       </div>
     )
@@ -315,9 +302,11 @@ export default function PageRenderer({ pageId, product, className }: PageRendere
   const compiledCSS = generateCompiledCSS(fullSectionsTree, pageStyles, pageId)
 
   return (
-    <div className={`page-renderer ${className || ''}`}>
-      {compiledCSS && <style dangerouslySetInnerHTML={{ __html: compiledCSS }} />}
-      {sections.map((section) => {
+    <div className={`page-renderer-root ${className || ''}`} style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      {/* ── CONTEÚDO PRINCIPAL DA PÁGINA ── */}
+      <main style={{ flex: '1 0 auto' }}>
+        {compiledCSS && <style dangerouslySetInnerHTML={{ __html: compiledCSS }} />}
+        {sections.map((section) => {
         const isHideDesktop = section.hide_on_desktop || section.hide_desktop
         const isHideTablet = section.hide_on_tablet || section.hide_tablet
         const isHideMobile = section.hide_on_mobile || section.hide_mobile
@@ -332,25 +321,54 @@ export default function PageRenderer({ pageId, product, className }: PageRendere
 
         const sectionContainers = containers[section.id] || []
 
+        const sStyle = computeSectionStyles(section, viewport)
+        const secBgOverlay = (section as any).bg_overlay || (section as any).settings?.bg_overlay
+        const secBgOpacity = (section as any).bg_opacity !== undefined
+          ? (Number((section as any).bg_opacity) > 1 ? Number((section as any).bg_opacity) / 100 : Number((section as any).bg_opacity))
+          : ((section as any).settings?.bg_opacity !== undefined ? (Number((section as any).settings?.bg_opacity) > 1 ? Number((section as any).settings?.bg_opacity) / 100 : Number((section as any).settings?.bg_opacity)) : 0.5)
+        const secBlendMode = (section as any).bg_overlay_blend_mode || (section as any).blend_mode || (section as any).settings?.bg_overlay_blend_mode
+
         return (
-          <section
+          <Editable as="section" widgetId={section.id} label="Seção" editorKind="section" content={{}}
             key={section.id}
             data-section-id={section.id}
-            className={`${section.custom_class || ''} ${visibilityClasses}`.trim()}
-            style={computeSectionStyles(section, 'desktop')}
+            className={`teknix-section ${section.custom_class || ''} ${visibilityClasses}`.trim()}
+            style={{ ...sStyle, position: 'relative' }}
           >
-            <div style={{
-              width: '100%',
-              maxWidth: section.max_width || '1200px',
-              margin: '0 auto',
-              padding: '0 24px',
-              display: 'flex',
-              flexDirection: (section.direction as any) || (sectionContainers.length > 1 ? 'row' : 'column'),
-              gap: section.gap || '24px',
-              flexWrap: 'wrap',
-              alignItems: 'stretch',
-              boxSizing: 'border-box'
-            }}>
+            {/* Background Overlay */}
+            {secBgOverlay && secBgOverlay !== 'transparent' && (
+              <div
+                className="elementor-background-overlay"
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background: secBgOverlay,
+                  opacity: secBgOpacity,
+                  mixBlendMode: (secBlendMode as any) || 'normal',
+                  pointerEvents: 'none',
+                  zIndex: 0,
+                  borderRadius: sStyle.borderRadius || 0
+                }}
+              />
+            )}
+
+            <div
+              className="section-containers section-containers-wrap"
+              style={{
+                position: 'relative',
+                zIndex: 1,
+                width: '100%',
+                maxWidth: section.layout === 'full' ? '100%' : (section.max_width || '1200px'),
+                margin: '0 auto',
+                padding: section.layout === 'full' ? '0' : '0 24px',
+                display: 'flex',
+                flexDirection: (section.direction as any) || (sectionContainers.length > 1 ? 'row' : 'column'),
+                gap: section.gap || '24px',
+                alignItems: ((section as any).align_items as any) || 'stretch',
+                justifyContent: ((section as any).justify_content as any) || 'flex-start',
+                boxSizing: 'border-box'
+              }}
+            >
               {sectionContainers.map((container) => {
                 const isBoxed = container.content_width !== 'full'
                 const conHideDesktop = container.hide_on_desktop || container.hide_desktop
@@ -366,18 +384,46 @@ export default function PageRenderer({ pageId, product, className }: PageRendere
                 ].filter(Boolean).join(' ')
 
                 const containerWidgets = widgets[container.id] || []
+                const conOuterStyles = computeContainerOuterStyles(container, viewport)
+                const conBgOverlay = (container as any).bg_overlay || (container as any).settings?.bg_overlay
+                const conBgOpacity = (container as any).bg_opacity !== undefined
+                  ? (Number((container as any).bg_opacity) > 1 ? Number((container as any).bg_opacity) / 100 : Number((container as any).bg_opacity))
+                  : ((container as any).settings?.bg_opacity !== undefined ? (Number((container as any).settings?.bg_opacity) > 1 ? Number((container as any).settings?.bg_opacity) / 100 : Number((container as any).settings?.bg_opacity)) : 0.5)
+                const conBlendMode = (container as any).bg_overlay_blend_mode || (container as any).blend_mode || (container as any).settings?.bg_overlay_blend_mode
 
                 return (
-                  <div
+                  <Editable as="div" widgetId={container.id} label="Contêiner" editorKind="container" content={{}}
                     key={container.id}
                     data-container-id={container.id}
                     className={`e-con ${isBoxed ? 'e-con-boxed' : 'e-con-full'} ${container.custom_class || ''} ${conVisibilityClasses}`.trim()}
-                    style={computeContainerOuterStyles(container, 'desktop')}
+                    style={{
+                      ...conOuterStyles,
+                      position: 'relative',
+                      minWidth: 0,
+                      boxSizing: 'border-box'
+                    }}
                   >
+                    {/* Container Background Overlay */}
+                    {conBgOverlay && conBgOverlay !== 'transparent' && (
+                      <div
+                        className="elementor-background-overlay"
+                        style={{
+                          position: 'absolute',
+                          inset: 0,
+                          background: conBgOverlay,
+                          opacity: conBgOpacity,
+                          mixBlendMode: (conBlendMode as any) || 'normal',
+                          pointerEvents: 'none',
+                          zIndex: 0,
+                          borderRadius: conOuterStyles.borderRadius || 0
+                        }}
+                      />
+                    )}
+
                     <div
                       data-container-inner-id={container.id}
                       className="e-con-inner"
-                      style={computeContainerInnerStyles(container, 'desktop')}
+                      style={{ ...computeContainerInnerStyles(container, viewport), position: 'relative', zIndex: 1 }}
                     >
                       {containerWidgets.map((widget) => {
                         const wHideDesktop = widget.hide_on_desktop || widget.hide_desktop
@@ -398,12 +444,50 @@ export default function PageRenderer({ pageId, product, className }: PageRendere
                         const isScroll = widget.vertical_scroll || (widget as any).onepage_scroll
                         const isTilt = widget.mouse_tilt
 
+                        const customW = (widget as any).width || (widget as any).settings?.width || (widget as any).style?.width || ''
+                        const dirVal = container.direction || (container as any).settings?.direction || 'column'
+                        const isRow = dirVal === 'row'
+
+                        const computedWidgetStyle = computeWidgetStyles(widget, viewport)
+                        const isPositioned = computedWidgetStyle.position === 'absolute' || computedWidgetStyle.position === 'fixed' || computedWidgetStyle.position === 'sticky'
+                        const cAlign = container.align_items || 'stretch'
+
                         return (
                           <div
                             key={widget.id}
                             data-widget-id={widget.id}
                             className={`${widget.custom_class || ''} ${wVisibilityClasses}`.trim()}
-                            style={computeWidgetStyles(widget, 'desktop')}
+                            style={{
+                              ...computedWidgetStyle,
+                              position: (computedWidgetStyle.position as any) || 'relative',
+                              top: computedWidgetStyle.top,
+                              right: computedWidgetStyle.right,
+                              bottom: computedWidgetStyle.bottom,
+                              left: computedWidgetStyle.left,
+                              zIndex: computedWidgetStyle.zIndex,
+                              alignSelf: computedWidgetStyle.alignSelf,
+                              order: computedWidgetStyle.order,
+                              flexGrow: computedWidgetStyle.flexGrow,
+                              transform: computedWidgetStyle.transform,
+                              width: isPositioned
+                                ? (computedWidgetStyle.width || 'auto')
+                                : (container.display_type === 'grid'
+                                  ? 'auto'
+                                  : (computedWidgetStyle.width && computedWidgetStyle.width !== '100%'
+                                    ? computedWidgetStyle.width
+                                    : (customW
+                                      ? customW
+                                      : (isRow
+                                        ? 'auto'
+                                        : (computedWidgetStyle.alignSelf && computedWidgetStyle.alignSelf !== 'stretch' && computedWidgetStyle.alignSelf !== 'auto'
+                                          ? 'auto'
+                                          : (cAlign === 'stretch' ? '100%' : 'auto')))))),
+                              flex: isPositioned
+                                ? undefined
+                                : (isRow ? (customW ? `0 0 ${customW}` : (computedWidgetStyle.flexGrow ? `${computedWidgetStyle.flexGrow} 1 auto` : '0 0 auto')) : undefined),
+                              maxWidth: isPositioned ? (computedWidgetStyle.maxWidth || undefined) : (isRow && customW ? customW : undefined),
+                              boxSizing: 'border-box',
+                            }}
                             data-teknix-entrance={anim && anim !== 'none' ? anim : undefined}
                             data-teknix-duration={widget.animation_duration || undefined}
                             data-teknix-delay={widget.animation_delay || undefined}
@@ -414,14 +498,11 @@ export default function PageRenderer({ pageId, product, className }: PageRendere
                             data-teknix-scale-scroll={widget.scale_scroll ? 'true' : undefined}
                             data-teknix-tilt={isTilt ? 'true' : undefined}
                           >
-                            <WidgetRenderer
+                            <ExistingWidget
                               widget={{
-                                id: widget.id,
-                                container_id: widget.container_id,
-                                type: widget.type,
-                                order: widget.order,
+                                ...widget,
                                 content: widget.content,
-                                style: computeWidgetStyles(widget, 'desktop'),
+                                style: computeWidgetStyles(widget, viewport),
                               }}
                               product={product}
                             />
@@ -429,13 +510,15 @@ export default function PageRenderer({ pageId, product, className }: PageRendere
                         )
                       })}
                     </div>
-                  </div>
+                  </Editable>
                 )
               })}
             </div>
-          </section>
+          </Editable>
         )
       })}
+      </main>
+
     </div>
   )
 }
