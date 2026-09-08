@@ -2247,12 +2247,14 @@
 
 /* 2. Título */
 .ml-pdp-title {
-  font-size: clamp(26px, 2.2vw, 34px);
-  font-weight: var(--tkn-weight-medium);
-  color: #111827;
-  line-height: 1.2;
-  margin: 0 0 18px;
-  letter-spacing: -0.01em;
+  font-size: clamp(22px, 1.8vw, 28px);
+  font-weight: 500;
+  color: #1a1a1a;
+  line-height: 1.35;
+  margin: 0 0 16px;
+  letter-spacing: -0.015em;
+  word-break: break-word;
+  hyphens: auto;
 }
 
 /* 3. Avaliação */

@@ -7,7 +7,7 @@
 .product-detail-page-root .main-image-frame { min-width:0; }
 .product-detail-page-root .container-info { border:0; border-radius:0; padding: 0; background:transparent; box-shadow:none; box-sizing:border-box; gap: var(--tkn-space-16); }
 #root .product-detail-page-root h1.jet-product-name { font-size: var(--tkn-text-24); line-height:1.2; }
-#root .product-detail-page-root h1.ml-pdp-title { font-size:clamp(22px,1.75vw,28px); line-height:1.22; }
+#root .product-detail-page-root h1.ml-pdp-title { font-size: clamp(20px, 2.4vw, 26px); line-height: 1.35; letter-spacing: -0.015em; }
 .product-detail-page-root .valueDiscount { color:#111; }
 .product-detail-page-root .jet-product-flag-discount { color:#111; border-radius:4px; }
 .product-detail-page-root .priceDiscount { flex-wrap:wrap; gap: var(--tkn-space-8); }
@@ -40,7 +40,7 @@
   .product-detail-page-root .btn-one-click { min-width:0; flex:1; }
   .product-detail-page-root .product-editorial h2,.product-detail-page-root .section-headline { font-size: var(--tkn-text-24); }
   .product-detail-page-root .freight-input-container { min-width:0; }
-  #root .product-detail-page-root h1.ml-pdp-title { font-size: 24px; line-height: 1.3; letter-spacing: -0.015em; margin-bottom: 20px; }
+  #root .product-detail-page-root h1.ml-pdp-title { font-size: 19px; line-height: 1.4; letter-spacing: -0.01em; margin-bottom: 16px; word-break: break-word; hyphens: auto; }
   .product-detail-page-root .pdp-tab-toggle-btn { display: inline-flex; align-items: center; gap: 0; min-height: 38px; padding: 0; border: 0; background: transparent; box-shadow: none; color: #0071e3; font-size: 15px; font-weight: 600; }
   .product-detail-page-root .pdp-tab-toggle-btn svg { display: none; }
   .product-detail-page-root .pdp-gallery-description-text { font-size: 16px; line-height: 1.7; }
