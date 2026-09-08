@@ -37,8 +37,8 @@ export function GhostButton({ children, onClick, className = '' }: { children: R
 export function StatCard({ label, value, subtitle }: { label: string; value: string; subtitle?: string }) {
   return (
     <div className="mp-card-sm">
-      <p className="text-[10px] sm:text-xs text-[#999] font-medium">{label}</p>
-      <p className="text-base sm:text-xl font-bold text-[#333] mt-0.5 sm:mt-1 truncate">{value}</p>
+      <p className="text-[10px] sm:text-xs text-[#999] font-normal">{label}</p>
+      <p className="text-base sm:text-xl font-semibold text-[#222] mt-0.5 sm:mt-1 truncate tracking-tight">{value}</p>
       {subtitle && <p className="text-[10px] sm:text-xs text-[#999] mt-0.5 sm:mt-1 truncate">{subtitle}</p>}
     </div>
   )

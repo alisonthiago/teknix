@@ -119,11 +119,11 @@ function ModernAreaLineChart({
               {timeframe} <ChevronDown className="w-3.5 h-3.5 text-[#888]" />
             </span>
           </div>
-          <h3 className="text-[15px] font-black text-[#111] tracking-tight mt-0.5">{title}</h3>
+          <h3 className="text-[15px] font-semibold text-[#111] tracking-tight mt-0.5">{title}</h3>
           {subtitle && <p className="text-[11px] text-[#777] mt-0.5">{subtitle}</p>}
         </div>
 
-        <span className="px-2.5 py-1 rounded-full text-[10px] font-black bg-[#ecfdf5] text-[#16a34a] border border-[#bbf7d0] flex items-center gap-1">
+        <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-[#ecfdf5] text-[#16a34a] border border-[#bbf7d0] flex items-center gap-1">
           <span className="w-1.5 h-1.5 rounded-full bg-[#16a34a] animate-pulse" /> Em Tempo Real
         </span>
       </div>
@@ -428,33 +428,33 @@ export default function FinanceiroPage() {
             {/* Top Stat Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
               <div className="bg-white px-5 py-6 rounded-2xl border border-[#e6e6e6] shadow-2xs">
-                <p className="text-[11px] font-bold text-[#888] uppercase tracking-wider">Receita Bruta</p>
-                <p className="text-2xl font-black text-[#111] mt-1">{formatBRL(financialData.revenue)}</p>
-                <div className="flex items-center gap-1 text-[11px] font-extrabold text-[#16a34a] mt-2">
+                <p className="text-[11px] font-normal text-[#888] uppercase tracking-wider">Receita Bruta</p>
+                <p className="text-2xl font-semibold text-[#111] mt-1 tracking-tight">{formatBRL(financialData.revenue)}</p>
+                <div className="flex items-center gap-1 text-[11px] font-medium text-[#16a34a] mt-2">
                   <ArrowUpRight className="w-3.5 h-3.5" /> +18.4% vs semana anterior
                 </div>
               </div>
 
               <div className="bg-white px-5 py-6 rounded-2xl border border-[#e6e6e6] shadow-2xs">
-                <p className="text-[11px] font-bold text-[#888] uppercase tracking-wider">Lucro Líquido</p>
-                <p className="text-2xl font-black text-[#16a34a] mt-1">{formatBRL(financialData.profit)}</p>
-                <div className="flex items-center gap-1 text-[11px] font-extrabold text-[#16a34a] mt-2">
+                <p className="text-[11px] font-normal text-[#888] uppercase tracking-wider">Lucro Líquido</p>
+                <p className="text-2xl font-semibold text-[#16a34a] mt-1 tracking-tight">{formatBRL(financialData.profit)}</p>
+                <div className="flex items-center gap-1 text-[11px] font-medium text-[#16a34a] mt-2">
                   <Sparkles className="w-3.5 h-3.5 text-[#84cc16]" /> {financialData.avgMargin}% de Margem Real
                 </div>
               </div>
 
               <div className="bg-white px-5 py-6 rounded-2xl border border-[#e6e6e6] shadow-2xs">
-                <p className="text-[11px] font-bold text-[#888] uppercase tracking-wider">Custos & Taxas</p>
-                <p className="text-2xl font-black text-[#111] mt-1">{formatBRL(financialData.cost + financialData.fees + financialData.taxes + financialData.freight)}</p>
-                <div className="flex items-center gap-1 text-[11px] font-bold text-[#777] mt-2">
+                <p className="text-[11px] font-normal text-[#888] uppercase tracking-wider">Custos & Taxas</p>
+                <p className="text-2xl font-semibold text-[#111] mt-1 tracking-tight">{formatBRL(financialData.cost + financialData.fees + financialData.taxes + financialData.freight)}</p>
+                <div className="flex items-center gap-1 text-[11px] font-normal text-[#777] mt-2">
                   {(100 - Number(financialData.avgMargin)).toFixed(1)}% do faturamento
                 </div>
               </div>
 
               <div className="bg-white px-5 py-6 rounded-2xl border border-[#e6e6e6] shadow-2xs">
-                <p className="text-[11px] font-bold text-[#888] uppercase tracking-wider">Ticket Médio</p>
-                <p className="text-2xl font-black text-[#111] mt-1">{formatBRL(financialData.revenue / Math.max(1, financialData.totalOrders))}</p>
-                <div className="flex items-center gap-1 text-[11px] font-bold text-[#16a34a] mt-2">
+                <p className="text-[11px] font-normal text-[#888] uppercase tracking-wider">Ticket Médio</p>
+                <p className="text-2xl font-semibold text-[#111] mt-1 tracking-tight">{formatBRL(financialData.revenue / Math.max(1, financialData.totalOrders))}</p>
+                <div className="flex items-center gap-1 text-[11px] font-medium text-[#16a34a] mt-2">
                   {financialData.totalOrders} pedidos contabilizados
                 </div>
               </div>
@@ -479,19 +479,19 @@ export default function FinanceiroPage() {
                 <div>
                   <div className="flex items-center justify-between pb-3 border-b border-[#f0f0f0]">
                     <div>
-                      <h3 className="text-[15px] font-black text-[#111] tracking-tight">Composição da Receita</h3>
+                      <h3 className="text-[15px] font-semibold text-[#111] tracking-tight">Composição da Receita</h3>
                       <p className="text-[11px] text-[#666] mt-0.5">Distribuição percentual sobre a receita total de {formatBRL(financialData.revenue)}</p>
                     </div>
-                    <span className="px-2.5 py-1 rounded-full text-[10px] font-black bg-[#ecfdf5] text-[#16a34a] border border-[#bbf7d0]">
+                    <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-[#ecfdf5] text-[#16a34a] border border-[#bbf7d0]">
                       {financialData.avgMargin}% Margem Real
                     </span>
                   </div>
 
                   {/* Barra Consolidada de Distribuição Segmentada */}
                   <div className="pt-4 pb-3">
-                    <div className="flex items-center justify-between text-[11px] font-bold text-[#666] mb-1.5">
+                    <div className="flex items-center justify-between text-[11px] font-normal text-[#666] mb-1.5">
                       <span>Distribuição do Faturamento</span>
-                      <span className="text-[#111] font-extrabold">100%</span>
+                      <span className="text-[#111] font-medium">100%</span>
                     </div>
                     <div className="h-4 rounded-xl bg-[#f0f0f0] overflow-hidden flex shadow-inner gap-0.5 p-0.5">
                       <div className="h-full bg-[#222] rounded-l-lg transition-all" style={{ width: '42%' }} title="Custo Produtos: 42%" />
@@ -505,19 +505,19 @@ export default function FinanceiroPage() {
                   {/* Grid de Detalhamento dos Custos */}
                   <div className="grid grid-cols-2 gap-2.5 pt-1">
                     <div className="p-3 rounded-xl border border-[#e6e6e6] bg-[#fafafa]">
-                      <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#666] mb-1">
+                      <div className="flex items-center gap-1.5 text-[10px] font-normal text-[#666] mb-1">
                         <span className="w-2 h-2 rounded-full bg-[#222]" /> Custo Produtos (COGS)
                       </div>
-                      <p className="text-sm font-black text-[#111]">{formatBRL(financialData.cost)}</p>
-                      <p className="text-[10px] font-extrabold text-[#777] mt-0.5">42.0% da receita</p>
+                      <p className="text-sm font-semibold text-[#111]">{formatBRL(financialData.cost)}</p>
+                      <p className="text-[10px] font-normal text-[#777] mt-0.5">42.0% da receita</p>
                     </div>
 
                     <div className="p-3 rounded-xl border border-[#fef3c7] bg-[#fffbeb]">
-                      <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#b45309] mb-1">
+                      <div className="flex items-center gap-1.5 text-[10px] font-normal text-[#b45309] mb-1">
                         <span className="w-2 h-2 rounded-full bg-[#f59e0b]" /> Taxas ML / Canais
                       </div>
-                      <p className="text-sm font-black text-[#92400e]">{formatBRL(financialData.fees)}</p>
-                      <p className="text-[10px] font-extrabold text-[#b45309] mt-0.5">16.0% comissão</p>
+                      <p className="text-sm font-semibold text-[#92400e]">{formatBRL(financialData.fees)}</p>
+                      <p className="text-[10px] font-normal text-[#b45309] mt-0.5">16.0% comissão</p>
                     </div>
 
                     <div className="p-3 rounded-xl border border-[#dbeafe] bg-[#eff6ff]">

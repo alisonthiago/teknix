@@ -17,11 +17,19 @@ export const metadata: Metadata = {
 
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import { ToastContainer } from '@/components/ui/ToastContainer';
+import { Inter } from "next/font/google";
+
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-sans",
+  weight: ["300", "400", "500", "600", "700"],
+});
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">
+    <html lang="pt-BR" className={`h-full antialiased ${inter.variable}`}>
+      <body className="min-h-full flex flex-col font-sans">
         <NotificationProvider>
           {children}
           <ToastContainer />

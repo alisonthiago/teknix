@@ -102,17 +102,17 @@ export function CockpitCentralOperacao({ orders = [], products = [] }: CockpitDa
     <div className="bg-white border border-[#e6e6e6] rounded-md p-5">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#f0f0f0]">
         <div>
-          <span className="text-[11px] font-bold text-[#666] uppercase tracking-wider">
+          <span className="text-[11px] font-medium text-[#777] uppercase tracking-wider">
             Cockpit de Operação
           </span>
-          <h2 className="text-[18px] font-bold text-[#111] mt-0.5">
+          <h2 className="text-[17px] font-semibold text-[#111] mt-0.5">
             {totalActionsCount === 0 ? (
               'Operação 100% em dia'
             ) : (
               `${totalActionsCount} ações prioritárias hoje`
             )}
           </h2>
-          <p className="text-[12px] text-[#666] mt-0.5">
+          <p className="text-[12px] text-[#777] mt-0.5">
             Pedidos, separação, etiquetas e estoque em tempo real.
           </p>
         </div>
@@ -120,7 +120,7 @@ export function CockpitCentralOperacao({ orders = [], products = [] }: CockpitDa
         <div className="flex flex-wrap items-center gap-2">
           <Link
             href="/pedidos"
-            className="px-4 py-2.5 bg-[#347ff2] hover:bg-[#2469d8] text-white text-[12px] font-semibold rounded-xl transition-colors flex items-center gap-1.5 shadow-2xs"
+            className="px-4 py-2 bg-[#347ff2] hover:bg-[#2469d8] text-white text-[12px] font-medium rounded-xl transition-colors flex items-center gap-1.5 shadow-2xs"
           >
             <Package className="w-3.5 h-3.5" />
             Ver Pedidos & Etiquetas
@@ -128,7 +128,7 @@ export function CockpitCentralOperacao({ orders = [], products = [] }: CockpitDa
 
           <Link
             href="/operacao"
-            className="px-4 py-2.5 bg-white hover:bg-[#f8f8f8] text-[#333] border border-[#e6e6e6] text-[12px] font-semibold rounded-xl transition-colors"
+            className="px-4 py-2 bg-white hover:bg-[#f8f8f8] text-[#333] border border-[#e6e6e6] text-[12px] font-medium rounded-xl transition-colors"
           >
             Ver Estoque & Catálogo
           </Link>
@@ -138,41 +138,41 @@ export function CockpitCentralOperacao({ orders = [], products = [] }: CockpitDa
       {/* 4 Clean Metric Columns */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4">
         <div>
-          <div className="flex items-center gap-1.5 text-[11px] text-[#666] font-medium">
+          <div className="flex items-center gap-1.5 text-[11px] text-[#777] font-normal">
             <span className="w-2 h-2 rounded-full bg-[#e74c3c]" />
             Urgente
           </div>
-          <div className="text-[22px] font-bold text-[#333] mt-0.5">
+          <div className="text-[20px] font-semibold text-[#333] mt-0.5 tracking-tight">
             {urgentItems.length} <span className="text-[12px] font-normal text-[#999]">pendências</span>
           </div>
         </div>
 
         <div>
-          <div className="flex items-center gap-1.5 text-[11px] text-[#666] font-medium">
+          <div className="flex items-center gap-1.5 text-[11px] text-[#777] font-normal">
             <span className="w-2 h-2 rounded-full bg-[#f39c12]" />
             Para Enviar
           </div>
-          <div className="text-[22px] font-bold text-[#333] mt-0.5">
+          <div className="text-[20px] font-semibold text-[#333] mt-0.5 tracking-tight">
             {toShipOrders.length} <span className="text-[12px] font-normal text-[#999]">pedidos</span>
           </div>
         </div>
 
         <div>
-          <div className="flex items-center gap-1.5 text-[11px] text-[#666] font-medium">
+          <div className="flex items-center gap-1.5 text-[11px] text-[#777] font-normal">
             <span className="w-2 h-2 rounded-full bg-[#1f2328]" />
             Estoque Baixo
           </div>
-          <div className="text-[22px] font-bold text-[#333] mt-0.5">
+          <div className="text-[20px] font-semibold text-[#333] mt-0.5 tracking-tight">
             {lowStockProducts.length} <span className="text-[12px] font-normal text-[#999]">produtos</span>
           </div>
         </div>
 
         <div>
-          <div className="flex items-center gap-1.5 text-[11px] text-[#666] font-medium">
+          <div className="flex items-center gap-1.5 text-[11px] text-[#777] font-normal">
             <span className="w-2 h-2 rounded-full bg-[#27ae60]" />
             Expedidos
           </div>
-          <div className="text-[22px] font-bold text-[#333] mt-0.5">
+          <div className="text-[20px] font-semibold text-[#333] mt-0.5 tracking-tight">
             {completedOrders.length} <span className="text-[12px] font-normal text-[#999]">concluídos</span>
           </div>
         </div>

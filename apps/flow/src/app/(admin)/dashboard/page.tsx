@@ -204,16 +204,16 @@ export default function DashboardPage() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-sm font-extrabold uppercase tracking-wider text-[#333]">Vendas de Hoje</span>
-              <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-black/10 text-[#222] tracking-wider uppercase">
+              <span className="text-xs font-semibold uppercase tracking-wider text-[#333]">Vendas de Hoje</span>
+              <span className="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-black/10 text-[#222] tracking-wider uppercase">
                 Ao Vivo
               </span>
             </div>
-            <div className="text-[26px] sm:text-[32px] font-black tracking-tight text-[#111] mt-0.5 font-sans flex items-baseline gap-1">
-              <span className="text-[20px] font-bold">R$</span>
+            <div className="text-[24px] sm:text-[30px] font-semibold tracking-tight text-[#111] mt-0.5 font-sans flex items-baseline gap-1">
+              <span className="text-[18px] font-medium">R$</span>
               {(stats?.todayRevenue ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
-            <p className="text-[11px] font-medium text-[#444]">
+            <p className="text-[11px] font-normal text-[#444]">
                {new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' })}, {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} • Sincronização ativa
             </p>
           </div>
@@ -221,14 +221,14 @@ export default function DashboardPage() {
 
         <div className="flex items-center gap-3">
           <div className="hidden sm:block text-right pr-3 border-r border-black/10">
-              <span className="text-[10px] font-extrabold uppercase text-[#444] block">Vendas Brutas</span>
-            <span className="text-[15px] font-black text-[#111] font-mono">
+              <span className="text-[10px] font-medium uppercase text-[#444] block">Vendas Brutas</span>
+            <span className="text-[15px] font-semibold text-[#111] font-mono">
               R$ {(stats?.totalRevenue ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </span>
           </div>
           <Link
             href="/ao-vivo"
-            className="px-5 py-3 rounded-xl bg-black hover:bg-[#222] text-white text-[13px] font-bold transition-all flex items-center justify-center gap-2 shadow-sm shrink-0"
+            className="px-5 py-2.5 rounded-xl bg-black hover:bg-[#222] text-white text-[13px] font-medium transition-all flex items-center justify-center gap-2 shadow-sm shrink-0"
           >
             <span>Ir para o Monitor ao Vivo</span>
             <span className="text-[14px]">→</span>

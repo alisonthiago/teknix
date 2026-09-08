@@ -583,13 +583,13 @@ export default function CentralEtiquetasPage() {
                       />
 
                       <div className="min-w-0 space-y-0.5">
-                        <p className="font-bold text-sm text-[#0f172a] truncate max-w-[320px]">
+                        <p className="font-medium text-[13.5px] text-[#1f2328] truncate max-w-[320px]">
                           {order.productName}
                         </p>
                         <div className="flex items-center gap-2 text-xs text-[#64748b]">
                           <span className="font-mono">SKU: {order.productSku}</span>
                           <span>·</span>
-                          <span className="font-medium text-[#0f172a]">#{order.orderNumber}</span>
+                          <span className="font-normal text-[#1f2328]">#{order.orderNumber}</span>
                         </div>
                       </div>
                     </div>
@@ -599,19 +599,19 @@ export default function CentralEtiquetasPage() {
                       {/* Canal */}
                       <div className="hidden md:flex items-center gap-2 min-w-[110px]">
                         <MarketplaceLogo name={order.marketplaceName} className="w-4 h-4" />
-                        <span className="text-xs font-semibold text-[#334155]">{order.marketplaceName}</span>
+                        <span className="text-xs font-medium text-[#334155]">{order.marketplaceName}</span>
                       </div>
 
                       {/* Rastreio */}
                       <div className="hidden sm:block min-w-[150px] space-y-0.5">
-                        <p className="text-xs font-semibold text-[#0f172a] truncate max-w-[140px]">{order.customerName}</p>
-                        <p className="font-mono text-xs font-bold text-[#16a34a]">{order.trackingCode}</p>
+                        <p className="text-xs font-medium text-[#1f2328] truncate max-w-[140px]">{order.customerName}</p>
+                        <p className="font-mono text-xs font-medium text-[#16a34a]">{order.trackingCode}</p>
                       </div>
 
                       {/* Status */}
                       <div className="min-w-[90px] text-center">
                         {order.labelStatus === 'AVAILABLE' && (
-                          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-[#fef9c3] text-[#a16207]">
+                          <span className="px-3 py-1 rounded-full text-xs font-medium bg-[#fef9c3] text-[#a16207]">
                             Disponível
                           </span>
                         )}

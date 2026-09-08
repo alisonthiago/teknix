@@ -122,29 +122,29 @@ function SalesTab() {
       {/* Top Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
         <div className="bg-white px-5 py-6 rounded-2xl border border-[#e6e6e6] shadow-2xs">
-          <p className="text-[10px] sm:text-xs font-semibold text-[#999] uppercase tracking-wide">Receita de Vendas</p>
-          <p className="text-2xl font-black text-[#111] mt-1">{formatBRL(totalRevenue)}</p>
-          <div className="flex items-center gap-1 text-sm font-extrabold text-[#16a34a] mt-2">
+          <p className="text-[10px] sm:text-xs font-normal text-[#999] uppercase tracking-wide">Receita de Vendas</p>
+          <p className="text-2xl font-semibold text-[#111] mt-1 tracking-tight">{formatBRL(totalRevenue)}</p>
+          <div className="flex items-center gap-1 text-xs font-medium text-[#16a34a] mt-2">
             <ArrowUpRight className="w-3.5 h-3.5" /> 100% faturamento ativo
           </div>
         </div>
 
         <div className="bg-white px-5 py-6 rounded-2xl border border-[#e6e6e6] shadow-2xs">
-          <p className="text-[10px] sm:text-xs font-semibold text-[#999] uppercase tracking-wide">Total de Vendas</p>
-          <p className="text-2xl font-black text-[#111] mt-1">{filtered.length}</p>
-          <p className="text-sm text-[#666] font-semibold mt-2">Pedidos processados</p>
+          <p className="text-[10px] sm:text-xs font-normal text-[#999] uppercase tracking-wide">Total de Vendas</p>
+          <p className="text-2xl font-semibold text-[#111] mt-1 tracking-tight">{filtered.length}</p>
+          <p className="text-xs text-[#777] font-normal mt-2">Pedidos processados</p>
         </div>
 
         <div className="bg-white px-5 py-6 rounded-2xl border border-[#e6e6e6] shadow-2xs">
-          <p className="text-[10px] sm:text-xs font-semibold text-[#999] uppercase tracking-wide">Itens Vendidos</p>
-          <p className="text-2xl font-black text-[#111] mt-1">{totalItems}</p>
-          <p className="text-sm text-[#666] font-semibold mt-2">Unidades expedidas</p>
+          <p className="text-[10px] sm:text-xs font-normal text-[#999] uppercase tracking-wide">Itens Vendidos</p>
+          <p className="text-2xl font-semibold text-[#111] mt-1 tracking-tight">{totalItems}</p>
+          <p className="text-xs text-[#777] font-normal mt-2">Unidades expedidas</p>
         </div>
 
         <div className="bg-white px-5 py-6 rounded-2xl border border-[#e6e6e6] shadow-2xs">
-          <p className="text-[10px] sm:text-xs font-semibold text-[#999] uppercase tracking-wide">Ticket Médio</p>
-          <p className="text-2xl font-black text-[#111] mt-1">{formatBRL(totalRevenue / Math.max(1, filtered.length))}</p>
-          <p className="text-sm text-[#16a34a] font-bold mt-2">Média por venda</p>
+          <p className="text-[10px] sm:text-xs font-normal text-[#999] uppercase tracking-wide">Ticket Médio</p>
+          <p className="text-2xl font-semibold text-[#111] mt-1 tracking-tight">{formatBRL(totalRevenue / Math.max(1, filtered.length))}</p>
+          <p className="text-xs text-[#16a34a] font-medium mt-2">Média por venda</p>
         </div>
       </div>
 
@@ -211,35 +211,35 @@ function SalesTab() {
                   onClick={() => router.push(`/pedidos/${s.orderId || s.id}`)} 
                   className="hover:bg-[#f8f9fa] transition-colors cursor-pointer group"
                 >
-                  <td className="py-4.5 px-5 font-mono font-bold text-[#111] text-[13px]">
+                  <td className="py-4.5 px-5 font-mono font-medium text-[#111] text-[13px]">
                     {s.orderId}
                   </td>
-                  <td className="py-4.5 px-5 font-semibold text-[#333]">
+                  <td className="py-4.5 px-5 font-normal text-[#333]">
                     <div className="flex items-center gap-2">
                       <User className="w-4 h-4 text-[#94a3b8]" />
-                      <span className="text-[13px]">{s.customerName}</span>
+                      <span className="text-[13px] font-medium">{s.customerName}</span>
                     </div>
                   </td>
                   <td className="py-4.5 px-5 text-[#555]">
                     <div className="flex items-center gap-2">
                       <MarketplaceLogo name={s.marketplaceName} className="w-4 h-4" />
-                      <span className="font-semibold text-[#222] text-[13px]">{s.marketplaceName}</span>
+                      <span className="font-normal text-[#222] text-[13px]">{s.marketplaceName}</span>
                     </div>
                   </td>
-                  <td className="py-4.5 px-5 text-sm text-[#64748b] font-medium">
+                  <td className="py-4.5 px-5 text-sm text-[#64748b] font-normal">
                     {s.accountName}
                   </td>
-                   <td className="py-4.5 px-5 text-[#64748b] font-medium text-[13px]">
+                   <td className="py-4.5 px-5 text-[#64748b] font-normal text-[13px]">
                     {s.date} <span className="text-[#94a3b8] text-sm">{s.time}</span>
                   </td>
-                  <td className="py-4.5 px-5 text-right font-bold text-[#111] text-[13px]">
+                  <td className="py-4.5 px-5 text-right font-medium text-[#111] text-[13px]">
                     {s.itemsCount} un
                   </td>
-                  <td className="py-4.5 px-5 text-right font-black text-[#111] text-[14px]">
+                  <td className="py-4.5 px-5 text-right font-semibold text-[#111] text-[13.5px]">
                     {formatBRL(s.revenue)}
                   </td>
                   <td className="py-4.5 px-5 text-center">
-                    <span className={`inline-flex px-3 py-1 rounded-full text-sm font-bold ${
+                    <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
                       s.status === 'CONCLUIDO' 
                         ? 'bg-[#ecfdf5] text-[#16a34a] border border-[#bbf7d0]' 
                         : 'bg-[#fef2f2] text-[#ef4444] border border-[#fecaca]'

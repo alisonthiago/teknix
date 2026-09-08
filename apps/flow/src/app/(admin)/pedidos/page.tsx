@@ -489,15 +489,15 @@ export default function PedidosPage() {
                         className="w-13 h-13 rounded-2xl object-contain border border-[#e2e8f0] bg-[#f5f5f5] p-1 shrink-0 shadow-2xs"
                       />
 
-                      <div className="min-w-0 space-y-1.5 flex-1">
-                        <p className="font-bold text-[14px] text-[#0f172a] truncate max-w-md leading-snug">
+                      <div className="min-w-0 space-y-1 flex-1">
+                        <p className="font-medium text-[13.5px] text-[#1f2328] truncate max-w-md leading-snug">
                           {productName}
                         </p>
                         <div className="flex items-center gap-2 text-xs flex-wrap">
-                          <span className="px-2 py-0.5 rounded-md bg-[#f1f5f9] text-[10px] font-mono font-bold text-[#475569]">
+                          <span className="px-2 py-0.5 rounded-md bg-[#f1f5f9] text-[10px] font-mono font-medium text-[#475569]">
                             SKU: {productSku}
                           </span>
-                          <span className="px-2 py-0.5 rounded-md bg-[#f5f5f5] border border-[#e2e8f0] text-[10px] font-mono font-bold text-[#0f172a]">
+                          <span className="px-2 py-0.5 rounded-md bg-[#f5f5f5] border border-[#e2e8f0] text-[10px] font-mono font-medium text-[#1f2328]">
                             #{order.order_number}
                           </span>
                         </div>
@@ -508,20 +508,20 @@ export default function PedidosPage() {
                     <div className="flex items-center gap-8 lg:gap-12 shrink-0 pr-4">
                       <div className="hidden md:flex items-center gap-2 min-w-[120px]">
                         <MarketplaceLogo name={mp?.name || 'Mercado Livre'} className="w-4 h-4" />
-                        <span className="text-[13px] font-semibold text-[#334155]">{mp?.name || 'Mercado Livre'}</span>
+                        <span className="text-[13px] font-medium text-[#334155]">{mp?.name || 'Mercado Livre'}</span>
                       </div>
 
-                      <div className="hidden sm:block min-w-[170px] space-y-1">
-                        <p className="text-[13px] font-semibold text-[#0f172a] truncate max-w-[160px]">{customerName}</p>
-                        <p className="font-mono text-[11px] font-bold text-[#16a34a] truncate max-w-[160px]">{order.tracking_code || 'Envio Padrão'}</p>
+                      <div className="hidden sm:block min-w-[170px] space-y-0.5">
+                        <p className="text-[13px] font-medium text-[#1f2328] truncate max-w-[160px]">{customerName}</p>
+                        <p className="font-mono text-[11px] font-medium text-[#16a34a] truncate max-w-[160px]">{order.tracking_code || 'Envio Padrão'}</p>
                       </div>
 
-                      <div className="min-w-[90px] text-right font-black text-[14px] text-[#0f172a]">
+                      <div className="min-w-[90px] text-right font-semibold text-[13.5px] text-[#1f2328]">
                         R$ {totalAmount.toFixed(2).replace('.', ',')}
                       </div>
 
                       <div className="min-w-[110px] text-center">
-                        <span className={`inline-flex px-3 py-1 rounded-full text-[11px] font-bold ${getStatus(order.status).c}`}>
+                        <span className={`inline-flex px-3 py-1 rounded-full text-[11px] font-medium ${getStatus(order.status).c}`}>
                           {getStatus(order.status).l}
                         </span>
                       </div>

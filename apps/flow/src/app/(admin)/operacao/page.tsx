@@ -271,7 +271,7 @@ function ProductsTab() {
             <select
               value={situationFilter}
               onChange={(e) => setSituationFilter(e.target.value as any)}
-              className="h-[38px] px-3.5 bg-[#f8f9fa] hover:bg-[#f0f0f0] border border-[#e6e6e6] rounded-xl text-xs font-bold text-[#333] focus:outline-none focus:border-[#16a34a] cursor-pointer shadow-sm transition-all"
+              className="h-[38px] px-3.5 bg-[#f8f9fa] hover:bg-[#f0f0f0] border border-[#e6e6e6] rounded-xl text-xs font-medium text-[#333] focus:outline-none focus:border-[#16a34a] cursor-pointer shadow-sm transition-all"
             >
               <option value="ALL">Todas Situações ({counts.ALL})</option>
               <option value="ACTIVE">Ativos ({counts.ACTIVE})</option>
@@ -404,9 +404,9 @@ function ProductsTab() {
                       </div>
                       <div className="flex flex-col justify-center min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <p className="font-bold text-[#111] text-[13px] leading-tight truncate max-w-sm">{p.name as string}</p>
+                          <p className="font-medium text-[#111] text-[13px] leading-tight truncate max-w-sm">{p.name as string}</p>
                           {((p.marketplace_listings as any)?.length > 0 || String(p.sku || '').startsWith('MLB')) && (
-                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#fffde7] text-[#856404] border border-[#ffeeba] text-[10px] font-bold shrink-0">
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#fffde7] text-[#856404] border border-[#ffeeba] text-[10px] font-medium shrink-0">
                               <MarketplaceLogo name="Mercado Livre" className="w-3 h-3" /> ML
                             </span>
                           )}
@@ -416,16 +416,16 @@ function ProductsTab() {
                     </div>
                   </Td>
                   <Td className="text-[#666] text-xs">{supplierName}</Td>
-                  <Td className="text-right text-xs font-bold text-[#111] whitespace-nowrap">
+                  <Td className="text-right text-xs font-medium text-[#111] whitespace-nowrap">
                     R$ {cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </Td>
                   <Td className="text-right whitespace-nowrap">
-                    <span className={`font-bold text-xs ${stock === 0 ? 'text-[#dc2626]' : stock <= minStock ? 'text-[#d97706]' : 'text-[#111]'}`}>
+                    <span className={`font-medium text-xs ${stock === 0 ? 'text-[#dc2626]' : stock <= minStock ? 'text-[#d97706]' : 'text-[#111]'}`}>
                       {stock}
                     </span>
                   </Td>
                   <Td className="text-center whitespace-nowrap">
-                    <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-black border ${statusBadgeConfig.bg}`}>
+                    <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-medium border ${statusBadgeConfig.bg}`}>
                       {stock === 0 && status === 'ACTIVE' ? 'Sem Estoque' : statusBadgeConfig.label}
                     </span>
                   </Td>
