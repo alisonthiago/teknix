@@ -404,7 +404,7 @@ function ProductsTab() {
                       </div>
                       <div className="flex flex-col justify-center min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <p className="font-medium text-[#111] text-[13px] leading-tight truncate max-w-sm">{p.name as string}</p>
+                          <p className="font-medium text-[#111] text-[14.5px] leading-snug truncate max-w-lg">{p.name as string}</p>
                           {((p.marketplace_listings as any)?.length > 0 || String(p.sku || '').startsWith('MLB')) && (
                             <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#fffde7] text-[#856404] border border-[#ffeeba] text-[10px] font-medium shrink-0">
                               <MarketplaceLogo name="Mercado Livre" className="w-3 h-3" /> ML

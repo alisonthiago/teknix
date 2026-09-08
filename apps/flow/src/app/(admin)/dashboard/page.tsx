@@ -141,8 +141,8 @@ export default function DashboardPage() {
             )}
           </div>
           <div>
-              <h1 className="text-[32px] font-bold text-[#333]">Olá, {userProfile.name?.split(' ')[0]}</h1>
-            <p className="text-[13px] text-[#666] font-medium">Bem-vindo de volta!</p>
+            <h1 className="text-[24px] sm:text-[26px] font-semibold text-[#111827] tracking-tight">Olá, {userProfile.name?.split(' ')[0]}</h1>
+            <p className="text-[13px] text-[#6b7280] font-normal">Bem-vindo de volta!</p>
           </div>
         </div>
       )}
@@ -347,12 +347,12 @@ export default function DashboardPage() {
 
                   {/* Conteúdo: título + cliente + status (limpo no mobile) */}
                   <div className="flex-1 min-w-0">
-                    <p className="mp-list-item-title truncate">{prodTitle}</p>
+                    <p className="mp-list-item-title truncate text-[14px] font-medium">{prodTitle}</p>
                     <div className="flex items-center gap-1.5 mt-0.5 min-w-0">
                       <span className="text-[11px] text-[#888] truncate">{(order.customer_name as string) || 'Comprador'}</span>
                       <span className="hidden sm:inline text-[#bbb]">•</span>
                       <span className="hidden sm:inline font-mono text-[12px] text-[#999] truncate">SKU: {prodSku}</span>
-                      <span className={`inline-flex px-1.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-black border shrink-0 ${
+                      <span className={`inline-flex px-1.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-medium border shrink-0 ${
                         isCancelled
                           ? 'bg-[#fee2e2] text-[#dc2626] border-[#fecaca]'
                           : 'bg-[#ecfdf5] text-[#16a34a] border-[#bbf7d0]'
@@ -364,17 +364,17 @@ export default function DashboardPage() {
 
                   {/* Pedido + data (somente desktop) */}
                   <div className="hidden sm:block text-right shrink-0">
-                    <div className="font-mono font-bold text-[13px] text-[#111]">{order.order_number}</div>
-                    <div className="text-[12px] text-[#888] font-medium">• {new Date(order.created_at).toLocaleDateString('pt-BR')}</div>
+                    <div className="font-mono font-medium text-[13px] text-[#111]">{order.order_number}</div>
+                    <div className="text-[12px] text-[#888] font-normal">• {new Date(order.created_at).toLocaleDateString('pt-BR')}</div>
                   </div>
 
                   {/* Marketplace (desktop) + Valor */}
                   <div className="flex items-center gap-3 shrink-0">
-                    <div className="hidden sm:flex items-center gap-1.5 px-2 py-1 rounded-lg bg-[#fafafa] border border-[#eee] text-[11px] font-bold text-[#555]">
+                    <div className="hidden sm:flex items-center gap-1.5 px-2 py-1 rounded-lg bg-[#fafafa] border border-[#eee] text-[11px] font-medium text-[#555]">
                       <MarketplaceLogo name={(mp?.name as string) || 'Mercado Livre'} className="w-3.5 h-3.5 shrink-0" />
                       <span>{(mp?.name as string) || 'ML'}</span>
                     </div>
-                    <span className="font-black text-[#111] text-[14px] text-right">
+                    <span className="font-semibold text-[#111] text-[14px] text-right">
                       R$ {Number(order.total_amount || 0).toFixed(2).replace('.', ',')}
                     </span>
                   </div>

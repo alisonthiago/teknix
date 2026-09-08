@@ -4,7 +4,7 @@
 
 .products-page-container {
   width: 100%;
-  font-family: 'Roboto', Arial, sans-serif;
+  font-family: var(--tk-font-family);
 }
 
 .products-wrapper {
@@ -24,8 +24,8 @@
 }
 
 .header-info h1 {
-  font-size: 28px;
-  font-weight: 700;
+  font-size: 26px;
+  font-weight: 600;
   color: #111111;           /* preto, não azul */
   letter-spacing: -0.02em;
   margin: 0;
@@ -226,21 +226,22 @@
   overflow: hidden;
 }
 
-/* Nome preto, não azul */
+/* Nome do produto no catálogo do HUB — legível, padrão Apple/Linear */
 .product-name-link {
-  font-size: 13px;
-  font-weight: 600;
-  color: #111111;           /* preto */
+  font-size: 14.5px;
+  font-weight: 500;
+  color: #111827;
   text-decoration: none;
-  line-height: 1.35;
+  line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  letter-spacing: -0.01em;
 }
 
 .product-name-link:hover {
-  color: #1f2328;
+  color: #0071e3;
   text-decoration: underline;
 }
 

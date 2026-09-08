@@ -877,7 +877,7 @@ export default function PagesList() {
                         {getPageIcon(e)}
                       </div>
                       <div className="table-title-column">
-                        <span className="table-title-main" style={{ fontWeight: 600 }}>{e.title}</span>
+                        <span className="table-title-main">{e.title}</span>
                       </div>
                     </div>
                   </td>

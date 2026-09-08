@@ -37,8 +37,8 @@
   gap: 6px;
   padding: 4px 8px 14px;
   border-bottom: 1px solid var(--tk-color-border-subtle, #f3f4f6);
-  font-size: 14.5px;
-  font-weight: 700;
+  font-size: 13.5px;
+  font-weight: 500;
   color: var(--tk-color-text-primary, #111827);
   cursor: pointer;
   letter-spacing: -0.01em;
@@ -56,11 +56,11 @@
 }
 
 .settings-group-title {
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 10.5px;
+  font-weight: 500;
   color: var(--tk-color-text-tertiary, #9ca3af);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   padding: 4px 8px 4px;
 }
 
@@ -68,10 +68,10 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 10px;
+  padding: 7px 10px;
   border-radius: var(--tk-radius-btn, 8px);
-  font-size: 13.5px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 400;
   color: var(--tk-color-text-secondary, #4b5563);
   text-decoration: none;
   background: none;
@@ -89,9 +89,9 @@
 }
 
 .settings-nav-item.active {
-  background: var(--tk-color-primary-light, #e8f2f8);
+  background: var(--tk-color-primary-light, #f0f7ff);
   color: var(--tk-color-primary, #0071e3);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 /* Settings Content Area */
@@ -114,18 +114,20 @@
 }
 
 .settings-main-title {
-  font-size: 24px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 600;
   color: var(--tk-color-text-primary, #111827);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.015em;
   margin: 0;
-  line-height: 1.2;
+  line-height: 1.25;
 }
 
 .settings-subtitle {
-  font-size: 14px;
-  color: var(--tk-color-text-secondary, #4b5563);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--tk-color-text-secondary, #6b7280);
   margin: 4px 0 0;
+  line-height: 1.4;
 }
 
 /* Card in Settings */
@@ -133,7 +135,7 @@
   background: #ffffff;
   border: 1px solid var(--tk-color-border, #e5e7eb);
   border-radius: var(--tk-radius-card, 12px);
-  padding: 28px 32px;
+  padding: 24px 28px;
   box-shadow: var(--tk-shadow-card);
   display: flex;
   flex-direction: column;
@@ -141,8 +143,8 @@
 }
 
 .settings-card-title {
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 15px;
+  font-weight: 550;
   color: var(--tk-color-text-primary, #111827);
   margin: 0 0 4px 0;
   letter-spacing: -0.01em;
@@ -155,30 +157,34 @@
 }
 
 .settings-label {
-  font-size: 13.5px;
-  font-weight: 600;
+  font-size: 12.5px;
+  font-weight: 500;
   color: #374151;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  letter-spacing: -0.005em;
 }
 
 .settings-hint {
-  font-size: 12px;
+  font-size: 11.5px;
+  font-weight: 400;
   color: var(--tk-color-text-tertiary, #9ca3af);
   margin-top: 2px;
+  line-height: 1.4;
 }
 
 .settings-input,
 .settings-textarea,
 .settings-select {
   font-family: var(--tk-font-family);
-  font-size: 14px;
+  font-size: 13.5px;
+  font-weight: 400;
   color: #111827 !important;
   background: #ffffff !important;
   border: 1px solid var(--tk-color-border-dark, #d1d5db) !important;
   border-radius: var(--tk-radius-btn, 8px);
-  padding: 10px 14px;
+  padding: 9px 13px;
   width: 100%;
   max-width: 560px;
   box-sizing: border-box;
@@ -190,7 +196,7 @@
 .settings-textarea:focus,
 .settings-select:focus {
   border-color: var(--tk-color-primary, #0071e3) !important;
-  box-shadow: 0 0 0 2px rgba(0, 113, 227, 0.15) !important;
+  box-shadow: 0 0 0 2px rgba(0, 113, 227, 0.12) !important;
 }
 
 .settings-textarea {
