@@ -685,3 +685,61 @@
   color: #6b7280;
   border-color: #e5e7eb;
 }
+
+/* Hierarquia tipográfica do dashboard: leve, legível e sem excesso de bold. */
+.dash-page {
+  gap: 28px;
+}
+
+.dash-welcome-name {
+  font-size: 28px;
+  font-weight: 500;
+  color: #2f2f2f;
+}
+
+.dash-welcome-sub {
+  font-size: 14px;
+  font-weight: 400;
+  color: #777777;
+  margin-top: 4px;
+}
+
+.dash-filter-label,
+.dash-filter-label span {
+  font-weight: 500 !important;
+}
+
+.dash-hero-label,
+.dash-cockpit-eyebrow,
+.dash-cockpit-actions,
+.dash-metric-label {
+  font-weight: 500;
+}
+
+.dash-hero-pill,
+.dash-hero-gross-label,
+.dash-mp-badge,
+.dash-badge {
+  font-weight: 500;
+}
+
+.dash-hero-value {
+  font-weight: 600;
+}
+
+.dash-hero-currency {
+  font-weight: 500;
+}
+
+.dash-cockpit-title {
+  font-weight: 500;
+}
+
+.dash-metric-val,
+.dash-metric-val strong {
+  font-weight: 600;
+}
+
+.dash-order-price {
+  font-weight: 600;
+}

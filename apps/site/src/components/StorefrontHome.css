@@ -4444,14 +4444,14 @@
 
 /* ── 6 & 7. VITRINES VERTICAIS (1:1 DESIGN SYSTEM CASAS BAHIA) ── */
 .cb-shelf-section {
-  padding: var(--tkn-space-24) 0 var(--tkn-space-8);
+  padding: 0;
   /* Respiro generoso entre o fim dos cards e o próximo título */
   margin: 0 0 var(--tkn-space-48);
 }
 
 .cb-shelf-section > .ui.container {
-  padding-top: var(--tkn-space-8);
-  padding-bottom: var(--tkn-space-8);
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 .cb-shelf-header {

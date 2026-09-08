@@ -131,25 +131,26 @@ select {
     @apply bg-[#f5f5f5] text-[#333] antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     overflow-x: hidden;
-    /* Base font: 17px mobile, 18.5px desktop — textos menos pequenos */
-    font-size: 17px;
+    /* Base font: 14px mobile, 15px desktop — leve e profissional */
+    font-size: 14px;
+    font-weight: 400;
   }
   html {
     @apply font-sans;
   }
-  /* Desktop: ligeiramente maior */
+  /* Desktop: tamanho padrão confortável */
   @media (min-width: 1024px) {
     html, body {
-      font-size: 18.5px;
+      font-size: 15px;
     }
   }
   /* Tabelas ficam legíveis no celular */
   table {
-    font-size: 0.875rem;
+    font-size: 0.9rem;
   }
   @media (min-width: 768px) {
     table {
-      font-size: 0.9375rem;
+      font-size: 0.933rem;
     }
   }
 }
@@ -225,34 +226,36 @@ select {
 
   /* ─── Tipografia estilo Nubank/MP — título + descrição ─── */
 
-  /* Título principal da página — grande e bold como no print */
+  /* Título principal da página */
   .mp-page-title {
-    @apply text-[28px] sm:text-[32px] font-bold text-[#111] leading-tight;
+    @apply text-[22px] sm:text-[26px] font-semibold text-[#111] leading-tight;
+    letter-spacing: -0.015em;
   }
 
-  /* Descrição abaixo do título — legível e respira */
+  /* Descrição abaixo do título */
   .mp-page-subtitle {
-    @apply text-[15px] sm:text-[16px] text-[#666] mt-2 leading-relaxed;
+    @apply text-[13px] sm:text-[14px] text-[#666] mt-1.5 leading-relaxed;
+    font-weight: 400;
   }
 
-  /* Título de seção dentro de card (ex: "Informações pessoais") */
+  /* Título de seção dentro de card */
   .mp-section-title {
-    @apply text-[17px] sm:text-[18px] font-bold text-[#111] leading-snug;
-  }
-
-  /* Texto principal de item de lista (ex: nome, produto) */
-  .mp-list-item-title {
     @apply text-[15px] sm:text-[16px] font-semibold text-[#111] leading-snug;
   }
 
-  /* Subtexto de item de lista (ex: "Nome e sobrenome", SKU) */
-  .mp-list-item-sub {
-    @apply text-[13px] sm:text-[14px] text-[#777] leading-snug mt-0.5;
+  /* Texto principal de item de lista */
+  .mp-list-item-title {
+    @apply text-[13px] sm:text-[14px] font-medium text-[#111] leading-snug;
   }
 
-  /* Link "Conferir tudo →" / "Ver todos →" */
+  /* Subtexto de item de lista */
+  .mp-list-item-sub {
+    @apply text-[11px] sm:text-[12px] text-[#777] leading-snug mt-0.5;
+  }
+
+  /* Link "Ver todos →" */
   .mp-see-all-link {
-    @apply text-[14px] font-bold text-[#111] hover:underline flex items-center gap-1 transition-colors;
+    @apply text-[13px] font-medium text-[#111] hover:underline flex items-center gap-1 transition-colors;
   }
 
   /* ─── Tabs de card ─── */
@@ -267,12 +270,12 @@ select {
   }
 
   .mp-card-tab {
-    @apply pb-3 text-[13px] sm:text-[14px] font-semibold transition-colors relative whitespace-nowrap text-[#333] hover:text-[#666];
+    @apply pb-3 text-[12px] sm:text-[13px] font-medium transition-colors relative whitespace-nowrap text-[#555] hover:text-[#333];
     flex-shrink: 0;
   }
 
   .mp-card-tab-active {
-    @apply text-[#111] font-bold;
+    @apply text-[#111] font-semibold;
   }
 
   .mp-card-tab-active::after {
@@ -281,11 +284,11 @@ select {
   }
 
   .mp-amount {
-    @apply text-3xl sm:text-4xl font-bold text-[#333] tracking-tight leading-none;
+    @apply text-2xl sm:text-3xl font-semibold text-[#333] tracking-tight leading-none;
   }
 
   .mp-amount-sup {
-    @apply text-xl align-super font-bold;
+    @apply text-lg align-super font-semibold;
   }
 
   /* Table scroll container — ONLY this can have horizontal scroll */
@@ -405,13 +408,9 @@ a[class*="bg-[#1f2328]"]:hover {
   box-shadow: none !important;
 }
 
-/* ─── AUMENTO GLOBAL DE TIPOGRAFIA ───
-   A interface densa usa tamanhos fixos (text-[Npx]) que não acompanham a
-   base. Estas regras (não agrupadas em @layer) vencem as utilities do
-   Tailwind e aumentam os textos pequenos em desktop e mobile. */
-.text-\[10px\] { font-size: 12px; }
-.text-\[11px\] { font-size: 13px; }
-.text-\[12px\] { font-size: 14px; }
-.text-\[13px\] { font-size: 15px; }
-.text-\[14px\] { font-size: 15.5px; }
-.text-\[15px\] { font-size: 16.5px; }
+/* ─── HARMONIA TIPOGRÁFICA DO FLOW ───
+   Suaviza o peso bold global para 550 (Inter Variable).
+   font-bold (700) → 550, font-semibold (600) → 500
+   Mantém legibilidade sem deixar tudo pesado. */
+.font-bold, [class*="font-bold"] { font-weight: 550 !important; }
+.font-semibold, [class*="font-semibold"] { font-weight: 500 !important; }
