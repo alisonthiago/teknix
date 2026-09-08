@@ -1051,7 +1051,7 @@
 .widget-drop-zone:hover {
   border-color: #0071e3;
   color: #0071e3;
-  background: #f0f7ff;
+  background: #fafafa;
 }
 
 .widget-insert-zone {
@@ -1484,7 +1484,7 @@
 
 .elementor-structure-tile:hover .structure-tile-visual {
   border-color: #0071e3;
-  background: #f0f7ff;
+  background: #fafafa;
   box-shadow: 0 0 0 2px rgba(0, 113, 227, 0.15);
 }
 
@@ -2857,7 +2857,7 @@
 .elementor-inspector-breadcrumbs .breadcrumb-item.current {
   color: #2563eb;
   font-weight: 700;
-  background: #eff6ff;
+  background: #f8fafc;
 }
 
 .elementor-inspector-breadcrumbs .breadcrumb-separator {
@@ -2997,7 +2997,7 @@
 }
 
 .elementor-dimension-link-btn.linked {
-  background: #eff6ff;
+  background: #f8fafc;
   border-color: #bfdbfe;
   color: #2563eb;
 }
@@ -3369,26 +3369,6 @@
   line-height: 1.25;
   font-weight: 500;
   color: inherit;
-}
-
-/* Custom Widget CTA */
-.elementor-panel-custom-widgets__cta {
-  font-size: 10px;
-  font-weight: 600;
-  color: #0071e3;
-  background: rgba(0, 113, 227, 0.08);
-  border: 1px solid rgba(0, 113, 227, 0.2);
-  padding: 2px 8px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-left: auto;
-}
-
-.elementor-panel-category-custom-widgets-empty {
-  padding: 12px 14px;
-  font-size: 11px;
-  color: #86868b;
-  line-height: 1.5;
 }
 
 /* Controls Stack (Aba Conteúdo, Estilo, Avançado) */
@@ -3968,5 +3948,4 @@
   background: transparent !important;
   z-index: 5 !important;
 }
-
 

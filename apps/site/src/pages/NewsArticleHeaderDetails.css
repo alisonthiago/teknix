@@ -1,0 +1,6 @@
+.news-article-site .news-logo small{color:#17213f;font-size:8px;letter-spacing:.12em;margin-left:5px}.news-article-site .news-header nav .active{background:#17213f;color:#fff!important;border-radius:22px;padding:9px 18px}.news-article-site .news-header nav span{font-size:12px;color:#17213f}
+.news-article-site .article-tag,.news-article-site .related-card>span,.news-article-site .related-card b{background:#B5F500;color:#000}
+.news-article-site{font-family:'Roboto',Arial,sans-serif}
+.news-article-site .article-hero{background:#686868;color:#fff}
+.news-article-site .article-hero aside{position:fixed;right:24px;top:50%;transform:translateY(-50%);z-index:20}
+.news-article-site .news-header .news-logo{display:flex;align-items:center;gap:5px;font-size:0}.news-article-site .news-header .news-logo:before{content:'';display:block;width:114px;height:27px;background:url('/teknix-logo.svg') center/contain no-repeat}.news-article-site .news-header .news-logo small{font-size:8px}

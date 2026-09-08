@@ -29,7 +29,7 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  background: #111827;
+  background: var(--tk-color-primary);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -341,12 +341,12 @@
 }
 
 .blog-action-btn.view {
-  background: #eff6ff;
+  background: #f8fafc;
   color: #1d4ed8;
 }
 
 .blog-action-btn.view:hover {
-  background: #dbeafe;
+  background: #f1f3f5;
 }
 
 .blog-action-btn.delete {

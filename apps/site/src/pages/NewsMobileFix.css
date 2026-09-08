@@ -1,0 +1,21 @@
+@media screen and (max-width: 768px) {
+  .news-page-root .banner-img.is-not-front .banner-description { padding: 0 24px; }
+  .news-page-root .banner-img.is-not-front .banner-description-wrapper { width: 100%; gap: 10px; }
+  .news-page-root .banner-img.is-not-front .banner-text .p1 { width: 100%; max-width: 100%; padding: 14px 20px; font-size: clamp(30px, 8vw, 40px); line-height: 1.18; border-radius: 14px; }
+  .news-page-root .banner-img.is-not-front .title_bg { font-size: 11px; padding: 7px 12px; }
+  .news-page-root .block-fifty-text-only .description-wrapper { padding: 42px 30px; }
+  .news-page-root .block-fifty-text-only .title-block-50 { font-size: 28px; line-height: 1.18; }
+  .news-page-root .block-fifty-text-only .description-50-right p { font-size: 16px; line-height: 1.55; }
+  .news-page-root .logo_footer .footer-logo-svg { width: 160px; height: auto; }
+  .news-page-root .logo_footer { margin-bottom: 28px; }
+  .news-page-root .banner-img.is-not-front { min-height: 460px; height: 460px; }
+  .news-page-root .banner-container > .banner-img:not(.is-not-front) { min-height: 430px; height: 430px; }
+  .news-page-root .banner-img.is-not-front .banner-text .p1 { font-size: 32px; line-height: 1.2; }
+  .news-page-root .banner-img.is-not-front .banner-description { padding-top: 18px; padding-bottom: 18px; }
+  .news-page-root .news-header-menu li a { font-size: 16px; min-height: 52px; }
+  .news-page-root .news-item.big-news { height: auto; min-height: 0; padding: 20px 18px 24px; }
+  .news-page-root .news-item.big-news .news-images { min-height: 180px; }
+  .news-page-root .news-item.big-news .news-images a img { height: 180px; }
+  .news-page-root .news-item.big-news .news-body h2 { font-size: 22px; line-height: 1.25; }
+  .news-page-root .news-item.big-news .short-description { font-size: 16px; line-height: 1.5; }
+}

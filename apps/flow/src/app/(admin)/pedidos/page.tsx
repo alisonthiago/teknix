@@ -242,7 +242,7 @@ export default function PedidosPage() {
 
           <button
             onClick={() => router.push('/etiquetas')}
-            className="px-5 py-2.5 bg-[#16a34a] hover:bg-[#15803d] text-white rounded-xl text-sm font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-xs"
+            className="px-5 py-2.5 bg-[#347ff2] hover:bg-[#2469d8] text-white rounded-xl text-sm font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-xs"
           >
             <Printer className="w-4 h-4" />
             <span>Central de Etiquetas</span>

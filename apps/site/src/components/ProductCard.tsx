@@ -65,7 +65,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   }
 
   return (
-    <Link to={`/produtos/${product.slug || product.id}`} className="product-card">
+    <Link to={`/${product.slug || product.id}`} className="product-card">
       <div className="product-card-image" onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
         {product.image_url ? (
           <ProductImage src={hovered && alternate ? alternate : product.image_url} alt={product.name} />

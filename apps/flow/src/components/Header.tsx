@@ -246,9 +246,9 @@ function HeaderActions({
         </button>
 
         {notifOpen && (
-          <div className="absolute right-0 top-full mt-2 w-[420px] max-w-[94vw] bg-white rounded-3xl border border-[#e6e6e6] shadow-[0_12px_40px_rgba(0,0,0,0.14)] overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+          <div className="absolute right-0 top-full mt-3 w-[390px] max-w-[94vw] bg-white rounded-2xl border border-[#e0e0e0] shadow-[0_10px_28px_rgba(0,0,0,0.12)] overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150">
             {/* Header Notificações Inteligentes */}
-            <div className="px-3 py-2.5 border-b border-[#eeeeee] flex items-center justify-between bg-white">
+            <div className="px-4 py-3 border-b border-[#eeeeee] flex items-center justify-between bg-white">
               <div className="flex items-center gap-2">
                 <h3 className="text-[13px] font-bold text-[#1f2328]">Alertas & Mercado Livre</h3>
                 {activeUnreadCount > 0 && (
@@ -268,7 +268,7 @@ function HeaderActions({
             </div>
 
             {/* Notification Items List Estilo Mercado Livre */}
-            <div className="max-h-[360px] overflow-y-auto divide-y divide-[#f0f0f0] p-2.5 space-y-1.5">
+            <div className="max-h-[360px] overflow-y-auto divide-y divide-[#f0f0f0] p-3 space-y-2">
               {filteredNotifications.length === 0 ? (
                 <div className="p-8 text-center">
                   <div className="w-10 h-10 rounded-full bg-[#f8fafc] border border-[#e2e8f0] flex items-center justify-center mx-auto mb-2 text-[#94a3b8]">
@@ -297,7 +297,7 @@ function HeaderActions({
                       setNotifOpen(false)
                       router.push(path)
                     }}
-                     className={`p-3 rounded-xl transition-all cursor-pointer flex gap-4 items-center ${
+                     className={`p-3.5 rounded-xl transition-all cursor-pointer flex gap-3 items-center ${
                        n.is_read
                          ? 'bg-white hover:bg-[#fafafa]'
                          : 'bg-[#fafafa] hover:bg-[#f5f5f5] border border-[#e2e8f0]'
@@ -324,7 +324,7 @@ function HeaderActions({
             {/* Footer */}
 
             {/* Footer */}
-            <div className="p-2.5 border-t border-[#f0f0f0] bg-[#fafafa] text-center">
+            <div className="p-3 border-t border-[#f0f0f0] bg-[#fafafa] text-center">
               <Link
                 href="/notifications"
                 onClick={() => setNotifOpen(false)}
@@ -340,7 +340,7 @@ function HeaderActions({
       {/* 🔴 BOTÃO AO VIVO DENTRO DA PÍLULA VERDE (AGORA PRETO CLEAN CONFORME PEDIDO) */}
       <button
         onClick={() => setLiveDrawerOpen(true)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#111111] hover:bg-[#222222] text-white text-[11px] font-black shadow-sm transition-all tracking-wider uppercase cursor-pointer"
+        className="header-live-button flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white hover:bg-[#f5f5f5] text-[#111111] text-[11px] font-black shadow-sm transition-all tracking-wider uppercase cursor-pointer"
         title="Monitor ao Vivo em Tempo Real"
       >
         <span className="relative flex h-2 w-2 shrink-0">
@@ -362,7 +362,7 @@ function HeaderActions({
 
       <button
         onClick={onCalcOpen}
-        className="hidden lg:flex w-10 h-10 rounded-full items-center justify-center text-[#333] hover:bg-[#EEFFB3]/60 transition-colors cursor-pointer"
+        className="flex w-9 h-9 lg:w-10 lg:h-10 rounded-full items-center justify-center text-[#333] hover:bg-[#EEFFB3]/60 transition-colors cursor-pointer"
         title="Precificação"
       >
         <BadgeDollarSign className="w-5 h-5" strokeWidth={1.5} />
@@ -398,57 +398,43 @@ function HeaderActions({
           <ChevronDown className="w-4 h-4 text-[#666] hidden sm:block" strokeWidth={2} />
           </button>
         {userOpen && (
-          <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl border border-[#e6e6e6] shadow-[0_8px_24px_rgba(0,0,0,0.1)] overflow-hidden z-50">
-            <div className="p-4 border-b border-[#eeeeee]">
-              <p className="text-sm font-semibold text-[#333]">{userName}</p>
-              <p className="text-xs text-[#999] mt-0.5">{userRole}</p>
+          <div className="absolute right-0 top-full mt-2 w-[230px] bg-white rounded-2xl border border-[#e6e6e6] shadow-[0_10px_30px_rgba(0,0,0,0.12)] overflow-hidden z-50 p-1.5">
+            <div className="px-2.5 py-1.5">
+              <p className="text-xs font-bold text-[#111827]">{userName}</p>
+              <p className="text-[11px] text-[#999] mt-0.5">{userRole}</p>
             </div>
-            <div className="p-1.5">
+            <div className="h-px bg-[#f0f0f0] my-1" />
+            <div>
               <button 
                 onClick={() => {
                   setUserOpen(false)
                   router.push('/sistema/perfil')
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-[#666] hover:bg-[#f5f5f5] rounded-xl"
+                className="w-full text-left px-2.5 py-2 text-[13px] font-medium text-[#111827] hover:bg-[#f5f5f5] rounded-md"
               >
-                <User className="w-4 h-4" strokeWidth={1.5} /> Meu Perfil
+                Dados da conta
               </button>
               <button 
                 onClick={() => {
                   setUserOpen(false)
                   router.push('/sistema')
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-[#666] hover:bg-[#f5f5f5] rounded-xl"
+                className="w-full text-left px-2.5 py-2 text-[13px] font-medium text-[#111827] hover:bg-[#f5f5f5] rounded-md"
               >
-                <Settings className="w-4 h-4" strokeWidth={1.5} /> Configurações
-              </button>
-              <button 
-                onClick={() => {
-                  setUserOpen(false)
-                  setIsFloatingOpen(true)
-                  setIsFloatingMinimized(false)
-                }}
-                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-[#666] hover:bg-[#f5f5f5] rounded-xl"
-              >
-                <MessageSquare className="w-4 h-4" strokeWidth={1.5} />
-                <span>Conversas & Chat</span>
-                {totalUnreadCount > 0 && (
-                  <span className="ml-auto px-1.5 py-0.5 rounded-full text-[10px] font-black bg-[#16a34a] text-white">
-                    {totalUnreadCount}
-                  </span>
-                )}
+                Configurações da loja
               </button>
             </div>
-            <div className="p-1.5 border-t border-[#eeeeee]">
+            <div className="h-px bg-[#f0f0f0] my-1" />
+            <div>
               <button 
                 onClick={async () => {
                   const supabase = createClient()
                   await supabase.auth.signOut()
                   window.location.href = '/login'
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-[#f23d4f] hover:bg-[#fff5f5] rounded-xl"
+                className="w-full text-left px-2.5 py-2 text-[13px] font-medium text-[#ef4444] hover:bg-[#fff5f5] rounded-md"
               >
-                <LogOut className="w-4 h-4" strokeWidth={1.5} /> Sair
+                Sair
               </button>
             </div>
           </div>

@@ -19,9 +19,9 @@
   --tkn-radius-md: 18px;
   --tkn-radius-lg: 24px;
   --tkn-radius-xl: 36px;
-  --tkn-font: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --tkn-font-heading: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  --cb-font: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --tkn-font: 'Roboto', Arial, sans-serif;
+  --tkn-font-heading: 'Roboto', Arial, sans-serif;
+  --cb-font: 'Roboto', Arial, sans-serif;
   --tkn-max-width: 1200px;
   --tkn-section-pad: 160px;
   --tkn-section-pad-sm: 100px;

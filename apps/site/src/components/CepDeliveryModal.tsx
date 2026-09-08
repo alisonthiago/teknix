@@ -232,6 +232,32 @@ export default function CepDeliveryModal({
 
   if (!isOpen) return null
 
+  // A entrega é uma decisão rápida na vitrine: o modal mantém somente o CEP,
+  // como no fluxo de compra. O endereço completo continua sendo tratado em /conta.
+  const simpleDeliveryModal = (
+    <div className="dsvia-cep-simple-overlay" role="dialog" aria-modal="true" aria-labelledby="cep-simple-title" onMouseDown={onClose}>
+      <div className="dsvia-cep-simple-card" ref={modalRef} onMouseDown={event => event.stopPropagation()}>
+        <button type="button" className="dsvia-cep-simple-close" onClick={onClose} aria-label="Fechar">×</button>
+        <h3 id="cep-simple-title">Onde vamos entregar?</h3>
+        <p>Assim, mostramos as melhores ofertas e prazos para a sua região.</p>
+        <form onSubmit={handleSaveQuickCep}>
+          <label htmlFor="cep-simple-input">Enviar para</label>
+          <div className="dsvia-cep-simple-row">
+            <span aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z" /><circle cx="12" cy="10" r="3" /></svg>
+            </span>
+            <input id="cep-simple-input" type="tel" inputMode="numeric" placeholder="CEP" maxLength={9} value={quickCepInput} onChange={handleQuickCepChange} autoFocus />
+            <a href="https://buscacepinter.correios.com.br/app/endereco/index.php" target="_blank" rel="noreferrer">Não sei o meu CEP</a>
+          </div>
+          {quickError && <div className="dsvia-cep-simple-error">{quickError}</div>}
+          <button type="submit" disabled={loadingQuick || quickCepInput.replace(/\D/g, '').length < 8}>{loadingQuick ? 'Buscando…' : 'Confirmar'}</button>
+        </form>
+      </div>
+    </div>
+  )
+
+  if (simpleDeliveryModal) return simpleDeliveryModal
+
   return (
     <div className="dsvia-cep-modal-overlay" aria-modal="true" role="dialog">
       <div className="dsvia-cep-popover dsvia-cep-modal-panel" ref={modalRef}>

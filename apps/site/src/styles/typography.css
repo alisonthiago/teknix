@@ -1,8 +1,12 @@
-/* Public storefront typography. Published editorial layouts keep their hierarchy. */
+/* Public storefront typography — Configuração Oficial Padrão Magalu (Roboto) */
 :root {
+  --tkn-font-family: 'Roboto', Arial, sans-serif;
   --tkn-weight-regular: 400;
   --tkn-weight-medium: 500;
   --tkn-weight-semibold: 600;
+  --tkn-weight-bold: 700;
+
+  /* Escala de texto Magalu */
   --tkn-text-12: 12px;
   --tkn-text-13: 13px;
   --tkn-text-14: 14px;
@@ -20,23 +24,114 @@
   --tkn-text-72: 72px;
   --tkn-text-80: 80px;
   --tkn-text-96: 96px;
-  --tkn-page-title: clamp(28px, 2.4vw, 36px);
-  --tkn-section-title: clamp(24px, 2vw, 28px);
-  --tkn-product-title: clamp(26px, 2.2vw, 34px);
+
+  /* Aplicação estrutural Magalu */
+  --tkn-menu-size: 14px;
+  --tkn-menu-line: 20px;
+  --tkn-menu-weight: 500;
+
+  --tkn-search-size: 16px;
+  --tkn-search-line: 24px;
+  --tkn-search-weight: 400;
+
+  --tkn-section-title: 20px;
+  --tkn-section-title-line: 28px;
+  --tkn-section-title-weight: 700;
+
+  --tkn-page-title: 24px;
+  --tkn-product-title: 15px;
+  --tkn-product-title-line: 22px;
+  --tkn-product-title-weight: 500;
+
+  --tkn-price-size: 24px;
+  --tkn-price-line: 28px;
+  --tkn-price-weight: 700;
+
+  --tkn-btn-size: 15px;
+  --tkn-btn-line: 22px;
+  --tkn-btn-weight: 600;
+
+  --tkn-small-size: 12.5px;
+  --tkn-small-line: 18px;
+  --tkn-small-weight: 400;
 }
-body { font-weight: var(--tkn-weight-regular); font-size: var(--tkn-text-16); }
-input, select, textarea { font-family: var(--tkn-font); font-weight: var(--tkn-weight-regular); }
-#root :is(strong, b) { font-weight: var(--tkn-weight-semibold); }
-#root :is([class$="-price"], [class$="-price"] strong, .cb-bag-item-total, .cb-bag-total dd) {
-  font-weight: var(--tkn-weight-medium);
+
+body {
+  font-family: var(--tkn-font, 'Roboto', Arial, sans-serif);
+  font-weight: var(--tkn-weight-regular);
+  font-size: var(--tkn-text-14);
+  line-height: 20px;
 }
-#root :is(button, .btn, [role="button"], a[class*="-btn"], a[class*="-cta"],
-  .cb-bag-primary, .cb-account-support-btn) { font-weight: var(--tkn-weight-semibold); }
+
+input, select, textarea {
+  font-family: var(--tkn-font, 'Roboto', Arial, sans-serif);
+  font-weight: var(--tkn-weight-regular);
+  font-size: var(--tkn-search-size);
+  line-height: var(--tkn-search-line);
+}
+
+/* Títulos de seção: 20–24px, peso 600/700, line-height 28–32px */
+#root :is(h2, .cb-shelf-title, .cb-section-title, .flash-sale-title, .cb-deals-title) {
+  font-size: var(--tkn-section-title);
+  font-weight: var(--tkn-section-title-weight);
+  line-height: var(--tkn-section-title-line);
+  letter-spacing: -0.01em;
+}
+
+/* Títulos de produto: 14–16px, peso 500, line-height 20–22px */
+#root :is(.cb-card-title, .ml-card-title, .product-card-title, .ml-pdp-title) {
+  font-size: var(--tkn-product-title) !important;
+  font-weight: var(--tkn-product-title-weight) !important;
+  line-height: var(--tkn-product-title-line) !important;
+}
+
+/* Preço principal de destaque (produtos padrão): 24px, peso 700 */
+#root :is(.ml-current-price, .cb-current-price, .cb-bag-item-total, .cb-bag-total dd) {
+  font-size: var(--tkn-price-size);
+  font-weight: var(--tkn-price-weight) !important;
+  line-height: var(--tkn-price-line);
+}
+
+/* Preço nas Ofertas Relâmpago: tamanho proporcional de 18px */
+#root :is(.flash-sale-main-price) {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  color: #111827 !important;
+  line-height: 1.25 !important;
+  letter-spacing: -0.01em !important;
+}
+
+/* Preço antigo riscado (Old price): SEMPRE pequeno (12px), discreto e tachado */
+#root :is(.ml-old-price, .flash-sale-old-price, .old-price, [class*="old-price"]) {
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  color: #9ca3af !important;
+  text-decoration: line-through !important;
+  line-height: 1.25 !important;
+}
+
+/* Botões: 14–16px, peso 600, line-height 20–24px */
+#root :is(button, .btn, [role="button"], a[class*="-btn"], a[class*="-cta"], .cb-bag-primary, .cb-account-support-btn) {
+  font-size: var(--tkn-btn-size);
+  font-weight: var(--tkn-btn-weight);
+  line-height: var(--tkn-btn-line);
+}
+
+/* Informações menores: 12–13px, peso 400, line-height 16–18px */
+#root :is(small, .caption, .hint, .ml-installment-text, .ml-pix-label, .ml-card-rating-count) {
+  font-size: var(--tkn-small-size);
+  font-weight: var(--tkn-small-weight);
+  line-height: var(--tkn-small-line);
+}
+
+#root :is(strong, b) {
+  font-weight: var(--tkn-weight-bold);
+}
+
 #root :is(.cb-account-main-title, .cb-bag-heading h1, .teknix-orders-title,
-  .apple-saved-title, .apple-lookup-heading, .apple-signin-main-title) {
-  font-size: var(--tkn-page-title);
-  font-weight: var(--tkn-weight-medium);
-  line-height: 1.2;
-  letter-spacing: -0.025em;
+  .apple-saved-title, .apple-lookup-heading, .apple-signin-main-title, .identification-content h1, .results-title) {
+  font-size: var(--tkn-page-title) !important;
+  font-weight: var(--tkn-weight-bold);
+  line-height: 1.25;
+  letter-spacing: -0.02em;
 }
-#root .ml-pdp-title { font-size: var(--tkn-product-title); font-weight: var(--tkn-weight-medium); }

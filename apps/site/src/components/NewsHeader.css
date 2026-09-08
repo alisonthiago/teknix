@@ -1,0 +1,302 @@
+/* ═════════════════════════════════════════════════════════════
+   NEWS HEADER — DESIGN SYSTEM OFICIAL TEKNIX NEWS
+   Funciona de forma totalmente autônoma em qualquer página
+   (News, Sobre nós, Ecossistema, Investidores, Sustentabilidade,
+    Notícias, Artigos do Blog).
+   ═════════════════════════════════════════════════════════════ */
+
+/* ── Container do Header ───────────────────────────────────── */
+header.news-shared-header {
+  background: #ffffff !important;
+  border-bottom: 1px solid #eaeaea !important;
+  position: sticky !important;
+  top: 0 !important;
+  left: 0 !important;
+  z-index: 1000 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+header.news-shared-header .news-header-inner {
+  max-width: 1032px !important;
+  margin: 0 auto !important;
+  padding: 0 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  height: 70px !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+}
+
+/* ── Logo Teknix (Tamanho blindado) ────────────────────────── */
+header.news-shared-header .news-header-logo {
+  display: inline-flex !important;
+  align-items: center !important;
+  text-decoration: none !important;
+  flex-shrink: 0 !important;
+  width: 114px !important;
+  max-width: 114px !important;
+  height: 30px !important;
+  overflow: hidden !important;
+  cursor: pointer !important;
+}
+
+header.news-shared-header .news-header-logo img {
+  width: 114px !important;
+  max-width: 114px !important;
+  height: auto !important;
+  display: block !important;
+  object-fit: contain !important;
+}
+
+/* ── Nav ───────────────────────────────────────────────────── */
+header.news-shared-header nav[role="navigation"] {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* ── Menu List (Desktop) ───────────────────────────────────── */
+header.news-shared-header .news-header-menu {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 6px !important;
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+header.news-shared-header .news-header-menu li {
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+}
+
+header.news-shared-header .news-header-menu li a {
+  padding: 8px 16px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: #333333 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  text-decoration: none !important;
+  transition: color 0.15s ease, background 0.15s ease, transform 0.15s ease !important;
+  font-family: 'Roboto', Arial, sans-serif !important;
+  white-space: nowrap !important;
+  border-radius: 100px !important;
+  line-height: 1.2 !important;
+}
+
+header.news-shared-header .news-header-menu li a:hover {
+  color: #111111 !important;
+  background: #f4f4f6 !important;
+}
+
+/* ── Item Ativo ────────────────────────────────────────────── */
+header.news-shared-header .news-header-menu li.news-menu-active > a {
+  font-weight: 700 !important;
+  color: #111111 !important;
+  background: #f0f0f2 !important;
+}
+
+/* ── Botão Notícias (Verde Teknix Oficial #B5F500) ─────────── */
+header.news-shared-header .news-header-menu li.news-menu-noticias > a {
+  background: #B5F500 !important;
+  color: #111111 !important;
+  border-radius: 100px !important;
+  padding: 8px 22px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.2px !important;
+}
+
+header.news-shared-header .news-header-menu li.news-menu-noticias > a:hover {
+  background: #a4e100 !important;
+  color: #000000 !important;
+}
+
+header.news-shared-header .news-header-menu li.news-menu-noticias.news-menu-active > a {
+  background: #9ed900 !important;
+  color: #000000 !important;
+  box-shadow: 0 0 0 2px rgba(181, 245, 0, 0.4) !important;
+}
+
+/* ── Botão Mobile (Hambúrguer) ─────────────────────────────── */
+header.news-shared-header .news-mobile-btn {
+  display: none !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 8px !important;
+  cursor: pointer !important;
+  line-height: 0 !important;
+  border-radius: 8px !important;
+  transition: background 0.15s ease !important;
+}
+
+header.news-shared-header .news-mobile-btn:hover {
+  background: #f5f5f5 !important;
+}
+
+header.news-shared-header .news-hamburger {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+  width: 22px !important;
+}
+
+header.news-shared-header .news-hamburger span {
+  display: block !important;
+  width: 22px !important;
+  height: 2px !important;
+  background: #222222 !important;
+  border-radius: 2px !important;
+  transition: transform 0.2s ease, opacity 0.2s ease !important;
+  transform-origin: center !important;
+}
+
+/* Hambúrguer animado em X quando ativo */
+header.news-shared-header .news-mobile-btn.active .news-hamburger span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg) !important;
+}
+header.news-shared-header .news-mobile-btn.active .news-hamburger span:nth-child(2) {
+  opacity: 0 !important;
+  transform: scale(0) !important;
+}
+header.news-shared-header .news-mobile-btn.active .news-hamburger span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg) !important;
+}
+
+/* ═════════════════════════════════════════════════════════════
+   MOBILE & TABLET (≤ 768px)
+   ═════════════════════════════════════════════════════════════ */
+@media screen and (max-width: 768px) {
+  header.news-shared-header {
+    height: 64px !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1002 !important;
+  }
+
+  header.news-shared-header .news-header-inner {
+    height: 64px !important;
+    padding: 0 16px !important;
+  }
+
+  /* Exibe o botão hambúrguer */
+  header.news-shared-header .news-mobile-btn {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 1004 !important;
+  }
+
+  /* Backdrop escuro no mobile */
+  .news-mobile-overlay {
+    position: fixed !important;
+    top: 64px !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: rgba(0, 0, 0, 0.45) !important;
+    backdrop-filter: blur(3px) !important;
+    -webkit-backdrop-filter: blur(3px) !important;
+    z-index: 1000 !important;
+  }
+
+  /* Menu fechado: oculto */
+  header.news-shared-header .news-header-menu-wrapper {
+    display: none !important;
+    position: fixed !important;
+    top: 64px !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    background: #ffffff !important;
+    padding: 16px 20px 24px !important;
+    border-bottom: 1px solid #e8e8e8 !important;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.16) !important;
+    box-sizing: border-box !important;
+    z-index: 1003 !important;
+    max-height: calc(100vh - 64px) !important;
+    overflow-y: auto !important;
+  }
+
+  /* Menu aberto: animado */
+  header.news-shared-header .news-header-menu-wrapper.active {
+    display: block !important;
+    animation: newsHeaderSlideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+
+  @keyframes newsHeaderSlideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Menu itens verticais para toque confortável */
+  header.news-shared-header .news-header-menu {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  header.news-shared-header .news-header-menu li {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  header.news-shared-header .news-header-menu li a {
+    min-height: 48px !important;
+    padding: 12px 18px !important;
+    border-radius: 12px !important;
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    justify-content: flex-start !important;
+    background: #f7f7f9 !important;
+  }
+
+  header.news-shared-header .news-header-menu li a:hover,
+  header.news-shared-header .news-header-menu li a:active {
+    background: #B5F500 !important;
+    color: #17213d !important;
+  }
+
+  header.news-shared-header .news-header-menu li.news-menu-active > a {
+    background: #B5F500 !important;
+    font-weight: 700 !important;
+    color: #000000 !important;
+  }
+
+  /* Botão Notícias em destaque no mobile */
+  header.news-shared-header .news-header-menu li.news-menu-noticias {
+    margin-top: 6px !important;
+  }
+
+  header.news-shared-header .news-header-menu li.news-menu-noticias > a {
+    background: #B5F500 !important;
+    color: #111111 !important;
+    border-radius: 12px !important;
+    justify-content: center !important;
+    font-weight: 700 !important;
+    font-size: 16px !important;
+    text-align: center !important;
+  }
+
+  header.news-shared-header .news-header-menu li.news-menu-noticias > a:hover {
+    background: #a4e100 !important;
+  }
+}

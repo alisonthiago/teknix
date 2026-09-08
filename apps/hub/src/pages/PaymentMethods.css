@@ -135,7 +135,7 @@
 }
 
 .badge-featured {
-  background: #eff6ff;
+  background: #f8fafc;
   color: #2563eb;
   font-size: 0.7rem;
   font-weight: 700;
@@ -224,7 +224,7 @@
 .btn-activate {
   padding: 8px 20px;
   border-radius: 8px;
-  background: #111827;
+  background: var(--tk-color-primary);
   color: #ffffff;
   border: none;
   font-size: 0.85rem;

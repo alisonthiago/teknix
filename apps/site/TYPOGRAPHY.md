@@ -9,7 +9,7 @@ Fonte de verdade: `src/styles/typography.css`.
 - Botões, etiquetas e destaques: `--tkn-weight-semibold` (600).
 - Texto principal: `--tkn-text-14` ou `--tkn-text-16`.
 - Informação secundária: `--tkn-text-12` ou `--tkn-text-13`.
-- Título de página: `--tkn-page-title`, de 28px a 36px.
+- Título de página: `--tkn-page-title`, padronizado em 24px (mobile 22px).
 - Título de produto: `--tkn-product-title`, de 26px a 34px.
 - Seções: `--tkn-section-title`, de 24px a 28px.
 

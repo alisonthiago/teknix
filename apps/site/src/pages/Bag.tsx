@@ -40,7 +40,7 @@ export default function Bag() {
                 const price = item.promo_price && item.promo_price > 0 ? item.promo_price : item.price
                 const productUrl = '/produtos/' + encodeURIComponent(item.id)
                 const cardKey = `bag-item-${item.id}`
-                return <Editable as="article" key={item.id} widgetId={cardKey} productId={item.id} label={`Produto: ${item.name}`} widgetType="storefrontCard" editorKind="container" renderContent={false} className="cb-bag-item">
+                return <Editable as="article" key={item.id} widgetId={cardKey} productId={item.id} label={`Produto: ${item.name}`} widgetType="storefrontCard" editorKind="widget" renderContent={false} className="cb-bag-item">
                   <Editable as={Link} widgetId={`${cardKey}-image`} productId={item.id} label={`Imagem: ${item.name}`} widgetType="image" content={{ src: item.image || '', alt: item.name }} renderContent={false} to={productUrl} className="cb-bag-item-image" aria-label={'Ver ' + item.name}>
                     {item.image ? <img src={item.image} alt={item.name} /> : <Package size={36} />}
                   </Editable>

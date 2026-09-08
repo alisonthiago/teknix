@@ -5,13 +5,69 @@
 .stats-page-container {
   width: 100%;
   font-family: var(--tk-font-family);
+  color: #27313b;
+  max-width: 1280px;
+  margin: 0 auto;
 }
+
+.stats-page-container,
+.stats-page-container * { font-family: var(--tk-font-family); }
 
 .stats-wrapper {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 24px;
+}
+
+.stats-page-container .page-header {
+  padding-bottom: 4px;
+}
+
+.stats-page-container .page-header h1 {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.stats-page-container .page-header p {
+  max-width: 620px;
+  color: #6b7280;
+}
+
+.stats-tab-nav {
+  align-items: center;
+  padding: 2px 0 10px !important;
+  border-bottom-color: #e5e7eb !important;
+}
+
+.stats-tab-button {
+  border: 0 !important;
+  border-radius: 7px !important;
+  padding: 7px 13px !important;
+  background: transparent !important;
+  color: #6b7280 !important;
+  font-family: inherit;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+}
+
+.stats-tab-button:hover { background: #f3f4f6 !important; color: #1f2328 !important; }
+.stats-tab-button.is-active { background: var(--tk-color-primary) !important; color: #fff !important; }
+
+/* A tela deve parecer um painel de leitura, não uma sequência de botões pesados. */
+.stats-page-container h1,
+.stats-page-container h2,
+.stats-page-container strong,
+.stats-page-container .stat-card-value {
+  font-weight: 500;
+}
+
+.stats-page-container .stat-card-label,
+.stats-page-container .stats-subtitle,
+.stats-page-container .filter-select-pill,
+.stats-page-container button {
+  font-weight: 400;
 }
 
 /* Filter Bar */
@@ -47,11 +103,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 4px;
+  margin-top: 8px;
 }
 
 .stats-title {
-  font-size: 1.25rem;
+  font-size: 1.45rem;
   font-weight: 600;
   color: var(--tk-color-text-primary, #1d1d1f);
   margin: 0;
@@ -76,20 +132,25 @@
 .stats-metrics-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
+  gap: 16px;
 }
 
 .stat-card {
   background: #ffffff;
   border: 1px solid var(--tk-color-border, #e5e5e7);
   border-radius: var(--tk-radius-card, 14px);
-  padding: 16px 18px;
-  box-shadow: var(--tk-shadow-card);
+  padding: 22px;
+  box-shadow: 0 8px 24px rgba(31, 35, 40, 0.045);
   display: flex;
   flex-direction: column;
   gap: 10px;
   min-height: 120px;
 }
+
+.stats-metrics-grid .stat-card:nth-child(1) { border-top: 3px solid #d9dee5; }
+.stats-metrics-grid .stat-card:nth-child(2) { border-top: 3px solid #b5f500; }
+.stats-metrics-grid .stat-card:nth-child(3) { border-top: 3px solid #00a650; }
+.stats-metrics-grid .stat-card:nth-child(4) { border-top: 3px solid #1f2328; }
 
 .stat-card-header {
   display: flex;
@@ -117,7 +178,7 @@
 }
 
 .stat-card-value {
-  font-size: 1.35rem;
+  font-size: 1.55rem;
   font-weight: 600;
   color: var(--tk-color-text-primary, #1d1d1f);
   letter-spacing: -0.02em;
@@ -153,6 +214,22 @@
   justify-content: space-between;
   min-height: 240px;
 }
+
+.stats-page-container .stat-card-large {
+  border-color: #dbe3ec;
+  box-shadow: 0 8px 24px rgba(31, 41, 55, 0.05);
+}
+
+.visitor-funnel { display: grid; gap: 16px; padding: 20px 0; }
+.visitor-funnel-step { display: grid; gap: 7px; }
+.visitor-funnel-label { display: flex; justify-content: space-between; gap: 12px; color: #334155; font-size: .8rem; font-weight: 600; }
+.visitor-funnel-label span:last-child { color: #64748b; font-variant-numeric: tabular-nums; }
+.visitor-funnel-track { height: 9px; overflow: hidden; border-radius: 999px; background: #edf1f6; box-shadow: inset 0 1px 2px rgba(15,23,42,.05); }
+.visitor-funnel-fill { height: 100%; border-radius: inherit; box-shadow: 0 2px 5px rgba(37,99,235,.22); }
+.visitor-funnel-fill.blue { background: linear-gradient(90deg, #2563eb, #60a5fa); }
+.visitor-funnel-fill.purple { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+.visitor-funnel-fill.orange { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+.visitor-funnel-fill.green { background: linear-gradient(90deg, #059669, #34d399); }
 
 .stat-empty-chart-box {
   display: flex;

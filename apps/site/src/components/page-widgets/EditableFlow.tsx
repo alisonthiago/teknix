@@ -1,5 +1,5 @@
 import {Children,isValidElement,useEffect,useMemo,useState,type ReactNode} from 'react'
-import {Editable,usePageWidgetState,useWidgetEdit} from './PageWidgets'
+import {Editable,usePageWidgetState,useWidgetEdit,useProductContext} from './PageWidgets'
 import {type CanvasNode,type CanvasLayout,getHubOrigin,findNodePath,matchNode} from '../../../../../packages/core/src/pageWidgets'
 import CatalogWidget from './CatalogWidget'
 import WidgetRenderer from '../WidgetRenderer'
@@ -204,6 +204,35 @@ export default function EditableFlow({
     return null
   }
 
+  // Native drag events can land on the browser drag image instead of the
+  // React node under it. Capture dragover at document level for nested flows
+  // (product columns, cards and similar regions) so the real canvas remains
+  // the hit-test surface.
+  useEffect(() => {
+    if (!ctx?.preview || !parentFlow) return
+    const onDocumentDragOver = (event: DragEvent) => {
+      event.preventDefault()
+      const target = calculateDropTarget(event.clientX, event.clientY)
+      if (target) {
+        event.dataTransfer && (event.dataTransfer.dropEffect = 'copy')
+        setDragTarget(target)
+      }
+    }
+    const onDocumentDrop = (event: DragEvent) => {
+      const target = dragTarget || calculateDropTarget(event.clientX, event.clientY)
+      if (!target) return
+      event.preventDefault()
+      event.stopPropagation()
+      drop(event as any, target.id, target.inside, target.position)
+    }
+    document.addEventListener('dragover', onDocumentDragOver, true)
+    document.addEventListener('drop', onDocumentDrop, true)
+    return () => {
+      document.removeEventListener('dragover', onDocumentDragOver, true)
+      document.removeEventListener('drop', onDocumentDrop, true)
+    }
+  }, [ctx?.preview, parentFlow, layout, dragTarget])
+
   function drop(event: React.DragEvent, target?: string, inside = false, position: 'before' | 'after' | 'inside' = 'after') {
     if (!ctx?.preview) return
     event.preventDefault()
@@ -328,7 +357,10 @@ export default function EditableFlow({
               event.preventDefault()
               event.stopPropagation()
               autoScroll(event.clientY)
-              event.dataTransfer.dropEffect = 'copy'
+              const dragData = event.dataTransfer.types.includes('application/teknix-widget')
+                ? event.dataTransfer.getData('application/teknix-widget')
+                : ''
+              event.dataTransfer.dropEffect = dragData.includes('nodeId') ? 'move' : 'copy'
               const target = calculateDropTarget(event.clientX, event.clientY)
               if (target) setDragTarget(target)
             } : undefined}
@@ -444,7 +476,7 @@ export default function EditableFlow({
                 </button>
               </div>
             )}
-            {source ? source.element : (node.type === 'container' || node.type === 'grid') ? <ContainerNode node={node} regionId={id} globalKey={globalKey ? `global:${node.id}` : undefined} renderChildNodes={render} onDrop={drop} onChoose={action} preview={!!ctx?.preview} isDropActive={dragTarget?.id === node.id && dragTarget.position === 'inside'} parentLayout={parentLayout} onCalculateDropTarget={calculateDropTarget} onSetDragTarget={setDragTarget} /> : node.type === 'ads' ? <Ads position={String(node.content?.placement || 'middle_screen')} /> : <Editable widgetId={node.id} globalKey={globalKey ? `global:${node.id}` : undefined} label={node.label} widgetType={node.type} content={node.content || {}} renderContent={false}><FlowWidget node={node} globalKey={globalKey ? `global:${node.id}` : undefined} /></Editable>}
+            {source ? source.element : (node.type === 'container' || node.type === 'grid') ? <ContainerNode node={node} regionId={id} globalKey={globalKey ? `global:${node.id}` : undefined} renderChildNodes={render} onDrop={drop} onChoose={action} preview={!!ctx?.preview} isDropActive={dragTarget?.id === node.id || dragTarget?.targetContainerId === node.id} parentLayout={parentLayout} onCalculateDropTarget={calculateDropTarget} onSetDragTarget={setDragTarget} /> : node.type === 'ads' ? <Ads position={String(node.content?.placement || 'middle_screen')} /> : <Editable widgetId={node.id} globalKey={globalKey ? `global:${node.id}` : undefined} label={node.label} widgetType={node.type} content={node.content || {}} renderContent={false}><FlowWidget node={node} globalKey={globalKey ? `global:${node.id}` : undefined} /></Editable>}
           </div>
           {ctx?.preview && isTarget && dragTarget.position === 'after' && (
             <div className={dropLineClass} />
@@ -599,6 +631,7 @@ function ContainerNode({ node, globalKey, renderChildNodes, onDrop, onChoose, pr
       <Tag
         className={`editor-flow-container-wrap ${isDropActive ? 'editor-flow-container-drop-active' : ''}`}
         data-container-id={node.id}
+        data-drop-container="true"
         style={{
           ...containerStyle,
           height: isChildOfRow ? '100%' : undefined,
@@ -682,7 +715,8 @@ function ContainerNode({ node, globalKey, renderChildNodes, onDrop, onChoose, pr
 }
 function FlowWidget({node,globalKey}:{node:CanvasNode;globalKey?:string}){
   const edit=useWidgetEdit(node.id,globalKey)
+  const product=useProductContext()
   if(node.type==='storefrontCard'||node.type==='storefrontShelf')return <CatalogWidget id={node.id} content={{...node.content,...edit?.content}} shelf={node.type==='storefrontShelf'}/>
   const aliases:Record<string,string>={imageCarousel:'carousel',basicGallery:'gallery',progress:'progressBar',testimonial:'testimonials',reviews:'testimonials',loopCarousel:'carousel',categoryMosaic:'categories',flashSaleSection:'productGrid'}
-  return <WidgetRenderer widget={{id:node.id,type:aliases[node.type||'']||node.type,content:{...node.content,...edit?.content},...edit?.schema,style:{...edit?.schema?.style,...edit?.style}} as any}/>
+  return <WidgetRenderer widget={{id:node.id,type:aliases[node.type||'']||node.type,content:{...node.content,...edit?.content},...edit?.schema,style:{...edit?.schema?.style,...edit?.style}} as any} product={product}/>
 }

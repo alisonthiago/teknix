@@ -46,10 +46,30 @@
 .hagor-home-root {
   font-family: var(--tkn-font);
   color: var(--hagor-black);
-  background-color: #fcfcfc !important;
+  /* Faixa da home: a cor forte #b5f500 fica no topo e sobe a transição,
+     clareando mais cedo para não ficar muito verde embaixo */
+  background: linear-gradient(180deg, #b5f500 0, #b5f500 40px, #c8f866 120px, #e7fac8 260px, #f3fce0 420px, #f8fdf2 540px, #fcfcfc 640px) no-repeat,
+    #fcfcfc !important;
+  background-size: 100% 640px, auto;
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
+}
+
+@media (max-width: 1024px) {
+  .hagor-home-root {
+    background: linear-gradient(180deg, #b5f500 0, #b5f500 30px, #c8f866 100px, #e7fac8 220px, #f3fce0 360px, #f8fdf2 460px, #fcfcfc 540px) no-repeat,
+      #fcfcfc !important;
+    background-size: 100% 540px, auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .hagor-home-root {
+    background: linear-gradient(180deg, #b5f500 0, #b5f500 20px, #c8f866 80px, #e7fac8 170px, #f3fce0 280px, #f8fdf2 360px, #fcfcfc 440px) no-repeat,
+      #fcfcfc !important;
+    background-size: 100% 440px, auto;
+  }
 }
 
 /* ── PADRÃO DE CONTAINER ESTRUTURAL CASAS BAHIA (.css-16p6xcm) ── */
@@ -1432,12 +1452,13 @@
 .dsvia-mosaic-track {
   display: flex;
   align-items: flex-start;
-  gap: var(--tkn-space-16);
+  justify-content: space-between;
+  width: 100%;
   overflow-x: auto;
   scroll-behavior: smooth;
   scrollbar-width: none;
-  width: 100%;
-  padding: var(--tkn-space-24) 2px var(--tkn-space-8);
+  padding: var(--tkn-space-24) 0 var(--tkn-space-8);
+  gap: var(--tkn-space-12);
 }
 
 .dsvia-mosaic-track::-webkit-scrollbar {
@@ -1449,8 +1470,9 @@
   flex-direction: column;
   align-items: center;
   text-decoration: none;
-  flex: 0 0 auto;
-  width: 110px;
+  flex: 1 1 0;
+  max-width: 150px;
+  min-width: 90px;
   cursor: pointer;
   transition: transform 0.2s ease;
 }
@@ -1459,16 +1481,24 @@
   width: 90px;
   height: 90px;
   border-radius: 20px;
-  background-color: var(--tkn-green);
+  background-color: #f4f5f7;
+  border: 1px solid #e2e4e9;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  transition: transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: none;
+  transition: background-color 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.dsvia-mosaic-item:hover .dsvia-mosaic-card,
 .dsvia-mosaic-card:hover {
-  transform: scale(0.96);
+  background-color: var(--tkn-green, #B5F500) !important;
+  border-color: var(--tkn-green, #B5F500) !important;
+  box-shadow: none;
+  transform: translateY(-3px) scale(1.04);
 }
 
 /* Produtos recortados sobressaem sem ampliar as fotos com cenário. */
@@ -1484,7 +1514,14 @@
   flex-shrink: 0;
   object-fit: contain;
   transform: translateY(-9px);
-  filter: drop-shadow(0 5px 3px rgba(0, 0, 0, 0.18));
+  filter: none;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dsvia-mosaic-item:hover .dsvia-mosaic-card.is-cutout img,
+.dsvia-mosaic-card.is-cutout:hover img {
+  transform: translateY(-12px) scale(1.06);
+  filter: none;
 }
 
 .dsvia-mosaic-card img {
@@ -1525,16 +1562,21 @@
 
 .dsvia-mosaic-label {
   font-family: var(--tkn-font);
-  font-size: var(--tkn-text-12);
-  line-height: 150%;
+  font-size: 10px;
+  line-height: 1.25;
   letter-spacing: 0.02em;
-  font-weight: var(--tkn-weight-semibold);
+  font-weight: 500;
   text-transform: capitalize;
-  color: #111827;
-  margin-top: var(--tkn-space-8);
+  color: #4b5563;
+  margin-top: 5px;
   text-align: center;
   word-break: break-word;
   max-width: 110px;
+  transition: color 0.15s ease;
+}
+
+.dsvia-mosaic-item:hover .dsvia-mosaic-label {
+  color: #111827;
 }
 
 /* ==========================================================================
@@ -4217,6 +4259,59 @@
 }
 
 /* ── 5. OFERTAS RELÂMPAGO CARDS HORIZONTAIS COMPACTOS ── */
+.teknix-best-sellers {
+  margin-top: var(--tkn-space-24);
+  margin-bottom: var(--tkn-space-24);
+}
+.teknix-best-sellers-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.teknix-best-sellers-header h2 { font-size: 18px; color: #1f2937; }
+.teknix-best-sellers-dots { color: #b5f500; letter-spacing: 5px; }
+.teknix-best-sellers-track {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-snap-type: x mandatory;
+}
+.teknix-best-sellers-track::-webkit-scrollbar { display: none; }
+.teknix-best-seller-card {
+  flex: 0 0 150px;
+  min-height: 174px;
+  padding: 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  color: #1f2937;
+  text-decoration: none;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow: hidden;
+}
+.teknix-best-seller-card h3 { font-size: 11px; line-height: 1.2; height: 27px; overflow: hidden; }
+.teknix-best-seller-card img { width: 100%; height: 76px; object-fit: contain; }
+.teknix-best-seller-card strong { font-size: 14px; }
+.teknix-best-seller-card span { color: #16834b; background: #dff7e9; font-size: 10px; padding: 3px 5px; width: fit-content; }
+
+@media (max-width: 768px) {
+  .cb-product-vertical-card .cb-card-title {
+    font-size: 14px !important;
+    line-height: 1.35 !important;
+    min-height: 42px !important;
+  }
+  .cb-product-vertical-card .ml-card-rating-row,
+  .cb-product-vertical-card .ml-card-rating-score,
+  .cb-product-vertical-card .ml-card-rating-count { font-size: 13px !important; }
+  .cb-product-vertical-card .ml-card-stars { font-size: 13px !important; }
+  .cb-product-vertical-card .ml-current-price { font-size: 19px !important; }
+}
+
 .flash-sale-cards-track-wrap {
   position: relative;
   width: 100%;
@@ -4295,11 +4390,11 @@
 
 .flash-sale-old-price {
   font-family: var(--cb-font);
-  font-size: var(--tkn-text-12);
-  font-weight: var(--tkn-weight-medium);
-  color: #696969;
-  text-decoration: line-through;
-  line-height: 150%;
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  color: #9ca3af !important;
+  text-decoration: line-through !important;
+  line-height: 1.3 !important;
 }
 
 .flash-sale-discount-badge {
@@ -4314,11 +4409,11 @@
 
 .flash-sale-main-price {
   font-family: var(--cb-font);
-  font-size: var(--tkn-text-16);
-  font-weight: var(--tkn-weight-medium);
-  color: #111827;
-  line-height: 120%;
-  letter-spacing: 0.02em;
+  font-size: 17px !important;
+  font-weight: 700 !important;
+  color: #111827 !important;
+  line-height: 1.25 !important;
+  letter-spacing: -0.01em;
 }
 
 .flash-sale-pix-info {
@@ -4439,6 +4534,265 @@
   opacity: 1;
 }
 
+/* Vitrine de produtos em destaque — Layout oficial limpo 1:1 Mercado Livre (referência do usuário) */
+.cb-shelf-cards-grid {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-snap-type: x mandatory;
+  padding: 4px 4px 14px 4px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+}
+.cb-shelf-cards-grid::-webkit-scrollbar {
+  display: none;
+}
+
+.cb-product-vertical-card {
+  flex: 0 0 calc((100% - 64px) / 5);
+  min-width: 205px;
+  min-height: 410px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  cursor: pointer;
+  scroll-snap-align: start;
+}
+
+.cb-product-vertical-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-color: #cbd5e1;
+  z-index: 2;
+}
+
+.cb-product-vertical-card::after {
+  display: none;
+}
+
+/* Selo Full no topo esquerdo do card (1:1 Mercado Livre azul) */
+.ml-card-top-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 5;
+  background: #3483fa;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2.5px 7px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3.5px;
+  letter-spacing: -0.01em;
+  box-shadow: 0 1px 3px rgba(52, 131, 250, 0.25);
+}
+.ml-card-top-badge svg {
+  fill: currentColor;
+}
+
+.cb-card-img-wrap {
+  width: 100%;
+  height: 195px;
+  margin: 16px 0 20px 0;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding: 10px 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  position: relative;
+}
+.cb-card-img-wrap img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.cb-product-vertical-card:hover .cb-card-img-wrap img {
+  transform: scale(1.03);
+}
+
+.cb-card-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  text-align: left;
+}
+
+.cb-card-title {
+  min-height: 42px;
+  max-height: 44px;
+  padding-bottom: 2px;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+  font-size: 13.5px;
+  font-weight: 400;
+  color: #1f2937;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+}
+
+/* Avaliação com estrelas amarelas/âmbar */
+.ml-card-rating-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 0 6px 0;
+  line-height: 1;
+}
+.ml-card-rating-score {
+  color: #1f2937;
+  font-size: 12px;
+  font-weight: 700;
+}
+.ml-card-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.5px;
+  color: #f59e0b;
+  font-size: 12px;
+  line-height: 1;
+}
+.ml-card-rating-count {
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+/* Selo de desconto verde */
+.ml-discount-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 20px;
+  margin: 0 0 4px 0;
+}
+.ml-discount-badge {
+  background: #e8f8ee;
+  color: #00a650;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+.ml-old-price {
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  color: #9ca3af !important;
+  text-decoration: line-through !important;
+  line-height: 1.2 !important;
+}
+
+/* Preço principal com 'no Pix' */
+.ml-main-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  margin: 0 0 3px 0;
+  flex-wrap: wrap;
+  line-height: 1;
+}
+.ml-current-price {
+  color: #111827;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.ml-cents {
+  font-size: 13px;
+  font-weight: 700;
+  vertical-align: baseline;
+  margin-left: 0.5px;
+}
+.ml-price-pix-label {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 400;
+  margin-left: 2px;
+  line-height: 1;
+}
+.ml-card-sold {
+  display: none;
+}
+
+/* Linha de parcelamento */
+.ml-installment-line {
+  margin: 0 0 4px 0;
+}
+.ml-installment-text {
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.35;
+}
+.ml-pix-block {
+  margin: 0 0 4px 0;
+}
+.ml-pix-label {
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+/* Linha de frete */
+.ml-shipping-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 4px;
+  flex-wrap: nowrap;
+  min-height: 18px;
+  max-width: 100%;
+  overflow: hidden;
+}
+.ml-shipping-tag {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: #00a650;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  display: inline-block;
+  line-height: 1.25;
+}
+.ml-shipping-tag:hover {
+  text-decoration: underline;
+  opacity: 0.85;
+}
+.ml-full-badge.teknix-express {
+  display: none;
+}
+.ml-shipping-sub {
+  display: none;
+}
+
 .cb-top-badge {
   position: absolute;
   top: 12px;
@@ -4490,8 +4844,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--tkn-space-8) var(--tkn-space-12);
+  padding: var(--tkn-space-8) 0 !important;
   margin: var(--tkn-space-4) 0 var(--tkn-space-16);
+  margin-left: 0 !important;
+  margin-right: 0 !important;
   box-sizing: border-box;
   position: relative;
 }
@@ -4522,19 +4878,23 @@
 
 .cb-card-title {
   flex-shrink: 0;
-  font-family: var(--cb-font);
-  font-size: var(--tkn-text-13);
-  font-weight: var(--tkn-weight-medium);
+  font-family: var(--cb-font, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+  font-size: 13.5px;
+  font-weight: 400;
   color: #1f2937;
-  line-height: 1.35;
+  line-height: 1.4;
   letter-spacing: -0.01em;
-  margin: 0 0 var(--card-title-margin-bottom, var(--tkn-space-8));
+  margin: 0 0 var(--card-title-margin-bottom, 10px);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  min-height: 40px;
-  height: auto;
+  text-overflow: ellipsis;
+  word-break: break-word;
+  min-height: 42px;
+  max-height: 44px;
+  padding-bottom: 2px;
+  box-sizing: border-box;
 }
 
 .cb-stars-row {
@@ -4719,10 +5079,19 @@
 }
 
 .cb-card-fav-btn:hover {
-  background: #ffffff;
-  border-color: #cbd5e1;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-  transform: scale(1.12);
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  transform: scale(1.15);
+}
+
+.cb-card-fav-btn:hover svg {
+  stroke: var(--tkn-green, #B5F500) !important;
+}
+
+.cb-card-fav-btn.is-fav:hover svg {
+  fill: var(--tkn-green, #B5F500) !important;
+  stroke: var(--tkn-green, #B5F500) !important;
 }
 
 .cb-card-fav-btn:active {
@@ -4738,69 +5107,70 @@
 }
 
 .ml-discount-badge {
-  background: #059669;
-  color: #ffffff;
-  font-size: var(--tkn-text-12);
-  font-weight: var(--tkn-weight-semibold);
-  padding: 1.5px var(--tkn-space-4);
-  border-radius: 3px;
+  background: #e8f8ee;
+  color: #00a650;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
   line-height: 1.2;
 }
 
 .ml-old-price {
-  font-size: var(--tkn-text-12);
-  color: #9ca3af;
-  text-decoration: line-through;
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  color: #9ca3af !important;
+  text-decoration: line-through !important;
+  line-height: 1.2 !important;
 }
 
 .ml-main-price-row {
   display: flex;
   align-items: baseline;
-  gap: var(--tkn-space-8);
-  margin: 3px 0 var(--tkn-space-16);
+  gap: 3px;
+  margin: 2px 0 3px 0;
   flex-wrap: wrap;
+  line-height: 1;
 }
 
 #root .ml-current-price {
-  font-size: var(--tkn-text-28);
-  font-weight: var(--tkn-weight-semibold);
+  font-size: 24px;
+  font-weight: 700;
   color: #111827;
   letter-spacing: -0.02em;
   line-height: 1;
 }
 
 .ml-cents {
-  font-size: var(--tkn-text-13);
-  vertical-align: super;
-  font-weight: var(--tkn-weight-medium);
-  margin-left: 1px;
+  font-size: 13px;
+  vertical-align: baseline;
+  font-weight: 700;
+  margin-left: 0.5px;
 }
 
 .ml-card-sold {
-  font-size: var(--tkn-text-12);
-  color: #8c8c8c;
-  font-weight: var(--tkn-weight-regular);
+  display: none;
 }
 
 .ml-installment-line {
-  margin: 2px 0 var(--tkn-space-4);
+  margin: 0 0 4px 0;
 }
 
 .ml-installment-text {
-  font-size: var(--tkn-text-13);
-  font-weight: var(--tkn-weight-medium);
-  color: #059669;
-  line-height: 1.3;
+  font-size: 12px;
+  font-weight: 400;
+  color: #6b7280;
+  line-height: 1.35;
 }
 
 .ml-pix-block {
-  margin: 2px 0 var(--tkn-space-4);
+  margin: 0 0 4px 0;
 }
 
 .ml-pix-label {
-  font-size: var(--tkn-text-12);
-  font-weight: var(--tkn-weight-semibold);
-  color: #059669;
+  font-size: 12px;
+  font-weight: 400;
+  color: #6b7280;
   text-transform: none;
   letter-spacing: -0.01em;
   display: inline-block;
@@ -4815,23 +5185,29 @@
 .ml-shipping-row {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: var(--tkn-space-4);
-  margin-top: var(--tkn-space-8);
+  margin-top: 4px;
   font-size: var(--tkn-text-12);
   line-height: 1.3;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .ml-shipping-tag {
-  background: #f0fdf4;
-  color: #15803d;
-  border: 1px solid #bbf7d0;
+  color: #00a650;
   font-size: var(--tkn-text-12);
   font-weight: var(--tkn-weight-semibold);
-  padding: 2px var(--tkn-space-8);
-  border-radius: 4px;
-  display: inline-flex;
-  align-items: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  display: inline-block;
+  line-height: 1.25;
+  cursor: pointer;
 }
 
 .ml-full-badge {
@@ -5300,6 +5676,26 @@
   }
   .cb-shelf-next-arrow {
     display: none !important;
+  }
+  .ml-shipping-row {
+    margin-top: 2px !important;
+    min-height: 16px !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    flex-wrap: nowrap !important;
+  }
+  .ml-shipping-tag {
+    font-size: 11px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 100% !important;
+    display: inline-block !important;
+    line-height: 1.2 !important;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    color: #00a650 !important;
   }
 
   /* Banner Mondial */

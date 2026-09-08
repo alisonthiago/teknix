@@ -2,11 +2,10 @@ import { Editable, useWidgetEdit } from './page-widgets/PageWidgets'
 import EditableFlow from './page-widgets/EditableFlow'
 import { renderDynamicIcon } from './IconPickerModal'
 import { useState, useEffect, useRef } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../hooks/useAuth'
 import { CORE_CATEGORIES } from '../services/categories'
-import { BoschLogo, MakitaLogo, DewaltLogo, PdrLogo, BovenauLogo, KarcherLogo } from './BrandLogos'
 import CepDeliveryModal from './CepDeliveryModal'
 import './CasasBahiaHeader.css'
 import './StorefrontResponsive.css'
@@ -44,10 +43,51 @@ export const supportList = [
   { name: 'Contato', path: '/contato' }
 ]
 
+function getCategoryIcon(id: string) {
+  switch (id) {
+    case 'cat-eletricas':
+      return (
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+        </svg>
+      )
+    case 'cat-construcao':
+      return (
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+        </svg>
+      )
+    case 'cat-automotivos':
+      return (
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="3" />
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+        </svg>
+      )
+    case 'cat-pneumatica':
+      return (
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2" />
+        </svg>
+      )
+    case 'cat-bancada':
+    default:
+      return (
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+        </svg>
+      )
+  }
+}
+
+
 export default function TeknixHeader() {
   const navigate = useNavigate()
-  const { user, signOut } = useAuth()
   const { totalItems } = useCart()
+  const { user, signOut } = useAuth()
+  const location = useLocation()
+  const isHome = location.pathname === '/'
   const accountName = String(user?.user_metadata?.full_name || user?.user_metadata?.name || user?.user_metadata?.first_name || user?.email?.split('@')[0] || 'Cliente').split(' ')[0]
   const profileAvatar = typeof user?.user_metadata?.avatar_url === 'string' ? user.user_metadata.avatar_url : ''
 
@@ -55,7 +95,7 @@ export default function TeknixHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isCepOpen, setIsCepOpen] = useState(false)
   const [isAccountOpen, setIsAccountOpen] = useState(false)
-  const [cep, setCep] = useState(() => localStorage.getItem('teknix_user_cep') || '06700-510')
+  const [cep, setCep] = useState(() => localStorage.getItem('teknix_user_cep') || '')
 
   const accountPopoverRef = useRef<HTMLDivElement>(null)
 
@@ -63,14 +103,69 @@ export default function TeknixHeader() {
   const headerEdit = useWidgetEdit('chrome:header', 'chrome:header')
   const logoEdit = useWidgetEdit('chrome:header:logo', 'chrome:header:logo')
   const searchEdit = useWidgetEdit('chrome:header:search', 'chrome:header:search')
+  const cepEdit = useWidgetEdit('chrome:header:cep', 'chrome:header:cep')
   const cepIconEdit = useWidgetEdit('chrome:header:cep-icon', 'chrome:header:cep-icon')
   const cartEdit = useWidgetEdit('chrome:header:cart', 'chrome:header:cart')
   const favoritesEdit = useWidgetEdit('chrome:header:favorites', 'chrome:header:favorites')
   const ordersEdit = useWidgetEdit('chrome:header:orders', 'chrome:header:orders')
   const accountEdit = useWidgetEdit('chrome:header:account', 'chrome:header:account')
+  const departmentsEdit = useWidgetEdit('chrome:header:departments-nav', 'chrome:header:departments-nav')
   const customLogoUrl = logoEdit?.content?.image || logoEdit?.content?.src || (headerEdit?.schema as any)?.logo_url || (logoEdit?.schema as any)?.logo_url
   const customLogoHeight = Number((logoEdit?.schema as any)?.logo_height || (headerEdit?.schema as any)?.logo_height || 26)
   const customLogoWidth = (logoEdit?.schema as any)?.logo_width || (headerEdit?.schema as any)?.logo_width
+
+  const storedPrefix = (cepEdit?.content?.text as string) || (cepEdit?.schema as any)?.label_prefix
+  // Higieniza qualquer número de CEP ou dígito salvo acidentalmente no conteúdo do widget
+  const sanitizedPrefix = (storedPrefix || '')
+    .replace(/\d{5}-?\d{3}/g, '')
+    .replace(/\d+/g, '')
+    .replace(/:/g, '')
+    .trim()
+  const finalPrefix = sanitizedPrefix && !['Entrega', 'Receber em'].includes(sanitizedPrefix)
+    ? sanitizedPrefix
+    : 'Seu CEP'
+  const cepLabel = `${finalPrefix}:`
+
+  // Navegação horizontal / Departamentos
+  const deptContent = (departmentsEdit?.content || {}) as Record<string, any>
+  const deptSource = String(deptContent.source || 'categories')
+  const deptMaxItems = Number(deptContent.max_items || 6)
+  const deptOrderBy = String(deptContent.order_by || 'most_viewed')
+  const showDeptBtn = deptContent.show_departments_btn !== false
+  const deptBtnText = String(deptContent.departments_btn_text || 'Departamentos')
+  const showFeaturedItem = deptContent.show_featured_item !== false
+  const featuredText = String(deptContent.featured_item_text || 'Cupom')
+  const featuredLink = String(deptContent.featured_item_link || '/produtos')
+  const featuredStyle = String(deptContent.featured_item_style || 'badge')
+  const rawBg = String(deptContent.featured_item_bg || '')
+  const rawColor = String(deptContent.featured_item_color || '')
+  const featuredBg = (!rawBg || rawBg === '#e6f9f0' || rawBg.toLowerCase() === 'rgb(230, 249, 240)') ? '#b5f500' : rawBg
+  const featuredColor = (!rawColor || rawColor === '#059669' || rawColor.toLowerCase() === 'rgb(5, 150, 105)') ? '#102419' : rawColor
+
+  let baseDeptList = [
+    { label: 'Telefonia', url: '/produtos?q=telefonia' },
+    { label: 'Eletrodomésticos', url: '/produtos?q=eletrodomesticos' },
+    { label: 'Tvs e Vídeo', url: '/produtos?q=tv' },
+    { label: 'Móveis', url: '/produtos?q=moveis' },
+    { label: 'Eletroportáteis', url: '/produtos?q=eletroportateis' },
+    { label: 'Informática', url: '/produtos?q=informatica' },
+    { label: 'Ferramentas', url: '/produtos?q=ferramentas' }
+  ]
+
+  if (deptSource === 'custom' && Array.isArray(deptContent.items) && deptContent.items.length > 0) {
+    baseDeptList = deptContent.items
+  } else if (deptSource === 'manual' && Array.isArray(deptContent.manual_categories) && deptContent.manual_categories.length > 0) {
+    baseDeptList = deptContent.manual_categories.map((cName: string) => ({
+      label: cName,
+      url: `/produtos?q=${encodeURIComponent(cName.toLowerCase())}`
+    }))
+  } else if (deptOrderBy === 'name_asc') {
+    baseDeptList = [...baseDeptList].sort((a, b) => a.label.localeCompare(b.label))
+  } else if (deptOrderBy === 'name_desc') {
+    baseDeptList = [...baseDeptList].sort((a, b) => b.label.localeCompare(a.label))
+  }
+
+  const visibleDeptItems = baseDeptList.slice(0, deptMaxItems)
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -85,11 +180,14 @@ export default function TeknixHeader() {
         setIsAccountOpen(false)
       }
     }
+    const handleOpenCepModal = () => setIsCepOpen(true)
     document.addEventListener('mousedown', handleClickOutside)
     document.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('teknix:open-cep-modal', handleOpenCepModal)
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
       document.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('teknix:open-cep-modal', handleOpenCepModal)
     }
   }, [])
 
@@ -119,8 +217,8 @@ export default function TeknixHeader() {
 
   return (
     <>
-      {/* ── LINHA VERMELHA NO TOPO EXTREMO (CASAS BAHIA) ── */}
-      {!(headerEdit?.schema as any)?.hide_top_line && <div className="dsvia-top-red-line" />}
+      {/* ── LINHA NO TOPO EXTREMO (CASAS BAHIA) ── */}
+      {!(headerEdit?.schema as any)?.hide_top_line && <div className={`dsvia-top-red-line ${isHome ? 'dsvia-top-line-home' : ''}`} />}
 
       {/* ── CABEÇALHO PRINCIPAL (FUNDO #f7f7f7) ── */}
       <Editable
@@ -131,7 +229,7 @@ export default function TeknixHeader() {
         label="Cabeçalho"
         editorKind="container"
         renderContent={false}
-        className="dsvia-header-root"
+        className={`dsvia-header-root ${isHome ? 'dsvia-header-home' : 'dsvia-header-inner-page'}`}
         data-version="1.3.0"
         style={{
           background: (headerEdit?.schema as any)?.header_bg === 'transparent' ? 'transparent' : ((headerEdit?.schema as any)?.header_bg || undefined),
@@ -188,12 +286,12 @@ export default function TeknixHeader() {
             {/* Barra de Busca Central */}
             <Editable as="div" widgetId="chrome:header:search-box" globalKey="chrome:header:search-box" label="Barra de busca" widgetType="container" editorKind="container" className="dsvia-search-box" renderContent={false} style={{ display: (headerEdit?.schema as any)?.hide_search ? 'none' : undefined }}>
               <form className="dsvia-search-form" role="search" onSubmit={handleSearchSubmit}>
-                <Editable as="input" widgetId="chrome:header:search-input" globalKey="chrome:header:search-input" label="Campo de busca" widgetType="input" content={{ input_type: 'search', placeholder: 'O que você tá procurando?' }}
+                <Editable as="input" widgetId="chrome:header:search-input" globalKey="chrome:header:search-input" label="Campo de busca" widgetType="input" content={{ input_type: 'search', placeholder: 'Busque na TEKNIX' }}
                   type="text"
                   name="search"
                   id="search-input"
                   className="dsvia-search-input"
-                  placeholder="O que você tá procurando?"
+                  placeholder="Busque na TEKNIX"
                   autoComplete="off"
                   value={searchTerm}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
@@ -207,40 +305,31 @@ export default function TeknixHeader() {
                     </svg>
                   )}
                 </Editable>
+                <button
+                  type="button"
+                  className="dsvia-search-cep-btn"
+                  onClick={() => setIsCepOpen(true)}
+                  aria-label="Informe seu CEP"
+                  title="Informe seu CEP"
+                >
+                  <svg viewBox="0 0 22 16" width="18" height="14" fill="currentColor">
+                    <path d="M4.84389 15.5577C4.06336 15.5577 3.40066 15.2847 2.85579 14.7388C2.31092 14.1928 2.03849 13.5299 2.03849 12.75H1.25004C0.993941 12.75 0.779275 12.6634 0.606041 12.4901C0.432808 12.3169 0.346191 12.1022 0.346191 11.8462V2.30773C0.346191 1.8026 0.521191 1.37503 0.871191 1.02503C1.22119 0.675031 1.64875 0.500031 2.15387 0.500031H13.9615C14.4587 0.500031 14.8842 0.67704 15.2382 1.03106C15.5922 1.38506 15.7692 1.81061 15.7692 2.30773V4.30773H17.5192C17.8054 4.30773 18.0766 4.37175 18.3327 4.49978C18.5888 4.62783 18.7997 4.80483 18.9654 5.03078L21.4731 8.38851C21.5333 8.46384 21.5785 8.5467 21.6086 8.63708C21.6388 8.72746 21.6538 8.82538 21.6538 8.93083V11.8462C21.6538 12.1022 21.5672 12.3169 21.394 12.4901C21.2208 12.6634 21.0061 12.75 20.75 12.75H19.8462C19.8462 13.5299 19.573 14.1928 19.0266 14.7388C18.4802 15.2847 17.8167 15.5577 17.0362 15.5577C16.2557 15.5577 15.593 15.2847 15.0481 14.7388C14.5032 14.1928 14.2308 13.5299 14.2308 12.75H7.65384C7.65384 13.532 7.38065 14.1955 6.83427 14.7404C6.2879 15.2852 5.62444 15.5577 4.84389 15.5577ZM4.84617 14.0577C5.21283 14.0577 5.52245 13.9314 5.77502 13.6789C6.02758 13.4263 6.15387 13.1167 6.15387 12.75C6.15387 12.3833 6.02758 12.0737 5.77502 11.8211C5.52245 11.5686 5.21283 11.4423 4.84617 11.4423C4.47948 11.4423 4.16986 11.5686 3.91729 11.8211C3.66472 12.0737 3.53844 12.3833 3.53844 12.75C3.53844 13.1167 3.66472 13.4263 3.91729 13.6789C4.16986 13.9314 4.47948 14.0577 4.84617 14.0577ZM1.84617 11.25H2.56924C2.78204 10.8795 3.08941 10.5689 3.49134 10.3183C3.89327 10.0676 4.34488 9.94231 4.84617 9.94231C5.33463 9.94231 5.78303 10.066 6.19137 10.3135C6.5997 10.5609 6.91027 10.8731 7.12309 11.25H14.2693V2.30773C14.2693 2.21798 14.2404 2.14426 14.1827 2.08656C14.125 2.02886 14.0513 2.00001 13.9615 2.00001H2.15387C2.07695 2.00001 2.00643 2.03206 1.94232 2.09616C1.87822 2.16027 1.84617 2.2308 1.84617 2.30773V11.25ZM17.0385 14.0577C17.4052 14.0577 17.7148 13.9314 17.9673 13.6789C18.2199 13.4263 18.3462 13.1167 18.3462 12.75C18.3462 12.3833 18.2199 12.0737 17.9673 11.8211C17.7148 11.5686 17.4052 11.4423 17.0385 11.4423C16.6718 11.4423 16.3622 11.5686 16.1096 11.8211C15.857 12.0737 15.7308 12.3833 15.7308 12.75C15.7308 13.1167 15.857 13.4263 16.1096 13.6789C16.6718 14.0577 17.0385 14.0577Z" />
+                  </svg>
+                </button>
               </form>
             </Editable>
 
-            {/* Ações da Direita: CEP, Acesse sua Conta, Favoritos, Carrinho */}
+            {/* Modal Completo de CEP / Endereço de Entrega */}
+            <CepDeliveryModal
+              isOpen={isCepOpen}
+              onClose={() => setIsCepOpen(false)}
+              currentCep={cep}
+              onSelectCep={handleSelectCep}
+            />
+
+            {/* Ações da Direita: Acesse sua Conta, Pedidos, Favoritos, Carrinho */}
             <Editable as="div" widgetId="chrome:header:actions" globalKey="chrome:header:actions" label="Ícones e ações do cabeçalho" widgetType="container" editorKind="container" className="dsvia-actions-right" renderContent={false}>
               <EditableFlow id="header-actions" label="Ações do cabeçalho" globalKey="layout:chrome:header:actions" compact>
-              {/* Informe seu CEP */}
-              <Editable as="div" widgetId="chrome:header:cep-group" globalKey="chrome:header:cep-group" label="Grupo do CEP" widgetType="container" editorKind="container" renderContent={false} style={{ position: 'relative', display: (headerEdit?.schema as any)?.hide_cep ? 'none' : undefined }}>
-                <Editable as="button" widgetId="chrome:header:cep" globalKey="chrome:header:cep" widgetType="button" label="Botão de CEP" renderContent={false}
-                  type="button"
-                  className="dsvia-cep-trigger"
-                  onClick={() => setIsCepOpen(true)}
-                  aria-label="Informe seu CEP"
-                >
-                  <Editable as="span" widgetId="chrome:header:cep-icon" globalKey="chrome:header:cep-icon" widgetType="icon" label="Ícone do CEP" renderContent={false}>
-                    {cepIconEdit?.content?.icon ? (
-                      renderDynamicIcon(String(cepIconEdit.content.icon), Number(cepIconEdit.content.icon_size) || 20, String(cepIconEdit.content.icon_color || 'currentColor'))
-                    ) : (
-                      <svg viewBox="0 0 22 16" width="22" height="16" fill="currentColor">
-                        <path d="M4.84389 15.5577C4.06336 15.5577 3.40066 15.2847 2.85579 14.7388C2.31092 14.1928 2.03849 13.5299 2.03849 12.75H1.25004C0.993941 12.75 0.779275 12.6634 0.606041 12.4901C0.432808 12.3169 0.346191 12.1022 0.346191 11.8462V2.30773C0.346191 1.8026 0.521191 1.37503 0.871191 1.02503C1.22119 0.675031 1.64875 0.500031 2.15387 0.500031H13.9615C14.4587 0.500031 14.8842 0.67704 15.2382 1.03106C15.5922 1.38506 15.7692 1.81061 15.7692 2.30773V4.30773H17.5192C17.8054 4.30773 18.0766 4.37175 18.3327 4.49978C18.5888 4.62783 18.7997 4.80483 18.9654 5.03078L21.4731 8.38851C21.5333 8.46384 21.5785 8.5467 21.6086 8.63708C21.6388 8.72746 21.6538 8.82538 21.6538 8.93083V11.8462C21.6538 12.1022 21.5672 12.3169 21.394 12.4901C21.2208 12.6634 21.0061 12.75 20.75 12.75H19.8462C19.8462 13.5299 19.573 14.1928 19.0266 14.7388C18.4802 15.2847 17.8167 15.5577 17.0362 15.5577C16.2557 15.5577 15.593 15.2847 15.0481 14.7388C14.5032 14.1928 14.2308 13.5299 14.2308 12.75H7.65384C7.65384 13.532 7.38065 14.1955 6.83427 14.7404C6.2879 15.2852 5.62444 15.5577 4.84389 15.5577ZM4.84617 14.0577C5.21283 14.0577 5.52245 13.9314 5.77502 13.6789C6.02758 13.4263 6.15387 13.1167 6.15387 12.75C6.15387 12.3833 6.02758 12.0737 5.77502 11.8211C5.52245 11.5686 5.21283 11.4423 4.84617 11.4423C4.47948 11.4423 4.16986 11.5686 3.91729 11.8211C3.66472 12.0737 3.53844 12.3833 3.53844 12.75C3.53844 13.1167 3.66472 13.4263 3.91729 13.6789C4.16986 13.9314 4.47948 14.0577 4.84617 14.0577ZM1.84617 11.25H2.56924C2.78204 10.8795 3.08941 10.5689 3.49134 10.3183C3.89327 10.0676 4.34488 9.94231 4.84617 9.94231C5.33463 9.94231 5.78303 10.066 6.19137 10.3135C6.5997 10.5609 6.91027 10.8731 7.12309 11.25H14.2693V2.30773C14.2693 2.21798 14.2404 2.14426 14.1827 2.08656C14.125 2.02886 14.0513 2.00001 13.9615 2.00001H2.15387C2.07695 2.00001 2.00643 2.03206 1.94232 2.09616C1.87822 2.16027 1.84617 2.2308 1.84617 2.30773V11.25ZM17.0385 14.0577C17.4052 14.0577 17.7148 13.9314 17.9673 13.6789C18.2199 13.4263 18.3462 13.1167 18.3462 12.75C18.3462 12.3833 18.2199 12.0737 17.9673 11.8211C17.7148 11.5686 17.4052 11.4423 17.0385 11.4423C16.6718 11.4423 16.3622 11.5686 16.1096 11.8211C15.857 12.0737 15.7308 12.3833 15.7308 12.75C15.7308 13.1167 15.857 13.4263 16.1096 13.6789C16.6718 14.0577 17.0385 14.0577Z" />
-                      </svg>
-                    )}
-                  </Editable>
-                  <span>{cep ? `Entregar em: ${cep}` : 'Informe seu CEP'}</span>
-                </Editable>
-
-                {/* Modal Completo de CEP / Endereço de Entrega */}
-                <CepDeliveryModal
-                  isOpen={isCepOpen}
-                  onClose={() => setIsCepOpen(false)}
-                  currentCep={cep}
-                  onSelectCep={handleSelectCep}
-                />
-              </Editable>
 
               {/* Cápsula Cinza: Acesse sua Conta */}
               <Editable as="div" widgetId="chrome:header:account-group" globalKey="chrome:header:account-group" label="Grupo da conta" widgetType="container" editorKind="container" className="dsvia-account-menu" ref={accountPopoverRef} renderContent={false} style={{ display: (headerEdit?.schema as any)?.hide_account ? 'none' : undefined }}>
@@ -261,7 +350,14 @@ export default function TeknixHeader() {
                     </svg>
                   )}
                   <div className="dsvia-account-user-text">
-                    <span className="dsvia-account-greeting">{user ? accountName : 'Acesse sua conta'}</span>
+                    {user ? (
+                      <span className="dsvia-account-greeting">Olá, {accountName}</span>
+                    ) : (
+                      <>
+                        <span className="dsvia-account-greeting">Boas-vindas :)</span>
+                        <span className="dsvia-account-subtext">Entre ou cadastre-se</span>
+                      </>
+                    )}
                   </div>
                 </Editable>
 
@@ -274,14 +370,6 @@ export default function TeknixHeader() {
                   </div>
                 )}
 
-                {!user && (
-                  <div className="dsvia-guest-popover" role="menu" aria-label="Acesso à conta">
-                    <Link to="/login" className="dsvia-guest-popover-cta" role="menuitem">Entre ou cadastre-se</Link>
-                    <Link to="/pedidos" role="menuitem">Pedidos de Loja On-Line</Link>
-                    <Link to="/pedidos" role="menuitem">Pedidos de Loja Física</Link>
-                    <Link to="/contato" role="menuitem">Atendimento</Link>
-                  </div>
-                )}
               </Editable>
 
               {/* Ícone de Rastreamento / Meus Pedidos */}
@@ -326,44 +414,52 @@ export default function TeknixHeader() {
             </EditableFlow>
           </Editable>
 
-          {/* ── LINHA 3 MOBILE: INFORME SEU CEP ── */}
-          <Editable as="div" widgetId="chrome:header:mobile-subbar" globalKey="chrome:header:mobile-subbar" label="Barra móvel de CEP" widgetType="container" editorKind="container" className="dsvia-mobile-subbar" renderContent={false}>
-            <button
-              type="button"
-              className="dsvia-mobile-cep-trigger"
-              onClick={() => setIsCepOpen(!isCepOpen)}
-              aria-label="Informe seu CEP"
-            >
-              <svg viewBox="0 0 22 16" width="18" height="14" fill="currentColor">
-                <path d="M4.84389 15.5577C4.06336 15.5577 3.40066 15.2847 2.85579 14.7388C2.31092 14.1928 2.03849 13.5299 2.03849 12.75H1.25004C0.993941 12.75 0.779275 12.6634 0.606041 12.4901C0.432808 12.3169 0.346191 12.1022 0.346191 11.8462V2.30773C0.346191 1.8026 0.521191 1.37503 0.871191 1.02503C1.22119 0.675031 1.64875 0.500031 2.15387 0.500031H13.9615C14.4587 0.500031 14.8842 0.67704 15.2382 1.03106C15.5922 1.38506 15.7692 1.81061 15.7692 2.30773V4.30773H17.5192C17.8054 4.30773 18.0766 4.37175 18.3327 4.49978C18.5888 4.62783 18.7997 4.80483 18.9654 5.03078L21.4731 8.38851C21.5333 8.46384 21.5785 8.5467 21.6086 8.63708C21.6388 8.72746 21.6538 8.82538 21.6538 8.93083V11.8462C21.6538 12.1022 21.5672 12.3169 21.394 12.4901C21.2208 12.6634 21.0061 12.75 20.75 12.75H19.8462C19.8462 13.5299 19.573 14.1928 19.0266 14.7388C18.4802 15.2847 17.8167 15.5577 17.0362 15.5577C16.2557 15.5577 15.593 15.2847 15.0481 14.7388C14.5032 14.1928 14.2308 13.5299 14.2308 12.75H7.65384C7.65384 13.532 7.38065 14.1955 6.83427 14.7404C6.2879 15.2852 5.62444 15.5577 4.84389 15.5577ZM4.84617 14.0577C5.21283 14.0577 5.52245 13.9314 5.77502 13.6789C6.02758 13.4263 6.15387 13.1167 6.15387 12.75C6.15387 12.3833 6.02758 12.0737 5.77502 11.8211C5.52245 11.5686 5.21283 11.4423 4.84617 11.4423C4.47948 11.4423 4.16986 11.5686 3.91729 11.8211C3.66472 12.0737 3.53844 12.3833 3.53844 12.75C3.53844 13.1167 3.66472 13.4263 3.91729 13.6789C4.16986 13.9314 4.47948 14.0577 4.84617 14.0577ZM1.84617 11.25H2.56924C2.78204 10.8795 3.08941 10.5689 3.49134 10.3183C3.89327 10.0676 4.34488 9.94231 4.84617 9.94231C5.33463 9.94231 5.78303 10.066 6.19137 10.3135C6.5997 10.5609 6.91027 10.8731 7.12309 11.25H14.2693V2.30773C14.2693 2.21798 14.2404 2.14426 14.1827 2.08656C14.125 2.02886 14.0513 2.00001 13.9615 2.00001H2.15387C2.07695 2.00001 2.00643 2.03206 1.94232 2.09616C1.87822 2.16027 1.84617 2.2308 1.84617 2.30773V11.25ZM17.0385 14.0577C17.4052 14.0577 17.7148 13.9314 17.9673 13.6789C18.2199 13.4263 18.3462 13.1167 18.3462 12.75C18.3462 12.3833 18.2199 12.0737 17.9673 11.8211C17.7148 11.5686 17.4052 11.4423 17.0385 11.4423C16.6718 11.4423 16.3622 11.5686 16.1096 11.8211C15.857 12.0737 15.7308 12.3833 15.7308 12.75C15.7308 13.1167 15.857 13.4263 16.1096 13.6789C16.6718 14.0577 17.0385 14.0577Z" />
-              </svg>
-              <span>{cep ? `Entregar em: ${cep}` : 'Informe seu CEP'}</span>
-            </button>
-          </Editable>
-
           {/* ── LINHA 2: ≡ DEPARTAMENTOS + CATEGORIAS + CUPOM + SERVIÇOS ── */}
           <Editable as="div" widgetId="chrome:header:bottom-row" globalKey="chrome:header:bottom-row" label="Linha de navegação" widgetType="container" editorKind="container" className="dsvia-row-bottom" renderContent={false}>
             <EditableFlow id="header-navigation" label="Navegação do cabeçalho" globalKey="layout:chrome:header:navigation" compact>
             {/* Grupo Esquerdo: Menu e Categorias Principais */}
-            <Editable as="nav" widgetId="chrome:header:departments-nav" globalKey="chrome:header:departments-nav" label="Menu de departamentos" widgetType="container" editorKind="container" className="dsvia-nav-left" aria-label="Departamentos" renderContent={false}>
-              <button
-                type="button"
-                className="dsvia-dept-trigger"
-                onClick={() => setIsMenuOpen(true)}
-                aria-label="Abrir todos os departamentos"
-              >
-                <svg viewBox="0 0 18 12" width="16" height="12" fill="currentColor">
-                  <path d="M1.25 11.635c-.212 0-.391-.072-.534-.216S.5 11.097.5 10.884s.072-.391.216-.534.322-.215.534-.215h15.5c.212 0 .391.072.534.216s.216.322.216.535-.072.391-.216.534-.322.215-.534.215H1.25zm0-4.885c-.212 0-.391-.072-.534-.216S.5 6.212.5 6s.072-.391.216-.534.322-.215.534-.215h15.5c.212 0 .391.072.534.216s.216.322.216.535-.072.391-.216.534-.322.215-.534.215H1.25zm0-4.885c-.212 0-.391-.072-.534-.216S.5 1.328.5 1.115.572.724.716.581s.322-.215.534-.215h15.5c.212 0 .391.072.534.216s.216.322.216.535-.072.391-.216.534-.322.215-.534.215H1.25z" />
-                </svg>
-                <span>Departamentos</span>
-              </button>
+            <Editable
+              as="nav"
+              widgetId="chrome:header:departments-nav"
+              globalKey="chrome:header:departments-nav"
+              label="Menu Horizontal da Loja"
+              widgetType="horizontal-menu"
+              editorKind="widget"
+              className="dsvia-nav-left"
+              aria-label="Menu Horizontal da Loja"
+              renderContent={false}
+            >
+              {showDeptBtn && (
+                <Link
+                  to="/hub/categorias"
+                  className="dsvia-dept-trigger"
+                  aria-label="Abrir todos os departamentos"
+                >
+                  <svg viewBox="0 0 18 12" width="16" height="12" fill="currentColor">
+                    <path d="M1.25 11.635c-.212 0-.391-.072-.534-.216S.5 11.097.5 10.884s.072-.391.216-.534.322-.215.534-.215h15.5c.212 0 .391.072.534.216s.216.322.216.535-.072.391-.216.534-.322.215-.534.215H1.25zm0-4.885c-.212 0-.391-.072-.534-.216S.5 6.212.5 6s.072-.391.216-.534.322-.215.534-.215h15.5c.212 0 .391.072.534.216s.216.322.216.535-.072.391-.216.534-.322.215-.534.215H1.25zm0-4.885c-.212 0-.391-.072-.534-.216S.5 1.328.5 1.115.572.724.716.581s.322-.215.534-.215h15.5c.212 0 .391.072.534.216s.216.322.216.535-.072.391-.216.534-.322.215-.534.215H1.25z" />
+                  </svg>
+                  <span>{deptBtnText}</span>
+                </Link>
+              )}
 
-              <Link to="/produtos" className="dsvia-nav-link">Telefonia</Link>
-              <Link to="/produtos" className="dsvia-nav-link">Eletrodomésticos</Link>
-              <Link to="/produtos" className="dsvia-nav-link">Tvs e Vídeo</Link>
-              <Link to="/produtos" className="dsvia-nav-link">Móveis</Link>
-              <Link to="/produtos" className="dsvia-nav-link">Eletroportáteis</Link>
-              <Editable as={Link} widgetId="chrome:header:coupon" globalKey="chrome:header:coupon" widgetType="button" label="Botão Cupom" to="/produtos" className="dsvia-coupon-badge">Cupom</Editable>
+              {visibleDeptItems.map((item, idx) => (
+                <Link key={idx} to={item.url} className="dsvia-nav-link">{item.label}</Link>
+              ))}
+
+              {showFeaturedItem && (
+                <Link
+                  to={featuredLink}
+                  className="dsvia-coupon-badge"
+                  style={{
+                    backgroundColor: featuredBg,
+                    color: featuredColor,
+                    borderRadius: featuredStyle === 'badge' ? '980px' : '6px',
+                    fontWeight: 700
+                  }}
+                >
+                  {featuredText}
+                </Link>
+              )}
             </Editable>
 
             {/* Grupo Direito: Serviços Institucionais */}
@@ -375,6 +471,7 @@ export default function TeknixHeader() {
           </Editable>
           </EditableFlow>
         </div>
+        {!isHome && <div className="dsvia-bottom-green-line" aria-hidden="true" />}
       </Editable>
 
       {/* ── DRAWER MENU LATERAL ── */}
@@ -432,132 +529,116 @@ export default function TeknixHeader() {
               </Link>
             </div>
 
-            {/* Conteúdo rolável */}
+            {/* Conteúdo rolável resumido */}
             <div className="tkn-drawer-scroll-body">
-              {/* Seção 1: Departamentos */}
+              {/* Seção 1: Departamentos em Destaque */}
               <div className="tkn-drawer-section">
-                <h3 className="tkn-drawer-section-title">Departamentos</h3>
+                <div className="tkn-drawer-section-header">
+                  <h3 className="tkn-drawer-section-title">Departamentos</h3>
+                  <span className="tkn-drawer-section-badge">Categorias</span>
+                </div>
                 <ul className="tkn-drawer-list">
-                  {CORE_CATEGORIES.map(category => (
+                  {CORE_CATEGORIES.slice(0, 5).map(category => (
                     <li key={category.id} className="tkn-drawer-item">
                       <Link to={`/categoria/${category.slug}`} className="tkn-drawer-link" onClick={() => setIsMenuOpen(false)}>
+                        <span className="tkn-drawer-icon-wrap">
+                          {getCategoryIcon(category.id)}
+                        </span>
                         <span className="tkn-drawer-item-text">{category.name}</span>
-                        <span aria-hidden="true">›</span>
+                        <svg className="tkn-drawer-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="9 18 15 12 9 6" />
+                        </svg>
                       </Link>
                     </li>
                   ))}
                   <li className="tkn-drawer-item tkn-drawer-all-card-item">
                     <Link to="/produtos" className="tkn-drawer-all-card-link" onClick={() => setIsMenuOpen(false)}>
-                      <span>Todos os departamentos</span>
-                      <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
-                        <path d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708" />
+                      <div className="tkn-drawer-all-card-content">
+                        <span className="tkn-drawer-icon-wrap tkn-drawer-all-icon">
+                          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="3" y="3" width="7" height="7" rx="1.5" />
+                            <rect x="14" y="3" width="7" height="7" rx="1.5" />
+                            <rect x="14" y="14" width="7" height="7" rx="1.5" />
+                            <rect x="3" y="14" width="7" height="7" rx="1.5" />
+                          </svg>
+                        </span>
+                        <span>Ver todo o catálogo</span>
+                      </div>
+                      <svg className="tkn-drawer-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="9 18 15 12 9 6" />
                       </svg>
                     </Link>
                   </li>
                 </ul>
               </div>
 
-              {/* Seção 2: Nossas marcas e parceiros */}
+              {/* Seção 2: Minha Conta & Atalhos Essenciais */}
               <div className="tkn-drawer-section">
-                <h3 className="tkn-drawer-section-title">Nossas marcas e parceiros</h3>
-                <ul className="tkn-drawer-list tkn-drawer-brands-list">
-                  {[
-                    { name: 'Bosch', Logo: BoschLogo },
-                    { name: 'Makita', Logo: MakitaLogo },
-                    { name: 'DeWalt', Logo: DewaltLogo },
-                    { name: 'PDR', Logo: PdrLogo },
-                    { name: 'Bovenau', Logo: BovenauLogo },
-                    { name: 'Kärcher', Logo: KarcherLogo },
-                  ].map(({ name, Logo }) => (
-                    <li key={name} className="tkn-drawer-item">
-                      <Link to={`/busca?q=${encodeURIComponent(name)}`} className="tkn-drawer-brand-link" aria-label={name} onClick={() => setIsMenuOpen(false)}>
-                        <Logo height={22} />
-                      </Link>
-                    </li>
-                  ))}
-
-                  <li className="tkn-drawer-item">
-                    <Link to="/produtos" className="tkn-drawer-nav-chevron-link" onClick={() => setIsMenuOpen(false)}>
-                      <span>Todas as marcas</span>
-                      <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor">
-                        <path d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708" />
-                      </svg>
-                    </Link>
-                  </li>
-                  <li className="tkn-drawer-item">
-                    <Link to="/produtos" className="tkn-drawer-nav-chevron-link" onClick={() => setIsMenuOpen(false)}>
-                      <span>Todas as categorias</span>
-                      <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor">
-                        <path d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708" />
-                      </svg>
-                    </Link>
-                  </li>
-                  <li className="tkn-drawer-item">
-                    <Link to="/produtos" className="tkn-drawer-nav-chevron-link" onClick={() => setIsMenuOpen(false)}>
-                      <span>Todas as subcategorias</span>
-                      <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor">
-                        <path d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708" />
-                      </svg>
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-
-              {/* Seção 3: Serviços e benefícios */}
-              <div className="tkn-drawer-section">
-                <h3 className="tkn-drawer-section-title">Serviços e benefícios</h3>
-                <ul className="tkn-drawer-list">
-                  <li className="tkn-drawer-item"><Link to="/institucional" className="tkn-drawer-plain-link" onClick={() => setIsMenuOpen(false)}>Cartão TEKNIX</Link></li>
-                  <li className="tkn-drawer-item"><Link to="/institucional" className="tkn-drawer-plain-link" onClick={() => setIsMenuOpen(false)}>Cliente VIP / Ouro</Link></li>
-                  <li className="tkn-drawer-item"><Link to="/institucional" className="tkn-drawer-plain-link" onClick={() => setIsMenuOpen(false)}>TEKNIX Seguros &amp; Garantia</Link></li>
-                  <li className="tkn-drawer-item"><Link to="/institucional" className="tkn-drawer-plain-link" onClick={() => setIsMenuOpen(false)}>Blog da TEKNIX</Link></li>
-                  <li className="tkn-drawer-item"><Link to="/institucional" className="tkn-drawer-plain-link" onClick={() => setIsMenuOpen(false)}>TEKNIX + Benefícios</Link></li>
-                  <li className="tkn-drawer-item"><a href="https://wa.me/5546999155875" target="_blank" rel="noopener noreferrer" className="tkn-drawer-plain-link" onClick={() => setIsMenuOpen(false)}>WhatsApp da TEKNIX</a></li>
-                  <li className="tkn-drawer-item"><Link to="/institucional" className="tkn-drawer-nav-chevron-link" onClick={() => setIsMenuOpen(false)}><span>Todos os serviços</span><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708" /></svg></Link></li>
-                </ul>
-              </div>
-
-              {/* Seção 4: Canais / Lojas */}
-              <div className="tkn-drawer-section">
+                <div className="tkn-drawer-section-header">
+                  <h3 className="tkn-drawer-section-title">Navegação Rápida</h3>
+                </div>
                 <ul className="tkn-drawer-list">
                   <li className="tkn-drawer-item">
-                    <Link to="/contato" className="tkn-drawer-link" onClick={() => setIsMenuOpen(false)}>
+                    <Link to="/pedidos" className="tkn-drawer-link" onClick={() => setIsMenuOpen(false)}>
                       <span className="tkn-drawer-icon-wrap">
-                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                          <polyline points="9 22 9 12 15 12 15 22" />
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                          <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                          <line x1="12" y1="22.08" x2="12" y2="12" />
                         </svg>
                       </span>
-                      <span className="tkn-drawer-item-text">Comprar na loja física</span>
+                      <span className="tkn-drawer-item-text">Meus Pedidos</span>
+                      <svg className="tkn-drawer-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="9 18 15 12 9 6" />
+                      </svg>
+                    </Link>
+                  </li>
+                  <li className="tkn-drawer-item">
+                    <Link to="/itens-salvos" className="tkn-drawer-link" onClick={() => setIsMenuOpen(false)}>
+                      <span className="tkn-drawer-icon-wrap">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                        </svg>
+                      </span>
+                      <span className="tkn-drawer-item-text">Itens Salvos</span>
+                      <svg className="tkn-drawer-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="9 18 15 12 9 6" />
+                      </svg>
+                    </Link>
+                  </li>
+                  <li className="tkn-drawer-item">
+                    <Link to="/sacola" className="tkn-drawer-link" onClick={() => setIsMenuOpen(false)}>
+                      <span className="tkn-drawer-icon-wrap">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                          <line x1="3" y1="6" x2="21" y2="6" />
+                          <path d="M16 10a4 4 0 0 1-8 0" />
+                        </svg>
+                      </span>
+                      <span className="tkn-drawer-item-text">Sacola de Compras</span>
+                      <svg className="tkn-drawer-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="9 18 15 12 9 6" />
+                      </svg>
                     </Link>
                   </li>
                   <li className="tkn-drawer-item">
                     <Link to="/contato" className="tkn-drawer-link" onClick={() => setIsMenuOpen(false)}>
                       <span className="tkn-drawer-icon-wrap">
-                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                         </svg>
                       </span>
-                      <span className="tkn-drawer-item-text">Vender na TEKNIX</span>
-                    </Link>
-                  </li>
-                  <li className="tkn-drawer-item">
-                    <Link to="/institucional" className="tkn-drawer-link" onClick={() => setIsMenuOpen(false)}>
-                      <span className="tkn-drawer-icon-wrap">
-                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                          <polyline points="7 10 12 15 17 10" />
-                          <line x1="12" y1="15" x2="12" y2="3" />
-                        </svg>
-                      </span>
-                      <span className="tkn-drawer-item-text">Baixe o aplicativo</span>
+                      <span className="tkn-drawer-item-text">Atendimento &amp; Suporte</span>
+                      <svg className="tkn-drawer-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="9 18 15 12 9 6" />
+                      </svg>
                     </Link>
                   </li>
                 </ul>
               </div>
             </div>
 
-            {/* Rodapé Fixo do Drawer */}
+            {/* Rodapé Resumido e Direto */}
             <div className="tkn-drawer-footer" data-testid="header-sidebar-footer">
               <a
                 className="tkn-drawer-btn-primary"
@@ -569,24 +650,8 @@ export default function TeknixHeader() {
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
                 </svg>
-                <span>Comprar pelo WhatsApp</span>
+                <span>WhatsApp: (46) 99915-5875</span>
               </a>
-
-              <Link
-                to="/contato"
-                className="tkn-drawer-btn-outline"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                </svg>
-                <span>Atendimento TEKNIX</span>
-              </Link>
-
-              <div className="tkn-drawer-support-info">
-                <span className="tkn-drawer-phone-label">(46) 99915-5875</span>
-                <span className="tkn-drawer-schedule-label">Seg. a sex. · 8h30 às 18h</span>
-              </div>
             </div>
           </aside>
         </>

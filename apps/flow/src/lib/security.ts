@@ -11,7 +11,10 @@ const IV_LENGTH = 16
 const TAG_LENGTH = 16
 
 function getMasterKey(): Buffer {
-  const secret = process.env.ENCRYPTION_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || 'teknix-default-fallback-master-key-32b!'
+  const secret = process.env.ENCRYPTION_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!secret || secret.length < 32) {
+    throw new Error('ENCRYPTION_KEY deve estar configurada no servidor e possuir pelo menos 32 caracteres.')
+  }
   return crypto.createHash('sha256').update(secret).digest()
 }
 
@@ -33,7 +36,7 @@ export function encryptSecret(plainText: string): string {
     return `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted}`
   } catch (err) {
     console.error('[Security] Falha na criptografia de segredo')
-    return plainText
+    throw new Error('Não foi possível proteger o segredo com criptografia.')
   }
 }
 
@@ -57,8 +60,8 @@ export function decryptSecret(encryptedPayload: string): string {
     decrypted += decipher.final('utf8')
     return decrypted
   } catch (err) {
-    // If it wasn't encrypted or decryption failed, return original safely
-    return encryptedPayload
+    console.error('[Security] Falha na descriptografia de segredo')
+    throw new Error('Não foi possível descriptografar o segredo.')
   }
 }
 

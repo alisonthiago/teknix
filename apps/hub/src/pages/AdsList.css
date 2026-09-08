@@ -42,7 +42,7 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  background: #111827;
+  background: var(--tk-color-primary);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -470,7 +470,7 @@
 .ads-carousel-info-tag {
   font-size: 11px;
   color: #2563eb;
-  background: #eff6ff;
+  background: #f8fafc;
   padding: 4px 8px;
   border-radius: 6px;
   font-weight: 600;

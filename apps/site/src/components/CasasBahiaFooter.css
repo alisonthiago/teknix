@@ -1,584 +1,336 @@
 /* ==========================================================================
-   RODAPÉ OFICIAL TEKNIX — ESTRUTURA 1:1 CASAS BAHIA + IDENTIDADE TEKNIX
+   RODAPÉ OFICIAL TEKNIX — MODELO 1:1 MAGAZINE LUIZA
+   Aba retrátil "Menos Informações", colunas limpas, nav horizontal e disclaimer
    ========================================================================== */
 
-.cb-footer-root {
-  background: #f8f9fa;
-  font-family: var(--cb-font, 'Nunito', sans-serif);
-  color: #1f2937;
-  width: 100%;
-  border-top: 1px solid #e5e7eb;
-}
-
-.cb-footer-container {
-  width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 var(--tkn-space-24);
-}
-
-/* ── SEÇÃO 0: CANAIS DE ATENDIMENTO (3 CAIXAS) ── */
-.cb-footer-support-section {
-  padding: var(--tkn-space-32) 0 var(--tkn-space-24);
-  background: #f8f9fa;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.cb-support-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--tkn-space-24);
-}
-
-.cb-support-card {
+.mgl-footer-root {
   background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: var(--tkn-space-16) var(--tkn-space-24);
-  display: flex;
-  align-items: center;
-  gap: var(--tkn-space-16);
-  text-decoration: none;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  color: #555555;
+  font-family: var(--tkn-font, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+  width: 100%;
+  margin-top: 48px;
+  position: relative;
 }
 
-.cb-support-card:hover {
-  border-color: #111827;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+.mgl-footer-container {
+  width: 100%;
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 0 24px;
+  box-sizing: border-box;
 }
 
-.cb-support-icon-wrap {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: #f3f4f6;
-  color: #111827;
+/* ── BOTÃO DE ALTERNAR SUPERIOR (ABA COM TOPO ARREDONDADO) ── */
+.mgl-footer-toggle-wrap {
   display: flex;
-  align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  width: 100%;
+  position: relative;
+  z-index: 2;
+  margin-bottom: -1px;
+}
+
+.mgl-footer-toggle-btn {
+  background: #ffffff;
+  border: 1px solid #e2e5ea;
+  border-bottom: 1px solid #ffffff;
+  border-radius: 8px 8px 0 0;
+  padding: 10px 24px;
+  min-height: 44px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #4b5563;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
   transition: all 0.2s ease;
+  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.02);
 }
 
-.cb-support-card:hover .cb-support-icon-wrap {
-  background: #111827;
-  color: #ffffff;
+.mgl-footer-toggle-btn:hover {
+  color: #111827;
+  background: #fafafa;
 }
 
-.cb-support-text-wrap {
+.mgl-chevron-icon {
+  transition: transform 0.25s ease;
+}
+
+.mgl-chevron-icon.rotated {
+  transform: rotate(180deg);
+}
+
+/* ── PAINEL EXPANSÍVEL DE LINKS E CERTIFICADOS ── */
+.mgl-footer-expanded-panel {
+  background: #ffffff;
+  border-top: 1px solid #e5e7eb;
+  padding: 36px 0 28px;
+  animation: mglFadeIn 0.25s ease;
+}
+
+@keyframes mglFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.mgl-footer-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr) 220px;
+  gap: 28px;
+}
+
+.mgl-footer-col-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #222222;
+  margin: 0 0 14px 0;
+  letter-spacing: -0.2px;
+}
+
+.mgl-footer-col-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
+  gap: 8px;
 }
 
-.cb-support-title {
-  font-family: var(--cb-font, 'Nunito', sans-serif);
-  font-size: var(--tkn-text-13);
-  font-weight: var(--tkn-weight-medium);
-  color: #111827;
-  margin: 0 0 3px 0;
-  letter-spacing: 0.02em;
-}
-
-.cb-support-desc {
-  font-family: var(--cb-font, 'Nunito', sans-serif);
-  font-size: var(--tkn-text-12);
-  color: #6b7280;
-  margin: 0;
+.mgl-footer-col-list a {
+  color: #555555;
+  font-size: 12px;
+  text-decoration: none;
+  transition: color 0.15s ease;
   line-height: 1.4;
 }
 
-/* ── SEÇÃO 1: PRODUTOS MAIS BUSCADOS (SEO) ── */
-.cb-footer-searched-section {
-  padding: var(--tkn-space-32) 0;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.cb-footer-heading {
-  font-family: var(--cb-font, 'Nunito', sans-serif);
-  font-size: var(--tkn-text-13);
-  font-weight: var(--tkn-weight-medium);
-  color: #111827;
-  margin: 0 0 var(--tkn-space-16) 0;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-}
-
-.cb-searched-columns-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: var(--tkn-space-12) var(--tkn-space-16);
-}
-
-.cb-searched-col {
-  display: flex;
-  flex-direction: column;
-  gap: var(--tkn-space-8);
-}
-
-.cb-searched-col a {
-  font-family: var(--cb-font, 'Nunito', sans-serif);
-  font-size: var(--tkn-text-12);
-  color: #4b5563;
-  text-decoration: none;
-  line-height: 1.45;
-  letter-spacing: 0.01em;
-  transition: color 0.15s ease;
-}
-
-.cb-searched-col a:hover {
+.mgl-footer-col-list a:hover {
   color: #111827;
   text-decoration: underline;
 }
 
-/* ── SEÇÃO 2: GLOSSÁRIO ALFABÉTICO ── */
-.cb-footer-glossary-section {
-  padding: var(--tkn-space-24) 0;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.cb-glossary-alphabet-row {
+/* Coluna de Selos e Certificados */
+.mgl-footer-badges-col {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--tkn-space-8) var(--tkn-space-16);
-  align-items: center;
+  flex-direction: column;
 }
 
-.cb-glossary-letter {
-  font-family: var(--cb-font, 'Nunito', sans-serif);
-  font-size: var(--tkn-text-12);
-  font-weight: var(--tkn-weight-medium);
-  color: #4b5563;
-  text-decoration: none;
-  padding: 3px var(--tkn-space-8);
-  border-radius: 4px;
-  transition: all 0.15s ease;
-}
-
-.cb-glossary-letter:hover {
-  background: #e5e7eb;
-  color: #111827;
-}
-
-.cb-glossary-btn-wrap {
-  margin-top: var(--tkn-space-16);
+.mgl-cert-card {
   display: flex;
-  justify-content: flex-start;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.cb-glossary-toggle-btn {
-  background: none;
-  border: none;
-  color: #111827;
-  font-family: var(--cb-font, 'Nunito', sans-serif);
-  font-size: var(--tkn-text-12);
-  font-weight: var(--tkn-weight-semibold);
-  cursor: pointer;
+.mgl-cert-seal-ebit {
+  border: 1px solid #e2e5ea;
+  border-radius: 6px;
+  padding: 6px 12px;
   display: inline-flex;
+  flex-direction: column;
   align-items: center;
-  gap: var(--tkn-space-8);
-  padding: var(--tkn-space-4) 0;
-  letter-spacing: 0.02em;
-  transition: opacity 0.15s ease;
+  background: #fafafa;
+  width: fit-content;
 }
 
-.cb-glossary-toggle-btn:hover {
-  opacity: 0.75;
+.mgl-seal-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: #1d4ed8;
+  letter-spacing: 0.5px;
 }
 
-/* ── SEÇÃO 3: DIRETÓRIO DE LINKS INSTITUCIONAIS ── */
-.cb-footer-nav-section {
-  padding: var(--tkn-space-32) 0;
-  border-bottom: 1px solid #e5e7eb;
+.mgl-seal-stars {
+  font-size: 11px;
+  color: #f59e0b;
 }
 
-.cb-footer-links-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--tkn-space-32);
+.mgl-seal-sub {
+  font-size: 9px;
+  color: #6b7280;
+  font-weight: 600;
 }
 
-.cb-links-col {
-  display: flex;
+.mgl-cert-seal-ra {
+  border: 1px solid #15803d;
+  border-radius: 6px;
+  padding: 6px 12px;
+  display: inline-flex;
   flex-direction: column;
+  align-items: center;
+  background: #f0fdf4;
+  width: fit-content;
 }
 
-.cb-links-title {
-  font-family: var(--cb-font, 'Nunito', sans-serif);
-  font-size: var(--tkn-text-13);
-  font-weight: var(--tkn-weight-medium);
-  color: #111827;
-  margin: 0 0 var(--tkn-space-16) 0;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+.mgl-ra-badge {
+  font-size: 11px;
+  font-weight: 800;
+  color: #15803d;
 }
 
-.cb-links-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.mgl-ra-sub {
+  font-size: 9px;
+  color: #166534;
+}
+
+.mgl-cert-seal-ssl {
   display: flex;
-  flex-direction: column;
-  gap: var(--tkn-space-8);
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #555555;
+  font-weight: 500;
+  margin-top: 4px;
 }
 
-.cb-links-list li a {
-  font-family: var(--cb-font, 'Nunito', sans-serif);
-  font-size: var(--tkn-text-12);
+.mgl-cert-seal-ssl svg {
+  color: #16a34a;
+}
+
+/* ── BARRA FIXA PRINCIPAL DO RODAPÉ ── */
+.mgl-footer-main {
+  background: #ffffff;
+  border-top: 1px solid #e5e7eb;
+  padding: 24px 0 32px;
+}
+
+/* Navegação Horizontal */
+.mgl-footer-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #f0f1f3;
+}
+
+.mgl-footer-nav a {
   color: #4b5563;
+  font-size: 12px;
+  font-weight: 500;
   text-decoration: none;
-  line-height: 1.45;
   transition: color 0.15s ease;
 }
 
-.cb-links-list li a:hover {
+.mgl-footer-nav a:hover {
   color: #111827;
   text-decoration: underline;
 }
 
-/* Coluna 5 Especial: Card Linha Pro */
-.cb-card-promo-col {
-  background: #111827;
-  color: #ffffff;
-  padding: var(--tkn-space-24) var(--tkn-space-24);
-  border-radius: 8px;
-}
-
-.cb-card-promo-col .cb-links-title {
-  color: var(--site-accent, #B5F500);
-  margin-bottom: var(--tkn-space-12);
-}
-
-.cb-card-subtext {
-  font-family: var(--cb-font, 'Nunito', sans-serif);
-  font-size: var(--tkn-text-12);
-  line-height: 1.5;
-  color: #d1d5db;
-  margin: 0 0 var(--tkn-space-16) 0;
-}
-
-.cb-card-btn-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--site-accent, #B5F500);
-  color: #0a0a0a;
-  padding: var(--tkn-space-12) var(--tkn-space-16);
-  border-radius: 6px;
-  font-size: var(--tkn-text-12);
-  font-weight: var(--tkn-weight-semibold);
-  letter-spacing: 0.02em;
-  text-decoration: none;
-  transition: all 0.2s ease;
-}
-
-.cb-card-btn-link:hover {
-  background: var(--site-accent, #a2e000);
-  transform: translateY(-1px);
-}
-
-/* ── SEÇÃO 4: FORMAS DE PAGAMENTOS ── */
-.cb-footer-payment-section {
-  padding: var(--tkn-space-32) 0;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.cb-payment-methods-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--tkn-space-24);
-}
-
-.cb-payment-group {
+/* Conteúdo Legal + Botão de Televendas */
+.mgl-footer-content {
   display: flex;
-  flex-direction: column;
-  gap: var(--tkn-space-12);
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 28px;
+  margin-bottom: 22px;
 }
 
-.cb-payment-sub {
-  font-family: var(--cb-font, 'Nunito', sans-serif);
-  font-size: var(--tkn-text-12);
-  font-weight: var(--tkn-weight-medium);
-  color: #4b5563;
-  margin: 0;
-}
-
-.cb-badges-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--tkn-space-8);
-}
-
-.cb-payment-badge {
-  background: #ffffff;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
-  padding: var(--tkn-space-4) var(--tkn-space-12);
-  font-size: var(--tkn-text-12);
-  font-weight: var(--tkn-weight-semibold);
-  color: #374151;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-}
-
-.cb-payment-badge.pix {
-  background: #ecfdf5;
-  border-color: #a7f3d0;
-  color: #047857;
-}
-
-.cb-payment-badge.brand-tkn {
-  background: #111827;
-  color: var(--site-accent, #B5F500);
-  border-color: #111827;
-}
-
-/* ── SEÇÃO 5: REDES SOCIAIS, CANAIS DIGITAIS & CERTIFICADOS ── */
-.cb-footer-social-apps-section {
-  padding: var(--tkn-space-32) 0;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.cb-social-apps-grid {
-  display: grid;
-  grid-template-columns: 1.2fr 1.4fr 1.2fr;
-  gap: var(--tkn-space-32);
-  align-items: center;
-}
-
-.cb-social-col,
-.cb-apps-col,
-.cb-certs-col {
-  display: flex;
-  flex-direction: column;
-  gap: var(--tkn-space-12);
-}
-
-.cb-social-title {
-  font-family: var(--cb-font, 'Nunito', sans-serif);
-  font-size: var(--tkn-text-12);
-  font-weight: var(--tkn-weight-medium);
-  color: #111827;
-  margin: 0;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-}
-
-.cb-social-icons-row {
-  display: flex;
-  align-items: center;
-  gap: var(--tkn-space-12);
-}
-
-.cb-social-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: #ffffff;
-  border: 1px solid #d1d5db;
-  color: #374151;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-  transition: all 0.2s ease;
-}
-
-.cb-social-icon:hover {
-  background: #111827;
-  color: #ffffff;
-  border-color: #111827;
-}
-
-.cb-app-buttons-row {
-  display: flex;
-  align-items: center;
-  gap: var(--tkn-space-12);
-}
-
-.cb-app-badge-btn {
-  background: #ffffff;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  padding: var(--tkn-space-8) var(--tkn-space-16);
-  display: inline-flex;
-  align-items: center;
-  gap: var(--tkn-space-8);
-  color: #111827;
-  font-size: var(--tkn-text-12);
-  font-weight: var(--tkn-weight-semibold);
-  text-decoration: none;
-  transition: all 0.2s ease;
-}
-
-.cb-app-badge-btn:hover {
-  background: #111827;
-  color: #ffffff;
-  border-color: #111827;
-}
-
-.cb-certs-col {
-  flex-direction: row;
-  align-items: center;
-  gap: var(--tkn-space-16);
-}
-
-.cb-cert-badge-box {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  padding: var(--tkn-space-8) var(--tkn-space-12);
-  display: flex;
-  align-items: center;
-  gap: var(--tkn-space-12);
-}
-
-.cb-cert-icon {
-  font-size: 18px;
-}
-
-.cb-cert-text {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.2;
-}
-
-.cb-cert-text strong {
-  font-size: var(--tkn-text-12);
-  color: #111827;
-}
-
-.cb-cert-text span {
-  font-size: var(--tkn-text-12);
+.mgl-footer-text-col {
+  flex: 1;
+  font-size: 11px;
+  line-height: 1.6;
   color: #6b7280;
 }
 
-/* ── SEÇÃO 6: FAIXA INFERIOR SLATE DARK TEKNIX ── */
-.cb-footer-legal-bottom-bar {
-  background: #000;
-  color: #94a3b8;
-  padding: var(--tkn-space-24) 0 var(--tkn-space-32);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+.mgl-footer-buttons-col {
+  width: 224px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
 }
 
-.cb-legal-disclaimer {
-  font-family: var(--cb-font, 'Nunito', sans-serif);
-  font-size: var(--tkn-text-12);
-  line-height: 1.55;
-  margin: 0 0 var(--tkn-space-8) 0;
+.mgl-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 16px;
+  border: 1px solid #4b5563;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #1f2937;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.mgl-btn-outline:hover {
+  background: #f9fafb;
+  border-color: #111827;
+  color: #000000;
+}
+
+.mgl-phone-wrap {
   text-align: center;
-  color: #94a3b8;
+  font-size: 11px;
+  color: #6b7280;
+  line-height: 1.4;
 }
 
-.cb-legal-company {
-  font-family: var(--cb-font, 'Nunito', sans-serif);
-  font-size: var(--tkn-text-12);
-  line-height: 1.55;
-  margin: 0;
-  text-align: center;
-  color: #64748b;
+.mgl-phone-wrap strong {
+  display: block;
+  font-size: 17px;
+  font-weight: 700;
+  color: #111827;
+  margin-top: 2px;
+}
+.mgl-footer-toggle-btn { font-weight:700; color:#000; }
+
+/* Linha Final: Copyright */
+.mgl-footer-about {
+  font-size: 11px;
+  color: #8892a0;
+  line-height: 1.5;
+  border-top: 1px solid #f0f1f3;
+  padding-top: 16px;
+  text-align: left;
 }
 
-/* ==========================================================================
-   RESPONSIVIDADE OFICIAL (1920px, 1440px, 1024px, 768px, 430px, 390px, 360px)
-   ========================================================================== */
-
+/* ── RESPONSIVIDADE ── */
 @media (max-width: 1024px) {
-  .cb-searched-columns-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-
-  .cb-footer-links-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--tkn-space-24);
-  }
-
-  .cb-card-promo-col {
-    grid-column: span 3;
-  }
-
-  .cb-social-apps-grid {
-    grid-template-columns: 1fr;
-    gap: var(--tkn-space-24);
-  }
-}
-
-@media (max-width: 768px) {
-  .cb-footer-container {
-    padding: 0 var(--tkn-space-16);
-  }
-
-  .cb-support-grid {
-    grid-template-columns: 1fr;
-    gap: var(--tkn-space-12);
-  }
-
-  .cb-support-card {
-    padding: var(--tkn-space-16) var(--tkn-space-16);
-  }
-
-  .cb-searched-columns-grid {
+  .mgl-footer-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: var(--tkn-space-12) var(--tkn-space-16);
+    gap: 24px;
   }
-
-  .cb-footer-links-grid {
-    grid-template-columns: 1fr;
-    gap: var(--tkn-space-24);
-  }
-
-  .cb-card-promo-col {
-    grid-column: span 1;
-  }
-
-  .cb-payment-methods-grid {
-    grid-template-columns: 1fr;
-    gap: var(--tkn-space-16);
-  }
-
-  .cb-social-icons-row {
-    justify-content: flex-start;
-  }
-
-  .cb-app-buttons-row {
-    flex-wrap: wrap;
-  }
-
-  .cb-certs-col {
+  .mgl-footer-content {
     flex-direction: column;
+    gap: 18px;
+  }
+  .mgl-footer-buttons-col {
+    width: 100%;
     align-items: flex-start;
   }
-
-  .cb-legal-disclaimer,
-  .cb-legal-company {
+  .mgl-btn-outline {
+    max-width: 260px;
+  }
+  .mgl-phone-wrap {
     text-align: left;
   }
 }
 
-@media (max-width: 430px) {
-  .cb-footer-container {
-    padding: 0 var(--tkn-space-12);
+@media (max-width: 640px) {
+  .mgl-footer-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
   }
-
-  .cb-support-card {
-    gap: var(--tkn-space-12);
-    padding: var(--tkn-space-12) var(--tkn-space-16);
+  .mgl-footer-nav {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
   }
-
-  .cb-support-title {
-    font-size: var(--tkn-text-12);
+  .mgl-footer-buttons-col {
+    width: 100%;
   }
-
-  .cb-support-desc {
-    font-size: var(--tkn-text-12);
-  }
-
-  .cb-glossary-letter {
-    font-size: var(--tkn-text-12);
-    padding: 2px var(--tkn-space-4);
+  .mgl-btn-outline {
+    width: 100%;
+    max-width: 100%;
   }
 }

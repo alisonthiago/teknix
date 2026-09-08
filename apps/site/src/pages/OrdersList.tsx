@@ -26,7 +26,9 @@ import {
   MapPin,
   CreditCard,
   X,
-  MessageSquare
+  MessageSquare,
+  User,
+  Heart
 } from 'lucide-react'
 import './OrdersList.css'
 
@@ -254,10 +256,22 @@ export default function OrdersList() {
           <div className="teknix-orders-localnav-inner">
             <Link to="/conta" className="teknix-orders-localnav-title">Minha conta</Link>
             <nav className="teknix-orders-localnav-links" aria-label="Navegação da conta">
-              <Link to="/conta" className="teknix-orders-localnav-link">Visão Geral</Link>
-              <Link to="/pedidos" className="teknix-orders-localnav-link active" aria-current="page">Pedidos</Link>
-              <Link to="/itens-salvos" className="teknix-orders-localnav-link">Itens Salvos</Link>
-              <Link to="/buscar-pedido" className="teknix-orders-localnav-link">Rastrear</Link>
+              <Link to="/conta" className="teknix-orders-localnav-link">
+                <User size={15} />
+                <span>Visão Geral</span>
+              </Link>
+              <Link to="/pedidos" className="teknix-orders-localnav-link active" aria-current="page">
+                <Package size={15} />
+                <span>Pedidos</span>
+              </Link>
+              <Link to="/itens-salvos" className="teknix-orders-localnav-link">
+                <Heart size={15} />
+                <span>Itens Salvos</span>
+              </Link>
+              <Link to="/buscar-pedido" className="teknix-orders-localnav-link">
+                <Truck size={15} />
+                <span>Rastrear</span>
+              </Link>
             </nav>
           </div>
         </div>
@@ -359,7 +373,7 @@ export default function OrdersList() {
                 : 'Você ainda não possui pedidos com esse status.'}
             </Editable>
             <Link to="/produtos" className="teknix-orders-empty-cta">
-              Explorar Catálogo de Produtos TEKNIX →
+              Explorar produtos →
             </Link>
           </div>
         ) : (

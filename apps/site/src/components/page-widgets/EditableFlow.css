@@ -232,11 +232,22 @@
   transition: all 0.1s ease;
 }
 
+/* The drag preview must never win hit-testing over the real canvas. */
+.drag-overlay,
+.drag-preview,
+.drag-ghost,
+[data-drag-overlay="true"] {
+  pointer-events: none !important;
+}
+
 .editor-flow-drop-line.is-horizontal,
 .editor-flow-drop-line:not(.is-vertical) {
-  height: 3px;
+  min-height: 28px;
+  height: 28px;
   width: 100%;
   margin: 6px 0;
+  background: rgba(219, 70, 142, 0.08);
+  border: 2px dashed #db468e;
 }
 
 .editor-flow-drop-line.is-horizontal::after,

@@ -13,7 +13,7 @@ const money = (value: number) => value.toLocaleString('pt-BR',{style:'currency',
 export function storefrontCard(product: Product): CbProductItem {
   const pricing = productPricing(product.price,product.promo_price,product.commerce)
   return {id:product.id,title:product.name,img:product.image_url || '',images:product.images,
-    to:`/produtos/${encodeURIComponent(product.sku || product.id)}`,
+    to:`/${encodeURIComponent(product.sku || product.id)}`,
     signals:commerceSignals(product),reviews:'',oldPrice:pricing.base>pricing.pix ? money(pricing.base) : null,
     pricePix:money(pricing.pix),hasNoPixLabel:true,discountBadge:pricing.discount ? `${pricing.discount}% OFF` : null,
     installments:pricing.commerce.installments>1 ? `${pricing.commerce.installments}x de ${money(pricing.installment)} sem juros` : null,

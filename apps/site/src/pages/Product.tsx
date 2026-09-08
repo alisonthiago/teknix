@@ -4,7 +4,7 @@ import { Editable, PageWidgets } from '../components/page-widgets/PageWidgets'
    TEKNIX SITE — PÁGINA OFICIAL DE DETALHES DO PRODUTO (1:1 PADRÃO HAGOR/TEKNIX)
    ========================================================================== */
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { getProductBySku, getProductById, getProducts } from '../services/products'
 import { useCart } from '../context/CartContext'
@@ -12,12 +12,27 @@ import { useFavorites } from '../context/FavoritesContext'
 import type { Product as ProductType } from '../types/database'
 import './Product.css'
 import { Ads } from '../components/Ads'
-import { DEMO_PRODUCT, DEMO_SIGNALS, DEMO_REVIEWS } from '../services/demoProduct'
-import ProductReviews from '../components/ProductReviews'
+import { FileText, ShieldCheck, Truck, RotateCcw, Headphones, Zap, BatteryCharging, Wrench, ChevronDown, CheckCircle2 } from 'lucide-react'
 import './ProductResponsive.css'
-import { productPricing } from '../../../../packages/core/src/productCommerce'
+import { productPricing, cleanProductTitle, normalizeShowcase, type ProductEditorialShowcase } from '../../../../packages/core/src/productCommerce'
 import { commerceSignals } from '../services/storefrontCommerce'
 import { remainingOfferTime } from '../services/productPresentation'
+
+function renderBenefitIcon(iconName?: string) {
+  switch (iconName) {
+    case 'battery':
+      return <BatteryCharging size={15} />
+    case 'shield':
+      return <ShieldCheck size={15} />
+    case 'wrench':
+      return <Wrench size={15} />
+    case 'truck':
+      return <Truck size={15} />
+    case 'zap':
+    default:
+      return <Zap size={15} />
+  }
+}
 
 function formatMoney(value: number) {
   return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -74,8 +89,6 @@ function getYoutubeVideoId(url?: string) {
 export default function Product() {
   const params = useParams<{ sku?: string; slug?: string; categoria?: string; segmento?: string }>()
   const productId = params.slug || params.categoria || params.sku || ''
-  const [searchParams] = useSearchParams()
-  const isDemo = import.meta.env.DEV && searchParams.get('demo') === '1' && productId === DEMO_PRODUCT.sku
   const navigate = useNavigate()
 
   const [product, setProduct] = useState<ProductType | null>(null)
@@ -119,8 +132,19 @@ export default function Product() {
   const [freightCalculated, setFreightCalculated] = useState(false)
   const [freightLoading, setFreightLoading] = useState(false)
   const [showFreightCalc, setShowFreightCalc] = useState(false)
+  const [showCepModal, setShowCepModal] = useState(false)
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
+  const [showPaymentPopover, setShowPaymentPopover] = useState(false)
+  const [paymentTab, setPaymentTab] = useState<'credit' | 'pix' | 'boleto'>('credit')
+  const paymentPopoverRef = useRef<HTMLDivElement>(null)
+  const [deliveryCep, setDeliveryCep] = useState(() => localStorage.getItem('teknix_user_cep') || '')
   const [toastMessage, setToastMessage] = useState<string | null>(null)
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false)
+  const [activeOverviewTab, setActiveOverviewTab] = useState<'desc' | 'specs'>('desc')
+  const [isSpecsExpanded, setIsSpecsExpanded] = useState(false)
+  const [openFaq, setOpenFaq] = useState<number | null>(0)
   const [showStickyNav, setShowStickyNav] = useState(false)
+  const [mobileStickyNavOpen, setMobileStickyNavOpen] = useState(false)
   const [activeSection, setActiveSection] = useState('overview')
   const [pricingTime,setPricingTime] = useState(Date.now)
   useEffect(()=>{
@@ -129,19 +153,37 @@ export default function Product() {
     return ()=>clearInterval(timer)
   },[product?.commerce?.offerEnabled])
 
+  useEffect(() => {
+    const handlePopClickOutside = (e: MouseEvent) => {
+      if (paymentPopoverRef.current && !paymentPopoverRef.current.contains(e.target as Node)) {
+        setShowPaymentPopover(false)
+      }
+    }
+    if (showPaymentPopover) {
+      document.addEventListener('mousedown', handlePopClickOutside)
+    }
+    return () => {
+      document.removeEventListener('mousedown', handlePopClickOutside)
+    }
+  }, [showPaymentPopover])
+  useEffect(() => {
+    const handleCepChange = (event: Event) => {
+      const detail = (event as CustomEvent<{ cep?: string }>).detail
+      if (!detail?.cep) return
+      setDeliveryCep(detail.cep)
+      setCep(detail.cep)
+      setFreightCalculated(true)
+    }
+    window.addEventListener('teknix:cep-changed', handleCepChange)
+    return () => window.removeEventListener('teknix:cep-changed', handleCepChange)
+  }, [])
+
   const { addToCart } = useCart()
   const { isFavorite, toggleFavorite } = useFavorites()
 
   useEffect(() => {
     window.scrollTo(0, 0)
     if (!productId) return
-    if (isDemo) {
-      setProduct(DEMO_PRODUCT)
-      setRelated([])
-      setActiveImageIndex(0)
-      setLoading(false)
-      return
-    }
     setLoading(true)
     let cancelled = false
 
@@ -162,12 +204,14 @@ export default function Product() {
 
     load()
     return () => { cancelled = true }
-  }, [productId, isDemo])
+  }, [productId])
 
   useEffect(() => {
     const updateStickyNav = () => {
-      setShowStickyNav(window.scrollY > 420)
-      const sections = ['overview', 'specifications', 'differentials', 'warranty', 'reviews']
+      const isVisible = window.scrollY > 420
+      setShowStickyNav(isVisible)
+      if (!isVisible) setMobileStickyNavOpen(false)
+      const sections = ['overview', 'specifications']
       const current = sections.filter(id => {
         const el = document.getElementById(id)
         return el && el.getBoundingClientRect().top <= 150
@@ -202,7 +246,7 @@ export default function Product() {
   const oldPrice=basePrice
   const cardPrice=finalPrice
 
-  const currentSignals = isDemo ? DEMO_SIGNALS : commerceSignals(currentProduct, pricingTime)
+  const currentSignals = commerceSignals(currentProduct, pricingTime)
   const remSec = remainingOfferTime(currentSignals?.offerEndsAt, pricingTime)
   const remainingSeconds = remSec > 0 ? remSec : 5 * 3600 + 2 * 60 + 47
   const pixInt = Math.floor(pixPrice).toLocaleString('pt-BR')
@@ -215,14 +259,13 @@ export default function Product() {
   const fav = isFavorite(currentProduct.id)
 
   const handleAddToCart = () => {
-    if (isDemo) return
     addToCart({
       id: currentProduct.id,
       name: currentProduct.name,
       sku: currentProduct.sku || currentProduct.id,
       price: basePrice,
       promo_price: finalPrice,
-      image: productImages[0],
+      image: displayProductImages[0] || productImages[0],
       quantity: quantity,
       stock: currentProduct.stock || 0
     })
@@ -230,24 +273,165 @@ export default function Product() {
   }
 
   const handleOneClickBuy = () => {
-    if (isDemo) return
     handleAddToCart()
     navigate('/checkout')
   }
 
   const handleCalculateFreight = (e: React.FormEvent) => {
     e.preventDefault()
-    if (isDemo) return
     if (!cep.replace(/\D/g, '')) return
     setFreightLoading(true)
     setTimeout(() => {
       setFreightLoading(false)
       setFreightCalculated(true)
+      setShowCepModal(false)
     }, 600)
   }
 
+  const editorialHeroTitle = (() => {
+    let clean = cleanProductTitle(currentProduct.name || '')
+    clean = clean.replace(/\s*(cor\s+[a-z]+|frequ[eê]ncia[^,]*|127\/220v|50hz\/60|bivolt|voltagem[^,]*).*/i, '').trim()
+    if (!clean || clean.length < 5) return currentProduct.name || 'este equipamento'
+    return clean
+  })()
+
+  const rawShowcase = (currentProduct as any)?.editorial_showcase || (currentProduct.store_meta?.specifications as any)?.editorial_showcase
+  const showcase: ProductEditorialShowcase = normalizeShowcase(rawShowcase, editorialHeroTitle, productImages)
+  const presentationImages = ((rawShowcase as any)?.presentation_images || []).filter((image: unknown): image is string => typeof image === 'string' && image.trim().length > 0).slice(0, 3)
+  const displayProductImages = productImages.filter((image) => !presentationImages.includes(image))
+  const customFaqs = ((rawShowcase as any)?.custom_faqs || []).filter((item: any) => item?.question?.trim() && item?.answer?.trim())
+  const displayFaqs = customFaqs
+
+
   return (
-    <PageWidgets key={currentProduct.id} scope={`product:${currentProduct.id}`}><div className="product-detail-page-root"><EditableFlow id="product-page" label="Página do produto">
+    <PageWidgets key={currentProduct.id} scope={`product:${currentProduct.id}`} product={currentProduct}><div className="product-detail-page-root">
+      {showCepModal && (
+        <div className="pdp-cep-modal" role="dialog" aria-modal="true" aria-labelledby="pdp-cep-title" onMouseDown={() => setShowCepModal(false)}>
+          <div className="pdp-cep-modal-card" onMouseDown={event => event.stopPropagation()}>
+            <button type="button" className="pdp-cep-modal-close" onClick={() => setShowCepModal(false)} aria-label="Fechar">×</button>
+            <h2 id="pdp-cep-title">Onde vamos entregar?</h2>
+            <p>Assim, mostramos as melhores ofertas e prazos para a sua região.</p>
+            <form onSubmit={handleCalculateFreight}>
+              <label htmlFor="pdp-cep-modal-input">Enviar para</label>
+              <div className="pdp-cep-modal-input-row">
+                <span aria-hidden="true">⌖</span>
+                <input id="pdp-cep-modal-input" type="tel" inputMode="numeric" placeholder="CEP" maxLength={9} value={cep} onChange={e => setCep(e.target.value)} autoFocus />
+                <a href="https://buscacepinter.correios.com.br/app/endereco/index.php" target="_blank" rel="noreferrer">Não sei o meu CEP</a>
+              </div>
+              <button type="submit" disabled={freightLoading || !cep.replace(/\D/g, '')}>{freightLoading ? 'Calculando…' : 'Confirmar'}</button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL DE MEIOS DE PAGAMENTO (1:1 MERCADO LIVRE / TEKNIX) ── */}
+      {showPaymentModal && (
+        <div className="pdp-payment-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="pdp-payment-title" onMouseDown={() => setShowPaymentModal(false)}>
+          <div className="pdp-payment-modal-card" onMouseDown={event => event.stopPropagation()}>
+            <div className="pdp-payment-modal-header">
+              <div>
+                <h2 id="pdp-payment-title" className="pdp-payment-modal-title">Meios de pagamento</h2>
+                <p className="pdp-payment-modal-subtitle">Condições oficiais e simulação de parcelas para este produto</p>
+              </div>
+              <button type="button" className="pdp-payment-modal-close" onClick={() => setShowPaymentModal(false)} aria-label="Fechar">✕</button>
+            </div>
+
+            {/* Abas */}
+            <div className="pdp-payment-tabs">
+              <button
+                type="button"
+                className={`pdp-payment-tab ${paymentTab === 'credit' ? 'active' : ''}`}
+                onClick={() => setPaymentTab('credit')}
+              >
+                Cartão de crédito
+              </button>
+              <button
+                type="button"
+                className={`pdp-payment-tab ${paymentTab === 'pix' ? 'active' : ''}`}
+                onClick={() => setPaymentTab('pix')}
+              >
+                Pix <span className="pdp-tab-discount">{discountPercent > 0 ? `-${discountPercent}%` : 'Desconto'}</span>
+              </button>
+              <button
+                type="button"
+                className={`pdp-payment-tab ${paymentTab === 'boleto' ? 'active' : ''}`}
+                onClick={() => setPaymentTab('boleto')}
+              >
+                Boleto Bancário
+              </button>
+            </div>
+
+            {/* Conteúdo */}
+            <div className="pdp-payment-tab-content">
+              {paymentTab === 'credit' && (
+                <div className="pdp-payment-credit-panel">
+                  <div className="pdp-payment-flags-row">
+                    <img className="pdp-flag-logo" src="https://http2.mlstatic.com/storage/logos-api-admin/a5f047d0-9be0-11ec-aad4-c3381f368aaf-m.svg" alt="Visa" />
+                    <img className="pdp-flag-logo" src="https://http2.mlstatic.com/storage/logos-api-admin/9cf818e0-723a-11f0-a459-cf21d0937aeb-m.svg" alt="Mastercard" />
+                    <img className="pdp-flag-logo" src="https://http2.mlstatic.com/storage/logos-api-admin/bb7c7bb0-adec-11f0-92e6-59fb0bcb38c2-m.svg" alt="Elo" />
+                    <img className="pdp-flag-logo" src="https://http2.mlstatic.com/storage/logos-api-admin/b2c93a40-f3be-11eb-9984-b7076edb0bb7-m.svg" alt="American Express" />
+                    <img className="pdp-flag-logo" src="https://http2.mlstatic.com/storage/logos-api-admin/f3e8e940-f549-11ef-bad6-e9962bcd76e5-m.svg" alt="Mercado Crédito" />
+                  </div>
+                  <div className="pdp-payment-installments-list">
+                    {Array.from({ length: Math.min(commerce.installments || 10, 12) }, (_, i) => i + 1).map(n => {
+                      const installmentPrice = cardPrice / n
+                      return (
+                        <div className="pdp-installment-row" key={n}>
+                          <span className="pdp-installment-times"><strong>{n}x</strong> de {formatMoney(installmentPrice)}</span>
+                          <span className="pdp-installment-tag">sem juros</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {paymentTab === 'pix' && (
+                <div className="pdp-payment-pix-panel">
+                  <div className="pdp-pix-price-highlight">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <img src="https://http2.mlstatic.com/storage/logos-api-admin/f99fcca0-f3bd-11eb-9984-b7076edb0bb7-m.svg" alt="Pix" style={{ height: 26 }} />
+                      <span className="pdp-pix-total">{formatMoney(pixPrice)}</span>
+                    </div>
+                    <span className="pdp-pix-badge">Aprovação imediata</span>
+                  </div>
+                  <ul className="pdp-pix-instructions">
+                    <li>✓ Pagamento à vista com o menor preço garantido.</li>
+                    <li>✓ O código Pix e o QR Code são gerados na etapa de checkout.</li>
+                    <li>✓ Liberação e separação do estoque com máxima prioridade.</li>
+                  </ul>
+                </div>
+              )}
+
+              {paymentTab === 'boleto' && (
+                <div className="pdp-payment-boleto-panel">
+                  <div className="pdp-boleto-price-highlight">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <img src="https://http2.mlstatic.com/storage/logos-api-admin/00174300-571e-11e8-8364-bff51f08d440-m.svg" alt="Boleto" style={{ height: 24 }} />
+                      <span className="pdp-boleto-total">{formatMoney(cardPrice)}</span>
+                    </div>
+                    <span className="pdp-boleto-sub">à vista no boleto</span>
+                  </div>
+                  <ul className="pdp-boleto-instructions">
+                    <li>✓ Pague em qualquer banco, casa lotérica ou internet banking.</li>
+                    <li>✓ Vencimento do boleto em até 3 dias corridos.</li>
+                    <li>✓ A compensação bancária é realizada de 1 a 2 dias úteis.</li>
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            {/* Rodapé Seguro */}
+            <div className="pdp-payment-modal-footer">
+              <div className="pdp-security-note">
+                <ShieldCheck size={16} />
+                <span>Transação 100% segura com criptografia ponta a ponta e proteção ao comprador TEKNIX.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      <EditableFlow id="product-page" label="Página do produto">
       <Ads position="product-header" />
       {/* Toast Notification */}
       {toastMessage && (
@@ -256,17 +440,90 @@ export default function Product() {
         </div>
       )}
 
-      {/* ── STICKY NAV (ESTILO SANDISK) ── */}
+      {/* ── STICKY NAV (1:1 EXATO PADRÃO SANDISK / APPLE — COR PRETO, MESMO ESPAÇAMENTO, LARGURA E EFEITO) ── */}
       <div className={`pdp-sticky-nav ${showStickyNav ? 'is-visible' : ''}`} id="pdp-sticky-nav" aria-hidden={!showStickyNav} inert={!showStickyNav}>
         <div className="pdp-sticky-nav-inner">
-          <div className="pdp-sticky-nav-title">
-            <span className="pdp-sticky-nav-name">{currentProduct.name}</span>
-            <span className="pdp-sticky-nav-sku">{formatMoney(pixPrice)} no Pix {isDemo && '· Demonstração'}</span>
+          <div
+            className="pdp-sticky-nav-branding"
+            onClick={() => setMobileStickyNavOpen(!mobileStickyNavOpen)}
+            role="button"
+            tabIndex={0}
+            aria-expanded={mobileStickyNavOpen}
+          >
+            <span className="pdp-sticky-nav-title">{editorialHeroTitle}</span>
+            <span className="pdp-sticky-nav-spec">21V Lítio • 350 N.m • 46 Peças</span>
+            <span className={`pdp-sticky-nav-chevron-wrap ${mobileStickyNavOpen ? 'is-open' : ''}`}>
+              <ChevronDown size={15} />
+            </span>
           </div>
-          <nav className="pdp-sticky-nav-links">
-            {[['overview','Produto'],['specifications','Especificações'],['differentials','Detalhes'],['warranty','Garantia'],['reviews','Avaliações']].map(([id,label]) => <a key={id} href={`#${id}`} className={activeSection===id ? 'active' : ''} aria-current={activeSection===id ? 'location' : undefined}>{label}</a>)}
+
+          {/* Desktop links */}
+          <nav className="pdp-sticky-nav-links desktop-only" aria-label="Navegação do produto">
+            <a
+              href="#overview"
+              className={activeSection === 'overview' ? 'active' : ''}
+            >
+              Visão geral
+            </a>
+            <a
+              href="#specifications"
+              className={activeSection === 'specifications' ? 'active' : ''}
+            >
+              Especificações
+            </a>
+            <a
+              href="#specifications"
+              className={activeSection === 'faq' ? 'active' : ''}
+            >
+              Suporte e Recursos
+            </a>
+            <button
+              type="button"
+              className="pdp-sticky-nav-cta-btn"
+              onClick={handleOneClickBuy}
+            >
+              Comprar
+            </button>
           </nav>
+
+          {/* Mobile CTA */}
+          <div className="pdp-sticky-nav-mobile-cta">
+            <button
+              type="button"
+              className="pdp-sticky-nav-cta-btn"
+              onClick={handleOneClickBuy}
+            >
+              Comprar
+            </button>
+          </div>
         </div>
+
+        {/* Mobile Dropdown Menu (Padrão Apple Local Nav) */}
+        {mobileStickyNavOpen && (
+          <div className="pdp-sticky-nav-mobile-menu">
+            <a
+              href="#overview"
+              className={activeSection === 'overview' ? 'active' : ''}
+              onClick={() => setMobileStickyNavOpen(false)}
+            >
+              Visão geral
+            </a>
+            <a
+              href="#specifications"
+              className={activeSection === 'specifications' ? 'active' : ''}
+              onClick={() => setMobileStickyNavOpen(false)}
+            >
+              Especificações
+            </a>
+            <a
+              href="#specifications"
+              className={activeSection === 'faq' ? 'active' : ''}
+              onClick={() => setMobileStickyNavOpen(false)}
+            >
+              Suporte e Recursos
+            </a>
+          </div>
+        )}
       </div>
 
       {/* ── 1. BREADCRUMBS OFICIAIS ── */}
@@ -279,7 +536,7 @@ export default function Product() {
                 <Editable as="span" widgetId="product-control-1" className="divider">/</Editable>
               </li>
               <li>
-                <Link to="/categoria/ferramentas-eletricas" title="Ferramentas Elétricas">Ferramentas Elétricas</Link>
+                <Link to="/produtos" title="Produtos">Produtos</Link>
                 <Editable as="span" widgetId="product-control-2" className="divider">/</Editable>
               </li>
               <li>
@@ -288,7 +545,7 @@ export default function Product() {
                 </Link>
                 <Editable as="span" widgetId="product-control-3" className="divider">/</Editable>
               </li>
-              <li className="active-breadcrumb">{currentProduct.name}</li>
+              <li className="active-breadcrumb" title={cleanProductTitle(currentProduct.name)}>{cleanProductTitle(currentProduct.name)}</li>
             </ul>
           </div>
         </div>
@@ -309,10 +566,10 @@ export default function Product() {
                     className="main-image-nav prev"
                     onClick={() => {
                       setShowVideoMain(false)
-                      setActiveImageIndex((activeImageIndex - 1 + productImages.length) % productImages.length)
+                      setActiveImageIndex((activeImageIndex - 1 + displayProductImages.length) % displayProductImages.length)
                     }}
                     aria-label="Imagem anterior"
-                    hidden={productImages.length < 2}
+                        hidden={displayProductImages.length < 2}
                   >
                     ‹
                   </Editable>
@@ -400,7 +657,7 @@ export default function Product() {
                       ) : null
                     ) : (
                       <Editable as="img" widgetId={activeImageIndex === 0 ? 'product-3' : `product-photo-${activeImageIndex}`}
-                        src={productImages[activeImageIndex] || productImages[0]}
+                        src={displayProductImages[activeImageIndex] || displayProductImages[0]}
                         alt={currentProduct.name}
                         className="main-product-img"
                       />
@@ -411,10 +668,10 @@ export default function Product() {
                     className="main-image-nav next"
                     onClick={() => {
                       setShowVideoMain(false)
-                      setActiveImageIndex((activeImageIndex + 1) % productImages.length)
+                      setActiveImageIndex((activeImageIndex + 1) % displayProductImages.length)
                     }}
                     aria-label="Próxima imagem"
-                    hidden={productImages.length < 2}
+                    hidden={displayProductImages.length < 2}
                   >
                     ›
                   </Editable>
@@ -423,7 +680,7 @@ export default function Product() {
                 {/* Miniaturas Horizontais (abaixo da foto principal) */}
                 <div className="thumbs-horizontal-wrapper">
                   <div className="thumbs-horizontal-list">
-                    {productImages.map((imgUrl, idx) => (
+                    {displayProductImages.map((imgUrl, idx) => (
                       <button
                         key={idx}
                         type="button"
@@ -492,12 +749,160 @@ export default function Product() {
                   </div>
                 </div>
               </Editable>
+
+              {/* TABS ABAIXO DA GALERIA: DESCRIÇÃO E ESPECIFICAÇÃO (COM RESUMO E BOTÃO VER MAIS) */}
+              <div className="pdp-gallery-description-block" id="pdp-main-description">
+                <div className="pdp-tabs-nav" role="tablist">
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={activeOverviewTab === 'desc'}
+                    className={`pdp-tab-btn ${activeOverviewTab === 'desc' ? 'active' : ''}`}
+                    onClick={() => setActiveOverviewTab('desc')}
+                  >
+                    Descrição
+                  </button>
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={activeOverviewTab === 'specs'}
+                    className={`pdp-tab-btn ${activeOverviewTab === 'specs' ? 'active' : ''}`}
+                    onClick={() => setActiveOverviewTab('specs')}
+                  >
+                    Especificações
+                  </button>
+                </div>
+
+                <div className="pdp-tabs-content">
+                  {/* TAB 1: DESCRIÇÃO */}
+                  {activeOverviewTab === 'desc' && (
+                    <div className="pdp-gallery-description-content">
+                      <div className={`pdp-tab-collapsible-wrapper ${!isDescriptionExpanded ? 'collapsed' : ''}`}>
+                        <div className="pdp-gallery-description-text">
+                          {currentProduct.description || (
+                            `Experimente a máxima potência e versatilidade com o Kit Chave de Impacto 21V e Jogo de Soquetes 46 Peças!
+
+Tenha uma ferramenta profissional, ergonômica e robusta, com torque elevado de 350 N.m capaz de atender desde manutenções automotivas e trocas de rodas até montagens estruturais pesadas em canteiros de obras.
+
+O kit acompanha bateria de íons de lítio 21V com indicador de nível de carga, carregador inteligente rápido bivolt (127V/220V) e estojo completo com 46 peças e soquetes forjados em cromo-vanádio de alta resistência ao impacto.
+
+Principais Destaques:
+• Motor Brushless de alta performance sem escovas de carvão, garantindo menor aquecimento e maior durabilidade.
+• Iluminação LED frontal embutida para trabalho em áreas de pouca luminosidade ou caixas de rodas.
+• Seletor eletrônico de velocidade variável e reversão de sentido de rotação instantâneo.
+• Empunhadura emborrachada antiderrapante com distribuição de peso balanceada para longas jornadas de trabalho.`
+                          )}
+                        </div>
+                        {!isDescriptionExpanded && <div className="pdp-tab-fade-overlay" />}
+                      </div>
+
+                      <button
+                        type="button"
+                        className="pdp-tab-toggle-btn"
+                        onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                        aria-expanded={isDescriptionExpanded}
+                      >
+                        {isDescriptionExpanded ? (
+                          <>
+                            <span>Ver menos</span>
+                            <ChevronDown size={14} style={{ transform: 'rotate(180deg)' }} />
+                          </>
+                        ) : (
+                          <>
+                            <span>Ver mais</span>
+                            <ChevronDown size={14} />
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
+
+                  {/* TAB 2: ESPECIFICAÇÕES */}
+                  {activeOverviewTab === 'specs' && (
+                    <div className="pdp-tab-specs-pane">
+                      <div className={`pdp-tab-collapsible-wrapper ${!isSpecsExpanded ? 'collapsed' : ''}`}>
+                        <div className="pdp-specs-table-wrapper">
+                          <table className="pdp-specs-table">
+                            <tbody>
+                              <tr>
+                                <th>Marca</th>
+                                <td>{currentProduct.brand || 'Bomvink'}</td>
+                              </tr>
+                              <tr>
+                                <th>Modelo</th>
+                                <td>{currentProduct.name || 'Kit Chave De Impacto 21V'}</td>
+                              </tr>
+                              <tr>
+                                <th>SKU / Código</th>
+                                <td><code>{currentProduct.sku || 'BOM-9146-21V'}</code></td>
+                              </tr>
+                              <tr>
+                                <th>Tensão da Bateria</th>
+                                <td>21V Íon-Lítio Recarregável</td>
+                              </tr>
+                              <tr>
+                                <th>Torque Máximo</th>
+                                <td>350 N.m</td>
+                              </tr>
+                              <tr>
+                                <th>Velocidade sem Carga</th>
+                                <td>0 a 2.800 RPM</td>
+                              </tr>
+                              <tr>
+                                <th>Frequência de Impactos</th>
+                                <td>0 a 3.200 IPM</td>
+                              </tr>
+                              <tr>
+                                <th>Encaixe do Mandril</th>
+                                <td>Quadrado de 1/2" (12.7 mm) com pino trava</td>
+                              </tr>
+                              <tr>
+                                <th>Alimentação do Carregador</th>
+                                <td>Bivolt Automático (110V / 220V — 50Hz/60Hz)</td>
+                              </tr>
+                              <tr>
+                                <th>Acessórios Inclusos</th>
+                                <td>Jogo de Soquetes 46 Peças, Maleta Rígida Reforçada, Bateria 21V, Carregador</td>
+                              </tr>
+                              <tr>
+                                <th>Garantia de Fábrica</th>
+                                <td>90 dias oficiais contra defeitos de fabricação</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                        {!isSpecsExpanded && <div className="pdp-tab-fade-overlay" />}
+                      </div>
+
+                      <button
+                        type="button"
+                        className="pdp-tab-toggle-btn"
+                        onClick={() => setIsSpecsExpanded(!isSpecsExpanded)}
+                        aria-expanded={isSpecsExpanded}
+                      >
+                        {isSpecsExpanded ? (
+                          <>
+                            <span>Ver menos</span>
+                            <ChevronDown size={14} style={{ transform: 'rotate(180deg)' }} />
+                          </>
+                        ) : (
+                          <>
+                            <span>Ver mais</span>
+                            <ChevronDown size={14} />
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
 
             {/* LADO DIREITO: INFORMAÇÕES, PREÇOS, QUANTIDADE, BOTÕES E FRETE */}
             {/* LADO DIREITO: INFORMAÇÕES, PREÇOS, QUANTIDADE, BOTÕES E FRETE (PADRÃO 1:1 MERCADO LIVRE) */}
             {/* LADO DIREITO: INFORMAÇÕES DO PRODUTO E CARD DE COMPRA COMPACTO (1:1 MERCADO LIVRE) */}
             <Editable as="div" widgetId="product-control-12" className="container-info ml-pdp-container">
+              <EditableFlow id="product-info-column" label="Informações do produto" compact>
 
               {/* 1. Linha superior: Condição, Vendas, Selo e Favoritar */}
               <div className="ml-pdp-top-line">
@@ -515,7 +920,6 @@ export default function Product() {
                 <Editable as="button" widgetId="product-control-15"
                   type="button"
                   className={`ml-pdp-fav-btn ${fav ? 'active' : ''}`}
-                  disabled={isDemo}
                   onClick={() => toggleFavorite({
                     id: currentProduct.id,
                     name: currentProduct.name,
@@ -534,16 +938,16 @@ export default function Product() {
               </div>
 
               {/* 2. Título do Produto */}
-              <Editable as="h1" widgetId="product-5" className="ml-pdp-title notranslate">{currentProduct.name}</Editable>
+              <Editable as="h1" widgetId="product-5" className="ml-pdp-title notranslate">{cleanProductTitle(currentProduct.name)}</Editable>
 
               {/* 3. Avaliação Estrelas */}
-              <div className="ml-pdp-rating-row">
-                <Editable as="span" widgetId="product-control-16" className="ml-pdp-rating-num">4.9</Editable>
+              <Editable as="div" widgetId="product-rating" widgetType="productRating" editorKind="widget" renderContent={false} className="ml-pdp-rating-row">
+                <span className="ml-pdp-rating-num">4.9</span>
                 <div className="ml-pdp-stars">
-                  <Editable as="span" widgetId="product-control-17">★</Editable><Editable as="span" widgetId="product-control-18">★</Editable><Editable as="span" widgetId="product-control-19">★</Editable><Editable as="span" widgetId="product-control-20">★</Editable><Editable as="span" widgetId="product-control-21">★</Editable>
+                  <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
                 </div>
-                <Editable as="span" widgetId="product-control-22" className="ml-pdp-rating-count">(4455)</Editable>
-              </div>
+                <span className="ml-pdp-rating-count">(4455)</span>
+              </Editable>
 
               {/* 4. Bloco de Preço e Oferta Compacto */}
               <Editable as="div" widgetId="product-control-23" className="ml-pdp-price-section">
@@ -575,24 +979,109 @@ export default function Product() {
                 <div className="ml-pdp-installment-line">
                   ou {formatMoney(cardPrice)} em <strong style={{ color: '#059669' }}>{commerce.installments || 10}x {formatMoney(pricing.installment || (cardPrice / (commerce.installments || 10)))} sem juros</strong>
                 </div>
-                <a href="#pagamento" className="ml-pdp-payment-link" onClick={e => { e.preventDefault(); alert('Formas de pagamento aceitas: Cartão de Crédito em até 12x, Boleto Bancário e Pix com desconto imediato.'); }}>
-                  Ver meios de pagamento
-                </a>
+
+                <div className="ml-pdp-payment-wrapper" ref={paymentPopoverRef}>
+                  <div className="ml-pdp-payment-trigger-row">
+                    <div
+                      className="ml-pdp-mini-flags"
+                      onClick={() => setShowPaymentPopover(!showPaymentPopover)}
+                      title="Ver opções de pagamento"
+                    >
+                      <img src="https://http2.mlstatic.com/storage/logos-api-admin/a5f047d0-9be0-11ec-aad4-c3381f368aaf-m.svg" alt="Visa" className="ml-mini-flag" />
+                      <img src="https://http2.mlstatic.com/storage/logos-api-admin/9cf818e0-723a-11f0-a459-cf21d0937aeb-m.svg" alt="Mastercard" className="ml-mini-flag" />
+                      <img src="https://http2.mlstatic.com/storage/logos-api-admin/bb7c7bb0-adec-11f0-92e6-59fb0bcb38c2-m.svg" alt="Elo" className="ml-mini-flag" />
+                      <img src="https://http2.mlstatic.com/storage/logos-api-admin/b2c93a40-f3be-11eb-9984-b7076edb0bb7-m.svg" alt="American Express" className="ml-mini-flag" />
+                      <img src="https://http2.mlstatic.com/storage/logos-api-admin/f99fcca0-f3bd-11eb-9984-b7076edb0bb7-m.svg" alt="Pix" className="ml-mini-flag" />
+                    </div>
+                    <button
+                      type="button"
+                      className="ml-pdp-payment-link"
+                      onClick={() => setShowPaymentPopover(!showPaymentPopover)}
+                      aria-expanded={showPaymentPopover}
+                    >
+                      Ver meios de pagamento
+                    </button>
+                  </div>
+
+                  {/* POPUP / POPOVER LOGO ABAIXO */}
+                  {showPaymentPopover && (
+                    <div className="ml-pdp-payment-popover" role="dialog" aria-label="Opções de pagamento">
+                      <div className="ml-pdp-popover-header">
+                        <strong>Opções de pagamento</strong>
+                        <button
+                          type="button"
+                          className="ml-pdp-popover-close"
+                          onClick={() => setShowPaymentPopover(false)}
+                          aria-label="Fechar popup de pagamento"
+                        >
+                          ✕
+                        </button>
+                      </div>
+
+                      <div className="ml-pdp-popover-body">
+                        <div className="ml-pdp-popover-item">
+                          <span className="ml-pdp-popover-item-title">Cartão de crédito</span>
+                          <span className="ml-pdp-popover-item-desc">
+                            Em até <strong>{commerce.installments || 10}x {formatMoney(pricing.installment || (cardPrice / (commerce.installments || 10)))} sem juros</strong>
+                          </span>
+                          <div className="ml-pdp-popover-flags">
+                            <img src="https://http2.mlstatic.com/storage/logos-api-admin/a5f047d0-9be0-11ec-aad4-c3381f368aaf-m.svg" alt="Visa" />
+                            <img src="https://http2.mlstatic.com/storage/logos-api-admin/9cf818e0-723a-11f0-a459-cf21d0937aeb-m.svg" alt="Mastercard" />
+                            <img src="https://http2.mlstatic.com/storage/logos-api-admin/bb7c7bb0-adec-11f0-92e6-59fb0bcb38c2-m.svg" alt="Elo" />
+                            <img src="https://http2.mlstatic.com/storage/logos-api-admin/b2c93a40-f3be-11eb-9984-b7076edb0bb7-m.svg" alt="American Express" />
+                          </div>
+                        </div>
+
+                        <div className="ml-pdp-popover-item">
+                          <span className="ml-pdp-popover-item-title">Pix à vista</span>
+                          <span className="ml-pdp-popover-item-desc">
+                            <strong style={{ color: '#059669' }}>{formatMoney(pixPrice)}</strong> com aprovação imediata
+                          </span>
+                        </div>
+
+                        <div className="ml-pdp-popover-item">
+                          <span className="ml-pdp-popover-item-title">Boleto bancário</span>
+                          <span className="ml-pdp-popover-item-desc">
+                            <strong>{formatMoney(cardPrice)}</strong> à vista (vencimento em 3 dias)
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="ml-pdp-popover-footer">
+                        <button
+                          type="button"
+                          className="ml-pdp-popover-saiba-mais-btn"
+                          onClick={() => {
+                            setShowPaymentPopover(false)
+                            setShowPaymentModal(true)
+                          }}
+                        >
+                          Saiba mais
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </Editable>
 
-              {/* 5. CARD DE COMPRA COMPACTO (BUY BOX MERCADO LIVRE) */}
+              {/* 5. CARD DE COMPRA RESUMIDO & MODERNO */}
               <div className="ml-pdp-buy-box">
-                {/* Frete */}
+                {/* Frete Rápido */}
                 <div className="ml-pdp-box-shipping">
                   <div className="ml-pdp-shipping-title-row">
-                    <Editable as="span" widgetId="product-control-26" className="ml-pdp-shipping-title">Chegará grátis amanhã</Editable>
+                    <span className="ml-pdp-shipping-badge">
+                      <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
+                        <path d="m13 2-9 12h7l-1 8 10-13h-7z" />
+                      </svg>
+                      Chegará grátis amanhã
+                    </span>
                   </div>
                   <Editable as="button" widgetId="product-control-27"
                     type="button"
                     className="ml-pdp-shipping-details-link"
-                    onClick={() => setShowFreightCalc(v => !v)}
+                    onClick={() => setShowCepModal(true)}
                   >
-                    Mais detalhes e formas de entrega {showFreightCalc ? '▲' : '▼'}
+                    {deliveryCep || cep ? `Enviar para ${deliveryCep || cep}` : 'Calcular prazo de entrega'}
                   </Editable>
 
                   {showFreightCalc && (
@@ -607,59 +1096,62 @@ export default function Product() {
                           onChange={e => setCep(e.target.value)}
                           className="ml-pdp-freight-input"
                         />
-                        <Editable as="button" widgetId="product-control-28" type="submit" className="ml-pdp-freight-btn" disabled={freightLoading || isDemo}>
+                        <Editable as="button" widgetId="product-control-28" type="submit" className="ml-pdp-freight-btn" disabled={freightLoading}>
                           {freightLoading ? '...' : 'OK'}
                         </Editable>
                       </form>
                       {freightCalculated && (
                         <Editable as="p" widgetId="product-6" className="ml-pdp-freight-result">
-                          {commerce.freeShipping ? '✓ Frete grátis confirmado!' : 'Consulte prazos para sua região.'}
+                          {commerce.freeShipping ? `✓ Frete grátis confirmado para ${deliveryCep || cep}!` : `Consulte prazos para ${deliveryCep || cep}.`}
                         </Editable>
                       )}
                     </div>
                   )}
                 </div>
 
-                {/* Estoque e Quantidade */}
-                <div className="ml-pdp-box-stock">
-                  <div className="ml-pdp-stock-status">
-                    <Editable as="span" widgetId="product-control-29" className="green-dot"></Editable>
-                    <Editable as="span" widgetId="product-control-30">Estoque disponível</Editable>
+                {/* Estoque e Quantidade em Linha Única Resumida */}
+                <div className="ml-pdp-box-stock-compact">
+                  <div className="ml-pdp-stock-inline">
+                    <span className="ml-pdp-stock-status-text">Estoque disponível</span>
+                    <span className="ml-pdp-qty-avail">({currentProduct.stock || 15} disponíveis)</span>
                   </div>
-                  <div className="ml-pdp-qty-row">
-                    <Editable as="span" widgetId="product-control-31">Quantidade:</Editable>
+                  <div className="ml-pdp-qty-row-compact">
+                    <span className="ml-pdp-qty-label">Quantidade:</span>
                     <div className="ml-pdp-qty-controls">
                       <Editable as="button" widgetId="product-control-32" type="button" className="ml-pdp-qty-btn" onClick={() => setQuantity(q => Math.max(1, q - 1))} aria-label="Diminuir">-</Editable>
                       <input type="tel" aria-label="Quantidade" className="ml-pdp-qty-val" value={quantity} onChange={e => setQuantity(Math.max(1, parseInt(e.target.value) || 1))} />
                       <Editable as="button" widgetId="product-control-33" type="button" className="ml-pdp-qty-btn" onClick={() => setQuantity(q => q + 1)} aria-label="Aumentar">+</Editable>
                     </div>
-                    <span className="ml-pdp-qty-avail">({currentProduct.stock || 15} disponíveis)</span>
                   </div>
                 </div>
 
                 {/* Botões de Ação */}
                 <div className="ml-pdp-box-actions">
-                  <Editable as="button" widgetId="product-control-34" type="button" className="ml-pdp-btn-buy" onClick={handleOneClickBuy} disabled={isDemo}>
+                  <Editable as="button" widgetId="product-control-34" type="button" className="ml-pdp-btn-buy" onClick={handleOneClickBuy}>
                     Comprar agora
                   </Editable>
-                  <Editable as="button" widgetId="product-control-35" type="button" className="ml-pdp-btn-cart" onClick={handleAddToCart} disabled={isDemo}>
+                  <Editable as="button" widgetId="product-control-35" type="button" className="ml-pdp-btn-cart" onClick={handleAddToCart}>
                     Adicionar ao carrinho
                   </Editable>
                 </div>
 
-                {/* Garantias */}
-                <div className="ml-pdp-box-guarantee">
-                  <div className="ml-pdp-guar-item">
-                    <span className="ml-pdp-guar-icon" aria-hidden="true" />
-                    <span><strong>Devolução grátis.</strong> 30 dias a partir do recebimento.</span>
+                {/* Garantias Resumidas (1 Linha cada) */}
+                <div className="ml-pdp-box-guarantee-compact">
+                  <div className="ml-pdp-guar-compact-item">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#00a650" strokeWidth="2.2">
+                      <path d="M20 7h-9a4 4 0 1 0 4 4" /><path d="m20 7-3-3" /><path d="m20 7-3 3" />
+                    </svg>
+                    <span><strong>Devolução grátis</strong> em até 30 dias</span>
                   </div>
-                  <div className="ml-pdp-guar-item">
-                    <span className="ml-pdp-guar-icon" aria-hidden="true" />
-                    <span><strong>Compra Garantida</strong> com recebimento ou dinheiro de volta.</span>
+                  <div className="ml-pdp-guar-compact-item">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#00a650" strokeWidth="2.2">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" /><path d="m9 12 2 2 4-4" />
+                    </svg>
+                    <span><strong>Compra Garantida</strong> receba o produto ou seu dinheiro</span>
                   </div>
                 </div>
 
-                {/* Suporte WhatsApp */}
+                {/* Suporte WhatsApp Compacto */}
                 <div className="ml-pdp-box-support">
                   <a
                     href={`https://api.whatsapp.com/send?phone=5546999155875&text=${encodeURIComponent(`Olá, tenho dúvidas sobre o produto: ${currentProduct.name} - Código: ${currentProduct.sku || '58'}`)}`}
@@ -667,309 +1159,300 @@ export default function Product() {
                     rel="noreferrer"
                     className="ml-pdp-support-link"
                   >
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="#25d366">
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="#25d366">
                       <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2z"/>
                     </svg>
-                    Dúvidas sobre o produto? Fale conosco
+                    <span>Dúvidas? <strong>Fale conosco</strong></span>
                   </a>
                 </div>
               </div>
+
+              <aside className="ml-pdp-store-card" aria-label="Informações da loja TEKNIX">
+                <h2>Informações da loja</h2>
+                <div className="ml-pdp-store-heading">
+                  <div className="ml-pdp-store-logo" aria-hidden="true">
+                    <img src="/teknix-company-logo.png" alt="Logo TEKNIX" />
+                  </div>
+                  <div>
+                    <strong>TEKNIX</strong>
+                    <span>Loja oficial TEKNIX <b aria-label="Loja verificada">✓</b></span>
+                  </div>
+                </div>
+                <div className="ml-pdp-store-actions">
+                  <a href="https://api.whatsapp.com/send?phone=5546999155875" target="_blank" rel="noreferrer">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z" /><path d="M8 10h8M8 14h5" /></svg>
+                    Fale conosco
+                  </a>
+                  <a href="https://www.instagram.com/teknixbrasil/" target="_blank" rel="noreferrer">+ Seguir</a>
+                </div>
+                <div className="ml-pdp-store-meter" aria-label="Reputação excelente"><span /></div>
+                <div className="ml-pdp-store-metrics">
+                  <div><b>+20 mil</b><span>Produtos vendidos</span></div>
+                  <div><b>Entrega</b><span>No prazo</span></div>
+                  <div><b>Atendimento</b><span>Responde rápido</span></div>
+                </div>
+                <Link to="/loja" className="ml-pdp-store-link">Ver mais sobre a loja</Link>
+              </aside>
+              </EditableFlow>
             </Editable>
           </div>
         </div>
       </div>
 
-      {/* ── 3. VISÃO GERAL EDITORIAL ── */}
-      <Editable as="section" widgetId="product-7" className="product-editorial" id="overview-content">
-        <div className="product-editorial-inner">
-          <Editable as="h2" widgetId="product-8">{currentProduct.name}</Editable>
-          <Editable as="p" widgetId="product-9" className="product-editorial-intro">
-            {conciseDescription(currentProduct.description || currentProduct.short_description)}
-          </Editable>
-          {!isDemo && <div className="product-editorial-features">
-            <article>
-              <Editable as="h3" widgetId="product-10">Desempenho para o trabalho</Editable>
-              <Editable as="p" widgetId="product-11">Construção confiável e recursos pensados para entregar resultados consistentes em aplicações exigentes.</Editable>
-            </article>
-            <article>
-              <Editable as="h3" widgetId="product-12">Qualidade profissional</Editable>
-              <Editable as="p" widgetId="product-13">Materiais selecionados e acabamento robusto para acompanhar a rotina de quem usa ferramentas todos os dias.</Editable>
-            </article>
-            <article>
-              <Editable as="h3" widgetId="product-14">Praticidade e segurança</Editable>
-              <Editable as="p" widgetId="product-15">Uso intuitivo, suporte especializado e condições que tornam a compra mais tranquila.</Editable>
-            </article>
-          </div>}
-        </div>
-      </Editable>
+      {presentationImages.length > 0 && (
+        <section className="teknix-product-presentation-images" aria-label="Apresentação do produto">
+          <div className="teknix-ref-container" style={{ width: '100%', maxWidth: 1292, padding: 0 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 0, width: '100%' }}>
+              {presentationImages.map((image: string, index: number) => (
+                <img key={`${image}-${index}`} src={image} alt={`${currentProduct.name} — imagem ${index + 1}`} style={{ width: '100%', maxWidth: '100%', height: 'auto', display: 'block', objectFit: 'contain' }} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
-      {/* ── ESPECIFICAÇÕES TÉCNICAS ── */}
-      <Editable as="div" widgetId="product-control-36" className="ui container fluid description-section product-specifications-section" id="specifications">
-        <div className="ui container">
-          <div className="first-box-main-description">
-            <Editable as="span" widgetId="product-control-37" className="section-headline">Especificações</Editable>
-            <div className="specs-description-flex-box">
-              {/* Lado Esquerdo: Tabelas */}
-              <div className="specs-tables-col">
-                <Editable as="span" widgetId="product-control-38" className="table-lead-title">Características gerais</Editable>
-                <div className="table-responsive">
-                  <table className="tech-table">
-                    <tbody>
-                      <tr><td>Marca</td><td><strong>{currentProduct.brand || 'TEKNIX'}</strong></td></tr>
-                      <tr><td>Modelo</td><td><strong>{currentProduct.model || currentProduct.name}</strong></td></tr>
-                      <tr><td>Categoria</td><td><strong>{currentProduct.category || 'Geral'}</strong></td></tr>
-                      {currentProduct.sku && <tr><td>SKU / Código</td><td><strong>{currentProduct.sku}</strong></td></tr>}
-                      {(currentProduct.ean || (currentProduct as any).barcode) && (
-                        <tr><td>Código de Barras (EAN)</td><td><strong>{currentProduct.ean || (currentProduct as any).barcode}</strong></td></tr>
-                      )}
-                      {currentProduct.weight && (
-                        <tr><td>Peso</td><td><strong>{currentProduct.weight} kg</strong></td></tr>
-                      )}
-                      {(currentProduct.length || currentProduct.width || currentProduct.height) && (
-                        <tr>
-                          <td>Dimensões (C x L x A)</td>
-                          <td><strong>{currentProduct.length || 0} x {currentProduct.width || 0} x {currentProduct.height || 0} cm</strong></td>
-                        </tr>
-                      )}
-                      <tr><td>Condição</td><td><strong>Novo com Garantia Oficial</strong></td></tr>
-                      <tr>
-                        <td>Disponibilidade</td>
-                        <td>
-                          <strong>{currentProduct.stock !== undefined && currentProduct.stock > 0 ? `Em estoque (${currentProduct.stock} unid.)` : 'Disponível'}</strong>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+      {displayFaqs.length > 0 && (
+        <section className="teknix-product-questions" aria-label="Perguntas e respostas">
+          <div className="teknix-ref-container" style={{ padding: '64px 24px 32px', boxSizing: 'border-box' }}>
+            <h2 className="teknix-questions-title">Perguntas e respostas sobre o produto</h2>
+            <div style={{ display: 'grid', gap: 12 }}>
+              {displayFaqs.map((item: any, index: number) => (
+                <details key={index} style={{ borderBottom: '1px solid #e5e7eb', padding: '12px 0' }}>
+                  <summary style={{ cursor: 'pointer', fontWeight: 600 }}>{item.question || item.q}</summary>
+                  <p style={{ margin: '10px 0 0', lineHeight: 1.6, color: '#4b5563' }}>{item.answer || item.a}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
-                {currentProduct.specifications && currentProduct.specifications.length > 0 && (
-                  <>
-                    <Editable as="span" widgetId="product-control-39" className="table-lead-title" style={{ marginTop: '24px' }}>Especificações técnicas</Editable>
-                    <div className="table-responsive">
-                      <table className="tech-table">
-                        <tbody>
-                          {currentProduct.specifications.map((spec, idx) => {
-                            const [key, ...valueParts] = spec.split(':')
-                            return (
-                              <tr key={idx}>
-                                <td>{key.trim()}</td>
-                                <td><strong>{valueParts.join(':').trim()}</strong></td>
-                              </tr>
-                            )
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  </>
-                )}
-              </div>
+      {/* Showcase editorial removido da vitrine pública por solicitação. */}
+      {false && <Editable as="div" widgetId="product-control-36" className="ui container fluid description-section product-specifications-section" id="specifications">
+        <div className="teknix-ref-showcase-root">
+          
+          {/* SEÇÃO 1: HERO SPOTLIGHT (FUNDO PRETO PURO #000 — FOCO NO VALOR & POR QUE COMPRAR) */}
+          <section className="teknix-ref-hero-section">
+            <div className="teknix-ref-container">
+              <div className="teknix-ref-hero-grid">
+                <div className="teknix-ref-hero-text">
+                  <Editable as="span" widgetId="showcase-hero-eyebrow" className="teknix-ref-hero-eyebrow">
+                    {showcase.hero.eyebrow}
+                  </Editable>
+                  <Editable as="h2" widgetId="showcase-hero-title" className="teknix-ref-hero-title">
+                    {showcase.hero.title}
+                  </Editable>
+                  <Editable as="p" widgetId="showcase-hero-desc" className="teknix-ref-hero-desc">
+                    {showcase.hero.description}
+                  </Editable>
 
-              {/* Lado Direito: Texto Editorial + Recursos Principais */}
-              <div className="specs-editorial-col">
-                <Editable as="h2" widgetId="product-16" className="editorial-title">{currentProduct.name}</Editable>
-                {currentProduct.short_description && (
-                  <div style={{ padding: '12px 16px', background: '#f8fafc', borderRadius: '8px', borderLeft: '3px solid #10b981', marginBottom: '14px', fontSize: '0.9rem', fontWeight: 600, color: '#1e293b' }}>
-                    {currentProduct.short_description}
+                  <div className="teknix-ref-hero-benefits">
+                    {showcase.hero.benefits.map((b, bIdx) => (
+                      <div key={bIdx} className="teknix-ref-hero-benefit-item">
+                        <div className="teknix-ref-hero-benefit-icon">
+                          {renderBenefitIcon(b.icon)}
+                        </div>
+                        <span><strong>{b.title}:</strong> {b.desc}</span>
+                      </div>
+                    ))}
                   </div>
-                )}
-                {currentProduct.description && (
-                  <Editable as="p" widgetId="product-17" className="editorial-text" style={{ whiteSpace: 'pre-line', lineHeight: '1.7' }}>{currentProduct.description}</Editable>
-                )}
 
-                {!isDemo && <><Editable as="span" widgetId="product-control-40" className="resources-title">Diferenciais e Garantia</Editable>
-                <ul className="resources-list">
-                  <li>Produto de <strong>alta qualidade</strong> com nota fiscal e garantia oficial</li>
-                  {commerce.freeShipping && <li><strong>Frete grátis</strong> para este produto</li>}
-                  <li><strong>Devolução gratuita</strong> em até 30 dias após o recebimento</li>
-                  <li><strong>Suporte técnico</strong> e atendimento especializado TEKNIX</li>
-                  {commerce.pixDiscountPercent > 0 && (
-                    <li>Desconto especial de <strong>{commerce.pixDiscountPercent}% no Pix</strong></li>
-                  )}
-                  {commerce.installments > 1 && (
-                    <li>Parcelamento em até <strong>{commerce.installments}x sem juros</strong> no cartão</li>
-                  )}
-                </ul></>}
-              </div>
-            </div>
-          </div>
-        </div>
-      </Editable>
-
-
-
-      {/* ── 4. DIFERENCIAIS DO PRODUTO ── */}
-      {isDemo ? <Editable as="section" widgetId="product-18" className="product-editorial" id="differentials">
-        <div className="product-editorial-inner">
-          <Editable as="h2" widgetId="product-19">Detalhes do produto</Editable>
-          <Editable as="p" widgetId="product-20">Esta prévia utiliza a imagem enviada. Compatibilidade, pressão de trabalho e acessórios devem ser informados no cadastro definitivo.</Editable>
-          <Editable as="h2" widgetId="product-21" id="warranty">Garantia</Editable>
-          <Editable as="p" widgetId="product-22">Prazo e condições de garantia serão informados após a confirmação dos dados do fabricante.</Editable>
-        </div>
-      </Editable> : <>
-      <Editable as="div" widgetId="product-control-41" className="ui container fluid description-section" id="differentials">
-        <div className="ui container">
-          <div className="second-box-main-description">
-            <Editable as="span" widgetId="product-control-42" className="section-headline">Diferenciais do produto</Editable>
-            <div className="feature-split-box">
-              <div className="feature-left-text">
-                <Editable as="h3" widgetId="product-23" className="feature-subheading">Performance Industrial Comprovada</Editable>
-                <Editable as="p" widgetId="product-24">
-                  A linha TEKNIX Pro se destaca por sua alta eficiência energética e pela precisão milimétrica exigida em processos industriais e de funilaria técnica.
-                </Editable>
-                <ol className="feature-bullets-list">
-                  <li><strong>Ciclo de trabalho elevado:</strong> 350A a 60% para jornadas contínuas sem sobreaquecimento.</li>
-                  <li><strong>Eficiência de 85%:</strong> menor consumo na rede elétrica e máxima estabilidade de arco.</li>
-                  <li><strong>Construção monobloco com ventilação forçada túnel:</strong> protege os componentes eletrônicos contra pó de metal.</li>
-                  <li><strong>Frequência ajustável até 200Hz:</strong> arco focado e penetração controlada em chapas finas e grossas.</li>
-                </ol>
-              </div>
-              <div className="feature-right-img">
-                <Editable as="img" widgetId="product-25"
-                  src={productImages[1] || productImages[0]}
-                  alt="Diferenciais em Detalhes"
-                  loading="lazy"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </Editable>
-
-      {/* ── 5. INSTRUÇÕES DE USO ── */}
-      <Editable as="div" widgetId="product-control-43" className="ui container fluid description-section">
-        <div className="ui container">
-          <div className="third-box-main-description">
-            <div className="feature-split-box reverse">
-              <div className="feature-right-img">
-                <Editable as="img" widgetId="product-26"
-                  src="https://images.unsplash.com/photo-1530124566582-a618bc2615dc?w=800&auto=format&fit=crop&q=80"
-                  alt="Instruções e Boas Práticas"
-                  loading="lazy"
-                />
-              </div>
-              <div className="feature-left-text">
-                <Editable as="span" widgetId="product-control-44" className="section-headline">Instruções de uso</Editable>
-                <Editable as="h3" widgetId="product-27" className="feature-subheading">Operação Segura e Eficiente</Editable>
-                <Editable as="p" widgetId="product-28">
-                  Para operar o equipamento com máxima segurança e durabilidade, certifique-se de que todas as conexões do cabo terra e tocha estejam firmes antes de ligar à rede.
-                </Editable>
-                <ol className="feature-bullets-list">
-                  <li>Leia atentamente o manual de instruções incluso na embalagem.</li>
-                  <li>Verifique a voltagem e o disjuntor da rede antes de plugar o equipamento.</li>
-                  <li>Regule a amperagem e o fluxo de gás de acordo com a espessura do material base.</li>
-                  <li>Utilize sempre EPIs completos (máscara de solda automática, luvas de vaqueta e avental de raspa).</li>
-                </ol>
-              </div>
-            </div>
-          </div>
-
-          {/* ── 6. GARANTIA OFICIAL E CARDS DE SUPORTE ── */}
-          <div className="fourth-box-main-description" id="warranty">
-            <div className="warranty-header-row">
-              <Editable as="span" widgetId="product-control-45" className="section-headline">Garantia TEKNIX</Editable>
-              <div className="warranty-text-content">
-                <Editable as="p" widgetId="product-29">
-                  Este produto possui <strong>garantia oficial de fábrica de 1 ano</strong> contra defeitos de fabricação, a partir da data de emissão da Nota Fiscal de compra.
-                </Editable>
-                <Editable as="p" widgetId="product-30">
-                  A garantia cobre reparos, substituição de componentes originais e mão de obra especializada em nossa rede credenciada de assistência técnica em todo o território nacional.
-                </Editable>
-              </div>
-            </div>
-
-            <div className="warranty-cards-grid">
-              <div className="warranty-badge-card">
-                <div className="warranty-card-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="#B5F500" strokeWidth="2" width="28" height="28">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                  </svg>
+                  <div className="teknix-ref-hero-actions">
+                    <a href="#overview" className="teknix-ref-hero-btn">
+                      {showcase.hero.cta_primary_text || 'Garantir agora'}
+                    </a>
+                    <a href="#compare-specs" className="teknix-ref-hero-secondary-btn">
+                      {showcase.hero.cta_secondary_text || 'Comparar versões'}
+                    </a>
+                  </div>
                 </div>
-                <strong>Garantia de fábrica</strong>
-                <Editable as="span" widgetId="product-control-46">12 meses de cobertura total</Editable>
-              </div>
 
-              <div className="warranty-badge-card">
-                <div className="warranty-card-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="#B5F500" strokeWidth="2" width="28" height="28">
-                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                  </svg>
+                <div className="teknix-ref-hero-media">
+                  <div className="teknix-ref-hero-platform">
+                    {showcase.hero.top_badge && (
+                      <span className="teknix-ref-hero-pill-badge top-badge">{showcase.hero.top_badge}</span>
+                    )}
+                    <img
+                      src={showcase.hero.image_url || productImages[0]}
+                      alt={showcase.hero.title}
+                      className="teknix-ref-hero-img"
+                    />
+                    {showcase.hero.bottom_badge && (
+                      <span className="teknix-ref-hero-pill-badge bottom-badge">{showcase.hero.bottom_badge}</span>
+                    )}
+                    <div className="teknix-ref-hero-glow" />
+                  </div>
                 </div>
-                <strong>Suporte técnico SAC</strong>
-                <Editable as="span" widgetId="product-control-47">Atendimento direto com especialistas</Editable>
-              </div>
-
-              <div className="warranty-badge-card">
-                <div className="warranty-card-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="#B5F500" strokeWidth="2" width="28" height="28">
-                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-                    <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-                    <line x1="12" y1="22.08" x2="12" y2="12" />
-                  </svg>
-                </div>
-                <strong>Atendimento pós-venda</strong>
-                <Editable as="span" widgetId="product-control-48">Reposição de peças e acessórios originais</Editable>
               </div>
             </div>
-          </div>
-        </div>
-      </Editable>
+          </section>
 
-      </>}
-      <Ads position="product-middle" />
-      <ProductReviews reviews={isDemo ? DEMO_REVIEWS : []} demo={isDemo} />
-      {/* ── 7. VOCÊ TAMBÉM PODE GOSTAR ── */}
-      {related.length > 0 && (
-        <div className="pd__footer-also-like">
-          <div className="ui container">
-            <Editable as="h2" widgetId="product-31" className="pd__footer-also-like-title">Você também pode gostar</Editable>
-          </div>
-          <div className="ui container">
-            <div className="pd__footer-also-like-list">
-              {related.map((rel) => {
-                const relPrice = rel.promo_price || rel.price || 0
-                return (
-                  <Link
-                    key={rel.id}
-                    to={`/produtos/${rel.slug || rel.id}`}
-                    className="pd__footer-also-like-item"
-                  >
-                    <div className="pd__footer-also-like-item-picture">
+          {/* SEÇÃO 2: PERFORMANCE E RENDIMENTO DE ALTA VELOCIDADE (FUNDO PRETO PURO #000) */}
+          <section className="teknix-ref-speed-section">
+            <div className="teknix-ref-container">
+              <div className="teknix-ref-speed-grid">
+                <div className="teknix-ref-speed-media">
+                  <div className="teknix-ref-tech-stage">
+                    <div className="teknix-ref-screen-backdrop" />
+                    <img
+                      src={showcase.performance.image_url || productImages[1] || productImages[0]}
+                      alt={showcase.performance.title}
+                      className="teknix-ref-speed-img"
+                    />
+                  </div>
+                </div>
+
+                <div className="teknix-ref-speed-content">
+                  <Editable as="h2" widgetId="showcase-perf-title" className="teknix-ref-speed-title">
+                    {showcase.performance.title}
+                  </Editable>
+                  <Editable as="p" widgetId="showcase-perf-desc" className="teknix-ref-speed-lead">
+                    {showcase.performance.description}
+                  </Editable>
+
+                  <div className="teknix-ref-feature-items">
+                    {showcase.performance.features.map((f, fIdx) => (
+                      <div key={fIdx} className="teknix-ref-feature-item">
+                        <h4 className="teknix-ref-feature-title">
+                          {f.title}
+                        </h4>
+                        <p className="teknix-ref-feature-text">
+                          {f.desc}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* SEÇÃO 4: EXPLORE MODELOS DA LINHA (FUNDO BRANCO #FFF) */}
+          <section className="teknix-ref-explore-section">
+            <div className="teknix-ref-container">
+              <div className="teknix-ref-section-header text-center">
+                <Editable as="h2" widgetId="showcase-models-title" className="teknix-ref-title-dark">
+                  {showcase.explore_models.title}
+                </Editable>
+              </div>
+
+              <div className="teknix-ref-explore-grid">
+                {showcase.explore_models.models.map((m, mIdx) => (
+                  <div key={mIdx} className="teknix-ref-explore-card">
+                    {m.badge && (
+                      <span className="teknix-ref-explore-badge">
+                        {m.badge}
+                      </span>
+                    )}
+                    <div className="teknix-ref-explore-thumb">
                       <img
-                        src={rel.image_url || 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=300&auto=format&fit=crop&q=80'}
-                        alt={rel.name}
-                        loading="lazy"
+                        src={m.image_url || productImages[mIdx] || productImages[0]}
+                        alt={m.name}
                       />
                     </div>
-                    <div className="pd__footer-also-like-item-content">
-                      <h3 className="pd__footer-also-like-item-title">{rel.name}</h3>
-                      {rel.description && (
-                        <p className="pd__footer-also-like-item-description">
-                          {rel.description.substring(0, 80)}...
-                        </p>
-                      )}
-                      <div className="pd__footer-also-like-item-settlement">
-                        <div className="pd__footer-also-like-item-price">
-                          <span className="pd__footer-also-like-item-current-price">
-                            {formatMoney(relPrice)}
-                          </span>
-                        </div>
-                        <div className="pd__footer-also-like-item-cart-btn">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
-                            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
-                            <line x1="3" y1="6" x2="21" y2="6" />
-                            <path d="M16 10a4 4 0 01-8 0" />
-                          </svg>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                )
-              })}
+                    <h3 className="teknix-ref-explore-name">{m.name}</h3>
+                    <p className="teknix-ref-explore-specs">{m.specs}</p>
+                    <a href={m.link || '#overview'} className="teknix-ref-explore-link">
+                      Ver detalhes
+                    </a>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          </section>
+
+          {/* SEÇÃO 5: TABELA COMPARATIVA DE VERSÕES (FUNDO BRANCO #FFF) */}
+          <section className="teknix-ref-compare-section" id="compare-specs">
+            <div className="teknix-ref-container">
+              <div className="teknix-ref-section-header text-center">
+                <Editable as="h2" widgetId="showcase-comp-title" className="teknix-ref-title-dark">
+                  {showcase.comparison.title}
+                </Editable>
+              </div>
+
+              <div className="teknix-ref-table-wrap">
+                <table className="teknix-ref-compare-table">
+                  <thead>
+                    <tr>
+                      <th className="th-attr">&nbsp;</th>
+                      <th className="th-model">{showcase.comparison.col1_title}</th>
+                      <th className="th-model">{showcase.comparison.col2_title}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {showcase.comparison.rows.map((row, rIdx) => (
+                      <tr key={rIdx}>
+                        <td className="td-attr">{row.attr}</td>
+                        <td>{row.col1_val}</td>
+                        <td>{row.col2_val}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          {/* SEÇÃO 7: PERGUNTAS FREQUENTES (FUNDO BRANCO #FFF) */}
+          <section className="teknix-ref-faq-section">
+            <div className="teknix-ref-container">
+              <div className="teknix-ref-faq-content">
+                <h2 className="teknix-ref-faq-title">
+                  Perguntas Frequentes
+                </h2>
+
+                <div className="teknix-ref-faq-list">
+                  {showcase.faqs.map((item, idx) => {
+                    const isOpen = openFaq === idx
+                    return (
+                      <div key={idx} className={`teknix-ref-faq-row ${isOpen ? 'open' : ''}`}>
+                        <button
+                          type="button"
+                          className="teknix-ref-faq-trigger"
+                          onClick={() => setOpenFaq(isOpen ? null : idx)}
+                          aria-expanded={isOpen}
+                        >
+                          <span>{item.q}</span>
+                          <span className="teknix-ref-faq-icon">{isOpen ? '−' : '+'}</span>
+                        </button>
+                        {isOpen && (
+                          <div className="teknix-ref-faq-body">
+                            <p>{item.a}</p>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* SEÇÃO 8: NOTAS LEGAIS E ISENÇÕES TÉCNICAS (FUNDO CINZA CLARO #F5F5F7) */}
+          <section className="teknix-ref-notes-section">
+            <div className="teknix-ref-container">
+              <h5 className="teknix-ref-notes-heading">NOTAS E ISENÇÕES DE RESPONSABILIDADE:</h5>
+              <ol className="teknix-ref-notes-list">
+                <li>
+                  Os valores nominais de torque e rotação foram aferidos sob condições laboratoriais de teste com baterias totalmente carregadas. O rendimento real pode variar dependendo do material, bitola do parafuso e temperatura ambiente de trabalho.
+                </li>
+                <li>
+                  A durabilidade e autonomia das baterias de íons de lítio 21V dependem dos ciclos de carga e descarga realizados, além da observância das instruções de armazenagem constantes no manual do usuário.
+                </li>
+                <li>
+                  A garantia oficial TEKNIX cobre eventuais defeitos de fabricação mediante a apresentação da Nota Fiscal Eletrônica (NF-e) emitida no momento da compra.
+                </li>
+                <li>
+                  Imagens meramente ilustrativas para fins de demonstração. As especificações técnicas estão sujeitas a contínuas melhorias de projeto sem aviso prévio.
+                </li>
+              </ol>
+            </div>
+          </section>
+
         </div>
-      )}
-      <Ads position="product-footer" />
+      </Editable>}
+
+
     </EditableFlow></div></PageWidgets>
   )
 }

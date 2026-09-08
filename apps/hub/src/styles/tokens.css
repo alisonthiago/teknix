@@ -1,39 +1,42 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,300..900;1,6..12,300..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap');
 
 :root {
   /* ── Typography Fonts ── */
-  --tk-font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --tk-font-family: 'Roboto', Arial, sans-serif;
   --tk-font-mono: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
-  /* ── Font Sizes & Line Heights (FLOW Scale) ── */
-  --tk-font-size-h1: 22px;
+  /* ── Font Sizes & Line Heights (Escala Padrão Magalu) ── */
+  --tk-font-size-h1: 24px;
   --tk-line-height-h1: 1.25;
 
-  --tk-font-size-h2: 18px;
+  --tk-font-size-h2: 20px;
   --tk-line-height-h2: 1.3;
 
-  --tk-font-size-h3: 15px;
+  --tk-font-size-h3: 16px;
   --tk-line-height-h3: 1.35;
 
-  --tk-font-size-h4: 13.5px;
+  --tk-font-size-h4: 14px;
   --tk-line-height-h4: 1.4;
 
-  --tk-font-size-body: 13.5px;
+  --tk-font-size-body: 14px;
   --tk-line-height-body: 1.45;
 
-  --tk-font-size-body-sm: 12.5px;
+  --tk-font-size-body-sm: 13px;
   --tk-line-height-body-sm: 1.4;
 
-  --tk-font-size-caption: 11.5px;
+  --tk-font-size-caption: 12px;
   --tk-line-height-caption: 1.35;
 
-  --tk-font-size-micro: 10.5px;
+  --tk-font-size-micro: 11px;
 
-  /* ── Font Weights ── */
-  --tk-font-weight-regular: 400;
-  --tk-font-weight-medium: 500;
-  --tk-font-weight-semibold: 600;
-  --tk-font-weight-bold: 700;
+  /* ── Font Weights — Harmonia Magalu (Roboto) ── */
+  --tk-font-weight-regular: 400;    /* corpo de texto, inputs, infos menores */
+  --tk-font-weight-medium: 500;     /* labels, títulos de produto, menu */
+  --tk-font-weight-semibold: 600;   /* botões, títulos de seção */
+  --tk-font-weight-bold: 700;       /* preços, KPIs, destaques */
+  --tk-font-weight-display: 600;    /* títulos de página */
+  --tk-font-weight-data: 700;       /* métricas, KPIs, valores, preços */
+  --tk-font-weight-label: 400;      /* captions, hints, infos menores */
 
   /* ── Colors (FLOW Palette) ── */
   --tk-color-bg: #f5f5f5;
@@ -46,11 +49,11 @@
   --tk-color-text-tertiary: #999999;    /* FLOW Muted Text */
   --tk-color-text-inverse: #ffffff;
 
-  /* Accent & Action (FLOW Obsidian Dark & FLOW Brand Green) */
-  --tk-color-primary: #1f2328;          /* FLOW Dark Button */
-  --tk-color-primary-hover: #111827;
-  --tk-color-primary-active: #000000;
-  --tk-color-primary-light: #f3f4f6;
+  /* Accent & Action (checkout blue & FLOW Brand Green) */
+  --tk-color-primary: #347ff2;
+  --tk-color-primary-hover: #2469d8;
+  --tk-color-primary-active: #1858bd;
+  --tk-color-primary-light: #f5f5f5;
   --tk-color-primary-surface: #ffffff;
 
   /* Brand Green / Lime (FLOW Brand Tokens) */
@@ -62,7 +65,7 @@
   --tk-color-border: #e6e6e6;           /* FLOW standard border */
   --tk-color-border-dark: #d9d9d9;
   --tk-color-border-subtle: #f0f0f0;
-  --tk-color-border-focus: #1f2328;
+  --tk-color-border-focus: #d9d9d9;
 
   /* Semantic Status */
   --tk-color-success: #00a650;
@@ -100,3 +103,10 @@
   --tk-shadow-modal: 0 16px 36px rgba(0, 0, 0, 0.12);
   --tk-shadow-dropdown: 0 8px 24px rgba(0, 0, 0, 0.06);
 }
+
+/* Composição tipográfica do HUB: contraste por escala, peso e cor. */
+.hub-layout h1 { font-size: var(--tk-font-size-h1); line-height: var(--tk-line-height-h1); font-weight: var(--tk-font-weight-display); }
+.hub-layout h2 { font-size: var(--tk-font-size-h2); line-height: var(--tk-line-height-h2); font-weight: var(--tk-font-weight-medium); }
+.hub-layout h3, .hub-layout h4 { font-weight: var(--tk-font-weight-medium); }
+.hub-layout .metric-card-value, .hub-layout .dash-hero-value, .hub-layout .finance-kpi-val { font-weight: var(--tk-font-weight-data); letter-spacing: -0.02em; }
+.hub-layout small, .hub-layout .caption, .hub-layout .hint, .hub-layout .subtitle { color: var(--tk-color-text-tertiary); font-weight: var(--tk-font-weight-label); }

@@ -387,7 +387,7 @@ export default function Account() {
       {/* ── MODAL: DADOS CADASTRAIS ── */}
       {activeModal === 'cadastro' && (
         <div className="cb-account-detail-content">
-        <div className="cb-account-form-panel">
+        <div className="cb-account-form-panel cb-account-support-panel">
             <div className="cb-modal-header">
               <div className="cb-profile-heading">
                 <label className="cb-profile-avatar-upload" title="Alterar foto de perfil">
@@ -674,25 +674,25 @@ export default function Account() {
               </button>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '12px 0' }}>
-              <Editable as="p" widgetId="account-33" style={{ color: '#4b5563', margin: 0, lineHeight: 1.5 }}>
+            <div className="cb-account-support-content">
+              <Editable as="p" widgetId="account-33" className="cb-account-support-intro">
                 Estamos à disposição para te ajudar de segunda a sexta-feira, das 8h30 às 18h.
               </Editable>
 
-              <div style={{ background: '#f8f9fa', padding: '16px', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
-                <Editable as="p" widgetId="account-34" style={{ margin: '0 0 6px 0', fontWeight: 'var(--tkn-weight-medium)', color: '#0033c6' }}>
+              <div className="cb-account-support-contact">
+                <Editable as="p" widgetId="account-34" className="cb-account-support-label">
                   📱 WhatsApp Oficial
                 </Editable>
-                <Editable as="p" widgetId="account-35" style={{ margin: 0, color: '#1f2937', fontSize: '15px' }}>
+                <Editable as="p" widgetId="account-35" className="cb-account-support-value">
                   (46) 99915-5875
                 </Editable>
               </div>
 
-              <div style={{ background: '#f8f9fa', padding: '16px', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
-                <Editable as="p" widgetId="account-36" style={{ margin: '0 0 6px 0', fontWeight: 'var(--tkn-weight-medium)', color: '#0033c6' }}>
+              <div className="cb-account-support-contact">
+                <Editable as="p" widgetId="account-36" className="cb-account-support-label">
                   ✉️ E-mail SAC
                 </Editable>
-                <Editable as="p" widgetId="account-37" style={{ margin: 0, color: '#1f2937', fontSize: '15px' }}>
+                <Editable as="p" widgetId="account-37" className="cb-account-support-value">
                   sac@teknix.com.br
                 </Editable>
               </div>

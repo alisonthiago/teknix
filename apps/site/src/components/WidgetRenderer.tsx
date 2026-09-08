@@ -4,8 +4,8 @@ import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { getProducts } from '../services/products'
 import type { Product } from '../types/database'
 import {
-  ShoppingBag, ArrowRight, ChevronRight, Sparkles, Zap, Star, Heart, Check, Download, Play, ExternalLink, Phone, Mail,
-  Image as ImageIcon
+  ShoppingBag, ShoppingCart, ArrowRight, ChevronRight, Sparkles, Zap, Star, Heart, Check, Download, Play, ExternalLink, Phone, Mail,
+  Image as ImageIcon, Truck, ShieldCheck, Share2, Copy, Plus, Minus, Tag, CreditCard, RotateCcw, ThumbsUp, AlertCircle, Eye
 } from 'lucide-react'
 import lottie from 'lottie-web'
 
@@ -3353,6 +3353,277 @@ export default function WidgetRenderer({ widget, product }: WidgetRendererProps)
         ? <img src={(content.image || content.url) as string} alt={(content.alt as string) || ''} style={{ maxWidth: '100%', ...s }} />
         : <div style={{ padding: 20, background: '#f5f5f7', borderRadius: 12, color: '#86868b', textAlign: 'center', ...s }}>{type === 'logo' ? 'Logo' : type === 'svg' ? 'SVG' : 'GIF'}</div>
 
+    case 'horizontal-menu':
+    case 'navMenu':
+      return <HorizontalMenuWidget content={content} style={s} />
+
+    case 'productTitle': {
+      const p = product || FALLBACK_PREVIEW_PRODUCT
+      const Tag = ((content.tag as string) || 'h1') as any
+      const prefix = content.prefix || ''
+      const suffix = content.suffix || ''
+      return <Tag id={id} className={className} style={{ letterSpacing: '-0.02em', lineHeight: '1.15', width: '100%', margin: '0 0 8px', ...s }}>{prefix}{p.name}{suffix}</Tag>
+    }
+
+    case 'productSubtitle': {
+      const p = product || FALLBACK_PREVIEW_PRODUCT
+      const meta = Array.isArray(p.store_meta) ? p.store_meta[0] : p.store_meta
+      const text = content.text || meta?.subtitle || 'Máxima potência, durabilidade extrema e controle de torque inteligente.'
+      return <p id={id} className={className} style={{ fontSize: '1.05rem', color: '#6e6e73', lineHeight: 1.5, margin: '0 0 16px', ...s }}>{text}</p>
+    }
+
+    case 'productPrice':
+      return <ProductPriceWidget product={product} content={content} style={s} />
+
+    case 'productDiscount': {
+      const p = product || FALLBACK_PREVIEW_PRODUCT
+      const { price, promoPrice, isPromo } = getProductPrice(p)
+      const pct = isPromo && promoPrice ? Math.round(((price - promoPrice) / price) * 100) : 0
+      if (!isPromo || pct <= 0) return null
+      return (
+        <span id={id} className={className} style={{ display: 'inline-flex', alignItems: 'center', background: '#e6f9f0', color: '#059669', fontWeight: 700, fontSize: '0.82rem', padding: '3px 8px', borderRadius: 980, ...s }}>
+          {pct}% OFF
+        </span>
+      )
+    }
+
+    case 'productBadge': {
+      const p = product || FALLBACK_PREVIEW_PRODUCT
+      const meta = Array.isArray(p.store_meta) ? p.store_meta[0] : p.store_meta
+      const badgeText = content.text || meta?.badge || 'Destaque'
+      return (
+        <span id={id} className={className} style={{ display: 'inline-flex', alignItems: 'center', background: '#f5f5f7', color: '#1d1d1f', fontWeight: 600, fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '4px 10px', borderRadius: 980, ...s }}>
+          {badgeText}
+        </span>
+      )
+    }
+
+    case 'productGallery':
+      return <ProductGalleryWidget product={product} content={content} style={s} />
+
+    case 'productImage': {
+      const p = product || FALLBACK_PREVIEW_PRODUCT
+      const img = p.image_url || (Array.isArray((p as any).images) ? (p as any).images[0] : '')
+      return (
+        <div id={id} className={className} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f5f7', borderRadius: 16, padding: 16, overflow: 'hidden', ...s }}>
+          {img ? <img src={img} alt={p.name} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} /> : <span style={{ fontSize: '3rem', opacity: 0.3 }}>📦</span>}
+        </div>
+      )
+    }
+
+    case 'productShortDescription': {
+      const p = product || FALLBACK_PREVIEW_PRODUCT
+      const meta = Array.isArray(p.store_meta) ? p.store_meta[0] : p.store_meta
+      const shortDesc = content.text || meta?.short_description || p.description?.replace(/<[^>]*>?/gm, '').slice(0, 160) || ''
+      return <p id={id} className={className} style={{ fontSize: '0.95rem', color: '#6e6e73', lineHeight: 1.6, margin: '0 0 16px', ...s }}>{shortDesc}</p>
+    }
+
+    case 'productDescription': {
+      const p = product || FALLBACK_PREVIEW_PRODUCT
+      const desc = content.text || p.description || '<p>Sem descrição detalhada cadastrada.</p>'
+      return (
+        <div id={id} className={className} style={{ width: '100%', lineHeight: 1.7, color: '#48484a', ...s }}>
+          {content.title && <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1d1d1f', marginBottom: 12 }}>{content.title}</h3>}
+          <div dangerouslySetInnerHTML={{ __html: desc }} />
+        </div>
+      )
+    }
+
+    case 'productSpecifications':
+      return <ProductSpecificationsWidget product={product} content={content} style={s} />
+
+    case 'productFeatures':
+      return <ProductFeaturesWidget product={product} content={content} style={s} />
+
+    case 'productSku': {
+      const p = product || FALLBACK_PREVIEW_PRODUCT
+      return (
+        <div id={id} className={className} style={{ fontSize: '0.82rem', color: '#86868b', ...s }}>
+          <span>{content.prefix || 'SKU: '}</span>
+          <strong style={{ color: '#1d1d1f' }}>{p.sku || p.id}</strong>
+        </div>
+      )
+    }
+
+    case 'productStock': {
+      const p = product || FALLBACK_PREVIEW_PRODUCT
+      const stock = Number(p.stock || (p as any).stock_quantity || 0)
+      const inStock = stock > 0
+      return (
+        <div id={id} className={className} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: '0.85rem', fontWeight: 600, color: inStock ? '#059669' : '#dc2626', ...s }}>
+          <span style={{ width: 8, height: 8, borderRadius: '50%', background: inStock ? '#059669' : '#dc2626' }} />
+          <span>{inStock ? (content.in_stock_text || `Em estoque (${stock} disponíveis)`) : (content.out_of_stock_text || 'Produto Indisponível')}</span>
+        </div>
+      )
+    }
+
+    case 'productQuantity':
+      return <ProductQuantityWidget content={content} style={s} />
+
+    case 'productVariations':
+      return <ProductVariationsWidget product={product} content={content} style={s} />
+
+    case 'productRating':
+      return <ProductRatingWidget product={product} content={content} style={s} />
+
+    case 'productRatingCount': {
+      const p = product || FALLBACK_PREVIEW_PRODUCT
+      const meta = Array.isArray(p.store_meta) ? p.store_meta[0] : p.store_meta
+      const count = Number(meta?.reviews_count || (p as any).reviews_count || 142)
+      return <span id={id} className={className} style={{ fontSize: '0.85rem', color: '#86868b', ...s }}>({count} {content.text || 'avaliações'})</span>
+    }
+
+    case 'productBuyButton': {
+      const p = product || FALLBACK_PREVIEW_PRODUCT
+      return (
+        <a
+          id={id}
+          className={className}
+          href={`/checkout?sku=${p.sku || p.id}`}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+            width: content.full_width ? '100%' : 'auto',
+            padding: '14px 28px',
+            background: content.bg_color || '#0071e3',
+            color: content.text_color || '#fff',
+            borderRadius: 12,
+            fontWeight: 700,
+            fontSize: '1rem',
+            textDecoration: 'none',
+            cursor: 'pointer',
+            transition: 'opacity 0.2s',
+            ...s
+          }}
+        >
+          <ShoppingBag size={18} />
+          <span>{content.text || 'Comprar Agora'}</span>
+        </a>
+      )
+    }
+
+    case 'productAddToCart': {
+      const p = product || FALLBACK_PREVIEW_PRODUCT
+      return (
+        <button
+          id={id}
+          className={className}
+          type="button"
+          onClick={() => {
+            if (typeof window !== 'undefined') {
+              window.dispatchEvent(new CustomEvent('teknix:add-to-cart', { detail: { product: p } }))
+            }
+          }}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+            width: content.full_width ? '100%' : 'auto',
+            padding: '14px 28px',
+            background: content.bg_color || '#f5f5f7',
+            color: content.text_color || '#1d1d1f',
+            border: '1px solid #d2d2d7',
+            borderRadius: 12,
+            fontWeight: 700,
+            fontSize: '1rem',
+            cursor: 'pointer',
+            transition: 'background 0.2s',
+            ...s
+          }}
+        >
+          <ShoppingCart size={18} />
+          <span>{content.text || 'Adicionar à Sacola'}</span>
+        </button>
+      )
+    }
+
+    case 'productShipping':
+      return <ProductShippingWidget content={content} style={s} />
+
+    case 'productInstallments': {
+      const p = product || FALLBACK_PREVIEW_PRODUCT
+      const { price, promoPrice, isPromo } = getProductPrice(p)
+      const val = isPromo && promoPrice ? promoPrice : price
+      const maxInst = Number(content.max_installments) || 12
+      return (
+        <div id={id} className={className} style={{ fontSize: '0.9rem', color: '#6e6e73', ...s }}>
+          <span>ou até <strong>{maxInst}x</strong> de <strong>{formatPrice(val / maxInst)}</strong> sem juros</span>
+        </div>
+      )
+    }
+
+    case 'productPaymentMethods':
+      return <ProductPaymentMethodsWidget content={content} style={s} />
+
+    case 'productFavorite':
+      return (
+        <button
+          id={id}
+          className={className}
+          type="button"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '8px 14px',
+            borderRadius: 980,
+            border: '1px solid #e8e8ed',
+            background: '#fff',
+            cursor: 'pointer',
+            fontSize: '0.85rem',
+            fontWeight: 500,
+            color: '#1d1d1f',
+            ...s
+          }}
+        >
+          <Heart size={16} color="#e11d48" />
+          <span>{content.text || 'Favoritar'}</span>
+        </button>
+      )
+
+    case 'productShare':
+      return (
+        <button
+          id={id}
+          className={className}
+          type="button"
+          onClick={() => {
+            if (typeof navigator !== 'undefined' && navigator.share) {
+              navigator.share({ title: product?.name, url: window.location.href }).catch(() => {})
+            }
+          }}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '8px 14px',
+            borderRadius: 980,
+            border: '1px solid #e8e8ed',
+            background: '#fff',
+            cursor: 'pointer',
+            fontSize: '0.85rem',
+            fontWeight: 500,
+            color: '#1d1d1f',
+            ...s
+          }}
+        >
+          <Share2 size={16} color="#6e6e73" />
+          <span>{content.text || 'Compartilhar'}</span>
+        </button>
+      )
+
+    case 'productBreadcrumb':
+      return <ProductBreadcrumbWidget product={product} content={content} style={s} />
+
+    case 'productCarousel':
+      return <ProductCarouselDynamic content={content} style={s} />
+
+    case 'productGrid':
+      return <DynamicProductGrid content={content} style={s} />
+
     default:
       return <div style={{ padding: 20, background: '#f5f5f7', borderRadius: 12, color: '#86868b' }}>Widget: {type}</div>
   }
@@ -3457,5 +3728,788 @@ function DynamicProductGrid({ content, style }: { content: Record<string, unknow
         )
       })}
     </div>
+  )
+}
+
+// ── THEME BUILDER DE PRODUTO & FALLBACK PREVIEW ──
+export const FALLBACK_PREVIEW_PRODUCT: Product = {
+  id: 'demo-brushless-18v',
+  name: 'Furadeira e Parafusadeira de Impacto Brushless 18V Industrial',
+  sku: 'TKX-18V-PRO',
+  price: 899.90,
+  promo_price: 749.90,
+  cost_purchase: 500.00,
+  stock: 24,
+  image_url: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=1200&q=80',
+  description: '<p>Desenvolvida para atender às demandas mais rigorosas da indústria e construção civil, a <strong>Furadeira e Parafusadeira TEKNIX 18V Brushless</strong> oferece torque de 65 Nm, 2 velocidades mecânicas variáveis e mandril metálico de aperto rápido.</p><p>Acompanha 2 baterias de 4.0Ah de alta durabilidade e carregador bivolt ultra-rápido.</p>',
+  brand: 'TEKNIX Industrial',
+  category: 'Ferramentas Elétricas',
+  status: 'active',
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+  store_meta: {
+    subtitle: 'Máxima potência, durabilidade extrema e controle de torque inteligente para uso profissional contínuo.',
+    short_description: 'Motor Brushless de 18V, mandril metálico 13mm, 65Nm de torque, 2 baterias de íons de lítio 4.0Ah e maleta reforçada.',
+    rating: 4.9,
+    reviews_count: 142,
+    badge: 'Mais Vendido',
+    specifications: [
+      'Voltagem da Bateria: 18V Max Lithium',
+      'Torque Máximo: 65 Nm',
+      'Mandril: 13mm (1/2") Metálico de Aperto Rápido',
+      'Velocidade sem carga: 0-500 / 0-2.000 RPM',
+      'Impactos por minuto: 0-30.000 IPM',
+      'Capacidade em Madeira: 38 mm',
+      'Capacidade em Aço: 13 mm',
+      'Capacidade em Alvenaria: 13 mm',
+      'Peso (com bateria): 1.45 kg'
+    ],
+    features: [
+      'Motor Brushless: até 50% mais autonomia de bateria por carga',
+      'Mandril metálico monobloco com catraca de alta retenção',
+      '21 posições de ajuste de torque + função furadeira e martelete',
+      'LED de alta potência para iluminação da área de trabalho',
+      'Grip emborrachado ergonômico anti-fadiga'
+    ],
+    gallery: [
+      'https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?auto=format&fit=crop&w=1200&q=80'
+    ],
+    variations: [
+      { name: 'Voltagem', options: ['110V (Carregador)', '220V (Carregador)', 'Bivolt Automático'] },
+      { name: 'Kit', options: ['Com 1 Bateria 2.0Ah', 'Com 2 Baterias 4.0Ah + Maleta'] }
+    ]
+  } as any
+}
+
+export function ProductGalleryWidget({
+  product,
+  content,
+  style
+}: {
+  product?: Product
+  content: Record<string, any>
+  style: React.CSSProperties
+}) {
+  const p = product || FALLBACK_PREVIEW_PRODUCT
+  const meta = Array.isArray(p.store_meta) ? p.store_meta[0] : p.store_meta
+  const galleryList: string[] = useMemo(() => {
+    const list: string[] = []
+    if (meta?.gallery && Array.isArray(meta.gallery) && meta.gallery.length > 0) {
+      list.push(...meta.gallery)
+    } else if ((p as any).images && Array.isArray((p as any).images) && (p as any).images.length > 0) {
+      list.push(...(p as any).images)
+    }
+    if (p.image_url && !list.includes(p.image_url)) {
+      list.unshift(p.image_url)
+    }
+    return list.length > 0 ? list : ['https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=1200&q=80']
+  }, [p, meta])
+
+  const [activeIndex, setActiveIndex] = useState(0)
+  const activeImg = galleryList[activeIndex] || galleryList[0]
+  const layout = content.gallery_layout || 'bottom' // 'bottom' | 'left'
+  const isLeft = layout === 'left'
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: isLeft ? 'row' : 'column',
+        gap: 16,
+        alignItems: 'stretch',
+        width: '100%',
+        ...style
+      }}
+    >
+      {/* Miniaturas se layout for lateral esquerda */}
+      {isLeft && galleryList.length > 1 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: 80, flexShrink: 0 }}>
+          {galleryList.map((url, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => setActiveIndex(idx)}
+              style={{
+                border: activeIndex === idx ? '2px solid #0071e3' : '1px solid #e8e8ed',
+                borderRadius: 12,
+                padding: 4,
+                background: '#fff',
+                cursor: 'pointer',
+                overflow: 'hidden',
+                aspectRatio: '1',
+                outline: 'none',
+                transition: 'border-color 0.2s'
+              }}
+            >
+              <img src={url} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Imagem Principal */}
+      <div
+        style={{
+          flex: 1,
+          background: '#f5f5f7',
+          borderRadius: 20,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: 380,
+          maxHeight: 520,
+          position: 'relative',
+          overflow: 'hidden',
+          padding: 24
+        }}
+      >
+        <img
+          src={activeImg}
+          alt={p.name}
+          style={{
+            maxWidth: '100%',
+            maxHeight: '100%',
+            objectFit: 'contain',
+            transition: 'transform 0.3s ease'
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.04)' }}
+          onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)' }}
+        />
+      </div>
+
+      {/* Miniaturas se layout for inferior */}
+      {!isLeft && galleryList.length > 1 && (
+        <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 6 }}>
+          {galleryList.map((url, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => setActiveIndex(idx)}
+              style={{
+                border: activeIndex === idx ? '2px solid #0071e3' : '1px solid #e8e8ed',
+                borderRadius: 12,
+                padding: 6,
+                background: '#fff',
+                cursor: 'pointer',
+                overflow: 'hidden',
+                width: 72,
+                height: 72,
+                flexShrink: 0,
+                outline: 'none',
+                transition: 'border-color 0.2s'
+              }}
+            >
+              <img src={url} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+export function ProductPriceWidget({
+  product,
+  content,
+  style
+}: {
+  product?: Product
+  content: Record<string, any>
+  style: React.CSSProperties
+}) {
+  const p = product || FALLBACK_PREVIEW_PRODUCT
+  const { price, promoPrice, isPromo } = getProductPrice(p)
+  const finalPrice = isPromo && promoPrice ? promoPrice : price
+  const showOriginal = content.show_original_price !== false && isPromo
+  const showPixDiscount = content.show_pix_discount !== false
+  const showInstallments = content.show_installments !== false
+  const maxInstallments = Number(content.max_installments) || 12
+  const installmentValue = finalPrice > 0 ? (finalPrice / maxInstallments) : 0
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, width: '100%', ...style }}>
+      {showOriginal && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: '0.9rem', color: '#86868b', textDecoration: 'line-through' }}>
+            De {formatPrice(price)}
+          </span>
+          <span style={{ fontSize: '0.8rem', background: '#e6f9f0', color: '#059669', fontWeight: 700, padding: '2px 8px', borderRadius: 980 }}>
+            {Math.round(((price - finalPrice) / price) * 100)}% OFF
+          </span>
+        </div>
+      )}
+
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
+        <span style={{ fontSize: '2rem', fontWeight: 800, color: '#1d1d1f', letterSpacing: '-0.03em', lineHeight: 1.1 }}>
+          {formatPrice(finalPrice)}
+        </span>
+        {showPixDiscount && (
+          <span style={{ fontSize: '0.95rem', fontWeight: 600, color: '#059669' }}>
+            no PIX (com desconto)
+          </span>
+        )}
+      </div>
+
+      {showInstallments && (
+        <p style={{ margin: '4px 0 0', fontSize: '0.9rem', color: '#6e6e73' }}>
+          ou em até <strong>{maxInstallments}x</strong> de <strong>{formatPrice(installmentValue)}</strong> sem juros
+        </p>
+      )}
+    </div>
+  )
+}
+
+export function ProductSpecificationsWidget({
+  product,
+  content,
+  style
+}: {
+  product?: Product
+  content: Record<string, any>
+  style: React.CSSProperties
+}) {
+  const p = product || FALLBACK_PREVIEW_PRODUCT
+  const meta = Array.isArray(p.store_meta) ? p.store_meta[0] : p.store_meta
+  const rawSpecs: any[] = meta?.specifications || [
+    'Voltagem da Bateria: 18V Max Lithium',
+    'Torque Máximo: 65 Nm',
+    'Mandril: 13mm (1/2") Metálico',
+    'Peso: 1.45 kg'
+  ]
+  const specs: Array<{ label: string; value: string }> = rawSpecs.map((item: any) => {
+    if (typeof item === 'string') {
+      const idx = item.indexOf(':')
+      if (idx !== -1) {
+        return { label: item.slice(0, idx).trim(), value: item.slice(idx + 1).trim() }
+      }
+      return { label: item, value: '' }
+    }
+    return item
+  })
+
+  return (
+    <div style={{ width: '100%', borderRadius: 16, border: '1px solid #e8e8ed', overflow: 'hidden', background: '#fff', ...style }}>
+      {content.title && (
+        <div style={{ padding: '14px 20px', borderBottom: '1px solid #e8e8ed', background: '#fafafc', fontWeight: 700, fontSize: '1rem', color: '#1d1d1f' }}>
+          {content.title}
+        </div>
+      )}
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
+        {specs.map((item, idx) => (
+          <div
+            key={idx}
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              padding: '12px 20px',
+              background: idx % 2 === 0 ? '#fff' : '#f9f9fb',
+              borderBottom: idx === specs.length - 1 ? 'none' : '1px solid #f0f0f2',
+              fontSize: '0.9rem'
+            }}
+          >
+            <span style={{ color: '#6e6e73', fontWeight: 500 }}>{item.label}</span>
+            <span style={{ color: '#1d1d1f', fontWeight: 600, textAlign: 'right' }}>{item.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+export function ProductFeaturesWidget({
+  product,
+  content,
+  style
+}: {
+  product?: Product
+  content: Record<string, any>
+  style: React.CSSProperties
+}) {
+  const p = product || FALLBACK_PREVIEW_PRODUCT
+  const meta = Array.isArray(p.store_meta) ? p.store_meta[0] : p.store_meta
+  const features: string[] = meta?.features || [
+    'Motor Brushless: até 50% mais autonomia de bateria por carga',
+    'Mandril metálico monobloco com catraca de alta retenção',
+    '21 posições de ajuste de torque + martelete',
+    'LED de alta potência com acionamento automático'
+  ]
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%', ...style }}>
+      {content.title && (
+        <h4 style={{ margin: '0 0 4px', fontSize: '1.05rem', fontWeight: 700, color: '#1d1d1f' }}>
+          {content.title}
+        </h4>
+      )}
+      {features.map((feat, idx) => (
+        <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+          <div style={{ width: 22, height: 22, borderRadius: '50%', background: '#e6f9f0', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
+            <Check size={14} strokeWidth={2.5} />
+          </div>
+          <span style={{ fontSize: '0.95rem', color: '#1d1d1f', lineHeight: 1.45 }}>{feat}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+export function ProductQuantityWidget({
+  content,
+  style
+}: {
+  content: Record<string, any>
+  style: React.CSSProperties
+}) {
+  const [qty, setQty] = useState(1)
+  return (
+    <div style={{ display: 'inline-flex', alignItems: 'center', border: '1px solid #d2d2d7', borderRadius: 980, background: '#fff', overflow: 'hidden', ...style }}>
+      <button
+        type="button"
+        onClick={() => setQty(Math.max(1, qty - 1))}
+        style={{ width: 36, height: 36, border: 'none', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1d1d1f' }}
+        aria-label="Diminuir"
+      >
+        <Minus size={15} />
+      </button>
+      <span style={{ minWidth: 32, textAlign: 'center', fontWeight: 600, fontSize: '0.95rem', color: '#1d1d1f' }}>
+        {qty}
+      </span>
+      <button
+        type="button"
+        onClick={() => setQty(qty + 1)}
+        style={{ width: 36, height: 36, border: 'none', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1d1d1f' }}
+        aria-label="Aumentar"
+      >
+        <Plus size={15} />
+      </button>
+    </div>
+  )
+}
+
+export function ProductVariationsWidget({
+  product,
+  content,
+  style
+}: {
+  product?: Product
+  content: Record<string, any>
+  style: React.CSSProperties
+}) {
+  const p = product || FALLBACK_PREVIEW_PRODUCT
+  const meta = Array.isArray(p.store_meta) ? p.store_meta[0] : p.store_meta
+  const variations: Array<{ name: string; options: string[] }> = meta?.variations || [
+    { name: 'Voltagem', options: ['110V', '220V', 'Bivolt Automático'] },
+    { name: 'Kit', options: ['Padrão (1 Bateria)', 'Completo (2 Baterias + Maleta)'] }
+  ]
+
+  const [selected, setSelected] = useState<Record<string, string>>({
+    Voltagem: '220V',
+    Kit: 'Completo (2 Baterias + Maleta)'
+  })
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, width: '100%', ...style }}>
+      {variations.map((v, vIdx) => (
+        <div key={vIdx} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#1d1d1f' }}>
+            {v.name}: <span style={{ fontWeight: 400, color: '#6e6e73' }}>{selected[v.name] || v.options[0]}</span>
+          </span>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            {v.options.map((opt, oIdx) => {
+              const isActive = (selected[v.name] || v.options[0]) === opt
+              return (
+                <button
+                  key={oIdx}
+                  type="button"
+                  onClick={() => setSelected(prev => ({ ...prev, [v.name]: opt }))}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: 980,
+                    border: isActive ? '2px solid #0071e3' : '1px solid #d2d2d7',
+                    background: isActive ? '#f0f7ff' : '#fff',
+                    color: isActive ? '#0071e3' : '#1d1d1f',
+                    fontWeight: isActive ? 600 : 400,
+                    fontSize: '0.88rem',
+                    cursor: 'pointer',
+                    outline: 'none',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  {opt}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+export function ProductRatingWidget({
+  product,
+  content,
+  style
+}: {
+  product?: Product
+  content: Record<string, any>
+  style: React.CSSProperties
+}) {
+  const p = product || FALLBACK_PREVIEW_PRODUCT
+  const meta = Array.isArray(p.store_meta) ? p.store_meta[0] : p.store_meta
+  const rating = Number(meta?.rating || (p as any).rating || 4.9)
+  const count = Number(meta?.reviews_count || (p as any).reviews_count || 142)
+  const showRating = content.show_rating !== false
+  const showStars = content.show_stars !== false
+  const showReviewCount = content.show_review_count !== false
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6, ...style }}>
+      {showStars && <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
+            key={star}
+            size={16}
+            fill={star <= Math.round(rating) ? '#f59e0b' : '#e5e7eb'}
+            color={star <= Math.round(rating) ? '#f59e0b' : '#e5e7eb'}
+          />
+        ))}
+      </div>}
+      {showRating && <span style={{ fontWeight: 700, fontSize: '0.92rem', color: '#1d1d1f' }}>{rating.toFixed(1)}</span>}
+      {showReviewCount && <a href="#reviews" style={{ fontSize: '0.85rem', color: '#86868b' }}>({count} avaliações)</a>}
+    </div>
+  )
+}
+
+export function ProductShippingWidget({
+  content,
+  style
+}: {
+  content: Record<string, any>
+  style: React.CSSProperties
+}) {
+  const [cep, setCep] = useState('')
+  const [calculated, setCalculated] = useState(false)
+
+  const handleCalc = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (cep.length >= 8) setCalculated(true)
+  }
+
+  return (
+    <div style={{ width: '100%', background: '#fafafc', border: '1px solid #e8e8ed', borderRadius: 16, padding: 16, ...style }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+        <Truck size={18} color="#0071e3" />
+        <span style={{ fontWeight: 600, fontSize: '0.92rem', color: '#1d1d1f' }}>
+          {content.title || 'Calcular frete e prazo de entrega'}
+        </span>
+      </div>
+      <form onSubmit={handleCalc} style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+        <input
+          type="text"
+          placeholder="00000-000"
+          value={cep}
+          onChange={(e) => setCep(e.target.value.replace(/\D/g, '').slice(0, 8))}
+          style={{
+            flex: 1,
+            padding: '10px 14px',
+            borderRadius: 10,
+            border: '1px solid #d2d2d7',
+            fontSize: '0.9rem',
+            background: '#fff'
+          }}
+        />
+        <button
+          type="submit"
+          style={{
+            padding: '10px 18px',
+            borderRadius: 10,
+            border: 'none',
+            background: '#0071e3',
+            color: '#fff',
+            fontWeight: 600,
+            fontSize: '0.9rem',
+            cursor: 'pointer'
+          }}
+        >
+          Calcular
+        </button>
+      </form>
+      <a
+        href="https://buscacepinter.correios.com.br/app/endereco/index.php"
+        target="_blank"
+        rel="noreferrer"
+        style={{ fontSize: '0.8rem', color: '#0071e3', textDecoration: 'none' }}
+      >
+        Não sei meu CEP
+      </a>
+
+      {calculated && (
+        <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 8, borderTop: '1px solid #e8e8ed', paddingTop: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.88rem' }}>
+            <span><strong>Normal / Transportadora:</strong> 3 a 5 dias úteis</span>
+            <span style={{ color: '#059669', fontWeight: 700 }}>GRÁTIS</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.88rem' }}>
+            <span><strong>Expresso / SEDEX:</strong> 1 a 2 dias úteis</span>
+            <span style={{ fontWeight: 700, color: '#1d1d1f' }}>R$ 19,90</span>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export function ProductBreadcrumbWidget({
+  product,
+  content,
+  style
+}: {
+  product?: Product
+  content: Record<string, any>
+  style: React.CSSProperties
+}) {
+  const p = product || FALLBACK_PREVIEW_PRODUCT
+  const category = p.category || 'Ferramentas'
+
+  return (
+    <nav aria-label="Trilha de navegação" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.85rem', color: '#86868b', flexWrap: 'wrap', ...style }}>
+      <a href="/" style={{ color: '#6e6e73', textDecoration: 'none' }}>Início</a>
+      <ChevronRight size={13} />
+      <a href={`/produtos?q=${encodeURIComponent(category.toLowerCase())}`} style={{ color: '#6e6e73', textDecoration: 'none' }}>{category}</a>
+      <ChevronRight size={13} />
+      <span style={{ color: '#1d1d1f', fontWeight: 600 }}>{p.name}</span>
+    </nav>
+  )
+}
+
+export function ProductPaymentMethodsWidget({
+  content,
+  style
+}: {
+  content: Record<string, any>
+  style: React.CSSProperties
+}) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%', ...style }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <CreditCard size={16} color="#6e6e73" />
+        <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#1d1d1f' }}>Formas de Pagamento</span>
+      </div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+        <span style={{ padding: '4px 10px', background: '#f5f5f7', borderRadius: 8, fontSize: '0.78rem', fontWeight: 700, color: '#059669' }}>PIX (-15%)</span>
+        <span style={{ padding: '4px 10px', background: '#f5f5f7', borderRadius: 8, fontSize: '0.78rem', fontWeight: 600, color: '#1d1d1f' }}>Cartão até 12x</span>
+        <span style={{ padding: '4px 10px', background: '#f5f5f7', borderRadius: 8, fontSize: '0.78rem', fontWeight: 600, color: '#1d1d1f' }}>Boleto Bancário</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', background: '#e6f9f0', borderRadius: 8, fontSize: '0.78rem', fontWeight: 600, color: '#059669' }}>
+          <ShieldCheck size={13} /> Compra 100% Segura
+        </span>
+      </div>
+    </div>
+  )
+}
+
+export function ProductCarouselDynamic({
+  content,
+  style
+}: {
+  content: Record<string, any>
+  style: React.CSSProperties
+}) {
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const filter = content.filter || 'all'
+        const limit = Number(content.limit) || 8
+        const data = await getProducts({ limit })
+        if (data && data.length > 0) {
+          setProducts(data)
+        }
+      } catch (err) {
+        console.error('Error in ProductCarouselDynamic:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    load()
+  }, [content])
+
+  if (loading) {
+    return <div style={{ padding: 40, textAlign: 'center', ...style }}><div className="spinner" /></div>
+  }
+
+  const items = products.length > 0 ? products : [FALLBACK_PREVIEW_PRODUCT]
+
+  return (
+    <div style={{ width: '100%', overflow: 'hidden', ...style }}>
+      {content.title && (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+          <h3 style={{ fontSize: '1.4rem', fontWeight: 700, color: '#1d1d1f', margin: 0 }}>{content.title}</h3>
+        </div>
+      )}
+      <div style={{ display: 'flex', gap: 16, overflowX: 'auto', paddingBottom: 16, scrollSnapType: 'x mandatory' }}>
+        {items.map((prod) => {
+          const { price, promoPrice, isPromo } = getProductPrice(prod)
+          const displayPrice = isPromo ? promoPrice : price
+          const img = prod.image_url || (Array.isArray((prod as any).images) ? (prod as any).images[0] : '')
+
+          return (
+            <a
+              key={prod.id}
+              href={`/produtos/${prod.sku || prod.id}`}
+              style={{
+                textDecoration: 'none',
+                color: 'inherit',
+                flexShrink: 0,
+                width: 260,
+                scrollSnapAlign: 'start',
+                background: '#fff',
+                borderRadius: 18,
+                border: '1px solid #e8e8ed',
+                overflow: 'hidden',
+                transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-4px)'
+                e.currentTarget.style.boxShadow = '0 10px 20px rgba(0,0,0,0.06)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = 'none'
+              }}
+            >
+              <div style={{ height: 180, background: '#f5f5f7', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, position: 'relative' }}>
+                {img ? (
+                  <img src={img} alt={prod.name} style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} />
+                ) : (
+                  <span style={{ fontSize: '2.5rem', opacity: 0.3 }}>📦</span>
+                )}
+                {isPromo && (
+                  <span style={{ position: 'absolute', top: 10, right: 10, background: '#a2e000', color: '#fff', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 980 }}>
+                    OFERTA
+                  </span>
+                )}
+              </div>
+              <div style={{ padding: 16 }}>
+                <span style={{ fontSize: 11, color: '#86868b', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: 4 }}>
+                  {prod.brand || 'TEKNIX'}
+                </span>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: '#1d1d1f', margin: '0 0 10px', lineHeight: 1.3, height: '2.6em', overflow: 'hidden' }}>
+                  {prod.name}
+                </h4>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                  <span style={{ fontWeight: 800, color: '#1d1d1f', fontSize: '1.1rem' }}>{formatPrice(displayPrice || 0)}</span>
+                  {isPromo && <span style={{ fontSize: '0.8rem', color: '#86868b', textDecoration: 'line-through' }}>{formatPrice(price)}</span>}
+                </div>
+              </div>
+            </a>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+export function HorizontalMenuWidget({
+  content,
+  style
+}: {
+  content: Record<string, any>
+  style: React.CSSProperties
+}) {
+  const showDeptBtn = content.show_departments_btn !== false
+  const deptBtnText = content.departments_btn_text || 'Departamentos'
+  const deptSource = content.source || 'categories'
+  const deptMaxItems = Number(content.max_items) || 7
+  const deptOrderBy = content.order_by || 'default'
+  const showFeatured = content.show_featured_item !== false
+  const featuredText = content.featured_item_text || '🏷️ Cupom'
+  const featuredLink = content.featured_item_link || '/cupons'
+  const rawBg = content.featured_item_bg
+  const rawColor = content.featured_item_color
+  const featuredBg = (!rawBg || rawBg === '#e6f9f0' || rawBg === 'rgb(230, 249, 240)') ? '#b5f500' : rawBg
+  const featuredColor = (!rawColor || rawColor === '#059669' || rawColor === 'rgb(5, 150, 105)') ? '#102419' : rawColor
+
+  let items = [
+    { label: 'Telefonia', url: '/produtos?q=telefonia' },
+    { label: 'Eletrodomésticos', url: '/produtos?q=eletrodomesticos' },
+    { label: 'Tvs e Vídeo', url: '/produtos?q=tv' },
+    { label: 'Móveis', url: '/produtos?q=moveis' },
+    { label: 'Eletroportáteis', url: '/produtos?q=eletroportateis' },
+    { label: 'Informática', url: '/produtos?q=informatica' },
+    { label: 'Ferramentas', url: '/produtos?q=ferramentas' }
+  ]
+
+  if (deptSource === 'custom' && Array.isArray(content.items) && content.items.length > 0) {
+    items = content.items
+  } else if (deptSource === 'manual' && Array.isArray(content.manual_categories) && content.manual_categories.length > 0) {
+    items = content.manual_categories.map((c: string) => ({ label: c, url: `/produtos?q=${encodeURIComponent(c.toLowerCase())}` }))
+  } else if (deptOrderBy === 'name_asc') {
+    items = [...items].sort((a, b) => a.label.localeCompare(b.label))
+  } else if (deptOrderBy === 'name_desc') {
+    items = [...items].sort((a, b) => b.label.localeCompare(a.label))
+  }
+
+  const visibleItems = items.slice(0, deptMaxItems)
+
+  return (
+    <nav style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap', ...style }}>
+      {showDeptBtn && (
+        <a
+          href="/categorias"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8,
+            fontWeight: 700,
+            fontSize: '0.9rem',
+            color: '#1d1d1f',
+            textDecoration: 'none'
+          }}
+        >
+          <svg viewBox="0 0 18 12" width="16" height="12" fill="currentColor">
+            <path d="M1.25 11.635c-.212 0-.391-.072-.534-.216S.5 11.097.5 10.884s.072-.391.216-.534.322-.215.534-.215h15.5c.212 0 .391.072.534.216s.216.322.216.535-.072.391-.216.534-.322.215-.534.215H1.25zm0-4.885c-.212 0-.391-.072-.534-.216S.5 6.212.5 6s.072-.391.216-.534.322-.215.534-.215h15.5c.212 0 .391.072.534.216s.216.322.216.535-.072.391-.216.534-.322.215-.534.215H1.25zm0-4.885c-.212 0-.391-.072-.534-.216S.5 1.328.5 1.115.572.724.716.581s.322-.215.534-.215h15.5c.212 0 .391.072.534.216s.216.322.216.535-.072.391-.216.534-.322.215-.534.215H1.25z" />
+          </svg>
+          <span>{deptBtnText}</span>
+        </a>
+      )}
+
+      {visibleItems.map((it, idx) => (
+        <a
+          key={idx}
+          href={it.url}
+          style={{
+            fontSize: '0.9rem',
+            color: '#48484a',
+            fontWeight: 500,
+            textDecoration: 'none',
+            transition: 'color 0.15s ease'
+          }}
+        >
+          {it.label}
+        </a>
+      ))}
+
+      {showFeatured && (
+        <a
+          href={featuredLink}
+          style={{
+            fontSize: '0.82rem',
+            fontWeight: 700,
+            background: featuredBg,
+            color: featuredColor,
+            padding: '4px 12px',
+            borderRadius: 980,
+            textDecoration: 'none'
+          }}
+        >
+          {featuredText}
+        </a>
+      )}
+    </nav>
   )
 }

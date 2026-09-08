@@ -344,7 +344,7 @@ export default function CentralEtiquetasPage() {
             className={`px-5 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2.5 transition-all shadow-xs cursor-pointer ${
               stats.available > 0
                 ? 'bg-[#16a34a] hover:bg-[#15803d] text-white hover:shadow-md'
-                : 'bg-[#f1f5f9] text-[#94a3b8] cursor-not-allowed border border-[#e2e8f0]'
+                : 'bg-[#f5f5f5] text-[#94a3b8] cursor-not-allowed border border-[#d9d9d9]'
             }`}
           >
             <Printer className="w-4 h-4" />
@@ -393,10 +393,10 @@ export default function CentralEtiquetasPage() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setViewMode('ORDERS')}
-              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+              className={`label-view-tab px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
                 viewMode === 'ORDERS'
-                  ? 'bg-[#0f172a] text-white shadow-xs'
-                  : 'text-[#64748b] hover:text-[#0f172a] hover:bg-[#f1f5f9]'
+                  ? 'bg-[#347ff2] text-white'
+                  : 'text-[#334155] hover:text-white hover:bg-[#347ff2]'
               }`}
             >
               Por Pedido ({filteredOrders.length})
@@ -404,10 +404,10 @@ export default function CentralEtiquetasPage() {
 
             <button
               onClick={() => setViewMode('PRODUCTS')}
-              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+              className={`label-view-tab px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
                 viewMode === 'PRODUCTS'
-                  ? 'bg-[#0f172a] text-white shadow-xs'
-                  : 'text-[#64748b] hover:text-[#0f172a] hover:bg-[#f1f5f9]'
+                  ? 'bg-[#347ff2] text-white'
+                  : 'text-[#334155] hover:text-white hover:bg-[#347ff2]'
               }`}
             >
               Agrupado por Produto ({groupedByProduct.length})
@@ -415,10 +415,10 @@ export default function CentralEtiquetasPage() {
 
             <button
               onClick={() => setViewMode('HISTORY')}
-              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+              className={`label-view-tab px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
                 viewMode === 'HISTORY'
-                  ? 'bg-[#0f172a] text-white shadow-xs'
-                  : 'text-[#64748b] hover:text-[#0f172a] hover:bg-[#f1f5f9]'
+                  ? 'bg-[#347ff2] text-white'
+                  : 'text-[#334155] hover:text-white hover:bg-[#347ff2]'
               }`}
             >
               Histórico ({printLogs.length})
@@ -437,10 +437,10 @@ export default function CentralEtiquetasPage() {
               <button
                 key={f.key}
                 onClick={() => setStatusFilter(f.key as any)}
-                className={`px-3 py-1.5 rounded-full transition-all cursor-pointer ${
+                className={`label-status-filter px-3 py-1.5 rounded-full transition-colors cursor-pointer ${
                   statusFilter === f.key
-                    ? 'bg-[#e2e8f0] text-[#0f172a] font-bold'
-                    : 'bg-[#f8fafc] text-[#64748b] hover:bg-[#f1f5f9] hover:text-[#0f172a]'
+                    ? 'is-active bg-white text-[#1f2328] font-bold'
+                    : 'bg-white text-[#64748b] hover:bg-white hover:text-[#1f2328]'
                 }`}
               >
                 {f.label}
@@ -477,8 +477,8 @@ export default function CentralEtiquetasPage() {
                   onClick={() => setMarketplaceFilter(m)}
                   className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
                     isSelected
-                      ? 'bg-[#0f172a] text-white border-[#0f172a]'
-                      : 'bg-white text-[#64748b] border-[#e2e8f0] hover:border-[#cbd5e1]'
+                      ? 'bg-[#347ff2] text-white border-[#347ff2]'
+                      : 'bg-white text-[#64748b] border-[#e2e8f0] hover:border-[#347ff2] hover:bg-[#347ff2] hover:text-white'
                   }`}
                 >
                   {label}

@@ -11,7 +11,7 @@ function StatCard({ label, value, sub }: { label: string; value: string; sub?: s
   return (
     <div className="bg-white rounded-md border border-[#e6e6e6] p-4">
       <p className="text-sm font-medium text-[#999] mb-1">{label}</p>
-      <p className="text-[18px] font-semibold text-[#333]">{value}</p>
+      <p className="text-[18px] font-bold text-[#333]">{value}</p>
       {sub && <p className="text-xs text-[#ccc] mt-0.5">{sub}</p>}
     </div>
   )
@@ -100,7 +100,7 @@ export default function ClientesPage() {
   const avgTicket = customers.length > 0 ? totalSpentAll / customers.length : 0
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 -mx-5 sm:-mx-8 lg:-mx-12 xl:-mx-16">
       {/* Stats Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <StatCard label="Total de Clientes" value={String(customers.length)} />

@@ -10,7 +10,6 @@ import CartTray from './CartTray'
 import CompareTray from './CompareTray'
 import { Ads } from './Ads'
 import StorefrontProductCard, { type CbProductItem } from './StorefrontProductCard'
-import { DEMO_SIGNALS, DEMO_REVIEWS } from '../services/demoProduct'
 import { OfferCountdown } from './ProductSignals'
 import { getProducts } from '../services/products'
 import { storefrontCard } from '../services/storefrontCommerce'
@@ -36,15 +35,6 @@ const DEFAULT_MOSAIC_CONTENT = {
   card_shape: 'rounded',
   card_size: 90,
   items: [
-    {
-      name: 'Use: DESCONTO',
-      link: '/produtos',
-      bgType: 'promo',
-      badge: 'até 20%',
-      badgeSub: 'OFF',
-      iconUrl: '',
-      promoBg: '#22c55e'
-    },
     {
       name: 'Macaco',
       link: '/produtos?q=macaco+hidraulico',
@@ -85,6 +75,20 @@ const DEFAULT_MOSAIC_CONTENT = {
       link: '/produtos?q=lixadeira',
       bgType: 'normal',
       iconUrl: '/images/referencias/lixadeira.webp',
+      is_cutout: true
+    },
+    {
+      name: 'Macaco',
+      link: '/produtos?q=macaco+hidraulico',
+      bgType: 'normal',
+      iconUrl: '/images/referencias/macaco-hidraulico.webp',
+      is_cutout: true
+    },
+    {
+      name: 'Parafusadeira',
+      link: '/produtos?q=parafusadeira',
+      bgType: 'normal',
+      iconUrl: '/images/referencias/parafusadeira.webp',
       is_cutout: true
     }
   ]
@@ -180,77 +184,139 @@ export default function StorefrontHome() {
   }, [mc.items])
 
   const mosaicoCategories: MosaicoCategory[] = useMemo(() => {
-    return rawMosaicItems.map(item => ({
-      name: String(item.name || item.title || ''),
-      link: String(item.link || item.url || '/produtos'),
-      bgType: item.bgType === 'promo' ? 'promo' : 'blue',
-      iconUrl: String(item.iconUrl || item.image || item.src || ''),
-      badge: item.badge ? String(item.badge) : undefined,
-      badgeSub: item.badgeSub ? String(item.badgeSub) : undefined,
-      is_cutout: item.is_cutout !== false,
-      promoBg: item.promoBg,
-      cardBg: item.cardBg
-    }))
+    const cleaned = rawMosaicItems
+      .map(item => ({
+        ...item,
+        name: String(item.name || item.title || '').replace(/\s*\((?:cópia|copia)\)/gi, '').trim()
+      }))
+      .filter(item => {
+        const lower = item.name.toLowerCase()
+        if (!item.name || lower === 'use: desconto') return false
+        return true
+      })
+      .map(item => ({
+        name: item.name,
+        link: String(item.link || item.url || '/produtos'),
+        bgType: (item.bgType === 'promo' ? 'promo' : 'blue') as 'promo' | 'blue',
+        iconUrl: String(item.iconUrl || item.image || item.src || ''),
+        badge: item.badge ? String(item.badge) : undefined,
+        badgeSub: item.badgeSub ? String(item.badgeSub) : undefined,
+        is_cutout: item.is_cutout !== false,
+        promoBg: item.promoBg,
+        cardBg: item.cardBg
+      }))
+
+    let list = cleaned.length > 0 ? cleaned : (DEFAULT_MOSAIC_CONTENT.items as unknown as MosaicoCategory[])
+
+    // Garantir exatamente pelo menos 8 itens duplicando itens existentes conforme solicitado
+    if (list.length > 0 && list.length < 8) {
+      const needed = 8 - list.length
+      const duplicates = list.slice(0, needed).map(item => ({ ...item }))
+      list = [...list, ...duplicates]
+    }
+
+    return list
   }, [rawMosaicItems])
 
   const money = (val: number) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 
-  // Mock de fallback se o catálogo estiver vazio (DEVE estar ANTES do useMemo que o referencia)
-  const flashSaleProducts = [
+  // Produtos padrão de referência para Ofertas Relâmpago (Ferramentas reais do catálogo TEKNIX)
+  const defaultFlashSaleTools = [
     {
-      id: 'flash-1',
-      to: '/produtos',
-      title: "Smart TV Samsung 32'' Polegadas HD...",
-      img: 'https://images.unsplash.com/photo-1593784991095-a205069470b6?w=260&auto=format&fit=crop&q=80',
-      oldPrice: 'R$ 1.319,00',
-      discount: 'Baixou 10%',
-      price: 'R$ 1.192,62',
-      ratingCount: null,
-      pixInfo: null
+      id: 'b5ec9f54-f942-4e7f-bd2c-a78b269e6f59',
+      sku: 'MLB7453209398',
+      to: '/produtos/MLB7453209398',
+      title: 'Kit Parafusadeira Chave Fenda Elétrica 30 Peças Lançamento',
+      img: 'https://http2.mlstatic.com/D_985226-MLA115019108190_082026-O.jpg',
+      oldPrice: 'R$ 149,90',
+      discount: 'Baixou 20%',
+      price: 'R$ 119,90',
+      ratingCount: '(182)',
+      pixInfo: 'Exclusivo Pix com desconto'
     },
     {
-      id: 'flash-2',
-      to: '/produtos',
-      title: 'Geladeira Brastemp BRM46MK Frost Fre...',
-      img: 'https://images.unsplash.com/photo-1571175443880-49e1d25b2bc5?w=260&auto=format&fit=crop&q=80',
-      oldPrice: 'R$ 3.407,11',
-      discount: 'Baixou 9%',
-      price: 'R$ 2.849,00',
-      ratingCount: null,
-      pixInfo: 'Exclusivo Pix 10% OFF'
+      id: '4bae4104-dadb-44e1-98b0-8e3128eb7222',
+      sku: 'MLB7451225922',
+      to: '/produtos/MLB7451225922',
+      title: 'Kit Jogo De Ferramentas Chave Catraca Soquete Crv 46 Peças',
+      img: 'https://http2.mlstatic.com/D_955140-MLA100095920631_122025-O.jpg',
+      oldPrice: 'R$ 79,90',
+      discount: 'Baixou 25%',
+      price: 'R$ 59,90',
+      ratingCount: '(314)',
+      pixInfo: 'Exclusivo Pix com desconto'
     },
     {
-      id: 'flash-3',
-      to: '/produtos',
-      title: 'Lavadora de Roupas Electrolux 11Kg LES...',
-      img: 'https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=260&auto=format&fit=crop&q=80',
-      oldPrice: 'R$ 2.049,00',
+      id: '23d47105-f47f-471c-9e86-76992d5cfdee',
+      sku: 'MLB7441762656',
+      to: '/produtos/MLB7441762656',
+      title: 'Esmerilhadeira Angular Sem Fio 21v 125mm Bomvink 860w 2 Baterias',
+      img: 'https://http2.mlstatic.com/D_843763-MLA99938277957_112025-O.jpg',
+      oldPrice: 'R$ 359,00',
       discount: 'Baixou 17%',
-      price: 'R$ 1.699,00',
-      ratingCount: '(7)',
-      pixInfo: null
+      price: 'R$ 299,00',
+      ratingCount: '(95)',
+      pixInfo: 'Exclusivo Pix com desconto'
     },
     {
-      id: 'flash-4',
-      to: '/produtos',
-      title: 'Fritadeira Elétrica Sem Óleo Air Fryer...',
-      img: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=260&auto=format&fit=crop&q=80',
-      oldPrice: 'R$ 343,10',
-      discount: 'Baixou 19%',
-      price: 'R$ 278,07',
-      ratingCount: '(283)',
-      pixInfo: 'Exclusivo Pix 7% OFF'
+      id: 'a9b4e10a-2178-4464-97ea-5894d484369f',
+      sku: 'MLB5108941105',
+      to: '/produtos/MLB5108941105',
+      title: 'Chave Impacto Bomvink 21v 4000mah Furadeira Parafusadeira 3 Modos',
+      img: 'https://http2.mlstatic.com/D_740212-MLA99989847147_112025-O.jpg',
+      oldPrice: 'R$ 389,00',
+      discount: 'Baixou 15%',
+      price: 'R$ 329,90',
+      ratingCount: '(240)',
+      pixInfo: 'Exclusivo Pix com desconto'
     },
     {
-      id: 'flash-5',
-      to: '/produtos',
-      title: 'Smartphone Motorola Moto G34 5G 128GB...',
-      img: 'https://images.unsplash.com/photo-1580910051074-3eb694886505?w=260&auto=format&fit=crop&q=80',
-      oldPrice: 'R$ 1.099,00',
+      id: '7f4d99a8-228e-40b3-8dae-d18c0844ee71',
+      sku: 'MLB7451232960',
+      to: '/produtos/MLB7451232960',
+      title: 'Nível A Laser Verde De Alta Precisão Bomvink Bom-6210',
+      img: 'https://http2.mlstatic.com/D_616288-MLA116397354503_082026-O.webp',
+      oldPrice: 'R$ 199,90',
+      discount: 'Baixou 15%',
+      price: 'R$ 169,90',
+      ratingCount: '(88)',
+      pixInfo: 'Exclusivo Pix com desconto'
+    },
+    {
+      id: 'd49fd093-1981-4359-8e54-0e76ee268629',
+      sku: 'MLB5090385757',
+      to: '/produtos/MLB5090385757',
+      title: 'Lava Jato Lavadora Portátil De Alta Pressão 21v 2x Baterias',
+      img: 'https://http2.mlstatic.com/D_952794-MLA115069823794_082026-O.jpg',
+      oldPrice: 'R$ 219,00',
       discount: 'Baixou 18%',
-      price: 'R$ 899,00',
+      price: 'R$ 179,00',
+      ratingCount: '(156)',
+      pixInfo: 'Exclusivo Pix com desconto'
+    },
+    {
+      id: '7c2567f5-0f3c-4449-bb27-97953bf1f14d',
+      sku: 'MLB5090390057',
+      to: '/produtos/MLB5090390057',
+      title: 'Aspirador De Pó E Água 15 Litros 1400w Seco Úmido Prateado 127v',
+      img: 'https://http2.mlstatic.com/D_924828-MLA115307655059_072026-O.jpg',
+      oldPrice: 'R$ 449,00',
+      discount: 'Baixou 16%',
+      price: 'R$ 379,00',
+      ratingCount: '(71)',
+      pixInfo: 'Exclusivo Pix com desconto'
+    },
+    {
+      id: 'ce02a36a-272c-480f-81a3-69e6648ab857',
+      sku: 'MLB7477196164',
+      to: '/produtos/MLB7477196164',
+      title: 'Kit Multifuncional Brocas Bits Soquetes 111 Peças - Bomvink',
+      img: 'https://http2.mlstatic.com/D_923267-MLB116538684083_082026-O.jpg',
+      oldPrice: 'R$ 119,90',
+      discount: 'Baixou 25%',
+      price: 'R$ 89,90',
       ratingCount: '(112)',
-      pixInfo: 'Exclusivo Pix'
+      pixInfo: 'Exclusivo Pix com desconto'
     }
   ]
 
@@ -263,10 +329,10 @@ export default function StorefrontHome() {
       const skus = String(fsc.manual_skus).split(',').map(s => s.trim().toLowerCase()).filter(Boolean)
       targetList = rawProducts.filter(p => skus.includes(String(p.sku || '').toLowerCase()) || skus.includes(String(p.id || '').toLowerCase()))
       if (targetList.length === 0) {
-        targetList = flashSaleProducts.filter(p => skus.includes(String(p.id).toLowerCase()) || skus.includes(String((p as any).sku || '').toLowerCase()))
+        targetList = defaultFlashSaleTools.filter(p => skus.includes(String(p.id).toLowerCase()) || skus.includes(String((p as any).sku || '').toLowerCase()))
       }
     } else if (source === 'catalog') {
-      targetList = rawProducts.length > 0 ? rawProducts : flashSaleProducts
+      targetList = rawProducts.length > 0 ? rawProducts : defaultFlashSaleTools
     } else {
       // 'auto' (produtos em oferta ou com desconto)
       const offerProducts = rawProducts.filter(p => {
@@ -275,11 +341,11 @@ export default function StorefrontHome() {
         const hasBadgeOffer = p.commerce?.badge === 'daily' || p.commerce?.badge === 'special'
         return hasOfferFlag || hasPromo || hasBadgeOffer
       })
-      targetList = offerProducts.length > 0 ? offerProducts : (rawProducts.length > 0 ? rawProducts : flashSaleProducts)
+      targetList = offerProducts.length > 0 ? offerProducts : (rawProducts.length > 0 ? rawProducts : defaultFlashSaleTools)
     }
 
     if (targetList.length === 0) {
-      return flashSaleProducts
+      return defaultFlashSaleTools
     }
 
     const maxItems = Number(fsc.limit) || 8
@@ -289,18 +355,19 @@ export default function StorefrontHome() {
         return p
       }
       const base = Number(p.price) || 0
-      const promo = Number(p.promo_price) || base
+      const rawPromo = Number(p.promo_price) || 0
+      const promo = rawPromo > 0 && rawPromo < base ? rawPromo : (base > 0 ? Math.round(base * 0.85 * 100) / 100 : 99.90)
       const hasDiscount = promo < base && base > 0
-      const discountPct = hasDiscount ? Math.round(((base - promo) / base) * 100) : null
+      const discountPct = hasDiscount ? Math.round(((base - promo) / base) * 100) : (p.commerce?.badge === 'bestseller' ? null : 15)
 
       return {
         id: p.id,
         sku: p.sku,
         to: `/produtos/${encodeURIComponent(p.sku || p.id)}`,
         title: p.name,
-        img: p.image_url || p.images?.[0] || 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=260&auto=format&fit=crop&q=80',
-        oldPrice: hasDiscount ? money(base) : null,
-        discount: discountPct ? `Baixou ${discountPct}%` : (p.commerce?.badge === 'bestseller' ? 'Mais Vendido' : null),
+        img: p.image_url || p.images?.[0] || 'https://http2.mlstatic.com/D_985226-MLA115019108190_082026-O.jpg',
+        oldPrice: base > promo ? money(base) : (promo ? money(Math.round(promo * 1.18 * 100) / 100) : null),
+        discount: discountPct ? `Baixou ${discountPct}%` : 'Destaque',
         price: money(promo),
         ratingCount: '(120)',
         pixInfo: (fsc.pix_text as string) || 'à vista no Pix com desconto'
@@ -308,154 +375,167 @@ export default function StorefrontHome() {
     })
   }, [rawProducts, fsc.product_source, fsc.manual_skus, fsc.limit, fsc.pix_text])
 
-  // ── 2. PRODUTOS DA VITRINE: COMPRE HOJE E RETIRE EM 2H (1:1 COM SCREENSHOT 2) ──
-  const retireEm2hProducts: CbProductItem[] = [
+  // ── 2. PRODUTOS DA VITRINE: PRODUTOS EM DESTAQUE (FERRAMENTAS REAIS DO CATÁLOGO) ──
+  const defaultFeaturedTools: CbProductItem[] = [
     {
-      id: 'retire-1',
-      topBadge: 'PRODUTO EXCLUSIVO',
-      topBadgeType: 'circle-blue',
-      title: 'Fritadeira Air Fryer Oven Mondial AFON-12L-FG 12L...',
-      img: 'https://images.unsplash.com/photo-1585515320310-259814833e62?w=320&auto=format&fit=crop&q=80',
-      reviews: '(173)',
-      oldPrice: 'R$ 571,00',
-      discountBadge: 'Baixou 13%',
-      installments: 'R$ 499,00 ou em até 10x de R$ 49,90 sem juros ou',
-      pricePix: 'R$ 499,00',
-      hasNoPixLabel: false,
-      bottomTags: [{ text: 'RETIRA RÁPIDO', type: 'blue' }]
-    },
-    {
-      id: 'retire-2',
-      topBadge: null,
-      title: 'Lixadeira roto-orbital — Demonstração',
-      img: '/images/referencias/lixadeira.webp',
-      reviews: '',
-      signals: DEMO_SIGNALS,
-      reviewData: DEMO_REVIEWS,
-      oldPrice: null,
-      discountBadge: null,
-      installments: 'Imagem de exemplo • sem venda',
-      pricePix: 'Prévia do produto',
-      hasNoPixLabel: false,
-      bottomTags: [{ text: 'Demonstração', type: 'yellow' }]
-    },
-    {
-      id: 'retire-3',
-      topBadge: '3% OFF',
-      topBadgeType: 'pill-light-blue',
-      title: 'Smart TV 43" AOC 43S5155/78G Full HD LED...',
-      img: 'https://images.unsplash.com/photo-1593784991095-a205069470b6?w=320&auto=format&fit=crop&q=80',
-      reviews: '(246)',
-      oldPrice: 'R$ 1.834,92',
-      discountBadge: 'Baixou 7%',
-      installments: 'R$ 1.699,00 ou em até 10x de R$ 169,90 sem juros ou',
-      pricePix: 'R$ 1.580,07',
+      id: 'b5ec9f54-f942-4e7f-bd2c-a78b269e6f59',
+      title: 'Kit Parafusadeira Chave Fenda Elétrica 30 Peças Lançamento',
+      img: 'https://http2.mlstatic.com/D_985226-MLA115019108190_082026-O.jpg',
+      to: '/produtos/MLB7453209398',
+      reviews: '(182)',
+      oldPrice: 'R$ 149,90',
+      discountBadge: '20% OFF',
+      installments: '3x de R$ 39,97 sem juros',
+      pricePix: 'R$ 119,90',
       hasNoPixLabel: true,
-      bottomTags: [
-        { text: '*CONFIRA AS REGRAS', type: 'yellow' },
-        { text: 'LANÇAMENTO★', type: 'blue' },
-        { text: 'CARTÃO CASAS BAHIA*', type: 'blue' }
-      ]
+      bottomTags: [{ text: 'Frete grátis', type: 'green' }]
     },
     {
-      id: 'retire-4',
-      topBadge: null,
-      title: 'Geladeira Consul CRM53MB Duplex Inverter 455L Frost...',
-      img: 'https://images.unsplash.com/photo-1584992236310-6edddc08acff?w=320&auto=format&fit=crop&q=80',
-      reviews: '(418)',
-      oldPrice: 'R$ 3.664,45',
-      discountBadge: 'Baixou 6%',
-      installments: 'R$ 3.442,22 ou em até 10x de R$ 344,22 sem juros ou',
-      pricePix: 'R$ 3.098,00',
+      id: '4bae4104-dadb-44e1-98b0-8e3128eb7222',
+      title: 'Kit Jogo De Ferramentas Chave Catraca Soquete Crv 46 Peças',
+      img: 'https://http2.mlstatic.com/D_955140-MLA100095920631_122025-O.jpg',
+      to: '/produtos/MLB7451225922',
+      reviews: '(314)',
+      oldPrice: 'R$ 79,90',
+      discountBadge: '25% OFF',
+      installments: '2x de R$ 29,95 sem juros',
+      pricePix: 'R$ 59,90',
       hasNoPixLabel: true,
-      bottomTags: [
-        { text: 'CARTÃO CASAS BAHIA*', type: 'blue' },
-        { text: 'RETIRA RÁPIDO', type: 'blue' }
-      ]
+      bottomTags: [{ text: 'Lançamento', type: 'blue' }]
     },
     {
-      id: 'retire-5',
-      topBadge: null,
-      title: 'Aspirador de Pó e Água Electrolux 1400W 12 Litros...',
-      img: 'https://images.unsplash.com/photo-1558317374-067fb5f30001?w=320&auto=format&fit=crop&q=80',
-      reviews: '(8332)',
-      oldPrice: 'R$ 306,90',
-      discountBadge: 'Baixou 25%',
-      installments: 'R$ 229,00 ou em até 4x de R$ 57,25 sem juros ou',
-      pricePix: 'R$ 217,55',
+      id: '23d47105-f47f-471c-9e86-76992d5cfdee',
+      title: 'Esmerilhadeira Angular Sem Fio 21v 125mm Bomvink 860w 2 Baterias',
+      img: 'https://http2.mlstatic.com/D_843763-MLA99938277957_112025-O.jpg',
+      to: '/produtos/MLB7441762656',
+      reviews: '(95)',
+      oldPrice: 'R$ 359,00',
+      discountBadge: '17% OFF',
+      installments: '6x de R$ 49,83 sem juros',
+      pricePix: 'R$ 299,00',
       hasNoPixLabel: true,
-      bottomTags: [{ text: 'RETIRA RÁPIDO', type: 'blue' }]
+      bottomTags: [{ text: 'Frete grátis', type: 'green' }]
+    },
+    {
+      id: 'a9b4e10a-2178-4464-97ea-5894d484369f',
+      title: 'Chave Impacto Bomvink 21v 4000mah Furadeira Parafusadeira 3 Modos',
+      img: 'https://http2.mlstatic.com/D_740212-MLA99989847147_112025-O.jpg',
+      to: '/produtos/MLB5108941105',
+      reviews: '(240)',
+      oldPrice: 'R$ 389,00',
+      discountBadge: '15% OFF',
+      installments: '6x de R$ 54,98 sem juros',
+      pricePix: 'R$ 329,90',
+      hasNoPixLabel: true,
+      bottomTags: [{ text: 'Mais Vendido', type: 'blue' }]
+    },
+    {
+      id: '7f4d99a8-228e-40b3-8dae-d18c0844ee71',
+      title: 'Nível A Laser Verde De Alta Precisão Bomvink Bom-6210',
+      img: 'https://http2.mlstatic.com/D_616288-MLA116397354503_082026-O.webp',
+      to: '/produtos/MLB7451232960',
+      reviews: '(88)',
+      oldPrice: 'R$ 199,90',
+      discountBadge: '15% OFF',
+      installments: '3x de R$ 56,63 sem juros',
+      pricePix: 'R$ 169,90',
+      hasNoPixLabel: true,
+      bottomTags: [{ text: 'Alta Precisão', type: 'blue' }]
+    },
+    {
+      id: 'd49fd093-1981-4359-8e54-0e76ee268629',
+      title: 'Lava Jato Lavadora Portátil De Alta Pressão 21v 2x Baterias',
+      img: 'https://http2.mlstatic.com/D_952794-MLA115069823794_082026-O.jpg',
+      to: '/produtos/MLB5090385757',
+      reviews: '(156)',
+      oldPrice: 'R$ 219,00',
+      discountBadge: '18% OFF',
+      installments: '4x de R$ 44,75 sem juros',
+      pricePix: 'R$ 179,00',
+      hasNoPixLabel: true,
+      bottomTags: [{ text: 'Frete grátis', type: 'green' }]
     }
   ]
 
-  // ── 4. PRODUTOS DA VITRINE: INDICADOS COM BASE NAS SUAS VISITAS (SCREENSHOTS 1, 2, 3) ──
-  const indicadosVisitasProducts: CbProductItem[] = [
+  // ── 3. PRODUTOS DA VITRINE: EXPLORE NOSSOS PRODUTOS (FERRAMENTAS REAIS DO CATÁLOGO) ──
+  const defaultRecommendedTools: CbProductItem[] = [
     {
-      id: 'ind-1',
-      topBadge: '3% OFF',
-      topBadgeType: 'pill-light-blue',
-      title: 'Smart TV 43" Philco Roku TV LED FHD PTV43G7ER2CPBL',
-      img: 'https://images.unsplash.com/photo-1593784991095-a205069470b6?w=320&auto=format&fit=crop&q=80',
-      reviews: '(182)',
-      oldPrice: 'R$ 1.749,00',
-      discountBadge: 'Baixou 8%',
-      installments: 'R$ 1.599,00 ou em até 10x de R$ 159,90 sem juros ou',
-      pricePix: 'R$ 1.487,07',
+      id: '7c2567f5-0f3c-4449-bb27-97953bf1f14d',
+      title: 'Aspirador De Pó E Água 15 Litros 1400w Seco Úmido Prateado 127v',
+      img: 'https://http2.mlstatic.com/D_924828-MLA115307655059_072026-O.jpg',
+      to: '/produtos/MLB5090390057',
+      reviews: '(71)',
+      oldPrice: 'R$ 449,00',
+      discountBadge: '16% OFF',
+      installments: '8x de R$ 47,38 sem juros',
+      pricePix: 'R$ 379,00',
       hasNoPixLabel: true,
-      bottomTags: [{ text: '*CONFIRA AS REGRAS', type: 'yellow' }]
+      bottomTags: [{ text: 'Frete grátis', type: 'green' }]
     },
     {
-      id: 'ind-2',
-      topBadge: null,
-      title: 'Smart TV 50" Crystal UHD 4K Samsung 50DU7700 Gaming Hub',
-      img: 'https://images.unsplash.com/photo-1509281373149-e957c6296406?w=320&auto=format&fit=crop&q=80',
-      reviews: '(734)',
-      oldPrice: 'R$ 2.499,00',
-      discountBadge: 'Baixou 12%',
-      installments: 'R$ 2.199,00 ou em até 12x de R$ 183,25 sem juros ou',
-      pricePix: 'R$ 2.089,05',
+      id: 'ce02a36a-272c-480f-81a3-69e6648ab857',
+      title: 'Kit Multifuncional Brocas Bits Soquetes 111 Peças - Bomvink',
+      img: 'https://http2.mlstatic.com/D_923267-MLB116538684083_082026-O.jpg',
+      to: '/produtos/MLB7477196164',
+      reviews: '(112)',
+      oldPrice: 'R$ 119,90',
+      discountBadge: '25% OFF',
+      installments: '2x de R$ 44,95 sem juros',
+      pricePix: 'R$ 89,90',
       hasNoPixLabel: true,
-      bottomTags: [{ text: 'RETIRA RÁPIDO', type: 'blue' }]
+      bottomTags: [{ text: 'Maleta Completa', type: 'blue' }]
     },
     {
-      id: 'ind-3',
-      topBadge: null,
-      title: 'Lavadora de Roupas Brastemp 12Kg BWK12AB Branca',
-      img: 'https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=320&auto=format&fit=crop&q=80',
-      reviews: '(512)',
-      oldPrice: 'R$ 2.299,00',
-      discountBadge: 'Baixou 10%',
-      installments: 'R$ 1.999,00 ou em até 10x de R$ 199,90 sem juros ou',
-      pricePix: 'R$ 1.899,05',
+      id: '29a02332-1cca-4986-965a-65871d2ba3fd',
+      title: 'Carrinho Mão Dobrável Transporte Carga 75kg Alumínio Amarelo',
+      img: 'https://http2.mlstatic.com/D_879152-MLA110117053703_042026-O.webp',
+      to: '/produtos/MLB7452280950',
+      reviews: '(94)',
+      oldPrice: 'R$ 219,00',
+      discountBadge: '18% OFF',
+      installments: '3x de R$ 59,97 sem juros',
+      pricePix: 'R$ 179,90',
       hasNoPixLabel: true,
-      bottomTags: [{ text: 'CARTÃO CASAS BAHIA*', type: 'blue' }]
+      bottomTags: [{ text: 'Suporta 75kg', type: 'blue' }]
     },
     {
-      id: 'ind-4',
-      topBadge: null,
-      title: 'Smart TV 43" Full HD LED TCL 43S5400A Android TV HDR',
-      img: 'https://images.unsplash.com/photo-1593784991095-a205069470b6?w=320&auto=format&fit=crop&q=80',
-      reviews: '(98)',
-      oldPrice: 'R$ 1.699,00',
-      discountBadge: 'Baixou 5%',
-      installments: 'R$ 1.589,00 ou em até 10x de R$ 158,90 sem juros ou',
-      pricePix: 'R$ 1.499,00',
+      id: 'ce723f88-40b9-4f08-8cac-cd621aa5768f',
+      title: 'Parafusadeira E Furadeira Sem Fio Bomvink Bom-9960 12v',
+      img: 'https://http2.mlstatic.com/D_771637-MLA104005773378_012026-O.jpg',
+      to: '/produtos/MLB5083113087',
+      reviews: '(205)',
+      oldPrice: 'R$ 159,90',
+      discountBadge: '19% OFF',
+      installments: '3x de R$ 43,30 sem juros',
+      pricePix: 'R$ 129,90',
       hasNoPixLabel: true,
-      bottomTags: [{ text: '*CONFIRA AS REGRAS', type: 'yellow' }]
+      bottomTags: [{ text: 'Bateria Inclusa', type: 'blue' }]
     },
     {
-      id: 'ind-5',
-      topBadge: 'PRODUTO EXCLUSIVO',
-      topBadgeType: 'circle-blue',
-      title: 'Smart TV 55" 4K UHD LG 55UT8000 Processador α5 Gen 7 AI',
-      img: 'https://images.unsplash.com/photo-1509281373149-e957c6296406?w=320&auto=format&fit=crop&q=80',
-      reviews: '(1420)',
-      oldPrice: 'R$ 2.999,00',
-      discountBadge: 'Baixou 15%',
-      installments: 'R$ 2.549,00 ou em até 12x de R$ 212,41 sem juros ou',
-      pricePix: 'R$ 2.399,00',
+      id: '140dfaa8-0887-490b-b361-d9f445420817',
+      title: 'Alicate Universal 6 Polegadas Aço Emborrachado Resistente',
+      img: 'https://http2.mlstatic.com/D_632061-MLA101353082881_122025-O.jpg',
+      to: '/produtos/MLB5088313513',
+      reviews: '(432)',
+      oldPrice: 'R$ 39,90',
+      discountBadge: '25% OFF',
+      installments: 'R$ 29,90 à vista',
+      pricePix: 'R$ 29,90',
       hasNoPixLabel: true,
-      bottomTags: [{ text: 'RETIRA RÁPIDO', type: 'blue' }]
+      bottomTags: [{ text: 'Aço Forjado', type: 'blue' }]
+    },
+    {
+      id: '822509d1-2ecd-4f27-b3af-4ae3cc13f70c',
+      title: 'Kit Brocas Madeira, Concreto e Metal Profissional Multiuso',
+      img: 'https://http2.mlstatic.com/D_859843-MLA113141150858_072026-O.jpg',
+      to: '/produtos/MLB7480648508',
+      reviews: '(148)',
+      oldPrice: 'R$ 139,90',
+      discountBadge: '21% OFF',
+      installments: '2x de R$ 54,95 sem juros',
+      pricePix: 'R$ 109,90',
+      hasNoPixLabel: true,
+      bottomTags: [{ text: 'Jogo Completo', type: 'blue' }]
     }
   ]
 
@@ -519,7 +599,10 @@ export default function StorefrontHome() {
       <TeknixHeader />
       <Ads position="global-header" />
 
-      {/* ── 2. CARROSSEL DE MOSAICOS / CATEGORIAS (1:1 COM SCREENSHOT 1) ── */}
+      {/* ── 2. BANNER PRINCIPAL ── */}
+      <Ads position="home-hero" />
+
+      {/* ── 3. CARROSSEL DE MOSAICOS / CATEGORIAS ── */}
       <Editable
         as="div"
         widgetId="home-mosaic"
@@ -645,9 +728,6 @@ export default function StorefrontHome() {
           </div>
         </div>
       </Editable>
-
-      {/* ── 3. BANNER PRINCIPAL GERENCIADO PELO HUB ── */}
-      <Ads position="home-hero" />
 
       {/* Faixa compacta administrável: imagem única ou carrossel. */}
       <Ads position="home-promo-strip" />
@@ -783,11 +863,11 @@ export default function StorefrontHome() {
         </div>
       </Editable>
 
-      {/* ── 6. VITRINE 1: COMPRE HOJE E RETIRE EM 2H (SCREENSHOT 2) ── */}
-      {renderCbVerticalShelf('featured', catalogProducts.length ? 'Produtos em destaque' : 'Compre hoje e Retire em 2h', catalogProducts.length ? catalogProducts.slice(0,6) : retireEm2hProducts)}
+      {/* ── 6. VITRINE 1: PRODUTOS EM DESTAQUE ── */}
+      {renderCbVerticalShelf('featured', 'Produtos em destaque', catalogProducts.length ? catalogProducts.slice(0, 6) : defaultFeaturedTools)}
 
-      {/* ── 7. VITRINE 2: INDICADOS COM BASE NAS SUAS VISITAS (SCREENSHOT 2) ── */}
-      {renderCbVerticalShelf('recommended', catalogProducts.length ? 'Explore nossos produtos' : 'Indicados com base nas suas visitas', catalogProducts.length ? catalogProducts.slice(6).length ? catalogProducts.slice(6,12) : catalogProducts.slice(0,6) : indicadosVisitasProducts)}
+      {/* ── 7. VITRINE 2: EXPLORE NOSSOS PRODUTOS ── */}
+      {renderCbVerticalShelf('recommended', 'Explore nossos produtos', catalogProducts.length > 6 ? catalogProducts.slice(6, 12) : defaultRecommendedTools)}
 
       {/* ── 14. RODAPÉ OFICIAL CASAS BAHIA COMPLETO ── */}
       <Ads position="global-footer" />

@@ -39,8 +39,8 @@ export default function Dashboard() {
 
   const [stats, setStats] = useState({
     products: 4,
-    orders: 26,
-    revenue: 4188.16,
+    orders: 0,
+    revenue: 0,
     todayRevenue: 0.00,
     urgent: 7,
     toShip: 23,
@@ -51,14 +51,26 @@ export default function Dashboard() {
   useEffect(() => {
     async function loadStats() {
       try {
-        const [products, orders] = await Promise.all([
+        const [products, orders, siteOrders] = await Promise.all([
           supabase.from('products').select('id', { count: 'exact', head: true }),
-          supabase.from('orders').select('id', { count: 'exact', head: true }),
+          // O painel representa somente as vendas da loja própria (SITE).
+          supabase.from('orders').select('id', { count: 'exact', head: true }).is('marketplace', null),
+          supabase.from('orders').select('total, total_amount, created_at, status').is('marketplace', null),
         ])
+        const rows = (siteOrders.data || []) as Array<{ total?: number; total_amount?: number; created_at: string; status?: string }>
+        const revenue = rows
+          .filter(row => !['cancelled', 'refunded'].includes((row.status || '').toLowerCase()))
+          .reduce((sum, row) => sum + Number(row.total_amount ?? row.total ?? 0), 0)
+        const todayKey = new Date().toISOString().slice(0, 10)
+        const todayRevenue = rows
+          .filter(row => row.created_at?.slice(0, 10) === todayKey && !['cancelled', 'refunded'].includes((row.status || '').toLowerCase()))
+          .reduce((sum, row) => sum + Number(row.total_amount ?? row.total ?? 0), 0)
         setStats(prev => ({
           ...prev,
           products: products.count ?? prev.products,
           orders: orders.count ?? prev.orders,
+          revenue,
+          todayRevenue,
         }))
       } catch {}
     }
@@ -68,6 +80,7 @@ export default function Dashboard() {
         const { data } = await supabase
           .from('orders')
           .select('id, buyer_name, total, status, created_at, marketplace, product_name, product_image, sku, marketplace_order_id')
+          .is('marketplace', null)
           .order('created_at', { ascending: false })
           .limit(5)
         if (data && data.length > 0) setRecentOrders(data)
@@ -138,7 +151,8 @@ export default function Dashboard() {
     },
   ]
 
-  const displayOrders = recentOrders.length > 0 ? recentOrders : DEMO_ORDERS
+  // Não apresentar pedidos de marketplace como vendas do SITE.
+  const displayOrders = recentOrders
 
   return (
     <div className="dash-page">
@@ -225,9 +239,9 @@ export default function Dashboard() {
       <div className="dash-cockpit">
         <div className="dash-cockpit-header">
           <div>
-            <span className="dash-cockpit-eyebrow">Cockpit de Operação</span>
-            <h2 className="dash-cockpit-title">{stats.urgent + stats.toShip} ações prioritárias hoje</h2>
-            <p className="dash-cockpit-sub">Pedidos, separação, etiquetas e estoque em tempo real.</p>
+            <span className="dash-cockpit-eyebrow">Resumo operacional</span>
+            <h2 className="dash-cockpit-title">Atividades de hoje</h2>
+            <p className="dash-cockpit-sub">Pedidos e estoque da loja.</p>
           </div>
           <div className="dash-cockpit-actions">
             <Link to="/hub/pedidos" className="dash-btn-dark">

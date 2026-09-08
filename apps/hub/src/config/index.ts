@@ -8,7 +8,7 @@ export const config = {
       if (!product) {
         return encodeURIComponent('Olá! Vim pelo site Teknix Ferramentas e gostaria de mais informações.')
       }
-      const url = product.slug ? `${window.location.origin}/produtos/${product.slug}` : ''
+      const url = product.slug ? `${window.location.origin}/${product.slug}` : ''
       return encodeURIComponent(
         `Olá! Tenho interesse no produto:\n\n` +
         `*${product.name}*\n` +

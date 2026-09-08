@@ -89,7 +89,7 @@ const DEFAULT_FOOTER_COLUMNS = [
         { label: 'Hoje na TEKNIX (Workshops)', url: '/contato' },
         { label: 'Financiamento & Parcelamento', url: '/checkout' },
         { label: 'Status do Pedido', url: '/minha-conta' },
-        { label: 'Ajuda para Compras', url: '/contato' },
+        { label: 'Ajuda para Compras', url: '/ajuda' },
       ]}
     ]
   },

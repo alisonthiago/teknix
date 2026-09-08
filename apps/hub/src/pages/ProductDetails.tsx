@@ -18,11 +18,13 @@ import {
   Copy,
   Check,
   Globe,
-  EyeOff
+  EyeOff,
+  Sparkles
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { createPage } from '../services/pageBuilder'
 import type { Product } from '../types/database'
+import { normalizeShowcase } from '../../../../packages/core/src/productCommerce'
 import './ProductDetails.css'
 
 function FormattedDescription({ text }: { text: string }) {
@@ -165,7 +167,7 @@ export default function ProductDetails() {
     try {
       const { data, error } = await supabase
         .from('products')
-        .select('*, store_meta:product_store_metadata(*)')
+        .select('*, store_meta:product_store_metadata(*), product_images(url, sort_order, display_order, is_primary)')
         .eq('id', productId)
         .maybeSingle()
 
@@ -175,7 +177,7 @@ export default function ProductDetails() {
       } else {
         const { data: bySku } = await supabase
           .from('products')
-          .select('*, store_meta:product_store_metadata(*)')
+          .select('*, store_meta:product_store_metadata(*), product_images(url, sort_order, display_order, is_primary)')
           .eq('sku', productId)
           .maybeSingle()
 
@@ -398,8 +400,31 @@ export default function ProductDetails() {
   const profit = currentPrice - costPrice
   const marginPercent = currentPrice > 0 ? ((profit / currentPrice) * 100).toFixed(1) : '0'
 
-  const imgUrl = (product.images && product.images[0]) || product.main_image || product.image_url || ''
-  const allImages = [...new Set([imgUrl, ...(product.images || [])].filter(Boolean))]
+  const rawSpecs = (product as any).specifications || (product as any).specs || {}
+  const productSpecs = typeof rawSpecs === 'string' ? (() => { try { return JSON.parse(rawSpecs) } catch { return {} } })() : rawSpecs
+  const storeMeta = Array.isArray((product as any).store_meta) ? (product as any).store_meta[0] : (product as any).store_meta
+  const editorial = (product as any).editorial_showcase || (productSpecs as any)?.editorial_showcase || {}
+  const presentationImages = Array.isArray((editorial as any).presentation_images) ? (editorial as any).presentation_images : []
+  const editorialImages = [
+    (editorial as any)?.hero?.image_url,
+    (editorial as any)?.performance?.image_url,
+    ...presentationImages,
+  ]
+  const relatedImages = Array.isArray((product as any).product_images)
+    ? (product as any).product_images
+      .slice()
+      .sort((a: any, b: any) => (a.sort_order ?? a.display_order ?? 0) - (b.sort_order ?? b.display_order ?? 0))
+      .map((image: any) => image.url)
+    : []
+  const galleryImages = [
+    ...relatedImages,
+    ...((product as any).images || []),
+    ...(Array.isArray(productSpecs) ? productSpecs : ((productSpecs as any).gallery_images || [])),
+    ...((storeMeta as any)?.gallery_images || []),
+    ...editorialImages,
+  ].filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
+  const imgUrl = galleryImages[0] || product.main_image || product.image_url || ''
+  const allImages = [...new Set([imgUrl, ...galleryImages, product.main_image, product.image_url].filter(Boolean))]
 
   return (
     <div className="product-details-page">
@@ -422,7 +447,7 @@ export default function ProductDetails() {
       {(() => {
         const siteBaseUrl = import.meta.env.VITE_SITE_URL || (import.meta.env.DEV ? 'http://localhost:5173' : (window.location.hostname.includes('teknixbrasil.com.br') ? 'https://www.teknixbrasil.com.br' : 'http://localhost:5173'))
         const productPublicSlug = meta?.slug || product.slug || product.sku || product.id
-        const productPublicUrl = `${siteBaseUrl}/produtos/${productPublicSlug}`
+        const productPublicUrl = `${siteBaseUrl}/${productPublicSlug}`
 
         return (
           <div className="product-details-header">
@@ -492,6 +517,11 @@ export default function ProductDetails() {
                     {copiedId ? <Check size={11} color="#15803d" /> : <Copy size={11} />}
                     {copiedId && <span className="copied-tag">Copiado!</span>}
                   </button>
+                </div>
+
+                <div className="product-header-summary" aria-label="Resumo do produto">
+                  <span><strong>Preço:</strong> R$ {salePrice.toFixed(2).replace('.', ',')}</span>
+                  <span><strong>Estoque:</strong> {product.manage_stock === false ? 'Infinito' : `${product.stock || 0} unidades`}</span>
                 </div>
               </div>
             </div>
@@ -696,6 +726,109 @@ export default function ProductDetails() {
             )}
             <FormattedDescription text={meta?.store_description || product.notes || product.description || ''} />
           </div>
+
+          {/* Apresentação Editorial & Storytelling (1:1 Apple Store) */}
+          {(() => {
+            const showcase = normalizeShowcase(
+              meta?.specifications?.editorial_showcase,
+              product.name,
+              allImages
+            )
+            return (
+              <div className="product-section-card storytelling-overview-card">
+                <div className="product-section-header-row">
+                  <h2 className="product-section-title">
+                    <Sparkles size={18} color="#e91e63" />
+                    Storytelling & Apresentação
+                  </h2>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    <button
+                      type="button"
+                      className="btn-product-action pagebuilder"
+                      onClick={handleEditPage}
+                      disabled={editingPage}
+                      style={{ height: 32, padding: '0 10px', fontSize: 12 }}
+                      title="Abrir no Page Builder Visual"
+                    >
+                      <LayoutTemplate size={13} />
+                      <span>{editingPage ? 'Abrindo...' : 'Page Builder'}</span>
+                    </button>
+                    <Link
+                      to={`/hub/produtos/editar/${product.id}`}
+                      className="btn-product-action primary"
+                      style={{ height: 32, padding: '0 10px', fontSize: 12 }}
+                      title="Editar dados do produto"
+                    >
+                      <Edit size={13} />
+                      <span>Editar Produto</span>
+                    </Link>
+                  </div>
+                </div>
+
+                <p style={{ fontSize: 13, color: '#64748b', margin: '0 0 16px', lineHeight: 1.4 }}>
+                  As 5 seções da vitrine pública deste produto:
+                </p>
+
+                <div className="storytelling-blocks-overview">
+                  <div className="storytelling-block-item">
+                    <span className="storytelling-block-num">1</span>
+                    <div className="storytelling-block-info">
+                      <div className="storytelling-block-name">Hero Spotlight</div>
+                      <div className="storytelling-block-desc">
+                        <strong>{showcase.hero.eyebrow || 'Destaque'}</strong>: {showcase.hero.title}
+                      </div>
+                      {(showcase.hero.top_badge || showcase.hero.bottom_badge) && (
+                        <div className="storytelling-pills-row">
+                          {showcase.hero.top_badge && <span className="storytelling-mini-pill">{showcase.hero.top_badge}</span>}
+                          {showcase.hero.bottom_badge && <span className="storytelling-mini-pill">{showcase.hero.bottom_badge}</span>}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="storytelling-block-item">
+                    <span className="storytelling-block-num">2</span>
+                    <div className="storytelling-block-info">
+                      <div className="storytelling-block-name">Performance / Em Ação</div>
+                      <div className="storytelling-block-desc">
+                        {showcase.performance.title} ({showcase.performance.features.length} recursos técnicos)
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="storytelling-block-item">
+                    <span className="storytelling-block-num">3</span>
+                    <div className="storytelling-block-info">
+                      <div className="storytelling-block-name">Explore os Modelos e Configurações</div>
+                      <div className="storytelling-block-desc">
+                        {showcase.explore_models.models.length} versões/modelos cadastrados
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="storytelling-block-item">
+                    <span className="storytelling-block-num">4</span>
+                    <div className="storytelling-block-info">
+                      <div className="storytelling-block-name">Tabela Comparativa de Versões</div>
+                      <div className="storytelling-block-desc">
+                        {showcase.comparison.rows.length} especificações comparadas ({showcase.comparison.col1_title} vs. {showcase.comparison.col2_title})
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="storytelling-block-item">
+                    <span className="storytelling-block-num">5</span>
+                    <div className="storytelling-block-info">
+                      <div className="storytelling-block-name">Perguntas Frequentes (FAQ)</div>
+                      <div className="storytelling-block-desc">
+                        {showcase.faqs.length} dúvidas com respostas oficiais cadastradas
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )
+          })()}
         </div>
 
         {/* Coluna Direita: Galeria e Canais */}

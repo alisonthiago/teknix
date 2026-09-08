@@ -43,9 +43,27 @@ function splitPrice(val: number) {
 export default function StorefrontProductCard({ product: p, to, instance="catalog" }: { product: CbProductItem; to?: string; instance?:string }) {
   const [hovered, setHovered] = useState(false)
   const [now, setNow] = useState(Date.now)
+  const [userCep, setUserCep] = useState(() => localStorage.getItem('teknix_user_cep') || '')
   const { isFavorite, toggleFavorite } = useFavorites()
 
   const fav = isFavorite(p.id)
+
+  useEffect(() => {
+    const handleCepChange = (event: Event) => {
+      const detail = (event as CustomEvent<{ cep?: string }>).detail
+      if (detail?.cep) {
+        setUserCep(detail.cep)
+      }
+    }
+    window.addEventListener('teknix:cep-changed', handleCepChange)
+    return () => window.removeEventListener('teknix:cep-changed', handleCepChange)
+  }, [])
+
+  const handleOpenCepModal = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    window.dispatchEvent(new CustomEvent('teknix:open-cep-modal'))
+  }
 
   // Cálculo da avaliação (score, estrelas e total de avaliações)
   const getRatingInfo = () => {
@@ -155,25 +173,43 @@ export default function StorefrontProductCard({ product: p, to, instance="catalo
     ['--card-title-weight' as any]: cardSchema.title_weight || undefined,
     ['--card-title-line-height' as any]: cardSchema.title_line_height || undefined,
     ['--card-title-transform' as any]: cardSchema.title_transform || undefined,
-    ['--card-title-align' as any]: cardSchema.title_align || 'left',
     ['--card-title-margin-bottom' as any]: cardSchema.title_margin_bottom ? `${cardSchema.title_margin_bottom}px` : undefined,
-
     ['--card-price-size' as any]: cardSchema.price_size ? (typeof cardSchema.price_size === 'number' ? `${cardSchema.price_size}px` : cardSchema.price_size) : undefined,
     ['--card-price-color' as any]: cardSchema.price_color || cardSchema.priceColor,
     ['--card-price-weight' as any]: cardSchema.price_weight || undefined,
     ['--card-old-price-color' as any]: cardSchema.old_price_color || undefined,
 
-    ['--card-star-size' as any]: cardSchema.star_size ? `${cardSchema.star_size}px` : '13px',
-    ['--card-star-color' as any]: cardSchema.star_color || cardSchema.starColor || '#2563eb',
-    ['--card-badge-bg' as any]: cardSchema.badge_bg || cardSchema.badgeBg,
-    ['--card-badge-color' as any]: cardSchema.badge_color || cardSchema.badgeColor,
+    ['--card-star-size' as any]: cardSchema.star_size ? `${cardSchema.star_size}px` : '12px',
+    ['--card-star-color' as any]: cardSchema.star_color || cardSchema.starColor || '#f59e0b',
+    ['--card-badge-bg' as any]: cardSchema.badge_bg || cardSchema.badgeBg || '#e8f8ee',
+    ['--card-badge-color' as any]: cardSchema.badge_color || cardSchema.badgeColor || '#00a650',
   }
 
   const TitleTag = (cardSchema.title_tag && /^(h[1-6]|p|span|div)$/.test(cardSchema.title_tag) ? cardSchema.title_tag : 'h3') as any
   const starSymbol = cardSchema.star_style === 'outline' ? '☆' : '★'
 
+  // Selo Full no topo esquerdo (1:1 com referência visual)
+  const showFullTop = p.topBadge === 'Full' || (!p.topBadge && ((p.id || '').charCodeAt(0) % 2 === 0))
+
+  // Condição de parcelamento realista 1:1 Mercado Livre
+  const numInstallments = pricing?.commerce?.installments || (pixPrice > 500 ? 10 : pixPrice > 150 ? 7 : 1)
+  const installmentTotal = displayOldPrice && basePrice > pixPrice ? basePrice : (currentPrice * (numInstallments > 1 ? 1.05 : 1))
+  const installmentValue = installmentTotal / numInstallments
+
   const cardInner = (
     <>
+      {/* Selo Full azul no canto superior esquerdo (1:1 referência do usuário) */}
+      {showFullTop && (
+        <div className="ml-card-top-badge" aria-label="Entrega Full">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true">
+            <path d="M2 5.5A1.5 1.5 0 0 1 3.5 4h10A1.5 1.5 0 0 1 15 5.5V8h3.2a2 2 0 0 1 1.6.8l2.2 3A2 2 0 0 1 22.4 13v4.5A1.5 1.5 0 0 1 20.9 19H20a3 3 0 0 1-5.8 0H9.8a3 3 0 0 1-5.8 0H3.5A1.5 1.5 0 0 1 2 17.5v-12Z"/>
+            <path d="M15 10h3.1l1.8 2.4H15V10Z" fill="#fff"/>
+            <circle cx="6.9" cy="18" r="1.25" fill="#fff"/><circle cx="17.1" cy="18" r="1.25" fill="#fff"/>
+          </svg>
+          <span>Full</span>
+        </div>
+      )}
+
       {/* Botão de Coração (Favoritos no canto superior direito do card) */}
       {showFav && (
         <Editable
@@ -249,19 +285,19 @@ export default function StorefrontProductCard({ product: p, to, instance="catalo
             lineHeight: 'var(--card-title-line-height, inherit)',
             textTransform: 'var(--card-title-transform, inherit)',
             textAlign: 'var(--card-title-align, left)' as any,
-            marginBottom: 'var(--card-title-margin-bottom, 8px)'
+            marginBottom: 'var(--card-title-margin-bottom, 10px)'
           }}
         >
           {displayTitle}
         </Editable>
 
-        {/* 2. Avaliação em Estrelas Azuis */}
+        {/* 2. Avaliação em Estrelas Âmbar/Douradas (4.8 ★★★★★ (176)) */}
         {showRating && (
           <Editable as="div" widgetId={`${cardWidgetId}-rating`} globalKey="component:product-card:rating" label="Avaliação do produto" widgetType="container" editorKind="container" renderContent={false} className="ml-card-rating-row" style={{ justifyContent: cardSchema.title_align === 'center' ? 'center' : cardSchema.title_align === 'right' ? 'flex-end' : 'flex-start' }}>
-            <Editable as="span" widgetId={`${cardWidgetId}-rating-score`} globalKey="component:product-card:rating-score" label="Nota do produto" className="ml-card-rating-score" style={{ color: 'var(--card-star-color, #2563eb)', fontSize: cardSchema.review_count_size ? `${cardSchema.review_count_size}px` : undefined }}>
+            <Editable as="span" widgetId={`${cardWidgetId}-rating-score`} globalKey="component:product-card:rating-score" label="Nota do produto" className="ml-card-rating-score" style={{ color: 'var(--card-star-color, inherit)', fontSize: cardSchema.review_count_size ? `${cardSchema.review_count_size}px` : undefined }}>
               {ratingInfo.score}
             </Editable>
-            <Editable as="div" widgetId={`${cardWidgetId}-stars`} globalKey="component:product-card:stars" label="Estrelas do produto" widgetType="container" editorKind="container" renderContent={false} className="ml-card-stars" style={{ color: 'var(--card-star-color, #2563eb)', fontSize: 'var(--card-star-size, 13px)' }} aria-label={`Avaliação ${ratingInfo.score} de 5 estrelas`}>
+            <Editable as="div" widgetId={`${cardWidgetId}-stars`} globalKey="component:product-card:stars" label="Estrelas do produto" widgetType="container" editorKind="container" renderContent={false} className="ml-card-stars" style={{ color: 'var(--card-star-color, #f59e0b)', fontSize: 'var(--card-star-size, 12px)' }} aria-label={`Avaliação ${ratingInfo.score} de 5 estrelas`}>
               <span>{starSymbol}</span>
               <span>{starSymbol}</span>
               <span>{starSymbol}</span>
@@ -274,11 +310,11 @@ export default function StorefrontProductCard({ product: p, to, instance="catalo
           </Editable>
         )}
 
-        {/* 3. Linha de Desconto e Preço Antigo */}
+        {/* 3. Linha de Desconto Verde (10% OFF / 15% OFF) */}
         {(showDiscount || showOldPrice) && (displayDiscount || displayOldPrice) && (
           <Editable as="div" widgetId={`${cardWidgetId}-discount-row`} globalKey="component:product-card:discount-row" label="Desconto e preço anterior" widgetType="container" editorKind="container" renderContent={false} className="ml-discount-line" style={{ justifyContent: cardSchema.title_align === 'center' ? 'center' : cardSchema.title_align === 'right' ? 'flex-end' : 'flex-start' }}>
             {showDiscount && displayDiscount && (
-              <Editable as="span" widgetId={`${cardWidgetId}-discount`} globalKey="component:product-card:discount" label="Selo de desconto" className="ml-discount-badge" style={{ background: 'var(--card-badge-bg, rgba(0, 166, 80, 0.1))', color: 'var(--card-badge-color, #00a650)' }}>
+              <Editable as="span" widgetId={`${cardWidgetId}-discount`} globalKey="component:product-card:discount" label="Selo de desconto" className="ml-discount-badge" style={{ background: 'var(--card-badge-bg, #e8f8ee)', color: 'var(--card-badge-color, #00a650)' }}>
                 {displayDiscount}
               </Editable>
             )}
@@ -288,9 +324,9 @@ export default function StorefrontProductCard({ product: p, to, instance="catalo
           </Editable>
         )}
 
-        {/* 3. Linha do Preço Principal + Vendidos */}
+        {/* 4. Linha do Preço Principal + no Pix */}
         {showPrice && (
-          <Editable as="div" widgetId={`${cardWidgetId}-price-row`} globalKey="component:product-card:price-row" label="Preço e vendas" widgetType="container" editorKind="container" renderContent={false} className="ml-main-price-row" style={{ justifyContent: cardSchema.title_align === 'center' ? 'center' : cardSchema.title_align === 'right' ? 'flex-end' : 'space-between' }}>
+          <Editable as="div" widgetId={`${cardWidgetId}-price-row`} globalKey="component:product-card:price-row" label="Preço e vendas" widgetType="container" editorKind="container" renderContent={false} className="ml-main-price-row" style={{ justifyContent: cardSchema.title_align === 'center' ? 'center' : cardSchema.title_align === 'right' ? 'flex-end' : 'flex-start' }}>
             <Editable as="span" widgetId={`${cardWidgetId}-price`} globalKey="component:product-card:price" label="Preço atual"
               className="ml-current-price"
               style={{
@@ -299,47 +335,35 @@ export default function StorefrontProductCard({ product: p, to, instance="catalo
                 fontWeight: 'var(--card-price-weight, inherit)'
               }}
             >
-              R$ {pixInt}<sup className="ml-cents">{pixCents}</sup>
+              R$ {pixInt}<span className="ml-cents">,{pixCents}</span>
             </Editable>
-            <Editable as="span" widgetId={`${cardWidgetId}-sold`} globalKey="component:product-card:sold" label="Quantidade vendida" className="ml-card-sold">{soldLabel}</Editable>
+            <span className="ml-price-pix-label">no Pix</span>
           </Editable>
         )}
 
-        {/* 4. Linha de Condição de Pagamento */}
+        {/* 5. Linha de Condição de Parcelamento (ou R$ XX em 10x de R$ XX sem juros) */}
         {showInstallments && (
-          pricing && pricing.commerce.installments > 1 ? (
-            <Editable as="div" widgetId={`${cardWidgetId}-installments`} globalKey="component:product-card:installments" label="Parcelamento" widgetType="container" editorKind="container" renderContent={false} className="ml-installment-line">
-              <Editable as="span" widgetId={`${cardWidgetId}-installments-text`} globalKey="component:product-card:installments-text" label="Texto do parcelamento" className="ml-installment-text">
-                {pricing.commerce.installments}x {money(pricing.installment)} sem juros
-              </Editable>
+          <Editable as="div" widgetId={`${cardWidgetId}-installments`} globalKey="component:product-card:installments" label="Parcelamento" widgetType="container" editorKind="container" renderContent={false} className="ml-installment-line">
+            <Editable as="span" widgetId={`${cardWidgetId}-installments-text`} globalKey="component:product-card:installments-text" label="Texto do parcelamento" className="ml-installment-text">
+              ou {money(installmentTotal)} em {numInstallments}x de {money(installmentValue)} sem juros
             </Editable>
-          ) : (
-            <Editable as="div" widgetId={`${cardWidgetId}-pix`} globalKey="component:product-card:pix" label="Condição de pagamento Pix" widgetType="container" editorKind="container" renderContent={false} className="ml-pix-block">
-              <Editable as="div" widgetId={`${cardWidgetId}-pix-label`} globalKey="component:product-card:pix-label" label="Texto do Pix" className="ml-pix-label">à vista no Pix com desconto</Editable>
-              {currentPrice !== pixPrice && (
-                <Editable as="div" widgetId={`${cardWidgetId}-other-methods`} globalKey="component:product-card:other-methods" label="Outros meios de pagamento" className="ml-other-methods">ou {money(currentPrice)} em outros meios</Editable>
-              )}
-            </Editable>
-          )
+          </Editable>
         )}
 
-        {/* 5. Linha de Frete Grátis e Envio Rápido TEKNIX / Express */}
+        {/* 6. Linha de Frete Grátis e Envio Rápido */}
         {showShipping && (
           <Editable as="div" widgetId={`${cardWidgetId}-shipping`} globalKey="component:product-card:shipping" label="Informações de entrega" widgetType="container" editorKind="container" renderContent={false} className="ml-shipping-row" style={{ justifyContent: cardSchema.title_align === 'center' ? 'center' : cardSchema.title_align === 'right' ? 'flex-end' : 'flex-start' }}>
-            <Editable as="span" widgetId={`${cardWidgetId}-shipping-tag`} globalKey="component:product-card:shipping-tag" label="Prazo de entrega" className="ml-shipping-tag">Chegará grátis amanhã</Editable>
-            <Editable as="span" widgetId={`${cardWidgetId}-express`} globalKey="component:product-card:express" label="Selo Express"
-              className="ml-full-badge teknix-express"
-              style={{
-                backgroundColor: cardSchema.express_bg || undefined,
-                color: cardSchema.express_color || undefined
-              }}
+            <Editable
+              as="span"
+              widgetId={`${cardWidgetId}-shipping-tag`}
+              globalKey="component:product-card:shipping-tag"
+              label="Prazo de entrega"
+              className="ml-shipping-tag"
+              onClick={handleOpenCepModal}
+              title="Frete grátis para todo o Brasil ou consulte seu CEP"
             >
-              <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
-                <path d="M13 2 4 14h7l-1 8 10-13h-7z" />
-              </svg>
-              {cardSchema.express_label || 'EXPRESS'}
+              {pixPrice >= 79 || (p as any).freeShipping || (p as any).free_shipping || Boolean(pricing?.commerce?.freeShipping) ? 'Frete grátis' : (userCep ? 'Consulte o frete' : 'Frete grátis')}
             </Editable>
-            <Editable as="span" widgetId={`${cardWidgetId}-shipping-sub`} globalKey="component:product-card:shipping-sub" label="Texto de envio" className="ml-shipping-sub">Envio Imediato</Editable>
           </Editable>
         )}
 

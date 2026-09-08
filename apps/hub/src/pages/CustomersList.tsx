@@ -15,6 +15,8 @@ export default function CustomersList() {
   const [customers, setCustomers] = useState<CustomerWithMetrics[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
+  const [showAddCustomer, setShowAddCustomer] = useState(false)
+  const [newCustomer, setNewCustomer] = useState({ name: '', email: '', phone: '', document: '' })
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -102,7 +104,7 @@ export default function CustomersList() {
         </div>
         <div className="header-actions">
           <button className="btn btn-secondary">Exportar (CSV)</button>
-          <button className="btn btn-primary">Adicionar Cliente</button>
+          <button className="btn btn-primary" onClick={() => setShowAddCustomer(true)}>Adicionar Cliente</button>
         </div>
       </div>
 
@@ -179,6 +181,26 @@ export default function CustomersList() {
           </table>
         )}
       </div>
+
+      {showAddCustomer && (
+        <div className="customer-modal-backdrop" onClick={() => setShowAddCustomer(false)}>
+          <form className="customer-modal" onClick={e => e.stopPropagation()} onSubmit={e => {
+            e.preventDefault()
+            if (!newCustomer.name.trim()) return
+            const customer = { ...newCustomer, id: `local-${Date.now()}`, created_at: new Date().toISOString(), city: '', state: '', total_spent: 0, orders_count: 0 }
+            setCustomers(current => [customer as CustomerWithMetrics, ...current])
+            setNewCustomer({ name: '', email: '', phone: '', document: '' })
+            setShowAddCustomer(false)
+          }}>
+            <div className="customer-modal-header"><div><h2>Novo cliente</h2><p>Cadastre os dados básicos para acompanhar o cliente.</p></div><button type="button" onClick={() => setShowAddCustomer(false)}>×</button></div>
+            <label>Nome<input required value={newCustomer.name} onChange={e => setNewCustomer({ ...newCustomer, name: e.target.value })} /></label>
+            <label>E-mail<input type="email" value={newCustomer.email} onChange={e => setNewCustomer({ ...newCustomer, email: e.target.value })} /></label>
+            <label>Telefone<input value={newCustomer.phone} onChange={e => setNewCustomer({ ...newCustomer, phone: e.target.value })} /></label>
+            <label>CPF/CNPJ<input value={newCustomer.document} onChange={e => setNewCustomer({ ...newCustomer, document: e.target.value })} /></label>
+            <div className="customer-modal-actions"><button type="button" className="btn btn-secondary" onClick={() => setShowAddCustomer(false)}>Cancelar</button><button className="btn btn-primary">Salvar cliente</button></div>
+          </form>
+        </div>
+      )}
     </div>
   )
 }

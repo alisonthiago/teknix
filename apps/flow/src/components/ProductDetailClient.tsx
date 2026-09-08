@@ -605,7 +605,7 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
   }
 
   return (
-    <div>
+    <div className="product-detail-page">
       <div className="mb-4">
         <Link href="/operacao" className="inline-flex items-center gap-1.5 text-sm text-[#999] hover:text-[#333] transition-colors">
           <ArrowLeft className="w-3.5 h-3.5" />
@@ -614,12 +614,12 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
       </div>
 
       {/* Main Product Hero Card */}
-      <div className="bg-white border border-[#e6e6e6] rounded-2xl p-6 mb-5 shadow-xs">
-        <div className="flex flex-col lg:flex-row items-start gap-8">
+      <div className="bg-white border border-[#e6e6e6] rounded-2xl p-5 mb-5 shadow-xs">
+        <div className="flex flex-col lg:flex-row items-start gap-5">
           {/* Photos Gallery */}
-          <div className="w-full lg:w-80 flex flex-col items-center gap-3 shrink-0">
+          <div className="w-full lg:w-24 flex flex-col items-center gap-2 shrink-0">
             {/* Big Preview Frame */}
-            <div className="relative w-full h-72 rounded-2xl bg-[#fafafa] border border-[#e6e6e6] overflow-hidden flex items-center justify-center p-3 shadow-inner group">
+            <div className="relative w-full h-72 lg:h-24 rounded-xl bg-[#fafafa] border border-[#e6e6e6] overflow-hidden flex items-center justify-center p-2 shadow-inner group">
               {selectedImage && selectedImage !== '/placeholder-product.png' ? (
                 <img 
                   src={selectedImage} 
@@ -740,19 +740,19 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
               {/* Price & Stock Quick Highlight Cards */}
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 bg-white border border-[#e6e6e6] rounded-2xl mb-2 shadow-2xs">
                 <div>
-                  <span className="text-xs uppercase font-bold text-[#64748b] tracking-wider">Preço no Mercado Livre</span>
+                  <span className="text-[10px] uppercase font-bold text-[#64748b] tracking-wider">Preço no Mercado Livre</span>
                   <div className="text-xl font-black text-[#0f172a] mt-0.5">
                     {formatBRL(product.pricing.current_price || product.costs.real || 0)}
                   </div>
                 </div>
                 <div>
-                  <span className="text-xs uppercase font-bold text-[#64748b] tracking-wider">Estoque Disponível</span>
+                  <span className="text-[10px] uppercase font-bold text-[#64748b] tracking-wider">Estoque Disponível</span>
                   <div className={`text-xl font-black mt-0.5 ${product.stock.physical > 0 ? 'text-[#16a34a]' : 'text-[#dc2626]'}`}>
                     {product.stock.physical} unidades
                   </div>
                 </div>
                 <div className="hidden sm:block">
-                  <span className="text-xs uppercase font-bold text-[#64748b] tracking-wider">Margem / Lucro</span>
+                  <span className="text-[10px] uppercase font-bold text-[#64748b] tracking-wider">Margem / Lucro</span>
                   <div className="text-xl font-black text-[#2563eb] mt-0.5">
                     {product.pricing.margin ? `${product.pricing.margin}%` : 'Ativo'}
                   </div>

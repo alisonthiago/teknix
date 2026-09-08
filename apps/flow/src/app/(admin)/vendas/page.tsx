@@ -330,7 +330,7 @@ function MarketplacesTab() {
 
 export default function VendasPage() {
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-14 animate-in fade-in duration-200">
+    <div className="space-y-6 max-w-none -mx-5 sm:-mx-8 lg:-mx-12 xl:-mx-16 pb-14 animate-in fade-in duration-200">
       <PageHeader title="Vendas" description="Vendas, canais e desempenho em tempo real" />
       <Tabs defaultValue="vendas">
         <TabsList>

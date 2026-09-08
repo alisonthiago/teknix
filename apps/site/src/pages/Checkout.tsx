@@ -27,6 +27,7 @@ export default function Checkout() {
   const [document, setDocument] = useState('')
   const [taxType, setTaxType] = useState<'CPF' | 'CNPJ'>('CPF')
   const [company, setCompany] = useState('')
+  const [loadingCnpj, setLoadingCnpj] = useState(false)
   const [accountName, setAccountName] = useState('')
   const [payment, setPayment] = useState<'pix' | 'credit_card' | 'boleto'>('pix')
   const [coupon, setCoupon] = useState<AppliedCoupon | null>(null)
@@ -115,6 +116,46 @@ export default function Checkout() {
     if (!result.coupon) { setCouponNotice(result.error || 'Não foi possível aplicar o cupom.'); return }
     setCoupon(result.coupon); setCouponNotice(`Cupom ${result.coupon.code} aplicado.`); setCouponOpen(false)
   }
+
+  const handleDocumentChange = async (val: string) => {
+    const clean = val.replace(/\D/g, '')
+    setDocument(clean)
+    if (taxType === 'CNPJ' && clean.length === 14) {
+      setLoadingCnpj(true)
+      try {
+        let legalName = ''
+        try {
+          const res = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${clean}`)
+          if (res.ok) {
+            const data = await res.json()
+            legalName = data.razao_social || data.nome_fantasia || ''
+          }
+        } catch (err) {
+          console.warn('BrasilAPI CNPJ lookup failed, trying fallback', err)
+        }
+        if (!legalName) {
+          try {
+            const res2 = await fetch(`https://publica.cnpj.ws/cnpj/${clean}`)
+            if (res2.ok) {
+              const data2 = await res2.json()
+              legalName = data2.razao_social || data2.estabelecimento?.nome_fantasia || ''
+            }
+          } catch {}
+        }
+        if (legalName) {
+          setCompany(legalName)
+        }
+      } finally {
+        setLoadingCnpj(false)
+      }
+    }
+  }
+
+  const handleDocumentBlur = () => {
+    if (taxType === 'CNPJ' && document.length === 14 && !company) {
+      void handleDocumentChange(document)
+    }
+  }
   return <div id="checkout-container" className="tkn-checkout">
     <Editable as="header" widgetId="checkout-header" label="Cabeçalho do checkout" widgetType="container" editorKind="container" renderContent={false} className="tkn-checkout-top"><div className="tkn-checkout-shell">
       <Link to="/" aria-label="TEKNIX início"><Editable as="img" widgetId="checkout-1" src="/teknix-logo.svg" alt="TEKNIX" width="122" /></Link>
@@ -144,7 +185,7 @@ export default function Checkout() {
         <Package size={40} /><Editable as="h1" widgetId="checkout-9">Sua sacola está vazia</Editable><Editable as="p" widgetId="checkout-10">Adicione um produto para finalizar sua compra.</Editable><Link to="/produtos" className="tkn-checkout-primary">Explorar produtos</Link>
       </Editable> : <>
         <Link to="/sacola" className="tkn-checkout-back"><ArrowLeft size={15} /> Voltar à sacola</Link>
-        <Editable as="form" widgetId="checkout-form" label="Formulário do checkout" widgetType="container" editorKind="container" renderContent={false} id="tkn-checkout-form" className="tkn-checkout-grid" onSubmit={submit}>
+          <Editable as="form" widgetId="checkout-form" label="Formulário do checkout" widgetType="form" editorKind="widget" renderContent={false} id="tkn-checkout-form" className="tkn-checkout-grid" onSubmit={submit}>
           <EditableFlow id="checkout-columns" label="Colunas do checkout" compact>
           <Editable as="fieldset" widgetId="checkout-fields" label="Dados de entrega e pagamento" widgetType="container" editorKind="container" renderContent={false} className="tkn-checkout-content" disabled={busy || loading}>
             <Editable as="h1" widgetId="checkout-11">Finalize sua compra</Editable>
@@ -180,9 +221,9 @@ export default function Checkout() {
               <div className="tkn-checkout-fields">
                 <label>E-mail<input type="email" autoComplete="email" required value={email} onChange={e => setEmail(e.target.value)} /></label>
                 <label>Celular com DDD<input type="tel" autoComplete="tel" required value={phone} onChange={e => setPhone(e.target.value)} /></label>
-                <label>Tipo de pessoa<select value={taxType} onChange={e => { setTaxType(e.target.value as 'CPF' | 'CNPJ'); setDocument('') }}><option value="CPF">Pessoa física</option><option value="CNPJ">Pessoa jurídica</option></select></label>
-                <label>{taxType}<input inputMode="numeric" required value={document} maxLength={taxType === 'CPF' ? 11 : 14} onChange={e => setDocument(e.target.value.replace(/\D/g, ''))} /></label>
-                {taxType === 'CNPJ' && <label className="tkn-checkout-wide">Razão social<input required value={company} onChange={e => setCompany(e.target.value)} /></label>}
+                <label>Tipo de pessoa<select value={taxType} onChange={e => { setTaxType(e.target.value as 'CPF' | 'CNPJ'); setDocument(''); setCompany('') }}><option value="CPF">Pessoa física</option><option value="CNPJ">Pessoa jurídica</option></select></label>
+                <label><span>{taxType} {taxType === 'CNPJ' && loadingCnpj && <small style={{ color: '#059669', fontSize: 11, fontWeight: 500 }}>(Consultando...)</small>}</span><input inputMode="numeric" required value={document} maxLength={taxType === 'CPF' ? 11 : 14} placeholder={taxType === 'CNPJ' ? '00000000000000' : '00000000000'} onChange={e => void handleDocumentChange(e.target.value)} onBlur={handleDocumentBlur} /></label>
+                {taxType === 'CNPJ' && <label className="tkn-checkout-wide"><span>Razão social {loadingCnpj && <small style={{ color: '#059669', fontSize: 11, fontWeight: 500 }}>(Buscando na Receita...)</small>}</span><input required value={company} placeholder={loadingCnpj ? 'Consultando Receita Federal...' : 'Razão social da empresa'} onChange={e => setCompany(e.target.value)} /></label>}
               </div>
             </Editable>
           </Editable>
@@ -191,7 +232,7 @@ export default function Checkout() {
             <button className="tkn-checkout-coupon" type="button" onClick={() => { setCouponNotice(''); setCouponOpen(true) }}><Ticket size={16} /> {coupon ? `Cupom ${coupon.code}` : 'Inserir código do cupom'}</button>
             <dl><div><dt>Produtos</dt><dd>{money(totalPrice)}</dd></div><div><dt>Frete</dt><dd>{money(shippingCost)}</dd></div>{coupon && <div><dt>Desconto</dt><dd>- {money(coupon.discount)}</dd></div>}<div className="tkn-checkout-total"><dt><button type="button" onClick={() => setSummaryOpen(true)}>Total <ChevronUp size={14} /></button></dt><dd>{money(total)}</dd></div></dl>
             {error && <Editable content={{}} as="p" widgetId="checkout-25" role="alert" className="tkn-checkout-error">{error}</Editable>}
-            <button className="tkn-checkout-primary" type="submit" disabled={busy || loading}>{busy ? 'Processando…' : 'Continuar para pagamento'}</button>
+            <button className="tkn-checkout-primary" type="submit" disabled={busy || loading}>{busy ? 'Processando…' : 'Comprar agora!'}</button>
             <Editable as="p" widgetId="checkout-26" className="tkn-checkout-safe"><ShieldCheck size={16} /> Confira os dados antes de continuar.</Editable>
             <Link className="tkn-checkout-link" to="/sacola">Editar sacola</Link>
           </Editable>
@@ -201,7 +242,7 @@ export default function Checkout() {
       </Editable>
       </EditableFlow>
     </main>
-    {summaryOpen && <div className="tkn-checkout-overlay andes-bottom-sheet__overlay" role="dialog" aria-modal="true" aria-label="Resumo da compra"><Editable as="section" widgetId="checkout-27" className="tkn-checkout-sheet tkn-checkout-full-summary"><button className="tkn-checkout-close" type="button" onClick={() => setSummaryOpen(false)} aria-label="Fechar resumo"><X size={20} /></button><Editable as="h2" widgetId="checkout-28">Resumo da compra</Editable><dl><div><dt>Produtos</dt><dd>{money(totalPrice)}</dd></div>{coupon && <div className="tkn-summary-discount"><dt>Desconto do produto</dt><dd>- {money(coupon.discount)}</dd></div>}<div><dt>Frete</dt><dd>{money(shippingCost)}</dd></div></dl><button className="tkn-sheet-coupon" type="button" onClick={() => { setSummaryOpen(false); setCouponOpen(true) }}><Ticket size={16} /> Inserir código do cupom</button><dl><div><dt>Subtotal</dt><dd>{money(total)}</dd></div><div><dt>Você pagará</dt><dd>{money(total)}<small>{payment === 'pix' ? 'Pix' : payment === 'boleto' ? 'Boleto' : 'Cartão de crédito'}</small></dd></div><div className="tkn-checkout-total"><dt>Total</dt><dd>{money(total)}</dd></div></dl><button className="tkn-checkout-primary" type="submit" form="tkn-checkout-form">Continuar para pagamento</button></Editable></div>}
+    {summaryOpen && <div className="tkn-checkout-overlay andes-bottom-sheet__overlay" role="dialog" aria-modal="true" aria-label="Resumo da compra"><Editable as="section" widgetId="checkout-27" className="tkn-checkout-sheet tkn-checkout-full-summary"><button className="tkn-checkout-close" type="button" onClick={() => setSummaryOpen(false)} aria-label="Fechar resumo"><X size={20} /></button><Editable as="h2" widgetId="checkout-28">Resumo da compra</Editable><dl><div><dt>Produtos</dt><dd>{money(totalPrice)}</dd></div>{coupon && <div className="tkn-summary-discount"><dt>Desconto do produto</dt><dd>- {money(coupon.discount)}</dd></div>}<div><dt>Frete</dt><dd>{money(shippingCost)}</dd></div></dl><button className="tkn-sheet-coupon" type="button" onClick={() => { setSummaryOpen(false); setCouponOpen(true) }}><Ticket size={16} /> Inserir código do cupom</button><dl><div><dt>Subtotal</dt><dd>{money(total)}</dd></div><div><dt>Você pagará</dt><dd>{money(total)}<small>{payment === 'pix' ? 'Pix' : payment === 'boleto' ? 'Boleto' : 'Cartão de crédito'}</small></dd></div><div className="tkn-checkout-total"><dt>Total</dt><dd>{money(total)}</dd></div></dl><button className="tkn-checkout-primary" type="submit" form="tkn-checkout-form">Comprar agora!</button></Editable></div>}
     {couponOpen && <div className="tkn-checkout-overlay andes-bottom-sheet__overlay" role="dialog" aria-modal="true" aria-label="Cupons"><Editable content={{}} as="section" widgetId="checkout-29" className="tkn-checkout-sheet tkn-checkout-coupon-sheet"><button className="tkn-checkout-close" type="button" onClick={() => setCouponOpen(false)} aria-label="Fechar cupons"><X size={20} /></button><Editable as="h2" widgetId="checkout-30">Cupons</Editable><Editable as="p" widgetId="checkout-31">Insira um código cadastrado para aplicá-lo a esta compra.</Editable><div className="tkn-checkout-coupon-form"><input autoFocus value={couponCode} placeholder="Insira seu código aqui" onChange={e => setCouponCode(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') void applyCoupon() }} /><button type="button" onClick={() => void applyCoupon()}>Inserir</button></div>{couponNotice && <Editable content={{}} as="p" widgetId="checkout-32" className="tkn-checkout-coupon-notice" role="status">{couponNotice}</Editable>}</Editable></div>}
     <Editable as="footer" widgetId="checkout-footer" label="Rodapé do checkout" widgetType="container" editorKind="container" renderContent={false} className="tkn-checkout-footer"><div className="tkn-checkout-shell"><Link to="/contato">Contato e atendimento</Link><Link to="/sacola">Minha sacola</Link><span>TEKNIX · Todos os direitos reservados.</span></div></Editable>
   </div>

@@ -3,7 +3,7 @@ import PageScope from './components/page-widgets/PageScope'
 import EditableFlow from './components/page-widgets/EditableFlow'
 import { Editable } from './components/page-widgets/PageWidgets'
 import WidgetPreview from './pages/WidgetPreview'
-import { Routes, Route, useLocation } from 'react-router-dom'
+import { Routes, Route, useLocation, Navigate, useParams } from 'react-router-dom'
 import { AuthProvider } from './hooks/useAuth'
 import { CartProvider } from './context/CartContext'
 import { FavoritesProvider } from './context/FavoritesContext'
@@ -27,6 +27,16 @@ import DynamicPage from './pages/DynamicPage'
 import ComparePage from './pages/ComparePage'
 import Account from './pages/Account'
 import Blog from './pages/Blog'
+import News from './pages/News'
+import NewsAbout from './pages/NewsAbout'
+import NewsEcosystem from './pages/NewsEcosystem'
+import NewsInvestors from './pages/NewsInvestors'
+import NewsSustainability from './pages/NewsSustainability'
+import NewsArticle from './pages/NewsArticle'
+import NewsIndex from './pages/NewsIndex'
+import HelpCenter from './pages/HelpCenter'
+import HelpTopic from './pages/HelpTopic'
+import LegalPage from './pages/LegalPage'
 import './App.css'
 
 import TeknixHeader from './components/TeknixHeader'
@@ -35,6 +45,8 @@ import CartTray from './components/CartTray'
 import CompareTray from './components/CompareTray'
 import { Ads } from './components/Ads'
 import CookieNotice from './components/CookieNotice'
+import NewsHeader from './components/NewsHeader'
+import { useAuth } from './hooks/useAuth'
 
 function NativePageCanvas({ children }: { children: React.ReactNode }) {
   const { pathname } = useLocation()
@@ -58,12 +70,15 @@ function NativePageCanvas({ children }: { children: React.ReactNode }) {
 
 export function SiteLayout({ children, hideHeader, hideFooter }: { children: React.ReactNode; hideHeader?: boolean; hideFooter?: boolean }) {
   const { pathname } = useLocation()
+  const { user } = useAuth()
   const isBlog = pathname.startsWith('/blog')
+  const isHelp = pathname === '/ajuda' || pathname === '/ajuda/' || pathname.startsWith('/ajuda/') || pathname.startsWith('/legal/')
+  const loggedUserName = user ? String(user.user_metadata?.first_name || user.user_metadata?.name || user.email?.split('@')[0] || 'Cliente').split(' ')[0] : undefined
   return (
-    <div className="site-layout-wrapper" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {!hideHeader && <Ads position="promo-bar" />}
-      {!hideHeader && <TeknixHeader />}
-      {!hideHeader && <Ads position="global-header" />}
+    <div className={`site-layout-wrapper${isHelp ? ' help-layout' : ''}`} style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      {!hideHeader && !isHelp && <Ads position="promo-bar" />}
+      {!hideHeader && (isHelp ? <NewsHeader activePage="" hideMenu loggedUserName={loggedUserName} /> : <TeknixHeader />)}
+      {!hideHeader && !isHelp && <Ads position="global-header" />}
       {isBlog && <Ads position="blog-header" />}
       <main style={{ flex: '1 0 auto' }}>
         <NativePageCanvas>{children}</NativePageCanvas>
@@ -72,15 +87,31 @@ export function SiteLayout({ children, hideHeader, hideFooter }: { children: Rea
       {isBlog && <Ads position="blog-footer" />}
       {!hideFooter && <Ads position="global-footer" />}
       {!hideFooter && <TeknixFooter />}
-      {pathname !== '/sacola' && <CartTray />}
+      {pathname !== '/sacola' && !isHelp && <CartTray />}
       <CompareTray />
     </div>
   )
 }
 
+function LegacyProductRedirect() {
+  const { slug = '' } = useParams()
+  return <Navigate to={`/${encodeURIComponent(slug)}`} replace />
+}
+
 
 function App() {
   const { pathname } = useLocation()
+  const isNewsHost = typeof window !== 'undefined' && window.location.hostname.startsWith('news.')
+  const isNewsRoute = pathname.startsWith('/news') || pathname.startsWith('/blog') || pathname === '/noticias'
+  if (isNewsHost || isNewsRoute) {
+    if (pathname === '/noticias') return <NewsIndex />
+    if (pathname.startsWith('/blog/')) return <NewsArticle />
+    if (pathname === '/news/sobre-nos' || pathname === '/news/sobrenos' || pathname === '/news/acercade') return <NewsAbout />
+    if (pathname === '/news/nosso-ecossistema' || pathname === '/news/nuestro-ecosistema') return <NewsEcosystem />
+    if (pathname === '/news/investidores' || pathname === '/news/inversores') return <NewsInvestors />
+    if (pathname === '/news/sustentabilidade' || pathname === '/news/sustentabilidad') return <NewsSustainability />
+    return <News />
+  }
   return (
     <AuthProvider>
       <CartProvider>
@@ -115,7 +146,10 @@ function App() {
               <Route path="/sacola" element={<SiteLayout><Bag /></SiteLayout>} />
 
               {/* 3. Suporte e Contato */}
-              <Route path="/contato" element={<SiteLayout><Contact /></SiteLayout>} />
+              <Route path="/contato" element={<Navigate to="/ajuda" replace />} />
+              <Route path="/ajuda" element={<SiteLayout><HelpCenter /></SiteLayout>} />
+              <Route path="/ajuda/:slug" element={<SiteLayout><HelpTopic /></SiteLayout>} />
+              <Route path="/legal/:slug" element={<SiteLayout><LegalPage /></SiteLayout>} />
               <Route path="/institucional/*" element={<DynamicPage />} />
 
               {/* 4. Checkout Oficial */}
@@ -128,9 +162,12 @@ function App() {
               <Route path="/produtos" element={<SiteLayout><SearchResults /></SiteLayout>} />
 
               {/* 6. Página de Produto */}
-              <Route path="/produto/:slug" element={<SiteLayout><Product /></SiteLayout>} />
-              <Route path="/produto/:categoria/:slug" element={<SiteLayout><Product /></SiteLayout>} />
-              <Route path="/produtos/:slug" element={<SiteLayout><Product /></SiteLayout>} />
+              <Route path="/produto/:slug" element={<LegacyProductRedirect />} />
+              <Route path="/produto/:categoria/:slug" element={<LegacyProductRedirect />} />
+              {/* URL pública direta do produto, sem o prefixo /produto(s). */}
+              <Route path="/:slug" element={<SiteLayout><Product /></SiteLayout>} />
+              {/* Compatibilidade: URLs antigas no plural são normalizadas para o singular. */}
+              <Route path="/produtos/:slug" element={<LegacyProductRedirect />} />
 
               {/* 6b. Comparar Produtos */}
               <Route path="/comparar" element={<SiteLayout><ComparePage /></SiteLayout>} />

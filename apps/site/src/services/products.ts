@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import type { Product } from '../types/database'
-import { normalizeCommerce } from '../../../../packages/core/src/productCommerce'
+import { normalizeCommerce, cleanProductTitle, normalizeShowcase } from '../../../../packages/core/src/productCommerce'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://ykgprfzfnffooqmfbeox.supabase.co'
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlrZ3ByZnpmbmZmb29xbWZiZW94Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5NDM3OTEsImV4cCI6MjEwMjUxOTc5MX0.DQ-4lHwbyMW2umWSGmxfB2JUthUTKujGmZ-IACtFCIY'
@@ -35,40 +35,112 @@ export async function ensureCatalogAuth() {
 // Produtos padrão de referência sincronizados com o HUB
 export const HUB_FALLBACK_PRODUCTS: Product[] = [
   {
-    id: 'demo-1',
-    name: 'Parafusadeira e Furadeira de Impacto 12V Bivolt TEKNIX',
-    slug: 'parafusadeira-impacto-12v',
-    sku: 'TKN-FUR-12V',
-    price: 45.00,
-    promo_price: 39.90,
-    manage_stock: false,
-    stock: 100,
-    image_url: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=600&auto=format&fit=crop&q=80',
-    images: ['https://images.unsplash.com/photo-1504148455328-c376907d081c?w=600&auto=format&fit=crop&q=80'],
+    id: 'macaco-hidraulico-garrafa-2t',
+    name: 'Macaco Hidráulico Tipo Garrafa 2 Toneladas Bovenau Profissional',
+    slug: 'macaco-hidraulico-tipo-garrafa-2-toneladas-bovenau',
+    sku: 'TKN-MCK-002',
+    price: 189.90,
+    promo_price: 159.90,
+    manage_stock: true,
+    stock: 25,
+    image_url: '/images/referencias/macaco-hidraulico.webp',
+    images: ['/images/referencias/macaco-hidraulico.webp'],
     status: 'published',
-    brand: 'TEKNIX',
-    category: 'Ferramentas',
+    brand: 'Bovenau',
+    category: 'Equipamentos Automotivos',
     created_at: '2026-08-20T00:00:00Z',
-    description: 'Parafusadeira e Furadeira de Impacto 12V Bivolt TEKNIX com bateria de íon de lítio de alta durabilidade.',
-    short_description: '12V Bivolt • Mandril 3/8" • 2 Baterias Inclusas'
+    description: 'Macaco hidráulico tipo garrafa capacidade 2 toneladas, ideal para oficinas, borracharias e manutenção automotiva com válvula de segurança integrada.',
+    short_description: 'Capacidade 2 Toneladas • Acionamento hidráulico suave • Bovenau'
   },
   {
-    id: 'demo-2',
-    name: 'Disco de Corte Diamantado Extra Fino 110mm',
-    slug: 'disco-corte-diamantado',
-    sku: 'TKN-DISC-110',
-    price: 18.50,
-    promo_price: 15.00,
+    id: 'morsa-bancada-giratoria-n4',
+    name: 'Morsa Torno de Bancada Giratória Nº 4 Base com Fixação Reforçada',
+    slug: 'morsa-torno-bancada-giratoria-n4',
+    sku: 'TKN-MRS-004',
+    price: 249.90,
+    promo_price: 219.90,
     manage_stock: true,
-    stock: 24,
-    image_url: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop&q=80',
-    images: ['https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop&q=80'],
+    stock: 18,
+    image_url: '/images/referencias/morsa-de-bancada.webp',
+    images: ['/images/referencias/morsa-de-bancada.webp'],
     status: 'published',
     brand: 'TEKNIX',
-    category: 'Acessórios',
+    category: 'Ferramentas Manuais e Bancada',
     created_at: '2026-08-20T00:00:00Z',
-    description: 'Disco de corte diamantado extra fino 110mm para cortes rápidos e precisos em porcelanatos, mármores e granitos.',
-    short_description: 'Extra fino 110mm • Furo 20mm • Alta precisão'
+    description: 'Morsa torno de bancada nº 4 com base giratória 360 graus em ferro fundido nodular de alta resistência.',
+    short_description: 'Base Giratória 360° • Ferro Fundido Nodular • Mordente Aço Temperado'
+  },
+  {
+    id: 'pistola-pintura-hvlp-600ml',
+    name: 'Pistola de Pintura Gravidade Profissional HVLP Bico 1.4mm Caneca 600ml',
+    slug: 'pistola-pintura-gravidade-hvlp-bico-14mm-600ml',
+    sku: 'TKN-PST-014',
+    price: 199.90,
+    promo_price: 169.90,
+    manage_stock: true,
+    stock: 32,
+    image_url: '/images/referencias/pistola-de-pintura.webp',
+    images: ['/images/referencias/pistola-de-pintura.webp'],
+    status: 'published',
+    brand: 'PDR',
+    category: 'Pintura e Repintura',
+    created_at: '2026-08-20T00:00:00Z',
+    description: 'Pistola de pintura profissional HVLP por gravidade com bico 1.4mm e copo de 600ml para acabamentos finos.',
+    short_description: 'Tecnologia HVLP • Bico 1.4mm Aço Inox • Caneca 600ml'
+  },
+  {
+    id: 'lixadeira-roto-orbital-125mm',
+    name: 'Lixadeira Roto Orbital Elétrica 125mm 300W com Coletor de Pó',
+    slug: 'lixadeira-roto-orbital-eletrica-125mm-300w',
+    sku: 'TKN-LIX-125',
+    price: 279.90,
+    promo_price: 239.90,
+    manage_stock: true,
+    stock: 20,
+    image_url: '/images/referencias/lixadeira.webp',
+    images: ['/images/referencias/lixadeira.webp'],
+    status: 'published',
+    brand: 'TEKNIX',
+    category: 'Ferramentas Elétricas',
+    created_at: '2026-08-20T00:00:00Z',
+    description: 'Lixadeira roto orbital de alta performance com velocidade variável e sistema integrado de aspiração de pó.',
+    short_description: 'Potência 300W • Disco 125mm • 6 Níveis de Velocidade'
+  },
+  {
+    id: 'b5ec9f54-f942-4e7f-bd2c-a78b269e6f59',
+    name: 'Kit Parafusadeira Chave Fenda Elétrica 30 Peças Lançamento',
+    slug: 'kit-parafusadeira-chave-fenda-eletrica-30-pecas',
+    sku: 'MLB7453209398',
+    price: 119.90,
+    promo_price: 99.90,
+    manage_stock: true,
+    stock: 30,
+    image_url: 'https://http2.mlstatic.com/D_985226-MLA115019108190_082026-O.jpg',
+    images: ['https://http2.mlstatic.com/D_985226-MLA115019108190_082026-O.jpg'],
+    status: 'published',
+    brand: 'Bomvink',
+    category: 'Ferramentas',
+    created_at: '2026-08-20T00:00:00Z',
+    description: 'A Parafusadeira Chave de Fenda Elétrica Bomvink BOM-9917 foi desenvolvida para facilitar tarefas do dia a dia com mais agilidade, precisão e conforto.',
+    short_description: 'Kit 30 peças com estojo organizador • Bateria recarregável'
+  },
+  {
+    id: '4bae4104-dadb-44e1-98b0-8e3128eb7222',
+    name: 'Kit Jogo De Ferramentas Chave Catraca Soquete Crv 46 Peças Sextavado',
+    slug: 'kit-ferramentas-catraca-soquete-crv-46-pecas',
+    sku: 'MLB7451225922',
+    price: 69.90,
+    promo_price: 54.90,
+    manage_stock: true,
+    stock: 45,
+    image_url: 'https://http2.mlstatic.com/D_955140-MLA100095920631_122025-O.jpg',
+    images: ['https://http2.mlstatic.com/D_955140-MLA100095920631_122025-O.jpg'],
+    status: 'published',
+    brand: 'Bomvink',
+    category: 'Ferramentas Manuais',
+    created_at: '2026-08-20T00:00:00Z',
+    description: 'Jogo de ferramentas catraca soquetes 46 peças em aço cromo vanádio de alta durabilidade.',
+    short_description: 'Aço CrV 46 peças • Maleta rígida reforçada'
   }
 ]
 
@@ -119,7 +191,7 @@ function mapProduct(p: any): Product {
 
   return {
     ...p,
-    name:meta?.seo?.store_name||p.name,
+    name: cleanProductTitle(meta?.seo?.store_name || p.name),
     commerce: normalizeCommerce({
       freeShipping,
       ...commerceData
@@ -147,6 +219,18 @@ function mapProduct(p: any): Product {
     short_description: meta?.short_description || p.short_description || '',
     description: meta?.store_description || p.notes || p.description || '',
     specifications: Array.isArray(specs) ? specs : (Array.isArray(p.specifications) ? p.specifications : []),
+    editorial_showcase: (() => {
+      const rawShowcase = {
+        ...((meta?.seo?.editorial_showcase && typeof meta.seo.editorial_showcase === 'object') ? meta.seo.editorial_showcase : {}),
+        ...((specs?.editorial_showcase && typeof specs.editorial_showcase === 'object') ? specs.editorial_showcase : {}),
+        ...(((p as any).editorial_showcase && typeof (p as any).editorial_showcase === 'object') ? (p as any).editorial_showcase : {})
+      }
+      const normalized = normalizeShowcase(rawShowcase, meta?.seo?.store_name || p.name, [...new Set([meta?.seo?.store_image || p.main_image || p.image_url || galleryImages[0] || images[0], ...galleryImages, ...images].filter(Boolean))])
+      const presentationImages = Array.isArray(rawShowcase.presentation_images)
+        ? rawShowcase.presentation_images.filter((image: unknown): image is string => typeof image === 'string' && image.trim().length > 0).slice(0, 3)
+        : []
+      return { ...normalized, presentation_images: presentationImages }
+    })(),
     store_meta: meta || undefined
   }
 }
@@ -270,14 +354,28 @@ export async function getProducts(options?: {
         product.model,
       ].some((value) => matchesNormalizedToken(value, options.brand))
 
-      const searchMatches = !searchTerm || [
-        product.name,
-        product.sku,
-        product.brand,
-        product.category,
-        product.model,
-        product.slug,
-      ].some((value) => matchesNormalizedToken(value, searchTerm))
+      const searchMatches = !searchTerm || (() => {
+        const normTerm = normalizeSearchValue(searchTerm)
+        if (!normTerm) return true
+
+        const fullProductText = normalizeSearchValue([
+          product.name,
+          product.sku,
+          product.brand,
+          product.category,
+          product.model,
+          product.slug,
+          product.short_description,
+          product.description
+        ].join(' '))
+
+        if (fullProductText.includes(normTerm)) return true
+
+        const words = normTerm.split(/\s+/).filter(w => w.length > 1)
+        if (words.length === 0) return true
+
+        return words.every(word => fullProductText.includes(word))
+      })()
 
       return categoryMatches && brandMatches && searchMatches
     })
@@ -295,26 +393,37 @@ export async function getProducts(options?: {
 
 export async function getProductById(id: string) {
   if (!id) return null
-  await ensureCatalogAuth()
 
   // 1. Verifica no fallback padrão
   const fallback = HUB_FALLBACK_PRODUCTS.find(p => p.id === id || p.sku === id || p.slug === id)
   if (fallback) return fallback
 
-  // 2. Consulta via storeClient
+  // 2. Consulta o catálogo público sem depender da sessão do cliente.
+  // A visualização de produto é pública; autenticação fica restrita a conta,
+  // pedidos e checkout. O storeClient ainda é usado para respeitar as regras
+  // de publicação existentes quando a base permitir leitura anônima.
   const keys = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
-    ? ['id', 'sku', 'slug'] : ['sku', 'slug']
+    ? ['id', 'sku', 'slug', 'mercadolivre_item_id']
+    : ['sku', 'slug', 'mercadolivre_item_id']
   for (const key of keys) {
-    const { data } = await storeClient.from('products')
-      .select('*, store_meta:product_store_metadata(*)').eq(key, id).maybeSingle()
-    if (data) return mapProduct(data)
+    try {
+      const { data } = await storeClient.from('products')
+        .select('*, store_meta:product_store_metadata(*)').ilike(key, id).maybeSingle()
+      if (data) return mapProduct(data)
+    } catch {
+      // A página continua pública mesmo quando o catálogo remoto está indisponível.
+    }
   }
-  const { data: metadata } = await storeClient.from('product_store_metadata')
-    .select('product_id').eq('slug', id).maybeSingle()
-  if (!metadata) return null
-  const { data } = await storeClient.from('products')
-    .select('*, store_meta:product_store_metadata(*)').eq('id', metadata.product_id).maybeSingle()
-  return data ? mapProduct(data) : null
+  try {
+    const { data: metadata } = await storeClient.from('product_store_metadata')
+      .select('product_id').ilike('slug', id).maybeSingle()
+    if (!metadata) return null
+    const { data } = await storeClient.from('products')
+      .select('*, store_meta:product_store_metadata(*)').eq('id', metadata.product_id).maybeSingle()
+    return data ? mapProduct(data) : null
+  } catch {
+    return null
+  }
 }
 
 export async function getProductBySku(sku: string) {

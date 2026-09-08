@@ -338,7 +338,7 @@ function OrderActions({ order }: { order: OrderDetail }) {
         defaultNote={shareModal.note}
       />
 
-      <div className="flex items-center gap-2 mt-3 sm:justify-end">
+      <div className="flex items-center gap-2 mt-3 pb-6 sm:justify-end">
         {/* BOTÕES DE AÇÃO OPERACIONAIS (SOMENTE ÍCONES CLEAN NEUTROS) */}
         <button
           onClick={handleShareOrder}

@@ -295,3 +295,54 @@ export function isAllowedSiteOrigin(origin?: string | null, envOverride?: string
   return false
 }
 
+// ── THEME BUILDER DE PRODUTO & CONTEÚDO DINÂMICO ──
+export const PRODUCT_DEFAULT_TEMPLATE_SCOPE = 'product:default'
+
+export const PRODUCT_WIDGET_TYPES = [
+  'productTitle',
+  'productSubtitle',
+  'productPrice',
+  'productDiscount',
+  'productBadge',
+  'productGallery',
+  'productImage',
+  'productShortDescription',
+  'productDescription',
+  'productSpecifications',
+  'productFeatures',
+  'productSku',
+  'productCode',
+  'productBrand',
+  'productCategory',
+  'productSubcategory',
+  'productStock',
+  'productQuantity',
+  'productVariations',
+  'productRating',
+  'productRatingCount',
+  'productBuyButton',
+  'productAddToCart',
+  'productShipping',
+  'productInstallments',
+  'productPaymentMethods',
+  'productFavorite',
+  'productShare',
+  'productBreadcrumb',
+  'productCarousel',
+  'productGrid',
+  'productRelated',
+  'productUpsell'
+] as const
+
+export type ProductWidgetType = typeof PRODUCT_WIDGET_TYPES[number]
+
+export const DEFAULT_HORIZONTAL_MENU_ITEMS = [
+  { label: 'Telefonia', url: '/produtos?q=telefonia' },
+  { label: 'Eletrodomésticos', url: '/produtos?q=eletrodomesticos' },
+  { label: 'Tvs e Vídeo', url: '/produtos?q=tv' },
+  { label: 'Móveis', url: '/produtos?q=moveis' },
+  { label: 'Eletroportáteis', url: '/produtos?q=eletroportateis' },
+  { label: 'Informática', url: '/produtos?q=informatica' },
+  { label: 'Ferramentas', url: '/produtos?q=ferramentas' }
+]
+

@@ -51,7 +51,7 @@ export default function FinanceOverview() {
           <p>Acompanhe o faturamento, ticket médio e transações da sua loja.</p>
         </div>
         <div className="header-actions">
-          <Link to="/hub/mercado-pago" className="btn btn-secondary">
+          <Link to="/hub/mercado-pago" className="btn btn-secondary btn-action-primary">
             <CreditCard size={14} /> Configurar Gateway
           </Link>
         </div>

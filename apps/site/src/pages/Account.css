@@ -7,7 +7,7 @@
   width: min(100% - 48px, 1296px);
   margin: var(--tkn-space-48) auto 72px;
   gap: var(--tkn-space-48);
-  font-family: var(--cb-font, 'Nunito', sans-serif);
+  font-family: var(--cb-font, 'Roboto', Arial, sans-serif);
   color: #242424;
   display: flex;
 }
@@ -127,11 +127,12 @@
 }
 
 .cb-account-main-title {
-  font-size: var(--tkn-text-28);
-  font-weight: var(--tkn-weight-medium);
-  color: #000000;
-  margin: 0 0 var(--tkn-space-12);
-  letter-spacing: -0.01em;
+  font-size: var(--tkn-page-title, 24px);
+  font-weight: var(--tkn-weight-semibold, 600);
+  color: #111827;
+  margin: 0 0 var(--tkn-space-8);
+  letter-spacing: -0.02em;
+  line-height: 1.25;
 }
 
 .cb-account-main-subtitle {
@@ -294,6 +295,26 @@
 .cb-account-detail .cb-modal-actions { justify-content: flex-start; flex-wrap: wrap; }
 .cb-account-detail .cb-modal-header h3 { font-size: var(--tkn-text-28); }
 
+/* Central de atendimento: conteúdo reservado à área autenticada e com leitura mais clara. */
+.cb-account-support-panel { max-width: 720px; }
+.cb-account-support-panel .cb-modal-header { margin-bottom: 0; }
+.cb-account-support-content { display: grid; gap: 16px; padding-top: 4px; }
+.cb-account-support-intro { margin: 0; color: #4b5563; font-size: 15px; line-height: 1.6; }
+.cb-account-support-contact {
+  padding: 18px 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+.cb-account-support-label { margin: 0 0 7px; color: #0033c6; font-weight: var(--tkn-weight-semibold); }
+.cb-account-support-value { margin: 0; color: #1f2937; font-size: 16px; line-height: 1.4; }
+.cb-account-support-panel .cb-btn-save { background: #0071e3; }
+.cb-account-support-panel .cb-btn-save:hover { background: #0068d1; }
+@media (max-width: 800px) {
+  .cb-account-support-panel .cb-modal-header h3 { font-size: 24px; }
+  .cb-account-support-contact { padding: 16px; }
+}
+
 .cb-modal-overlay {
   position: fixed;
   top: 0;
@@ -439,7 +460,7 @@
     padding: 0 var(--tkn-space-4) var(--tkn-space-16);
   }
 
-  .cb-account-main-title { font-size: var(--tkn-text-28); }
+  .cb-account-main-title { font-size: 22px; }
   .cb-account-main-subtitle { margin-bottom: var(--tkn-space-24); }
   .cb-account-cards-grid { gap: var(--tkn-space-12); }
   .cb-account-logout-wrap { margin-top: var(--tkn-space-16); }

@@ -120,7 +120,7 @@ export function CockpitCentralOperacao({ orders = [], products = [] }: CockpitDa
         <div className="flex flex-wrap items-center gap-2">
           <Link
             href="/pedidos"
-            className="px-4 py-2.5 bg-[#111111] hover:bg-black text-white text-[12px] font-semibold rounded-xl transition-colors flex items-center gap-1.5 shadow-2xs"
+            className="px-4 py-2.5 bg-[#347ff2] hover:bg-[#2469d8] text-white text-[12px] font-semibold rounded-xl transition-colors flex items-center gap-1.5 shadow-2xs"
           >
             <Package className="w-3.5 h-3.5" />
             Ver Pedidos & Etiquetas

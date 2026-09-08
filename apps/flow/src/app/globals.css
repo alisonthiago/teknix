@@ -1,4 +1,22 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap');
 @import "tailwindcss";
+
+/* Dropdowns neutros em todo o Flow: sem destaque azul nativo. */
+select,
+select option,
+select option:checked,
+select option:hover {
+  background-color: #ffffff;
+  color: #333333;
+}
+
+select {
+  color-scheme: light;
+}
+
+.product-detail-page {
+  font-family: 'Roboto', Arial, sans-serif;
+}
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
@@ -50,9 +68,9 @@
   /* Brand design tokens */
   --brand-lime: #B5F500;
   --brand-lime-light: #EEFFB3;
-  --color-mp-blue: #1f2328;
-  --color-mp-blue-hover: #111827;
-  --color-mp-blue-light: #ecf3fe;
+  --color-mp-blue: #347ff2;
+  --color-mp-blue-hover: #2469d8;
+  --color-mp-blue-light: #f5f5f5;
   --color-mp-green: #00a650;
   --color-mp-bg: #f5f5f5;
   --color-mp-border: #e6e6e6;
@@ -69,18 +87,18 @@
   --card-foreground: #333333;
   --popover: #ffffff;
   --popover-foreground: #333333;
-  --primary: #1f2328;
+  --primary: #347ff2;
   --primary-foreground: #ffffff;
-  --secondary: #ecf3fe;
-  --secondary-foreground: #1f2328;
+  --secondary: #f5f5f5;
+  --secondary-foreground: #347ff2;
   --muted: #f5f5f5;
   --muted-foreground: #999999;
-  --accent: #ecf3fe;
+  --accent: #f5f5f5;
   --accent-foreground: #1f2328;
   --destructive: #f23d4f;
   --border: #e6e6e6;
   --input: #e6e6e6;
-  --ring: #1f2328;
+  --ring: #d9d9d9;
   --chart-1: #1f2328;
   --chart-2: #00a650;
   --chart-3: #B5F500;
@@ -151,7 +169,7 @@
   }
 
   .mp-btn-primary {
-    @apply inline-flex items-center justify-center gap-2 bg-[#111111] text-white font-semibold rounded-xl px-5 py-3 text-base hover:bg-black transition-colors shadow-2xs;
+    @apply inline-flex items-center justify-center gap-2 bg-[#347ff2] text-white font-semibold rounded-xl px-5 py-3 text-base hover:bg-[#2469d8] transition-colors shadow-2xs;
     min-height: 44px;
   }
 
@@ -263,11 +281,11 @@
   }
 
   .mp-amount {
-    @apply text-3xl sm:text-4xl font-semibold text-[#333] tracking-tight leading-none;
+    @apply text-3xl sm:text-4xl font-bold text-[#333] tracking-tight leading-none;
   }
 
   .mp-amount-sup {
-    @apply text-xl align-super font-semibold;
+    @apply text-xl align-super font-bold;
   }
 
   /* Table scroll container — ONLY this can have horizontal scroll */
@@ -315,6 +333,76 @@
   .mp-form-grid {
     @apply grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4;
   }
+}
+
+html, body, button, input, textarea, select { font-family: 'Roboto', Arial, sans-serif; }
+
+button:disabled {
+  background-color: #f5f5f5 !important;
+  border-color: #d9d9d9 !important;
+  color: #94a3b8 !important;
+  box-shadow: none !important;
+}
+
+/* Ações legadas que ainda carregam a classe escura recebem o mesmo azul do Hub. */
+button[class*="bg-[#1f2328]"],
+button[class*="bg-[#111827]"],
+button[class*="bg-[#111111]"],
+button[class*="bg-black"],
+a[class*="bg-[#1f2328]"] {
+  background-color: #347ff2 !important;
+}
+
+button[class*="bg-[#1f2328]"]:hover,
+button[class*="bg-[#111827]"]:hover,
+button[class*="bg-[#111111]"]:hover,
+button[class*="bg-black"]:hover,
+a[class*="bg-[#1f2328]"]:hover {
+  background-color: #2469d8 !important;
+}
+
+.header-live-button,
+.header-live-button:hover { background-color: #ffffff !important; color: #111111 !important; border: 1px solid #e2e2e2 !important; }
+
+/* Azul fica reservado para ações; superfícies e estados selecionados usam neutro. */
+[class*="bg-[#eff6ff]"], [class*="bg-[#f0f7ff]"], [class*="bg-[#f8faff]"],
+[class*="bg-[#edf5ff]"], [class*="bg-[#eaf2ff]"],
+[class*="bg-[#ecf3fe]"], [class*="bg-[#dbeafe]"], [class*="bg-[#e0efff]"],
+[class*="bg-[#bfdbfe]"], [class*="hover:bg-[#dbeafe]"]:hover,
+[class*="hover:bg-[#e0efff]"]:hover {
+  background-color: #f5f5f5 !important;
+}
+
+.label-view-tab:not([class*="bg-[#0f172a]"]):not([class*="bg-[#347ff2]"]) { background-color: transparent !important; }
+.label-view-tab:not([class*="bg-[#0f172a]"]):not([class*="bg-[#347ff2]"]):hover { background-color: transparent !important; }
+
+.label-status-filter,
+.label-status-filter:hover,
+.label-status-filter:focus,
+.label-status-filter:focus-visible {
+  box-shadow: none !important;
+  filter: none !important;
+  outline: none;
+}
+.label-status-filter.is-active { background-color: #ffffff !important; border: 1px solid #d9d9d9; }
+
+/* Remove o azul-claro de qualquer filtro/aba global do Flow. */
+[class*="hover:bg-[#f1f5f9]"]:hover,
+[class*="hover:bg-[#f8faff]"]:hover,
+[class*="hover:bg-[#eff6ff]"]:hover,
+[class*="hover:bg-[#edf5ff]"]:hover,
+[class*="hover:bg-[#ecf3fe]"]:hover,
+[class*="hover:bg-[#dbeafe]"]:hover,
+[class*="hover:bg-[#e0efff]"]:hover {
+  background-color: transparent !important;
+}
+
+/* Bordas, rings e contornos decorativos azuis viram neutros globalmente. */
+[class*="border-[#dbeafe]"], [class*="border-[#bfdbfe]"], [class*="border-[#c1d9fd]"],
+[class*="focus:border-[#1f2328]"]:focus, [class*="focus:ring-[#1f2328]"]:focus,
+[class*="focus:ring-blue"]:focus, [class*="focus-visible:ring-blue"]:focus-visible {
+  border-color: #e2e2e2 !important;
+  box-shadow: none !important;
 }
 
 /* ─── AUMENTO GLOBAL DE TIPOGRAFIA ───

@@ -11,7 +11,7 @@ export default async function PedidoDetailPage({ params }: { params: Promise<{ i
   }
 
   return (
-    <div className="px-0 sm:px-0">
+    <div className="-mx-5 sm:-mx-8 lg:-mx-12 xl:-mx-16">
       <PedidoDetailClient order={order} />
     </div>
   )

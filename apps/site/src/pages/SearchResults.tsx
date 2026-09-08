@@ -9,7 +9,6 @@ import { useSearchParams, Link } from 'react-router-dom'
 import { getProducts } from '../services/products'
 import type { Product as ProductType } from '../types/database'
 import StorefrontProductCard from '../components/StorefrontProductCard'
-import { DEMO_PRODUCT, DEMO_SIGNALS, DEMO_REVIEWS } from '../services/demoProduct'
 import { storefrontCard } from '../services/storefrontCommerce'
 import './SearchResults.css'
 
@@ -21,8 +20,6 @@ function formatMoney(value: number) {
 export default function SearchResults() {
   const [searchParams, setSearchParams] = useSearchParams()
   const searchTerm = searchParams.get('q') || searchParams.get('search') || ''
-  const isDemo = import.meta.env.DEV && searchParams.get('demo') === '1'
-    && searchTerm.toLowerCase().trim() === 'pistola de lavagem'
   const brandFilter = searchParams.get('brand') || searchParams.get('marca') || ''
   const sortParam = searchParams.get('sort') || 'newest'
 
@@ -33,12 +30,6 @@ export default function SearchResults() {
   const [selectedSort, setSelectedSort] = useState(sortParam)
 
   useEffect(() => {
-    if (isDemo) {
-      setProducts(selectedBrand && selectedBrand !== DEMO_PRODUCT.brand ? [] : [DEMO_PRODUCT])
-      setLoading(false)
-      return
-    }
-
     setLoading(true)
     let active = true
     getProducts({
@@ -50,7 +41,7 @@ export default function SearchResults() {
       .then(data => { if (active) setProducts(data) })
       .finally(() => { if (active) setLoading(false) })
     return () => { active = false }
-  }, [searchTerm, selectedBrand, isDemo])
+  }, [searchTerm, selectedBrand])
 
   const sortedAndFilteredProducts = useMemo(() => {
     let result = [...products].filter(
@@ -184,16 +175,32 @@ export default function SearchResults() {
           {/* ── GRID DE PRODUTOS (DIREITA) ── */}
           <Editable as="section" widgetId="catalog-results" label="Resultados do catálogo" widgetType="container" editorKind="container" className="search-results-content" renderContent={false}>
             <EditableFlow id="catalog-results" label="Conteúdo dos resultados" compact>
-            {isDemo && <Editable as="p" widgetId="searchresults-5" role="status">Demonstração local: produto, preços e condições ilustrativos. Compra e favoritos desativados; nenhum item foi cadastrado no catálogo real.</Editable>}
             <Editable as="div" widgetId="catalog-results-header" label="Cabeçalho dos resultados" widgetType="container" editorKind="container" className="results-header" renderContent={false}>
-              <Editable as="h1" widgetId="searchresults-6">
-                {searchTerm ? (
-                  <>Resultados para "<strong>{searchTerm}</strong>"</>
-                ) : (
-                  <>Catálogo de Produtos</>
-                )}
-              </Editable>
-              <Editable as="span" widgetId="catalog-results-count" className="results-count">{sortedAndFilteredProducts.length} produtos {searchTerm ? 'encontrados' : 'disponíveis'}</Editable>
+              <div className="results-header-info">
+                <Editable as="h1" widgetId="searchresults-6">
+                  {searchTerm ? (
+                    <>Resultados para "<strong>{searchTerm}</strong>"</>
+                  ) : (
+                    <>Catálogo de Produtos</>
+                  )}
+                </Editable>
+                <Editable as="span" widgetId="catalog-results-count" className="results-count">
+                  {sortedAndFilteredProducts.length} {sortedAndFilteredProducts.length === 1 ? 'produto encontrado' : 'produtos encontrados'}
+                </Editable>
+              </div>
+
+              <div className="results-header-sort">
+                <span className="results-sort-label">Ordenar:</span>
+                <select
+                  value={selectedSort}
+                  onChange={(e) => handleSortChange(e.target.value)}
+                  className="results-sort-select"
+                >
+                  <option value="newest">Mais recentes</option>
+                  <option value="price_asc">Menor preço</option>
+                  <option value="price_desc">Maior preço</option>
+                </select>
+              </div>
             </Editable>
 
             {loading ? (
@@ -207,29 +214,41 @@ export default function SearchResults() {
                 {sortedAndFilteredProducts.map((product) => (
                   <Editable as="div" key={product.id} widgetId={`catalog-product-${product.id}`} label={`Produto ${product.name}`} widgetType="storefrontCard" editorKind="container" style={{ display: 'contents' }} renderContent={false}>
                     <StorefrontProductCard
-                      to={`/produtos/${encodeURIComponent(product.sku || product.id)}${isDemo ? '?demo=1' : ''}`}
+                      to={`/${encodeURIComponent(product.sku || product.id)}`}
                       product={{
                         ...storefrontCard(product),
                         id: product.id,
-                        signals: isDemo ? DEMO_SIGNALS : storefrontCard(product).signals,
-                        reviewData: isDemo ? DEMO_REVIEWS : undefined,
+                        signals: storefrontCard(product).signals,
                         title: product.name,
                         img: product.image_url || '',
                         reviews: '',
                         oldPrice: product.promo_price && product.promo_price < (product.price || 0) ? formatMoney(product.price || 0) : null,
                         pricePix: storefrontCard(product).pricePix,
                         hasNoPixLabel: true,
-                        bottomTags: isDemo ? [{text: 'Ver demonstração', type: 'green'}] : storefrontCard(product).bottomTags,
-                        commerceProduct: isDemo ? undefined : product,
+                        bottomTags: storefrontCard(product).bottomTags,
+                        commerceProduct: product,
                       }} />
                   </Editable>
                 ))}
                 </EditableFlow>
               </Editable>
             ) : (
-              <Editable as="div" widgetId="catalog-empty" label="Catálogo vazio" widgetType="container" editorKind="container" className="no-results" renderContent={false}>
-                <Editable as="h2" widgetId="searchresults-8">{searchTerm ? 'Nenhum produto encontrado' : 'Nenhum produto publicado'}</Editable>
-                <Editable as="p" widgetId="searchresults-9">{searchTerm ? 'Tente ajustar seus filtros ou termos de busca' : 'Ainda não há produtos publicados na vitrine da loja.'}</Editable>
+              <Editable as="div" widgetId="catalog-empty" label="Catálogo vazio" widgetType="container" editorKind="container" className="no-results-modern" renderContent={false}>
+                <div className="no-results-icon-wrap">
+                  <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" strokeWidth="1.8">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  </svg>
+                </div>
+                <Editable as="h2" widgetId="searchresults-8">
+                  {searchTerm ? `Nenhum produto encontrado para "${searchTerm}"` : 'Nenhum produto publicado'}
+                </Editable>
+                <Editable as="p" widgetId="searchresults-9">
+                  {searchTerm ? 'Verifique a ortografia das palavras ou tente buscar por termos mais genéricos.' : 'Ainda não há produtos publicados na vitrine da loja.'}
+                </Editable>
+                <Link to="/produtos" className="no-results-action-btn">
+                  Ver todo o catálogo
+                </Link>
               </Editable>
             )}
             </EditableFlow>

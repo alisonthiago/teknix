@@ -124,7 +124,7 @@ export default function OrdersList() {
           <p>Acompanhe e gerencie as vendas e envios da loja.</p>
         </div>
         <div className="header-actions">
-          <button className="btn btn-secondary">Exportar</button>
+          <button className="btn btn-secondary btn-action-primary">Exportar</button>
         </div>
       </div>
 

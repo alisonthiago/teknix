@@ -1,0 +1,16 @@
+.help-topic-page { min-height: calc(100vh - 70px); background: #fff; padding: 42px 24px 100px; color: #171717; }
+.help-topic-inner { max-width: 760px; margin: 0 auto; }
+.help-breadcrumb { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 24px; color: #667085; font-size: 13px; }
+.help-breadcrumb a { color: #0071e3; text-decoration: none; }
+.help-topic-page h1 { margin: 0 0 22px; font-size: 28px; line-height: 1.2; letter-spacing: -.02em; }
+.help-topic-card { background: #fff; border-radius: 8px; padding: 24px 28px 0; box-shadow: 0 5px 18px rgba(20,32,48,.08); }
+.help-topic-list-card { overflow: hidden; background: #fff; border-radius: 8px; box-shadow: 0 5px 18px rgba(20,32,48,.08); }
+.help-topic-list-card a { display: flex; justify-content: space-between; gap: 16px; padding: 18px 16px; border-bottom: 1px solid #e5e7eb; color: #202124; font-size: 15px; text-decoration: none; }
+.help-topic-list-card a:last-child { border-bottom: 0; }
+.help-topic-list-card a:hover { background: #f5f9ff; color: #0071e3; }
+.help-topic-list-card a span:last-child { color: #0071e3; font-size: 22px; line-height: 1; }
+.help-topic-card p { margin: 0 0 18px; font-size: 16px; line-height: 1.5; }
+.help-feedback { display: flex; align-items: center; gap: 12px; margin-top: 62px; padding: 22px 0 24px; border-top: 1px solid #e5e7eb; }
+.help-feedback strong { font-size: 14px; margin-right: 4px; }
+.help-feedback button { display: grid; place-items: center; padding: 4px; border: 0; background: transparent; color: #0071e3; cursor: pointer; }
+@media (max-width: 640px) { .help-topic-page { padding: 28px 16px 64px; } .help-topic-card { padding: 22px 18px 0; } .help-topic-page h1 { font-size: 26px; } .help-topic-card p { font-size: 17px; line-height: 1.65; margin-bottom: 22px; } .help-breadcrumb { font-size: 14px; line-height: 1.5; } .help-feedback { margin-top: 42px; padding: 24px 0 26px; } }

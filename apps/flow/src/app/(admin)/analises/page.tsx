@@ -54,9 +54,9 @@ export default function AnalisesPage() {
     }
   })
 
-  const orders = rawData?.orders || []
-  const products = rawData?.products || []
-  const orderItems = rawData?.orderItems || []
+  const orders = useMemo(() => rawData?.orders || [], [rawData?.orders])
+  const products = useMemo(() => rawData?.products || [], [rawData?.products])
+  const orderItems = useMemo(() => rawData?.orderItems || [], [rawData?.orderItems])
 
   // Calculated metrics
   const profitMetrics = useMemo(() => calculateRealProfit(orders), [orders])

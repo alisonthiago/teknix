@@ -47,6 +47,7 @@ const icons: Record<string, React.ReactElement> = {
 export default function HubLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [showUserDropdown, setShowUserDropdown] = useState(false)
+  const [showNotifications, setShowNotifications] = useState(false)
   const location = useLocation()
 
   const { can, canAccessRoute, role, isMaster } = usePermissions()
@@ -98,6 +99,13 @@ export default function HubLayout() {
     { icon: 'plusLogo', label: 'Ver Todas', path: '/hub/integracoes' },
   ]
 
+  // Mantém o menu lateral compacto; a página de Integrações continua
+  // reunindo todos os canais pelo item "Ver Todas".
+  const compactIntegrationMenuItems = [
+    ...integrationMenuItems.slice(0, 2),
+    integrationMenuItems[integrationMenuItems.length - 1],
+  ]
+
   // ─── menuItems do HUB (Filtrados por Permissão Real) ──────────────────────
   interface MenuItemDef {
     icon: string
@@ -137,7 +145,7 @@ export default function HubLayout() {
     },
     {
       section: 'Integrações',
-      items: can('integrations.view') ? integrationMenuItems : []
+      items: can('integrations.view') ? compactIntegrationMenuItems : []
     },
     {
       section: 'Conteúdo',
@@ -256,7 +264,7 @@ export default function HubLayout() {
                   type="button"
                   className="flow-pill-btn"
                   title="Notificações e Alertas"
-                  onClick={() => alert('37 notificações pendentes (Pedidos, estoque e sincronização em dia)')}
+                  onClick={() => { setShowNotifications(!showNotifications); setShowUserDropdown(false) }}
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" width="18" height="18">
                     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
@@ -264,16 +272,6 @@ export default function HubLayout() {
                   </svg>
                   <span className="flow-badge-red">37</span>
                 </button>
-
-                {/* Chip de Faturamento / Ao Vivo */}
-                <div
-                  className="flow-live-chip"
-                  title="Faturamento em Tempo Real"
-                  onClick={() => window.open('/ao-vivo', '_blank')}
-                >
-                  <span className="flow-live-dot" />
-                  <span>R$ 0,00</span>
-                </div>
 
                 {/* Usuário logado */}
                 <button
@@ -294,6 +292,25 @@ export default function HubLayout() {
                   </svg>
                 </button>
               </div>
+
+              {showNotifications && (
+                <div className="flow-notification-dropdown" onClick={e => e.stopPropagation()}>
+                  <div className="flow-notification-header">
+                    <strong>Alertas & Mercado Livre</strong>
+                    <span>37 novas</span>
+                  </div>
+                  <div className="flow-notification-list">
+                    {['Nova venda recebida no Mercado Livre', 'Pedido atualizado no sistema', 'Sincronização concluída com sucesso'].map((message, index) => (
+                      <div className="flow-notification-item" key={message}>
+                        <div className="flow-notification-icon">✓</div>
+                        <div><strong>{message}</strong><small>{index + 1}h atrás</small></div>
+                        <i />
+                      </div>
+                    ))}
+                  </div>
+                  <Link to="/hub/notificacoes" onClick={() => setShowNotifications(false)} className="flow-notification-footer">Ver histórico completo de notificações →</Link>
+                </div>
+              )}
 
               {showUserDropdown && (
                 <div className="flow-user-dropdown" onClick={() => setShowUserDropdown(false)}>

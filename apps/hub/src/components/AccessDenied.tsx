@@ -20,7 +20,7 @@ export default function AccessDenied({
       minHeight: '400px',
       padding: '40px 20px',
       textAlign: 'center',
-      fontFamily: "'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+      fontFamily: "'Roboto', Arial, sans-serif"
     }}>
       <div style={{
         width: 64,

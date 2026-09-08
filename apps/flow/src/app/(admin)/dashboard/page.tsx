@@ -141,7 +141,7 @@ export default function DashboardPage() {
             )}
           </div>
           <div>
-              <h1 className="text-[32px] font-bold text-[#333]">Olá, {userProfile.name}</h1>
+              <h1 className="text-[32px] font-bold text-[#333]">Olá, {userProfile.name?.split(' ')[0]}</h1>
             <p className="text-[13px] text-[#666] font-medium">Bem-vindo de volta!</p>
           </div>
         </div>
@@ -153,7 +153,7 @@ export default function DashboardPage() {
           <Filter className="w-4 h-4" />
           <span className="font-medium">Filtros</span>
         </div>
-        <div className="flex flex-wrap items-center gap-2 flex-1">
+        <div className="grid grid-cols-2 sm:flex items-center gap-2 flex-1">
           <select
             value={selectedMarketplace}
             onChange={e => {
@@ -182,7 +182,7 @@ export default function DashboardPage() {
           <select
             value={period}
             onChange={e => setPeriod(e.target.value)}
-            className="w-full sm:w-auto px-3 py-2.5 sm:py-1.5 border border-[#e6e6e6] rounded-md text-xs text-[#333] bg-white focus:outline-none focus:border-[#1f2328] min-h-[44px]"
+            className="col-span-2 w-full sm:col-span-1 sm:w-auto px-3 py-2.5 sm:py-1.5 border border-[#e6e6e6] rounded-md text-xs text-[#333] bg-white focus:outline-none focus:border-[#1f2328] min-h-[44px]"
           >
             <option value="7">Últimos 7 dias</option>
             <option value="30">Últimos 30 dias</option>
@@ -334,7 +334,7 @@ export default function DashboardPage() {
                 <div
                   key={order.id as string}
                   onClick={() => router.push(`/pedidos/${order.id}`)}
-                  className="py-4 px-3 sm:py-5 sm:px-4 hover:bg-[#fafafa] rounded-xl transition-all cursor-pointer flex items-center gap-3 sm:gap-3.5 group"
+                  className="py-5 px-3 sm:py-6 sm:px-4 hover:bg-[#fafafa] rounded-xl transition-all cursor-pointer flex items-center gap-3 sm:gap-3.5 group"
                 >
                   {/* Foto */}
                   <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-[#f5f5f5] border border-[#e6e6e6] p-1 flex items-center justify-center shrink-0 overflow-hidden">

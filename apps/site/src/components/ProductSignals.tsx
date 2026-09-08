@@ -79,17 +79,16 @@ export default function ProductSignals({ data, overlay = false }: { data?: Produ
         OFERTA IMPERDÍVEL
       </span>
     )
-  } else if (data.badge === 'daily' || (data.demo && !data.badge && !overlay)) {
+  } else if (data.badge === 'daily') {
     singleBadge = <span className="product-signal offer">OFERTA DO DIA</span>
   } else if (data.stock === 1) {
     singleBadge = <span className="product-signal last-unit">ÚLTIMA UNIDADE</span>
   }
 
-  if (!singleBadge && !data.demo) return null
+  if (!singleBadge) return null
 
   return (
-    <div className={`product-signals ${overlay ? 'image-signals' : ''}`} aria-label={data.demo ? 'Selos ilustrativos' : 'Destaques do produto'}>
-      {data.demo && !overlay && !singleBadge && <small className="product-signals-demo">Exemplos de selos</small>}
+    <div className={`product-signals ${overlay ? 'image-signals' : ''}`} aria-label="Destaques do produto">
       {singleBadge}
     </div>
   )

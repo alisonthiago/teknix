@@ -155,7 +155,7 @@ export default function LiveMonitorDrawer({ open, onClose }: LiveMonitorDrawerPr
       <div className="relative z-10 w-full max-w-md bg-[#f5f5f7] h-full shadow-2xl flex flex-col overflow-hidden border-l border-[#e6e6e6] animate-in slide-in-from-right duration-300">
         
         {/* Header do Drawer */}
-        <div className="bg-[#B5F500] px-5 py-4 border-b border-[#a2e000] flex items-center justify-between shrink-0">
+        <div className="bg-white px-5 py-4 border-b border-[#e6e6e6] flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5">
             <span className="relative flex h-3 w-3">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#e74c3c] opacity-75"></span>
@@ -169,14 +169,14 @@ export default function LiveMonitorDrawer({ open, onClose }: LiveMonitorDrawerPr
            <div className="flex items-center gap-2">
              <button
                onClick={() => refetch()}
-               className="p-2 rounded-lg hover:bg-black/10 text-[#333] transition-all active:scale-95"
+               className="p-2 rounded-lg bg-white border border-[#e2e2e2] hover:bg-[#f5f5f5] text-[#111] transition-all active:scale-95"
                title="Atualizar dados"
              >
                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
              </button>
              <button
                onClick={onClose}
-               className="p-2 rounded-lg hover:bg-black/10 text-[#333] transition-all active:scale-95"
+               className="p-2 rounded-lg bg-white border border-[#e2e2e2] hover:bg-[#f5f5f5] text-[#111] transition-all active:scale-95"
              >
                <X className="w-5 h-5" />
              </button>
@@ -354,7 +354,7 @@ export default function LiveMonitorDrawer({ open, onClose }: LiveMonitorDrawerPr
           <Link
             href="/ao-vivo"
             onClick={onClose}
-            className="w-full py-3 bg-[#16a34a] hover:bg-[#15803d] text-white text-[13px] font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all text-center"
+            className="w-full py-3 bg-[#347ff2] hover:bg-[#2469d8] text-white text-[13px] font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all text-center"
           >
             <span>Ver Painel Completo ao Vivo</span>
             <ArrowRight className="w-4 h-4" />

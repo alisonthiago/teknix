@@ -70,7 +70,7 @@
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: #eff6ff;
+  background: #f8fafc;
   color: #2563eb;
   font-weight: 800;
   font-size: 0.8rem;
@@ -295,7 +295,7 @@
 .coupon-code-pill {
   font-family: monospace;
   font-weight: 700;
-  background: #eff6ff;
+  background: #f8fafc;
   color: #1d4ed8;
   padding: 3px 8px;
   border-radius: 6px;

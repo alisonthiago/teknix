@@ -406,7 +406,7 @@
 /* ── Dropzone e Vídeos ── */
 .upload-dropzone.is-dragging {
   border-color: #2563eb;
-  background: #eff6ff;
+  background: #f8fafc;
 }
 
 .upload-dropzone.is-uploading {
@@ -907,3 +907,115 @@
   color: #0f172a;
   border-color: #cbd5e1;
 }
+
+/* ============================================================
+   TEKNIX HUB — ABAS E EDITOR DE STORYTELLING (1:1 APPLE STORE)
+   ============================================================ */
+
+.product-form-tabs-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 6px 0 12px;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 8px;
+}
+
+.product-form-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #e2e8f0;
+  padding: 4px;
+  border-radius: 10px;
+}
+
+.product-form-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #475569;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  font-family: inherit;
+}
+
+.product-form-tab-btn:hover {
+  color: #0f172a;
+}
+
+.product-form-tab-btn.active {
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.tab-pill-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #f43f5e, #e11d48);
+  color: #ffffff;
+}
+
+.product-form-tab-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-smart-ai {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  color: #ffffff;
+  border: none;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
+  transition: all 0.2s ease;
+}
+
+.btn-smart-ai:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.btn-tab-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-tab-link:hover {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+

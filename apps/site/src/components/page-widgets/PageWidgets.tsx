@@ -7,12 +7,24 @@ import { renderDynamicIcon } from '../IconPickerModal'
 import { useFlowContext } from './FlowContext'
 
 const Context = createContext<{ edits: WidgetEdits; register: (widget: WidgetDescriptor) => () => void; select: (id: string, global?:boolean) => void; preview: boolean; scope: string; width: number; selected: string } | null>(null)
+export const ProductContext = createContext<any>(null)
+export function useProductContext() { return useContext(ProductContext) }
+
 const hubOrigin = getHubOrigin(import.meta.env.VITE_HUB_URL)
-export function PageWidgets({scope,children}:{scope:string;children:ReactNode}){const parent=useContext(Context);return parent?.scope===scope?<>{children}</>:<PageWidgetsProvider scope={scope}>{children}</PageWidgetsProvider>}
-function PageWidgetsProvider({ scope, children }: { scope: string; children: ReactNode }) {
+export function PageWidgets({scope,product,children}:{scope:string;product?:any;children:ReactNode}){
+  const parent=useContext(Context)
+  return parent?.scope===scope
+    ? <ProductContext.Provider value={product}>{children}</ProductContext.Provider>
+    : <PageWidgetsProvider scope={scope} product={product}>{children}</PageWidgetsProvider>
+}
+
+function PageWidgetsProvider({ scope, product, children }: { scope: string; product?: any; children: ReactNode }) {
   const [edits, setEdits] = useState<WidgetEdits>({})
   const [width, setWidth] = useState(window.innerWidth)
   const [selected,setSelected]=useState('')
+  const [activeProduct, setActiveProduct] = useState<any>(product)
+  useEffect(() => { setActiveProduct(product) }, [product])
+
   useEffect(() => { const resize = () => setWidth(window.innerWidth); window.addEventListener('resize', resize); return () => window.removeEventListener('resize', resize) }, [])
   const registry = useRef(new Map<string, WidgetDescriptor>())
   const preview = typeof window !== 'undefined' && window.parent !== window && new URLSearchParams(window.location.search).get('widgetPreview') === '1'
@@ -41,9 +53,20 @@ function PageWidgetsProvider({ scope, children }: { scope: string; children: Rea
 
   useEffect(() => {
     let cancelled = false
-    let query = supabase.from('pages').select('page_styles').eq('status', 'published')
-    query = scope === 'native:/' ? query.in('slug',['/','']).limit(1) : scope.startsWith('page:') ? query.eq('id', scope.slice(5)) : query.eq('slug', scopeSlug(scope))
-    query.maybeSingle().then(({ data }) => {
+    async function loadScopeStyles() {
+      let query = supabase.from('pages').select('page_styles').eq('status', 'published')
+      query = scope === 'native:/' ? query.in('slug',['/','']).limit(1) : scope.startsWith('page:') ? query.eq('id', scope.slice(5)) : query.eq('slug', scopeSlug(scope))
+      let res = await query.maybeSingle()
+      let data = res.data
+
+      // Herança de Produto: se for scope product e não houver override publicado, carrega o template padrão product:default
+      if (!data && scope.startsWith('product:') && scope !== 'product:default') {
+        const fallbackRes = await supabase.from('pages').select('page_styles').eq('status', 'published').eq('slug', scopeSlug('product:default')).maybeSingle()
+        if (fallbackRes.data) {
+          data = fallbackRes.data
+        }
+      }
+
       if (cancelled) return
       if (!preview && data) {
         const raw = data.page_styles?.published_snapshot_v2?.page?.page_styles || data.page_styles?.published_snapshot_v2?.page_styles || data.page_styles
@@ -53,7 +76,8 @@ function PageWidgetsProvider({ scope, children }: { scope: string; children: Rea
         }
         setEdits(parsed || {})
       }
-    })
+    }
+    loadScopeStyles()
     return () => { cancelled = true }
   }, [scope, preview])
   useEffect(() => {
@@ -177,7 +201,14 @@ function PageWidgetsProvider({ scope, children }: { scope: string; children: Rea
     if (preview) window.parent.postMessage({ type: 'teknix:select', scope, id, global }, hubOrigin)
   }, [preview, scope])
   const value = useMemo(() => ({ edits, register, select, preview, scope, width, selected }), [edits, register, select, preview, scope, width, selected])
-  return <Context.Provider value={value}>{preview && <style>{`[data-widget-key]:hover:not(:has([data-widget-key]:hover)){outline:1px solid #db468e;outline-offset:2px;cursor:pointer}[data-editor-selected="true"],[data-editor-selected="true"] > :first-child{outline:1px solid #db468e;outline-offset:2px}`}</style>}{children}</Context.Provider>
+  return (
+    <Context.Provider value={value}>
+      <ProductContext.Provider value={activeProduct}>
+        {preview && <style>{`[data-widget-key]:hover:not(:has([data-widget-key]:hover)){outline:1px solid #db468e;outline-offset:2px;cursor:pointer}[data-editor-selected="true"],[data-editor-selected="true"] > :first-child{outline:1px solid #db468e;outline-offset:2px}`}</style>}
+        {children}
+      </ProductContext.Provider>
+    </Context.Provider>
+  )
 }
 export function usePageWidgetState() { return useContext(Context) }
 export function useWidgetEdit(id: string, globalKey?: string) {
@@ -199,6 +230,15 @@ function extractTextFromChildren(node: any): string {
   return ''
 }
 
+// A rendered React tree is only a source of editable text for semantic text
+// widgets.  Composite widgets (product price, cards, sliders, etc.) must keep
+// their structured content; flattening their children here destroys it when
+// the editor registers the widget.
+function isTextWidget(as: any, widgetType?: string): boolean {
+  if (['heading', 'text', 'paragraph', 'rich_text', 'title'].includes(String(widgetType || ''))) return true
+  return as === 'p' || as === 'span' || as === 'label' || /^h[1-6]$/.test(String(as))
+}
+
 /** Keeps the original HTML tag, classes, handlers and live commerce behavior. */
 export function Editable({ as = 'div', widgetId, label, children, content, style, editorKind, editorSchema, globalKey, productId, widgetType, locked=false, renderContent = true, ...props }: {
   globalKey?:string;productId?:string;widgetType?:string;locked?:boolean;renderContent?: boolean; editorKind?: 'widget' | 'section' | 'container'; editorSchema?: Record<string,any>; as?: any; widgetId: string; label?: string; children?: ReactNode; content?: Record<string, unknown>; style?: CSSProperties; [key: string]: any
@@ -213,13 +253,18 @@ export function Editable({ as = 'div', widgetId, label, children, content, style
   const matchedEdit = ctx?.edits[widgetId] || (token ? ctx?.edits[token] : undefined)
   const edit = globalBase || matchedEdit ? mergeWidgetEdit(globalBase, matchedEdit) : undefined
   const width = ctx?.width || window.innerWidth
-  const extractedText = extractTextFromChildren(children)
-  const rawBase: Record<string, unknown> = content || (as === 'img' ? { src: props.src || '', alt: props.alt || '' } : extractedText ? { text: extractedText } : typeof children === 'string' || typeof children === 'number' ? { text: String(children) } : {})
+  const canInferText = isTextWidget(as, widgetType)
+  const extractedText = canInferText ? extractTextFromChildren(children) : ''
+  const rawBase: Record<string, unknown> = content || (as === 'img' ? { src: props.src || '', alt: props.alt || '' } : canInferText && extractedText ? { text: extractedText } : {})
   const signature = JSON.stringify(rawBase)
   const base: Record<string, unknown> = useMemo(() => JSON.parse(signature), [signature])
   const register = ctx?.register
   const widgetLabel = label || `${({ img: 'Imagem', input: 'Campo', textarea: 'Campo de texto', label: 'Rótulo', h1: 'Título principal', h2: 'Título', h3: 'Subtítulo', p: 'Texto', button: 'Botão', section: 'Área', div: 'Área', span: 'Texto' } as Record<string, string>)[as] || as}: ${String(base.text || base.alt || props.id || widgetId).slice(0, 65)}`
-  useEffect(() => register?.({ id: widgetId, label: widgetLabel, content: base, kind:editorKind, globalKey, productId, regionId: flow?.regionId, widgetType:widgetType || (as === 'img' ? 'image' : /^h[1-6]$/.test(as) ? 'heading' : as === 'button' ? 'button' : 'text') }), [register, widgetId, widgetLabel, base, editorKind, as,globalKey,productId,widgetType,flow?.regionId])
+  // A generic div is a structural wrapper, not a text widget.  Treating it as
+  // text makes the Hub open a textarea for composite renderers whose children
+  // happen to contain readable text.
+  const registeredType = widgetType || (as === 'img' ? 'image' : /^h[1-6]$/.test(as) ? 'heading' : as === 'button' ? 'button' : as === 'p' || as === 'span' || as === 'label' ? 'text' : 'widget')
+  useEffect(() => register?.({ id: widgetId, label: widgetLabel, content: base, kind:editorKind, globalKey, productId, regionId: flow?.regionId, widgetType: registeredType }), [register, widgetId, widgetLabel, base, editorKind, as,globalKey,productId,widgetType,registeredType,flow?.regionId])
   const css = (styles: Record<string, string> = {}) => Object.entries(safeStyle(styles)).map(([key, value]) => `${key.replace(/[A-Z]/g, c => '-' + c.toLowerCase())}:${value} !important`).join(';')
   const responsive = [ ['tablet', 1024], ['mobile', 767] ].map(([mode, width]) => {
     const rules = css(edit?.responsive?.[mode as 'tablet' | 'mobile'])
@@ -235,8 +280,6 @@ export function Editable({ as = 'div', widgetId, label, children, content, style
       onClickCapture: (event: any) => {
         if(locked&&!unlocked){event.preventDefault();event.stopPropagation();ctx.select(widgetId);return}
         if (event.target.closest('[data-widget-key]') !== event.currentTarget) return
-        const control = event.target.closest('button,input,select,textarea')
-        if (control && control !== event.currentTarget) return
         event.preventDefault()
         event.stopPropagation()
         ctx.select(widgetId)
@@ -294,7 +337,7 @@ export function Editable({ as = 'div', widgetId, label, children, content, style
     } else {
       renderedChildren = iconElement
     }
-  } else if (renderContent && typeof editedText === 'string') {
+  } else if (renderContent && isTextWidget(as, widgetType) && typeof editedText === 'string') {
     renderedChildren = editedText
   }
 

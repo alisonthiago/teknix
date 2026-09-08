@@ -223,9 +223,9 @@ function SimulatorTab({ initialProduct, onShare }: { initialProduct?: Product | 
   const activeMpConfig = MARKETPLACE_CONFIG.find(m => m.id === selectedMktId)
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Coluna Esquerda: Entradas de Dados */}
-      <div className="space-y-4">
+      <div className="space-y-5 px-1 sm:px-0">
         {initialProduct && (
           <div className="bg-[#f5f5f5] border border-[#c1d9fd] rounded-xl px-3 py-2 flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -279,7 +279,7 @@ function SimulatorTab({ initialProduct, onShare }: { initialProduct?: Product | 
 
         <div>
           <h3 className="text-sm font-semibold text-[#333] mb-2">Custos Fixos (Valores em R$)</h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 sm:grid-cols-3 gap-3">
             <div>
               <label className="block text-[10px] font-medium text-[#999] mb-1 uppercase tracking-wider">Custo Fornec.</label>
               <input type="number" value={custo || ''} onChange={e => setCusto(+e.target.value)} className="w-full border border-[#e6e6e6] rounded-xl px-3 py-1.5 text-sm outline-none focus:border-[#1f2328] transition-colors text-[#333]" />
@@ -343,7 +343,7 @@ function SimulatorTab({ initialProduct, onShare }: { initialProduct?: Product | 
         ) : (
           <div className="space-y-2.5 flex-1 flex flex-col justify-between">
             {/* 1. Frase Explicativa Clara */}
-            <div className="bg-[#f0fdf4] border border-[#bbf7d0] rounded-xl p-2.5 flex items-center gap-2">
+            <div className="bg-[#f0fdf4] border border-[#bbf7d0] rounded-xl p-4 flex items-center gap-2">
               <div className="w-6 h-6 rounded-full bg-[#16a34a] text-white flex items-center justify-center shrink-0">
                 <Check className="w-3.5 h-3.5" />
               </div>
@@ -483,7 +483,7 @@ MEU LUCRO REAL: ${formatCurrency(lucroLiq)} (Margem: ${margemLiquida}%)
 Vendendo por ${formatCurrency(precoSugerido)}, você ganha ${formatCurrency(lucroLiq)} por venda.`
                   onShare(summary)
                 }}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#111111] hover:bg-[#222222] text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-xs"
+                className="w-full flex items-center justify-center gap-2 px-4 py-4 bg-[#347ff2] hover:bg-[#2469d8] text-white text-sm font-bold rounded-xl transition-all cursor-pointer shadow-xs"
               >
                 <Share2 className="w-3.5 h-3.5" />
                 Compartilhar Precificação

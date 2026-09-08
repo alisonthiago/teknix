@@ -1,0 +1,186 @@
+/* ==============================================================
+   TEKNIX NEWS FOOTER - PADRÃO OFICIAL DEFINITIVO
+   ============================================================== */
+
+footer.page-footer {
+  background: #B5F500 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  padding: 50px 24px 34px !important;
+  font-size: 14px !important;
+  color: #333333 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+footer.page-footer .logo_footer {
+  max-width: 1032px !important;
+  width: 100% !important;
+  margin-bottom: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+footer.page-footer .logo_footer .home-link {
+  display: inline-flex !important;
+  align-items: center !important;
+  text-decoration: none !important;
+}
+
+footer.page-footer .footer-logo-svg {
+  width: 114px !important;
+  max-width: 114px !important;
+  height: auto !important;
+  display: block !important;
+}
+
+footer.page-footer .meli-wrap-wide {
+  height: auto !important;
+  display: block !important;
+  width: 100% !important;
+  max-width: 1032px !important;
+  padding: 0 !important;
+  margin: 0 auto !important;
+}
+
+footer.page-footer .footer-content {
+  width: 100% !important;
+  max-width: 1032px !important;
+}
+
+footer.page-footer .footer-content nav > ul.menu {
+  display: grid !important;
+  grid-template-columns: repeat(6, 1fr) !important;
+  gap: 24px !important;
+  margin: 0 0 40px 0 !important;
+  padding: 0 !important;
+  list-style: none !important;
+}
+
+footer.page-footer .footer-content .menu-item--expanded > a,
+footer.page-footer .footer-content .menu-item--expanded > span {
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  color: #222222 !important;
+  display: inline-block !important;
+  margin-bottom: 14px !important;
+  text-decoration: none !important;
+  transition: color 0.15s ease !important;
+}
+
+footer.page-footer .footer-content .menu-item--expanded > a:hover {
+  color: #000000 !important;
+  text-decoration: underline !important;
+}
+
+footer.page-footer .footer-content .menu-item--expanded ul.menu {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 9px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  list-style: none !important;
+}
+
+footer.page-footer .footer-content .menu-item--expanded ul.menu li {
+  font-size: 13px !important;
+  color: #444444 !important;
+  line-height: 1.35 !important;
+}
+
+footer.page-footer .footer-content .menu-item--expanded ul.menu li a {
+  color: #444444 !important;
+  text-decoration: none !important;
+  transition: color 0.15s ease !important;
+}
+
+footer.page-footer .footer-content .menu-item--expanded ul.menu li a:hover {
+  color: #000000 !important;
+  text-decoration: underline !important;
+}
+
+footer.page-footer .footer-content .menu-item--expanded ul.menu li span {
+  color: #555555 !important;
+}
+
+footer.page-footer .social-networks {
+  display: flex !important;
+  justify-content: flex-end !important;
+  margin-bottom: 28px !important;
+}
+
+footer.page-footer .social-networks-wrapper ul {
+  display: flex !important;
+  gap: 18px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  list-style: none !important;
+}
+
+footer.page-footer .social-networks a {
+  color: #222222 !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+  transition: color 0.15s ease !important;
+}
+
+footer.page-footer .social-networks a:hover {
+  color: #000000 !important;
+  text-decoration: underline !important;
+}
+
+footer.page-footer .legal-footer {
+  border-top: 1px solid rgba(0, 0, 0, 0.15) !important;
+  padding-top: 24px !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  font-size: 12px !important;
+  color: #555555 !important;
+}
+
+footer.page-footer .legal-footer .terms nav {
+  display: flex !important;
+  gap: 18px !important;
+  margin-bottom: 8px !important;
+}
+
+footer.page-footer .legal-footer .terms nav a {
+  color: #444444 !important;
+  text-decoration: underline !important;
+  font-size: 12px !important;
+}
+
+footer.page-footer .legal-footer .terms p {
+  color: #555555 !important;
+  margin: 0 !important;
+  font-size: 12px !important;
+}
+
+/* Responsivo */
+@media screen and (max-width: 1024px) {
+  footer.page-footer .footer-content nav > ul.menu {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 28px !important;
+  }
+}
+
+@media screen and (max-width: 640px) {
+  footer.page-footer {
+    padding: 36px 18px 28px !important;
+  }
+  footer.page-footer .footer-content nav > ul.menu {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 22px !important;
+  }
+  footer.page-footer .social-networks {
+    justify-content: flex-start !important;
+  }
+  footer.page-footer .social-networks-wrapper ul {
+    flex-wrap: wrap !important;
+    gap: 14px !important;
+  }
+}

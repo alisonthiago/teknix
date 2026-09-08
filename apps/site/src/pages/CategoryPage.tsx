@@ -304,7 +304,7 @@ export default function CategoryPage() {
                 <div className={`category-products-grid ${viewMode==='list'?'list-view':''}`}>
                   <EditableFlow id="category-products" label="Produtos da categoria" compact>
                   {paginatedProducts.map((product) => (
-                    <Editable as="div" key={product.id} widgetId={`category-product-${product.id}`} productId={product.id} label={`Produto: ${product.name}`} widgetType="storefrontCard" editorKind="container" renderContent={false} style={{ display: 'contents' }}>
+                    <Editable as="div" key={product.id} widgetId={`category-product-${product.id}`} productId={product.id} label={`Produto: ${product.name}`} widgetType="storefrontCard" editorKind="widget" renderContent={false} style={{ display: 'contents' }}>
                       <StorefrontProductCard
                         to={`/produtos/${encodeURIComponent(product.sku || product.id)}`}
                         product={{

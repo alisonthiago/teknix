@@ -101,9 +101,9 @@ function slugify(text: string) {
 }
 
 function getPageIcon(e: Entry) {
-  if (e.id.includes('chrome:header')) return <PanelTop size={16} color="#0071e3" />
+  if (e.id.includes('chrome:header')) return <PanelTop size={16} color="#1f2328" />
   if (e.id.includes('chrome:footer')) return <PanelBottom size={16} color="#6b7280" />
-  if (e.path === '/') return <Home size={16} color="#0071e3" />
+  if (e.path === '/') return <Home size={16} color="#1f2328" />
   if (e.kind === 'products') return <Package size={16} color="#7c3aed" />
   if (e.id.startsWith('store_categories')) return <FolderTree size={16} color="#059669" />
   if (e.path === '/sacola' || e.path === '/checkout') return <ShoppingCart size={16} color="#f59e0b" />
@@ -307,7 +307,7 @@ export default function PagesList() {
                     variant: 'primary'
                   },
                   style: {
-                    background: '#0071e3',
+                    background: '#1f2328',
                     color: '#ffffff',
                     padding: '12px 28px',
                     borderRadius: '980px',
@@ -414,7 +414,7 @@ export default function PagesList() {
           type="button"
           disabled={busy}
           onClick={openCreateModal}
-          className="pages-primary-btn"
+          className="pages-primary-btn btn-action-primary"
         >
           <Plus size={15} />
           <span>Criar página</span>
@@ -524,7 +524,7 @@ export default function PagesList() {
                   height: 36,
                   borderRadius: 10,
                   background: '#e8f2ff',
-                  color: '#0071e3',
+                  color: '#1f2328',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
@@ -570,7 +570,7 @@ export default function PagesList() {
                 <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12.5, fontWeight: 600, color: '#1d1d1f', marginBottom: 6 }}>
                   <span>Título da Página <span style={{ color: '#ef4444' }}>*</span></span>
                   {dialog.kind === 'create' && autoSlug && (
-                    <span style={{ fontSize: 11, color: '#0071e3', fontWeight: 500 }}>
+                    <span style={{ fontSize: 11, color: '#1f2328', fontWeight: 500 }}>
                       Gerando URL automaticamente
                     </span>
                   )}
@@ -753,7 +753,7 @@ export default function PagesList() {
                           style={{
                             padding: '12px 10px',
                             borderRadius: 10,
-                            border: isSelected ? '2px solid #0071e3' : '1px solid #e5e5ea',
+                            border: isSelected ? '2px solid #1f2328' : '1px solid #e5e5ea',
                             background: isSelected ? '#f5f9ff' : '#ffffff',
                             cursor: 'pointer',
                             transition: 'all 0.15s ease',
@@ -767,7 +767,7 @@ export default function PagesList() {
                               width: 26,
                               height: 26,
                               borderRadius: 6,
-                              background: isSelected ? '#0071e3' : '#f5f5f7',
+                              background: isSelected ? '#1f2328' : '#f5f5f7',
                               color: isSelected ? '#ffffff' : '#6e6e73',
                               display: 'flex',
                               alignItems: 'center',
@@ -775,9 +775,9 @@ export default function PagesList() {
                             }}>
                               <IconComp size={14} />
                             </div>
-                            {isSelected && <Check size={14} color="#0071e3" />}
+                            {isSelected && <Check size={14} color="#1f2328" />}
                           </div>
-                          <div style={{ fontSize: 12, fontWeight: 600, color: isSelected ? '#0071e3' : '#1d1d1f' }}>
+                          <div style={{ fontSize: 12, fontWeight: 600, color: isSelected ? '#1f2328' : '#1d1d1f' }}>
                             {item.title}
                           </div>
                           <div style={{ fontSize: 10.5, color: '#86868b', lineHeight: 1.3 }}>

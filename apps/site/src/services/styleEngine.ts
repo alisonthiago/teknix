@@ -788,6 +788,9 @@ export function resolveDynamicTags(
     customer?: any
     site?: any
     order?: any
+    fallback?: string
+    prefix?: string
+    suffix?: string
   }
 ): string {
   if (typeof template !== 'string') return String(template ?? '')
@@ -795,7 +798,7 @@ export function resolveDynamicTags(
 
   const product = context?.product || {}
   const customer = context?.customer || {}
-  const site = context?.site || { name: 'TEKNIX', url: 'https://teknix.com.br' }
+  const site = context?.site || { name: 'TEKNIX', url: 'https://teknixbrasil.com.br' }
 
   const fmtCurrency = (val: any) => {
     const num = Number(val)
@@ -803,48 +806,68 @@ export function resolveDynamicTags(
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(num)
   }
 
-  const priceNum = Number(product.sale_price ?? product.price ?? 0)
-  const promoPriceNum = Number(product.promotional_price ?? product.promo_price ?? 0)
+  const meta = Array.isArray(product.store_meta) ? product.store_meta[0] : product.store_meta
+  const priceNum = Number(meta?.sale_price ?? product.sale_price ?? product.sell_price ?? product.price ?? product.cost_purchase ?? 0)
+  const promoPriceNum = Number(meta?.promotional_price ?? product.promotional_price ?? product.promo_price ?? 0)
   const isPromo = promoPriceNum > 0 && promoPriceNum < priceNum
   const currentPrice = isPromo ? promoPriceNum : priceNum
   const originalPrice = isPromo ? priceNum : 0
-  const discountPercent = isPromo ? Math.round(((priceNum - promoPriceNum) / priceNum) * 100) : 0
+  const discountPercent = isPromo && priceNum > 0 ? Math.round(((priceNum - promoPriceNum) / priceNum) * 100) : 0
+  const pixPriceNum = currentPrice > 0 ? currentPrice * 0.95 : 0
   const installmentVal = currentPrice > 0 ? (currentPrice / 12).toFixed(2).replace('.', ',') : '0,00'
+  const stockNum = Number(product.stock ?? product.stock_quantity ?? product.inventory_quantity ?? 12)
+  const stockStatus = stockNum > 5 ? 'Em Estoque' : stockNum > 0 ? `Apenas ${stockNum} unidades` : 'Esgotado'
 
   const tags: Record<string, string> = {
     'product.name': product.name || product.title || '',
     'product.title': product.name || product.title || '',
+    'product.subtitle': product.subtitle || product.short_description || '',
     'product.sku': product.sku || '',
+    'product.code': product.sku || product.code || product.id || '',
     'product.price': fmtCurrency(currentPrice || 0),
+    'product.pix_price': fmtCurrency(pixPriceNum || 0),
+    'product.pix_discount': '5% de desconto',
     'product.compare_price': originalPrice > 0 ? fmtCurrency(originalPrice) : fmtCurrency(currentPrice || 0),
     'product.original_price': originalPrice > 0 ? fmtCurrency(originalPrice) : fmtCurrency(currentPrice || 0),
     'product.discount': discountPercent > 0 ? `${discountPercent}% OFF` : '',
+    'product.discount_percent': discountPercent > 0 ? `-${discountPercent}%` : '',
     'product.installments': currentPrice > 0 ? `12x de R$ ${installmentVal} sem juros` : '',
-    'product.stock': product.stock ?? product.stock_quantity ?? '',
+    'product.stock': String(stockNum),
+    'product.stock_status': stockStatus,
     'product.image': product.image_url || (Array.isArray(product.images) ? product.images[0] : '') || '',
     'product.gallery': product.image_url || '',
     'product.description': product.description || '',
-    'product.short_description': product.short_description || '',
-    'product.category': product.category || product.category_name || '',
-    'product.brand': product.brand || '',
-    'product.rating': '',
-    'product.reviews_count': '',
-    'product.shipping': '',
-    'product.availability': '',
-    'product.url': product.slug ? `/produto/${product.slug}` : '',
+    'product.short_description': product.short_description || (product.description ? product.description.slice(0, 160) + '…' : ''),
+    'product.category': product.category || product.category_name || 'Ferramentas',
+    'product.subcategory': product.subcategory || '',
+    'product.brand': product.brand || 'TEKNIX',
+    'product.rating': '4.9',
+    'product.reviews_count': '128',
+    'product.shipping': 'Frete Grátis acima de R$ 199',
+    'product.availability': stockStatus,
+    'product.url': product.slug ? `/${product.slug}` : (product.id ? `/${product.id}` : ''),
     'customer.name': customer.name || '',
     'customer.first_name': customer.name ? customer.name.split(' ')[0] : '',
     'customer.email': customer.email || '',
-    'site.name': site.name || '',
-    'site.url': site.url || '',
-    'site.logo': site.logo || ''
+    'site.name': site.name || 'TEKNIX',
+    'site.url': site.url || 'https://teknixbrasil.com.br',
+    'site.logo': site.logo || '/teknix-logo.svg'
   }
 
-  if (tags[template]) return tags[template]
+  let resolved = tags[template]
+  if (resolved === undefined) {
+    resolved = template.replace(/\{\{\s*([a-zA-Z0-9_.]+)\s*\}\}/g, (_, key) => {
+      return tags[key] !== undefined ? tags[key] : `{{${key}}}`
+    })
+  }
 
-  return template.replace(/\{\{\s*([a-zA-Z0-9_.]+)\s*\}\}/g, (_, key) => {
-    return tags[key] !== undefined ? tags[key] : `{{${key}}}`
-  })
+  if (!resolved && context?.fallback) {
+    resolved = context.fallback
+  }
+
+  const prefix = context?.prefix || ''
+  const suffix = context?.suffix || ''
+  return resolved ? `${prefix}${resolved}${suffix}` : (context?.fallback || '')
 }
 
 // ------------------------------------------------------------

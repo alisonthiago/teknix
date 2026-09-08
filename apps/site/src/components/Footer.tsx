@@ -98,7 +98,7 @@ export default function Footer() {
                 <li><Link to="/produtos">Troca de produtos (Trade In)</Link></li>
                 <li><Link to="/checkout">Financiamento</Link></li>
                 <li><Link to="/minha-conta">Status do pedido</Link></li>
-                <li><Link to="/contato">Ajuda para compras</Link></li>
+                <li><Link to="/ajuda">Ajuda para compras</Link></li>
               </ul>
             </div>
           </div>

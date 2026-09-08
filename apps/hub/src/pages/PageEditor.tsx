@@ -18,7 +18,8 @@ import {
   AlignVerticalJustifyStart, AlignVerticalJustifyCenter, AlignVerticalJustifyEnd, ChevronDown,
   Clock, Share2, MessageSquare, AlertCircle, Activity, PlusCircle, LayoutGrid, List,
   ClipboardList, Lock, PlaySquare, Table, Paintbrush, Download, FolderOpen, Upload, Sparkles,
-  ArrowUp, ArrowDown, CheckCircle2, DollarSign
+  ArrowUp, ArrowDown, CheckCircle2, DollarSign,
+  ShoppingCart, Truck, CreditCard, ShieldCheck, Heart, Award, Hash, MessageCircle
 } from 'lucide-react'
 import { loadEditorTarget, saveEditorTarget, type EditorTarget } from '../services/widgetEditor'
 import {
@@ -73,6 +74,7 @@ const ELEMENTOR_PRO_WIDGETS = [
   { type: 'form', label: 'Form', icon: ClipboardList, desc: 'Formulário Pro' },
   { type: 'login', label: 'Login', icon: Lock, desc: 'Acesso do cliente' },
   { type: 'slides', label: 'Slides', icon: PlaySquare, desc: 'Apresentação de slides' },
+  { type: 'horizontal-menu', label: 'Menu Horizontal da Loja', icon: Menu, desc: 'Departamentos e categorias' },
   { type: 'navMenu', label: 'Menu TEKNIX', icon: Menu, desc: 'Navegação do site' },
   { type: 'shareButtons', label: 'Share Buttons', icon: Share2, desc: 'Compartilhamento' },
 ]
@@ -98,6 +100,36 @@ const ELEMENTOR_STORE_WIDGETS = [
   { type: 'ads', label: 'Espaço de anúncio', icon: Megaphone, desc: 'Campanhas de anúncios' },
   { type: 'categoryMosaic', label: 'Mosaico de categorias', icon: LayoutTemplate, desc: 'Grid 2x2 de categorias' },
   { type: 'flashSaleSection', label: 'Oferta relâmpago', icon: Zap, desc: 'Contador e ofertas' },
+]
+
+const ELEMENTOR_PRODUCT_WIDGETS = [
+  { type: 'productTitle', label: 'Título do Produto', icon: Heading, desc: 'Nome dinâmico do produto' },
+  { type: 'productSubtitle', label: 'Subtítulo do Produto', icon: Type, desc: 'Frase de impacto / linha fina' },
+  { type: 'productPrice', label: 'Preço do Produto', icon: DollarSign, desc: 'Preço regular, pix e parcelas' },
+  { type: 'productDiscount', label: 'Desconto / % OFF', icon: Tag, desc: 'Badge de desconto' },
+  { type: 'productBadge', label: 'Selo / Badge', icon: Award, desc: 'Mais Vendido, Destaque' },
+  { type: 'productGallery', label: 'Galeria do Produto', icon: ImageIcon, desc: 'Fotos interativas' },
+  { type: 'productImage', label: 'Imagem Principal', icon: ImageIcon, desc: 'Imagem única' },
+  { type: 'productShortDescription', label: 'Descrição Curta', icon: AlignLeft, desc: 'Resumo do produto' },
+  { type: 'productDescription', label: 'Descrição Completa', icon: FileText, desc: 'HTML completo do produto' },
+  { type: 'productSpecifications', label: 'Especificações Técnicas', icon: List, desc: 'Tabela de ficha técnica' },
+  { type: 'productFeatures', label: 'Destaques / Benefícios', icon: CheckCircle2, desc: 'Lista de diferenciais' },
+  { type: 'productSku', label: 'SKU / Código', icon: Hash, desc: 'Código do produto' },
+  { type: 'productStock', label: 'Estoque / Disponibilidade', icon: Box, desc: 'Disponibilidade real' },
+  { type: 'productQuantity', label: 'Seletor de Quantidade', icon: PlusCircle, desc: 'Controle de unidades' },
+  { type: 'productVariations', label: 'Variações do Produto', icon: Layers, desc: 'Cores, voltagem, kits' },
+  { type: 'productRating', label: 'Avaliações / Estrelas', icon: Star, desc: 'Média de avaliações' },
+  { type: 'productRatingCount', label: 'Contador de Avaliações', icon: MessageCircle, desc: 'Quantidade de reviews' },
+  { type: 'productBuyButton', label: 'Botão Comprar Agora', icon: ShoppingBag, desc: 'Checkout imediato' },
+  { type: 'productAddToCart', label: 'Botão Adicionar à Sacola', icon: ShoppingCart, desc: 'Adiciona ao minicarrinho' },
+  { type: 'productShipping', label: 'Cálculo de Frete', icon: Truck, desc: 'Simulação de CEP e prazos' },
+  { type: 'productInstallments', label: 'Parcelamento', icon: CreditCard, desc: 'Parcelas no cartão' },
+  { type: 'productPaymentMethods', label: 'Formas de Pagamento', icon: ShieldCheck, desc: 'Pix, Cartão, Boleto' },
+  { type: 'productFavorite', label: 'Botão Favoritar', icon: Heart, desc: 'Lista de desejos' },
+  { type: 'productShare', label: 'Botão Compartilhar', icon: Share2, desc: 'Compartilhar link' },
+  { type: 'productBreadcrumb', label: 'Trilha / Breadcrumb', icon: ChevronRight, desc: 'Hierarquia de categorias' },
+  { type: 'productCarousel', label: 'Carrossel de Produtos', icon: Sliders, desc: 'Produtos relacionados' },
+  { type: 'productGrid', label: 'Grid de Produtos', icon: Grid, desc: 'Grade dinâmica' },
 ]
 
 const PROMO_COLOR_PRESETS = [
@@ -371,6 +403,20 @@ function initialWidgetContent(type: string): Record<string, any> {
           bgType: 'normal',
           iconUrl: '/images/referencias/lixadeira.webp',
           is_cutout: true
+        },
+        {
+          name: 'Macaco',
+          link: '/produtos?q=macaco+hidraulico',
+          bgType: 'normal',
+          iconUrl: '/images/referencias/macaco-hidraulico.webp',
+          is_cutout: true
+        },
+        {
+          name: 'Parafusadeira',
+          link: '/produtos?q=parafusadeira',
+          bgType: 'normal',
+          iconUrl: '/images/referencias/parafusadeira.webp',
+          is_cutout: true
         }
       ]
     }
@@ -411,6 +457,57 @@ function initialWidgetContent(type: string): Record<string, any> {
       searched_columns: 7,
       searched_items: DEFAULT_FOOTER_SEARCHED_ITEMS
     }
+    case 'horizontal-menu': return {
+      source: 'categories',
+      max_items: 6,
+      order_by: 'most_viewed',
+      show_departments_btn: true,
+      departments_btn_text: 'Departamentos',
+      departments_btn_action: 'drawer',
+      show_featured_item: true,
+      featured_item_text: '🏷️ Cupom',
+      featured_item_style: 'badge',
+      featured_item_link: '/cupons',
+      featured_item_bg: '#b5f500',
+      featured_item_color: '#102419',
+      manual_categories: ['Telefonia', 'Eletrodomésticos', 'Tvs e Vídeo', 'Móveis', 'Eletroportáteis', 'Informática', 'Ferramentas'],
+      items: [
+        { label: 'Telefonia', url: '/produtos?q=telefonia' },
+        { label: 'Eletrodomésticos', url: '/produtos?q=eletrodomesticos' },
+        { label: 'Tvs e Vídeo', url: '/produtos?q=tv' },
+        { label: 'Móveis', url: '/produtos?q=moveis' },
+        { label: 'Eletroportáteis', url: '/produtos?q=eletroportateis' },
+        { label: 'Informática', url: '/produtos?q=informatica' },
+        { label: 'Ferramentas', url: '/produtos?q=ferramentas' }
+      ]
+    }
+    case 'productTitle': return { tag: 'h1', prefix: '', suffix: '' }
+    case 'productSubtitle': return { text: '' }
+    case 'productPrice': return { show_original_price: true, show_pix_discount: true, show_installments: true, max_installments: 12 }
+    case 'productDiscount': return {}
+    case 'productBadge': return { text: 'Destaque' }
+    case 'productGallery': return { gallery_layout: 'bottom' }
+    case 'productImage': return {}
+    case 'productShortDescription': return {}
+    case 'productDescription': return { title: 'Descrição do Produto' }
+    case 'productSpecifications': return { title: 'Especificações Técnicas' }
+    case 'productFeatures': return { title: 'Destaques e Benefícios' }
+    case 'productSku': return { prefix: 'SKU: ' }
+    case 'productStock': return { in_stock_text: 'Em estoque para envio imediato', out_of_stock_text: 'Produto Indisponível' }
+    case 'productQuantity': return {}
+    case 'productVariations': return {}
+    case 'productRating': return {}
+    case 'productRatingCount': return { text: 'avaliações' }
+    case 'productBuyButton': return { text: 'Comprar Agora', full_width: true, bg_color: '#0071e3', text_color: '#ffffff' }
+    case 'productAddToCart': return { text: 'Adicionar à Sacola', full_width: true, bg_color: '#f5f5f7', text_color: '#1d1d1f' }
+    case 'productShipping': return { title: 'Calcular frete e prazo de entrega' }
+    case 'productInstallments': return { max_installments: 12 }
+    case 'productPaymentMethods': return {}
+    case 'productFavorite': return { text: 'Favoritar' }
+    case 'productShare': return { text: 'Compartilhar' }
+    case 'productBreadcrumb': return {}
+    case 'productCarousel': return { title: 'Produtos Relacionados', filter: 'all', limit: 8 }
+    case 'productGrid': return { product_columns: 4, product_limit: 8 }
     default: return { title: 'Novo Bloco TEKNIX', text: 'Descrição do bloco configurável no painel.' }
   }
 }
@@ -454,6 +551,8 @@ export default function PageEditor() {
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(true)
   const [publishMenuOpen, setPublishMenuOpen] = useState(false)
+  const [showProductSaveModal, setShowProductSaveModal] = useState(false)
+  const [productSaveOption, setProductSaveOption] = useState<'individual' | 'global_default'>('individual')
   const publishDropdownRef = useRef<HTMLDivElement>(null)
   const [copiedStyles, setCopiedStyles] = useState<{ schema?: Record<string, any>; style?: Record<string, any> } | null>(null)
   const [contextMenu, setContextMenu] = useState<{
@@ -494,7 +593,8 @@ export default function PageEditor() {
     custom: false,
     pro: false,
     general: false,
-    store: true
+    store: true,
+    product: true
   })
   const toggleCat = (k: string) => setOpenCats(prev => ({ ...prev, [k]: !prev[k] }))
 
@@ -836,7 +936,11 @@ export default function PageEditor() {
 
       // Se o usuário arrastou um widget fora de qualquer contêiner na raiz do layout:
       // Cria automaticamente o contêiner e insere o widget dentro
-      if (!isStructureWidget && !targetHasParentContainer && (!isInside || !targetIsContainer)) {
+      // Only auto-wrap a genuinely root-level drop.  If the pointer is over a
+      // valid container, keep that container as the destination; otherwise a
+      // new wrapper is incorrectly nested inside it.
+      const needsAutoWrap = !isStructureWidget && !targetNode && !isInside
+      if (needsAutoWrap) {
         const autoContainer: CanvasNode = {
           id: crypto.randomUUID(),
           label: 'Contêiner',
@@ -1419,8 +1523,33 @@ export default function PageEditor() {
     return () => window.removeEventListener('keydown', key)
   }, [target, edits, saving, history.length])
 
+  async function executeProductSave(scopeType: 'individual' | 'global_default', publish = true) {
+    setShowProductSaveModal(false)
+    if (!target) return
+    setSaving(true); setError(''); setMessage('')
+    try {
+      if (scopeType === 'global_default') {
+        const productDefaultTarget = await loadEditorTarget('template', 'product:default')
+        await saveEditorTarget(productDefaultTarget, localEdits, publish)
+        setMessage(publish ? 'Modelo padrão publicado para todos os produtos da loja com sucesso!' : 'Rascunho do modelo padrão salvo com sucesso!')
+      } else {
+        await saveEditorTarget(target, localEdits, publish)
+        setMessage(publish ? 'Personalização exclusiva deste produto publicada com sucesso!' : 'Rascunho deste produto salvo com sucesso!')
+      }
+    } catch (e: any) {
+      setError(e.message || 'Erro ao salvar produto.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
   async function save(publish = false, scopeOverride?: 'local' | 'global') {
     if (!target || saving) return
+    const isProd = target.scope.startsWith('product:') || kind === 'product' || targetId.includes('/produto')
+    if (publish && isProd && target.scope !== 'product:default' && !scopeOverride) {
+      setShowProductSaveModal(true)
+      return
+    }
     const currentScope = scopeOverride || editScope
     if (scopeOverride && scopeOverride !== editScope) {
       setEditScope(scopeOverride)
@@ -1499,6 +1628,12 @@ export default function PageEditor() {
 
   function getWidgetType(w?: WidgetDescriptor): string {
     if (!w) return ''
+    if (w.id === 'chrome:header:departments-nav' || w.id.includes('departments-nav') || w.widgetType === 'horizontal-menu' || w.widgetType === 'navMenu') return 'horizontal-menu'
+    if (w.widgetType && w.widgetType.startsWith('product')) return w.widgetType
+    if (w.id.startsWith('product-') || w.id.startsWith('productTitle') || w.id.startsWith('productPrice')) {
+      const found = ELEMENTOR_PRODUCT_WIDGETS.find(p => w.id.startsWith(p.type))
+      if (found) return found.type
+    }
     if (w.id === 'chrome:header' || w.widgetType === 'header') return 'chrome:header'
     if (w.id === 'chrome:footer' || w.widgetType === 'footer') return 'chrome:footer'
     if (w.widgetType === 'layoutRegion') return 'container'
@@ -1522,6 +1657,35 @@ export default function PageEditor() {
     if (!w) return 'Elemento'
     const type = getWidgetType(w)
     switch (type) {
+      case 'horizontal-menu':
+      case 'navMenu': return 'Menu Horizontal da Loja'
+      case 'productTitle': return 'Título do Produto'
+      case 'productSubtitle': return 'Subtítulo do Produto'
+      case 'productPrice': return 'Preço do Produto'
+      case 'productDiscount': return 'Desconto / % OFF'
+      case 'productBadge': return 'Selo / Badge do Produto'
+      case 'productGallery': return 'Galeria de Fotos'
+      case 'productImage': return 'Imagem Principal'
+      case 'productShortDescription': return 'Descrição Curta'
+      case 'productDescription': return 'Descrição Completa'
+      case 'productSpecifications': return 'Especificações Técnicas'
+      case 'productFeatures': return 'Destaques / Benefícios'
+      case 'productSku': return 'SKU / Código'
+      case 'productStock': return 'Estoque / Disponibilidade'
+      case 'productQuantity': return 'Seletor de Quantidade'
+      case 'productVariations': return 'Variações do Produto'
+      case 'productRating': return 'Avaliações / Estrelas'
+      case 'productRatingCount': return 'Contador de Avaliações'
+      case 'productBuyButton': return 'Botão Comprar Agora'
+      case 'productAddToCart': return 'Botão Adicionar à Sacola'
+      case 'productShipping': return 'Cálculo de Frete'
+      case 'productInstallments': return 'Parcelamento'
+      case 'productPaymentMethods': return 'Formas de Pagamento'
+      case 'productFavorite': return 'Botão Favoritar'
+      case 'productShare': return 'Botão Compartilhar'
+      case 'productBreadcrumb': return 'Trilha / Breadcrumb'
+      case 'productCarousel': return 'Carrossel de Produtos'
+      case 'productGrid': return 'Grid de Produtos'
       case 'heading': return 'Título'
       case 'text': return 'Editor de texto'
       case 'image': return 'Imagem'
@@ -1783,35 +1947,7 @@ export default function PageEditor() {
                             </div>
                           )}
 
-                          {/* 3. WIDGET PERSONALIZADO */}
-                          {(!search || 'personalizado custom widget'.includes(search.toLowerCase())) && (
-                            <div id="elementor-panel-category-custom-widgets" className={`elementor-panel-category ${openCats.custom ? 'elementor-active' : ''}`}>
-                              <div
-                                role="button"
-                                tabIndex={0}
-                                className="elementor-panel-heading elementor-panel-category-title"
-                                onClick={() => toggleCat('custom')}
-                                onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleCat('custom') } }}
-                              >
-                                <span className="elementor-panel-heading-toggle">
-                                  <ChevronRight size={14} style={{ transform: openCats.custom ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s' }} />
-                                </span>
-                                <span className="elementor-panel-heading-title">Widget personalizado</span>
-                                <button type="button" className="elementor-panel-custom-widgets__cta" onClick={e => { e.stopPropagation(); showNotice('Módulo de Widgets Personalizados') }}>
-                                  Experimente gratuitamente
-                                </button>
-                              </div>
-                              {openCats.custom && (
-                                <div className="elementor-panel-category-items elementor-responsive-panel" style={{ display: 'block' }}>
-                                  <div className="elementor-panel-category-custom-widgets-empty">
-                                    <p style={{ margin: 0 }}>Crie widgets personalizados, descrevendo o que você precisa.</p>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          )}
-
-                          {/* 4. PRO */}
+                          {/* 3. PRO */}
                           {(!search || ELEMENTOR_PRO_WIDGETS.some(w => w.label.toLowerCase().includes(search.toLowerCase()))) && (
                             <div id="elementor-panel-category-pro-elements" className={`elementor-panel-category ${openCats.pro ? 'elementor-active' : ''}`}>
                               <button
@@ -1905,6 +2041,45 @@ export default function PageEditor() {
                               {openCats.store && (
                                 <div className="elementor-panel-category-items elementor-responsive-panel">
                                   {ELEMENTOR_STORE_WIDGETS.filter(w => !search || w.label.toLowerCase().includes(search.toLowerCase())).map(w => {
+                                    const IconComponent = w.icon
+                                    return (
+                                      <div key={w.type} className="elementor-element-wrapper">
+                                        <button
+                                          type="button"
+                                          className="elementor-element"
+                                          data-library-element-type={w.type}
+                                          draggable
+                                          onDragStart={e => handleWidgetDragStart(e, w.type)}
+                                          onDragEnd={handleWidgetDragEnd}
+                                          onClick={() => addWidget(w.type)}
+                                        >
+                                          <div className="icon"><IconComponent size={22} /></div>
+                                          <div className="title-wrapper"><div className="title">{w.label}</div></div>
+                                        </button>
+                                      </div>
+                                    )
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* 7. WIDGETS DE PRODUTO / THEME BUILDER */}
+                          {(!search || ELEMENTOR_PRODUCT_WIDGETS.some(w => w.label.toLowerCase().includes(search.toLowerCase()))) && (
+                            <div id="elementor-panel-category-product" className={`elementor-panel-category ${openCats.product ? 'elementor-active' : ''}`}>
+                              <button
+                                type="button"
+                                className="elementor-panel-heading elementor-panel-category-title"
+                                onClick={() => toggleCat('product')}
+                              >
+                                <span className="elementor-panel-heading-toggle">
+                                  <ChevronRight size={14} style={{ transform: openCats.product ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s' }} />
+                                </span>
+                                <span className="elementor-panel-heading-title">Produto (Theme Builder)</span>
+                              </button>
+                              {openCats.product && (
+                                <div className="elementor-panel-category-items elementor-responsive-panel">
+                                  {ELEMENTOR_PRODUCT_WIDGETS.filter(w => !search || w.label.toLowerCase().includes(search.toLowerCase())).map(w => {
                                     const IconComponent = w.icon
                                     return (
                                       <div key={w.type} className="elementor-element-wrapper">
@@ -4990,6 +5165,408 @@ export default function PageEditor() {
                           <ElementorSliderControl label="Altura" value={c.height ?? 400} min={100} max={1000} onChange={height => patch({ content: { height } })} />
                         </ElementorAccordion>}
 
+                        {/* WIDGET: MENU HORIZONTAL DA LOJA */}
+                        {widgetType === 'horizontal-menu' && (() => {
+                          const items: any[] = Array.isArray(c.items) && c.items.length > 0 ? c.items : [
+                            { label: 'Telefonia', url: '/produtos?q=telefonia' },
+                            { label: 'Eletrodomésticos', url: '/produtos?q=eletrodomesticos' },
+                            { label: 'Tvs e Vídeo', url: '/produtos?q=tv' },
+                            { label: 'Móveis', url: '/produtos?q=moveis' },
+                            { label: 'Eletroportáteis', url: '/produtos?q=eletroportateis' },
+                            { label: 'Informática', url: '/produtos?q=informatica' },
+                            { label: 'Ferramentas', url: '/produtos?q=ferramentas' }
+                          ]
+                          const manualCats: string[] = Array.isArray(c.manual_categories) ? c.manual_categories : [
+                            'Telefonia', 'Eletrodomésticos', 'Tvs e Vídeo', 'Móveis', 'Eletroportáteis', 'Informática', 'Ferramentas'
+                          ]
+                          const availableCats = [
+                            'Telefonia', 'Eletrodomésticos', 'Tvs e Vídeo', 'Móveis', 'Eletroportáteis',
+                            'Informática', 'Ferramentas', 'Ferramentas Elétricas', 'Jardinagem', 'Automotivo',
+                            'Construção', 'Iluminação', 'Segurança', 'Climatização'
+                          ]
+                          const openIdx = openRepeaterIndex[selected] !== undefined ? openRepeaterIndex[selected] : 0
+
+                          return (
+                            <>
+                              <ElementorAccordion title="Configuração dos Itens" icon={Menu} isOpen={openSections.c_hmenu_items !== false} onToggle={() => toggleSection('c_hmenu_items')}>
+                                <ControlRow label="Fonte dos Itens" description="De onde virão os departamentos do menu">
+                                  <select value={String(c.source || 'categories')} onChange={e => patch({ content: { source: e.target.value } })}>
+                                    <option value="categories">Todas as Categorias do Catálogo</option>
+                                    <option value="featured">Categorias em Destaque</option>
+                                    <option value="subcategories">Subcategorias</option>
+                                    <option value="most_viewed">Categorias Mais Acessadas</option>
+                                    <option value="best_sellers">Mais Vendidas</option>
+                                    <option value="manual">Seleção Manual de Categorias</option>
+                                    <option value="custom">Links Personalizados</option>
+                                  </select>
+                                </ControlRow>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                                  <ControlRow label="Máximo de Itens (Desktop)">
+                                    <input
+                                      type="number"
+                                      min="2"
+                                      max="15"
+                                      value={Number(c.max_items || 6)}
+                                      onChange={e => patch({ content: { max_items: Number(e.target.value) } })}
+                                    />
+                                  </ControlRow>
+                                  <ControlRow label="Ordenação">
+                                    <select value={String(c.order_by || 'default')} onChange={e => patch({ content: { order_by: e.target.value } })}>
+                                      <option value="default">Ordem Padrão</option>
+                                      <option value="most_viewed">Mais Acessadas</option>
+                                      <option value="best_sellers">Mais Vendidas</option>
+                                      <option value="name_asc">Alfabética (A-Z)</option>
+                                      <option value="name_desc">Alfabética (Z-A)</option>
+                                    </select>
+                                  </ControlRow>
+                                </div>
+
+                                {c.source === 'manual' && (
+                                  <ControlRow label="Categorias Selecionadas" description="Marque as categorias que devem aparecer no menu">
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 180, overflowY: 'auto', padding: 8, background: '#f8fafc', borderRadius: 8, border: '1px solid #e2e8f0' }}>
+                                      {availableCats.map((catName) => {
+                                        const isChecked = manualCats.includes(catName)
+                                        return (
+                                          <label key={catName} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, cursor: 'pointer' }}>
+                                            <input
+                                              type="checkbox"
+                                              checked={isChecked}
+                                              onChange={e => {
+                                                const next = e.target.checked
+                                                  ? [...manualCats, catName]
+                                                  : manualCats.filter(k => k !== catName)
+                                                patch({ content: { manual_categories: next } })
+                                              }}
+                                            />
+                                            <span>{catName}</span>
+                                          </label>
+                                        )
+                                      })}
+                                    </div>
+                                  </ControlRow>
+                                )}
+
+                                {c.source === 'custom' && (
+                                  <>
+                                    <p style={{ fontSize: 11, color: '#64748b', margin: '8px 0 10px' }}>Links manuais personalizados:</p>
+                                    {items.map((item: any, idx: number) => {
+                                      const itemLabel = typeof item === 'string' ? item : item.label || `Link #${idx + 1}`
+                                      const itemUrl = typeof item === 'string' ? '#' : item.url || '#'
+                                      return (
+                                        <ElementorRepeaterItem
+                                          key={idx}
+                                          index={idx}
+                                          title={itemLabel}
+                                          subtitle={itemUrl}
+                                          isOpen={openIdx === idx}
+                                          onToggle={() => setOpenRepeaterIndex(prev => ({ ...prev, [selected]: openIdx === idx ? -1 : idx }))}
+                                          onDuplicate={() => {
+                                            const next = [...items]
+                                            next.splice(idx + 1, 0, { label: `${itemLabel} (Cópia)`, url: itemUrl })
+                                            patch({ content: { items: next } })
+                                            setOpenRepeaterIndex(prev => ({ ...prev, [selected]: idx + 1 }))
+                                          }}
+                                          onDelete={() => {
+                                            const next = items.filter((_, i) => i !== idx)
+                                            patch({ content: { items: next } })
+                                          }}
+                                        >
+                                          <RepeaterField label="Rótulo" icon={Type}>
+                                            <input
+                                              type="text"
+                                              className="editor-repeater-input"
+                                              value={itemLabel}
+                                              onChange={e => {
+                                                const next = [...items]
+                                                next[idx] = { ...next[idx], label: e.target.value }
+                                                patch({ content: { items: next } })
+                                              }}
+                                            />
+                                          </RepeaterField>
+                                          <RepeaterField label="URL" icon={Link2}>
+                                            <input
+                                              type="text"
+                                              className="editor-repeater-input"
+                                              value={itemUrl}
+                                              onChange={e => {
+                                                const next = [...items]
+                                                next[idx] = { ...next[idx], url: e.target.value }
+                                                patch({ content: { items: next } })
+                                              }}
+                                            />
+                                          </RepeaterField>
+                                        </ElementorRepeaterItem>
+                                      )
+                                    })}
+                                    <button
+                                      type="button"
+                                      className="editor-add-item"
+                                      onClick={() => {
+                                        const next = [...items, { label: 'Novo Link', url: '/novo-link' }]
+                                        patch({ content: { items: next } })
+                                        setOpenRepeaterIndex(prev => ({ ...prev, [selected]: next.length - 1 }))
+                                      }}
+                                    >
+                                      <Plus size={14} /> Adicionar Link Personalizado
+                                    </button>
+                                  </>
+                                )}
+                              </ElementorAccordion>
+
+                              <ElementorAccordion title="Botão Departamentos (≡)" icon={Layers} isOpen={openSections.c_hmenu_dept !== false} onToggle={() => toggleSection('c_hmenu_dept')}>
+                                <ControlRow label="Exibir Botão Departamentos">
+                                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, cursor: 'pointer' }}>
+                                    <input
+                                      type="checkbox"
+                                      checked={c.show_departments_btn !== false}
+                                      onChange={e => patch({ content: { show_departments_btn: e.target.checked } })}
+                                    />
+                                    Exibir botão no início do menu
+                                  </label>
+                                </ControlRow>
+                                <ControlRow label="Texto do Botão">
+                                  <input
+                                    type="text"
+                                    value={String(c.departments_btn_text || 'Departamentos')}
+                                    onChange={e => patch({ content: { departments_btn_text: e.target.value } })}
+                                  />
+                                </ControlRow>
+                                <ControlRow label="Ação ao Clicar">
+                                  <select value={String(c.departments_btn_action || 'drawer')} onChange={e => patch({ content: { departments_btn_action: e.target.value } })}>
+                                    <option value="drawer">Abrir Menu Lateral (Drawer)</option>
+                                    <option value="dropdown">Abrir Menu Dropdown</option>
+                                    <option value="link">Navegar para /categorias</option>
+                                  </select>
+                                </ControlRow>
+                              </ElementorAccordion>
+
+                              <ElementorAccordion title="Destaque Promocional (Cupom)" icon={Tag} isOpen={openSections.c_hmenu_featured !== false} onToggle={() => toggleSection('c_hmenu_featured')}>
+                                <ControlRow label="Exibir Item de Destaque">
+                                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, cursor: 'pointer' }}>
+                                    <input
+                                      type="checkbox"
+                                      checked={c.show_featured_item !== false}
+                                      onChange={e => patch({ content: { show_featured_item: e.target.checked } })}
+                                    />
+                                    Exibir item com badge / botão no final
+                                  </label>
+                                </ControlRow>
+                                <ControlRow label="Texto do Destaque">
+                                  <input
+                                    type="text"
+                                    value={String(c.featured_item_text || '🏷️ Cupom')}
+                                    onChange={e => patch({ content: { featured_item_text: e.target.value } })}
+                                  />
+                                </ControlRow>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                                  <ControlRow label="Estilo">
+                                    <select value={String(c.featured_item_style || 'badge')} onChange={e => patch({ content: { featured_item_style: e.target.value } })}>
+                                      <option value="badge">Badge Arredondado</option>
+                                      <option value="button">Botão Sólido</option>
+                                      <option value="link">Link Simples</option>
+                                    </select>
+                                  </ControlRow>
+                                  <ControlRow label="Link de Destino">
+                                    <input
+                                      type="text"
+                                      value={String(c.featured_item_link || '/cupons')}
+                                      onChange={e => patch({ content: { featured_item_link: e.target.value } })}
+                                    />
+                                  </ControlRow>
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                                  <ControlRow label="Cor de Fundo">
+                                    <input
+                                      type="color"
+                                      value={String(c.featured_item_bg || '#b5f500')}
+                                      onChange={e => patch({ content: { featured_item_bg: e.target.value } })}
+                                      style={{ width: '100%', height: 32, padding: 0 }}
+                                    />
+                                  </ControlRow>
+                                  <ControlRow label="Cor do Texto">
+                                    <input
+                                      type="color"
+                                      value={String(c.featured_item_color || '#102419')}
+                                      onChange={e => patch({ content: { featured_item_color: e.target.value } })}
+                                      style={{ width: '100%', height: 32, padding: 0 }}
+                                    />
+                                  </ControlRow>
+                                </div>
+                              </ElementorAccordion>
+                            </>
+                          )
+                        })()}
+
+                        {/* WIDGETS DE PRODUTO INDEPENDENTES */}
+                        {widgetType === 'productTitle' && (
+                          <ElementorAccordion title="Título do Produto" icon={Heading} isOpen={openSections.c_prod_title !== false} onToggle={() => toggleSection('c_prod_title')}>
+                            <ControlRow label="Tag HTML">
+                              <select value={String(c.tag || 'h1')} onChange={e => patch({ content: { tag: e.target.value } })}>
+                                <option value="h1">H1</option>
+                                <option value="h2">H2</option>
+                                <option value="h3">H3</option>
+                                <option value="h4">H4</option>
+                                <option value="div">div</option>
+                              </select>
+                            </ControlRow>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                              <ControlRow label="Prefixo">
+                                <input type="text" placeholder="Ex: Furadeira " value={String(c.prefix || '')} onChange={e => patch({ content: { prefix: e.target.value } })} />
+                              </ControlRow>
+                              <ControlRow label="Sufixo">
+                                <input type="text" placeholder="Ex: - TEKNIX" value={String(c.suffix || '')} onChange={e => patch({ content: { suffix: e.target.value } })} />
+                              </ControlRow>
+                            </div>
+                          </ElementorAccordion>
+                        )}
+
+                        {widgetType === 'productPrice' && (
+                          <ElementorAccordion title="Preço do Produto" icon={DollarSign} isOpen={openSections.c_prod_price !== false} onToggle={() => toggleSection('c_prod_price')}>
+                            <ControlRow label="Opções de Exibição">
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, cursor: 'pointer' }}>
+                                  <input type="checkbox" checked={c.show_original_price !== false} onChange={e => patch({ content: { show_original_price: e.target.checked } })} />
+                                  Exibir preço de / riscado (quando houver promoção)
+                                </label>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, cursor: 'pointer' }}>
+                                  <input type="checkbox" checked={c.show_pix_discount !== false} onChange={e => patch({ content: { show_pix_discount: e.target.checked } })} />
+                                  Exibir destaque "no PIX (com desconto)"
+                                </label>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, cursor: 'pointer' }}>
+                                  <input type="checkbox" checked={c.show_installments !== false} onChange={e => patch({ content: { show_installments: e.target.checked } })} />
+                                  Exibir texto de parcelamento sem juros
+                                </label>
+                              </div>
+                            </ControlRow>
+                            <ControlRow label="Máximo de Parcelas no Cartão">
+                              <input type="number" min="1" max="24" value={Number(c.max_installments || 12)} onChange={e => patch({ content: { max_installments: Number(e.target.value) } })} />
+                            </ControlRow>
+                          </ElementorAccordion>
+                        )}
+
+                        {widgetType === 'productRating' && (
+                          <ElementorAccordion title="Avaliação do Produto" icon={Star} isOpen={openSections.c_prod_rating !== false} onToggle={() => toggleSection('c_prod_rating')}>
+                            <div style={{ fontSize: 11, color: '#86868b', marginBottom: 10 }}>Fonte: Produto atual 🔒</div>
+                            {[
+                              ['show_rating', 'Mostrar nota'],
+                              ['show_stars', 'Mostrar estrelas'],
+                              ['show_review_count', 'Mostrar quantidade de avaliações']
+                            ].map(([field, label]) => (
+                              <ControlRow key={field} label={label}>
+                                <input type="checkbox" checked={c[field] !== false} onChange={e => patch({ content: { [field]: e.target.checked } })} />
+                              </ControlRow>
+                            ))}
+                            <ControlRow label="Link ao clicar">
+                              <select value={String(c.link_action || 'reviews')} onChange={e => patch({ content: { link_action: e.target.value } })}>
+                                <option value="reviews">Ir para avaliações</option>
+                                <option value="none">Nenhum</option>
+                              </select>
+                            </ControlRow>
+                          </ElementorAccordion>
+                        )}
+
+                        {widgetType === 'productGallery' && (
+                          <ElementorAccordion title="Galeria do Produto" icon={ImageIcon} isOpen={openSections.c_prod_gallery !== false} onToggle={() => toggleSection('c_prod_gallery')}>
+                            <ControlRow label="Posição das Miniaturas">
+                              <select value={String(c.gallery_layout || 'bottom')} onChange={e => patch({ content: { gallery_layout: e.target.value } })}>
+                                <option value="bottom">Abaixo da foto principal (Padrão)</option>
+                                <option value="left">Lateral esquerda (Estilo Apple)</option>
+                              </select>
+                            </ControlRow>
+                          </ElementorAccordion>
+                        )}
+
+                        {widgetType === 'productBuyButton' && (
+                          <ElementorAccordion title="Botão Comprar Agora" icon={ShoppingBag} isOpen={openSections.c_prod_buy !== false} onToggle={() => toggleSection('c_prod_buy')}>
+                            <ControlRow label="Texto do Botão">
+                              <input type="text" value={String(c.text || 'Comprar Agora')} onChange={e => patch({ content: { text: e.target.value } })} />
+                            </ControlRow>
+                            <ControlRow label="Largura">
+                              <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, cursor: 'pointer' }}>
+                                <input type="checkbox" checked={c.full_width !== false} onChange={e => patch({ content: { full_width: e.target.checked } })} />
+                                Largura total (100%)
+                              </label>
+                            </ControlRow>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                              <ControlRow label="Cor de Fundo">
+                                <input type="color" value={String(c.bg_color || '#0071e3')} onChange={e => patch({ content: { bg_color: e.target.value } })} style={{ width: '100%', height: 32, padding: 0 }} />
+                              </ControlRow>
+                              <ControlRow label="Cor do Texto">
+                                <input type="color" value={String(c.text_color || '#ffffff')} onChange={e => patch({ content: { text_color: e.target.value } })} style={{ width: '100%', height: 32, padding: 0 }} />
+                              </ControlRow>
+                            </div>
+                          </ElementorAccordion>
+                        )}
+
+                        {widgetType === 'productAddToCart' && (
+                          <ElementorAccordion title="Botão Adicionar à Sacola" icon={ShoppingCart} isOpen={openSections.c_prod_cart !== false} onToggle={() => toggleSection('c_prod_cart')}>
+                            <ControlRow label="Texto do Botão">
+                              <input type="text" value={String(c.text || 'Adicionar à Sacola')} onChange={e => patch({ content: { text: e.target.value } })} />
+                            </ControlRow>
+                            <ControlRow label="Largura">
+                              <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, cursor: 'pointer' }}>
+                                <input type="checkbox" checked={c.full_width !== false} onChange={e => patch({ content: { full_width: e.target.checked } })} />
+                                Largura total (100%)
+                              </label>
+                            </ControlRow>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                              <ControlRow label="Cor de Fundo">
+                                <input type="color" value={String(c.bg_color || '#f5f5f7')} onChange={e => patch({ content: { bg_color: e.target.value } })} style={{ width: '100%', height: 32, padding: 0 }} />
+                              </ControlRow>
+                              <ControlRow label="Cor do Texto">
+                                <input type="color" value={String(c.text_color || '#1d1d1f')} onChange={e => patch({ content: { text_color: e.target.value } })} style={{ width: '100%', height: 32, padding: 0 }} />
+                              </ControlRow>
+                            </div>
+                          </ElementorAccordion>
+                        )}
+
+                        {widgetType === 'productShipping' && (
+                          <ElementorAccordion title="Cálculo de Frete" icon={Truck} isOpen={openSections.c_prod_ship !== false} onToggle={() => toggleSection('c_prod_ship')}>
+                            <ControlRow label="Título da Caixa">
+                              <input type="text" value={String(c.title || 'Calcular frete e prazo de entrega')} onChange={e => patch({ content: { title: e.target.value } })} />
+                            </ControlRow>
+                          </ElementorAccordion>
+                        )}
+
+                        {widgetType === 'productCarousel' && (
+                          <ElementorAccordion title="Carrossel de Produtos" icon={Sliders} isOpen={openSections.c_prod_car !== false} onToggle={() => toggleSection('c_prod_car')}>
+                            <ControlRow label="Título do Carrossel">
+                              <input type="text" value={String(c.title || 'Produtos Relacionados')} onChange={e => patch({ content: { title: e.target.value } })} />
+                            </ControlRow>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                              <ControlRow label="Filtro de Produtos">
+                                <select value={String(c.filter || 'all')} onChange={e => patch({ content: { filter: e.target.value } })}>
+                                  <option value="all">Todos os Produtos</option>
+                                  <option value="category">Mesma Categoria</option>
+                                  <option value="best_sellers">Mais Vendidos</option>
+                                </select>
+                              </ControlRow>
+                              <ControlRow label="Limite de Itens">
+                                <input type="number" min="2" max="24" value={Number(c.limit || 8)} onChange={e => patch({ content: { limit: Number(e.target.value) } })} />
+                              </ControlRow>
+                            </div>
+                          </ElementorAccordion>
+                        )}
+
+                        {widgetType === 'productGrid' && (
+                          <ElementorAccordion title="Grade de Produtos" icon={Grid} isOpen={openSections.c_prod_grid !== false} onToggle={() => toggleSection('c_prod_grid')}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                              <ControlRow label="Colunas">
+                                <select value={Number(c.product_columns || 4)} onChange={e => patch({ content: { product_columns: Number(e.target.value) } })}>
+                                  <option value={2}>2 Colunas</option>
+                                  <option value={3}>3 Colunas</option>
+                                  <option value={4}>4 Colunas</option>
+                                  <option value={5}>5 Colunas</option>
+                                </select>
+                              </ControlRow>
+                              <ControlRow label="Limite de Produtos">
+                                <input type="number" min="2" max="32" value={Number(c.product_limit || 8)} onChange={e => patch({ content: { product_limit: Number(e.target.value) } })} />
+                              </ControlRow>
+                            </div>
+                          </ElementorAccordion>
+                        )}
+
                         {/* WIDGET: MENU DE NAVEGAÇÃO */}
                         {(widgetType === 'navMenu' || widgetType === 'megaMenu') && (() => {
                           const items: any[] = Array.isArray(c.items) && c.items.length > 0
@@ -5913,7 +6490,8 @@ export default function PageEditor() {
                             <ControlRow label="Navegação"><select value={c.navigation || 'both'} onChange={e => patch({ content: { navigation: e.target.value } })}><option value="both">Setas e pontos</option><option value="arrows">Setas</option><option value="dots">Pontos</option><option value="none">Nenhuma</option></select></ControlRow>
                           </ElementorAccordion>
                         </>}
-                        {!['heading', 'image', 'text', 'input', 'icon', 'button', 'video', 'divider', 'spacer', 'container', 'grid', 'storefrontCard', 'storefrontShelf', 'ads', 'chrome:header', 'chrome:footer', 'counter', 'progress', 'progressBar', 'accordion', 'toggle', 'tabs', 'iconBox', 'imageBox', 'iconList', 'testimonial', 'starRating', 'rating', 'alert', 'socialIcons', 'shareButtons', 'flipBox', 'flipBoxPro', 'priceTable', 'priceTablePro', 'countdown', 'countdownPro', 'animatedHeadline', 'animatedHeadlinePro', 'cta', 'call-to-action', 'reviews', 'reviewsPro', 'googleMaps', 'googleMapsPro', 'google-maps', 'gallery', 'basicGallery', 'imageCarousel', 'carousel', 'priceList', 'priceListPro', 'form', 'formPro', 'form-pro', 'login', 'loginPro', 'login-pro', 'posts', 'postsCarousel', 'portfolio', 'slides', 'navMenu', 'megaMenu', 'categoryMosaic', 'flashSaleSection', 'tableOfContents', 'tableOfContentsPro', 'hotspot', 'loopGrid', 'loopCarousel'].includes(widgetType) && (() => {
+                        {/* Widgets sem schema próprio não podem cair em um formulário genérico. */}
+                        {false && !['heading', 'image', 'text', 'input', 'icon', 'button', 'video', 'divider', 'spacer', 'container', 'grid', 'storefrontCard', 'storefrontShelf', 'ads', 'chrome:header', 'chrome:footer', 'counter', 'progress', 'progressBar', 'accordion', 'toggle', 'tabs', 'iconBox', 'imageBox', 'iconList', 'testimonial', 'starRating', 'rating', 'alert', 'socialIcons', 'shareButtons', 'flipBox', 'flipBoxPro', 'priceTable', 'priceTablePro', 'countdown', 'countdownPro', 'animatedHeadline', 'animatedHeadlinePro', 'cta', 'call-to-action', 'reviews', 'reviewsPro', 'googleMaps', 'googleMapsPro', 'google-maps', 'gallery', 'basicGallery', 'imageCarousel', 'carousel', 'priceList', 'priceListPro', 'form', 'formPro', 'form-pro', 'login', 'loginPro', 'login-pro', 'posts', 'postsCarousel', 'portfolio', 'slides', 'navMenu', 'megaMenu', 'categoryMosaic', 'flashSaleSection', 'tableOfContents', 'tableOfContentsPro', 'hotspot', 'loopGrid', 'loopCarousel', 'horizontal-menu'].includes(widgetType) && !widgetType.startsWith('product') && (() => {
                           const fieldLabelMap: Record<string, string> = {
                             title: 'Título', text: 'Texto / Conteúdo', description: 'Descrição',
                             link: 'Link / URL', url: 'URL', image: 'Imagem', src: 'Fonte da Imagem',
@@ -5926,7 +6504,7 @@ export default function PageEditor() {
                           const entries = Object.entries(c).filter(([field]) => !['__type', '_id', '_rev'].includes(field))
                           const hasRealContent = entries.length > 0 && !(entries.length === 2 && c.title === 'Novo Bloco TEKNIX' && c.text)
                           return (
-                            <ElementorAccordion title={widget?.label ? `Conteúdo: ${widget.label}` : 'Configuração do Bloco'} icon={Sliders} isOpen={openSections.reference_section_34 !== false} onToggle={() => toggleSection('reference_section_34')}>
+                            <ElementorAccordion title={widget?.label ? `Conteúdo: ${widget?.label}` : 'Configuração do Bloco'} icon={Sliders} isOpen={openSections.reference_section_34 !== false} onToggle={() => toggleSection('reference_section_34')}>
                               <div style={{ padding: '4px 0 6px', fontSize: 11, color: '#86868b', marginBottom: 10, lineHeight: 1.5 }}>
                                 {widgetType ? `Tipo: ${widgetType}` : 'Bloco personalizado'} • Edite os campos abaixo
                               </div>
@@ -6016,8 +6594,50 @@ export default function PageEditor() {
                     {/* ==================================================== */}
                     {inspectorTab === 'style' && (
                       <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        {/* ESTILO: TÍTULO (1:1 Screenshots 2 & 4) */}
-                        {widgetType === 'heading' && (
+                        {/* ESTILO: MENU HORIZONTAL DA LOJA */}
+                        {widgetType === 'horizontal-menu' && (
+                          <ElementorAccordion title="Estilo dos Links" icon={Sliders} isOpen={openSections.s_hmenu !== false} onToggle={() => toggleSection('s_hmenu')}>
+                            <StateTabs
+                              activeTab={styleHoverTab}
+                              onSelect={setStyleHoverTab}
+                            />
+                            {styleHoverTab === 'normal' ? (
+                              <ControlRow label="Cor do Texto">
+                                <input
+                                  type="color"
+                                  value={String(s.color || '#48484a')}
+                                  onChange={e => patch({ schema: { color: e.target.value } })}
+                                  style={{ width: '100%', height: 32, padding: 0 }}
+                                />
+                              </ControlRow>
+                            ) : (
+                              <ControlRow label="Cor no Hover">
+                                <input
+                                  type="color"
+                                  value={String(s.hover_color || '#0071e3')}
+                                  onChange={e => patch({ schema: { hover_color: e.target.value } })}
+                                  style={{ width: '100%', height: 32, padding: 0 }}
+                                />
+                              </ControlRow>
+                            )}
+                            <TypographyControl
+                              schema={s}
+                              onChange={updates => patch({ schema: updates })}
+                            />
+                            <ControlRow label="Espaço entre Itens (Gap px)">
+                              <input
+                                type="number"
+                                min="0"
+                                max="60"
+                                value={Number(String(s.gap || '20px').replace('px', ''))}
+                                onChange={e => patch({ schema: { gap: `${e.target.value}px` } })}
+                              />
+                            </ControlRow>
+                          </ElementorAccordion>
+                        )}
+
+                        {/* ESTILO: TÍTULO */}
+                        {(widgetType === 'heading' || widgetType === 'productTitle') && (
                           <ElementorAccordion title="Título" icon={Heading} isOpen={openSections.s_heading !== false} onToggle={() => toggleSection('s_heading')}>
                             <ControlRow label="Alinhamento">
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>

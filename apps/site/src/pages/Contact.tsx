@@ -33,7 +33,7 @@ export default function Contact() {
 
         <Editable as="div" widgetId="contact-grid" label="Colunas de contato" widgetType="container" editorKind="container" className="contact-grid" renderContent={false}>
           <EditableFlow id="contact-columns" label="Colunas do contato" compact>
-            <Editable as="form" widgetId="contact-form" label="Formulário de contato" widgetType="container" editorKind="container" className="contact-form" onSubmit={handleSubmit} renderContent={false}>
+            <Editable as="form" widgetId="contact-form" label="Formulário de contato" widgetType="form" editorKind="widget" className="contact-form" onSubmit={handleSubmit} renderContent={false}>
               <EditableFlow id="contact-form-fields" label="Campos do formulário" compact>
                 <Editable as="div" widgetId="contact-field-name" label="Campo Nome" widgetType="container" editorKind="container" className="form-group" renderContent={false}>
                   <Editable as="label" widgetId="contact-label-name" htmlFor="name">Nome</Editable>

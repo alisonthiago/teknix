@@ -34,7 +34,7 @@ export default function StatsOverview() {
         </div>
 
         {/* Navigation Tabs */}
-        <div style={{ display: 'flex', gap: 6, borderBottom: '1px solid var(--tk-color-border, #e5e5e7)', paddingBottom: 8, overflowX: 'auto' }}>
+        <div className="stats-tab-nav" style={{ display: 'flex', gap: 6, borderBottom: '1px solid var(--tk-color-border, #e5e5e7)', paddingBottom: 8, overflowX: 'auto' }}>
           {[
             { id: 'general', label: 'Visão geral' },
             { id: 'products', label: 'Produtos' },
@@ -46,6 +46,7 @@ export default function StatsOverview() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
+              className={`stats-tab-button ${activeTab === tab.id ? 'is-active' : ''}`}
               style={{
                 background: activeTab === tab.id ? 'var(--tk-color-primary, #0071e3)' : '#ffffff',
                 color: activeTab === tab.id ? '#ffffff' : 'var(--tk-color-text-primary, #1d1d1f)',
@@ -177,37 +178,33 @@ export default function StatsOverview() {
                   <span className="stat-card-label">Comportamento dos visitantes <Info size={14} className="stat-card-info-icon" /></span>
                   <MoreVertical size={16} className="stat-card-dots" />
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 14, padding: '20px 0' }}>
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.84rem', fontWeight: 600, marginBottom: 4 }}>
+                <div className="visitor-funnel">
+                  <div className="visitor-funnel-step">
+                    <div className="visitor-funnel-label">
                       <span>Visitantes no site</span><span>1.428 (100%)</span>
                     </div>
-                    <div style={{ height: 10, background: '#f3f4f6', borderRadius: 5, overflow: 'hidden' }}>
-                      <div style={{ width: '100%', height: '100%', background: '#2563eb' }}></div>
+                    <div className="visitor-funnel-track"><div className="visitor-funnel-fill blue" style={{ width: '100%' }}></div>
                     </div>
                   </div>
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.84rem', fontWeight: 600, marginBottom: 4 }}>
+                  <div className="visitor-funnel-step">
+                    <div className="visitor-funnel-label">
                       <span>Adicionaram ao carrinho</span><span>184 (12.8%)</span>
                     </div>
-                    <div style={{ height: 10, background: '#f3f4f6', borderRadius: 5, overflow: 'hidden' }}>
-                      <div style={{ width: '12.8%', height: '100%', background: '#7c3aed' }}></div>
+                    <div className="visitor-funnel-track"><div className="visitor-funnel-fill purple" style={{ width: '12.8%' }}></div>
                     </div>
                   </div>
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.84rem', fontWeight: 600, marginBottom: 4 }}>
+                  <div className="visitor-funnel-step">
+                    <div className="visitor-funnel-label">
                       <span>Iniciaram Checkout</span><span>72 (5.0%)</span>
                     </div>
-                    <div style={{ height: 10, background: '#f3f4f6', borderRadius: 5, overflow: 'hidden' }}>
-                      <div style={{ width: '5.0%', height: '100%', background: '#f59e0b' }}></div>
+                    <div className="visitor-funnel-track"><div className="visitor-funnel-fill orange" style={{ width: '5%' }}></div>
                     </div>
                   </div>
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.84rem', fontWeight: 600, marginBottom: 4 }}>
+                  <div className="visitor-funnel-step">
+                    <div className="visitor-funnel-label">
                       <span>Pedidos Concluídos</span><span>34 (2.38%)</span>
                     </div>
-                    <div style={{ height: 10, background: '#f3f4f6', borderRadius: 5, overflow: 'hidden' }}>
-                      <div style={{ width: '2.38%', height: '100%', background: '#059669' }}></div>
+                    <div className="visitor-funnel-track"><div className="visitor-funnel-fill green" style={{ width: '2.38%' }}></div>
                     </div>
                   </div>
                 </div>
@@ -349,4 +346,3 @@ export default function StatsOverview() {
     </div>
   )
 }
-

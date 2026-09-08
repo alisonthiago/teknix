@@ -6,7 +6,7 @@
 .dash-page {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 24px;
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
@@ -41,7 +41,7 @@
 
 .dash-welcome-name {
   font-size: 32px;
-  font-weight: 700;
+  font-weight: 600;
   color: #333333;
   line-height: 1.1;
   margin: 0;
@@ -123,6 +123,18 @@
 
 .dash-select:focus {
   border-color: #1f2328;
+}
+
+/* Mantém o menu nativo neutro, sem o destaque azul do tema do navegador. */
+.dash-select option,
+.dash-select option:checked,
+.dash-select option:hover {
+  background: #ffffff;
+  color: #333333;
+}
+
+.dash-select {
+  color-scheme: light;
 }
 
 .dash-filter-hint {
@@ -213,7 +225,7 @@
 
 .dash-hero-label {
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: #333333;
@@ -300,7 +312,7 @@
   gap: 8px;
   padding: 12px 20px;
   border-radius: 12px;
-  background: #111111;
+  background: var(--tk-color-primary);
   color: #ffffff;
   font-size: 13px;
   font-weight: 700;
@@ -310,7 +322,7 @@
 }
 
 .dash-hero-btn:hover {
-  background: #222222;
+  background: var(--tk-color-primary-hover);
   color: #ffffff;
 }
 
@@ -372,7 +384,7 @@
   align-items: center;
   gap: 6px;
   padding: 10px 16px;
-  background: #111111;
+  background: var(--tk-color-primary);
   color: #ffffff;
   font-size: 12px;
   font-weight: 600;
@@ -382,7 +394,7 @@
 }
 
 .dash-btn-dark:hover {
-  background: #000000;
+  background: var(--tk-color-primary-hover);
   color: #ffffff;
 }
 
@@ -657,7 +669,7 @@
 }
 
 .badge-blue {
-  background: #eff6ff;
+  background: #f8fafc;
   color: #2563eb;
   border-color: #bfdbfe;
 }

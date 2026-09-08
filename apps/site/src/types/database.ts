@@ -35,6 +35,7 @@ export interface Product {
   description?: string
   short_description?: string
   specifications?: string[]
+  editorial_showcase?: any
   store_meta?: {
     commercial_settings?: ProductCommerce
     slug?: string
@@ -42,7 +43,7 @@ export interface Product {
     featured?: boolean
     short_description?: string
     store_description?: string
-    specifications?: string[]
+    specifications?: any
     segment_id?: string
     category_id?: string
   }

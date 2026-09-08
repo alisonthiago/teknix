@@ -2,14 +2,31 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import {
-  ChevronLeft, Upload, Trash2, Video, Globe,
+  ChevronLeft, ChevronDown, ChevronUp, Upload, Trash2, Video, Globe,
   CheckCircle, Plus, Eye,
   Percent, Tag, DollarSign, Package, Layers, Sparkles,
-  X, ExternalLink, Check, Play, Loader2, Film
+  X, ExternalLink, Check, Play, Loader2, Film,
+  HelpCircle, Wand2, Sliders, Zap, Battery, Shield, Wrench, Truck, Star,
+  LayoutTemplate, Copy, ArrowRight, MessageSquare
 } from 'lucide-react'
 import './ProductForm.css'
 import './ProductCommerce.css'
-import { DEFAULT_COMMERCE, normalizeCommerce, validateCommerce, productPricing, type ProductCommerce } from '../../../../packages/core/src/productCommerce'
+import {
+  DEFAULT_COMMERCE,
+  normalizeCommerce,
+  validateCommerce,
+  productPricing,
+  cleanProductTitle,
+  createDefaultShowcase,
+  normalizeShowcase,
+  type ProductCommerce,
+  type ProductEditorialShowcase,
+  type EditorialBenefit,
+  type EditorialFeature,
+  type EditorialModelCard,
+  type EditorialComparisonRow,
+  type EditorialFaq
+} from '../../../../packages/core/src/productCommerce'
 
 interface FormData {
   commerce: ProductCommerce
@@ -52,6 +69,7 @@ interface FormData {
   published: boolean
   featured: boolean
   free_shipping: boolean
+  editorial_showcase: ProductEditorialShowcase
 }
 
 const initialForm: FormData = {
@@ -93,13 +111,36 @@ const initialForm: FormData = {
   status: 'active',
   published: false,
   featured: false,
-  free_shipping: false
+  free_shipping: false,
+  editorial_showcase: createDefaultShowcase()
 }
 
 export default function ProductForm() {
   const { id } = useParams()
   const navigate = useNavigate()
   const isEditing = Boolean(id && id !== 'novo')
+  // A aba Storytelling foi removida; mantemos o estado apenas para não
+  // desmontar o conteúdo editorial já salvo nos produtos existentes.
+  const [activeTab] = useState<'details' | 'storytelling'>('details')
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+    hero: true,
+    performance: false,
+    models: false,
+    comparison: false,
+    faq: false
+  })
+  const toggleSection = (s: string) => {
+    setExpandedSections(prev => ({ ...prev, [s]: !prev[s] }))
+  }
+  const toggleAllSections = (expand: boolean) => {
+    setExpandedSections({
+      hero: expand,
+      performance: expand,
+      models: expand,
+      comparison: expand,
+      faq: expand
+    })
+  }
 
   const [form, setForm] = useState<FormData>(initialForm)
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([])
@@ -246,7 +287,12 @@ export default function ProductForm() {
           origin: data.origin || specs.origin || '0',
           cest: data.cest || specs.cest || '',
           status: data.status || 'active',
-          featured: Boolean(store?.featured || data.featured)
+          featured: Boolean(store?.featured || data.featured),
+          editorial_showcase: normalizeShowcase(
+            specs?.editorial_showcase,
+            data.name,
+            [data.main_image || data.image_url, ...(Array.isArray(specs.gallery_images) ? specs.gallery_images : [])].filter(Boolean)
+          )
         })
       }
     } catch (e: any) {
@@ -306,7 +352,7 @@ export default function ProductForm() {
     return match ? match[1] : null
   }
 
-  async function handleUploadFiles(files: FileList | File[]) {
+  async function handleUploadFiles(files: FileList | File[], presentationIndex?: number) {
     if (!files || files.length === 0) return
     setIsUploadingMedia(true)
     setUploadStatus('Processando mídias...')
@@ -401,6 +447,15 @@ export default function ProductForm() {
     if (newImages.length > 0) {
       setForm(prev => {
         const combined = [...prev.images, ...newImages]
+        if (presentationIndex != null) {
+          const currentShowcase = (prev.editorial_showcase || {}) as any
+          const presentationImages = [...(currentShowcase.presentation_images || [])]
+          presentationImages[presentationIndex] = newImages[0]
+          return {
+            ...prev,
+            editorial_showcase: { ...currentShowcase, presentation_images: presentationImages.slice(0, 3) }
+          }
+        }
         return {
           ...prev,
           images: combined,
@@ -472,12 +527,21 @@ export default function ProductForm() {
         ? existing.seo
         : {}
 
+      const requestedSlug = form.seo_slug || form.slug || `produto-${productId}`
+      const { data: slugOwner } = await supabase
+        .from('product_store_metadata')
+        .select('product_id')
+        .eq('slug', requestedSlug)
+        .neq('product_id', productId)
+        .maybeSingle()
+      const uniqueSlug = slugOwner ? `${requestedSlug}-${productId.slice(0, 8)}` : requestedSlug
+
       const meta: any = {
         product_id: productId,
         category_id: form.category_id || null,
         sale_price: form.sell_price ? Number(form.sell_price) : null,
         promotional_price: (form.has_promo && form.promo_price) ? Number(form.promo_price) : null,
-        slug: form.seo_slug || form.slug || `produto-${productId}`,
+        slug: uniqueSlug,
         published: isPublished,
         featured: Boolean(form.featured),
         short_description: form.short_description || '',
@@ -487,7 +551,8 @@ export default function ProductForm() {
           gallery_images: form.images.filter(Boolean),
           video_url: form.video_url || null,
           variations: form.variations || [],
-          tags: form.tags || ''
+          tags: form.tags || '',
+          editorial_showcase: form.editorial_showcase
         },
         seo: {
           ...existingSeo,
@@ -540,9 +605,10 @@ export default function ProductForm() {
     if (commerceError) { setMessage({ type: 'error', text: commerceError }); setSaving(false); return }
 
     try {
+      const cleanedName = cleanProductTitle(form.name.trim())
       // Envia estritamente as colunas reais existentes na tabela products do Supabase
       const payload: any = {
-        name: form.name.trim(),
+        name: cleanedName,
         sku: form.sku?.trim() || null,
         brand: form.brand || 'TEKNIX',
         model: (form as any).model || null,
@@ -615,6 +681,35 @@ export default function ProductForm() {
   function handleOpenVisualEditor() {
     if (id) window.open(`/hub/editor/product/${encodeURIComponent(id)}`, '_blank', 'noopener,noreferrer')
   }
+
+  function handleFillSmartShowcase() {
+    const generated = createDefaultShowcase(
+      form.name || 'Equipamento TEKNIX',
+      categories.find(c => c.id === form.category_id)?.name,
+      form.images
+    )
+    setForm(prev => ({
+      ...prev,
+      editorial_showcase: generated
+    }))
+    setMessage({
+      type: 'success',
+      text: '✨ Storytelling inteligente gerado com sucesso! Revise e ajuste os textos e imagens abaixo conforme desejar.'
+    })
+  }
+
+  function updateShowcase(updater: (prev: ProductEditorialShowcase) => ProductEditorialShowcase) {
+    setForm(prev => {
+      const current = prev.editorial_showcase || createDefaultShowcase(prev.name, undefined, prev.images)
+      return {
+        ...prev,
+        editorial_showcase: updater(current)
+      }
+    })
+  }
+
+  const siteBaseUrl = import.meta.env.DEV ? 'http://localhost:5173' : (window.location.hostname.includes('teknixbrasil.com.br') ? 'https://www.teknixbrasil.com.br' : 'http://localhost:5173')
+  const productPublicUrl = `${siteBaseUrl}/produto/${form.seo_slug || form.slug || form.sku || form.id || ''}`
 
   // Margem e lucro calculados
   const profit = (form.sell_price || 0) - (form.cost_price || 0)
@@ -691,6 +786,19 @@ export default function ProductForm() {
           </div>
         </div>
 
+        {/* Navegação do formulário */}
+        <div className="product-form-tabs-bar">
+          <div className="product-form-tabs">
+            <button
+              type="button"
+              className="product-form-tab-btn active"
+            >
+              <Package size={15} />
+              <span>Dados</span>
+            </button>
+          </div>
+        </div>
+
         {message && (
           <div style={{
             padding: '12px 16px',
@@ -705,9 +813,12 @@ export default function ProductForm() {
           </div>
         )}
 
-        {/* 1. NOME E DESCRIÇÃO */}
-        <div className="form-card">
-          <h2 className="card-title">Nome e descrição</h2>
+        {/* Conteúdo da Aba 1: Dados do Produto */}
+        {activeTab === 'details' && (
+          <>
+            {/* 1. NOME E DESCRIÇÃO */}
+            <div className="form-card">
+              <h2 className="card-title">Nome e descrição</h2>
           <div className="form-group">
             <label>
               Nome *
@@ -719,6 +830,12 @@ export default function ProductForm() {
               placeholder="Ex: Parafusadeira e Furadeira de Impacto 12V Bivolt"
               value={form.name}
               onChange={(e) => handleNameChange(e.target.value)}
+              onBlur={(e) => {
+                const cleaned = cleanProductTitle(e.target.value)
+                if (cleaned && cleaned !== e.target.value) {
+                  handleNameChange(cleaned)
+                }
+              }}
               required
             />
           </div>
@@ -1638,8 +1755,963 @@ export default function ProductForm() {
             Esse produto possui frete grátis
           </label>
         </div>
+      </>
+    )}
+
+    {/* Conteúdo da Aba 2: Storytelling (Acordeão Compacto & Enxuto) */}
+    {activeTab === 'storytelling' && (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%' }}>
+        {/* Barra de controle */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 2px' }}>
+          <span style={{ fontSize: '0.82rem', color: '#64748b' }}>
+            5 seções da vitrine oficial do produto
+          </span>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button
+              type="button"
+              className="btn-secondary-action"
+              style={{ fontSize: '0.75rem', height: 26, padding: '0 8px' }}
+              onClick={() => toggleAllSections(true)}
+            >
+              Expandir Todos
+            </button>
+            <button
+              type="button"
+              className="btn-secondary-action"
+              style={{ fontSize: '0.75rem', height: 26, padding: '0 8px' }}
+              onClick={() => toggleAllSections(false)}
+            >
+              Recolher Todos
+            </button>
+          </div>
+        </div>
+
+        {/* ── 1. HERO SPOTLIGHT ── */}
+        <div className="form-card" style={{ padding: 0, overflow: 'hidden' }}>
+          <button
+            type="button"
+            onClick={() => toggleSection('hero')}
+            style={{
+              width: '100%',
+              padding: '12px 16px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              background: expandedSections.hero ? '#f8fafc' : '#ffffff',
+              border: 'none',
+              borderBottom: expandedSections.hero ? '1px solid #e2e8f0' : 'none',
+              cursor: 'pointer',
+              textAlign: 'left'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{
+                width: 22,
+                height: 22,
+                borderRadius: '50%',
+                background: '#e2e8f0',
+                color: '#334155',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>1</span>
+              <span style={{ fontSize: '0.88rem', fontWeight: 600, color: '#0f172a' }}>Hero Spotlight</span>
+              {form.editorial_showcase.hero.title && (
+                <span style={{ fontSize: '0.78rem', color: '#64748b', marginLeft: 4 }}>• {form.editorial_showcase.hero.title}</span>
+              )}
+            </div>
+            <div style={{ color: '#64748b' }}>
+              {expandedSections.hero ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </div>
+          </button>
+
+          {expandedSections.hero && (
+            <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Tag Superior</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="Ex: MÁXIMA EFICIÊNCIA"
+                    value={form.editorial_showcase.hero.eyebrow}
+                    onChange={e => updateShowcase(s => ({ ...s, hero: { ...s.hero, eyebrow: e.target.value } }))}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Título</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="Ex: Por que escolher este produto?"
+                    value={form.editorial_showcase.hero.title}
+                    onChange={e => updateShowcase(s => ({ ...s, hero: { ...s.hero, title: e.target.value } }))}
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>Descrição</label>
+                <textarea
+                  className="form-input"
+                  rows={2}
+                  style={{ resize: 'vertical' }}
+                  placeholder="Texto persuasivo de apresentação..."
+                  value={form.editorial_showcase.hero.description}
+                  onChange={e => updateShowcase(s => ({ ...s, hero: { ...s.hero, description: e.target.value } }))}
+                />
+              </div>
+
+              <div className="form-row" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
+                <div className="form-group">
+                  <label>Selo Foto 1</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="Ex: Alto Torque"
+                    value={form.editorial_showcase.hero.top_badge}
+                    onChange={e => updateShowcase(s => ({ ...s, hero: { ...s.hero, top_badge: e.target.value } }))}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Selo Foto 2</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="Ex: 2x Baterias"
+                    value={form.editorial_showcase.hero.bottom_badge}
+                    onChange={e => updateShowcase(s => ({ ...s, hero: { ...s.hero, bottom_badge: e.target.value } }))}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Botão 1</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="Ex: Garantir agora"
+                    value={form.editorial_showcase.hero.cta_primary_text}
+                    onChange={e => updateShowcase(s => ({ ...s, hero: { ...s.hero, cta_primary_text: e.target.value } }))}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Botão 2</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="Ex: Comparar"
+                    value={form.editorial_showcase.hero.cta_secondary_text}
+                    onChange={e => updateShowcase(s => ({ ...s, hero: { ...s.hero, cta_secondary_text: e.target.value } }))}
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>Imagem do Hero</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="URL da imagem"
+                  value={form.editorial_showcase.hero.image_url}
+                  onChange={e => updateShowcase(s => ({ ...s, hero: { ...s.hero, image_url: e.target.value } }))}
+                />
+                {form.images.length > 0 && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Fotos:</span>
+                    {form.images.map((img, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        style={{
+                          width: 34,
+                          height: 34,
+                          borderRadius: 6,
+                          border: form.editorial_showcase.hero.image_url === img ? '2px solid #2563eb' : '1px solid #cbd5e1',
+                          padding: 2,
+                          background: '#ffffff',
+                          cursor: 'pointer'
+                        }}
+                        onClick={() => updateShowcase(s => ({ ...s, hero: { ...s.hero, image_url: img } }))}
+                      >
+                        <img src={img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 4 }} />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="form-group">
+                <label>3 Benefícios Rápidos</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {(form.editorial_showcase.hero.benefits || []).map((b, bIdx) => (
+                    <div
+                      key={bIdx}
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: '130px 1fr 1.5fr',
+                        gap: 6,
+                        padding: 6,
+                        background: '#f8fafc',
+                        borderRadius: 6,
+                        border: '1px solid #e2e8f0',
+                        alignItems: 'center'
+                      }}
+                    >
+                      <select
+                        className="form-input"
+                        style={{ height: 32, padding: '4px 8px', fontSize: '0.8rem' }}
+                        value={b.icon || 'zap'}
+                        onChange={e => {
+                          const val = e.target.value as any
+                          updateShowcase(s => {
+                            const nextB = [...s.hero.benefits]
+                            nextB[bIdx] = { ...nextB[bIdx], icon: val }
+                            return { ...s, hero: { ...s.hero, benefits: nextB } }
+                          })
+                        }}
+                      >
+                        <option value="zap">⚡ Potência</option>
+                        <option value="battery">🔋 Bateria</option>
+                        <option value="shield">🛡️ Garantia</option>
+                        <option value="wrench">🔧 Robusto</option>
+                        <option value="truck">🚚 Frete</option>
+                        <option value="star">⭐ Qualidade</option>
+                      </select>
+                      <input
+                        type="text"
+                        className="form-input"
+                        style={{ height: 32, fontSize: '0.8rem' }}
+                        placeholder="Título"
+                        value={b.title}
+                        onChange={e => {
+                          const val = e.target.value
+                          updateShowcase(s => {
+                            const nextB = [...s.hero.benefits]
+                            nextB[bIdx] = { ...nextB[bIdx], title: val }
+                            return { ...s, hero: { ...s.hero, benefits: nextB } }
+                          })
+                        }}
+                      />
+                      <input
+                        type="text"
+                        className="form-input"
+                        style={{ height: 32, fontSize: '0.8rem' }}
+                        placeholder="Descrição curta"
+                        value={b.desc}
+                        onChange={e => {
+                          const val = e.target.value
+                          updateShowcase(s => {
+                            const nextB = [...s.hero.benefits]
+                            nextB[bIdx] = { ...nextB[bIdx], desc: val }
+                            return { ...s, hero: { ...s.hero, benefits: nextB } }
+                          })
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ── 2. PERFORMANCE & USO ── */}
+        <div className="form-card" style={{ padding: 0, overflow: 'hidden' }}>
+          <button
+            type="button"
+            onClick={() => toggleSection('performance')}
+            style={{
+              width: '100%',
+              padding: '12px 16px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              background: expandedSections.performance ? '#f8fafc' : '#ffffff',
+              border: 'none',
+              borderBottom: expandedSections.performance ? '1px solid #e2e8f0' : 'none',
+              cursor: 'pointer',
+              textAlign: 'left'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{
+                width: 22,
+                height: 22,
+                borderRadius: '50%',
+                background: '#e2e8f0',
+                color: '#334155',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>2</span>
+              <span style={{ fontSize: '0.88rem', fontWeight: 600, color: '#0f172a' }}>Performance & Uso</span>
+              {form.editorial_showcase.performance.title && (
+                <span style={{ fontSize: '0.78rem', color: '#64748b', marginLeft: 4 }}>• {form.editorial_showcase.performance.title}</span>
+              )}
+            </div>
+            <div style={{ color: '#64748b' }}>
+              {expandedSections.performance ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </div>
+          </button>
+
+          {expandedSections.performance && (
+            <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div className="form-group">
+                <label>Título</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="Ex: Rendimento com alta precisão"
+                  value={form.editorial_showcase.performance.title}
+                  onChange={e => updateShowcase(s => ({ ...s, performance: { ...s.performance, title: e.target.value } }))}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Descrição Técnica</label>
+                <textarea
+                  className="form-input"
+                  rows={2}
+                  style={{ resize: 'vertical' }}
+                  placeholder="Descrição técnica dos fluxos de trabalho..."
+                  value={form.editorial_showcase.performance.description}
+                  onChange={e => updateShowcase(s => ({ ...s, performance: { ...s.performance, description: e.target.value } }))}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Imagem em Operação</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="URL da imagem em ação"
+                  value={form.editorial_showcase.performance.image_url}
+                  onChange={e => updateShowcase(s => ({ ...s, performance: { ...s.performance, image_url: e.target.value } }))}
+                />
+                {form.images.length > 0 && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Fotos:</span>
+                    {form.images.map((img, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        style={{
+                          width: 34,
+                          height: 34,
+                          borderRadius: 6,
+                          border: form.editorial_showcase.performance.image_url === img ? '2px solid #2563eb' : '1px solid #cbd5e1',
+                          padding: 2,
+                          background: '#ffffff',
+                          cursor: 'pointer'
+                        }}
+                        onClick={() => updateShowcase(s => ({ ...s, performance: { ...s.performance, image_url: img } }))}
+                      >
+                        <img src={img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 4 }} />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="form-group">
+                <label>3 Destaques Técnicos</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 8 }}>
+                  {(form.editorial_showcase.performance.features || []).map((feat, fIdx) => (
+                    <div
+                      key={fIdx}
+                      style={{
+                        padding: 8,
+                        background: '#f8fafc',
+                        borderRadius: 6,
+                        border: '1px solid #e2e8f0',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 6
+                      }}
+                    >
+                      <input
+                        type="text"
+                        className="form-input"
+                        style={{ height: 32, fontSize: '0.82rem' }}
+                        placeholder="Título do destaque"
+                        value={feat.title}
+                        onChange={e => {
+                          const val = e.target.value
+                          updateShowcase(s => {
+                            const nextF = [...s.performance.features]
+                            nextF[fIdx] = { ...nextF[fIdx], title: val }
+                            return { ...s, performance: { ...s.performance, features: nextF } }
+                          })
+                        }}
+                      />
+                      <textarea
+                        className="form-input"
+                        rows={2}
+                        style={{ resize: 'vertical', fontSize: '0.8rem' }}
+                        placeholder="Explicação do diferencial"
+                        value={feat.desc}
+                        onChange={e => {
+                          const val = e.target.value
+                          updateShowcase(s => {
+                            const nextF = [...s.performance.features]
+                            nextF[fIdx] = { ...nextF[fIdx], desc: val }
+                            return { ...s, performance: { ...s.performance, features: nextF } }
+                          })
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ── 3. MODELOS & VERSÕES ── */}
+        <div className="form-card" style={{ padding: 0, overflow: 'hidden' }}>
+          <button
+            type="button"
+            onClick={() => toggleSection('models')}
+            style={{
+              width: '100%',
+              padding: '12px 16px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              background: expandedSections.models ? '#f8fafc' : '#ffffff',
+              border: 'none',
+              borderBottom: expandedSections.models ? '1px solid #e2e8f0' : 'none',
+              cursor: 'pointer',
+              textAlign: 'left'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{
+                width: 22,
+                height: 22,
+                borderRadius: '50%',
+                background: '#e2e8f0',
+                color: '#334155',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>3</span>
+              <span style={{ fontSize: '0.88rem', fontWeight: 600, color: '#0f172a' }}>Modelos & Versões</span>
+              <span style={{ fontSize: '0.78rem', color: '#64748b', marginLeft: 4 }}>
+                • {(form.editorial_showcase.explore_models.models || []).length} modelo(s)
+              </span>
+            </div>
+            <div style={{ color: '#64748b' }}>
+              {expandedSections.models ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </div>
+          </button>
+
+          {expandedSections.models && (
+            <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+                <div className="form-group" style={{ flex: 1, margin: 0 }}>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="Título da seção de modelos"
+                    value={form.editorial_showcase.explore_models.title}
+                    onChange={e => updateShowcase(s => ({ ...s, explore_models: { ...s.explore_models, title: e.target.value } }))}
+                  />
+                </div>
+                <button
+                  type="button"
+                  className="btn-secondary-action"
+                  style={{ fontSize: '0.78rem', height: 32, whiteSpace: 'nowrap' }}
+                  onClick={() => {
+                    updateShowcase(s => ({
+                      ...s,
+                      explore_models: {
+                        ...s.explore_models,
+                        models: [
+                          ...s.explore_models.models,
+                          {
+                            badge: 'Nova Versão',
+                            name: `${form.name || 'Produto'} Versão Extra`,
+                            specs: 'Especificações resumidas',
+                            image_url: form.images[0] || ''
+                          }
+                        ]
+                      }
+                    }))
+                  }}
+                >
+                  <Plus size={13} /> Adicionar Modelo
+                </button>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 8 }}>
+                {(form.editorial_showcase.explore_models.models || []).map((m, mIdx) => (
+                  <div
+                    key={mIdx}
+                    style={{
+                      padding: 10,
+                      background: '#f8fafc',
+                      borderRadius: 6,
+                      border: '1px solid #e2e8f0',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 6
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
+                      <input
+                        type="text"
+                        className="form-input"
+                        style={{ height: 30, fontSize: '0.8rem' }}
+                        placeholder="Selo"
+                        value={m.badge}
+                        onChange={e => {
+                          const val = e.target.value
+                          updateShowcase(s => {
+                            const nextM = [...s.explore_models.models]
+                            nextM[mIdx] = { ...nextM[mIdx], badge: val }
+                            return { ...s, explore_models: { ...s.explore_models, models: nextM } }
+                          })
+                        }}
+                      />
+                      <button
+                        type="button"
+                        style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 2 }}
+                        title="Remover modelo"
+                        onClick={() => {
+                          updateShowcase(s => ({
+                            ...s,
+                            explore_models: {
+                              ...s.explore_models,
+                              models: s.explore_models.models.filter((_, i) => i !== mIdx)
+                            }
+                          }))
+                        }}
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                    <input
+                      type="text"
+                      className="form-input"
+                      style={{ height: 30, fontSize: '0.8rem' }}
+                      placeholder="Nome do Modelo"
+                      value={m.name}
+                      onChange={e => {
+                        const val = e.target.value
+                        updateShowcase(s => {
+                          const nextM = [...s.explore_models.models]
+                          nextM[mIdx] = { ...nextM[mIdx], name: val }
+                          return { ...s, explore_models: { ...s.explore_models, models: nextM } }
+                        })
+                      }}
+                    />
+                    <input
+                      type="text"
+                      className="form-input"
+                      style={{ height: 30, fontSize: '0.8rem' }}
+                      placeholder="Especificações"
+                      value={m.specs}
+                      onChange={e => {
+                        const val = e.target.value
+                        updateShowcase(s => {
+                          const nextM = [...s.explore_models.models]
+                          nextM[mIdx] = { ...nextM[mIdx], specs: val }
+                          return { ...s, explore_models: { ...s.explore_models, models: nextM } }
+                        })
+                      }}
+                    />
+                    <input
+                      type="text"
+                      className="form-input"
+                      style={{ height: 30, fontSize: '0.8rem' }}
+                      placeholder="URL da Imagem"
+                      value={m.image_url}
+                      onChange={e => {
+                        const val = e.target.value
+                        updateShowcase(s => {
+                          const nextM = [...s.explore_models.models]
+                          nextM[mIdx] = { ...nextM[mIdx], image_url: val }
+                          return { ...s, explore_models: { ...s.explore_models, models: nextM } }
+                        })
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ── 4. TABELA COMPARATIVA ── */}
+        <div className="form-card" style={{ padding: 0, overflow: 'hidden' }}>
+          <button
+            type="button"
+            onClick={() => toggleSection('comparison')}
+            style={{
+              width: '100%',
+              padding: '12px 16px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              background: expandedSections.comparison ? '#f8fafc' : '#ffffff',
+              border: 'none',
+              borderBottom: expandedSections.comparison ? '1px solid #e2e8f0' : 'none',
+              cursor: 'pointer',
+              textAlign: 'left'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{
+                width: 22,
+                height: 22,
+                borderRadius: '50%',
+                background: '#e2e8f0',
+                color: '#334155',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>4</span>
+              <span style={{ fontSize: '0.88rem', fontWeight: 600, color: '#0f172a' }}>Tabela Comparativa</span>
+              <span style={{ fontSize: '0.78rem', color: '#64748b', marginLeft: 4 }}>
+                • {(form.editorial_showcase.comparison.rows || []).length} linha(s)
+              </span>
+            </div>
+            <div style={{ color: '#64748b' }}>
+              {expandedSections.comparison ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </div>
+          </button>
+
+          {expandedSections.comparison && (
+            <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div className="form-row" style={{ gridTemplateColumns: '2fr 1fr 1fr' }}>
+                <div className="form-group">
+                  <label>Título da Tabela</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="Ex: Comparar versões"
+                    value={form.editorial_showcase.comparison.title}
+                    onChange={e => updateShowcase(s => ({ ...s, comparison: { ...s.comparison, title: e.target.value } }))}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Coluna 1</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="Ex: Padrão"
+                    value={form.editorial_showcase.comparison.col1_title}
+                    onChange={e => updateShowcase(s => ({ ...s, comparison: { ...s.comparison, col1_title: e.target.value } }))}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Coluna 2</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="Ex: Versão Pro"
+                    value={form.editorial_showcase.comparison.col2_title}
+                    onChange={e => updateShowcase(s => ({ ...s, comparison: { ...s.comparison, col2_title: e.target.value } }))}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {(form.editorial_showcase.comparison.rows || []).map((r, rIdx) => (
+                  <div
+                    key={rIdx}
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: '2fr 1fr 1fr 32px',
+                      gap: 6,
+                      alignItems: 'center'
+                    }}
+                  >
+                    <input
+                      type="text"
+                      className="form-input"
+                      style={{ height: 32, fontSize: '0.8rem' }}
+                      placeholder="Atributo / Especificação"
+                      value={r.attr}
+                      onChange={e => {
+                        const val = e.target.value
+                        updateShowcase(s => {
+                          const nextR = [...s.comparison.rows]
+                          nextR[rIdx] = { ...nextR[rIdx], attr: val }
+                          return { ...s, comparison: { ...s.comparison, rows: nextR } }
+                        })
+                      }}
+                    />
+                    <input
+                      type="text"
+                      className="form-input"
+                      style={{ height: 32, fontSize: '0.8rem' }}
+                      placeholder="Valor Coluna 1"
+                      value={r.col1_val}
+                      onChange={e => {
+                        const val = e.target.value
+                        updateShowcase(s => {
+                          const nextR = [...s.comparison.rows]
+                          nextR[rIdx] = { ...nextR[rIdx], col1_val: val }
+                          return { ...s, comparison: { ...s.comparison, rows: nextR } }
+                        })
+                      }}
+                    />
+                    <input
+                      type="text"
+                      className="form-input"
+                      style={{ height: 32, fontSize: '0.8rem' }}
+                      placeholder="Valor Coluna 2"
+                      value={r.col2_val}
+                      onChange={e => {
+                        const val = e.target.value
+                        updateShowcase(s => {
+                          const nextR = [...s.comparison.rows]
+                          nextR[rIdx] = { ...nextR[rIdx], col2_val: val }
+                          return { ...s, comparison: { ...s.comparison, rows: nextR } }
+                        })
+                      }}
+                    />
+                    <button
+                      type="button"
+                      style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 2 }}
+                      title="Remover linha"
+                      onClick={() => {
+                        updateShowcase(s => ({
+                          ...s,
+                          comparison: {
+                            ...s.comparison,
+                            rows: s.comparison.rows.filter((_, i) => i !== rIdx)
+                          }
+                        }))
+                      }}
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
+                ))}
+                <div style={{ marginTop: 4 }}>
+                  <button
+                    type="button"
+                    className="btn-secondary-action"
+                    style={{ fontSize: '0.78rem', height: 28 }}
+                    onClick={() => {
+                      updateShowcase(s => ({
+                        ...s,
+                        comparison: {
+                          ...s.comparison,
+                          rows: [
+                            ...s.comparison.rows,
+                            { attr: 'Nova Especificação', col1_val: '—', col2_val: 'Incluso' }
+                          ]
+                        }
+                      }))
+                    }}
+                  >
+                    <Plus size={13} /> Adicionar Linha
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ── 5. PERGUNTAS FREQUENTES (FAQ) ── */}
+        <div className="form-card" style={{ padding: 0, overflow: 'hidden' }}>
+          <button
+            type="button"
+            onClick={() => toggleSection('faq')}
+            style={{
+              width: '100%',
+              padding: '12px 16px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              background: expandedSections.faq ? '#f8fafc' : '#ffffff',
+              border: 'none',
+              borderBottom: expandedSections.faq ? '1px solid #e2e8f0' : 'none',
+              cursor: 'pointer',
+              textAlign: 'left'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{
+                width: 22,
+                height: 22,
+                borderRadius: '50%',
+                background: '#e2e8f0',
+                color: '#334155',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>5</span>
+              <span style={{ fontSize: '0.88rem', fontWeight: 600, color: '#0f172a' }}>Perguntas Frequentes (FAQ)</span>
+              <span style={{ fontSize: '0.78rem', color: '#64748b', marginLeft: 4 }}>
+                • {(form.editorial_showcase.faqs || []).length} pergunta(s)
+              </span>
+            </div>
+            <div style={{ color: '#64748b' }}>
+              {expandedSections.faq ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </div>
+          </button>
+
+          {expandedSections.faq && (
+            <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <button
+                  type="button"
+                  className="btn-secondary-action"
+                  style={{ fontSize: '0.78rem', height: 28 }}
+                  onClick={() => {
+                    updateShowcase(s => ({
+                      ...s,
+                      faqs: [
+                        ...s.faqs,
+                        {
+                          q: 'Nova Pergunta Frequente?',
+                          a: 'Resposta da loja...'
+                        }
+                      ]
+                    }))
+                  }}
+                >
+                  <Plus size={13} /> Adicionar Pergunta
+                </button>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {(form.editorial_showcase.faqs || []).map((faq, fIdx) => (
+                  <div
+                    key={fIdx}
+                    style={{
+                      padding: 8,
+                      background: '#f8fafc',
+                      borderRadius: 6,
+                      border: '1px solid #e2e8f0',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 6
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <input
+                        type="text"
+                        className="form-input"
+                        style={{ height: 30, fontSize: '0.82rem' }}
+                        placeholder="Pergunta"
+                        value={faq.q}
+                        onChange={e => {
+                          const val = e.target.value
+                          updateShowcase(s => {
+                            const nextF = [...s.faqs]
+                            nextF[fIdx] = { ...nextF[fIdx], q: val }
+                            return { ...s, faqs: nextF }
+                          })
+                        }}
+                      />
+                      <button
+                        type="button"
+                        style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 2 }}
+                        title="Remover pergunta"
+                        onClick={() => {
+                          updateShowcase(s => ({
+                            ...s,
+                            faqs: s.faqs.filter((_, i) => i !== fIdx)
+                          }))
+                        }}
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                    <textarea
+                      className="form-input"
+                      rows={2}
+                      style={{ resize: 'vertical', fontSize: '0.8rem' }}
+                      placeholder="Resposta..."
+                      value={faq.a}
+                      onChange={e => {
+                        const val = e.target.value
+                        updateShowcase(s => {
+                          const nextF = [...s.faqs]
+                          nextF[fIdx] = { ...nextF[fIdx], a: val }
+                          return { ...s, faqs: nextF }
+                        })
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    )}
 
         {/* Sticky Bottom Save Bar */}
+        <div className="form-card" style={{ marginTop: 16 }}>
+          <h3 style={{ margin: '0 0 6px' }}>Apresentação do produto</h3>
+          <p style={{ margin: '0 0 14px', color: '#64748b', fontSize: 13 }}>
+            Adicione até 3 imagens que serão exibidas abaixo do produto na loja.
+          </p>
+          <div className="form-row">
+            {[0, 1, 2].map((index) => {
+              const images = ((form.editorial_showcase as any)?.presentation_images || []) as string[]
+              return (
+                <div className="form-group" key={index}>
+                  <label>Imagem {index + 1}</label>
+                  {images[index] && (
+                    <img
+                      src={images[index]}
+                      alt={`Pré-visualização da imagem ${index + 1}`}
+                      style={{ width: '100%', maxHeight: 180, objectFit: 'contain', border: '1px solid #e2e8f0', borderRadius: 8, marginBottom: 8, background: '#f8fafc' }}
+                    />
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    style={{ width: '100%', fontSize: 12 }}
+                    onChange={(event) => {
+                      if (event.target.files?.[0]) handleUploadFiles([event.target.files[0]], index)
+                      event.currentTarget.value = ''
+                    }}
+                  />
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        <div className="form-card" style={{ marginTop: 16 }}>
+          <h3 style={{ margin: '0 0 6px' }}>Perguntas e respostas</h3>
+          <p style={{ margin: '0 0 14px', color: '#64748b', fontSize: 13 }}>
+            Cadastre perguntas frequentes e respostas específicas deste produto.
+          </p>
+          {(((form.editorial_showcase as any)?.custom_faqs || []) as Array<{ question: string; answer: string }>).map((item, index, list) => (
+            <div key={index} style={{ display: 'grid', gap: 8, marginBottom: 12, padding: 12, border: '1px solid #e2e8f0', borderRadius: 8 }}>
+              <input className="form-input" placeholder="Título ou pergunta" value={item.question} onChange={(event) => {
+                const next = [...list]; next[index] = { ...next[index], question: event.target.value }
+                updateShowcase((showcase: any) => ({ ...showcase, custom_faqs: next }))
+              }} />
+              <textarea className="form-input" rows={2} placeholder="Resposta ou descrição" value={item.answer} onChange={(event) => {
+                const next = [...list]; next[index] = { ...next[index], answer: event.target.value }
+                updateShowcase((showcase: any) => ({ ...showcase, custom_faqs: next }))
+              }} />
+              <button type="button" className="btn-secondary-action" onClick={() => updateShowcase((showcase: any) => ({ ...showcase, custom_faqs: list.filter((_, itemIndex) => itemIndex !== index) }))}>Remover pergunta</button>
+            </div>
+          ))}
+          <button type="button" className="btn-secondary-action" onClick={() => updateShowcase((showcase: any) => ({ ...showcase, custom_faqs: [...(showcase.custom_faqs || []), { question: '', answer: '' }] }))}>+ Adicionar pergunta</button>
+        </div>
+
         <div className="product-form-footer">
           <button type="button" className="btn-secondary-action" onClick={() => navigate('/hub/produtos')}>
             Cancelar
