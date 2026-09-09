@@ -398,10 +398,8 @@ export async function getProductById(id: string) {
   const fallback = HUB_FALLBACK_PRODUCTS.find(p => p.id === id || p.sku === id || p.slug === id)
   if (fallback) return fallback
 
-  // 2. Consulta o catálogo público sem depender da sessão do cliente.
-  // A visualização de produto é pública; autenticação fica restrita a conta,
-  // pedidos e checkout. O storeClient ainda é usado para respeitar as regras
-  // de publicação existentes quando a base permitir leitura anônima.
+  // 2. Garante autenticação de catálogo para permissão de leitura no Supabase RLS
+  await ensureCatalogAuth()
   const keys = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
     ? ['id', 'sku', 'slug', 'mercadolivre_item_id']
     : ['sku', 'slug', 'mercadolivre_item_id']

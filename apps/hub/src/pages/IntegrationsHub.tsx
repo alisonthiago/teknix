@@ -202,7 +202,7 @@ export default function IntegrationsHub() {
         <div className="health-header">
           <div className="health-title-group">
             <div className="health-pulse-dot" />
-            <h2 style={{ fontSize: '15px', fontWeight: 700, margin: 0, color: '#111827' }}>
+            <h2 style={{ fontSize: '15px', fontWeight: 700, margin: 0, color: '#000000' }}>
               Status Operacional dos Serviços em Tempo Real
             </h2>
           </div>
@@ -356,7 +356,7 @@ export default function IntegrationsHub() {
       {activeTab === 'logs' && (
         <div className="logs-table-card">
           <div className="logs-table-header">
-            <h3 style={{ fontSize: '16px', fontWeight: 700, margin: 0, color: '#111827' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 700, margin: 0, color: '#000000' }}>
               Histórico de Eventos & Reprocessamento
             </h3>
             <button className="btn btn-secondary" style={{ fontSize: '12px' }} onClick={() => { IntegrationStorage.clearLogs(); loadData(); }}>
@@ -422,7 +422,7 @@ export default function IntegrationsHub() {
         <div className="logs-table-card">
           <div className="logs-table-header">
             <div>
-              <h3 style={{ fontSize: '16px', fontWeight: 700, margin: 0, color: '#111827' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: 700, margin: 0, color: '#000000' }}>
                 Simulador de Webhooks & Teste de Idempotência
               </h3>
               <p style={{ fontSize: '13px', color: '#6b7280', margin: '4px 0 0' }}>
@@ -464,7 +464,7 @@ export default function IntegrationsHub() {
                   height: '220px',
                   overflowY: 'auto',
                   fontSize: '12px',
-                  color: '#111827'
+                  color: '#000000'
                 }}
               >
                 {webhookResult ? JSON.stringify(webhookResult, null, 2) : 'Aguardando disparo do webhook...'}
@@ -479,7 +479,7 @@ export default function IntegrationsHub() {
         <div className="modal-overlay" onClick={() => setEditingConfig(null)}>
           <div className="modal-box" onClick={(e) => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ fontSize: '17px', fontWeight: 700, margin: 0, color: '#111827' }}>
+              <h3 style={{ fontSize: '17px', fontWeight: 700, margin: 0, color: '#000000' }}>
                 Configurar {editingConfig.name}
               </h3>
               <button

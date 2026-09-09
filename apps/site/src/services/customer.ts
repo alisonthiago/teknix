@@ -117,12 +117,42 @@ export async function createOrUpdateCustomer(user: User, customerData: Partial<C
     }
     return data as Customer
   } else {
+    // 2. Se não encontrou por user_id, verifica se existe cliente com o mesmo email
+    let existingByEmail: Customer | null = null
+    if (user.email) {
+      const { data: byEmail } = await supabase
+        .from('customers')
+        .select('*')
+        .eq('email', user.email.toLowerCase().trim())
+        .maybeSingle()
+      existingByEmail = byEmail as Customer | null
+    }
+
+    if (existingByEmail) {
+      const { data, error } = await supabase
+        .from('customers')
+        .update({
+          ...customerData,
+          user_id: user.id,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', existingByEmail.id)
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Erro ao vincular cliente existente por email:', error)
+        return null
+      }
+      return data as Customer
+    }
+
     const { data, error } = await supabase
       .from('customers')
       .insert({
         user_id: user.id,
-        name: customerData.name || user.user_metadata?.name || user.email?.split('@')[0] || 'Cliente',
-        email: user.email,
+        name: customerData.name || user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'Cliente',
+        email: user.email?.toLowerCase().trim() || '',
         phone: customerData.phone || '',
         ...customerData,
         created_at: new Date().toISOString()
@@ -135,6 +165,83 @@ export async function createOrUpdateCustomer(user: User, customerData: Partial<C
       return null
     }
     return data as Customer
+  }
+}
+
+/**
+ * Sincroniza usuário do provedor OAuth (Google) com a tabela customers.
+ * Vincula compras anteriores como visitante ou cadastra o novo cliente.
+ */
+export async function syncOAuthUser(user: User): Promise<Customer | null> {
+  if (!user || !user.id) return null
+
+  try {
+    const meta = user.user_metadata || {}
+    const fullName = meta.full_name || meta.name || user.email?.split('@')[0] || 'Cliente'
+
+    // 1. Tentar localizar cliente pelo user_id
+    const existing = await getCustomerByUserId(user.id)
+    if (existing) {
+      // Se não tinha nome registrado e agora o Google forneceu, atualiza
+      if (!existing.name && fullName) {
+        await supabase
+          .from('customers')
+          .update({ name: fullName, updated_at: new Date().toISOString() })
+          .eq('id', existing.id)
+      }
+      return existing
+    }
+
+    // 2. Se não achou pelo user_id, buscar pelo email para vincular histórico
+    if (user.email) {
+      const { data: byEmail } = await supabase
+        .from('customers')
+        .select('*')
+        .eq('email', user.email.toLowerCase().trim())
+        .maybeSingle()
+
+      if (byEmail) {
+        const { data: updated, error: updateErr } = await supabase
+          .from('customers')
+          .update({
+            user_id: user.id,
+            name: byEmail.name || fullName,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', byEmail.id)
+          .select()
+          .maybeSingle()
+
+        if (!updateErr && updated) {
+          return updated as Customer
+        }
+        return byEmail as Customer
+      }
+    }
+
+    // 3. Cadastrar novo cliente a partir dos dados do Google
+    const { data: created, error } = await supabase
+      .from('customers')
+      .insert({
+        user_id: user.id,
+        name: fullName,
+        email: user.email?.toLowerCase().trim() || '',
+        phone: meta.phone || '',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .select()
+      .maybeSingle()
+
+    if (error) {
+      console.warn('[syncOAuthUser] Não foi possível persistir em customers:', error.message)
+      return null
+    }
+
+    return created as Customer
+  } catch (err) {
+    console.error('[syncOAuthUser] Erro ao sincronizar cliente OAuth:', err)
+    return null
   }
 }
 

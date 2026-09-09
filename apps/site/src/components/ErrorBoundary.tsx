@@ -44,7 +44,7 @@ export default class ErrorBoundary extends Component<Props, State> {
           padding: '24px',
           fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
           background: '#f8fafc',
-          color: '#111827',
+          color: '#000000',
           textAlign: 'center'
         }}>
           <div style={{
@@ -76,7 +76,7 @@ export default class ErrorBoundary extends Component<Props, State> {
               fontWeight: 800,
               letterSpacing: '-0.02em',
               margin: '0 0 10px',
-              color: '#111827'
+              color: '#000000'
             }}>
               Ops! Tivemos um pequeno imprevisto.
             </h1>

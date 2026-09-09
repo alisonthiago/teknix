@@ -115,7 +115,7 @@
 
 .nav-tab-btn:hover {
   background: var(--tk-color-surface-hover, #f3f4f6);
-  color: var(--tk-color-text-primary, #111827);
+  color: var(--tk-color-text-primary, #000000);
 }
 
 .nav-tab-btn.active {
@@ -186,7 +186,7 @@
 .card-title {
   font-size: 16px;
   font-weight: 700;
-  color: var(--tk-color-text-primary, #111827);
+  color: var(--tk-color-text-primary, #000000);
   margin: 0;
 }
 
@@ -320,7 +320,7 @@
 .tk-table td {
   padding: 12px 14px;
   border-bottom: 1px solid #f3f4f6;
-  color: var(--tk-color-text-primary, #111827);
+  color: var(--tk-color-text-primary, #000000);
 }
 
 /* Modal */

@@ -155,11 +155,11 @@
 
 .nav-item:hover {
   background: #f8fafc;
-  color: #111827;
+  color: #000000;
 }
 
 .nav-item.active {
-  color: #111827;
+  color: #000000;
   font-weight: 500;
   background: #f1f5f9;
 }
@@ -175,11 +175,11 @@
 }
 
 .nav-item.active .nav-icon {
-  color: #111827;
+  color: #000000;
 }
 
 .nav-item:hover .nav-icon {
-  color: #111827;
+  color: #000000;
 }
 
 .nav-label {
@@ -321,7 +321,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #111827;
+  color: #000000;
   cursor: pointer;
   position: relative;
   transition: background 0.15s ease;
@@ -354,7 +354,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: #111827;
+  background: #000000;
   color: #ffffff;
   font-size: 12px;
   font-weight: 700;
@@ -414,7 +414,7 @@
 .flow-user-name-text {
   font-size: 13px;
   font-weight: 700;
-  color: #111827;
+  color: #000000;
   white-space: nowrap;
   max-width: 130px;
   overflow: hidden;
@@ -456,7 +456,7 @@
 .flow-notification-list { padding:12px; display:grid; gap:8px; max-height:360px; overflow:auto; }
 .flow-notification-item { display:flex; align-items:center; gap:10px; padding:12px 14px; border:1px solid #eee; border-radius:12px; background:#fff; }
 .flow-notification-icon { width:28px; height:28px; border-radius:50%; display:grid; place-items:center; background:#f5f5f5; color:#333; font-weight:700; }
-.flow-notification-item strong { display:block; font-size:12px; color:#111827; }
+.flow-notification-item strong { display:block; font-size:12px; color:#000000; }
 .flow-notification-item small { display:block; margin-top:3px; font-size:10px; color:#999; }
 .flow-notification-item i { margin-left:auto; width:7px; height:7px; border-radius:50%; background:#16a34a; }
 .flow-notification-footer { display:block; padding:12px; border-top:1px solid #eee; text-align:center; color:#347ff2; font-size:11px; font-weight:700; }
@@ -468,7 +468,7 @@
 .flow-dropdown-name {
   font-size: 13px;
   font-weight: 500;
-  color: #111827;
+  color: #000000;
   letter-spacing: -0.01em;
 }
 
@@ -498,7 +498,7 @@
 
 .flow-dropdown-item:hover {
   background: #f5f5f5;
-  color: #111827;
+  color: #000000;
 }
 
 .flow-dropdown-item.logout {

@@ -20,9 +20,23 @@ export class BrevoEmailProvider {
   constructor(apiKey?: string, sender?: { email: string; name: string }) {
     const globalObj = typeof globalThis !== 'undefined' ? (globalThis as any) : {}
     this.apiKey = apiKey || globalObj.process?.env?.BREVO_API_KEY || ''
+    
+    let envEmail = ''
+    let envName = ''
+    try {
+      envEmail = globalObj.process?.env?.BREVO_SENDER_EMAIL || globalObj.process?.env?.VITE_BREVO_SENDER_EMAIL || ''
+      envName = globalObj.process?.env?.BREVO_SENDER_NAME || globalObj.process?.env?.VITE_BREVO_SENDER_NAME || ''
+    } catch {}
+    try {
+      if (!envEmail && typeof import.meta !== 'undefined') {
+        envEmail = (import.meta as any)?.env?.VITE_BREVO_SENDER_EMAIL || (import.meta as any)?.env?.BREVO_SENDER_EMAIL || ''
+        envName = (import.meta as any)?.env?.VITE_BREVO_SENDER_NAME || (import.meta as any)?.env?.BREVO_SENDER_NAME || ''
+      }
+    } catch {}
+
     this.defaultSender = sender || {
-      email: 'nao-responda@teknixbrasil.com.br',
-      name: 'TEKNIX'
+      email: envEmail || 'alisonsilvathiago@gmail.com',
+      name: envName || 'TEKNIX'
     }
   }
 

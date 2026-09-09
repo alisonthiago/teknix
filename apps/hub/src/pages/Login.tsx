@@ -135,6 +135,19 @@ export default function Login() {
       <div className="flow-login-right">
         <div className="flow-login-grid-pattern"></div>
         <div className="flow-login-lime-glow"></div>
+        <div className="flow-login-promo">
+          <span className="flow-login-promo-kicker">TEKNIX • PAINEL DE OPERAÇÕES</span>
+          <h2>Controle sua loja em um só lugar.</h2>
+          <p>Produtos, pedidos, vendas e integrações organizados para você trabalhar melhor.</p>
+          <div className="flow-login-promo-points">
+            <span>✓ Gestão simples e centralizada</span>
+            <span>✓ Acompanhe seus resultados</span>
+            <span>✓ Venda com mais eficiência</span>
+          </div>
+          <div className="flow-login-promo-orbit" aria-hidden="true">
+            <span>⌂</span><span>▣</span><span>↗</span><span>✓</span>
+          </div>
+        </div>
       </div>
     </div>
   )

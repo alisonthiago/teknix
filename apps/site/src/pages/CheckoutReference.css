@@ -17,7 +17,7 @@
 .tkn-checkout-account-menu > summary { list-style:none; display:flex; align-items:center; gap:8px; cursor:pointer; }
 .tkn-checkout-account-menu > summary::-webkit-details-marker { display:none; }
 .tkn-checkout-account-menu[open] > summary > svg { transform:rotate(180deg); }
-.tkn-checkout-avatar { width:28px; height:28px; border-radius:50%; display:grid; place-items:center; flex:0 0 auto; overflow:hidden; background:#111827; color:#fff; font-size:11px; font-weight:600; }
+.tkn-checkout-avatar { width:28px; height:28px; border-radius:50%; display:grid; place-items:center; flex:0 0 auto; overflow:hidden; background:#000000; color:#fff; font-size:11px; font-weight:600; }
 .tkn-checkout-avatar img { width:100%; height:100%; object-fit:cover; }
 .tkn-checkout-account-name { max-width:132px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .tkn-checkout-account-popover { position:absolute; z-index:20; right:0; top:calc(100% + 12px); width:260px; padding:8px; border:1px solid #e2e2e2; border-radius:12px; background:#fff; box-shadow:0 12px 30px rgb(0 0 0 / .14); }
@@ -130,3 +130,209 @@
   #root .tkn-checkout h1 { font-size:24px; }
   #root .tkn-checkout h2 { font-size:18px; margin-bottom:20px; }
 }
+
+/* ==========================================================================
+   PIX SUCCESS SCREEN
+   ========================================================================== */
+.tkn-pix-screen, .tkn-boleto-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+}
+.tkn-pix-icon {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: #f0fff4;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+}
+.tkn-pix-title {
+  font-size: 22px !important;
+  font-weight: 600 !important;
+  margin: 0 !important;
+  color: #1d1d1f;
+}
+.tkn-pix-subtitle {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  line-height: 1.5;
+}
+.tkn-pix-qr {
+  display: block;
+  width: 200px; height: 200px;
+  border-radius: 16px;
+  border: 1px solid #e5e5e5;
+  box-shadow: 0 4px 16px rgb(0 0 0 / .08);
+  padding: 8px;
+  background: #fff;
+  box-sizing: border-box;
+}
+.tkn-pix-qr-placeholder {
+  width: 200px; height: 200px;
+  border-radius: 16px;
+  border: 1px solid #e5e5e5;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 12px;
+  background: #fafafa;
+  color: #999;
+  font-size: 13px;
+}
+.tkn-pix-code-wrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: stretch;
+}
+.tkn-pix-code {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  padding: 12px;
+  border: 1px solid #d5d5d5;
+  border-radius: 10px;
+  background: #f9f9f9;
+  color: #444;
+  resize: none;
+  word-break: break-all;
+}
+.tkn-pix-copy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 44px;
+  border: 1.5px solid #1dc860;
+  border-radius: 10px;
+  background: transparent;
+  color: #1dc860;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.tkn-pix-copy:hover, .tkn-pix-copy.is-copied {
+  background: #1dc860;
+  color: #fff;
+}
+.tkn-pix-tips {
+  text-align: left;
+  margin: 0;
+  padding: 16px 20px;
+  background: #f8f8f8;
+  border-radius: 12px;
+  list-style: none;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.tkn-pix-tips li {
+  font-size: 13px;
+  color: #555;
+  line-height: 1.5;
+  padding-left: 18px;
+  position: relative;
+}
+.tkn-pix-tips li::before {
+  content: '›';
+  position: absolute;
+  left: 0;
+  color: #3483fa;
+  font-weight: 700;
+}
+.tkn-pix-waiting {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #999;
+}
+@keyframes tkn-spin { to { transform: rotate(360deg); } }
+.tkn-pix-spin { animation: tkn-spin 1.5s linear infinite; }
+
+/* ==========================================================================
+   BOLETO SUCCESS SCREEN
+   ========================================================================== */
+.tkn-boleto-line-wrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+.tkn-boleto-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+.tkn-boleto-line {
+  width: 100%;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  color: #222;
+  background: #f8f8f8;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 12px 14px;
+  box-sizing: border-box;
+  word-break: break-all;
+  line-height: 1.6;
+}
+.tkn-boleto-open {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 48px;
+  border-radius: 10px;
+  background: #1d1d1f;
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity .15s;
+}
+.tkn-boleto-open:hover { opacity: .85; }
+
+/* ==========================================================================
+   CREDIT CARD FIELDS
+   ========================================================================== */
+.tkn-card-fields {
+  margin-top: 16px;
+  padding: 16px;
+  background: #f7f9ff;
+  border: 1px solid #dce8ff;
+  border-radius: 14px;
+}
+.tkn-card-brand-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #3483fa;
+  margin-bottom: 16px;
+}
+.tkn-card-brand-name {
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+

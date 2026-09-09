@@ -30,6 +30,10 @@ export interface CreateOrderParams {
   discount: number
   paymentMethod: 'pix' | 'credit_card' | 'boleto'
   userId?: string
+  // Credit card tokenization (Mercado Pago SDK)
+  cardToken?: string
+  cardBrand?: string
+  installments?: number
 }
 
 export interface CreatedOrderResult {
@@ -38,14 +42,20 @@ export interface CreatedOrderResult {
   orderNumber?: string
   total?: number
   paymentId?: string
+  // Pix
   qrCode?: string
   qrCodeBase64?: string
+  // Boleto
+  ticketUrl?: string
+  barcodeContent?: string
+  digitableLine?: string
+  // Legacy / external checkout fallback
   checkoutUrl?: string
   error?: string
 }
 
 export async function processCheckoutOrder(params: CreateOrderParams): Promise<CreatedOrderResult> {
-  const { items, customer, shippingCost, shippingMethod, discount, paymentMethod, userId } = params
+  const { items, customer, shippingCost, shippingMethod, discount, paymentMethod, userId, cardToken, cardBrand, installments } = params
 
   if (!items || items.length === 0) {
     return { success: false, error: 'O carrinho está vazio.' }
@@ -144,6 +154,16 @@ export async function processCheckoutOrder(params: CreateOrderParams): Promise<C
 
     const orderId = orderData.id
 
+    // 4a. DISPARO IMEDIATO — Pedido criado (aguardando pagamento)
+    dispatchSiteNotification('order.created', {
+      orderNumber: orderData.order_number || orderNumber,
+      total,
+      customerName: customer.name,
+      customerEmail: customer.email,
+      customerPhone: customer.phone,
+      itemsCount: items.length
+    }).catch(err => console.warn('[checkout] order.created notification:', err))
+
     // 4. Inserir Itens do Pedido na tabela `order_items`
     const orderItemsPayload = items.map(item => {
       const unitPrice = item.promo_price && item.promo_price > 0 ? item.promo_price : item.price
@@ -214,73 +234,72 @@ export async function processCheckoutOrder(params: CreateOrderParams): Promise<C
       }
     }
 
-    // 6. PROCESSAMENTO REAL DE PAGAMENTO NO SERVIDOR (MERCADO PAGO VIA EDGE FUNCTION)
+    // 6. PROCESSAMENTO REAL DE PAGAMENTO — MERCADO PAGO ORDERS API (/v1/orders)
+    //    Único ponto de criação de Order para Pix, Cartão e Boleto.
+    //    O Access Token NUNCA toca o frontend — trafega apenas via Edge Function.
     let paymentResult: any = null
     try {
-      if (paymentMethod === 'pix') {
-        const { data: edgeData } = await supabase.functions.invoke('integrations-proxy', {
-          body: {
-            provider: 'mercado_pago',
-            action: 'create_pix',
-            payload: {
-              orderId,
-              orderNumber,
-              amount: total,
-              description: `Pedido ${orderNumber} - TEKNIX`,
-              payer: {
-                email: customer.email,
-                firstName: customer.name.split(' ')[0],
-                lastName: customer.name.split(' ').slice(1).join(' '),
-                identification: {
-                  type: customer.document.replace(/\D/g, '').length > 11 ? 'CNPJ' : 'CPF',
-                  number: customer.document
-                }
+      const docNumber = customer.document.replace(/\D/g, '')
+      const docType = docNumber.length > 11 ? 'CNPJ' : 'CPF'
+
+      const { data: edgeData, error: edgeError } = await supabase.functions.invoke('integrations-proxy', {
+        body: {
+          provider: 'mercado_pago',
+          action: 'create_order',
+          payload: {
+            orderId,
+            orderNumber,
+            amount: total,
+            paymentMethod,
+            // Credit card
+            cardToken: cardToken || undefined,
+            cardBrand: cardBrand || undefined,
+            installments: installments || 1,
+            // Payer info
+            payer: {
+              email: customer.email,
+              firstName: customer.name.split(' ')[0],
+              lastName: customer.name.split(' ').slice(1).join(' ') || 'TEKNIX',
+              identification: { type: docType, number: docNumber },
+              // Address — required for boleto
+              address: {
+                zipCode: customer.zipCode,
+                street: customer.street,
+                number: customer.number,
+                neighborhood: customer.neighborhood,
+                city: customer.city || 'São Paulo',
+                state: customer.state || 'SP'
               }
-            }
+            },
+            // Idempotency key to prevent double charges
+            idempotencyKey: `teknix-${orderId}-${Date.now()}`
           }
-        })
-        paymentResult = edgeData
-      } else {
-        const { data: edgeData } = await supabase.functions.invoke('integrations-proxy', {
-          body: {
-            provider: 'mercado_pago',
-            action: 'create_preference',
-            payload: {
-              id: orderId,
-              title: `Pedido ${orderNumber} - TEKNIX`,
-              price: total,
-              quantity: 1,
-              originUrl: window.location.origin
-            }
-          }
-        })
-        paymentResult = edgeData
+        }
+      })
+
+      if (edgeError) {
+        console.warn('[checkout] Edge function error:', edgeError.message)
       }
 
-      // Atualiza o ID do pagamento gerado no pedido
-      if (paymentResult?.paymentId || paymentResult?.preferenceId) {
+      paymentResult = edgeData
+
+      // Update payment_id on the stored order
+      if (paymentResult?.mpPaymentId || paymentResult?.mpOrderId) {
         await supabase
           .from('orders')
           .update({
-            payment_id: paymentResult.paymentId || paymentResult.preferenceId,
+            payment_id: paymentResult.mpPaymentId || paymentResult.mpOrderId,
             updated_at: new Date().toISOString()
           })
           .eq('id', orderId)
       }
     } catch (mpErr: any) {
-      console.warn('Processamento de pagamento via fallback seguro:', mpErr.message)
+      console.warn('[checkout] Pagamento via fallback seguro (edge indisponível):', mpErr.message)
     }
 
-    // 7. DISPARO CENTRAL DE NOTIFICAÇÕES (COMPRADOR E OPERAÇÃO)
-    await dispatchSiteNotification('order.paid', {
-      orderNumber: orderData.order_number || orderNumber,
-      total,
-      customerName: customer.name,
-      customerEmail: customer.email,
-      customerPhone: customer.phone,
-      itemsCount: items.length
-    })
-
+    // 7. Retorna resultado com dados de pagamento para a UI
+    //    A notificação order.paid SÓ será disparada pelo webhook quando o
+    //    Mercado Pago confirmar o pagamento (via webhook idempotente).
     const defaultPixQr = `00020101021226840014br.gov.bcb.pix2562pix.mercadopago.com/qr/${orderNumber}5204000053039865802BR5925TEKNIX6009SAOPAULO62070503***6304`
 
     return {
@@ -288,9 +307,14 @@ export async function processCheckoutOrder(params: CreateOrderParams): Promise<C
       orderId,
       orderNumber: orderData.order_number || orderNumber,
       total,
-      paymentId: paymentResult?.paymentId,
-      qrCode: paymentResult?.qrCode || defaultPixQr,
+      paymentId: paymentResult?.mpPaymentId || paymentResult?.mpOrderId,
+      // Pix
+      qrCode: paymentResult?.qrCode || (paymentMethod === 'pix' ? defaultPixQr : ''),
       qrCodeBase64: paymentResult?.qrCodeBase64 || '',
+      // Boleto
+      ticketUrl: paymentResult?.ticketUrl || '',
+      barcodeContent: paymentResult?.barcodeContent || '',
+      digitableLine: paymentResult?.digitableLine || '',
       checkoutUrl: paymentResult?.checkoutUrl || ''
     }
   } catch (error: any) {

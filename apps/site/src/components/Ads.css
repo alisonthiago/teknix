@@ -537,7 +537,7 @@
   position: fixed;
   bottom: 24px;
   right: 24px;
-  background: #111827;
+  background: #000000;
   color: #fff;
   padding: var(--tkn-space-12) var(--tkn-space-16);
   border-radius: 9999px;
@@ -552,7 +552,7 @@
 }
 .teknix-ads-preview-return-hub {
   background: #b5f500;
-  color: #111827;
+  color: #000000;
   padding: var(--tkn-space-4) var(--tkn-space-12);
   border-radius: 9999px;
   text-decoration: none;

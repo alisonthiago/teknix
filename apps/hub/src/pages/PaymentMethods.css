@@ -29,7 +29,7 @@
 .payments-title {
   font-size: 1.45rem;
   font-weight: 700;
-  color: #111827;
+  color: #000000;
   margin: 0;
 }
 
@@ -63,12 +63,12 @@
 }
 
 .payment-tab-btn:hover {
-  color: #111827;
+  color: #000000;
 }
 
 .payment-tab-btn.active {
-  color: #111827;
-  border-bottom-color: #111827;
+  color: #000000;
+  border-bottom-color: #000000;
 }
 
 .tab-badge {

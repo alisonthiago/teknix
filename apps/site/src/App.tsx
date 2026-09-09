@@ -15,6 +15,7 @@ import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import ForgotPassword from './pages/ForgotPassword'
+import AuthCallback from './pages/AuthCallback'
 import OrdersList from './pages/OrdersList'
 import OrderLookup from './pages/OrderLookup'
 import SavedItems from './pages/SavedItems'
@@ -37,6 +38,7 @@ import NewsIndex from './pages/NewsIndex'
 import HelpCenter from './pages/HelpCenter'
 import HelpTopic from './pages/HelpTopic'
 import LegalPage from './pages/LegalPage'
+import EmailPreview from './pages/EmailPreview'
 import './App.css'
 
 import TeknixHeader from './components/TeknixHeader'
@@ -112,6 +114,34 @@ function App() {
     if (pathname === '/news/sustentabilidade' || pathname === '/news/sustentabilidad') return <NewsSustainability />
     return <News />
   }
+
+  // Suporte nativo ao domínio de checkout play.teknixbrasil.com.br
+  const isPlayHost = typeof window !== 'undefined' && (window.location.hostname.startsWith('play.') || window.location.hostname === 'play.teknixbrasil.com.br')
+  if (isPlayHost) {
+    return (
+      <AuthProvider>
+        <CartProvider>
+          <FavoritesProvider>
+            <CompareProvider>
+              <CookieNotice />
+              <SiteStandards>
+                <PageScope key={pathname} path={pathname}>
+                  <Routes>
+                    <Route path="/" element={<NativePageCanvas><Checkout /></NativePageCanvas>} />
+                    <Route path="/checkout" element={<NativePageCanvas><Checkout /></NativePageCanvas>} />
+                    <Route path="/checkout/:code" element={<NativePageCanvas><Checkout /></NativePageCanvas>} />
+                    <Route path="/:code" element={<NativePageCanvas><Checkout /></NativePageCanvas>} />
+                    <Route path="*" element={<NativePageCanvas><Checkout /></NativePageCanvas>} />
+                  </Routes>
+                </PageScope>
+              </SiteStandards>
+            </CompareProvider>
+          </FavoritesProvider>
+        </CartProvider>
+      </AuthProvider>
+    )
+  }
+
   return (
     <AuthProvider>
       <CartProvider>
@@ -128,6 +158,7 @@ function App() {
               <Route path="/login" element={<NativePageCanvas><Login /></NativePageCanvas>} />
               <Route path="/cadastro" element={<NativePageCanvas><Register /></NativePageCanvas>} />
               <Route path="/password" element={<NativePageCanvas><ForgotPassword /></NativePageCanvas>} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
 
               {/* 2. Páginas Nativas e Protegidas do Sistema */}
               <Route path="/conta" element={<SiteLayout><Account /></SiteLayout>} />
@@ -154,6 +185,11 @@ function App() {
 
               {/* 4. Checkout Oficial */}
               <Route path="/checkout" element={<NativePageCanvas><Checkout /></NativePageCanvas>} />
+              <Route path="/checkout/:code" element={<NativePageCanvas><Checkout /></NativePageCanvas>} />
+
+              {/* 4b. Pré-visualizador dos Templates de E-mail Brevo */}
+              <Route path="/email-preview" element={<EmailPreview />} />
+              <Route path="/emails" element={<Navigate to="/email-preview" replace />} />
 
               {/* 5. Busca de Produtos */}
               <Route path="/busca" element={<SiteLayout><SearchResults /></SiteLayout>} />

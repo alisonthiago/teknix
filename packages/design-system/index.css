@@ -1,0 +1,10 @@
+/* ==========================================================================
+   TEKNIX DESIGN SYSTEM — FONTE ÚNICA DE VERDADE DO MONOREPO
+   ========================================================================== */
+
+@import './tokens/typography.css';
+@import './tokens/colors.css';
+@import './tokens/spacing.css';
+@import './tokens/radius.css';
+@import './tokens/shadows.css';
+@import './styles/globals.css';

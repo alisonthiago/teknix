@@ -101,7 +101,7 @@ export default function CartDrawer() {
                 Frete calculado no checkout
               </p>
               <Link
-                to="/checkout"
+                to={items.length === 1 ? `/checkout/${encodeURIComponent(items[0].sku || items[0].id)}` : '/checkout'}
                 className="btn-checkout"
                 onClick={closeCart}
               >

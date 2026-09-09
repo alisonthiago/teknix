@@ -199,13 +199,13 @@
 .results-header h1 {
   font-size: 20px;
   font-weight: 600;
-  color: #111827;
+  color: #000000;
   margin: 0;
   line-height: 1.3;
 }
 
 .results-header strong {
-  color: #111827;
+  color: #000000;
   font-weight: 700;
 }
 
@@ -234,7 +234,7 @@
   background: #ffffff;
   font-size: 13px;
   font-weight: 500;
-  color: #111827;
+  color: #000000;
   cursor: pointer;
   outline: none;
   transition: border-color 0.15s ease;
@@ -242,7 +242,7 @@
 
 .results-sort-select:hover,
 .results-sort-select:focus {
-  border-color: #111827;
+  border-color: #000000;
 }
 
 /* ── MODERN EMPTY STATE ── */
@@ -276,7 +276,7 @@
 .no-results-modern h2 {
   font-size: 18px;
   font-weight: 600;
-  color: #111827;
+  color: #000000;
   margin: 0;
 }
 
@@ -294,7 +294,7 @@
   justify-content: center;
   padding: 10px 22px;
   border-radius: 8px;
-  background: #111827;
+  background: #000000;
   color: #ffffff;
   font-size: 13px;
   font-weight: 600;

@@ -90,7 +90,7 @@ export default function CartTray() {
 
         {/* Ações */}
         <div className="teknix-cart-tray-actions">
-          <Link to="/checkout" className="teknix-cart-tray-btn-primary">
+          <Link to={items.length === 1 ? `/checkout/${encodeURIComponent(items[0].sku || items[0].id)}` : '/checkout'} className="teknix-cart-tray-btn-primary">
             Comprar agora
           </Link>
         </div>

@@ -40,7 +40,7 @@ export default function AccessDenied({
       <h2 style={{
         fontSize: '22px',
         fontWeight: 800,
-        color: '#111827',
+        color: '#000000',
         margin: '0 0 8px 0'
       }}>
         {title}
@@ -63,7 +63,7 @@ export default function AccessDenied({
             display: 'inline-flex',
             alignItems: 'center',
             gap: '8px',
-            background: '#111827',
+            background: '#000000',
             color: '#ffffff',
             padding: '10px 20px',
             borderRadius: '10px',

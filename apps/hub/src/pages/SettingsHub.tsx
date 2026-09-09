@@ -423,13 +423,13 @@ export default function SettingsHub() {
               <div className="settings-card">
                 <h3 className="settings-card-title">Dados do cliente</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#111827' }}>Telefone</div>
+                  <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#000000' }}>Telefone</div>
                   <label className="toggle-switch-label">
                     <input type="checkbox" className="toggle-switch-input" />
                     Pedir telefone de contato
                   </label>
 
-                  <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#111827', marginTop: 4 }}>Emissão de notas fiscais</div>
+                  <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#000000', marginTop: 4 }}>Emissão de notas fiscais</div>
                   <label className="toggle-switch-label">
                     <input type="checkbox" className="toggle-switch-input" defaultChecked />
                     Pedir endereço para emissão de nota fiscal
@@ -542,7 +542,7 @@ export default function SettingsHub() {
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 8, padding: '12px 16px', marginTop: 8 }}>
                   <div>
-                    <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#111827' }}>🇧🇷 Brasil</div>
+                    <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#000000' }}>🇧🇷 Brasil</div>
                     <div style={{ fontSize: '0.78rem', color: '#6b7280' }}>Reais (BRL) • Português (PT-BR)</div>
                   </div>
                   <button className="btn-secondary-action" style={{ padding: '4px 10px', fontSize: '0.75rem' }}>Editar</button>
@@ -593,11 +593,11 @@ export default function SettingsHub() {
 
               <div className="settings-card" style={{ gap: 20 }}>
                 <div>
-                  <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#111827', margin: '0 0 16px 0' }}>Google</h2>
+                  <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#000000', margin: '0 0 16px 0' }}>Google</h2>
                   
                   {/* Google Tag Manager */}
                   <div style={{ marginBottom: 16 }}>
-                    <h3 style={{ fontSize: '0.92rem', fontWeight: 700, color: '#111827', margin: '0 0 4px 0' }}>Google Tag Manager</h3>
+                    <h3 style={{ fontSize: '0.92rem', fontWeight: 700, color: '#000000', margin: '0 0 4px 0' }}>Google Tag Manager</h3>
                     <p style={{ fontSize: '0.8rem', color: '#6b7280', margin: '0 0 8px 0' }}>Insira aqui a ID gerada pelo Google Tag Manager para sua loja.</p>
                     <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>Google GTM ID:</label>
                     <input
@@ -610,7 +610,7 @@ export default function SettingsHub() {
 
                   {/* Google Analytics 4 */}
                   <div style={{ marginBottom: 16 }}>
-                    <h3 style={{ fontSize: '0.92rem', fontWeight: 700, color: '#111827', margin: '0 0 4px 0' }}>Google Analytics 4</h3>
+                    <h3 style={{ fontSize: '0.92rem', fontWeight: 700, color: '#000000', margin: '0 0 4px 0' }}>Google Analytics 4</h3>
                     <p style={{ fontSize: '0.8rem', color: '#6b7280', margin: '0 0 8px 0' }}>Se você já tem uma conta de Google Analytics 4, adicione o código para medir o tráfego da sua loja e a efetividade de suas campanhas.</p>
                     
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -642,7 +642,7 @@ export default function SettingsHub() {
 
                   {/* Verificação de propriedade */}
                   <div>
-                    <h3 style={{ fontSize: '0.92rem', fontWeight: 700, color: '#111827', margin: '0 0 4px 0' }}>Verificação de propriedade da loja no Google</h3>
+                    <h3 style={{ fontSize: '0.92rem', fontWeight: 700, color: '#000000', margin: '0 0 4px 0' }}>Verificação de propriedade da loja no Google</h3>
                     <p style={{ fontSize: '0.8rem', color: '#6b7280', margin: '0 0 8px 0' }}>Além de validar a propriedade do domínio, você poderá saber que palavras-chave seus clientes usaram para te encontrar.</p>
                     <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>Metaetiqueta do Google</label>
                     <textarea
@@ -744,7 +744,7 @@ export default function SettingsHub() {
               <div className="settings-card" style={{ gap: 14 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #f3f4f6' }}>
                   <div>
-                    <div style={{ fontWeight: 700, fontSize: '0.88rem', color: '#111827' }}>Confirmação de pedido realizado</div>
+                    <div style={{ fontWeight: 700, fontSize: '0.88rem', color: '#000000' }}>Confirmação de pedido realizado</div>
                     <div style={{ fontSize: '0.78rem', color: '#6b7280' }}>Enviado assim que o cliente finaliza o checkout.</div>
                   </div>
                   <input type="checkbox" className="toggle-switch-input" defaultChecked />
@@ -752,7 +752,7 @@ export default function SettingsHub() {
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #f3f4f6' }}>
                   <div>
-                    <div style={{ fontWeight: 700, fontSize: '0.88rem', color: '#111827' }}>Pagamento confirmado</div>
+                    <div style={{ fontWeight: 700, fontSize: '0.88rem', color: '#000000' }}>Pagamento confirmado</div>
                     <div style={{ fontSize: '0.78rem', color: '#6b7280' }}>Enviado quando o PIX ou Cartão é aprovado.</div>
                   </div>
                   <input type="checkbox" className="toggle-switch-input" defaultChecked />
@@ -760,7 +760,7 @@ export default function SettingsHub() {
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #f3f4f6' }}>
                   <div>
-                    <div style={{ fontWeight: 700, fontSize: '0.88rem', color: '#111827' }}>Pedido enviado com código de rastreio</div>
+                    <div style={{ fontWeight: 700, fontSize: '0.88rem', color: '#000000' }}>Pedido enviado com código de rastreio</div>
                     <div style={{ fontSize: '0.78rem', color: '#6b7280' }}>Enviado ao despachar a mercadoria com link dos Correios / Transportadora.</div>
                   </div>
                   <input type="checkbox" className="toggle-switch-input" defaultChecked />
@@ -768,7 +768,7 @@ export default function SettingsHub() {
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0' }}>
                   <div>
-                    <div style={{ fontWeight: 700, fontSize: '0.88rem', color: '#111827' }}>Recuperação de carrinho abandonado</div>
+                    <div style={{ fontWeight: 700, fontSize: '0.88rem', color: '#000000' }}>Recuperação de carrinho abandonado</div>
                     <div style={{ fontSize: '0.78rem', color: '#6b7280' }}>Enviado 2 horas após o abandono com incentivo de cupom.</div>
                   </div>
                   <input type="checkbox" className="toggle-switch-input" defaultChecked />

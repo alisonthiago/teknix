@@ -29,7 +29,7 @@
 .categories-title {
   font-size: 1.6rem;
   font-weight: 800;
-  color: #111827;
+  color: #000000;
   margin: 0 0 4px 0;
 }
 
@@ -80,7 +80,7 @@
 .category-name {
   font-size: 0.92rem;
   font-weight: 600;
-  color: #111827;
+  color: #000000;
 }
 
 .category-product-count {
@@ -113,7 +113,7 @@
 
 .category-action-btn:hover {
   background: #f3f4f6;
-  color: #111827;
+  color: #000000;
 }
 
 /* Price Tables Page */
@@ -137,7 +137,7 @@
 .hero-title {
   font-size: 1.6rem;
   font-weight: 800;
-  color: #111827;
+  color: #000000;
   margin: 0;
 }
 
@@ -183,7 +183,7 @@
 .step-title {
   font-size: 0.95rem;
   font-weight: 700;
-  color: #111827;
+  color: #000000;
   margin: 0;
 }
 

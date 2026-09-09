@@ -30,7 +30,7 @@
   align-items: center;
   gap: var(--tkn-space-8);
   padding: var(--tkn-space-12) var(--tkn-space-24);
-  background: #111827;
+  background: #000000;
   color: #fff;
   border-radius: 8px;
   text-decoration: none;
@@ -54,7 +54,7 @@
 .compare-page-header h1 {
   font-size: var(--tkn-text-28);
   font-weight: var(--tkn-weight-medium);
-  color: #111827;
+  color: #000000;
   margin: 0;
 }
 
@@ -87,7 +87,7 @@
   align-items: center;
   gap: var(--tkn-space-8);
   padding: var(--tkn-space-12) var(--tkn-space-16);
-  background: #111827;
+  background: #000000;
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -198,7 +198,7 @@
 .compare-price-promo {
   font-size: var(--tkn-text-18);
   font-weight: var(--tkn-weight-medium);
-  color: #111827;
+  color: #000000;
 }
 
 .compare-price-original {

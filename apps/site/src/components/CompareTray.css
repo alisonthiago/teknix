@@ -28,7 +28,7 @@
   gap: var(--tkn-space-8);
   background: none;
   border: none;
-  color: #111827;
+  color: #000000;
   font-size: var(--tkn-text-14);
   font-weight: var(--tkn-weight-semibold);
   cursor: pointer;
@@ -62,7 +62,7 @@
   font-size: var(--tkn-text-20);
   font-weight: var(--tkn-weight-medium);
   line-height: 1.2;
-  color: #111827;
+  color: #000000;
 }
 
 .compare-tray-center {
@@ -121,7 +121,7 @@
   font-size: var(--tkn-text-12);
   font-weight: var(--tkn-weight-medium);
   margin-top: var(--tkn-space-8);
-  color: #111827;
+  color: #000000;
   max-width: 120px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -174,8 +174,8 @@
   justify-content: center;
   padding: var(--tkn-space-16) var(--tkn-space-32);
   background: #ffffff;
-  color: #111827;
-  border: 1px solid #111827;
+  color: #000000;
+  border: 1px solid #000000;
   border-radius: 980px;
   font-size: var(--tkn-text-14);
   font-weight: var(--tkn-weight-semibold);

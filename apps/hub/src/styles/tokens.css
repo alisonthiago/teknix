@@ -1,110 +1,113 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import '@teknix/design-system/index.css';
 
 :root {
   /* ── Typography Fonts ── */
-  --tk-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --tk-font-mono: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --tk-font-family: var(--font-family-base);
+  --tk-font-mono: var(--font-family-mono);
 
-  /* ── Font Sizes & Line Heights (Escala Padrão Magalu) ── */
-  --tk-font-size-h1: 24px;
-  --tk-line-height-h1: 1.25;
+  /* ── Font Sizes & Line Heights (Design System Oficial) ── */
+  --tk-font-size-display: var(--font-size-display);
+  --tk-line-height-display: var(--line-height-display);
 
-  --tk-font-size-h2: 20px;
-  --tk-line-height-h2: 1.3;
+  --tk-font-size-h1: var(--font-size-h1);
+  --tk-line-height-h1: var(--line-height-h1);
 
-  --tk-font-size-h3: 16px;
-  --tk-line-height-h3: 1.35;
+  --tk-font-size-h2: var(--font-size-h2);
+  --tk-line-height-h2: var(--line-height-h2);
 
-  --tk-font-size-h4: 14px;
-  --tk-line-height-h4: 1.4;
+  --tk-font-size-h3: var(--font-size-h3);
+  --tk-line-height-h3: var(--line-height-h3);
 
-  --tk-font-size-body: 14px;
-  --tk-line-height-body: 1.45;
+  --tk-font-size-h4: var(--font-size-h4);
+  --tk-line-height-h4: var(--line-height-h4);
 
-  --tk-font-size-body-sm: 13px;
-  --tk-line-height-body-sm: 1.4;
+  --tk-font-size-body: var(--font-size-body);
+  --tk-line-height-body: var(--line-height-body);
 
-  --tk-font-size-caption: 12px;
-  --tk-line-height-caption: 1.35;
+  --tk-font-size-body-sm: var(--font-size-body-small);
+  --tk-line-height-body-sm: var(--line-height-body-small);
+
+  --tk-font-size-caption: var(--font-size-caption);
+  --tk-line-height-caption: var(--line-height-caption);
 
   --tk-font-size-micro: 11px;
 
-  /* ── Font Weights — Harmonia Magalu (Roboto) ── */
-  --tk-font-weight-regular: 400;    /* corpo de texto, inputs, infos menores */
-  --tk-font-weight-medium: 500;     /* labels, títulos de produto, menu */
-  --tk-font-weight-semibold: 600;   /* botões, títulos de seção */
-  --tk-font-weight-bold: 700;       /* preços, KPIs, destaques */
-  --tk-font-weight-display: 600;    /* títulos de página */
-  --tk-font-weight-data: 700;       /* métricas, KPIs, valores, preços */
-  --tk-font-weight-label: 400;      /* captions, hints, infos menores */
+  /* ── Font Weights — Harmonia TEKNIX ── */
+  --tk-font-weight-regular: var(--font-weight-regular);    /* corpo de texto, inputs, infos menores */
+  --tk-font-weight-medium: var(--font-weight-medium);      /* labels, títulos de produto, menu */
+  --tk-font-weight-semibold: var(--font-weight-semibold);  /* botões, títulos de seção */
+  --tk-font-weight-bold: var(--font-weight-bold);          /* preços, KPIs, destaques */
+  --tk-font-weight-display: var(--font-weight-display);    /* títulos de página */
+  --tk-font-weight-data: var(--font-weight-semibold);      /* métricas, KPIs, valores, preços */
+  --tk-font-weight-label: var(--font-weight-regular);      /* captions, hints, infos menores */
 
-  /* ── Colors (FLOW Palette) ── */
-  --tk-color-bg: #f5f5f5;
-  --tk-color-surface: #ffffff;
-  --tk-color-surface-hover: #f5f5f5;
-  --tk-color-surface-subtle: #fafafc;
+  /* ── Colors (Paleta Oficial Neutra) ── */
+  --tk-color-bg: var(--color-background);
+  --tk-color-surface: var(--color-surface);
+  --tk-color-surface-hover: var(--color-surface-hover);
+  --tk-color-surface-subtle: var(--color-surface-subtle);
   
-  --tk-color-text-primary: #1f2328;     /* FLOW Main Text */
-  --tk-color-text-secondary: #666666;   /* FLOW Secondary Text */
-  --tk-color-text-tertiary: #999999;    /* FLOW Muted Text */
-  --tk-color-text-inverse: #ffffff;
+  --tk-color-text-primary: var(--color-text-primary);
+  --tk-color-text-secondary: var(--color-text-secondary);
+  --tk-color-text-tertiary: var(--color-text-tertiary);
+  --tk-color-text-inverse: var(--color-text-inverse);
 
-  /* Accent & Action (checkout blue & FLOW Brand Green) */
-  --tk-color-primary: #347ff2;
-  --tk-color-primary-hover: #2469d8;
-  --tk-color-primary-active: #1858bd;
-  --tk-color-primary-light: #f5f5f5;
-  --tk-color-primary-surface: #ffffff;
+  /* Accent & Action */
+  --tk-color-primary: var(--color-action-primary);
+  --tk-color-primary-hover: var(--color-action-primary-hover);
+  --tk-color-primary-active: var(--color-action-primary-active);
+  --tk-color-primary-light: var(--color-action-primary-light);
+  --tk-color-primary-surface: var(--color-action-surface);
 
-  /* Brand Green / Lime (FLOW Brand Tokens) */
-  --tk-color-brand-green: #00a650;
-  --tk-color-brand-lime: #B5F500;
-  --tk-color-brand-green-light: #e6f4ea;
+  /* Brand Green / Lime */
+  --tk-color-brand-green: var(--color-success);
+  --tk-color-brand-lime: var(--color-brand);
+  --tk-color-brand-green-light: var(--color-success-bg);
 
   /* Borders */
-  --tk-color-border: #e6e6e6;           /* FLOW standard border */
-  --tk-color-border-dark: #d9d9d9;
-  --tk-color-border-subtle: #f0f0f0;
-  --tk-color-border-focus: #d9d9d9;
+  --tk-color-border: var(--color-border);
+  --tk-color-border-dark: var(--color-border-dark);
+  --tk-color-border-subtle: var(--color-border-subtle);
+  --tk-color-border-focus: var(--color-border-focus);
 
   /* Semantic Status */
-  --tk-color-success: #00a650;
-  --tk-color-success-bg: #e6f4ea;
-  --tk-color-warning: #f59e0b;
-  --tk-color-warning-bg: #fffbeb;
-  --tk-color-danger: #f23d4f;
-  --tk-color-danger-bg: #fef2f2;
-  --tk-color-neutral-badge: #f1f3f4;
+  --tk-color-success: var(--color-success);
+  --tk-color-success-bg: var(--color-success-bg);
+  --tk-color-warning: var(--color-warning);
+  --tk-color-warning-bg: var(--color-warning-bg);
+  --tk-color-danger: var(--color-danger);
+  --tk-color-danger-bg: var(--color-danger-bg);
+  --tk-color-neutral-badge: var(--color-surface-subtle);
 
   /* ── Spacing Scale ── */
-  --tk-space-1: 4px;
+  --tk-space-1: var(--space-1);
   --tk-space-1-5: 6px;
-  --tk-space-2: 8px;
-  --tk-space-3: 12px;
-  --tk-space-4: 16px;
-  --tk-space-5: 20px;
-  --tk-space-6: 24px;
-  --tk-space-8: 32px;
-  --tk-space-10: 40px;
+  --tk-space-2: var(--space-2);
+  --tk-space-3: var(--space-3);
+  --tk-space-4: var(--space-4);
+  --tk-space-5: var(--space-5);
+  --tk-space-6: var(--space-6);
+  --tk-space-8: var(--space-8);
+  --tk-space-10: var(--space-10);
 
   /* ── Layout Containers & Respiro ── */
-  --tk-content-max-width: 1200px;
+  --tk-content-max-width: var(--content-max-width);
 
-  /* ── Shape & Border Radius (FLOW Card Radius) ── */
-  --tk-radius-sm: 6px;
-  --tk-radius-btn: 8px;
-  --tk-radius-card: 14px;
-  --tk-radius-lg: 16px;
-  --tk-radius-pill: 980px;
+  /* ── Shape & Border Radius ── */
+  --tk-radius-sm: var(--radius-sm);
+  --tk-radius-btn: var(--radius-btn);
+  --tk-radius-card: var(--radius-card);
+  --tk-radius-lg: var(--radius-xl);
+  --tk-radius-pill: var(--radius-pill);
 
-  /* ── Shadows ── */
-  --tk-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.02);
-  --tk-shadow-hover: 0 3px 10px rgba(0, 0, 0, 0.04);
-  --tk-shadow-modal: 0 16px 36px rgba(0, 0, 0, 0.12);
-  --tk-shadow-dropdown: 0 8px 24px rgba(0, 0, 0, 0.06);
+  /* ── Shadows (Neutras, sem glow) ── */
+  --tk-shadow-card: var(--shadow-card);
+  --tk-shadow-hover: var(--shadow-sm);
+  --tk-shadow-modal: var(--shadow-modal);
+  --tk-shadow-dropdown: var(--shadow-dropdown);
 }
 
-/* Composição tipográfica do HUB: contraste por escala, peso e cor. */
+/* Composição tipográfica do HUB: contraste por escala, peso e cor */
 .hub-layout h1 { font-size: var(--tk-font-size-h1); line-height: var(--tk-line-height-h1); font-weight: var(--tk-font-weight-display); }
 .hub-layout h2 { font-size: var(--tk-font-size-h2); line-height: var(--tk-line-height-h2); font-weight: var(--tk-font-weight-medium); }
 .hub-layout h3, .hub-layout h4 { font-weight: var(--tk-font-weight-medium); }

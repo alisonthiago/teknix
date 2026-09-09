@@ -124,7 +124,7 @@ ${urls.join('\n')}
   return (
     <div style={{ padding: 20 }}>
       <pre style={{
-        background: '#111827',
+        background: '#000000',
         color: '#a5f3fc',
         padding: 20,
         borderRadius: 8,

@@ -161,7 +161,7 @@ export default function MarketingHub() {
               <h3 style={{ margin: '0 0 6px 0', fontSize: '1rem', fontWeight: 700 }}>Pop-up de Primeira Compra</h3>
               <p style={{ fontSize: '0.82rem', color: '#6b7280' }}>Ofereça 10% OFF no primeiro pedido em troca do e-mail/WhatsApp do cliente.</p>
               <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, padding: 14, margin: '14px 0', textAlign: 'center' }}>
-                <div style={{ fontWeight: 800, color: '#111827' }}>🎁 Ganhe 10% de Desconto</div>
+                <div style={{ fontWeight: 800, color: '#000000' }}>🎁 Ganhe 10% de Desconto</div>
                 <div style={{ fontSize: '0.78rem', color: '#6b7280', marginTop: 4 }}>Cadastre seu e-mail e receba o cupom BEMVINDO</div>
               </div>
               <button className="m-card-btn primary">Personalizar Pop-up</button>

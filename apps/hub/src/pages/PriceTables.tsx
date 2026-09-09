@@ -81,7 +81,7 @@ export default function PriceTables() {
         </div>
 
         {/* 3 Step Cards from Nuvemshop */}
-        <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#111827', margin: '20px 0 0 0' }}>Como funciona?</h3>
+        <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#000000', margin: '20px 0 0 0' }}>Como funciona?</h3>
         <div className="price-steps-grid">
           <div className="step-card">
             <div className="step-number">1</div>
@@ -101,14 +101,14 @@ export default function PriceTables() {
         </div>
 
         {/* Existing Tables List */}
-        <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#111827', margin: '24px 0 0 0' }}>Tabelas de Preços Ativas</h3>
+        <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#000000', margin: '24px 0 0 0' }}>Tabelas de Preços Ativas</h3>
         <div className="category-tree-card">
           {tables.map(t => (
             <div key={t.id} className="category-tree-item">
               <div className="category-tree-left">
                 <DollarSign size={18} color="#059669" />
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: '0.92rem', color: '#111827' }}>{t.name}</div>
+                  <div style={{ fontWeight: 700, fontSize: '0.92rem', color: '#000000' }}>{t.name}</div>
                   <div style={{ fontSize: '0.78rem', color: '#6b7280' }}>{t.minOrder} • {t.audience}</div>
                 </div>
               </div>

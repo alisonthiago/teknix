@@ -39,7 +39,7 @@
   border-bottom: 1px solid var(--tk-color-border-subtle, #f3f4f6);
   font-size: 13.5px;
   font-weight: 500;
-  color: var(--tk-color-text-primary, #111827);
+  color: var(--tk-color-text-primary, #000000);
   cursor: pointer;
   letter-spacing: -0.01em;
   transition: color var(--tk-transition-fast, 0.12s);
@@ -85,7 +85,7 @@
 
 .settings-nav-item:hover {
   background: var(--tk-color-surface-hover, #f3f4f6);
-  color: var(--tk-color-text-primary, #111827);
+  color: var(--tk-color-text-primary, #000000);
 }
 
 .settings-nav-item.active {
@@ -116,7 +116,7 @@
 .settings-main-title {
   font-size: 20px;
   font-weight: 600;
-  color: var(--tk-color-text-primary, #111827);
+  color: var(--tk-color-text-primary, #000000);
   letter-spacing: -0.015em;
   margin: 0;
   line-height: 1.25;
@@ -145,7 +145,7 @@
 .settings-card-title {
   font-size: 15px;
   font-weight: 550;
-  color: var(--tk-color-text-primary, #111827);
+  color: var(--tk-color-text-primary, #000000);
   margin: 0 0 4px 0;
   letter-spacing: -0.01em;
 }
@@ -180,7 +180,7 @@
   font-family: var(--tk-font-family);
   font-size: 13.5px;
   font-weight: 400;
-  color: #111827 !important;
+  color: #000000 !important;
   background: #ffffff !important;
   border: 1px solid var(--tk-color-border-dark, #d1d5db) !important;
   border-radius: var(--tk-radius-btn, 8px);

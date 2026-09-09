@@ -8,6 +8,7 @@ import ProductsList from './pages/ProductsList'
 import ProductForm from './pages/ProductForm'
 import ProductDetails from './pages/ProductDetails'
 import OrdersList from './pages/OrdersList'
+import StockNotificationsList from './pages/StockNotificationsList'
 import OrderDetails from './pages/OrderDetails'
 import ShippingSettings from './pages/ShippingSettings'
 import CustomersList from './pages/CustomersList'
@@ -74,6 +75,7 @@ function App() {
             <Route path="/hub/tabelas-de-precos" element={<PriceTables />} />
             <Route path="/hub/assinaturas" element={<PlaceholderPage title="Assinaturas e Recorrência" />} />
             <Route path="/hub/pedidos" element={<OrdersList />} />
+            <Route path="/hub/avisos-estoque" element={<StockNotificationsList />} />
             <Route path="/hub/pedidos/:id" element={<OrderDetails />} />
             <Route path="/hub/entregas" element={<ShippingSettings />} />
             <Route path="/hub/clientes" element={<CustomersList />} />

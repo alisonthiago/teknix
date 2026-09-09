@@ -162,6 +162,158 @@ serve(async (req) => {
           }
         }
       }
+
+      // -----------------------------------------------------------------------
+      // CREATE ORDER — API de Orders /v1/orders (Pix, Cartão, Boleto)
+      // Único handler oficial para checkout transparente TEKNIX.
+      // Amounts MUST be strings ("15.00"), not numbers.
+      // -----------------------------------------------------------------------
+      else if (action === 'create_order') {
+        const {
+          orderId,
+          orderNumber,
+          amount,
+          paymentMethod, // 'pix' | 'credit_card' | 'boleto'
+          cardToken,
+          cardBrand,
+          installments,
+          payer,
+          idempotencyKey
+        } = payload
+
+        const amountStr = Number(amount).toFixed(2)
+
+        // Build payment_method block based on payment type
+        let paymentMethodBlock: Record<string, unknown>
+        if (paymentMethod === 'pix') {
+          paymentMethodBlock = { id: 'pix', type: 'bank_transfer' }
+        } else if (paymentMethod === 'credit_card') {
+          paymentMethodBlock = {
+            id: cardBrand || 'master',
+            type: 'credit_card',
+            token: cardToken,
+            installments: installments || 1
+          }
+        } else {
+          // boleto
+          paymentMethodBlock = { id: 'bolbradesco', type: 'ticket' }
+        }
+
+        // Build payer — address is required for boleto
+        const payerBlock: Record<string, unknown> = {
+          email: payer?.email || 'cliente@teknixbrasil.com.br',
+          first_name: payer?.firstName || 'Cliente',
+          last_name: payer?.lastName || 'TEKNIX',
+          identification: payer?.identification?.number ? {
+            type: payer.identification.type || 'CPF',
+            number: payer.identification.number.replace(/\D/g, '')
+          } : undefined
+        }
+
+        if (paymentMethod === 'boleto' && payer?.address) {
+          payerBlock.address = {
+            zip_code: (payer.address.zipCode || '').replace(/\D/g, ''),
+            street_name: payer.address.street || '',
+            street_number: payer.address.number || '',
+            neighborhood: payer.address.neighborhood || '',
+            city: payer.address.city || 'São Paulo',
+            state: payer.address.state || 'SP'
+          }
+        }
+
+        const orderBody: Record<string, unknown> = {
+          type: 'online',
+          processing_mode: 'automatic',
+          external_reference: orderId || orderNumber,
+          total_amount: amountStr,
+          payer: payerBlock,
+          transactions: {
+            payments: [
+              {
+                amount: amountStr,
+                payment_method: paymentMethodBlock
+              }
+            ]
+          }
+        }
+
+        if (!token) {
+          // Mock response for dev without credentials
+          const mockQr = `00020101021226840014br.gov.bcb.pix2562pix.mercadopago.com/qr/${orderNumber}5204000053039865802BR5925TEKNIX6009SAOPAULO62070503***6304`
+          result = {
+            success: true,
+            isMock: true,
+            orderId: `ORDTST-MOCK-${Date.now()}`,
+            status: 'action_required',
+            paymentStatus: 'waiting_payment',
+            qrCode: paymentMethod === 'pix' ? mockQr : '',
+            qrCodeBase64: '',
+            ticketUrl: paymentMethod === 'boleto' ? 'https://www.mercadopago.com.br/staging/ticket-mock' : '',
+            barcodeContent: paymentMethod === 'boleto' ? '23793380296060042192357006333306715660000002000' : ''
+          }
+        } else {
+          const iKey = idempotencyKey || `order-${orderId || orderNumber}-${Date.now()}`
+          const res = await fetch('https://api.mercadopago.com/v1/orders', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+              'X-Idempotency-Key': iKey
+            },
+            body: JSON.stringify(orderBody)
+          })
+
+          const data = await res.json()
+
+          if (!res.ok && !data?.data) {
+            const errMsg = data?.errors?.[0]?.message || data?.message || 'Erro ao criar pedido no Mercado Pago'
+            throw new Error(errMsg)
+          }
+
+          // Orders API returns data inside data.data when there are errors but partial success
+          const orderData = data?.data || data
+          const payments = orderData?.transactions?.payments || []
+          const firstPayment = payments[0] || {}
+          const pm = firstPayment.payment_method || {}
+
+          // Pix data
+          const txData = pm.transaction_data || {}
+          const qrCode = txData.qr_code || pm.qr_code || ''
+          const qrCodeBase64 = txData.qr_code_base64 || pm.qr_code_base64 || ''
+
+          // Boleto data
+          const ticketUrl = pm.ticket_url || ''
+          const barcodeContent = pm.barcode_content || pm.digitable_line || ''
+          const digitableLine = pm.digitable_line || barcodeContent
+
+          result = {
+            success: true,
+            isMock: false,
+            mpOrderId: orderData.id,
+            mpPaymentId: firstPayment.id,
+            status: orderData.status,
+            paymentStatus: firstPayment.status || firstPayment.status_detail,
+            // Pix
+            qrCode,
+            qrCodeBase64,
+            // Boleto
+            ticketUrl,
+            barcodeContent,
+            digitableLine
+          }
+
+          // Log a successful order creation
+          await supabaseClient.from('integration_logs').insert({
+            provider_id: 'mercado_pago',
+            category: 'payment',
+            action: `create_order.${paymentMethod}`,
+            status: 'success',
+            order_number: orderNumber,
+            response_payload: { mpOrderId: orderData.id, mpPaymentId: firstPayment.id, status: orderData.status },
+            created_at: new Date().toISOString()
+          }).catch(() => {/* non-critical */})
+        }
+      }
     }
 
     // ========================================================================

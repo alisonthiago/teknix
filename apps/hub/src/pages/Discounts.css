@@ -26,7 +26,7 @@
 
 .hub-header-icon-btn:hover {
   background: #f3f4f6;
-  color: #111827;
+  color: #000000;
 }
 
 .hub-lumi-btn {
@@ -108,7 +108,7 @@
 .dropdown-user-title {
   font-size: 0.88rem;
   font-weight: 700;
-  color: #111827;
+  color: #000000;
 }
 
 .dropdown-user-email {
@@ -140,7 +140,7 @@
 
 .dropdown-item-btn:hover {
   background: #f9fafb;
-  color: #111827;
+  color: #000000;
 }
 
 .dropdown-item-btn.logout {
@@ -245,7 +245,7 @@
   background: none;
   outline: none;
   font-size: 0.88rem;
-  color: #111827;
+  color: #000000;
 }
 
 .filter-btn-pill {

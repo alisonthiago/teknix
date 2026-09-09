@@ -49,7 +49,7 @@
 }
 
 .mgl-footer-toggle-btn:hover {
-  color: #111827;
+  color: #000000;
   background: #fafafa;
 }
 
@@ -106,7 +106,7 @@
 }
 
 .mgl-footer-col-list a:hover {
-  color: #111827;
+  color: #000000;
   text-decoration: underline;
 }
 
@@ -215,7 +215,7 @@
 }
 
 .mgl-footer-nav a:hover {
-  color: #111827;
+  color: #000000;
   text-decoration: underline;
 }
 
@@ -264,7 +264,7 @@
 
 .mgl-btn-outline:hover {
   background: #f9fafb;
-  border-color: #111827;
+  border-color: #000000;
   color: #000000;
 }
 
@@ -279,7 +279,7 @@
   display: block;
   font-size: 17px;
   font-weight: 700;
-  color: #111827;
+  color: #000000;
   margin-top: 2px;
 }
 .mgl-footer-toggle-btn { font-weight:700; color:#000; }

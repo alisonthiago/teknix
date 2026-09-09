@@ -232,7 +232,7 @@ export default function PaymentMethods() {
                     {gw.logoText}
                   </div>
                   <div>
-                    <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: '#111827' }}>{gw.name}</h3>
+                    <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: '#000000' }}>{gw.name}</h3>
                   </div>
                 </div>
                 <div className="gateway-badges">
@@ -282,7 +282,7 @@ export default function PaymentMethods() {
                   <button
                     type="button"
                     className="btn-configure"
-                    style={{ background: '#f3f4f6', color: '#111827', border: '1px solid #d1d5db', borderRadius: 20, padding: '6px 14px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+                    style={{ background: '#f3f4f6', color: '#000000', border: '1px solid #d1d5db', borderRadius: 20, padding: '6px 14px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
                     onClick={() => handleOpenConfig(gw)}
                   >
                     <Settings size={13} /> Configurar API

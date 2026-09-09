@@ -1,0 +1,31 @@
+{
+  "name": "@teknix/design-system",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Design System oficial, tokens e hierarquia tipográfica do ecossistema TEKNIX",
+  "main": "./index.css",
+  "style": "./index.css",
+  "exports": {
+    ".": {
+      "style": "./index.css",
+      "import": "./index.css",
+      "default": "./index.css"
+    },
+    "./index.css": {
+      "style": "./index.css",
+      "import": "./index.css",
+      "default": "./index.css"
+    },
+    "./tokens/colors.css": "./tokens/colors.css",
+    "./tokens/typography.css": "./tokens/typography.css",
+    "./tokens/spacing.css": "./tokens/spacing.css",
+    "./tokens/radius.css": "./tokens/radius.css",
+    "./tokens/shadows.css": "./tokens/shadows.css",
+    "./styles/globals.css": "./styles/globals.css",
+    "./*": {
+      "style": "./*",
+      "import": "./*",
+      "default": "./*"
+    }
+  }
+}

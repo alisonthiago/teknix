@@ -3232,7 +3232,7 @@ export default function PageEditor() {
                               </div>
                             </div>
                             <ControlRow label="Tamanho"><input type="number" min="8" max="160" value={Number(c.icon_size || 20)} onChange={e => patch({ content: { icon_size: Number(e.target.value) } })} /></ControlRow>
-                            <ControlRow label="Cor"><input type="color" value={String(c.icon_color || '#111827')} onChange={e => patch({ content: { icon_color: e.target.value } })} /></ControlRow>
+                            <ControlRow label="Cor"><input type="color" value={String(c.icon_color || '#000000')} onChange={e => patch({ content: { icon_color: e.target.value } })} /></ControlRow>
                           </ElementorAccordion>
                         )}
 
@@ -6988,7 +6988,7 @@ export default function PageEditor() {
                             <ElementorAccordion title="Campo" icon={Edit3} isOpen={openSections.s_input !== false} onToggle={() => toggleSection('s_input')}>
                               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                                 <ControlRow label="Cor do texto">
-                                  <input type="color" value={String(s.color || '#111827')} onChange={e => patch({ schema: { color: e.target.value } })} style={{ width: '100%', height: 30, padding: 0 }} />
+                                  <input type="color" value={String(s.color || '#000000')} onChange={e => patch({ schema: { color: e.target.value } })} style={{ width: '100%', height: 30, padding: 0 }} />
                                 </ControlRow>
                                 <ControlRow label="Cor de fundo">
                                   <input type="color" value={String(s.bg_color || '#ffffff')} onChange={e => patch({ schema: { bg_color: e.target.value } })} style={{ width: '100%', height: 30, padding: 0 }} />
@@ -7252,7 +7252,7 @@ export default function PageEditor() {
                                   <input type="number" min="14" max="42" placeholder="24" value={Number(s.price_size || 24)} onChange={e => patch({ schema: { price_size: Number(e.target.value) } })} />
                                 </ControlRow>
                                 <ControlRow label="Cor do Preço à Vista">
-                                  <input type="color" value={String(s.price_color || '#111827')} onChange={e => patch({ schema: { price_color: e.target.value } })} style={{ width: '100%', height: 30, padding: 0 }} />
+                                  <input type="color" value={String(s.price_color || '#000000')} onChange={e => patch({ schema: { price_color: e.target.value } })} style={{ width: '100%', height: 30, padding: 0 }} />
                                 </ControlRow>
                               </div>
                               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
@@ -7447,7 +7447,7 @@ export default function PageEditor() {
                                       { label: 'Sem cor (Transparente)', color: 'transparent' },
                                       { label: 'Branco', color: '#ffffff' },
                                       { label: 'Cinza Original TEKNIX', color: '#f7f7f7' },
-                                      { label: 'Preto Oficial', color: '#111827' },
+                                      { label: 'Preto Oficial', color: '#000000' },
                                       { label: 'TEKNIX Lime', color: '#a2e000' },
                                       { label: 'Azul Apple', color: '#0071e3' }
                                     ].map(p => {
@@ -7609,7 +7609,7 @@ export default function PageEditor() {
                                       { label: 'Sem borda', color: 'transparent' },
                                       { label: 'Cinza Suave', color: '#e5e7eb' },
                                       { label: 'Cinza Escuro', color: '#9ca3af' },
-                                      { label: 'Preto', color: '#111827' }
+                                      { label: 'Preto', color: '#000000' }
                                     ].map(p => {
                                       const active = (p.color === 'transparent' && isTransparent) || (!isTransparent && currentBorder.toLowerCase() === p.color.toLowerCase())
                                       return (
@@ -7742,7 +7742,7 @@ export default function PageEditor() {
                               <ControlRow label="Cor do Texto das Categorias">
                                 <input
                                   type="color"
-                                  value={String(s.label_color || '#111827')}
+                                  value={String(s.label_color || '#000000')}
                                   onChange={e => patch({ schema: { label_color: e.target.value } })}
                                   style={{ width: '100%', height: 30, padding: 0 }}
                                 />
@@ -7796,7 +7796,7 @@ export default function PageEditor() {
                                 <ControlRow label="Cor do Título">
                                   <input
                                     type="color"
-                                    value={String(s.title_color || '#111827')}
+                                    value={String(s.title_color || '#000000')}
                                     onChange={e => patch({ schema: { title_color: e.target.value } })}
                                     style={{ width: '100%', height: 30, padding: 0 }}
                                   />
@@ -7897,7 +7897,7 @@ export default function PageEditor() {
                                 <ControlRow label="Preço Principal">
                                   <input
                                     type="color"
-                                    value={String(s.price_color || '#111827')}
+                                    value={String(s.price_color || '#000000')}
                                     onChange={e => patch({ schema: { price_color: e.target.value } })}
                                     style={{ width: '100%', height: 30, padding: 0 }}
                                   />
@@ -7933,7 +7933,7 @@ export default function PageEditor() {
                                 <ControlRow label="Texto Pix">
                                   <input
                                     type="color"
-                                    value={String(s.pix_color || '#111827')}
+                                    value={String(s.pix_color || '#000000')}
                                     onChange={e => patch({ schema: { pix_color: e.target.value } })}
                                     style={{ width: '100%', height: 30, padding: 0 }}
                                   />
@@ -10020,8 +10020,8 @@ function ColorPickerControl({ id, label, child, description }: { id: string; lab
     },
     {
       title: 'Preto Oficial',
-      value: '#111827',
-      style: { background: 'rgb(17, 24, 39)' }
+      value: '#000000',
+      style: { background: '#000000' }
     },
     {
       title: 'TEKNIX Lime',

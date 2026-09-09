@@ -230,7 +230,7 @@
 .product-name-link {
   font-size: 14.5px;
   font-weight: 500;
-  color: #111827;
+  color: #000000;
   text-decoration: none;
   line-height: 1.4;
   display: -webkit-box;
@@ -269,7 +269,7 @@
 .product-price-text {
   font-size: 0.88rem;
   font-weight: 600;
-  color: #111827;
+  color: #000000;
 }
 
 .product-promo-text {
@@ -382,7 +382,7 @@
 .product-dots-btn.active {
   background: #f3f4f6;
   border-color: #d1d5db;
-  color: #111827;
+  color: #000000;
   box-shadow: 0 1px 3px rgba(0,0,0,0.08);
 }
 
@@ -436,7 +436,7 @@
 
 .product-dropdown-item:hover {
   background: #f3f4f6;
-  color: #111827;
+  color: #000000;
 }
 
 .product-dropdown-item.delete {

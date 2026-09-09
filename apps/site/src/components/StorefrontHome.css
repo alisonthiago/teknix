@@ -620,7 +620,7 @@
 }
 
 .hagor-header .account svg,
-.hagor-header .cart svg{width:20px;height:20px;stroke:#111827;stroke-width:1.8;background:transparent}
+.hagor-header .cart svg{width:20px;height:20px;stroke:#000000;stroke-width:1.8;background:transparent}
 
 .hagor-header .account:hover,
 .hagor-header .cart:hover,
@@ -1452,8 +1452,9 @@
 .dsvia-mosaic-track {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
-  width: 100%;
+  justify-content: flex-start;
+  flex: 1 1 auto;
+  width: auto;
   overflow-x: auto;
   scroll-behavior: smooth;
   scrollbar-width: none;
@@ -1470,7 +1471,7 @@
   flex-direction: column;
   align-items: center;
   text-decoration: none;
-  flex: 1 1 0;
+  flex: 0 0 calc((100% - 84px) / 8);
   max-width: 150px;
   min-width: 90px;
   cursor: pointer;
@@ -1491,6 +1492,18 @@
   transition: background-color 0.28s cubic-bezier(0.16, 1, 0.3, 1),
               border-color 0.28s cubic-bezier(0.16, 1, 0.3, 1),
               transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (min-width: 768px) {
+  .dsvia-mosaic-card {
+    width: 104px;
+    height: 104px;
+  }
+
+  .dsvia-mosaic-card.is-cutout img {
+    width: 120%;
+    height: 120%;
+  }
 }
 
 .dsvia-mosaic-item:hover .dsvia-mosaic-card,
@@ -1535,7 +1548,7 @@
 .dsvia-mosaic-card.promo {
   background-color: var(--hagor-green);
   border: 2px solid #ffffff;
-  color: #111827;
+  color: #000000;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1576,7 +1589,7 @@
 }
 
 .dsvia-mosaic-item:hover .dsvia-mosaic-label {
-  color: #111827;
+  color: #000000;
 }
 
 /* ==========================================================================
@@ -1624,7 +1637,7 @@
   font-family: var(--tkn-font);
   font-size: var(--tkn-text-18);
   font-weight: var(--tkn-weight-medium);
-  color: #111827;
+  color: #000000;
   line-height: 1;
 }
 
@@ -1636,7 +1649,7 @@
 }
 
 .promo-carne-col-center {
-  background: #111827;
+  background: #000000;
   color: #ffffff;
   padding: var(--tkn-space-12) var(--tkn-space-24);
   border-radius: 12px;
@@ -1670,7 +1683,7 @@
   height: 90px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid #111827;
+  border: 3px solid #000000;
 }
 
 @media (max-width: 768px) {
@@ -1716,7 +1729,7 @@
   font-family: var(--tkn-font);
   font-size: var(--tkn-text-20);
   font-weight: var(--tkn-weight-medium);
-  color: #111827;
+  color: #000000;
   margin: 0;
   letter-spacing: -0.01em;
 }
@@ -1827,16 +1840,16 @@
   width: 36px;
   height: 36px;
   border-radius: 4px;
-  border: 1.5px solid #111827;
+  border: 1.5px solid #000000;
   background: #f6f9fe;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: #111827;
+  color: #000000;
 }
 
 .shelf-arrow-btn:hover:not(:disabled) {
-  background: #111827;
-  border-color: #111827;
+  background: #000000;
+  border-color: #000000;
   color: #ffffff;
 }
 
@@ -2036,7 +2049,7 @@
 }
 
 .dsvia-title-link:hover .dsvia-title {
-  color: #111827 !important;
+  color: #000000 !important;
 }
 
 /* Avaliações em Estrelas */
@@ -2099,7 +2112,7 @@
   font-family: var(--tkn-font) !important;
   font-size: var(--tkn-text-24) !important;
   font-weight: var(--tkn-weight-medium) !important;
-  color: #111827 !important; /* AZUL ROYAL IDÊNTICO AO PRINT */
+  color: #000000 !important; /* AZUL ROYAL IDÊNTICO AO PRINT */
   letter-spacing: -0.5px !important;
   line-height: 1.1 !important;
   margin-top: 2px !important;
@@ -2109,7 +2122,7 @@
 .dsvia-pix-text {
   font-size: var(--tkn-text-12);
   font-weight: var(--tkn-weight-medium);
-  color: #111827; /* Mesmo azul royal */
+  color: #000000; /* Mesmo azul royal */
   margin-top: 2px;
   margin-bottom: var(--tkn-space-16);
 }
@@ -2541,8 +2554,8 @@
 .cat-ctrl-btn,
 .brand-ctrl-btn {
   background: #f6f9fe;
-  border: 1.5px solid #111827;
-  color: #111827;
+  border: 1.5px solid #000000;
+  color: #000000;
   width: 32px;
   height: 32px;
   border-radius: 4px;
@@ -2557,7 +2570,7 @@
 
 .cat-ctrl-btn:hover,
 .brand-ctrl-btn:hover {
-  background: #111827;
+  background: #000000;
   color: #ffffff;
 }
 
@@ -2587,7 +2600,7 @@
 
 .cat-dot.active,
 .brand-dot.active {
-  background: #111827;
+  background: #000000;
 }
 
 .category-carousel {
@@ -2658,7 +2671,7 @@
 }
 
 .categoria-card-item:hover .categoria-card-img-wrapper {
-  border-color: #111827;
+  border-color: #000000;
   box-shadow: 0 4px 14px rgba(0, 51, 198, 0.15);
 }
 
@@ -2689,7 +2702,7 @@
 }
 
 .categoria-card-item:hover .categoria-card-name {
-  color: #111827;
+  color: #000000;
 }
 
 /* ── 8. EXPLORE ATRAVÉS DAS MARCAS ── */
@@ -3620,7 +3633,7 @@
   .price-main-discount .price-val {
     font-size: var(--tkn-text-16);
     font-weight: var(--tkn-weight-medium);
-    color: #111827;
+    color: #000000;
   }
 
   .price-tag-badge {
@@ -4000,7 +4013,7 @@
   font-family: var(--tkn-font);
   font-size: var(--tkn-text-24);
   font-weight: var(--tkn-weight-medium);
-  color: #111827;
+  color: #000000;
   letter-spacing: -0.5px;
 }
 
@@ -4008,7 +4021,7 @@
   font-family: var(--tkn-font);
   font-size: var(--tkn-text-16);
   font-weight: var(--tkn-weight-medium);
-  color: #111827;
+  color: #000000;
   margin: var(--tkn-space-12) 0 var(--tkn-space-8);
   line-height: 1.25;
 }
@@ -4050,24 +4063,24 @@
 .cb-hero-disc-label {
   font-size: var(--tkn-text-14);
   font-weight: var(--tkn-weight-semibold);
-  color: #111827;
+  color: #000000;
 }
 
 .cb-hero-disc-percent {
   font-size: var(--tkn-text-40);
   font-weight: var(--tkn-weight-medium);
-  color: #111827;
+  color: #000000;
 }
 
 .cb-hero-disc-off {
   font-size: var(--tkn-text-16);
   font-weight: var(--tkn-weight-medium);
-  color: #111827;
+  color: #000000;
 }
 
 .cb-hero-coupon-box {
   background: #ffffff;
-  border: 1.5px dashed #111827;
+  border: 1.5px dashed #000000;
   border-radius: 4px;
   padding: var(--tkn-space-8) var(--tkn-space-16);
   margin: var(--tkn-space-8) 0;
@@ -4079,13 +4092,13 @@
 .cb-coupon-text {
   font-size: var(--tkn-text-12);
   font-weight: var(--tkn-weight-medium);
-  color: #111827;
+  color: #000000;
 }
 
 .cb-coupon-code {
   font-size: var(--tkn-text-16);
   font-weight: var(--tkn-weight-medium);
-  color: #111827;
+  color: #000000;
   letter-spacing: 0.5px;
 }
 
@@ -4102,8 +4115,8 @@
   width: 32px;
   height: 48px;
   background: rgba(255, 255, 255, 0.9);
-  border: 1px solid #111827;
-  color: #111827;
+  border: 1px solid #000000;
+  color: #000000;
   border-radius: 4px;
   display: flex;
   align-items: center;
@@ -4153,7 +4166,7 @@
 }
 
 .cb-dot.active {
-  background: #111827;
+  background: #000000;
   width: 12px;
   height: 12px;
 }
@@ -4198,14 +4211,14 @@
   font-family: var(--tkn-font);
   font-size: var(--tkn-text-20);
   font-weight: var(--tkn-weight-medium);
-  color: #111827;
+  color: #000000;
   line-height: 1;
 }
 
 .cb-carne-desc-main {
   font-size: var(--tkn-text-14);
   font-weight: var(--tkn-weight-medium);
-  color: #111827;
+  color: #000000;
   margin: var(--tkn-space-4) 0 2px 0;
 }
 
@@ -4255,7 +4268,7 @@
   height: 80px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2.5px solid #111827;
+  border: 2.5px solid #000000;
 }
 
 /* ── 5. OFERTAS RELÂMPAGO CARDS HORIZONTAIS COMPACTOS ── */
@@ -4411,7 +4424,7 @@
   font-family: var(--cb-font);
   font-size: 17px !important;
   font-weight: 700 !important;
-  color: #111827 !important;
+  color: #000000 !important;
   line-height: 1.25 !important;
   letter-spacing: -0.01em;
 }
@@ -4420,7 +4433,7 @@
   font-family: var(--cb-font);
   font-size: var(--tkn-text-12);
   font-weight: var(--tkn-weight-medium);
-  color: #111827;
+  color: #000000;
   letter-spacing: 0.02em;
 }
 
@@ -4432,7 +4445,7 @@
   width: 32px;
   height: 32px;
   background: #ffffff;
-  border: 1px solid #111827;
+  border: 1px solid #000000;
   border-radius: 4px;
   display: flex;
   align-items: center;
@@ -4476,7 +4489,7 @@
   font-family: var(--cb-font);
   font-size: var(--tkn-text-20);
   font-weight: var(--tkn-weight-medium);
-  color: #111827;
+  color: #000000;
   margin: 0;
   line-height: 1.2;
   letter-spacing: -0.01em;
@@ -4713,7 +4726,7 @@
   line-height: 1;
 }
 .ml-current-price {
-  color: #111827;
+  color: #000000;
   font-size: 24px;
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -4821,15 +4834,15 @@
 
 .cb-top-badge.pill-light-blue {
   background: #eef4fe;
-  color: #111827;
-  border: 1px solid #111827;
+  color: #000000;
+  border: 1px solid #000000;
   padding: 2px var(--tkn-space-8);
   border-radius: 3px;
   font-size: var(--tkn-text-12);
 }
 
 .cb-top-badge.blue-rect {
-  background: #111827;
+  background: #000000;
   color: #ffffff;
   padding: var(--tkn-space-4) var(--tkn-space-8);
   border-radius: 3px;
@@ -4992,7 +5005,7 @@
   font-family: var(--cb-font);
   font-size: var(--tkn-text-18);
   font-weight: var(--tkn-weight-medium);
-  color: #111827;
+  color: #000000;
   line-height: 1.15;
   letter-spacing: -0.02em;
 }
@@ -5001,7 +5014,7 @@
   font-family: var(--cb-font);
   font-size: var(--tkn-text-12);
   font-weight: var(--tkn-weight-medium);
-  color: #111827;
+  color: #000000;
   letter-spacing: 0.02em;
 }
 
@@ -5047,7 +5060,7 @@
 /* Tag de desconto — verde TEKNIX como assinatura (único uso nos cards) */
 .cb-bottom-tag.green {
   background: var(--site-accent, #B5F500);
-  color: #111827;
+  color: #000000;
 }
 
 /* ── Wishlist Heart Button on Card (Canto superior direito do Card) ── */
@@ -5136,7 +5149,7 @@
 #root .ml-current-price {
   font-size: 24px;
   font-weight: 700;
-  color: #111827;
+  color: #000000;
   letter-spacing: -0.02em;
   line-height: 1;
 }
@@ -5385,7 +5398,7 @@
   font-family: var(--tkn-font);
   font-size: var(--tkn-text-12);
   font-weight: var(--tkn-weight-medium);
-  color: #111827;
+  color: #000000;
   letter-spacing: 0.3px;
 }
 
@@ -5405,7 +5418,7 @@
   font-family: var(--tkn-font);
   font-size: var(--tkn-text-13);
   font-weight: var(--tkn-weight-medium);
-  color: #111827;
+  color: #000000;
   margin: 0 0 var(--tkn-space-16) 0;
   letter-spacing: 0.3px;
 }
@@ -5430,7 +5443,7 @@
 }
 
 .cb-searched-col a:hover {
-  color: #111827;
+  color: #000000;
   text-decoration: underline;
 }
 
@@ -5458,7 +5471,7 @@
 }
 
 .cb-cookie-text a {
-  color: #111827;
+  color: #000000;
   text-decoration: underline;
 }
 
@@ -5470,7 +5483,7 @@
 }
 
 .cb-cookie-accept-btn {
-  background: #111827;
+  background: #000000;
   color: #ffffff;
   border: none;
   border-radius: 4px;

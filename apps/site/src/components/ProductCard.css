@@ -145,12 +145,12 @@
 
 .product-card-compare:hover {
   background: #fff;
-  color: #111827;
-  border-color: #111827;
+  color: #000000;
+  border-color: #000000;
 }
 
 .product-card-compare.active {
-  background: #111827;
+  background: #000000;
   color: #fff;
-  border-color: #111827;
+  border-color: #000000;
 }

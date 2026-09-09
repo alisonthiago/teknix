@@ -3,6 +3,10 @@
    Recebe notificações assíncronas de pagamento do Mercado Pago,
    valida idempotência, consulta status real na API do MP no servidor
    e atualiza o status do pedido no HUB automaticamente.
+
+   Suporta tópicos:
+   - "order"   → consulta GET /v1/orders/{id}    (API de Orders)
+   - "payment" → consulta GET /v1/payments/{id}  (API legada de Payments)
    ========================================================================== */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
@@ -25,8 +29,8 @@ serve(async (req) => {
     )
 
     const url = new URL(req.url)
-    const topic = url.searchParams.get('topic') || url.searchParams.get('type')
-    const resourceId = url.searchParams.get('id') || url.searchParams.get('data.id')
+    const topicParam = url.searchParams.get('topic') || url.searchParams.get('type') || ''
+    const idParam = url.searchParams.get('id') || url.searchParams.get('data.id') || ''
 
     let body: any = {}
     try {
@@ -35,30 +39,38 @@ serve(async (req) => {
       // Body pode ser vazio se notificação veio via query params
     }
 
+    // Resolve topic: prefer body action/type, fallback to query params
+    const rawTopic = body?.action || body?.type || topicParam || 'payment.updated'
+    const resourceId = body?.data?.id || body?.resource?.split('/').pop() || idParam || ''
     const eventId = String(body?.id || resourceId || Date.now())
-    const paymentId = String(body?.data?.id || body?.resource?.split('/').pop() || resourceId || eventId)
-    const eventType = body?.action || body?.type || topic || 'payment.updated'
 
-    console.log(`[Mercado Pago Webhook] Evento recebido: ${eventType} | ID: ${paymentId}`)
+    // Detect whether this is an Orders API notification or legacy Payment notification
+    const isOrderTopic = rawTopic.startsWith('order') || topicParam === 'order'
+    const eventType = rawTopic
 
-    // 1. IDEMPOTÊNCIA: Verifica se o evento já foi processado
+    console.log(`[MP Webhook] Evento: ${eventType} | ResourceID: ${resourceId} | IsOrder: ${isOrderTopic}`)
+
+    // =========================================================
+    // 1. IDEMPOTÊNCIA — evita reprocessamento de eventos iguais
+    // =========================================================
+    const dedupeKey = `mp-${eventType.replace('.', '_')}-${resourceId || eventId}`
     const { data: existingEvent } = await supabaseClient
       .from('webhook_events')
       .select('id, processed')
-      .eq('event_id', `mp-${eventId}`)
+      .eq('event_id', dedupeKey)
       .maybeSingle()
 
     if (existingEvent?.processed) {
-      console.log(`[Mercado Pago Webhook] Evento ${eventId} já processado anteriormente. Ignorando duplicata.`)
+      console.log(`[MP Webhook] Evento ${dedupeKey} já processado. Ignorando duplicata.`)
       return new Response(JSON.stringify({ success: true, message: 'Evento já processado (Idempotente)' }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       })
     }
 
-    // Registra evento no banco
+    // Registra evento no banco (não processado ainda)
     await supabaseClient.from('webhook_events').upsert({
-      event_id: `mp-${eventId}`,
+      event_id: dedupeKey,
       provider_id: 'mercado_pago',
       event_type: eventType,
       payload: body,
@@ -66,7 +78,9 @@ serve(async (req) => {
       created_at: new Date().toISOString()
     })
 
-    // 2. Busca token seguro no servidor
+    // =========================================================
+    // 2. Busca token seguro no servidor (NUNCA no frontend)
+    // =========================================================
     const { data: config } = await supabaseClient
       .from('integration_configs')
       .select('credentials')
@@ -75,63 +89,114 @@ serve(async (req) => {
 
     const token = config?.credentials?.accessToken || ''
 
-    let paymentStatus = 'pending'
+    // =========================================================
+    // 3. Consulta status REAL no Mercado Pago (server-to-server)
+    // =========================================================
+    let mpStatus = 'pending'
+    let mpStatusDetail = ''
     let orderId: string | null = null
+    let mpPaymentId: string | null = resourceId || null
 
-    if (token && paymentId && paymentId !== 'undefined') {
-      // Consulta status real na API do Mercado Pago (Server-to-Server)
+    if (token && resourceId && resourceId !== 'undefined') {
       try {
-        const mpRes = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
-        if (mpRes.ok) {
-          const mpData = await mpRes.json()
-          paymentStatus = mpData.status // 'approved' | 'pending' | 'in_process' | 'rejected' | 'cancelled'
-          orderId = mpData.external_reference || null
+        if (isOrderTopic) {
+          // ---- Orders API (/v1/orders) ----
+          const mpRes = await fetch(`https://api.mercadopago.com/v1/orders/${resourceId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          })
+          if (mpRes.ok) {
+            const mpOrder = await mpRes.json()
+            mpStatus = mpOrder.status // 'paid' | 'action_required' | 'failed' | 'cancelled'
+            mpStatusDetail = mpOrder.status_detail || ''
+            orderId = mpOrder.external_reference || null
+
+            // Extract payment ID from order for record-keeping
+            const firstPayment = mpOrder?.transactions?.payments?.[0]
+            if (firstPayment?.id) mpPaymentId = firstPayment.id
+
+            console.log(`[MP Webhook] Orders API status: ${mpStatus} | external_ref: ${orderId}`)
+          }
+        } else {
+          // ---- Legacy Payments API (/v1/payments) ----
+          const mpRes = await fetch(`https://api.mercadopago.com/v1/payments/${resourceId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          })
+          if (mpRes.ok) {
+            const mpPayment = await mpRes.json()
+            // Normalize legacy payment statuses to Orders API format
+            const legacyStatus = mpPayment.status // 'approved' | 'pending' | 'in_process' | 'rejected' | 'cancelled'
+            if (legacyStatus === 'approved') mpStatus = 'paid'
+            else if (legacyStatus === 'rejected' || legacyStatus === 'cancelled') mpStatus = 'cancelled'
+            else mpStatus = 'pending'
+            mpStatusDetail = mpPayment.status_detail || ''
+            orderId = mpPayment.external_reference || null
+            console.log(`[MP Webhook] Payments API status: ${legacyStatus} → normalized: ${mpStatus}`)
+          }
         }
       } catch (err: any) {
-        console.warn(`[Mercado Pago Webhook] Falha ao consultar pagamento ${paymentId}:`, err.message)
+        console.warn(`[MP Webhook] Falha ao consultar Mercado Pago: ${err.message}`)
       }
     } else {
-      // Modo mock para testes
-      paymentStatus = body?.type === 'payment.approved' || body?.action === 'payment.approved' ? 'approved' : 'pending'
-      orderId = body?.order_id || body?.order_number || null
+      // Mock mode / sem credenciais
+      mpStatus = body?.type === 'payment.approved' || body?.action === 'payment.approved'
+        ? 'paid'
+        : 'pending'
+      orderId = body?.order_id || body?.order_number || body?.external_reference || null
     }
 
-    // 3. Atualiza o status do pedido no Supabase
+    // =========================================================
+    // 4. Mapeia status do Mercado Pago → status interno TEKNIX
+    // =========================================================
+    let newOrderStatus: string
+    let newPaymentStatus: string
+
+    if (mpStatus === 'paid' || mpStatus === 'approved') {
+      newOrderStatus = 'paid'
+      newPaymentStatus = 'approved'
+    } else if (mpStatus === 'failed' || mpStatus === 'cancelled' || mpStatus === 'rejected') {
+      newOrderStatus = 'cancelled'
+      newPaymentStatus = mpStatus
+    } else {
+      // 'action_required' | 'pending' | 'in_process'
+      newOrderStatus = 'pending'
+      newPaymentStatus = 'pending'
+    }
+
+    // =========================================================
+    // 5. Atualiza o pedido no Supabase
+    // =========================================================
     let updatedOrder = null
-    const newOrderStatus = paymentStatus === 'approved'
-      ? 'paid'
-      : paymentStatus === 'rejected' || paymentStatus === 'cancelled'
-      ? 'cancelled'
-      : 'pending'
 
     if (orderId) {
-      const query = orderId.startsWith('#TK-') || orderId.startsWith('TK-')
-        ? supabaseClient.from('orders').update({
-            status: newOrderStatus,
-            payment_status: paymentStatus,
-            payment_id: paymentId,
-            updated_at: new Date().toISOString()
-          }).eq('order_number', orderId)
-        : supabaseClient.from('orders').update({
-            status: newOrderStatus,
-            payment_status: paymentStatus,
-            payment_id: paymentId,
-            updated_at: new Date().toISOString()
-          }).eq('id', orderId)
+      // external_reference pode ser UUID (id) ou '#TK-XXXX' (order_number)
+      const isOrderNumber = orderId.startsWith('#TK-') || orderId.startsWith('TK-')
+      const updatePayload = {
+        status: newOrderStatus,
+        payment_status: newPaymentStatus,
+        payment_id: mpPaymentId || undefined,
+        updated_at: new Date().toISOString()
+      }
+
+      const query = isOrderNumber
+        ? supabaseClient.from('orders').update(updatePayload).eq('order_number', orderId)
+        : supabaseClient.from('orders').update(updatePayload).eq('id', orderId)
 
       const { data } = await query.select('id, order_number, status').maybeSingle()
       updatedOrder = data
+      console.log(`[MP Webhook] Pedido atualizado: ${updatedOrder?.order_number} → ${newOrderStatus}`)
     }
 
-    // 4. Marca evento como processado
+    // =========================================================
+    // 6. Marca evento como processado
+    // =========================================================
     await supabaseClient
       .from('webhook_events')
       .update({ processed: true, updated_at: new Date().toISOString() })
-      .eq('event_id', `mp-${eventId}`)
+      .eq('event_id', dedupeKey)
 
-    // 5. Registra log de auditoria
+    // =========================================================
+    // 7. Registra log de auditoria
+    // =========================================================
     await supabaseClient.from('integration_logs').insert({
       provider_id: 'mercado_pago',
       category: 'payment',
@@ -139,22 +204,30 @@ serve(async (req) => {
       status: 'success',
       order_id: updatedOrder?.id || orderId,
       order_number: updatedOrder?.order_number,
-      response_payload: { paymentId, paymentStatus, orderStatus: newOrderStatus },
+      response_payload: {
+        resourceId,
+        mpStatus,
+        mpStatusDetail,
+        newOrderStatus,
+        newPaymentStatus,
+        isOrderTopic
+      },
       created_at: new Date().toISOString()
-    })
+    }).catch(() => {/* non-critical audit log */})
 
     return new Response(
       JSON.stringify({
         success: true,
-        paymentId,
-        paymentStatus,
-        orderStatus: newOrderStatus,
+        resourceId,
+        mpStatus,
+        newOrderStatus,
+        newPaymentStatus,
         updatedOrder
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (err: any) {
-    console.error('[Mercado Pago Webhook] Erro crítico:', err)
+    console.error('[MP Webhook] Erro crítico:', err)
     return new Response(
       JSON.stringify({ success: false, error: err.message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

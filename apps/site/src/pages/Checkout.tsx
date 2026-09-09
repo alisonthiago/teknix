@@ -1,13 +1,14 @@
 import { Editable } from '../components/page-widgets/PageWidgets'
 import EditableFlow from '../components/page-widgets/EditableFlow'
-import { useEffect, useState, type FormEvent } from 'react'
-import { Link } from 'react-router-dom'
-import { MapPin, Truck, ShieldCheck, Package, ArrowLeft, CheckCircle2, ChevronDown, ChevronUp, Ticket, X } from 'lucide-react'
+import { useEffect, useState, useRef, type FormEvent } from 'react'
+import { Link, useParams, useSearchParams, useNavigate } from 'react-router-dom'
+import { MapPin, Truck, ShieldCheck, Package, ArrowLeft, CheckCircle2, ChevronDown, ChevronUp, Ticket, X, Copy, Check, ExternalLink, CreditCard, RefreshCw, Loader2 } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../hooks/useAuth'
 import { getAddressesByUserId, getCustomerByUserId } from '../services/customer'
 import { processCheckoutOrder, type CreatedOrderResult } from '../services/checkout'
 import { validateCoupon, registerCouponUse, type AppliedCoupon } from '../services/coupons'
+import { getProductById, getProductBySku } from '../services/products'
 import pixIcon from '../assets/bf_v6_pix.svg'
 import creditIcon from '../assets/bf_v6_credito_noborde.svg'
 import boletoIcon from '../assets/bf_v6_boleto_black_noborde.svg'
@@ -16,15 +17,332 @@ import './CheckoutReference.css'
 const money = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 const emptyAddress = { name: '', street: '', number: '', complement: '', neighborhood: '', city: '', state: '', zipCode: '' }
 
+// Mercado Pago SDK loader (loads once)
+let mpSdkPromise: Promise<any> | null = null
+function loadMercadoPagoSdk(publicKey: string): Promise<any> {
+  if (mpSdkPromise) return mpSdkPromise
+  mpSdkPromise = new Promise((resolve, reject) => {
+    if ((window as any).MercadoPago) {
+      resolve(new (window as any).MercadoPago(publicKey))
+      return
+    }
+    const script = document.createElement('script')
+    script.src = 'https://sdk.mercadopago.com/js/v2'
+    script.onload = () => resolve(new (window as any).MercadoPago(publicKey))
+    script.onerror = () => reject(new Error('Falha ao carregar SDK do Mercado Pago'))
+    document.head.appendChild(script)
+  })
+  return mpSdkPromise
+}
+
+// Detect card brand from first 6 digits (BIN)
+function detectCardBrand(number: string): string {
+  const n = number.replace(/\D/g, '')
+  if (/^4/.test(n)) return 'visa'
+  if (/^5[1-5]/.test(n) || /^2[2-7]/.test(n)) return 'master'
+  if (/^3[47]/.test(n)) return 'amex'
+  if (/^6(011|5)/.test(n)) return 'elo'
+  if (/^(301|303|360|374|375|376|378|34)/.test(n)) return 'hipercard'
+  return 'master'
+}
+
+// Format card number with spaces every 4 digits
+function formatCardNumber(value: string) {
+  return value.replace(/\D/g, '').slice(0, 16).replace(/(.{4})/g, '$1 ').trim()
+}
+
+// Format expiry MM/YY
+function formatExpiry(value: string) {
+  const v = value.replace(/\D/g, '').slice(0, 4)
+  if (v.length <= 2) return v
+  return v.slice(0, 2) + '/' + v.slice(2)
+}
+
+/* -----------------------------------------------------------------------
+   PIX SUCCESS SCREEN
+   ----------------------------------------------------------------------- */
+function PixSuccess({ qrCode, qrCodeBase64, orderNumber }: { qrCode: string, qrCodeBase64: string, orderNumber: string }) {
+  const [copied, setCopied] = useState(false)
+
+  const copy = () => {
+    navigator.clipboard.writeText(qrCode).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2500)
+    })
+  }
+
+  return (
+    <div className="tkn-pix-screen">
+      <div className="tkn-pix-icon">
+        <svg viewBox="0 0 24 24" width="32" height="32" fill="none">
+          <path d="M8.5 3h7l3.5 3.5v11L15.5 21h-7L5 17.5v-11L8.5 3z" stroke="#1dc860" strokeWidth="1.5" strokeLinejoin="round"/>
+          <path d="m9 12 2 2 4-4" stroke="#1dc860" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </div>
+      <h2 className="tkn-pix-title">Pague com Pix</h2>
+      <p className="tkn-pix-subtitle">Pedido <strong>{orderNumber}</strong> — escaneie o QR Code ou copie o código abaixo</p>
+
+      {qrCodeBase64 ? (
+        <img
+          src={`data:image/png;base64,${qrCodeBase64}`}
+          alt="QR Code Pix"
+          className="tkn-pix-qr"
+          width={200}
+          height={200}
+        />
+      ) : (
+        <div className="tkn-pix-qr-placeholder">
+          <RefreshCw size={32} className="tkn-pix-spin" />
+          <span>Gerando QR Code…</span>
+        </div>
+      )}
+
+      <div className="tkn-pix-code-wrap">
+        <textarea
+          className="tkn-pix-code"
+          readOnly
+          value={qrCode}
+          rows={3}
+          aria-label="Código Pix Copia e Cola"
+        />
+        <button
+          type="button"
+          className={`tkn-pix-copy ${copied ? 'is-copied' : ''}`}
+          onClick={copy}
+          aria-label="Copiar código Pix"
+        >
+          {copied ? <><Check size={15} /> Copiado!</> : <><Copy size={15} /> Copiar</>}
+        </button>
+      </div>
+
+      <ul className="tkn-pix-tips">
+        <li>Abra o app do seu banco e acesse a área Pix</li>
+        <li>Escolha "Pix Copia e Cola" ou escaneie o QR Code</li>
+        <li>Confirme o pagamento de <strong>{orderNumber}</strong></li>
+        <li>O pedido é confirmado automaticamente após o pagamento</li>
+      </ul>
+
+      <div className="tkn-pix-waiting">
+        <RefreshCw size={14} className="tkn-pix-spin" />
+        <span>Aguardando confirmação do pagamento…</span>
+      </div>
+    </div>
+  )
+}
+
+/* -----------------------------------------------------------------------
+   BOLETO SUCCESS SCREEN
+   ----------------------------------------------------------------------- */
+function BoletoSuccess({ ticketUrl, digitableLine, orderNumber }: { ticketUrl: string, digitableLine: string, orderNumber: string }) {
+  const [copied, setCopied] = useState(false)
+  const copy = () => {
+    navigator.clipboard.writeText(digitableLine).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2500)
+    })
+  }
+  return (
+    <div className="tkn-boleto-screen">
+      <div className="tkn-pix-icon">
+        <svg viewBox="0 0 24 24" width="32" height="32" fill="none">
+          <rect x="3" y="4" width="18" height="16" rx="2" stroke="#1d1d1f" strokeWidth="1.5"/>
+          <path d="M7 8h10M7 12h6M7 16h4" stroke="#1d1d1f" strokeWidth="1.5" strokeLinecap="round"/>
+        </svg>
+      </div>
+      <h2 className="tkn-pix-title">Boleto gerado!</h2>
+      <p className="tkn-pix-subtitle">Pedido <strong>{orderNumber}</strong> — pague até o vencimento (3 dias úteis)</p>
+
+      {digitableLine && (
+        <div className="tkn-boleto-line-wrap">
+          <span className="tkn-boleto-label">Linha Digitável</span>
+          <div className="tkn-boleto-line">{digitableLine}</div>
+          <button type="button" className={`tkn-pix-copy ${copied ? 'is-copied' : ''}`} onClick={copy}>
+            {copied ? <><Check size={15} /> Copiado!</> : <><Copy size={15} /> Copiar linha digitável</>}
+          </button>
+        </div>
+      )}
+
+      {ticketUrl && (
+        <a href={ticketUrl} target="_blank" rel="noopener noreferrer" className="tkn-boleto-open">
+          <ExternalLink size={16} /> Abrir / Imprimir Boleto
+        </a>
+      )}
+
+      <ul className="tkn-pix-tips">
+        <li>O boleto tem vencimento em 3 dias úteis</li>
+        <li>Após o pagamento, a confirmação pode levar até 3 dias</li>
+        <li>Pague em qualquer banco, lotérica ou app</li>
+      </ul>
+    </div>
+  )
+}
+
+/* -----------------------------------------------------------------------
+   CREDIT CARD FIELDS
+   ----------------------------------------------------------------------- */
+interface CardFieldsProps {
+  onToken: (token: string, brand: string, installments: number) => void
+  onError: (msg: string) => void
+  total: number
+  busy: boolean
+}
+function CardFields({ onToken, onError, total, busy }: CardFieldsProps) {
+  const [cardNumber, setCardNumber] = useState('')
+  const [cardName, setCardName] = useState('')
+  const [expiry, setExpiry] = useState('')
+  const [cvv, setCvv] = useState('')
+  const [docNumber, setDocNumber] = useState('')
+  const [installments, setInstallments] = useState(1)
+  const [tokenizing, setTokenizing] = useState(false)
+  const mpRef = useRef<any>(null)
+
+  useEffect(() => {
+    const pk = import.meta.env.VITE_MERCADO_PAGO_PUBLIC_KEY
+    if (!pk) return
+    loadMercadoPagoSdk(pk).then(mp => { mpRef.current = mp }).catch(() => {})
+  }, [])
+
+  const brand = detectCardBrand(cardNumber)
+
+  const handleTokenize = async () => {
+    const [month, year] = expiry.split('/')
+    if (!cardNumber || !cardName || !month || !year || !cvv || !docNumber) {
+      onError('Preencha todos os dados do cartão.')
+      return
+    }
+    setTokenizing(true)
+    try {
+      const mp = mpRef.current
+      if (!mp) throw new Error('SDK do Mercado Pago não carregado.')
+      const token = await mp.createCardToken({
+        cardNumber: cardNumber.replace(/\s/g, ''),
+        cardholderName: cardName.toUpperCase(),
+        cardExpirationMonth: month,
+        cardExpirationYear: year.length === 2 ? '20' + year : year,
+        securityCode: cvv,
+        identificationType: 'CPF',
+        identificationNumber: docNumber.replace(/\D/g, '')
+      })
+      if (!token?.id) throw new Error('Falha ao tokenizar o cartão. Verifique os dados.')
+      onToken(token.id, brand, installments)
+    } catch (err: any) {
+      onError(err.message || 'Erro ao processar cartão.')
+    } finally {
+      setTokenizing(false)
+    }
+  }
+
+  // Expose tokenize via data attribute so parent can trigger via submit
+  useEffect(() => {
+    const el = document.getElementById('tkn-card-tokenize-btn')
+    if (el) (el as any)._trigger = handleTokenize
+  })
+
+  return (
+    <div className="tkn-card-fields">
+      <div className="tkn-card-brand-row">
+        <CreditCard size={18} />
+        <span className="tkn-card-brand-name">{brand.toUpperCase()}</span>
+      </div>
+      <div className="tkn-checkout-fields">
+        <label className="tkn-checkout-wide">
+          Número do cartão
+          <input
+            type="text"
+            inputMode="numeric"
+            autoComplete="cc-number"
+            value={cardNumber}
+            onChange={e => setCardNumber(formatCardNumber(e.target.value))}
+            placeholder="0000 0000 0000 0000"
+            maxLength={19}
+          />
+        </label>
+        <label className="tkn-checkout-wide">
+          Nome impresso no cartão
+          <input
+            type="text"
+            autoComplete="cc-name"
+            value={cardName}
+            onChange={e => setCardName(e.target.value)}
+            placeholder="NOME COMO NO CARTÃO"
+          />
+        </label>
+        <label>
+          Validade
+          <input
+            type="text"
+            inputMode="numeric"
+            autoComplete="cc-exp"
+            value={expiry}
+            onChange={e => setExpiry(formatExpiry(e.target.value))}
+            placeholder="MM/AA"
+            maxLength={5}
+          />
+        </label>
+        <label>
+          CVV
+          <input
+            type="text"
+            inputMode="numeric"
+            autoComplete="cc-csc"
+            value={cvv}
+            onChange={e => setCvv(e.target.value.replace(/\D/g, '').slice(0, 4))}
+            placeholder="000"
+            maxLength={4}
+          />
+        </label>
+        <label className="tkn-checkout-wide">
+          CPF do titular do cartão
+          <input
+            type="text"
+            inputMode="numeric"
+            value={docNumber}
+            onChange={e => setDocNumber(e.target.value.replace(/\D/g, '').slice(0, 11))}
+            placeholder="00000000000"
+            maxLength={11}
+          />
+        </label>
+        <label className="tkn-checkout-wide">
+          Parcelas
+          <select value={installments} onChange={e => setInstallments(Number(e.target.value))}>
+            {[1, 2, 3, 4, 5, 6, 10, 12].map(n => (
+              <option key={n} value={n}>
+                {n}x {money(total / n)}{n === 1 ? ' sem juros' : ''}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+      {/* Hidden trigger button — parent calls _trigger() on submit */}
+      <button
+        id="tkn-card-tokenize-btn"
+        type="button"
+        style={{ display: 'none' }}
+        onClick={handleTokenize}
+        disabled={tokenizing || busy}
+      />
+    </div>
+  )
+}
+
+/* -----------------------------------------------------------------------
+   MAIN CHECKOUT PAGE
+   ----------------------------------------------------------------------- */
 export default function Checkout() {
-  const { items, totalPrice, clearCart } = useCart()
+  const params = useParams<{ code?: string }>()
+  const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
+  const urlCode = params.code || searchParams.get('product') || searchParams.get('sku') || searchParams.get('code') || ''
+
+  const { items, totalPrice, clearCart, addToCart } = useCart()
+  const [loadingProduct, setLoadingProduct] = useState(false)
   const { user, signOut } = useAuth()
   const [address, setAddress] = useState(emptyAddress)
   const [draft, setDraft] = useState(emptyAddress)
   const [editingAddress, setEditingAddress] = useState(true)
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
-  const [document, setDocument] = useState('')
+  const [taxDoc, setTaxDoc] = useState('')
   const [taxType, setTaxType] = useState<'CPF' | 'CNPJ'>('CPF')
   const [company, setCompany] = useState('')
   const [loadingCnpj, setLoadingCnpj] = useState(false)
@@ -41,9 +359,75 @@ export default function Checkout() {
   const [loading, setLoading] = useState(false)
   const [busy, setBusy] = useState(false)
   const [complete, setComplete] = useState<CreatedOrderResult | null>(null)
-  // Mantém o valor usado pela integração anterior; a cotação dinâmica é uma integração separada.
+  // Card tokenization state (set by CardFields component via callback)
+  const [cardToken, setCardToken] = useState('')
+  const [cardBrand, setCardBrand] = useState('')
+  const [cardInstallments, setCardInstallments] = useState(1)
+  const [cardReady, setCardReady] = useState(false)
+
   const shippingCost = 0
   const total = Math.max(0, totalPrice + shippingCost - (coupon?.discount || 0))
+
+  // 1. Sincronização automática do produto pela URL específica (/checkout/:code ou ?sku=...)
+  useEffect(() => {
+    if (!urlCode) return
+
+    const decoded = decodeURIComponent(urlCode).trim()
+    const alreadyInCart = items.some(
+      i => (i.sku && i.sku.toLowerCase() === decoded.toLowerCase()) ||
+           (i.id && i.id.toLowerCase() === decoded.toLowerCase()) ||
+           ((i as any).slug && (i as any).slug.toLowerCase() === decoded.toLowerCase())
+    )
+    if (alreadyInCart) return
+
+    let cancelled = false
+    setLoadingProduct(true)
+
+    async function loadProduct() {
+      try {
+        let p = await getProductBySku(decoded)
+        if (!p) p = await getProductById(decoded)
+        if (cancelled || !p) return
+
+        addToCart({
+          id: p.id,
+          name: p.name,
+          sku: p.sku || p.id,
+          price: p.price || 0,
+          promo_price: p.promo_price || undefined,
+          image: p.image_url || (p.images && p.images[0]) || '',
+          quantity: 1,
+          stock: p.stock || 0
+        })
+      } catch (err) {
+        console.warn('[checkout] Falha ao carregar produto por código:', err)
+      } finally {
+        if (!cancelled) setLoadingProduct(false)
+      }
+    }
+
+    loadProduct()
+    return () => { cancelled = true }
+  }, [urlCode, items, addToCart])
+
+  // 2. Garante que a URL SEMPRE exiba o código específico do produto em compra única
+  useEffect(() => {
+    if (!urlCode && items.length === 1) {
+      const singleCode = items[0].sku || items[0].id
+      if (singleCode) {
+        navigate(`/checkout/${encodeURIComponent(singleCode)}`, { replace: true })
+      }
+    }
+  }, [urlCode, items, navigate])
+
+  // 3. Normaliza URLs com query param (?product=... ou ?sku=...) para o formato oficial /checkout/:code
+  useEffect(() => {
+    const qCode = searchParams.get('product') || searchParams.get('sku') || searchParams.get('code')
+    if (qCode && !params.code) {
+      navigate(`/checkout/${encodeURIComponent(qCode)}`, { replace: true })
+    }
+  }, [searchParams, params.code, navigate])
+
   useEffect(() => {
     let active = true
     if (!user) return
@@ -59,7 +443,7 @@ export default function Checkout() {
         setAccountName(name)
         setPhone(customer?.phone || '')
         const id = (customer?.cpf_cnpj || customer?.document || '').replace(/\D/g, '')
-        setDocument(id); setTaxType(id.length > 11 ? 'CNPJ' : 'CPF')
+        setTaxDoc(id); setTaxType(id.length > 11 ? 'CNPJ' : 'CPF')
       })
       .catch(() => { if (active) setLoadNotice('Não foi possível carregar o cadastro. Você pode preencher os dados abaixo.') })
       .finally(() => { if (active) setLoading(false) })
@@ -87,25 +471,80 @@ export default function Checkout() {
     if (!validAddress(draft)) { setError('Preencha nome, CEP, rua, número, bairro, cidade e UF do endereço.'); return }
     setAddress({ ...draft, state: draft.state.toUpperCase() }); setEditingAddress(false); setError('')
   }
+
+  // Process order with tokenized card or other payment methods
+  const executeOrder = async (overrideCard?: { token: string; brand: string; installments: number }) => {
+    setBusy(true)
+    try {
+      const selected = editingAddress ? draft : address
+      const result = await processCheckoutOrder({
+        items,
+        customer: { ...selected, name: taxType === 'CNPJ' ? company.trim() : selected.name, email, phone, document: taxDoc },
+        shippingCost,
+        shippingMethod: 'sedex',
+        discount: coupon?.discount || 0,
+        paymentMethod: payment,
+        userId: user?.id,
+        cardToken: overrideCard ? overrideCard.token : (payment === 'credit_card' ? cardToken : undefined),
+        cardBrand: overrideCard ? overrideCard.brand : (payment === 'credit_card' ? cardBrand : undefined),
+        installments: overrideCard ? overrideCard.installments : (payment === 'credit_card' ? cardInstallments : undefined)
+      })
+      if (!result.success || !result.orderId) {
+        setError(result.error || 'Não foi possível continuar. Tente novamente.')
+        return
+      }
+      await registerCouponUse(coupon?.id)
+      setComplete(result)
+      clearCart()
+      setCardReady(false)
+      setCardToken('')
+    } catch {
+      setError('Não foi possível continuar. Tente novamente mais tarde.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  // Called by CardFields component when token is ready
+  const handleCardToken = (token: string, brand: string, installments: number) => {
+    setCardToken(token)
+    setCardBrand(brand)
+    setCardInstallments(installments)
+    setCardReady(true)
+    void executeOrder({ token, brand, installments })
+  }
+
+  const handleCardError = (msg: string) => {
+    setError(msg)
+    setBusy(false)
+  }
+
   const submit = async (event: FormEvent) => {
     event.preventDefault()
     if (busy || !items.length) return
     const selected = editingAddress ? draft : address
     if (!validAddress(selected)) { setError('Confira os campos do endereço antes de continuar.'); return }
-    if (document.length !== (taxType === 'CPF' ? 11 : 14) || (taxType === 'CNPJ' && !company.trim())) { setError('Confira o documento e os dados de faturamento.'); return }
+    if (taxDoc.length !== (taxType === 'CPF' ? 11 : 14) || (taxType === 'CNPJ' && !company.trim())) { setError('Confira o documento e os dados de faturamento.'); return }
     if (phone.replace(/\D/g, '').length < 10) { setError('Informe o telefone com DDD.'); return }
-    setBusy(true); setError('')
-    try {
-      const result = await processCheckoutOrder({
-        items, customer: { ...selected, name: taxType === 'CNPJ' ? company.trim() : selected.name, email, phone, document },
-        shippingCost, shippingMethod: 'sedex', discount: coupon?.discount || 0, paymentMethod: payment, userId: user?.id
-      })
-      if (!result.success || !result.orderId) { setError(result.error || 'Não foi possível continuar. Tente novamente.'); return }
-      await registerCouponUse(coupon?.id)
-      setComplete(result); clearCart()
-    } catch { setError('Não foi possível continuar. Tente novamente mais tarde.') }
-    finally { setBusy(false) }
+    setError('')
+
+    // For credit card: trigger tokenization first (calls handleCardToken -> executeOrder)
+    if (payment === 'credit_card') {
+      setBusy(true)
+      const btn = window.document.getElementById('tkn-card-tokenize-btn') as any
+      if (btn?._trigger) {
+        await btn._trigger()
+      } else {
+        setError('Preencha os dados do cartão antes de continuar.')
+        setBusy(false)
+      }
+      return
+    }
+
+    // For Pix / Boleto:
+    await executeOrder()
   }
+
   const safePaymentUrl = complete?.checkoutUrl?.startsWith('https://') ? complete.checkoutUrl : null
   const displayName = accountName || String(user?.user_metadata?.name || user?.email?.split('@')[0] || 'Minha conta')
   const initials = displayName.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toUpperCase() || 'TC'
@@ -117,9 +556,9 @@ export default function Checkout() {
     setCoupon(result.coupon); setCouponNotice(`Cupom ${result.coupon.code} aplicado.`); setCouponOpen(false)
   }
 
-  const handleDocumentChange = async (val: string) => {
+    const handleDocumentChange = async (val: string) => {
     const clean = val.replace(/\D/g, '')
-    setDocument(clean)
+    setTaxDoc(clean)
     if (taxType === 'CNPJ' && clean.length === 14) {
       setLoadingCnpj(true)
       try {
@@ -152,10 +591,16 @@ export default function Checkout() {
   }
 
   const handleDocumentBlur = () => {
-    if (taxType === 'CNPJ' && document.length === 14 && !company) {
-      void handleDocumentChange(document)
+    if (taxType === 'CNPJ' && taxDoc.length === 14 && !company) {
+      void handleDocumentChange(taxDoc)
     }
   }
+
+  // ── Determine success screen to show ──────────────────────────────────────
+  const showPixSuccess = complete && payment === 'pix'
+  const showBoletoSuccess = complete && payment === 'boleto'
+  const showCardSuccess = complete && payment === 'credit_card'
+
   return <div id="checkout-container" className="tkn-checkout">
     <Editable as="header" widgetId="checkout-header" label="Cabeçalho do checkout" widgetType="container" editorKind="container" renderContent={false} className="tkn-checkout-top"><div className="tkn-checkout-shell">
       <Link to="/" aria-label="TEKNIX início"><Editable as="img" widgetId="checkout-1" src="/teknix-logo.svg" alt="TEKNIX" width="122" /></Link>
@@ -177,10 +622,43 @@ export default function Checkout() {
     <main className="tkn-checkout-shell tkn-checkout-main">
       <EditableFlow id="checkout-main" label="Estrutura do checkout">
       <Editable as="div" widgetId="checkout-main-content" label="Conteúdo do checkout" widgetType="container" editorKind="container" renderContent={false} style={{ display: 'contents' }}>
+      {/* ── SUCCESS / PAYMENT SCREENS ─────────────────────────────────── */}
       {complete ? <Editable content={{}} as="section" widgetId="checkout-4" className="tkn-checkout-empty">
-        <CheckCircle2 size={40} /><Editable as="h1" widgetId="checkout-5">Pedido recebido</Editable><Editable content={{}} as="p" widgetId="checkout-6">Pedido {complete.orderNumber}. O pagamento ainda precisa ser confirmado.</Editable>
-        {safePaymentUrl ? <a className="tkn-checkout-primary" href={safePaymentUrl}>Continuar no pagamento</a> : <Editable as="p" widgetId="checkout-7">Consulte o status e as instruções de pagamento em seus pedidos.</Editable>}
+
+        {showPixSuccess && (
+          <PixSuccess
+            qrCode={complete.qrCode || ''}
+            qrCodeBase64={complete.qrCodeBase64 || ''}
+            orderNumber={complete.orderNumber || ''}
+          />
+        )}
+
+        {showBoletoSuccess && (
+          <BoletoSuccess
+            ticketUrl={complete.ticketUrl || ''}
+            digitableLine={complete.digitableLine || complete.barcodeContent || ''}
+            orderNumber={complete.orderNumber || ''}
+          />
+        )}
+
+        {showCardSuccess && <>
+          <CheckCircle2 size={40} />
+          <Editable as="h1" widgetId="checkout-5">Pedido recebido!</Editable>
+          <Editable content={{}} as="p" widgetId="checkout-6">Pedido {complete.orderNumber} — o pagamento está sendo processado.</Editable>
+          {safePaymentUrl && <a className="tkn-checkout-primary" href={safePaymentUrl}>Continuar no pagamento</a>}
+        </>}
+
+        {!showPixSuccess && !showBoletoSuccess && !showCardSuccess && <>
+          <CheckCircle2 size={40} />
+          <Editable as="h1" widgetId="checkout-5b">Pedido recebido</Editable>
+          <Editable content={{}} as="p" widgetId="checkout-6b">Pedido {complete.orderNumber}. O pagamento ainda precisa ser confirmado.</Editable>
+        </>}
+
         <Link to="/pedidos" className="tkn-checkout-link">Ver meus pedidos</Link>
+      </Editable> : (loadingProduct && !items.length) ? <Editable as="section" widgetId="checkout-8" className="tkn-checkout-empty">
+        <Loader2 size={40} className="animate-spin" style={{ color: '#0071e3', animation: 'spin 1s linear infinite' }} />
+        <Editable as="h1" widgetId="checkout-9">Carregando produto…</Editable>
+        <Editable as="p" widgetId="checkout-10">Buscando informações oficiais do equipamento para finalizar sua compra.</Editable>
       </Editable> : !items.length ? <Editable as="section" widgetId="checkout-8" className="tkn-checkout-empty">
         <Package size={40} /><Editable as="h1" widgetId="checkout-9">Sua sacola está vazia</Editable><Editable as="p" widgetId="checkout-10">Adicione um produto para finalizar sua compra.</Editable><Link to="/produtos" className="tkn-checkout-primary">Explorar produtos</Link>
       </Editable> : <>
@@ -214,15 +692,25 @@ export default function Checkout() {
             </Editable>
             <Editable content={{}} as="section" widgetId="checkout-20" className="tkn-checkout-card" aria-labelledby="payment-title">
               <Editable as="h2" widgetId="checkout-21" id="payment-title">Meios de pagamento</Editable>
-              {([{id:'pix',name:'Pix',detail:'Pagamento com QR Code',icon:pixIcon},{id:'credit_card',name:'Cartão de crédito',detail:'Continue no ambiente de pagamento',icon:creditIcon},{id:'boleto',name:'Boleto bancário',detail:'Sujeito à confirmação do pagamento',icon:boletoIcon}] as const).map(({id,name,detail,icon}) => <label key={id} className={'tkn-checkout-payment ' + (payment === id ? 'is-selected' : '')}><input type="radio" name="payment" value={id} checked={payment === id} onChange={() => setPayment(id)} /><img className="tkn-checkout-payment-icon" src={icon} alt="" /><span>{name}<small>{detail}</small></span></label>)}
+              {([{id:'pix',name:'Pix',detail:'Pagamento instantâneo com QR Code',icon:pixIcon},{id:'credit_card',name:'Cartão de crédito',detail:'Parcelamento em até 12x',icon:creditIcon},{id:'boleto',name:'Boleto bancário',detail:'Vencimento em 3 dias úteis',icon:boletoIcon}] as const).map(({id,name,detail,icon}) => <label key={id} className={'tkn-checkout-payment ' + (payment === id ? 'is-selected' : '')}><input type="radio" name="payment" value={id} checked={payment === id} onChange={() => { setPayment(id); setCardReady(false); setCardToken(''); setError('') }} /><img className="tkn-checkout-payment-icon" src={icon} alt="" /><span>{name}<small>{detail}</small></span></label>)}
+
+              {/* Credit card fields — shown inline when credit_card is selected */}
+              {payment === 'credit_card' && (
+                <CardFields
+                  onToken={handleCardToken}
+                  onError={handleCardError}
+                  total={total}
+                  busy={busy}
+                />
+              )}
             </Editable>
             <Editable as="section" widgetId="checkout-22" className="tkn-checkout-card" aria-labelledby="billing-title">
               <Editable as="h2" widgetId="checkout-23" id="billing-title">Faturamento e contato</Editable>
               <div className="tkn-checkout-fields">
                 <label>E-mail<input type="email" autoComplete="email" required value={email} onChange={e => setEmail(e.target.value)} /></label>
                 <label>Celular com DDD<input type="tel" autoComplete="tel" required value={phone} onChange={e => setPhone(e.target.value)} /></label>
-                <label>Tipo de pessoa<select value={taxType} onChange={e => { setTaxType(e.target.value as 'CPF' | 'CNPJ'); setDocument(''); setCompany('') }}><option value="CPF">Pessoa física</option><option value="CNPJ">Pessoa jurídica</option></select></label>
-                <label><span>{taxType} {taxType === 'CNPJ' && loadingCnpj && <small style={{ color: '#059669', fontSize: 11, fontWeight: 500 }}>(Consultando...)</small>}</span><input inputMode="numeric" required value={document} maxLength={taxType === 'CPF' ? 11 : 14} placeholder={taxType === 'CNPJ' ? '00000000000000' : '00000000000'} onChange={e => void handleDocumentChange(e.target.value)} onBlur={handleDocumentBlur} /></label>
+                <label>Tipo de pessoa<select value={taxType} onChange={e => { setTaxType(e.target.value as 'CPF' | 'CNPJ'); setTaxDoc(''); setCompany('') }}><option value="CPF">Pessoa física</option><option value="CNPJ">Pessoa jurídica</option></select></label>
+                <label><span>{taxType} {taxType === 'CNPJ' && loadingCnpj && <small style={{ color: '#059669', fontSize: 11, fontWeight: 500 }}>(Consultando...)</small>}</span><input inputMode="numeric" required value={taxDoc} maxLength={taxType === 'CPF' ? 11 : 14} placeholder={taxType === 'CNPJ' ? '00000000000000' : '00000000000'} onChange={e => void handleDocumentChange(e.target.value)} onBlur={handleDocumentBlur} /></label>
                 {taxType === 'CNPJ' && <label className="tkn-checkout-wide"><span>Razão social {loadingCnpj && <small style={{ color: '#059669', fontSize: 11, fontWeight: 500 }}>(Buscando na Receita...)</small>}</span><input required value={company} placeholder={loadingCnpj ? 'Consultando Receita Federal...' : 'Razão social da empresa'} onChange={e => setCompany(e.target.value)} /></label>}
               </div>
             </Editable>
@@ -232,7 +720,9 @@ export default function Checkout() {
             <button className="tkn-checkout-coupon" type="button" onClick={() => { setCouponNotice(''); setCouponOpen(true) }}><Ticket size={16} /> {coupon ? `Cupom ${coupon.code}` : 'Inserir código do cupom'}</button>
             <dl><div><dt>Produtos</dt><dd>{money(totalPrice)}</dd></div><div><dt>Frete</dt><dd>{money(shippingCost)}</dd></div>{coupon && <div><dt>Desconto</dt><dd>- {money(coupon.discount)}</dd></div>}<div className="tkn-checkout-total"><dt><button type="button" onClick={() => setSummaryOpen(true)}>Total <ChevronUp size={14} /></button></dt><dd>{money(total)}</dd></div></dl>
             {error && <Editable content={{}} as="p" widgetId="checkout-25" role="alert" className="tkn-checkout-error">{error}</Editable>}
-            <button className="tkn-checkout-primary" type="submit" disabled={busy || loading}>{busy ? 'Processando…' : 'Comprar agora!'}</button>
+            <button className="tkn-checkout-primary" type="submit" disabled={busy || loading}>
+              {busy ? (payment === 'credit_card' && !cardReady ? 'Validando cartão…' : 'Processando…') : 'Comprar agora!'}
+            </button>
             <Editable as="p" widgetId="checkout-26" className="tkn-checkout-safe"><ShieldCheck size={16} /> Confira os dados antes de continuar.</Editable>
             <Link className="tkn-checkout-link" to="/sacola">Editar sacola</Link>
           </Editable>

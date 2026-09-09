@@ -43,7 +43,7 @@ export default function MarketplaceHome() {
       tag: 'Frete Grátis para todo o Brasil',
       btnText: 'Ver Kits 21V',
       btnLink: '/ferramentas',
-      bgGradient: 'linear-gradient(135deg, #111827 0%, #1f2937 50%, #374151 100%)',
+      bgGradient: 'linear-gradient(135deg, #000000 0%, #1f2937 50%, #374151 100%)',
       img: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=1200&auto=format&fit=crop&q=80',
       badge: 'Destaque da Semana'
     },

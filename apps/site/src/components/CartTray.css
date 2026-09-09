@@ -30,7 +30,7 @@
   border-bottom: 0;
   border-radius: 10px 10px 0 0;
   background: #ffffff;
-  color: #111827;
+  color: #000000;
   box-shadow: 0 -4px 12px rgba(15, 23, 42, .10);
   font-size: var(--tkn-text-13);
   font-weight: var(--tkn-weight-medium);
@@ -50,7 +50,7 @@
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: #111827;
+  background: #000000;
   color: #fff;
   font: 700 12px/1 serif;
 }
@@ -75,7 +75,7 @@
   color: #56606e;
   font-size: var(--tkn-text-12);
 }
-.teknix-cart-tray-details strong { color: #111827; }
+.teknix-cart-tray-details strong { color: #000000; }
 
 /* ── Corpo da bandeja (colapsa/expande, botão sempre visível) ── */
 .teknix-cart-tray-body {

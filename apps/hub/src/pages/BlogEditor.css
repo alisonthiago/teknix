@@ -42,7 +42,7 @@
 
 .blog-back-btn:hover {
   background: #f3f4f6;
-  color: #111827;
+  color: #000000;
 }
 
 .blog-editor-title-crumb {
@@ -81,7 +81,7 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  background: #111827;
+  background: #000000;
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -195,7 +195,7 @@
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  color: #111827;
+  color: #000000;
 }
 
 .blog-cover-overlay button.remove {
@@ -210,7 +210,7 @@
   outline: none;
   font-size: 32px;
   font-weight: 800;
-  color: #111827;
+  color: #000000;
   resize: none;
   padding: 0;
   background: transparent;
@@ -289,8 +289,8 @@
 }
 
 .blog-editor-tab.active {
-  color: #111827;
-  border-bottom-color: #111827;
+  color: #000000;
+  border-bottom-color: #000000;
 }
 
 /* Blocks area */
@@ -345,7 +345,7 @@
 
 .block-ctrl-btn:hover {
   background: #e5e7eb;
-  color: #111827;
+  color: #000000;
 }
 
 .block-ctrl-btn.danger:hover {
@@ -390,7 +390,7 @@
   outline: none;
   background: transparent;
   font-family: inherit;
-  color: #111827;
+  color: #000000;
 }
 
 .block-input.h1 { font-size: 30px; font-weight: 800; }
@@ -640,7 +640,7 @@
   border-radius: 8px;
   padding: 10px 14px;
   font-size: 14px;
-  color: #111827;
+  color: #000000;
   outline: none;
   transition: border-color 0.15s;
   font-family: inherit;
@@ -656,7 +656,7 @@
   border-radius: 8px;
   padding: 10px 14px;
   font-size: 14px;
-  color: #111827;
+  color: #000000;
   outline: none;
   resize: vertical;
   font-family: inherit;

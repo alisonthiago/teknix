@@ -14,7 +14,7 @@
 .identification-card input { min-height: 52px; padding: 0 14px; border: 1px solid #c8ccd1; border-radius: 8px; color: #171b24; font: inherit; font-size: 16px; outline: 0; }
 .identification-card input:focus { border-color: #141b34; box-shadow: 0 0 0 3px rgba(181, 245, 0, .34); }
 .identification-card small { color: #72767d; font-size: 12px; line-height: 1.35; }
-.identification-continue { min-height: 48px; margin-top: 31px; border: 0; border-radius: 5px; background: var(--hagor-green, #b5f500); color: #111827; font: inherit; font-size: 15px; font-weight: 800; cursor: pointer; transition: background .18s ease, transform .18s ease; }
+.identification-continue { min-height: 48px; margin-top: 31px; border: 0; border-radius: 5px; background: var(--hagor-green, #b5f500); color: #000000; font: inherit; font-size: 15px; font-weight: 800; cursor: pointer; transition: background .18s ease, transform .18s ease; }
 .identification-continue:hover:not(:disabled) { background: #9cdd00; transform: translateY(-1px); }
 .identification-continue:disabled { background: #d1d3d5; color: #777a7e; cursor: not-allowed; }
 .identification-message { margin: -12px 0 20px; padding: 11px 12px; border-radius: 6px; background: #fff1f1; color: #a12a2a; font-size: 14px; }

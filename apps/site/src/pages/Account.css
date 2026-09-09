@@ -129,7 +129,7 @@
 .cb-account-main-title {
   font-size: var(--tkn-page-title, 24px);
   font-weight: var(--tkn-weight-semibold, 600);
-  color: #111827;
+  color: #000000;
   margin: 0 0 var(--tkn-space-8);
   letter-spacing: -0.02em;
   line-height: 1.25;
@@ -402,7 +402,7 @@
 .cb-password-group { position: relative; }
 .cb-password-group .cb-form-input { width: 100%; box-sizing: border-box; padding-right: 48px; }
 .cb-password-toggle { position: absolute; right: 10px; bottom: 8px; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 5px; background: transparent; color: #4b5563; cursor: pointer; }
-.cb-password-toggle:hover, .cb-password-toggle:focus-visible { background: #f3f4f6; color: #111827; outline: 0; }
+.cb-password-toggle:hover, .cb-password-toggle:focus-visible { background: #f3f4f6; color: #000000; outline: 0; }
 
 .cb-modal-actions {
   display: flex;

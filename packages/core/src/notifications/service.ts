@@ -1,22 +1,45 @@
 /* ==========================================================================
    TEKNIX CORE — CENTRAL NOTIFICATION SERVICE
-   Distribui eventos, grava histórico e despacha para Brevo / In-App / SMS
+   Distribui eventos, grava histórico e despacha para Brevo / In-App / SMS.
+   A API Key do Brevo é injetada automaticamente do ambiente (Node ou Vite).
    ========================================================================== */
 
 import type { NotificationPayload, EventType, ProjectContext } from './types'
 import { renderTemplate } from './templates'
 import { BrevoEmailProvider } from './providers/brevo'
 
+/** Lê a chave Brevo do ambiente — compatível com Node.js (BREVO_API_KEY)
+ *  e Vite/browser (VITE_BREVO_API_KEY via import.meta.env). */
+function resolveBrevoApiKey(explicitKey?: string): string {
+  if (explicitKey) return explicitKey
+
+  // Node.js / Edge Functions
+  try {
+    const nodeKey = (globalThis as any)?.process?.env?.BREVO_API_KEY
+    if (nodeKey) return nodeKey
+  } catch {}
+
+  // Vite browser build
+  try {
+    const viteKey = (import.meta as any)?.env?.VITE_BREVO_API_KEY
+    if (viteKey) return viteKey
+  } catch {}
+
+  return ''
+}
+
 export class NotificationService {
   private emailProvider: BrevoEmailProvider
   private inMemoryNotifications: NotificationPayload[] = []
 
   constructor(brevoApiKey?: string) {
-    this.emailProvider = new BrevoEmailProvider(brevoApiKey)
+    const resolvedKey = resolveBrevoApiKey(brevoApiKey)
+    this.emailProvider = new BrevoEmailProvider(resolvedKey)
   }
 
   /**
-   * Publica um evento central no monorepo e distribui as notificações necessárias
+   * Publica um evento central no monorepo e distribui as notificações necessárias.
+   * O template HTML correto é selecionado automaticamente pelo eventType.
    */
   async publishEvent(
     eventType: EventType,
@@ -77,8 +100,10 @@ export class NotificationService {
       if (!emailRes.success && emailRes.error) {
         errors.push(emailRes.error)
         payload.status = 'failed'
+        console.warn(`[NotificationService] Falha ao enviar e-mail (${eventType}):`, emailRes.error)
       } else {
         payload.status = 'sent'
+        console.info(`[NotificationService] ✅ E-mail enviado (${eventType}) → ${payload.recipientEmail}`)
       }
     }
 
@@ -113,5 +138,5 @@ export class NotificationService {
   }
 }
 
-// Instância Singleton para uso rápido no monorepo
+// Instância Singleton — a API Key é resolvida automaticamente do ambiente
 export const notificationService = new NotificationService()

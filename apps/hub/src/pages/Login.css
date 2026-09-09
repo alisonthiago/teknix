@@ -249,7 +249,7 @@
   width: 50%;
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 50%, #000000 100%);
+  background: linear-gradient(145deg, #101216 0%, #171d27 58%, #0b0d10 100%);
 }
 
 @media (min-width: 1024px) {
@@ -282,4 +282,69 @@
   background: #B5F500;
   opacity: 0.18;
   filter: blur(90px);
+}
+
+.flow-login-promo {
+  position: relative;
+  z-index: 1;
+  width: min(78%, 560px);
+  color: #fff;
+}
+
+.flow-login-promo-kicker {
+  display: inline-block;
+  color: #b5f500;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .08em;
+}
+
+.flow-login-promo h2 {
+  max-width: 520px;
+  margin: 22px 0 18px;
+  font-size: clamp(36px, 4vw, 58px);
+  line-height: 1.03;
+  font-weight: 500;
+  letter-spacing: -.04em;
+}
+
+.flow-login-promo h2::first-line { color: #fff; }
+
+.flow-login-promo p {
+  max-width: 470px;
+  margin: 0 0 28px;
+  color: #c9d0d8;
+  font-size: 17px;
+  line-height: 1.5;
+}
+
+.flow-login-promo-points {
+  display: grid;
+  gap: 12px;
+  color: #edf1f5;
+  font-size: 15px;
+}
+
+.flow-login-promo-points span::first-letter { color: #b5f500; }
+
+.flow-login-promo-orbit {
+  display: flex;
+  gap: 14px;
+  margin-top: 72px;
+}
+
+.flow-login-promo-orbit span {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border: 1px solid rgba(181,245,0,.5);
+  border-radius: 50%;
+  background: rgba(181,245,0,.08);
+  color: #b5f500;
+  font-size: 22px;
+}
+
+@media (max-width: 1023px) {
+  .flow-login-title { font-size: 28px; }
 }

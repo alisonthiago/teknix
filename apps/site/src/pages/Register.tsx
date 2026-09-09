@@ -1,14 +1,16 @@
 import { Editable } from '../components/page-widgets/PageWidgets'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { ArrowLeft, Check } from 'lucide-react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import './Login.css'
 import './Register.css'
 
 export default function Register() {
   const [params] = useSearchParams()
   const navigate = useNavigate()
-  const { signUp } = useAuth()
+  const { signUp, signInWithGoogle, user } = useAuth()
+  const redirectTarget = params.get('redirect') || '/conta'
   const documentNumber = params.get('document') || ''
   const initialEmail = params.get('email') || ''
   const [name, setName] = useState('')
@@ -21,6 +23,28 @@ export default function Register() {
   const [acceptedTerms, setAcceptedTerms] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [googleLoading, setGoogleLoading] = useState(false)
+
+  useEffect(() => {
+    if (user) {
+      navigate(redirectTarget, { replace: true })
+    }
+  }, [user, navigate, redirectTarget])
+
+  async function handleGoogleSignUp() {
+    setError('')
+    setGoogleLoading(true)
+    try {
+      const result = await signInWithGoogle(redirectTarget)
+      if (result.error) {
+        setError('O cadastro com Google não está disponível no momento.')
+        setGoogleLoading(false)
+      }
+    } catch {
+      setError('O cadastro com Google não está disponível no momento.')
+      setGoogleLoading(false)
+    }
+  }
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault()
@@ -38,7 +62,7 @@ export default function Register() {
       setLoading(false)
       return
     }
-    navigate('/conta')
+    navigate(redirectTarget)
   }
 
   return (
@@ -63,6 +87,20 @@ export default function Register() {
           <button type="button" className="register-back" onClick={() => navigate('/login')}><ArrowLeft size={16} /> Voltar</button>
           <Editable as="h1" widgetId="register-5">Cadastre sua nova conta</Editable>
           {documentNumber && <Editable content={{}} as="p" widgetId="register-6" className="register-document">CPF: {documentNumber}</Editable>}
+
+          <button
+            type="button"
+            className="identification-google"
+            onClick={handleGoogleSignUp}
+            disabled={googleLoading || loading}
+            style={{ width: '100%', marginBottom: 16 }}
+          >
+            <svg className="identification-google-logo" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.8 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.5a4.7 4.7 0 0 1-2 3.1v2.5h3.3c1.9-1.8 3-4.3 3-7.4Z"/><path fill="#34A853" d="M12 22c2.7 0 5-.9 6.7-2.4l-3.3-2.5c-.9.6-2.1 1-3.4 1-2.6 0-4.8-1.7-5.6-4.1H3v2.6A10 10 0 0 0 12 22Z"/><path fill="#FBBC05" d="M6.4 14c-.2-.6-.3-1.3-.3-2s.1-1.4.3-2V7.4H3A10 10 0 0 0 3 16.6L6.4 14Z"/><path fill="#EA4335" d="M12 5.9c1.5 0 2.9.5 4 1.6l3-3A10 10 0 0 0 3 7.4L6.4 10C7.2 7.6 9.4 5.9 12 5.9Z"/></svg>
+            {googleLoading ? 'Conectando com o Google...' : 'Cadastrar com o Google'}
+          </button>
+
+          <div className="identification-divider" style={{ marginBottom: 20 }}><span>ou preencha os dados</span></div>
+
           <form className="register-form" onSubmit={handleSubmit}>
             {error && <div className="register-error" role="alert">{error}</div>}
             <label>Nome completo<input value={name} onChange={event => setName(event.target.value)} placeholder="Insira seu nome completo" autoComplete="name" /></label>

@@ -72,7 +72,7 @@ export default function StatsOverview() {
               <select
                 value={period}
                 onChange={(e) => setPeriod(e.target.value)}
-                style={{ border: 'none', background: 'transparent', fontWeight: 600, color: '#111827', outline: 'none', cursor: 'pointer' }}
+                style={{ border: 'none', background: 'transparent', fontWeight: 600, color: '#000000', outline: 'none', cursor: 'pointer' }}
               >
                 <option value="today">Hoje</option>
                 <option value="yesterday">Ontem</option>
@@ -90,7 +90,7 @@ export default function StatsOverview() {
               <select
                 value={comparison}
                 onChange={(e) => setComparison(e.target.value)}
-                style={{ border: 'none', background: 'transparent', fontWeight: 600, color: '#111827', outline: 'none', cursor: 'pointer' }}
+                style={{ border: 'none', background: 'transparent', fontWeight: 600, color: '#000000', outline: 'none', cursor: 'pointer' }}
               >
                 <option value="none">Nenhuma</option>
                 <option value="prev_period">Período anterior</option>
@@ -337,7 +337,7 @@ export default function StatsOverview() {
         {/* Fallback para outras abas */}
         {(activeTab === 'products' || activeTab === 'sales' || activeTab === 'coupons') && (
           <div className="stat-card" style={{ padding: '40px', textAlign: 'center', color: '#6b7280' }}>
-            <h3 style={{ color: '#111827', margin: '0 0 8px 0' }}>Relatório Detalhado de {activeTab.toUpperCase()}</h3>
+            <h3 style={{ color: '#000000', margin: '0 0 8px 0' }}>Relatório Detalhado de {activeTab.toUpperCase()}</h3>
             <p style={{ margin: 0 }}>Todos os dados consolidados e atualizados de acordo com as vendas aprovadas.</p>
           </div>
         )}

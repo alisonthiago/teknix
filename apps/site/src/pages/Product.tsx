@@ -13,6 +13,7 @@ import type { Product as ProductType } from '../types/database'
 import './Product.css'
 import { Ads } from '../components/Ads'
 import { FileText, ShieldCheck, Truck, RotateCcw, Headphones, Zap, BatteryCharging, Wrench, ChevronDown, CheckCircle2 } from 'lucide-react'
+import StockNotifyModal from '../components/StockNotifyModal'
 import './ProductResponsive.css'
 import { productPricing, cleanProductTitle, normalizeShowcase, type ProductEditorialShowcase } from '../../../../packages/core/src/productCommerce'
 import { commerceSignals } from '../services/storefrontCommerce'
@@ -146,6 +147,7 @@ export default function Product() {
   const [showStickyNav, setShowStickyNav] = useState(false)
   const [mobileStickyNavOpen, setMobileStickyNavOpen] = useState(false)
   const [activeSection, setActiveSection] = useState('overview')
+  const [showStockNotifyModal, setShowStockNotifyModal] = useState(false)
   const [pricingTime,setPricingTime] = useState(Date.now)
   useEffect(()=>{
     if (!product?.commerce?.offerEnabled) return
@@ -248,7 +250,9 @@ export default function Product() {
 
   const currentSignals = commerceSignals(currentProduct, pricingTime)
   const remSec = remainingOfferTime(currentSignals?.offerEndsAt, pricingTime)
-  const remainingSeconds = remSec > 0 ? remSec : 5 * 3600 + 2 * 60 + 47
+  // O contador só pode aparecer quando existe uma oferta ativa com prazo válido.
+  // Não usar um prazo demonstrativo aqui, pois isso fazia todo produto parecer em oferta.
+  const remainingSeconds = remSec > 0 ? remSec : 0
   const pixInt = Math.floor(pixPrice).toLocaleString('pt-BR')
   const pixCents = (pixPrice % 1).toFixed(2).substring(2)
 
@@ -274,7 +278,8 @@ export default function Product() {
 
   const handleOneClickBuy = () => {
     handleAddToCart()
-    navigate('/checkout')
+    const productCode = currentProduct.sku || (currentProduct as any).slug || currentProduct.id
+    navigate(`/checkout/${encodeURIComponent(productCode)}`)
   }
 
   const handleCalculateFreight = (e: React.FormEvent) => {
@@ -431,6 +436,14 @@ export default function Product() {
           </div>
         </div>
       )}
+      {/* Modal de Aviso de Produto Esgotado */}
+      {showStockNotifyModal && currentProduct && (
+        <StockNotifyModal
+          productId={currentProduct.id}
+          productName={currentProduct.name || ''}
+          onClose={() => setShowStockNotifyModal(false)}
+        />
+      )}
       <EditableFlow id="product-page" label="Página do produto">
       <Ads position="product-header" />
       {/* Toast Notification */}
@@ -440,91 +453,6 @@ export default function Product() {
         </div>
       )}
 
-      {/* ── STICKY NAV (1:1 EXATO PADRÃO SANDISK / APPLE — COR PRETO, MESMO ESPAÇAMENTO, LARGURA E EFEITO) ── */}
-      <div className={`pdp-sticky-nav ${showStickyNav ? 'is-visible' : ''}`} id="pdp-sticky-nav" aria-hidden={!showStickyNav} inert={!showStickyNav}>
-        <div className="pdp-sticky-nav-inner">
-          <div
-            className="pdp-sticky-nav-branding"
-            onClick={() => setMobileStickyNavOpen(!mobileStickyNavOpen)}
-            role="button"
-            tabIndex={0}
-            aria-expanded={mobileStickyNavOpen}
-          >
-            <span className="pdp-sticky-nav-title">{editorialHeroTitle}</span>
-            <span className="pdp-sticky-nav-spec">21V Lítio • 350 N.m • 46 Peças</span>
-            <span className={`pdp-sticky-nav-chevron-wrap ${mobileStickyNavOpen ? 'is-open' : ''}`}>
-              <ChevronDown size={15} />
-            </span>
-          </div>
-
-          {/* Desktop links */}
-          <nav className="pdp-sticky-nav-links desktop-only" aria-label="Navegação do produto">
-            <a
-              href="#overview"
-              className={activeSection === 'overview' ? 'active' : ''}
-            >
-              Visão geral
-            </a>
-            <a
-              href="#specifications"
-              className={activeSection === 'specifications' ? 'active' : ''}
-            >
-              Especificações
-            </a>
-            <a
-              href="#specifications"
-              className={activeSection === 'faq' ? 'active' : ''}
-            >
-              Suporte e Recursos
-            </a>
-            <button
-              type="button"
-              className="pdp-sticky-nav-cta-btn"
-              onClick={handleOneClickBuy}
-            >
-              Comprar
-            </button>
-          </nav>
-
-          {/* Mobile CTA */}
-          <div className="pdp-sticky-nav-mobile-cta">
-            <button
-              type="button"
-              className="pdp-sticky-nav-cta-btn"
-              onClick={handleOneClickBuy}
-            >
-              Comprar
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Dropdown Menu (Padrão Apple Local Nav) */}
-        {mobileStickyNavOpen && (
-          <div className="pdp-sticky-nav-mobile-menu">
-            <a
-              href="#overview"
-              className={activeSection === 'overview' ? 'active' : ''}
-              onClick={() => setMobileStickyNavOpen(false)}
-            >
-              Visão geral
-            </a>
-            <a
-              href="#specifications"
-              className={activeSection === 'specifications' ? 'active' : ''}
-              onClick={() => setMobileStickyNavOpen(false)}
-            >
-              Especificações
-            </a>
-            <a
-              href="#specifications"
-              className={activeSection === 'faq' ? 'active' : ''}
-              onClick={() => setMobileStickyNavOpen(false)}
-            >
-              Suporte e Recursos
-            </a>
-          </div>
-        )}
-      </div>
 
       {/* ── 1. BREADCRUMBS OFICIAIS ── */}
       <div className="ui container fluid bread-detail">
@@ -1110,29 +1038,47 @@ Principais Destaques:
                 </div>
 
                 {/* Estoque e Quantidade em Linha Única Resumida */}
-                <div className="ml-pdp-box-stock-compact">
-                  <div className="ml-pdp-stock-inline">
-                    <span className="ml-pdp-stock-status-text">Estoque disponível</span>
-                    <span className="ml-pdp-qty-avail">({currentProduct.stock || 15} disponíveis)</span>
-                  </div>
-                  <div className="ml-pdp-qty-row-compact">
-                    <span className="ml-pdp-qty-label">Quantidade:</span>
-                    <div className="ml-pdp-qty-controls">
-                      <Editable as="button" widgetId="product-control-32" type="button" className="ml-pdp-qty-btn" onClick={() => setQuantity(q => Math.max(1, q - 1))} aria-label="Diminuir">-</Editable>
-                      <input type="tel" aria-label="Quantidade" className="ml-pdp-qty-val" value={quantity} onChange={e => setQuantity(Math.max(1, parseInt(e.target.value) || 1))} />
-                      <Editable as="button" widgetId="product-control-33" type="button" className="ml-pdp-qty-btn" onClick={() => setQuantity(q => q + 1)} aria-label="Aumentar">+</Editable>
+                {(currentProduct.stock ?? 1) > 0 ? (
+                  <div className="ml-pdp-box-stock-compact">
+                    <div className="ml-pdp-stock-inline">
+                      <span className="ml-pdp-stock-status-text">Estoque disponível</span>
+                      <span className="ml-pdp-qty-avail">({currentProduct.stock || 15} disponíveis)</span>
+                    </div>
+                    <div className="ml-pdp-qty-row-compact">
+                      <span className="ml-pdp-qty-label">Quantidade:</span>
+                      <div className="ml-pdp-qty-controls">
+                        <Editable as="button" widgetId="product-control-32" type="button" className="ml-pdp-qty-btn" onClick={() => setQuantity(q => Math.max(1, q - 1))} aria-label="Diminuir">-</Editable>
+                        <input type="tel" aria-label="Quantidade" className="ml-pdp-qty-val" value={quantity} onChange={e => setQuantity(Math.max(1, parseInt(e.target.value) || 1))} />
+                        <Editable as="button" widgetId="product-control-33" type="button" className="ml-pdp-qty-btn" onClick={() => setQuantity(q => q + 1)} aria-label="Aumentar">+</Editable>
+                      </div>
                     </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="ml-pdp-out-of-stock-banner">
+                    <p className="ml-pdp-out-of-stock-text">Produto esgotado, clique no botão abaixo para ser avisado quando chegar</p>
+                  </div>
+                )}
 
                 {/* Botões de Ação */}
                 <div className="ml-pdp-box-actions">
-                  <Editable as="button" widgetId="product-control-34" type="button" className="ml-pdp-btn-buy" onClick={handleOneClickBuy}>
-                    Comprar agora
-                  </Editable>
-                  <Editable as="button" widgetId="product-control-35" type="button" className="ml-pdp-btn-cart" onClick={handleAddToCart}>
-                    Adicionar ao carrinho
-                  </Editable>
+                  {(currentProduct.stock ?? 1) > 0 ? (
+                    <>
+                      <Editable as="button" widgetId="product-control-34" type="button" className="ml-pdp-btn-buy" onClick={handleOneClickBuy}>
+                        Comprar agora
+                      </Editable>
+                      <Editable as="button" widgetId="product-control-35" type="button" className="ml-pdp-btn-cart" onClick={handleAddToCart}>
+                        Adicionar ao carrinho
+                      </Editable>
+                    </>
+                  ) : (
+                    <button
+                      type="button"
+                      className="ml-pdp-btn-notify-stock"
+                      onClick={() => setShowStockNotifyModal(true)}
+                    >
+                      🔔 Quero ser avisado
+                    </button>
+                  )}
                 </div>
 
                 {/* Garantias Resumidas (1 Linha cada) */}

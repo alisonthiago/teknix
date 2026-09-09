@@ -85,7 +85,7 @@ export default function ShippingDiscounts() {
               <span style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.08em', color: '#6b7280', textTransform: 'uppercase' }}>
                 Frete Grátis
               </span>
-              <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#111827', margin: '4px 0 8px 0' }}>
+              <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#000000', margin: '4px 0 8px 0' }}>
                 Ofereça frete grátis para aumentar suas vendas
               </h2>
               <p style={{ fontSize: '0.88rem', color: '#4b5563', margin: '0 0 16px 0', lineHeight: 1.4 }}>

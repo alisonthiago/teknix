@@ -64,7 +64,7 @@
   font-size: 15px;
   font-weight: 700;
   letter-spacing: -0.015em;
-  color: #111827;
+  color: #000000;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -100,13 +100,13 @@
 }
 
 .teknix-orders-localnav-link:hover {
-  color: #111827;
+  color: #000000;
   background: rgba(255, 255, 255, 0.6);
 }
 
 .teknix-orders-localnav-link.active {
   background: #ffffff;
-  color: #111827;
+  color: #000000;
   font-weight: 700;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
@@ -154,7 +154,7 @@
   font-size: var(--tkn-page-title, 24px);
   font-weight: var(--tkn-weight-semibold);
   letter-spacing: -0.02em;
-  color: var(--tkn-orders-text, #111827);
+  color: var(--tkn-orders-text, #000000);
   margin: 0 0 var(--tkn-space-8) 0;
   line-height: 1.25;
 }
@@ -364,7 +364,7 @@
 
 .total-highlight {
   font-weight: var(--tkn-weight-medium);
-  color: #111827;
+  color: #000000;
 }
 
 .meta-order-id {
@@ -650,7 +650,7 @@
 .item-price {
   font-size: var(--tkn-text-14);
   font-weight: var(--tkn-weight-medium);
-  color: #111827;
+  color: #000000;
   margin-top: 2px;
 }
 
@@ -731,7 +731,7 @@
   gap: var(--tkn-space-8);
   font-size: var(--tkn-text-13);
   font-weight: var(--tkn-weight-medium);
-  color: #111827;
+  color: #000000;
   margin: 0 0 var(--tkn-space-8) 0;
   text-transform: none;
   letter-spacing: 0;
@@ -746,7 +746,7 @@
 
 .detail-text.bold {
   font-weight: var(--tkn-weight-medium);
-  color: #111827;
+  color: #000000;
 }
 
 .detail-text.cep {
@@ -784,7 +784,7 @@
   padding-top: var(--tkn-space-8);
   font-weight: var(--tkn-weight-medium);
   font-size: var(--tkn-text-14);
-  color: #111827;
+  color: #000000;
 }
 
 .free-badge {
@@ -819,7 +819,7 @@
 .nfe-key-text {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: var(--tkn-text-12);
-  color: #111827;
+  color: #000000;
   font-weight: var(--tkn-weight-medium);
 }
 
@@ -832,7 +832,7 @@
 }
 
 .btn-copy-nfe:hover {
-  color: #111827;
+  color: #000000;
 }
 
 .btn-view-nfe {
@@ -871,7 +871,7 @@
 
 .btn-help-order:hover {
   border-color: #94a3b8;
-  color: #111827;
+  color: #000000;
   background: #ffffff;
 }
 
@@ -930,7 +930,7 @@
 
 .btn-support-whatsapp {
   background: var(--site-accent, #B5F500);
-  color: #111827;
+  color: #000000;
   text-decoration: none;
   padding: var(--tkn-space-12) var(--tkn-space-24);
   border-radius: 980px;
@@ -943,7 +943,7 @@
 
 .btn-support-whatsapp:hover {
   background: #a2e000;
-  color: #111827;
+  color: #000000;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(181, 245, 0, 0.35);
 }
@@ -1002,7 +1002,7 @@
   align-items: center;
   justify-content: center;
   background: var(--site-accent, #B5F500);
-  color: #111827;
+  color: #000000;
   padding: var(--tkn-space-12) var(--tkn-space-24);
   border-radius: 980px;
   font-size: var(--tkn-text-14);
@@ -1015,7 +1015,7 @@
 
 .teknix-orders-empty-cta:hover {
   background: #a2e000;
-  color: #111827;
+  color: #000000;
   transform: translateY(-1px);
   box-shadow: 0 4px 14px rgba(181, 245, 0, 0.35);
 }
@@ -1291,7 +1291,7 @@
 
 .help-tile-text strong {
   font-size: var(--tkn-text-14);
-  color: #111827;
+  color: #000000;
 }
 
 .help-tile-text span {
@@ -1314,7 +1314,7 @@
   align-items: center;
   gap: var(--tkn-space-8);
   background: var(--site-accent, #B5F500);
-  color: #111827;
+  color: #000000;
   border: none;
   border-radius: 8px;
   padding: var(--tkn-space-8) var(--tkn-space-16);
@@ -1328,7 +1328,7 @@
 
 .btn-modal-primary:hover {
   background: #a2e000;
-  color: #111827;
+  color: #000000;
 }
 
 .btn-modal-secondary {
@@ -1355,8 +1355,8 @@
 .teknix-orders-page .item-subinfo { font-size: var(--tkn-text-12); color: #777; }
 .teknix-orders-page .item-actions { display: flex; flex-direction: column; align-items: flex-end; gap: var(--tkn-space-16); }
 .teknix-orders-page .item-price { font-size: var(--tkn-text-20); font-weight: var(--tkn-weight-medium); color: #222; margin: 0; white-space: nowrap; }
-.teknix-orders-page .btn-buy-again { background: var(--site-accent, #B5F500); color: #111827; font-weight: 700; border: none; border-radius: 8px; padding: var(--tkn-space-12) var(--tkn-space-16); }
-.teknix-orders-page .btn-buy-again:hover { background: #a2e000; color: #111827; }
+.teknix-orders-page .btn-buy-again { background: var(--site-accent, #B5F500); color: #000000; font-weight: 700; border: none; border-radius: 8px; padding: var(--tkn-space-12) var(--tkn-space-16); }
+.teknix-orders-page .btn-buy-again:hover { background: #a2e000; color: #000000; }
 .teknix-orders-page .btn-toggle-details { justify-content: flex-start; padding-top: var(--tkn-space-24); }
 .teknix-orders-page .status-banner-content { min-width: 0; }
 .teknix-orders-page .status-banner-tracking, .teknix-orders-page .item-subinfo { flex-wrap: wrap; }

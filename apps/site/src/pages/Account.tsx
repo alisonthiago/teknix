@@ -112,7 +112,7 @@ export default function Account() {
     })])
       .then(([customer, addresses]) => {
         if (!active) return
-        setCadastroData({ nome: customer?.name || user.user_metadata?.name || '', cpf: customer?.document || customer?.cpf_cnpj || '', email: user.email || '', telefone: customer?.phone || '', dataNascimento: customer?.birth_date || '' })
+        setCadastroData({ nome: customer?.name || user.user_metadata?.full_name || user.user_metadata?.name || '', cpf: customer?.document || customer?.cpf_cnpj || '', email: user.email || '', telefone: customer?.phone || '', dataNascimento: customer?.birth_date || '' })
         const address = addresses[0]
         setAddressId(address?.id || null)
         setAddressData({ cep: address?.zip_code || '', rua: address?.street || '', bairro: address?.neighborhood || '', cidade: address?.city || '', estado: address?.state || '', numero: address?.number || '', complemento: address?.complement || '' })
@@ -123,7 +123,9 @@ export default function Account() {
   }, [user])
 
   useEffect(() => {
-    setProfileAvatar(typeof user?.user_metadata?.avatar_url === 'string' ? user.user_metadata.avatar_url : '')
+    const meta = user?.user_metadata || {}
+    const avatar = meta.avatar_url || meta.picture || ''
+    setProfileAvatar(typeof avatar === 'string' ? avatar : '')
   }, [user])
 
   const saveAddress = async (event: React.FormEvent) => {

@@ -619,7 +619,7 @@ export default function StorefrontHome() {
         <div className="ui container">
           {mc.show_section_title && (
             <div className="dsvia-mosaic-header-group" style={{ marginBottom: 12 }}>
-              {mc.title && <h2 style={{ fontSize: 20, fontWeight: 700, margin: 0, color: ms.title_color || '#111827' }}>{mc.title}</h2>}
+              {mc.title && <h2 style={{ fontSize: 20, fontWeight: 700, margin: 0, color: ms.title_color || '#000000' }}>{mc.title}</h2>}
               {mc.subtitle && <p style={{ fontSize: 13, color: '#6b7280', margin: '4px 0 0' }}>{mc.subtitle}</p>}
             </div>
           )}

@@ -6,7 +6,7 @@
 .blog-stat-num { font-size:26px; }
 .blog-view-toggle { display:flex; padding:3px; border:1px solid #e5e7eb; border-radius:8px; background:#fff; }
 .blog-view-toggle button { display:flex; align-items:center; justify-content:center; width:32px; height:32px; border:0; border-radius:5px; background:transparent; color:#64748b; cursor:pointer; }
-.blog-view-toggle button[aria-pressed="true"] { background:#111827; color:white; }
+.blog-view-toggle button[aria-pressed="true"] { background:#000000; color:white; }
 .blog-filters-row { flex-wrap:wrap; }
 .blog-post-card { min-width:0; border-radius:10px; }
 .blog-post-title,.blog-post-url { overflow-wrap:anywhere; }

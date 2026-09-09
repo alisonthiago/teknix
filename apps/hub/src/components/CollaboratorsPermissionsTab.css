@@ -130,7 +130,7 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: #111827;
+  background: #000000;
   color: #ffffff;
   display: flex;
   align-items: center;
@@ -293,7 +293,7 @@
 }
 
 .colab-role-card.active {
-  border-color: #111827;
+  border-color: #000000;
   background: #f8fafc;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
 }
@@ -433,7 +433,7 @@
 .colab-checkbox {
   margin-top: 2px;
   cursor: pointer;
-  accent-color: #111827;
+  accent-color: #000000;
   width: 16px;
   height: 16px;
 }

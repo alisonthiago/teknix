@@ -439,7 +439,7 @@ export default function ProductDetails() {
           <span>/</span>
           <Link to="/hub/produtos">Produtos</Link>
           <span>/</span>
-          <span style={{ color: '#111827', fontWeight: 600 }}>{product.name}</span>
+          <span style={{ color: '#000000', fontWeight: 600 }}>{product.name}</span>
         </div>
       </div>
 
@@ -867,7 +867,7 @@ export default function ProductDetails() {
                     TX
                   </div>
                   <div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#111827' }}>Loja Própria TEKNIX</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#000000' }}>Loja Própria TEKNIX</div>
                     <div style={{ fontSize: 12, color: '#6b7280' }}>
                       {isPublished ? 'Ativo na vitrine pública' : 'Oculto da vitrine'}
                     </div>
@@ -884,7 +884,7 @@ export default function ProductDetails() {
                     ML
                   </div>
                   <div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#111827' }}>Mercado Livre (FLOW)</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#000000' }}>Mercado Livre (FLOW)</div>
                     <div style={{ fontSize: 12, color: '#6b7280' }}>
                       {product.sku?.startsWith('MLB') ? `Anúncio: ${product.sku}` : 'Catálogo central'} • {salesInfo.totalSold} vendas registradas
                     </div>

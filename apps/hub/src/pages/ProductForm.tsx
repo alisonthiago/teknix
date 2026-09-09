@@ -773,8 +773,8 @@ export default function ProductForm() {
               onClick={() => handleSubmit(undefined, true)}
               disabled={saving}
               style={{
-                background: form.published ? '#059669' : '#111827',
-                borderColor: form.published ? '#059669' : '#111827',
+                background: form.published ? '#059669' : '#000000',
+                borderColor: form.published ? '#059669' : '#000000',
                 color: '#ffffff',
                 fontWeight: 600,
                 transition: 'all 0.2s ease'
@@ -1237,7 +1237,7 @@ export default function ProductForm() {
             </div>
           )}
 
-          <h3 style={{ fontSize: '0.95rem', fontWeight: 700, margin: '14px 0 0 0', color: '#111827' }}>Códigos</h3>
+          <h3 style={{ fontSize: '0.95rem', fontWeight: 700, margin: '14px 0 0 0', color: '#000000' }}>Códigos</h3>
           <div className="form-row">
             <div className="form-group">
               <label>SKU</label>
@@ -1398,7 +1398,7 @@ export default function ProductForm() {
               <button
                 type="button"
                 onClick={() => setShowAddCategory(true)}
-                style={{ background: 'none', border: 'none', color: '#111827', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', textAlign: 'left', marginTop: 4 }}
+                style={{ background: 'none', border: 'none', color: '#000000', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', textAlign: 'left', marginTop: 4 }}
               >
                 + Adicionar categorias
               </button>
@@ -2732,8 +2732,8 @@ export default function ProductForm() {
             onClick={() => handleSubmit(undefined, true)}
             disabled={saving}
             style={{
-              background: form.published ? '#059669' : '#111827',
-              borderColor: form.published ? '#059669' : '#111827',
+              background: form.published ? '#059669' : '#000000',
+              borderColor: form.published ? '#059669' : '#000000',
               color: '#ffffff',
               fontWeight: 600,
               transition: 'all 0.2s ease'

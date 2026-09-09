@@ -241,7 +241,7 @@ export default function SearchResults() {
                   </svg>
                 </div>
                 <Editable as="h2" widgetId="searchresults-8">
-                  {searchTerm ? `Nenhum produto encontrado para "${searchTerm}"` : 'Nenhum produto publicado'}
+                  {searchTerm ? 'Nenhum produto encontrado' : 'Nenhum produto publicado'}
                 </Editable>
                 <Editable as="p" widgetId="searchresults-9">
                   {searchTerm ? 'Verifique a ortografia das palavras ou tente buscar por termos mais genéricos.' : 'Ainda não há produtos publicados na vitrine da loja.'}

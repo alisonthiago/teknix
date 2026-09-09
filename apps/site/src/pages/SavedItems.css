@@ -35,7 +35,7 @@
 }
 
 .apple-saved-breadcrumb .breadcrumb-home:hover {
-  color: #111827;
+  color: #000000;
 }
 
 .apple-saved-breadcrumb .breadcrumb-sep {
@@ -44,7 +44,7 @@
 }
 
 .apple-saved-breadcrumb .breadcrumb-current {
-  color: #111827;
+  color: #000000;
   font-weight: 500;
 }
 
@@ -78,7 +78,7 @@
   font-size: var(--tkn-page-title, 24px);
   font-weight: var(--tkn-weight-semibold, 600);
   letter-spacing: -0.02em;
-  color: #111827;
+  color: #000000;
   margin: 0;
   line-height: 1.25;
 }
@@ -115,7 +115,7 @@
   align-items: center;
   gap: 8px;
   background: var(--site-accent, #b5f500);
-  color: #111827;
+  color: #000000;
   border: none;
   border-radius: 980px;
   padding: 10px 20px;
@@ -179,7 +179,7 @@
   font-size: 22px;
   font-weight: 700;
   letter-spacing: -0.02em;
-  color: #111827;
+  color: #000000;
   margin: 0 0 10px 0;
 }
 
@@ -252,8 +252,8 @@
 
 .suggestion-pill:hover {
   background: #ffffff;
-  border-color: #111827;
-  color: #111827;
+  border-color: #000000;
+  color: #000000;
 }
 
 /* ── Grid de Itens Salvos ── */
@@ -382,7 +382,7 @@
 .apple-saved-card-title {
   font-size: 15px;
   font-weight: 600;
-  color: #111827;
+  color: #000000;
   line-height: 1.4;
   margin: 0;
   display: -webkit-box;
@@ -410,7 +410,7 @@
 .apple-saved-card-price {
   font-size: 22px;
   font-weight: 700;
-  color: #111827;
+  color: #000000;
   margin: 0;
   letter-spacing: -0.02em;
 }
@@ -439,7 +439,7 @@
   justify-content: center;
   gap: 8px;
   background: var(--site-accent, #b5f500);
-  color: #111827;
+  color: #000000;
   border: none;
   border-radius: 12px;
   padding: 12px 18px;
@@ -476,7 +476,7 @@
 }
 
 .apple-saved-btn-view:hover {
-  color: #111827;
+  color: #000000;
 }
 
 /* ── Responsividade ── */

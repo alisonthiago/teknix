@@ -1,19 +1,48 @@
 import { Editable } from '../components/page-widgets/PageWidgets'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { ArrowLeft } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
-import { supabase } from '../lib/supabase'
 import './Login.css'
 
 export default function Login({ customTitle }: { onGuestContinue?: () => void; customTitle?: string }) {
-  const { signIn } = useAuth()
+  const { signIn, signInWithGoogle, user } = useAuth()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const redirectTarget = searchParams.get('redirect') || '/conta'
+
   const [step, setStep] = useState<'identify' | 'password'>('identify')
   const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [googleLoading, setGoogleLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+
+  // Se já estiver logado, redireciona para o destino
+  useEffect(() => {
+    if (user) {
+      navigate(redirectTarget, { replace: true })
+    }
+  }, [user, navigate, redirectTarget])
+
+  // Trata erro de retorno do provedor OAuth se houver na URL ou em sessionStorage
+  useEffect(() => {
+    const sessionError = sessionStorage.getItem('auth_error')
+    if (sessionError) {
+      setErrorMsg(sessionError)
+      sessionStorage.removeItem('auth_error')
+      return
+    }
+
+    const errorDescription = searchParams.get('error_description') || searchParams.get('error')
+    if (errorDescription) {
+      if (errorDescription.includes('Unable to exchange external code')) {
+        setErrorMsg('Falha na validação das chaves do Google com o Supabase. Verifique o Client ID e Secret.')
+      } else {
+        setErrorMsg('Não foi possível autenticar com o Google. Tente novamente.')
+      }
+    }
+  }, [searchParams])
 
   const email = identifier.trim().toLowerCase()
   const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
@@ -24,7 +53,7 @@ export default function Login({ customTitle }: { onGuestContinue?: () => void; c
     event.preventDefault()
     setErrorMsg(null)
     if (isEmail) return setStep('password')
-    if (isDocument) return navigate(`/cadastro?document=${encodeURIComponent(digits)}`)
+    if (isDocument) return navigate(`/cadastro?document=${encodeURIComponent(digits)}&redirect=${encodeURIComponent(redirectTarget)}`)
     setErrorMsg('Informe um e-mail válido, CPF ou CNPJ.')
   }
 
@@ -39,7 +68,7 @@ export default function Login({ customTitle }: { onGuestContinue?: () => void; c
         setErrorMsg('Não encontramos uma conta com esses dados. Você pode criar sua conta agora.')
         return
       }
-      navigate('/conta')
+      navigate(redirectTarget)
     } catch {
       setErrorMsg('Não foi possível entrar. Confira seus dados e tente novamente.')
     } finally {
@@ -49,8 +78,18 @@ export default function Login({ customTitle }: { onGuestContinue?: () => void; c
 
   async function handleGoogleSignIn() {
     setErrorMsg(null)
-    const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: `${window.location.origin}/conta` } })
-    if (error) setErrorMsg('O login com Google não está disponível no momento.')
+    setGoogleLoading(true)
+    try {
+      const result = await signInWithGoogle(redirectTarget)
+      if (result.error) {
+        setErrorMsg('O login com Google não está disponível no momento. Tente com e-mail e senha.')
+        setGoogleLoading(false)
+      }
+      // Se não houver erro, o navegador será redirecionado para a tela de login do Google
+    } catch {
+      setErrorMsg('O login com Google não está disponível no momento.')
+      setGoogleLoading(false)
+    }
   }
 
   return (
@@ -89,9 +128,9 @@ export default function Login({ customTitle }: { onGuestContinue?: () => void; c
           )}
           {step === 'identify' && <>
             <div className="identification-divider"><span>ou entre com</span></div>
-            <button type="button" className="identification-google" onClick={handleGoogleSignIn}>
+            <button type="button" className="identification-google" onClick={handleGoogleSignIn} disabled={googleLoading || loading}>
               <svg className="identification-google-logo" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.8 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.5a4.7 4.7 0 0 1-2 3.1v2.5h3.3c1.9-1.8 3-4.3 3-7.4Z"/><path fill="#34A853" d="M12 22c2.7 0 5-.9 6.7-2.4l-3.3-2.5c-.9.6-2.1 1-3.4 1-2.6 0-4.8-1.7-5.6-4.1H3v2.6A10 10 0 0 0 12 22Z"/><path fill="#FBBC05" d="M6.4 14c-.2-.6-.3-1.3-.3-2s.1-1.4.3-2V7.4H3A10 10 0 0 0 3 16.6L6.4 14Z"/><path fill="#EA4335" d="M12 5.9c1.5 0 2.9.5 4 1.6l3-3A10 10 0 0 0 3 7.4L6.4 10C7.2 7.6 9.4 5.9 12 5.9Z"/></svg>
-              Continuar com o Google
+              {googleLoading ? 'Conectando com o Google...' : 'Continuar com o Google'}
             </button>
           </>}
         </Editable>

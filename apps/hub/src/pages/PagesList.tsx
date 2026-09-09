@@ -254,7 +254,7 @@ export default function PagesList() {
                 style: {
                   fontSize: '38px',
                   fontWeight: '700',
-                  color: '#111827',
+                  color: '#000000',
                   textAlign: 'center',
                   margin: '0 0 10px 0'
                 }
@@ -462,7 +462,7 @@ export default function PagesList() {
       {deleteTarget && (
         <div className="pages-confirm-overlay">
           <section role="dialog" aria-modal="true" aria-labelledby="delete-page-title">
-            <h2 id="delete-page-title" style={{ margin: '0 0 8px 0', fontSize: 16, fontWeight: 700, color: '#111827' }}>Excluir página</h2>
+            <h2 id="delete-page-title" style={{ margin: '0 0 8px 0', fontSize: 16, fontWeight: 700, color: '#000000' }}>Excluir página</h2>
             <p style={{ margin: '0 0 20px 0', fontSize: 13, color: '#4b5563' }}>Tem certeza que deseja excluir “{deleteTarget.title}” e suas configurações?</p>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button
@@ -532,7 +532,7 @@ export default function PagesList() {
                   <Sparkles size={18} />
                 </div>
                 <div>
-                  <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: '#111827' }}>
+                  <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: '#000000' }}>
                     {dialog.kind === 'create' ? 'Criar Nova Página' : 'Duplicar Página'}
                   </h2>
                   <p style={{ margin: 0, fontSize: 12, color: '#6b7280' }}>

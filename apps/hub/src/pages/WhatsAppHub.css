@@ -7,7 +7,7 @@
   flex-direction: column;
   gap: 20px;
   width: 100%;
-  font-family: 'Roboto', Arial, sans-serif;
+  font-family: var(--tk-font-family);
 }
 
 /* ── Tabs ── */

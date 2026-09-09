@@ -1,0 +1,249 @@
+/* ==========================================================================
+   TEKNIX SITE — MODAL AVISO DE ESTOQUE
+   ========================================================================== */
+
+.stock-notify-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.45);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: snOverlayIn 0.2s ease-out;
+}
+
+@keyframes snOverlayIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.stock-notify-modal {
+  background: #ffffff;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 440px;
+  padding: 36px 32px 32px;
+  position: relative;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18);
+  animation: snModalIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes snModalIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.stock-notify-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: #f0f0f0;
+  color: #555;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.stock-notify-close:hover { background: #e0e0e0; }
+
+.stock-notify-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: #fff8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+  font-size: 26px;
+}
+
+.stock-notify-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.stock-notify-product-name {
+  font-size: 13px;
+  color: #8a8a8a;
+  margin: 0 0 22px 0;
+  line-height: 1.4;
+  font-weight: 400;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.stock-notify-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.stock-notify-label {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #8a8a8a;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.stock-notify-input {
+  width: 100%;
+  height: 46px;
+  border: 1.5px solid #e8e8e8;
+  border-radius: 10px;
+  padding: 0 14px;
+  font-size: 15px;
+  color: #1a1a1a;
+  background: #fafafa;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  outline: none;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.stock-notify-input:focus {
+  border-color: #1a1a1a;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+}
+
+.stock-notify-input::placeholder { color: #c0c0c0; }
+
+.stock-notify-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1.5px solid #e8e8e8;
+  border-radius: 10px;
+  background: #fafafa;
+  padding: 0 14px;
+  height: 46px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.stock-notify-input-row:focus-within {
+  border-color: #1a1a1a;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+}
+
+.stock-notify-input-row input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 15px;
+  color: #1a1a1a;
+  font-family: inherit;
+}
+
+.stock-notify-input-row input::placeholder { color: #c0c0c0; }
+
+.stock-notify-flag {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.stock-notify-submit {
+  height: 50px;
+  width: 100%;
+  background: #1a1a1a;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  font-family: inherit;
+  letter-spacing: -0.01em;
+}
+
+.stock-notify-submit:hover { opacity: 0.88; }
+.stock-notify-submit:active { transform: scale(0.98); }
+.stock-notify-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.stock-notify-privacy {
+  margin-top: 12px;
+  font-size: 11.5px;
+  color: #aaa;
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* SUCCESS STATE */
+.stock-notify-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 8px 0 4px;
+  gap: 12px;
+}
+
+.stock-notify-success-icon {
+  font-size: 48px;
+}
+
+.stock-notify-success-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.stock-notify-success-text {
+  font-size: 14px;
+  color: #8a8a8a;
+  margin: 0;
+  line-height: 1.55;
+}
+
+.stock-notify-success-btn {
+  margin-top: 8px;
+  height: 46px;
+  padding: 0 28px;
+  background: #f0f0f0;
+  color: #1a1a1a;
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s ease;
+}
+.stock-notify-success-btn:hover { background: #e5e5e5; }
+
+/* Error */
+.stock-notify-error {
+  font-size: 12px;
+  color: #e03131;
+  margin-top: -4px;
+}
+
+@media (max-width: 480px) {
+  .stock-notify-modal {
+    padding: 28px 20px 24px;
+  }
+}
