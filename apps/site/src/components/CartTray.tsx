@@ -90,9 +90,22 @@ export default function CartTray() {
 
         {/* Ações */}
         <div className="teknix-cart-tray-actions">
-          <Link to={items.length === 1 ? `/checkout/${encodeURIComponent(items[0].sku || items[0].id)}` : '/checkout'} className="teknix-cart-tray-btn-primary">
-            Comprar agora
-          </Link>
+          {(() => {
+            const isProd = typeof window !== 'undefined' && (
+              window.location.hostname === 'teknixbrasil.com.br' ||
+              window.location.hostname === 'www.teknixbrasil.com.br' ||
+              window.location.hostname.endsWith('teknixbrasil.com.br')
+            )
+            const targetCode = items.length === 1 ? (items[0].sku || items[0].id) : 'sacola'
+            const checkoutHref = isProd
+              ? `https://play.teknixbrasil.com.br/${encodeURIComponent(targetCode)}`
+              : (items.length === 1 ? `/checkout/${encodeURIComponent(items[0].sku || items[0].id)}` : '/checkout')
+            return (
+              <a href={checkoutHref} className="teknix-cart-tray-btn-primary">
+                Comprar agora
+              </a>
+            )
+          })()}
         </div>
       </div>
       {isOpen && (

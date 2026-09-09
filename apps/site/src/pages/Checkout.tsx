@@ -364,21 +364,38 @@ export default function Checkout() {
   const [cardBrand, setCardBrand] = useState('')
   const [cardInstallments, setCardInstallments] = useState(1)
   const [cardReady, setCardReady] = useState(false)
+  const [directItem, setDirectItem] = useState<any>(null)
 
-  const shippingCost = 0
-  const total = Math.max(0, totalPrice + shippingCost - (coupon?.discount || 0))
+  const isPlayDomain = typeof window !== 'undefined' && (
+    window.location.hostname.startsWith('play.') || 
+    window.location.hostname === 'play.teknixbrasil.com.br'
+  )
+  const storeUrl = (path: string) => isPlayDomain ? `https://teknixbrasil.com.br${path}` : path
 
-  // 1. Sincronização automática do produto pela URL específica (/checkout/:code ou ?sku=...)
+  // 1. Sincronização automática do produto pela URL específica (ex: play.teknixbrasil.com.br/:code ou /checkout/:code)
   useEffect(() => {
-    if (!urlCode) return
+    if (!urlCode) {
+      setDirectItem(null)
+      return
+    }
 
     const decoded = decodeURIComponent(urlCode).trim()
-    const alreadyInCart = items.some(
+    const isCartRoute = decoded.toLowerCase() === 'sacola' || decoded.toLowerCase() === 'carrinho' || decoded.toLowerCase() === 'pedido'
+    if (isCartRoute) {
+      setDirectItem(null)
+      return
+    }
+
+    // Se já estiver no carrinho, isola o item diretamente para este checkout
+    const inCart = items.find(
       i => (i.sku && i.sku.toLowerCase() === decoded.toLowerCase()) ||
            (i.id && i.id.toLowerCase() === decoded.toLowerCase()) ||
            ((i as any).slug && (i as any).slug.toLowerCase() === decoded.toLowerCase())
     )
-    if (alreadyInCart) return
+    if (inCart) {
+      setDirectItem(inCart)
+      return
+    }
 
     let cancelled = false
     setLoadingProduct(true)
@@ -389,7 +406,7 @@ export default function Checkout() {
         if (!p) p = await getProductById(decoded)
         if (cancelled || !p) return
 
-        addToCart({
+        const isolated = {
           id: p.id,
           name: p.name,
           sku: p.sku || p.id,
@@ -398,7 +415,8 @@ export default function Checkout() {
           image: p.image_url || (p.images && p.images[0]) || '',
           quantity: 1,
           stock: p.stock || 0
-        })
+        }
+        setDirectItem(isolated)
       } catch (err) {
         console.warn('[checkout] Falha ao carregar produto por código:', err)
       } finally {
@@ -408,25 +426,35 @@ export default function Checkout() {
 
     loadProduct()
     return () => { cancelled = true }
-  }, [urlCode, items, addToCart])
+  }, [urlCode, items])
 
-  // 2. Garante que a URL SEMPRE exiba o código específico do produto em compra única
+  const activeItems = directItem ? [directItem] : items
+  const activeTotalPrice = directItem
+    ? (directItem.promo_price && directItem.promo_price > 0 ? directItem.promo_price : directItem.price) * directItem.quantity
+    : totalPrice
+
+  const shippingCost = 0
+  const total = Math.max(0, activeTotalPrice + shippingCost - (coupon?.discount || 0))
+
+  // 2. Garante que a URL SEMPRE exiba o código específico do produto (sem /checkout no play.teknixbrasil.com.br)
   useEffect(() => {
-    if (!urlCode && items.length === 1) {
-      const singleCode = items[0].sku || items[0].id
+    if (!urlCode && activeItems.length === 1) {
+      const singleCode = activeItems[0].sku || activeItems[0].id
       if (singleCode) {
-        navigate(`/checkout/${encodeURIComponent(singleCode)}`, { replace: true })
+        const dest = isPlayDomain ? `/${encodeURIComponent(singleCode)}` : `/checkout/${encodeURIComponent(singleCode)}`
+        navigate(dest, { replace: true })
       }
     }
-  }, [urlCode, items, navigate])
+  }, [urlCode, activeItems, navigate, isPlayDomain])
 
-  // 3. Normaliza URLs com query param (?product=... ou ?sku=...) para o formato oficial /checkout/:code
+  // 3. Normaliza URLs com query param para o formato correto
   useEffect(() => {
     const qCode = searchParams.get('product') || searchParams.get('sku') || searchParams.get('code')
     if (qCode && !params.code) {
-      navigate(`/checkout/${encodeURIComponent(qCode)}`, { replace: true })
+      const dest = isPlayDomain ? `/${encodeURIComponent(qCode)}` : `/checkout/${encodeURIComponent(qCode)}`
+      navigate(dest, { replace: true })
     }
-  }, [searchParams, params.code, navigate])
+  }, [searchParams, params.code, navigate, isPlayDomain])
 
   useEffect(() => {
     let active = true
@@ -478,7 +506,7 @@ export default function Checkout() {
     try {
       const selected = editingAddress ? draft : address
       const result = await processCheckoutOrder({
-        items,
+        items: activeItems,
         customer: { ...selected, name: taxType === 'CNPJ' ? company.trim() : selected.name, email, phone, document: taxDoc },
         shippingCost,
         shippingMethod: 'sedex',
@@ -521,7 +549,7 @@ export default function Checkout() {
 
   const submit = async (event: FormEvent) => {
     event.preventDefault()
-    if (busy || !items.length) return
+    if (busy || !activeItems.length) return
     const selected = editingAddress ? draft : address
     if (!validAddress(selected)) { setError('Confira os campos do endereço antes de continuar.'); return }
     if (taxDoc.length !== (taxType === 'CPF' ? 11 : 14) || (taxType === 'CNPJ' && !company.trim())) { setError('Confira o documento e os dados de faturamento.'); return }

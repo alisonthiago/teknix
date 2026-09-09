@@ -178,6 +178,8 @@ serve(async (req) => {
           cardBrand,
           installments,
           payer,
+          productCode,
+          items,
           idempotencyKey
         } = payload
 
@@ -221,20 +223,37 @@ serve(async (req) => {
           }
         }
 
+        // Código personalizado do produto para reconhecimento inequívoco no Mercado Pago
+        const primaryCode = productCode || (items?.[0]?.sku || items?.[0]?.id) || ''
+        const customRef = primaryCode ? `${orderNumber || orderId}_${primaryCode}` : (orderNumber || orderId)
+        const desc = `Pedido ${orderNumber || orderId}${primaryCode ? ` [${primaryCode}]` : ''} - TEKNIX`
+
         const orderBody: Record<string, unknown> = {
           type: 'online',
           processing_mode: 'automatic',
-          external_reference: orderId || orderNumber,
+          external_reference: customRef,
           total_amount: amountStr,
+          description: desc,
           payer: payerBlock,
           transactions: {
             payments: [
               {
                 amount: amountStr,
+                description: desc,
                 payment_method: paymentMethodBlock
               }
             ]
           }
+        }
+
+        // Se houver lista de itens detalhada, anexa ao pedido
+        if (Array.isArray(items) && items.length > 0) {
+          orderBody.items = items.map((it: any) => ({
+            id: String(it.id || it.sku || primaryCode || 'PROD'),
+            title: String(it.title || it.name || 'Equipamento TEKNIX').slice(0, 127),
+            unit_price: Number(it.unitPrice || it.price || amount).toFixed(2),
+            quantity: Number(it.quantity || 1)
+          }))
         }
 
         if (!token) {

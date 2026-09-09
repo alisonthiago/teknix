@@ -180,7 +180,7 @@ export default function Product() {
     return () => window.removeEventListener('teknix:cep-changed', handleCepChange)
   }, [])
 
-  const { addToCart } = useCart()
+  const { addToCart, clearCart } = useCart()
   const { isFavorite, toggleFavorite } = useFavorites()
 
   useEffect(() => {
@@ -277,9 +277,31 @@ export default function Product() {
   }
 
   const handleOneClickBuy = () => {
-    handleAddToCart()
     const productCode = currentProduct.sku || (currentProduct as any).slug || currentProduct.id
-    navigate(`/checkout/${encodeURIComponent(productCode)}`)
+    // Isola esta compra para o produto específico (não acumula itens anteriores)
+    clearCart()
+    addToCart({
+      id: currentProduct.id,
+      name: currentProduct.name,
+      sku: currentProduct.sku || currentProduct.id,
+      price: basePrice,
+      promo_price: finalPrice,
+      image: displayProductImages[0] || productImages[0],
+      quantity: quantity,
+      stock: currentProduct.stock || 0
+    })
+
+    const isProd = typeof window !== 'undefined' && (
+      window.location.hostname === 'teknixbrasil.com.br' ||
+      window.location.hostname === 'www.teknixbrasil.com.br' ||
+      window.location.hostname.endsWith('teknixbrasil.com.br')
+    )
+
+    if (isProd) {
+      window.location.href = `https://play.teknixbrasil.com.br/${encodeURIComponent(productCode)}`
+    } else {
+      navigate(`/checkout/${encodeURIComponent(productCode)}`)
+    }
   }
 
   const handleCalculateFreight = (e: React.FormEvent) => {

@@ -168,8 +168,9 @@ serve(async (req) => {
     let updatedOrder = null
 
     if (orderId) {
-      // external_reference pode ser UUID (id) ou '#TK-XXXX' (order_number)
-      const isOrderNumber = orderId.startsWith('#TK-') || orderId.startsWith('TK-')
+      // external_reference pode ser UUID (id), '#TK-XXXX' (order_number) ou '#TK-XXXX_MLB5108941105'
+      const cleanRef = orderId.includes('_') ? orderId.split('_')[0] : orderId
+      const isOrderNumber = cleanRef.startsWith('#TK-') || cleanRef.startsWith('TK-')
       const updatePayload = {
         status: newOrderStatus,
         payment_status: newPaymentStatus,
@@ -178,8 +179,8 @@ serve(async (req) => {
       }
 
       const query = isOrderNumber
-        ? supabaseClient.from('orders').update(updatePayload).eq('order_number', orderId)
-        : supabaseClient.from('orders').update(updatePayload).eq('id', orderId)
+        ? supabaseClient.from('store_orders').update(updatePayload).eq('order_number', cleanRef)
+        : supabaseClient.from('store_orders').update(updatePayload).eq('id', cleanRef)
 
       const { data } = await query.select('id, order_number, status').maybeSingle()
       updatedOrder = data

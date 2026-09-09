@@ -124,13 +124,17 @@ export async function processCheckoutOrder(params: CreateOrderParams): Promise<C
     const total = Math.max(0, subtotal + shippingCost - discount)
     const orderNumber = `#TK-${Math.floor(1000 + Math.random() * 9000)}`
 
-    // 3. Inserir Pedido na tabela `orders`
+    // 3. Inserir Pedido na tabela `store_orders` (Loja Própria — separado do FLOW)
     const { data: orderData, error: orderErr } = await supabase
-      .from('orders')
+      .from('store_orders')
       .insert({
         order_number: orderNumber,
         customer_id: customerId,
         user_id: userId || null,
+        customer_name: customer.name,
+        customer_email: customer.email,
+        customer_phone: customer.phone,
+        customer_document: customer.document,
         subtotal,
         shipping_cost: shippingCost,
         discount,
@@ -164,20 +168,21 @@ export async function processCheckoutOrder(params: CreateOrderParams): Promise<C
       itemsCount: items.length
     }).catch(err => console.warn('[checkout] order.created notification:', err))
 
-    // 4. Inserir Itens do Pedido na tabela `order_items`
+    // 4. Inserir Itens do Pedido na tabela `store_order_items`
     const orderItemsPayload = items.map(item => {
       const unitPrice = item.promo_price && item.promo_price > 0 ? item.promo_price : item.price
       return {
         order_id: orderId,
         product_id: item.id,
         product_name: item.name,
+        sku: item.sku || '',
         quantity: item.quantity,
         price: unitPrice,
         total: unitPrice * item.quantity
       }
     })
 
-    await supabase.from('order_items').insert(orderItemsPayload)
+    await supabase.from('store_order_items').insert(orderItemsPayload)
 
     // 5. BAIXA DE ESTOQUE BLINDADA (SINCRONIZAÇÃO COMPARTILHADA COM FLOW E MARKETPLACES)
     for (const item of items) {
@@ -242,6 +247,7 @@ export async function processCheckoutOrder(params: CreateOrderParams): Promise<C
       const docNumber = customer.document.replace(/\D/g, '')
       const docType = docNumber.length > 11 ? 'CNPJ' : 'CPF'
 
+      const primarySku = items[0]?.sku || items[0]?.id || ''
       const { data: edgeData, error: edgeError } = await supabase.functions.invoke('integrations-proxy', {
         body: {
           provider: 'mercado_pago',
@@ -251,6 +257,13 @@ export async function processCheckoutOrder(params: CreateOrderParams): Promise<C
             orderNumber,
             amount: total,
             paymentMethod,
+            productCode: primarySku,
+            items: items.map(it => ({
+              id: it.sku || it.id,
+              name: it.name,
+              price: it.promo_price && it.promo_price > 0 ? it.promo_price : it.price,
+              quantity: it.quantity || 1
+            })),
             // Credit card
             cardToken: cardToken || undefined,
             cardBrand: cardBrand || undefined,
@@ -286,7 +299,7 @@ export async function processCheckoutOrder(params: CreateOrderParams): Promise<C
       // Update payment_id on the stored order
       if (paymentResult?.mpPaymentId || paymentResult?.mpOrderId) {
         await supabase
-          .from('orders')
+          .from('store_orders')
           .update({
             payment_id: paymentResult.mpPaymentId || paymentResult.mpOrderId,
             updated_at: new Date().toISOString()

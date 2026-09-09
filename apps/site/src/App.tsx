@@ -115,9 +115,26 @@ function App() {
     return <News />
   }
 
-  // Suporte nativo ao domínio de checkout play.teknixbrasil.com.br
-  const isPlayHost = typeof window !== 'undefined' && (window.location.hostname.startsWith('play.') || window.location.hostname === 'play.teknixbrasil.com.br')
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : ''
+  const isPlayHost = hostname.startsWith('play.') || hostname === 'play.teknixbrasil.com.br'
+  const isMainProdSite = hostname === 'teknixbrasil.com.br' || hostname === 'www.teknixbrasil.com.br'
+
+  // Redirecionamento de produção do site oficial para o domínio oficial play.teknixbrasil.com.br
+  if (isMainProdSite && pathname.startsWith('/checkout')) {
+    const rawCode = pathname.replace(/^\/checkout\/?/, '')
+    const targetUrl = rawCode ? `https://play.teknixbrasil.com.br/${rawCode}` : 'https://play.teknixbrasil.com.br/'
+    window.location.replace(targetUrl)
+    return null
+  }
+
+  // Suporte nativo ao domínio oficial de checkout play.teknixbrasil.com.br
   if (isPlayHost) {
+    // No domínio play, o termo "/checkout" é estritamente proibido na URL
+    if (pathname.startsWith('/checkout')) {
+      const cleanCode = pathname.replace(/^\/checkout\/?/, '')
+      return <Navigate to={cleanCode ? `/${cleanCode}` : '/'} replace />
+    }
+
     return (
       <AuthProvider>
         <CartProvider>
@@ -128,8 +145,6 @@ function App() {
                 <PageScope key={pathname} path={pathname}>
                   <Routes>
                     <Route path="/" element={<NativePageCanvas><Checkout /></NativePageCanvas>} />
-                    <Route path="/checkout" element={<NativePageCanvas><Checkout /></NativePageCanvas>} />
-                    <Route path="/checkout/:code" element={<NativePageCanvas><Checkout /></NativePageCanvas>} />
                     <Route path="/:code" element={<NativePageCanvas><Checkout /></NativePageCanvas>} />
                     <Route path="*" element={<NativePageCanvas><Checkout /></NativePageCanvas>} />
                   </Routes>

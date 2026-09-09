@@ -100,13 +100,26 @@ export default function CartDrawer() {
               <p className="cart-shipping-note">
                 Frete calculado no checkout
               </p>
-              <Link
-                to={items.length === 1 ? `/checkout/${encodeURIComponent(items[0].sku || items[0].id)}` : '/checkout'}
-                className="btn-checkout"
-                onClick={closeCart}
-              >
-                Finalizar Compra
-              </Link>
+              {(() => {
+                const isProd = typeof window !== 'undefined' && (
+                  window.location.hostname === 'teknixbrasil.com.br' ||
+                  window.location.hostname === 'www.teknixbrasil.com.br' ||
+                  window.location.hostname.endsWith('teknixbrasil.com.br')
+                )
+                const targetCode = items.length === 1 ? (items[0].sku || items[0].id) : 'sacola'
+                const checkoutHref = isProd
+                  ? `https://play.teknixbrasil.com.br/${encodeURIComponent(targetCode)}`
+                  : (items.length === 1 ? `/checkout/${encodeURIComponent(items[0].sku || items[0].id)}` : '/checkout')
+                return (
+                  <a
+                    href={checkoutHref}
+                    className="btn-checkout"
+                    onClick={closeCart}
+                  >
+                    Finalizar Compra
+                  </a>
+                )
+              })()}
               <button className="btn-continue-shopping" onClick={closeCart}>
                 Continuar Comprando
               </button>

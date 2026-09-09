@@ -70,7 +70,20 @@ export default function Bag() {
                 <div className="cb-bag-total"><dt>Subtotal</dt><dd>{formatPrice(totalPrice)}</dd></div>
               </dl>
               <Editable as="p" widgetId="bag-9">Frete e pagamento na próxima etapa.</Editable>
-              <Link to={items.length === 1 ? `/checkout/${encodeURIComponent(items[0].sku || items[0].id)}` : '/checkout'} className="cb-bag-primary">Continuar para pagamento <ArrowRight size={18} /></Link>
+              {(() => {
+                const isProd = typeof window !== 'undefined' && (
+                  window.location.hostname === 'teknixbrasil.com.br' ||
+                  window.location.hostname === 'www.teknixbrasil.com.br' ||
+                  window.location.hostname.endsWith('teknixbrasil.com.br')
+                )
+                const targetCode = items.length === 1 ? (items[0].sku || items[0].id) : 'sacola'
+                const checkoutHref = isProd
+                  ? `https://play.teknixbrasil.com.br/${encodeURIComponent(targetCode)}`
+                  : (items.length === 1 ? `/checkout/${encodeURIComponent(items[0].sku || items[0].id)}` : '/checkout')
+                return (
+                  <a href={checkoutHref} className="cb-bag-primary">Continuar para pagamento <ArrowRight size={18} /></a>
+                )
+              })()}
               <span className="cb-bag-summary-note">Revise antes de concluir.</span>
             </Editable>
             </EditableFlow>
