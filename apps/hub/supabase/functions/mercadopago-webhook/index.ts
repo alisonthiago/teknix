@@ -182,9 +182,46 @@ serve(async (req) => {
         ? supabaseClient.from('store_orders').update(updatePayload).eq('order_number', cleanRef)
         : supabaseClient.from('store_orders').update(updatePayload).eq('id', cleanRef)
 
-      const { data } = await query.select('id, order_number, status').maybeSingle()
+      const { data } = await query.select('id, order_number, customer_email, customer_name, total, payment_method, status').maybeSingle()
       updatedOrder = data
       console.log(`[MP Webhook] Pedido atualizado: ${updatedOrder?.order_number} → ${newOrderStatus}`)
+
+      // =========================================================
+      // E-mail Brevo: notificação de pagamento aprovado (fire-and-forget)
+      // =========================================================
+      if (newOrderStatus === 'paid' && updatedOrder?.customer_email) {
+        ;(async () => {
+          try {
+            const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
+            const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+            if (supabaseUrl && supabaseAnonKey) {
+              await fetch(`${supabaseUrl}/functions/v1/integrations-proxy`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'apikey': supabaseAnonKey,
+                  'Authorization': `Bearer ${supabaseAnonKey}`
+                },
+                body: JSON.stringify({
+                  provider: 'brevo',
+                  action: 'send_email',
+                  payload: {
+                    template: 'payment_approved',
+                    to: { email: updatedOrder.customer_email, name: updatedOrder.customer_name || '' },
+                    orderNumber: updatedOrder.order_number,
+                    customerName: updatedOrder.customer_name || '',
+                    total: updatedOrder.total || 0,
+                    paymentMethod: updatedOrder.payment_method || 'Pix'
+                  }
+                })
+              })
+              console.log(`[MP Webhook] E-mail Brevo disparado para ${updatedOrder.customer_email}`)
+            }
+          } catch (emailErr: any) {
+            console.warn('[MP Webhook] Falha ao enviar e-mail Brevo (não crítico):', emailErr.message)
+          }
+        })()
+      }
     }
 
     // =========================================================

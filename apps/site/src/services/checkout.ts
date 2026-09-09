@@ -280,7 +280,38 @@ export async function processCheckoutOrder(params: CreateOrderParams): Promise<C
       }).eq('id', orderId).then(undefined, () => {})
     }
 
-    // 5c. Baixa de estoque: paralela por produto, 100% fire-and-forget
+    // 5c. E-mail Brevo: envia QR Code Pix ou confirmação (fire-and-forget)
+    ;(async () => {
+      try {
+        const resolvedQrForEmail =
+          paymentMethod === 'pix'
+            ? (paymentResult?.qrCode || '')
+            : ''
+
+        const emailTemplate = paymentMethod === 'pix' ? 'pix_pending' : 'payment_approved'
+        await supabase.functions.invoke('integrations-proxy', {
+          body: {
+            provider: 'brevo',
+            action: 'send_email',
+            payload: {
+              template: emailTemplate,
+              to: { email: customer.email, name: customer.name },
+              orderNumber: finalOrderNumber || orderNumber,
+              customerName: customer.name,
+              total,
+              pixCode: resolvedQrForEmail,
+              paymentMethod: paymentMethod === 'pix' ? 'Pix'
+                : paymentMethod === 'credit_card' ? 'Cartão de Crédito'
+                : 'Boleto'
+            }
+          }
+        })
+      } catch {
+        // Não crítico — nunca bloqueia o checkout
+      }
+    })()
+
+    // 5d. Baixa de estoque: paralela por produto, 100% fire-and-forget
     void (async () => {
       try {
         await Promise.all(items.map(async (item) => {

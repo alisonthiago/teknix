@@ -134,6 +134,223 @@ serve(async (req) => {
       )
     }
 
+    // ========================================================================
+    // BREVO — E-mail Transacional (server-side)
+    // Suporta templates: pix_pending | payment_approved | order_shipped
+    // A API key é buscada em integration_configs (id = 'brevo')
+    // ========================================================================
+    if (provider === 'brevo') {
+      // Busca API key do Brevo no banco
+      const { data: brevoConfig } = await supabaseClient
+        .from('integration_configs')
+        .select('credentials')
+        .eq('id', 'brevo')
+        .maybeSingle()
+
+      const brevoKey = brevoConfig?.credentials?.apiKey
+        || Deno.env.get('BREVO_API_KEY')
+        || ''
+
+      if (!brevoKey) {
+        console.warn('[brevo] API key não configurada. E-mail ignorado.')
+        return new Response(
+          JSON.stringify({ success: false, error: 'Brevo API key não configurada. Configure em Integrações > Brevo.' }),
+          { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      if (action === 'send_email') {
+        const {
+          template,          // 'pix_pending' | 'payment_approved' | 'order_shipped' | 'custom'
+          to,                // { email: string, name?: string }
+          orderNumber,
+          customerName,
+          total,
+          pixCode,           // código Pix copia-e-cola (para pix_pending)
+          paymentMethod,
+          senderEmail = 'noreply@teknixbrasil.com.br',
+          senderName = 'TEKNIX',
+          subject: customSubject,
+          htmlContent: customHtml
+        } = payload || {}
+
+        if (!to?.email) {
+          return new Response(
+            JSON.stringify({ success: false, error: 'Campo to.email é obrigatório' }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+
+        // Monta assunto e HTML baseado no template
+        let subject = customSubject || 'TEKNIX — Notificação de Pedido'
+        let htmlContent = customHtml || ''
+
+        const fmt = (v: number) => 'R$ ' + Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })
+
+        if (template === 'pix_pending') {
+          subject = `🔔 Seu pedido ${orderNumber} está aguardando pagamento via Pix`
+          htmlContent = `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',Helvetica,Arial,sans-serif">
+  <div style="max-width:600px;margin:32px auto;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08)">
+    <!-- Header -->
+    <div style="background:#1d1d1f;padding:32px 40px;text-align:center">
+      <div style="font-size:22px;font-weight:700;color:#ffffff;letter-spacing:-0.5px">TEKNIX</div>
+      <div style="font-size:13px;color:#999;margin-top:4px">teknixbrasil.com.br</div>
+    </div>
+    <!-- Body -->
+    <div style="padding:40px">
+      <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#1d1d1f;letter-spacing:-0.5px">Pedido recebido! ✓</h1>
+      <p style="margin:0 0 24px;color:#6e6e73;font-size:15px">Olá${customerName ? ', ' + customerName : ''}! Seu pedido <strong style="color:#1d1d1f">${orderNumber}</strong> foi criado com sucesso.</p>
+
+      <!-- Pix Box -->
+      <div style="background:#f0fff4;border:2px solid #34c759;border-radius:16px;padding:24px;margin-bottom:24px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <div style="font-size:28px">🔑</div>
+          <div>
+            <div style="font-size:16px;font-weight:700;color:#1d1d1f">Pagar com Pix</div>
+            <div style="font-size:13px;color:#6e6e73">Total: <strong>${fmt(total)}</strong></div>
+          </div>
+        </div>
+        ${pixCode ? `
+        <div style="background:#ffffff;border:1px solid #d1fae5;border-radius:10px;padding:14px;margin-bottom:14px">
+          <div style="font-size:11px;color:#6e6e73;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px">Código Pix — Copia e Cola</div>
+          <div style="font-family:monospace;font-size:11px;color:#1d1d1f;word-break:break-all;line-height:1.6">${pixCode}</div>
+        </div>
+        <div style="font-size:12px;color:#6e6e73">⏱ O código Pix expira em <strong>30 minutos</strong>. Abra o app do seu banco e use a opção <em>Pix Copia e Cola</em>.</div>
+        ` : ''}
+      </div>
+
+      <!-- Resumo -->
+      <div style="background:#f5f5f7;border-radius:12px;padding:20px;margin-bottom:24px">
+        <div style="font-size:13px;font-weight:700;color:#1d1d1f;margin-bottom:12px;text-transform:uppercase;letter-spacing:0.05em">Resumo do Pedido</div>
+        <div style="display:flex;justify-content:space-between;font-size:14px;color:#555;padding:6px 0;border-bottom:1px solid #e5e5e7">
+          <span>Pedido</span><span style="font-weight:600">${orderNumber}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:14px;color:#555;padding:6px 0;border-bottom:1px solid #e5e5e7">
+          <span>Forma de pagamento</span><span>Pix</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:15px;font-weight:700;color:#1d1d1f;padding:10px 0 0">
+          <span>Total</span><span>${fmt(total)}</span>
+        </div>
+      </div>
+
+      <p style="font-size:13px;color:#86868b;margin:0">Após o pagamento ser confirmado, você receberá um novo e-mail de confirmação. Dúvidas? Entre em contato conosco.</p>
+    </div>
+    <!-- Footer -->
+    <div style="background:#f5f5f7;padding:20px 40px;text-align:center;border-top:1px solid #e5e5e7">
+      <p style="margin:0;font-size:12px;color:#aaa">© ${new Date().getFullYear()} TEKNIX Brasil — teknixbrasil.com.br</p>
+    </div>
+  </div>
+</body>
+</html>`
+        } else if (template === 'payment_approved') {
+          subject = `✅ Pagamento aprovado — Pedido ${orderNumber}`
+          htmlContent = `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',Helvetica,Arial,sans-serif">
+  <div style="max-width:600px;margin:32px auto;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08)">
+    <div style="background:#1d1d1f;padding:32px 40px;text-align:center">
+      <div style="font-size:22px;font-weight:700;color:#ffffff;letter-spacing:-0.5px">TEKNIX</div>
+      <div style="font-size:13px;color:#999;margin-top:4px">teknixbrasil.com.br</div>
+    </div>
+    <div style="padding:40px">
+      <!-- Status Banner -->
+      <div style="background:#e9fce9;border:2px solid #34c759;border-radius:16px;padding:20px 24px;margin-bottom:28px;text-align:center">
+        <div style="font-size:36px;margin-bottom:8px">✅</div>
+        <div style="font-size:20px;font-weight:700;color:#1d7e40">Pagamento Aprovado!</div>
+        <div style="font-size:14px;color:#2d8c3c;margin-top:4px">Pedido ${orderNumber} confirmado</div>
+      </div>
+
+      <p style="margin:0 0 24px;color:#6e6e73;font-size:15px">Olá${customerName ? ', ' + customerName : ''}! Seu pagamento foi confirmado e estamos preparando seu pedido.</p>
+
+      <div style="background:#f5f5f7;border-radius:12px;padding:20px;margin-bottom:24px">
+        <div style="font-size:13px;font-weight:700;color:#1d1d1f;margin-bottom:12px;text-transform:uppercase;letter-spacing:0.05em">Confirmação</div>
+        <div style="display:flex;justify-content:space-between;font-size:14px;color:#555;padding:6px 0;border-bottom:1px solid #e5e5e7">
+          <span>Pedido</span><span style="font-weight:600">${orderNumber}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:14px;color:#555;padding:6px 0;border-bottom:1px solid #e5e5e7">
+          <span>Forma de pagamento</span><span>${paymentMethod || 'Pix'}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:15px;font-weight:700;color:#1d1d1f;padding:10px 0 0">
+          <span>Total pago</span><span>${fmt(total)}</span>
+        </div>
+      </div>
+
+      <p style="font-size:13px;color:#86868b;margin:0">Em breve você receberá o código de rastreamento do seu pedido. Obrigado por comprar na TEKNIX! 🚀</p>
+    </div>
+    <div style="background:#f5f5f7;padding:20px 40px;text-align:center;border-top:1px solid #e5e5e7">
+      <p style="margin:0;font-size:12px;color:#aaa">© ${new Date().getFullYear()} TEKNIX Brasil — teknixbrasil.com.br</p>
+    </div>
+  </div>
+</body>
+</html>`
+        } else if (template === 'order_shipped') {
+          subject = `📦 Seu pedido ${orderNumber} foi enviado!`
+          htmlContent = `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,sans-serif">
+  <div style="max-width:600px;margin:32px auto;background:#fff;border-radius:20px;overflow:hidden">
+    <div style="background:#1d1d1f;padding:32px 40px;text-align:center">
+      <div style="font-size:22px;font-weight:700;color:#fff">TEKNIX</div>
+    </div>
+    <div style="padding:40px">
+      <div style="text-align:center;margin-bottom:24px">
+        <div style="font-size:48px">📦</div>
+        <h1 style="font-size:24px;font-weight:700;color:#1d1d1f;margin:12px 0 4px">Pedido enviado!</h1>
+        <p style="color:#6e6e73;font-size:15px;margin:0">Olá${customerName ? ', ' + customerName : ''}! Seu pedido <strong>${orderNumber}</strong> está a caminho.</p>
+      </div>
+    </div>
+    <div style="background:#f5f5f7;padding:20px;text-align:center"><p style="margin:0;font-size:12px;color:#aaa">© ${new Date().getFullYear()} TEKNIX Brasil</p></div>
+  </div>
+</body>
+</html>`
+        }
+
+        // Envia via Brevo API
+        const brevoRes = await fetch('https://api.brevo.com/v3/smtp/email', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'api-key': brevoKey
+          },
+          body: JSON.stringify({
+            sender: { email: senderEmail, name: senderName },
+            to: [{ email: to.email, name: to.name || customerName || to.email }],
+            subject,
+            htmlContent
+          })
+        })
+
+        const brevoData = await brevoRes.json().catch(() => ({}))
+
+        if (brevoRes.ok) {
+          console.log(`[brevo] E-mail enviado para ${to.email} — template: ${template} — messageId: ${brevoData.messageId}`)
+          return new Response(
+            JSON.stringify({ success: true, messageId: brevoData.messageId }),
+            { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        } else {
+          console.warn('[brevo] Falha no envio:', brevoData)
+          return new Response(
+            JSON.stringify({ success: false, error: brevoData.message || 'Erro no Brevo', details: brevoData }),
+            { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+      }
+
+      return new Response(
+        JSON.stringify({ success: false, error: `Ação brevo/${action} não encontrada` }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     // 1. Busca credenciais no banco interno via service_role (SERVER-SIDE)
     const { data: config, error: configError } = await supabaseClient
       .from('integration_configs')
