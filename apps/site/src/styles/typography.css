@@ -96,8 +96,9 @@ input, select, textarea {
 }
 
 #root .product-detail-page-root .ml-pdp-price-amount {
-  font-size: 42px !important;
-  font-weight: 600 !important;
+  font-size: 38px !important;
+  font-weight: 500 !important;
+  color: #333333 !important;
 }
 
 #root .product-detail-page-root .ml-pdp-price-cents {
@@ -111,7 +112,7 @@ input, select, textarea {
   }
 
   #root .product-detail-page-root .ml-pdp-price-amount {
-    font-size: 36px !important;
+    font-size: 34px !important;
   }
 }
 
