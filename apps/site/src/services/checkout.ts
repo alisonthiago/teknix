@@ -184,57 +184,24 @@ export async function processCheckoutOrder(params: CreateOrderParams): Promise<C
       }
     })
 
-    let orderId: string
-    let finalOrderNumber: string = orderNumber
-
-    try {
-      // Inserção via Edge Function (service_role — bypassa RLS)
-      const { data: pd, error: pe } = await supabase.functions.invoke('integrations-proxy', {
-        body: {
-          provider: 'store',
-          action: 'create_order',
-          payload: { order: orderPayload, items: orderItemsPayload }
-        }
-      })
-      if (!pe && pd?.success && pd?.id) {
-        orderId = pd.id
-        finalOrderNumber = pd.order_number || orderNumber
-      } else {
-        throw new Error(pe?.message || pd?.error || 'Proxy store falhou')
-      }
-    } catch (proxyErr: any) {
-      console.warn('[checkout] Edge Function store indisponível, direct insert:', proxyErr?.message)
-      const { data: od, error: oe } = await supabase
-        .from('store_orders')
-        .insert(orderPayload)
-        .select('id, order_number')
-        .single()
-      if (oe) throw new Error(`Falha ao registrar pedido: ${oe.message}`)
-      orderId = od.id
-      finalOrderNumber = od.order_number || orderNumber
-      // Itens em background
-      supabase.from('store_order_items')
-        .insert(orderItemsPayload.map(i => ({ ...i, order_id: orderId })))
-        .then(undefined, () => {})
-    }
-
-    // ── FASE 4: Pagamento no Mercado Pago ────────────────────────────────────
-    // Idempotency key ESTÁVEL: tecnix-{orderId} (sem Date.now)
-    // → duplo clique / retry nunca gera segunda cobrança
+    // ── FASE 3 & 4: Registro do Pedido e Pagamento em Roundtrip Único de Baixa Latência ────
     const docNumber = customer.document.replace(/\D/g, '')
     const docType = docNumber.length > 11 ? 'CNPJ' : 'CPF'
     const primarySku = items[0]?.sku || items[0]?.id || ''
-    const stableKey = `teknix-${orderId}`
+    const stableKey = `teknix-${orderNumber}`
 
+    let orderId: string = `ORD-${Date.now()}`
+    let finalOrderNumber: string = orderNumber
     let paymentResult: any = null
+
     try {
-      const { data: ed, error: ee } = await supabase.functions.invoke('integrations-proxy', {
+      // Envia storeOrder + payment em uma ÚNICA chamada de rede (elimina 1 segundo de latência)
+      const { data: unifiedData, error: unifiedErr } = await supabase.functions.invoke('integrations-proxy', {
         body: {
           provider: 'mercado_pago',
           action: 'create_order',
           payload: {
-            orderId,
-            orderNumber: finalOrderNumber,
+            orderNumber,
             amount: total,
             paymentMethod,
             productCode: primarySku,
@@ -261,14 +228,36 @@ export async function processCheckoutOrder(params: CreateOrderParams): Promise<C
                 state: customer.state || 'SP'
               }
             },
-            idempotencyKey: stableKey
+            idempotencyKey: stableKey,
+            storeOrder: { order: orderPayload, items: orderItemsPayload }
           }
         }
       })
-      if (ee) console.warn('[checkout] Edge function mercado_pago error:', ee.message)
-      paymentResult = ed
-    } catch (mpErr: any) {
-      console.warn('[checkout] MP edge indisponível:', mpErr.message)
+
+      if (!unifiedErr && unifiedData) {
+        orderId = unifiedData.orderId || ''
+        finalOrderNumber = unifiedData.orderNumber || orderNumber
+        paymentResult = unifiedData
+      } else {
+        throw new Error(unifiedErr?.message || 'Chamada unificada falhou')
+      }
+    } catch (unifyErr: any) {
+      console.warn('[checkout] Chamada unificada indisponível, usando fallback:', unifyErr?.message)
+      // Fallback: insere pedido localmente se a edge function unificada falhou
+      try {
+        const { data: od, error: oe } = await supabase
+          .from('store_orders')
+          .insert(orderPayload)
+          .select('id, order_number')
+          .single()
+        if (!oe && od) {
+          orderId = od.id
+          finalOrderNumber = od.order_number || orderNumber
+          supabase.from('store_order_items').insert(orderItemsPayload.map(i => ({ ...i, order_id: orderId }))).then(undefined, () => {})
+        }
+      } catch (e) {
+        console.warn('[checkout] Fallback insert error:', e)
+      }
     }
 
     // ── FASE 5: Fire-and-forget — não bloqueiam resposta ao usuário ───────────

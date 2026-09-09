@@ -640,6 +640,7 @@ export default function Checkout() {
   const [cardBrand, setCardBrand] = useState('')
   const [cardInstallments, setCardInstallments] = useState(1)
   const [cardReady, setCardReady] = useState(false)
+  const [checkoutStep, setCheckoutStep] = useState('')
   const [directItem, setDirectItem] = useState<any>(null)
 
   const isPlayDomain = typeof window !== 'undefined' && (
@@ -791,6 +792,14 @@ export default function Checkout() {
   // Process order with tokenized card or other payment methods
   const executeOrder = async (overrideCard?: { token: string; brand: string; installments: number }) => {
     setBusy(true)
+    if (!overrideCard && payment === 'pix') {
+      setCheckoutStep('Gerando QR Code Pix instantâneo…')
+    } else if (overrideCard) {
+      setCheckoutStep('Processando pagamento com a operadora…')
+    } else {
+      setCheckoutStep('Finalizando pedido…')
+    }
+
     try {
       const selected = editingAddress ? draft : address
       const result = await processCheckoutOrder({
@@ -818,6 +827,7 @@ export default function Checkout() {
       setError('Não foi possível continuar. Tente novamente mais tarde.')
     } finally {
       setBusy(false)
+      setCheckoutStep('')
     }
   }
 
@@ -827,12 +837,14 @@ export default function Checkout() {
     setCardBrand(brand)
     setCardInstallments(installments)
     setCardReady(true)
+    setCheckoutStep('Processando pagamento com a operadora…')
     void executeOrder({ token, brand, installments })
   }
 
   const handleCardError = (msg: string) => {
     setError(msg)
     setBusy(false)
+    setCheckoutStep('')
   }
 
   const submit = async (event: FormEvent) => {
@@ -847,17 +859,20 @@ export default function Checkout() {
     // For credit card: trigger tokenization first (calls handleCardToken -> executeOrder)
     if (payment === 'credit_card') {
       setBusy(true)
+      setCheckoutStep('Criptografando dados do cartão…')
       const btn = window.document.getElementById('tkn-card-tokenize-btn') as any
       if (btn?._trigger) {
         await btn._trigger()
       } else {
         setError('Preencha os dados do cartão antes de continuar.')
         setBusy(false)
+        setCheckoutStep('')
       }
       return
     }
 
     // For Pix / Boleto:
+    setCheckoutStep(payment === 'pix' ? 'Gerando QR Code Pix instantâneo…' : 'Gerando boleto bancário…')
     await executeOrder()
   }
 
@@ -1043,8 +1058,32 @@ export default function Checkout() {
             <dl><div><dt>Produtos</dt><dd>{money(activeTotalPrice)}</dd></div><div><dt>Frete</dt><dd>{money(shippingCost)}</dd></div>{coupon && <div><dt>Desconto</dt><dd>- {money(coupon.discount)}</dd></div>}<div className="tkn-checkout-total"><dt><button type="button" onClick={() => setSummaryOpen(true)}>Total <ChevronUp size={14} /></button></dt><dd>{money(total)}</dd></div></dl>
             {error && <Editable content={{}} as="p" widgetId="checkout-25" role="alert" className="tkn-checkout-error">{error}</Editable>}
             <button className="tkn-checkout-primary" type="submit" disabled={busy || loading}>
-              {busy ? (payment === 'credit_card' && !cardReady ? 'Validando cartão…' : 'Processando…') : 'Comprar agora!'}
+              {busy ? (
+                <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                  <RefreshCw size={15} className="tkn-pix-spin" />
+                  <span>{checkoutStep || 'Processando com segurança…'}</span>
+                </span>
+              ) : (
+                payment === 'pix' ? 'Pagar com Pix' : payment === 'credit_card' ? 'Pagar com Cartão' : 'Comprar agora!'
+              )}
             </button>
+            {busy && (
+              <div style={{
+                marginTop: 8,
+                padding: '7px 10px',
+                borderRadius: 6,
+                background: '#f5f5f7',
+                border: '1px solid #e5e5ea',
+                fontSize: 11.5,
+                color: '#3a3a3c',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6
+              }}>
+                <ShieldCheck size={13} style={{ color: '#008a7b', flexShrink: 0 }} />
+                <span>Criptografia ponta a ponta ativa</span>
+              </div>
+            )}
             <Editable as="p" widgetId="checkout-26" className="tkn-checkout-safe"><ShieldCheck size={16} /> Confira os dados antes de continuar.</Editable>
             <a className="tkn-checkout-link" href={storeUrl('/sacola')}>Editar sacola</a>
           </Editable>

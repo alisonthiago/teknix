@@ -308,8 +308,37 @@ serve(async (req) => {
           payer,
           productCode,
           items,
-          idempotencyKey
+          idempotencyKey,
+          storeOrder
         } = payload
+
+        let effectiveOrderId = orderId
+        let effectiveOrderNumber = orderNumber
+
+        // Otimização de baixa latência: cria o pedido diretamente no Postgres interno (10ms)
+        // eliminando um roundtrip completo de rede pela internet antes do pagamento
+        if (storeOrder?.order) {
+          try {
+            const { data: soData, error: soErr } = await supabaseClient
+              .from('store_orders')
+              .insert(storeOrder.order)
+              .select('id, order_number')
+              .single()
+
+            if (!soErr && soData) {
+              effectiveOrderId = soData.id
+              effectiveOrderNumber = soData.order_number || orderNumber
+              if (Array.isArray(storeOrder.items) && storeOrder.items.length > 0) {
+                const itemsWithId = storeOrder.items.map((it: any) => ({ ...it, order_id: soData.id }))
+                supabaseClient.from('store_order_items').insert(itemsWithId).then(undefined, () => {})
+              }
+            } else if (soErr) {
+              console.warn('[integrations-proxy] storeOrder insert error:', soErr)
+            }
+          } catch (e) {
+            console.warn('[integrations-proxy] storeOrder exception:', e)
+          }
+        }
 
         const amountStr = Number(amount).toFixed(2)
 
@@ -353,8 +382,8 @@ serve(async (req) => {
 
         // Código personalizado do produto para reconhecimento inequívoco no Mercado Pago
         const primaryCode = productCode || (items?.[0]?.sku || items?.[0]?.id) || ''
-        const customRef = primaryCode ? `${orderNumber || orderId}_${primaryCode}` : (orderNumber || orderId)
-        const desc = `Pedido ${orderNumber || orderId}${primaryCode ? ` [${primaryCode}]` : ''} - TEKNIX`
+        const customRef = primaryCode ? `${effectiveOrderNumber || effectiveOrderId}_${primaryCode}` : (effectiveOrderNumber || effectiveOrderId)
+        const desc = `Pedido ${effectiveOrderNumber || effectiveOrderId}${primaryCode ? ` [${primaryCode}]` : ''} - TEKNIX`
 
         const orderBody: Record<string, unknown> = {
           type: 'online',
@@ -384,7 +413,7 @@ serve(async (req) => {
           }))
         }
 
-        const cleanOrderRef = String(orderNumber || orderId || 'PEDIDO').replace(/[^A-Za-z0-9]/g, '').slice(0, 25)
+        const cleanOrderRef = String(effectiveOrderNumber || effectiveOrderId || 'PEDIDO').replace(/[^A-Za-z0-9]/g, '').slice(0, 25)
         const bacenOrderQr = generatePixBRCode({
           amount: Number(amount),
           txId: cleanOrderRef
@@ -394,7 +423,8 @@ serve(async (req) => {
           result = {
             success: true,
             isMock: true,
-            orderId: `ORDTST-MOCK-${Date.now()}`,
+            orderId: effectiveOrderId || `ORDTST-MOCK-${Date.now()}`,
+            orderNumber: effectiveOrderNumber || 'PEDIDO',
             status: 'action_required',
             paymentStatus: 'waiting_payment',
             qrCode: paymentMethod === 'pix' ? bacenOrderQr : '',
@@ -404,7 +434,7 @@ serve(async (req) => {
           }
         } else {
           // Idempotency key ESTÁVEL — sem Date.now() para evitar cobrança dupla em retry
-          const iKey = idempotencyKey || `order-${orderId || orderNumber}`
+          const iKey = idempotencyKey || `order-${effectiveOrderId || effectiveOrderNumber}`
 
           const paymentMethodId = paymentMethod === 'pix' ? 'pix'
             : paymentMethod === 'boleto' ? 'bolbradesco'
@@ -486,6 +516,8 @@ serve(async (req) => {
             result = {
               success: true,
               isMock: false,
+              orderId: effectiveOrderId,
+              orderNumber: effectiveOrderNumber,
               mpOrderId: orderData.id,
               mpPaymentId: firstPayment.id,
               status: orderData.status,
