@@ -129,6 +129,15 @@ function App() {
 
   // Suporte nativo ao domínio oficial de checkout play.teknixbrasil.com.br
   if (isPlayHost) {
+    // Se o usuário tentar navegar no domínio play para páginas comuns do site oficial,
+    // redireciona imediatamente para o site oficial teknixbrasil.com.br para não manter play na URL
+    const siteExitRoutes = ['/sacola', '/carrinho', '/conta', '/pedidos', '/buscar-pedido', '/salvos', '/itens-salvos', '/login', '/cadastro', '/ajuda', '/contato', '/produtos', '/noticias', '/blog']
+    const isExit = siteExitRoutes.some(r => pathname === r || pathname.startsWith(r + '/'))
+    if (isExit) {
+      window.location.replace(`https://teknixbrasil.com.br${pathname}`)
+      return null
+    }
+
     // No domínio play, o termo "/checkout" é estritamente proibido na URL
     if (pathname.startsWith('/checkout')) {
       const cleanCode = pathname.replace(/^\/checkout\/?/, '')

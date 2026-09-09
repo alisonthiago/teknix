@@ -631,7 +631,7 @@ export default function Checkout() {
 
   return <div id="checkout-container" className="tkn-checkout">
     <Editable as="header" widgetId="checkout-header" label="Cabeçalho do checkout" widgetType="container" editorKind="container" renderContent={false} className="tkn-checkout-top"><div className="tkn-checkout-shell">
-      <Link to="/" aria-label="TEKNIX início"><Editable as="img" widgetId="checkout-1" src="/teknix-logo.svg" alt="TEKNIX" width="122" /></Link>
+      <a href={storeUrl('/')} aria-label="TEKNIX início"><Editable as="img" widgetId="checkout-1" src="/teknix-logo.svg" alt="TEKNIX" width="122" /></a>
       <nav aria-label="Ajuda e conta">
         {user ? <details className="tkn-checkout-account-menu">
           <summary aria-label={`Abrir menu de ${displayName}`}>
@@ -640,11 +640,11 @@ export default function Checkout() {
           </summary>
           <div className="tkn-checkout-account-popover">
             <div className="tkn-checkout-account-identity"><span className="tkn-checkout-avatar">{avatarUrl ? <Editable as="img" widgetId="checkout-3" src={avatarUrl} alt="" /> : initials}</span><span><strong>{displayName}</strong><small>{user.email}</small></span></div>
-            <Link to="/conta">Minha conta</Link><Link to="/pedidos">Meus pedidos</Link><Link to="/conta/enderecos">Endereços</Link>
+            <a href={storeUrl('/conta')}>Minha conta</a><a href={storeUrl('/pedidos')}>Meus pedidos</a><a href={storeUrl('/conta/enderecos')}>Endereços</a>
             <button type="button" onClick={() => { void signOut() }}>Sair</button>
           </div>
-        </details> : <Link to="/login">Entrar</Link>}
-        <Link to="/contato">Contato</Link>
+        </details> : <a href={storeUrl('/login')}>Entrar</a>}
+        <a href={storeUrl('/ajuda')}>Contato</a>
       </nav>
     </div></Editable>
     <main className="tkn-checkout-shell tkn-checkout-main">
@@ -682,22 +682,22 @@ export default function Checkout() {
           <Editable content={{}} as="p" widgetId="checkout-6b">Pedido {complete.orderNumber}. O pagamento ainda precisa ser confirmado.</Editable>
         </>}
 
-        <Link to="/pedidos" className="tkn-checkout-link">Ver meus pedidos</Link>
+        <a href={storeUrl('/pedidos')} className="tkn-checkout-link">Ver meus pedidos</a>
       </Editable> : (loadingProduct && !items.length) ? <Editable as="section" widgetId="checkout-8" className="tkn-checkout-empty">
         <Loader2 size={40} className="animate-spin" style={{ color: '#0071e3', animation: 'spin 1s linear infinite' }} />
         <Editable as="h1" widgetId="checkout-9">Carregando produto…</Editable>
         <Editable as="p" widgetId="checkout-10">Buscando informações oficiais do equipamento para finalizar sua compra.</Editable>
       </Editable> : !items.length ? <Editable as="section" widgetId="checkout-8" className="tkn-checkout-empty">
-        <Package size={40} /><Editable as="h1" widgetId="checkout-9">Sua sacola está vazia</Editable><Editable as="p" widgetId="checkout-10">Adicione um produto para finalizar sua compra.</Editable><Link to="/produtos" className="tkn-checkout-primary">Explorar produtos</Link>
+        <Package size={40} /><Editable as="h1" widgetId="checkout-9">Sua sacola está vazia</Editable><Editable as="p" widgetId="checkout-10">Adicione um produto para finalizar sua compra.</Editable><a href={storeUrl('/')} className="tkn-checkout-primary">Explorar produtos</a>
       </Editable> : <>
-        <Link to="/sacola" className="tkn-checkout-back"><ArrowLeft size={15} /> Voltar à sacola</Link>
+        <a href={storeUrl('/sacola')} className="tkn-checkout-back"><ArrowLeft size={15} /> Voltar à sacola</a>
           <Editable as="form" widgetId="checkout-form" label="Formulário do checkout" widgetType="form" editorKind="widget" renderContent={false} id="tkn-checkout-form" className="tkn-checkout-grid" onSubmit={submit}>
           <EditableFlow id="checkout-columns" label="Colunas do checkout" compact>
           <Editable as="fieldset" widgetId="checkout-fields" label="Dados de entrega e pagamento" widgetType="container" editorKind="container" renderContent={false} className="tkn-checkout-content" disabled={busy || loading}>
             <Editable as="h1" widgetId="checkout-11">Finalize sua compra</Editable>
             <div className="tkn-checkout-products">{items.map(item => <article key={item.id} className="tkn-checkout-product">
               <div className="tkn-checkout-thumb">{item.image ? <img src={item.image} alt={item.name} /> : <Package size={24} />}</div>
-              <div><Link to={'/produtos/' + encodeURIComponent(item.id)}>{item.name}</Link><p>Quantidade: <strong>{item.quantity}</strong> · {money((item.promo_price && item.promo_price > 0 ? item.promo_price : item.price) * item.quantity)}</p></div>
+              <div><a href={storeUrl('/' + encodeURIComponent(item.sku || item.id))}>{item.name}</a><p>Quantidade: <strong>{item.quantity}</strong> · {money((item.promo_price && item.promo_price > 0 ? item.promo_price : item.price) * item.quantity)}</p></div>
             </article>)}</div>
             {loading && <Editable as="p" widgetId="checkout-12" role="status">Carregando seus dados…</Editable>}
             {loadNotice && <Editable content={{}} as="p" widgetId="checkout-13" className="tkn-checkout-notice" role="status">{loadNotice}</Editable>}
@@ -752,7 +752,7 @@ export default function Checkout() {
               {busy ? (payment === 'credit_card' && !cardReady ? 'Validando cartão…' : 'Processando…') : 'Comprar agora!'}
             </button>
             <Editable as="p" widgetId="checkout-26" className="tkn-checkout-safe"><ShieldCheck size={16} /> Confira os dados antes de continuar.</Editable>
-            <Link className="tkn-checkout-link" to="/sacola">Editar sacola</Link>
+            <a className="tkn-checkout-link" href={storeUrl('/sacola')}>Editar sacola</a>
           </Editable>
           </EditableFlow>
         </Editable>
@@ -762,6 +762,6 @@ export default function Checkout() {
     </main>
     {summaryOpen && <div className="tkn-checkout-overlay andes-bottom-sheet__overlay" role="dialog" aria-modal="true" aria-label="Resumo da compra"><Editable as="section" widgetId="checkout-27" className="tkn-checkout-sheet tkn-checkout-full-summary"><button className="tkn-checkout-close" type="button" onClick={() => setSummaryOpen(false)} aria-label="Fechar resumo"><X size={20} /></button><Editable as="h2" widgetId="checkout-28">Resumo da compra</Editable><dl><div><dt>Produtos</dt><dd>{money(totalPrice)}</dd></div>{coupon && <div className="tkn-summary-discount"><dt>Desconto do produto</dt><dd>- {money(coupon.discount)}</dd></div>}<div><dt>Frete</dt><dd>{money(shippingCost)}</dd></div></dl><button className="tkn-sheet-coupon" type="button" onClick={() => { setSummaryOpen(false); setCouponOpen(true) }}><Ticket size={16} /> Inserir código do cupom</button><dl><div><dt>Subtotal</dt><dd>{money(total)}</dd></div><div><dt>Você pagará</dt><dd>{money(total)}<small>{payment === 'pix' ? 'Pix' : payment === 'boleto' ? 'Boleto' : 'Cartão de crédito'}</small></dd></div><div className="tkn-checkout-total"><dt>Total</dt><dd>{money(total)}</dd></div></dl><button className="tkn-checkout-primary" type="submit" form="tkn-checkout-form">Comprar agora!</button></Editable></div>}
     {couponOpen && <div className="tkn-checkout-overlay andes-bottom-sheet__overlay" role="dialog" aria-modal="true" aria-label="Cupons"><Editable content={{}} as="section" widgetId="checkout-29" className="tkn-checkout-sheet tkn-checkout-coupon-sheet"><button className="tkn-checkout-close" type="button" onClick={() => setCouponOpen(false)} aria-label="Fechar cupons"><X size={20} /></button><Editable as="h2" widgetId="checkout-30">Cupons</Editable><Editable as="p" widgetId="checkout-31">Insira um código cadastrado para aplicá-lo a esta compra.</Editable><div className="tkn-checkout-coupon-form"><input autoFocus value={couponCode} placeholder="Insira seu código aqui" onChange={e => setCouponCode(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') void applyCoupon() }} /><button type="button" onClick={() => void applyCoupon()}>Inserir</button></div>{couponNotice && <Editable content={{}} as="p" widgetId="checkout-32" className="tkn-checkout-coupon-notice" role="status">{couponNotice}</Editable>}</Editable></div>}
-    <Editable as="footer" widgetId="checkout-footer" label="Rodapé do checkout" widgetType="container" editorKind="container" renderContent={false} className="tkn-checkout-footer"><div className="tkn-checkout-shell"><Link to="/contato">Contato e atendimento</Link><Link to="/sacola">Minha sacola</Link><span>TEKNIX · Todos os direitos reservados.</span></div></Editable>
+    <Editable as="footer" widgetId="checkout-footer" label="Rodapé do checkout" widgetType="container" editorKind="container" renderContent={false} className="tkn-checkout-footer"><div className="tkn-checkout-shell"><a href={storeUrl('/ajuda')}>Contato e atendimento</a><a href={storeUrl('/sacola')}>Minha sacola</a><span>TEKNIX · Todos os direitos reservados.</span></div></Editable>
   </div>
 }
