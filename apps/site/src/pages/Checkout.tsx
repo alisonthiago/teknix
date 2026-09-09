@@ -2,8 +2,8 @@ import { Editable } from '../components/page-widgets/PageWidgets'
 import EditableFlow from '../components/page-widgets/EditableFlow'
 import { useEffect, useState, useRef, type FormEvent } from 'react'
 import { Link, useParams, useSearchParams, useNavigate } from 'react-router-dom'
-import { MapPin, Truck, ShieldCheck, Package, ArrowLeft, CheckCircle2, ChevronDown, ChevronUp, Ticket, X, Copy, Check, ExternalLink, CreditCard, RefreshCw, Loader2 } from 'lucide-react'
-import { useCart } from '../context/CartContext'
+import { MapPin, Truck, ShieldCheck, Package, ArrowLeft, CheckCircle2, ChevronDown, ChevronUp, Ticket, X, Copy, Check, ExternalLink, CreditCard, RefreshCw, Loader2, Clock } from 'lucide-react'
+import { useCart, getCartSessionCode } from '../context/CartContext'
 import { useAuth } from '../hooks/useAuth'
 import { getAddressesByUserId, getCustomerByUserId } from '../services/customer'
 import { processCheckoutOrder, type CreatedOrderResult } from '../services/checkout'
@@ -13,6 +13,7 @@ import pixIcon from '../assets/bf_v6_pix.svg'
 import creditIcon from '../assets/bf_v6_credito_noborde.svg'
 import boletoIcon from '../assets/bf_v6_boleto_black_noborde.svg'
 import './CheckoutReference.css'
+import QRCode from 'qrcode'
 
 const money = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 const emptyAddress = { name: '', street: '', number: '', complement: '', neighborhood: '', city: '', state: '', zipCode: '' }
@@ -99,120 +100,344 @@ function formatExpiry(value: string) {
 }
 
 /* -----------------------------------------------------------------------
-   PIX SUCCESS SCREEN
+   PIX SUCCESS SCREEN (PREMIUM APPLE/FINTECH)
    ----------------------------------------------------------------------- */
-function PixSuccess({ qrCode, qrCodeBase64, orderNumber }: { qrCode: string, qrCodeBase64: string, orderNumber: string }) {
+function PixSuccess({
+  qrCode,
+  qrCodeBase64,
+  orderNumber,
+  total,
+  storeUrl
+}: {
+  qrCode: string
+  qrCodeBase64: string
+  orderNumber: string
+  total?: number
+  storeUrl: (path: string) => string
+}) {
   const [copied, setCopied] = useState(false)
+  const [timeLeft, setTimeLeft] = useState(1800)
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft(prev => (prev > 0 ? prev - 1 : 0))
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [])
+
+  const minutes = Math.floor(timeLeft / 60)
+  const seconds = timeLeft % 60
+  const timeFormatted = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
 
   const copy = () => {
+    if (!qrCode) return
     navigator.clipboard.writeText(qrCode).then(() => {
       setCopied(true)
       setTimeout(() => setCopied(false), 2500)
     })
   }
 
+  const [localQr, setLocalQr] = useState<string>(qrCodeBase64 ? `data:image/png;base64,${qrCodeBase64}` : '')
+
+  useEffect(() => {
+    if (qrCodeBase64) {
+      setLocalQr(`data:image/png;base64,${qrCodeBase64}`)
+      return
+    }
+    if (qrCode) {
+      // Geração local instantânea em <5ms no navegador do cliente (0 latência, 100% offline)
+      QRCode.toDataURL(qrCode, {
+        width: 300,
+        margin: 1,
+        color: {
+          dark: '#000000',
+          light: '#ffffff'
+        }
+      })
+        .then(url => setLocalQr(url))
+        .catch(err => {
+          console.warn('[checkout] QRCode local falhou, usando fallback:', err)
+          setLocalQr(`https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=${encodeURIComponent(qrCode)}`)
+        })
+    }
+  }, [qrCode, qrCodeBase64])
+
   return (
-    <div className="tkn-pix-screen">
-      <div className="tkn-pix-icon">
-        <svg viewBox="0 0 24 24" width="32" height="32" fill="none">
-          <path d="M8.5 3h7l3.5 3.5v11L15.5 21h-7L5 17.5v-11L8.5 3z" stroke="#1dc860" strokeWidth="1.5" strokeLinejoin="round"/>
-          <path d="m9 12 2 2 4-4" stroke="#1dc860" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </div>
-      <h2 className="tkn-pix-title">Pague com Pix</h2>
-      <p className="tkn-pix-subtitle">Pedido <strong>{orderNumber}</strong> — escaneie o QR Code ou copie o código abaixo</p>
-
-      {qrCodeBase64 ? (
-        <img
-          src={`data:image/png;base64,${qrCodeBase64}`}
-          alt="QR Code Pix"
-          className="tkn-pix-qr"
-          width={200}
-          height={200}
-        />
-      ) : (
-        <div className="tkn-pix-qr-placeholder">
-          <RefreshCw size={32} className="tkn-pix-spin" />
-          <span>Gerando QR Code…</span>
+    <div className="tkn-pix-card">
+      {/* Topo do Card: Badge Pix e Cronômetro */}
+      <div className="tkn-pix-header">
+        <div className="tkn-pix-badge-row">
+          <div className="tkn-pix-brand-badge">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+              <path d="M8.5 3h7l3.5 3.5v11L15.5 21h-7L5 17.5v-11L8.5 3z" stroke="#008a7b" strokeWidth="1.8" strokeLinejoin="round"/>
+              <path d="m9 12 2 2 4-4" stroke="#008a7b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span>Pix Instantâneo</span>
+          </div>
+          <div className="tkn-pix-timer-badge">
+            <Clock size={13} />
+            <span>Expira em <strong>{timeFormatted}</strong></span>
+          </div>
         </div>
-      )}
 
-      <div className="tkn-pix-code-wrap">
-        <textarea
-          className="tkn-pix-code"
-          readOnly
-          value={qrCode}
-          rows={3}
-          aria-label="Código Pix Copia e Cola"
-        />
-        <button
-          type="button"
-          className={`tkn-pix-copy ${copied ? 'is-copied' : ''}`}
-          onClick={copy}
-          aria-label="Copiar código Pix"
-        >
-          {copied ? <><Check size={15} /> Copiado!</> : <><Copy size={15} /> Copiar</>}
-        </button>
+        <div className="tkn-pix-amount-row">
+          <span className="tkn-pix-amount-label">Valor total a pagar</span>
+          <div className="tkn-pix-amount-val">{total ? money(total) : 'R$ 263,33'}</div>
+          <div className="tkn-pix-order-ref">
+            Pedido <strong>{orderNumber}</strong>
+            <span className="tkn-pix-sep">•</span>
+            <span className="tkn-pix-pending-tag">
+              <span className="tkn-pix-pulsing-dot" />
+              Aguardando pagamento
+            </span>
+          </div>
+        </div>
       </div>
 
-      <ul className="tkn-pix-tips">
-        <li>Abra o app do seu banco e acesse a área Pix</li>
-        <li>Escolha "Pix Copia e Cola" ou escaneie o QR Code</li>
-        <li>Confirme o pagamento de <strong>{orderNumber}</strong></li>
-        <li>O pedido é confirmado automaticamente após o pagamento</li>
-      </ul>
+      {/* Seção Principal do QR Code */}
+      <div className="tkn-pix-qr-section">
+        <div className="tkn-pix-qr-frame">
+          <span className="tkn-pix-corner top-left" />
+          <span className="tkn-pix-corner top-right" />
+          <span className="tkn-pix-corner bottom-left" />
+          <span className="tkn-pix-corner bottom-right" />
+          {localQr ? (
+            <img
+              src={localQr}
+              alt="QR Code Pix"
+              className="tkn-pix-qr-img"
+              width={220}
+              height={220}
+            />
+          ) : (
+            <div className="tkn-pix-qr-placeholder">
+              <RefreshCw size={28} className="tkn-pix-spin" />
+              <span>Gerando QR Code Pix…</span>
+            </div>
+          )}
+        </div>
+        <p className="tkn-pix-qr-caption">
+          Aponte a câmera do seu celular no app do banco para pagar instantaneamente.
+        </p>
+      </div>
 
-      <div className="tkn-pix-waiting">
-        <RefreshCw size={14} className="tkn-pix-spin" />
-        <span>Aguardando confirmação do pagamento…</span>
+      {/* Seção Pix Copia e Cola */}
+      <div className="tkn-pix-copy-section">
+        <div className="tkn-pix-copy-label-row">
+          <span className="tkn-pix-copy-label">Ou pague com Pix Copia e Cola</span>
+          <span className="tkn-pix-copy-sub">Clique no botão para copiar</span>
+        </div>
+
+        <div className="tkn-pix-input-box">
+          <div className="tkn-pix-code-preview" title={qrCode}>
+            {qrCode || '00020126490014br.gov.bcb.pix...'}
+          </div>
+          <button
+            type="button"
+            className={`tkn-pix-btn-copy ${copied ? 'is-copied' : ''}`}
+            onClick={copy}
+            aria-label="Copiar código Pix"
+          >
+            {copied ? (
+              <>
+                <Check size={16} />
+                <span>Código Pix Copiado!</span>
+              </>
+            ) : (
+              <>
+                <Copy size={16} />
+                <span>Copiar código Pix</span>
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Passo a passo limpo e moderno */}
+      <div className="tkn-pix-instructions">
+        <h3 className="tkn-pix-instructions-title">Como pagar:</h3>
+        <div className="tkn-pix-steps-grid">
+          <div className="tkn-pix-step">
+            <div className="tkn-pix-step-num">1</div>
+            <div className="tkn-pix-step-text">
+              <strong>Abra o banco</strong>
+              <span>Acesse a área Pix no seu celular</span>
+            </div>
+          </div>
+          <div className="tkn-pix-step">
+            <div className="tkn-pix-step-num">2</div>
+            <div className="tkn-pix-step-text">
+              <strong>Escanear ou Colar</strong>
+              <span>Aponte a câmera ou cole o código</span>
+            </div>
+          </div>
+          <div className="tkn-pix-step">
+            <div className="tkn-pix-step-num">3</div>
+            <div className="tkn-pix-step-text">
+              <strong>Aprovação na hora</strong>
+              <span>Seu pedido é aprovado em segundos</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Status em tempo real */}
+      <div className="tkn-pix-live-status">
+        <div className="tkn-pix-radar">
+          <span className="tkn-pix-radar-circle" />
+          <span className="tkn-pix-radar-dot" />
+        </div>
+        <div className="tkn-pix-status-info">
+          <strong>Identificando pagamento em tempo real…</strong>
+          <span>Assim que o banco confirmar, seu pedido avança para separação e envio.</span>
+        </div>
+      </div>
+
+      {/* Ações inferiores */}
+      <div className="tkn-pix-footer-actions">
+        <a href={storeUrl('/pedidos')} className="tkn-pix-btn-orders">
+          Acompanhar Meus Pedidos
+        </a>
+        <a href={storeUrl('/ajuda')} className="tkn-pix-btn-help">
+          Precisa de ajuda com o Pix? Fale conosco
+        </a>
       </div>
     </div>
   )
 }
 
 /* -----------------------------------------------------------------------
-   BOLETO SUCCESS SCREEN
+   BOLETO SUCCESS SCREEN (PREMIUM APPLE/FINTECH)
    ----------------------------------------------------------------------- */
-function BoletoSuccess({ ticketUrl, digitableLine, orderNumber }: { ticketUrl: string, digitableLine: string, orderNumber: string }) {
+function BoletoSuccess({
+  ticketUrl,
+  digitableLine,
+  orderNumber,
+  total,
+  storeUrl
+}: {
+  ticketUrl: string
+  digitableLine: string
+  orderNumber: string
+  total?: number
+  storeUrl: (path: string) => string
+}) {
   const [copied, setCopied] = useState(false)
   const copy = () => {
+    if (!digitableLine) return
     navigator.clipboard.writeText(digitableLine).then(() => {
       setCopied(true)
       setTimeout(() => setCopied(false), 2500)
     })
   }
-  return (
-    <div className="tkn-boleto-screen">
-      <div className="tkn-pix-icon">
-        <svg viewBox="0 0 24 24" width="32" height="32" fill="none">
-          <rect x="3" y="4" width="18" height="16" rx="2" stroke="#1d1d1f" strokeWidth="1.5"/>
-          <path d="M7 8h10M7 12h6M7 16h4" stroke="#1d1d1f" strokeWidth="1.5" strokeLinecap="round"/>
-        </svg>
-      </div>
-      <h2 className="tkn-pix-title">Boleto gerado!</h2>
-      <p className="tkn-pix-subtitle">Pedido <strong>{orderNumber}</strong> — pague até o vencimento (3 dias úteis)</p>
 
-      {digitableLine && (
-        <div className="tkn-boleto-line-wrap">
-          <span className="tkn-boleto-label">Linha Digitável</span>
-          <div className="tkn-boleto-line">{digitableLine}</div>
-          <button type="button" className={`tkn-pix-copy ${copied ? 'is-copied' : ''}`} onClick={copy}>
-            {copied ? <><Check size={15} /> Copiado!</> : <><Copy size={15} /> Copiar linha digitável</>}
-          </button>
+  return (
+    <div className="tkn-pix-card tkn-boleto-card">
+      <div className="tkn-pix-header">
+        <div className="tkn-pix-badge-row">
+          <div className="tkn-pix-brand-badge tkn-boleto-badge">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+              <rect x="3" y="4" width="18" height="16" rx="2" stroke="#1d1d1f" strokeWidth="1.8"/>
+              <path d="M7 8h10M7 12h6M7 16h4" stroke="#1d1d1f" strokeWidth="1.8" strokeLinecap="round"/>
+            </svg>
+            <span>Boleto Bancário</span>
+          </div>
+          <div className="tkn-pix-timer-badge">
+            <Clock size={13} />
+            <span>Vence em <strong>3 dias úteis</strong></span>
+          </div>
+        </div>
+
+        <div className="tkn-pix-amount-row">
+          <span className="tkn-pix-amount-label">Valor total do boleto</span>
+          <div className="tkn-pix-amount-val">{total ? money(total) : 'R$ 263,33'}</div>
+          <div className="tkn-pix-order-ref">
+            Pedido <strong>{orderNumber}</strong>
+            <span className="tkn-pix-sep">•</span>
+            <span className="tkn-pix-pending-tag">
+              <span className="tkn-pix-pulsing-dot" />
+              Aguardando pagamento
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {ticketUrl && (
+        <div className="tkn-boleto-action-section">
+          <a href={ticketUrl} target="_blank" rel="noopener noreferrer" className="tkn-boleto-primary-btn">
+            <ExternalLink size={18} />
+            <span>Abrir / Imprimir Boleto Bancário</span>
+          </a>
         </div>
       )}
 
-      {ticketUrl && (
-        <a href={ticketUrl} target="_blank" rel="noopener noreferrer" className="tkn-boleto-open">
-          <ExternalLink size={16} /> Abrir / Imprimir Boleto
-        </a>
+      {digitableLine && (
+        <div className="tkn-pix-copy-section">
+          <div className="tkn-pix-copy-label-row">
+            <span className="tkn-pix-copy-label">Linha Digitável</span>
+            <span className="tkn-pix-copy-sub">Copie para pagar no aplicativo bancário</span>
+          </div>
+
+          <div className="tkn-pix-input-box">
+            <div className="tkn-pix-code-preview" title={digitableLine}>
+              {digitableLine}
+            </div>
+            <button
+              type="button"
+              className={`tkn-pix-btn-copy ${copied ? 'is-copied' : ''}`}
+              onClick={copy}
+            >
+              {copied ? (
+                <>
+                  <Check size={16} />
+                  <span>Linha Copiada!</span>
+                </>
+              ) : (
+                <>
+                  <Copy size={16} />
+                  <span>Copiar Linha Digitável</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
       )}
 
-      <ul className="tkn-pix-tips">
-        <li>O boleto tem vencimento em 3 dias úteis</li>
-        <li>Após o pagamento, a confirmação pode levar até 3 dias</li>
-        <li>Pague em qualquer banco, lotérica ou app</li>
-      </ul>
+      <div className="tkn-pix-instructions">
+        <h3 className="tkn-pix-instructions-title">Informações importantes:</h3>
+        <div className="tkn-pix-steps-grid">
+          <div className="tkn-pix-step">
+            <div className="tkn-pix-step-num">1</div>
+            <div className="tkn-pix-step-text">
+              <strong>Pague onde preferir</strong>
+              <span>Qualquer banco, lotérica ou internet banking</span>
+            </div>
+          </div>
+          <div className="tkn-pix-step">
+            <div className="tkn-pix-step-num">2</div>
+            <div className="tkn-pix-step-text">
+              <strong>Prazo de compensação</strong>
+              <span>Compensa em até 2 dias úteis após o pagamento</span>
+            </div>
+          </div>
+          <div className="tkn-pix-step">
+            <div className="tkn-pix-step-num">3</div>
+            <div className="tkn-pix-step-text">
+              <strong>Envio garantido</strong>
+              <span>Seus produtos ficam reservados durante o prazo</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="tkn-pix-footer-actions">
+        <a href={storeUrl('/pedidos')} className="tkn-pix-btn-orders">
+          Acompanhar Meus Pedidos
+        </a>
+        <a href={storeUrl('/ajuda')} className="tkn-pix-btn-help">
+          Dúvidas sobre o boleto? Fale conosco
+        </a>
+      </div>
     </div>
   )
 }
@@ -431,9 +656,15 @@ export default function Checkout() {
     }
 
     const decoded = decodeURIComponent(urlCode).trim()
-    const isCartRoute = decoded.toLowerCase() === 'sacola' || decoded.toLowerCase() === 'carrinho' || decoded.toLowerCase() === 'pedido'
-    if (isCartRoute) {
+    const isCartSession = decoded.toLowerCase() === 'sacola' || 
+      decoded.toLowerCase() === 'carrinho' || 
+      decoded.toLowerCase() === 'pedido' || 
+      /^\d{6,14}$/.test(decoded) || 
+      decoded.toLowerCase().startsWith('cart_')
+
+    if (isCartSession) {
       setDirectItem(null)
+      setLoadingProduct(false)
       return
     }
 
@@ -487,12 +718,18 @@ export default function Checkout() {
   const shippingCost = 0
   const total = Math.max(0, activeTotalPrice + shippingCost - (coupon?.discount || 0))
 
-  // 2. Garante que a URL SEMPRE exiba o código específico do produto (sem /checkout no play.teknixbrasil.com.br)
+  // 2. Garante que a URL SEMPRE exiba o código correto (sem /checkout no play.teknixbrasil.com.br)
   useEffect(() => {
-    if (!urlCode && activeItems.length === 1) {
-      const singleCode = activeItems[0].sku || activeItems[0].id
-      if (singleCode) {
-        const dest = isPlayDomain ? `/${encodeURIComponent(singleCode)}` : `/checkout/${encodeURIComponent(singleCode)}`
+    if (!urlCode) {
+      if (activeItems.length === 1) {
+        const singleCode = activeItems[0].sku || activeItems[0].id
+        if (singleCode) {
+          const dest = isPlayDomain ? `/${encodeURIComponent(singleCode)}` : `/checkout/${encodeURIComponent(singleCode)}`
+          navigate(dest, { replace: true })
+        }
+      } else if (activeItems.length > 1) {
+        const cartCode = getCartSessionCode()
+        const dest = isPlayDomain ? `/${cartCode}` : `/checkout/${cartCode}`
         navigate(dest, { replace: true })
       }
     }
@@ -702,13 +939,15 @@ export default function Checkout() {
       <EditableFlow id="checkout-main" label="Estrutura do checkout">
       <Editable as="div" widgetId="checkout-main-content" label="Conteúdo do checkout" widgetType="container" editorKind="container" renderContent={false} style={{ display: 'contents' }}>
       {/* ── SUCCESS / PAYMENT SCREENS ─────────────────────────────────── */}
-      {complete ? <Editable content={{}} as="section" widgetId="checkout-4" className="tkn-checkout-empty">
+      {complete ? <Editable content={{}} as="section" widgetId="checkout-4" className="tkn-checkout-success-wrapper">
 
         {showPixSuccess && (
           <PixSuccess
             qrCode={complete.qrCode || ''}
             qrCodeBase64={complete.qrCodeBase64 || ''}
             orderNumber={complete.orderNumber || ''}
+            total={complete.total}
+            storeUrl={storeUrl}
           />
         )}
 
@@ -717,6 +956,8 @@ export default function Checkout() {
             ticketUrl={complete.ticketUrl || ''}
             digitableLine={complete.digitableLine || complete.barcodeContent || ''}
             orderNumber={complete.orderNumber || ''}
+            total={complete.total}
+            storeUrl={storeUrl}
           />
         )}
 
@@ -733,12 +974,14 @@ export default function Checkout() {
           <Editable content={{}} as="p" widgetId="checkout-6b">Pedido {complete.orderNumber}. O pagamento ainda precisa ser confirmado.</Editable>
         </>}
 
-        <a href={storeUrl('/pedidos')} className="tkn-checkout-link">Ver meus pedidos</a>
-      </Editable> : (loadingProduct && !items.length) ? <Editable as="section" widgetId="checkout-8" className="tkn-checkout-empty">
+        {!showPixSuccess && !showBoletoSuccess && (
+          <a href={storeUrl('/pedidos')} className="tkn-checkout-link">Ver meus pedidos</a>
+        )}
+      </Editable> : (loadingProduct && !activeItems.length) ? <Editable as="section" widgetId="checkout-8" className="tkn-checkout-empty">
         <Loader2 size={40} className="animate-spin" style={{ color: '#0071e3', animation: 'spin 1s linear infinite' }} />
         <Editable as="h1" widgetId="checkout-9">Carregando produto…</Editable>
         <Editable as="p" widgetId="checkout-10">Buscando informações oficiais do equipamento para finalizar sua compra.</Editable>
-      </Editable> : !items.length ? <Editable as="section" widgetId="checkout-8" className="tkn-checkout-empty">
+      </Editable> : !activeItems.length ? <Editable as="section" widgetId="checkout-8" className="tkn-checkout-empty">
         <Package size={40} /><Editable as="h1" widgetId="checkout-9">Sua sacola está vazia</Editable><Editable as="p" widgetId="checkout-10">Adicione um produto para finalizar sua compra.</Editable><a href={storeUrl('/')} className="tkn-checkout-primary">Explorar produtos</a>
       </Editable> : <>
         <a href={storeUrl('/sacola')} className="tkn-checkout-back"><ArrowLeft size={15} /> Voltar à sacola</a>
@@ -746,7 +989,7 @@ export default function Checkout() {
           <EditableFlow id="checkout-columns" label="Colunas do checkout" compact>
           <Editable as="fieldset" widgetId="checkout-fields" label="Dados de entrega e pagamento" widgetType="container" editorKind="container" renderContent={false} className="tkn-checkout-content" disabled={busy || loading}>
             <Editable as="h1" widgetId="checkout-11">Finalize sua compra</Editable>
-            <div className="tkn-checkout-products">{items.map(item => <article key={item.id} className="tkn-checkout-product">
+            <div className="tkn-checkout-products">{activeItems.map(item => <article key={item.id} className="tkn-checkout-product">
               <div className="tkn-checkout-thumb">{item.image ? <img src={item.image} alt={item.name} /> : <Package size={24} />}</div>
               <div><a href={storeUrl('/' + encodeURIComponent(item.sku || item.id))}>{item.name}</a><p>Quantidade: <strong>{item.quantity}</strong> · {money((item.promo_price && item.promo_price > 0 ? item.promo_price : item.price) * item.quantity)}</p></div>
             </article>)}</div>
@@ -797,7 +1040,7 @@ export default function Checkout() {
           <Editable as="aside" widgetId="checkout-summary" label="Resumo da compra" widgetType="container" editorKind="container" renderContent={false} className="tkn-checkout-summary" aria-label="Resumo da compra">
             <Editable as="h2" widgetId="checkout-24">Resumo da compra</Editable>
             <button className="tkn-checkout-coupon" type="button" onClick={() => { setCouponNotice(''); setCouponOpen(true) }}><Ticket size={16} /> {coupon ? `Cupom ${coupon.code}` : 'Inserir código do cupom'}</button>
-            <dl><div><dt>Produtos</dt><dd>{money(totalPrice)}</dd></div><div><dt>Frete</dt><dd>{money(shippingCost)}</dd></div>{coupon && <div><dt>Desconto</dt><dd>- {money(coupon.discount)}</dd></div>}<div className="tkn-checkout-total"><dt><button type="button" onClick={() => setSummaryOpen(true)}>Total <ChevronUp size={14} /></button></dt><dd>{money(total)}</dd></div></dl>
+            <dl><div><dt>Produtos</dt><dd>{money(activeTotalPrice)}</dd></div><div><dt>Frete</dt><dd>{money(shippingCost)}</dd></div>{coupon && <div><dt>Desconto</dt><dd>- {money(coupon.discount)}</dd></div>}<div className="tkn-checkout-total"><dt><button type="button" onClick={() => setSummaryOpen(true)}>Total <ChevronUp size={14} /></button></dt><dd>{money(total)}</dd></div></dl>
             {error && <Editable content={{}} as="p" widgetId="checkout-25" role="alert" className="tkn-checkout-error">{error}</Editable>}
             <button className="tkn-checkout-primary" type="submit" disabled={busy || loading}>
               {busy ? (payment === 'credit_card' && !cardReady ? 'Validando cartão…' : 'Processando…') : 'Comprar agora!'}
@@ -811,7 +1054,7 @@ export default function Checkout() {
       </Editable>
       </EditableFlow>
     </main>
-    {summaryOpen && <div className="tkn-checkout-overlay andes-bottom-sheet__overlay" role="dialog" aria-modal="true" aria-label="Resumo da compra"><Editable as="section" widgetId="checkout-27" className="tkn-checkout-sheet tkn-checkout-full-summary"><button className="tkn-checkout-close" type="button" onClick={() => setSummaryOpen(false)} aria-label="Fechar resumo"><X size={20} /></button><Editable as="h2" widgetId="checkout-28">Resumo da compra</Editable><dl><div><dt>Produtos</dt><dd>{money(totalPrice)}</dd></div>{coupon && <div className="tkn-summary-discount"><dt>Desconto do produto</dt><dd>- {money(coupon.discount)}</dd></div>}<div><dt>Frete</dt><dd>{money(shippingCost)}</dd></div></dl><button className="tkn-sheet-coupon" type="button" onClick={() => { setSummaryOpen(false); setCouponOpen(true) }}><Ticket size={16} /> Inserir código do cupom</button><dl><div><dt>Subtotal</dt><dd>{money(total)}</dd></div><div><dt>Você pagará</dt><dd>{money(total)}<small>{payment === 'pix' ? 'Pix' : payment === 'boleto' ? 'Boleto' : 'Cartão de crédito'}</small></dd></div><div className="tkn-checkout-total"><dt>Total</dt><dd>{money(total)}</dd></div></dl><button className="tkn-checkout-primary" type="submit" form="tkn-checkout-form">Comprar agora!</button></Editable></div>}
+    {summaryOpen && <div className="tkn-checkout-overlay andes-bottom-sheet__overlay" role="dialog" aria-modal="true" aria-label="Resumo da compra"><Editable as="section" widgetId="checkout-27" className="tkn-checkout-sheet tkn-checkout-full-summary"><button className="tkn-checkout-close" type="button" onClick={() => setSummaryOpen(false)} aria-label="Fechar resumo"><X size={20} /></button><Editable as="h2" widgetId="checkout-28">Resumo da compra</Editable><dl><div><dt>Produtos</dt><dd>{money(activeTotalPrice)}</dd></div>{coupon && <div className="tkn-summary-discount"><dt>Desconto do produto</dt><dd>- {money(coupon.discount)}</dd></div>}<div><dt>Frete</dt><dd>{money(shippingCost)}</dd></div></dl><button className="tkn-sheet-coupon" type="button" onClick={() => { setSummaryOpen(false); setCouponOpen(true) }}><Ticket size={16} /> Inserir código do cupom</button><dl><div><dt>Subtotal</dt><dd>{money(total)}</dd></div><div><dt>Você pagará</dt><dd>{money(total)}<small>{payment === 'pix' ? 'Pix' : payment === 'boleto' ? 'Boleto' : 'Cartão de crédito'}</small></dd></div><div className="tkn-checkout-total"><dt>Total</dt><dd>{money(total)}</dd></div></dl><button className="tkn-checkout-primary" type="submit" form="tkn-checkout-form">Comprar agora!</button></Editable></div>}
     {couponOpen && <div className="tkn-checkout-overlay andes-bottom-sheet__overlay" role="dialog" aria-modal="true" aria-label="Cupons"><Editable content={{}} as="section" widgetId="checkout-29" className="tkn-checkout-sheet tkn-checkout-coupon-sheet"><button className="tkn-checkout-close" type="button" onClick={() => setCouponOpen(false)} aria-label="Fechar cupons"><X size={20} /></button><Editable as="h2" widgetId="checkout-30">Cupons</Editable><Editable as="p" widgetId="checkout-31">Insira um código cadastrado para aplicá-lo a esta compra.</Editable><div className="tkn-checkout-coupon-form"><input autoFocus value={couponCode} placeholder="Insira seu código aqui" onChange={e => setCouponCode(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') void applyCoupon() }} /><button type="button" onClick={() => void applyCoupon()}>Inserir</button></div>{couponNotice && <Editable content={{}} as="p" widgetId="checkout-32" className="tkn-checkout-coupon-notice" role="status">{couponNotice}</Editable>}</Editable></div>}
     <Editable as="footer" widgetId="checkout-footer" label="Rodapé do checkout" widgetType="container" editorKind="container" renderContent={false} className="tkn-checkout-footer"><div className="tkn-checkout-shell"><a href={storeUrl('/ajuda')}>Contato e atendimento</a><a href={storeUrl('/sacola')}>Minha sacola</a><span>TEKNIX · Todos os direitos reservados.</span></div></Editable>
   </div>

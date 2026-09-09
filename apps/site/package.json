@@ -13,8 +13,10 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.112.4",
     "@teknix/design-system": "workspace:*",
+    "@types/qrcode": "^1.5.6",
     "lottie-web": "^5.13.0",
     "lucide-react": "^1.34.0",
+    "qrcode": "^1.5.4",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.2"

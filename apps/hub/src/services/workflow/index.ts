@@ -202,7 +202,7 @@ export class MercadoPagoAdapter implements PaymentGateway {
       transactionId,
       status: 'pending',
       paymentUrl: `https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=${transactionId}`,
-      qrCode: isPix ? `00020101021226840014br.gov.bcb.pix2562pix.mercadopago.com/qr/${transactionId}5204000053039865802BR5925TEKNIX FERRAMENTAS6009SAO PAULO62070503***6304` : undefined,
+      qrCode: isPix ? `00020126490014br.gov.bcb.pix0127alisonsilvathiago@gmail.com520400005303986540${data.amount.toFixed(2).length.toString().padStart(2, '0')}${data.amount.toFixed(2)}5802BR5906TEKNIX6009SAO PAULO62070503***6304A9C5` : undefined,
       qrCodeBase64: isPix ? 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==' : undefined
     }
   }

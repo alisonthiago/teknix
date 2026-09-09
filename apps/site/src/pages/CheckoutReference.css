@@ -132,185 +132,474 @@
 }
 
 /* ==========================================================================
-   PIX SUCCESS SCREEN
+   PIX & BOLETO SUCCESS SCREENS (APPLE/FINTECH GRADE)
    ========================================================================== */
-.tkn-pix-screen, .tkn-boleto-screen {
+.tkn-checkout-success-wrapper {
+  width: 100%;
+  max-width: 580px;
+  margin: 16px auto 48px;
+  padding: 0 16px;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: center;
-  gap: 16px;
+}
+
+.tkn-pix-card {
   width: 100%;
-  max-width: 480px;
-  margin: 0 auto;
-}
-.tkn-pix-icon {
-  width: 64px; height: 64px;
-  border-radius: 50%;
-  background: #f0fff4;
-  display: grid; place-items: center;
-  flex-shrink: 0;
-}
-.tkn-pix-title {
-  font-size: 22px !important;
-  font-weight: 600 !important;
-  margin: 0 !important;
-  color: #1d1d1f;
-}
-.tkn-pix-subtitle {
-  font-size: 14px;
-  color: #666;
-  margin: 0;
-  line-height: 1.5;
-}
-.tkn-pix-qr {
-  display: block;
-  width: 200px; height: 200px;
-  border-radius: 16px;
-  border: 1px solid #e5e5e5;
-  box-shadow: 0 4px 16px rgb(0 0 0 / .08);
-  padding: 8px;
-  background: #fff;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 24px;
+  box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.04);
+  padding: 36px 32px;
   box-sizing: border-box;
-}
-.tkn-pix-qr-placeholder {
-  width: 200px; height: 200px;
-  border-radius: 16px;
-  border: 1px solid #e5e5e5;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  gap: 12px;
-  background: #fafafa;
-  color: #999;
-  font-size: 13px;
-}
-.tkn-pix-code-wrap {
-  width: 100%;
   display: flex;
   flex-direction: column;
+  gap: 26px;
+  text-align: left;
+}
+
+/* Header */
+.tkn-pix-header {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  border-bottom: 1px solid #f0f0f2;
+  padding-bottom: 22px;
+}
+
+.tkn-pix-badge-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.tkn-pix-brand-badge {
+  display: inline-flex;
+  align-items: center;
   gap: 8px;
-  align-items: stretch;
+  background: #e6f9f7;
+  color: #008a7b;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
 }
-.tkn-pix-code {
-  width: 100%;
-  box-sizing: border-box;
-  font-family: 'Courier New', monospace;
-  font-size: 11px;
-  line-height: 1.5;
-  padding: 12px;
-  border: 1px solid #d5d5d5;
+
+.tkn-boleto-badge {
+  background: #f2f2f7 !important;
+  color: #1d1d1f !important;
+}
+
+.tkn-pix-timer-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f5f5f7;
+  color: #6e6e73;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.tkn-pix-amount-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tkn-pix-amount-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #86868b;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.tkn-pix-amount-val {
+  font-size: 34px;
+  font-weight: 700;
+  color: #1d1d1f;
+  letter-spacing: -0.8px;
+  line-height: 1.15;
+}
+
+.tkn-pix-order-ref {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #515154;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.tkn-pix-sep {
+  color: #d2d2d7;
+}
+
+.tkn-pix-pending-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #d97706;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.tkn-pix-pulsing-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #d97706;
+  animation: pulseDot 2s infinite ease-in-out;
+}
+
+/* QR Code Section */
+.tkn-pix-qr-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+
+.tkn-pix-qr-frame {
+  position: relative;
+  padding: 14px;
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid #e5e5ea;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tkn-pix-corner {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-color: #00bdae;
+  border-style: solid;
+  pointer-events: none;
+}
+.tkn-pix-corner.top-left { top: 6px; left: 6px; border-width: 2.5px 0 0 2.5px; border-top-left-radius: 6px; }
+.tkn-pix-corner.top-right { top: 6px; right: 6px; border-width: 2.5px 2.5px 0 0; border-top-right-radius: 6px; }
+.tkn-pix-corner.bottom-left { bottom: 6px; left: 6px; border-width: 0 0 2.5px 2.5px; border-bottom-left-radius: 6px; }
+.tkn-pix-corner.bottom-right { bottom: 6px; right: 6px; border-width: 0 2.5px 2.5px 0; border-bottom-right-radius: 6px; }
+
+.tkn-pix-qr-img {
+  display: block;
+  width: 200px;
+  height: 200px;
   border-radius: 10px;
-  background: #f9f9f9;
-  color: #444;
-  resize: none;
-  word-break: break-all;
 }
-.tkn-pix-copy {
+
+.tkn-pix-qr-placeholder {
+  width: 200px;
+  height: 200px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: #fafafa;
+  color: #8e8e93;
+  font-size: 13px;
+}
+
+.tkn-pix-qr-caption {
+  font-size: 13px;
+  color: #6e6e73;
+  max-width: 320px;
+  line-height: 1.45;
+  margin: 0;
+}
+
+/* Copia e Cola */
+.tkn-pix-copy-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tkn-pix-copy-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tkn-pix-copy-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+.tkn-pix-copy-sub {
+  font-size: 12px;
+  color: #86868b;
+}
+
+.tkn-pix-input-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #fbfbfd;
+  border: 1px solid #e1e1e6;
+  border-radius: 14px;
+  padding: 12px;
+}
+
+.tkn-pix-code-preview {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  color: #48484a;
+  background: #ffffff;
+  border: 1px solid #e8e8ed;
+  border-radius: 8px;
+  padding: 10px 12px;
+  max-height: 48px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-all;
+  line-height: 1.5;
+}
+
+.tkn-pix-btn-copy {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
   width: 100%;
-  min-height: 44px;
-  border: 1.5px solid #1dc860;
-  border-radius: 10px;
-  background: transparent;
-  color: #1dc860;
-  font: inherit;
+  min-height: 46px;
+  border-radius: 12px;
+  background: #0071e3;
+  color: #ffffff;
+  border: none;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: background .15s, color .15s;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.tkn-pix-copy:hover, .tkn-pix-copy.is-copied {
-  background: #1dc860;
-  color: #fff;
-}
-.tkn-pix-tips {
-  text-align: left;
-  margin: 0;
-  padding: 16px 20px;
-  background: #f8f8f8;
-  border-radius: 12px;
-  list-style: none;
-  width: 100%;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.tkn-pix-tips li {
-  font-size: 13px;
-  color: #555;
-  line-height: 1.5;
-  padding-left: 18px;
-  position: relative;
-}
-.tkn-pix-tips li::before {
-  content: '›';
-  position: absolute;
-  left: 0;
-  color: #3483fa;
-  font-weight: 700;
-}
-.tkn-pix-waiting {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  color: #999;
-}
-@keyframes tkn-spin { to { transform: rotate(360deg); } }
-.tkn-pix-spin { animation: tkn-spin 1.5s linear infinite; }
 
-/* ==========================================================================
-   BOLETO SUCCESS SCREEN
-   ========================================================================== */
-.tkn-boleto-line-wrap {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  align-items: flex-start;
+.tkn-pix-btn-copy:hover {
+  background: #0077ed;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(0, 113, 227, 0.25);
 }
-.tkn-boleto-label {
+
+.tkn-pix-btn-copy.is-copied {
+  background: #10b981;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+}
+
+/* Instructions */
+.tkn-pix-instructions {
+  background: #fbfbfd;
+  border: 1px solid #ededf0;
+  border-radius: 16px;
+  padding: 18px 20px;
+}
+
+.tkn-pix-instructions-title {
   font-size: 12px;
   font-weight: 600;
-  color: #888;
+  color: #1d1d1f;
+  margin: 0 0 14px 0;
   text-transform: uppercase;
-  letter-spacing: .5px;
+  letter-spacing: 0.5px;
 }
-.tkn-boleto-line {
-  width: 100%;
-  font-family: 'Courier New', monospace;
+
+.tkn-pix-steps-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.tkn-pix-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.tkn-pix-step-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #0071e3;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.tkn-pix-step-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.tkn-pix-step-text strong {
   font-size: 13px;
-  color: #222;
-  background: #f8f8f8;
-  border: 1px solid #e0e0e0;
-  border-radius: 10px;
-  padding: 12px 14px;
-  box-sizing: border-box;
-  word-break: break-all;
-  line-height: 1.6;
+  font-weight: 600;
+  color: #1d1d1f;
 }
-.tkn-boleto-open {
+
+.tkn-pix-step-text span {
+  font-size: 12px;
+  color: #6e6e73;
+  line-height: 1.4;
+}
+
+/* Live Status */
+.tkn-pix-live-status {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+
+.tkn-pix-radar {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.tkn-pix-radar-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #16a34a;
+}
+
+.tkn-pix-radar-circle {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(22, 163, 74, 0.25);
+  animation: radarPulse 2s infinite ease-out;
+}
+
+.tkn-pix-status-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tkn-pix-status-info strong {
+  font-size: 13px;
+  font-weight: 600;
+  color: #15803d;
+}
+
+.tkn-pix-status-info span {
+  font-size: 12px;
+  color: #166534;
+  line-height: 1.4;
+}
+
+/* Footer Actions */
+.tkn-pix-footer-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.tkn-pix-btn-orders {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 44px;
+  border-radius: 12px;
+  background: #f5f5f7;
+  color: #1d1d1f;
+  border: 1px solid #e5e5ea;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.tkn-pix-btn-orders:hover {
+  background: #e8e8ed;
+  color: #000000;
+}
+
+.tkn-pix-btn-help {
+  font-size: 13px;
+  color: #0071e3;
+  text-decoration: none;
+  transition: opacity 0.15s;
+}
+
+.tkn-pix-btn-help:hover {
+  text-decoration: underline;
+}
+
+/* Boleto Specific */
+.tkn-boleto-action-section {
+  width: 100%;
+}
+
+.tkn-boleto-primary-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   width: 100%;
   min-height: 48px;
-  border-radius: 10px;
+  border-radius: 12px;
   background: #1d1d1f;
-  color: #fff;
-  font: inherit;
-  font-size: 14px;
+  color: #ffffff;
+  font-size: 15px;
   font-weight: 600;
   text-decoration: none;
-  cursor: pointer;
-  transition: opacity .15s;
+  transition: all 0.15s ease;
 }
-.tkn-boleto-open:hover { opacity: .85; }
+
+.tkn-boleto-primary-btn:hover {
+  background: #000000;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes radarPulse {
+  0% { transform: scale(0.6); opacity: 1; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.85); }
+}
+
+@keyframes tkn-spin {
+  to { transform: rotate(360deg); }
+}
+.tkn-pix-spin {
+  animation: tkn-spin 1.5s linear infinite;
+}
 
 /* ==========================================================================
    CREDIT CARD FIELDS

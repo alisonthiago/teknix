@@ -120,18 +120,36 @@ function App() {
   const isMainProdSite = hostname === 'teknixbrasil.com.br' || hostname === 'www.teknixbrasil.com.br'
 
   // Redirecionamento de produção do site oficial para o domínio oficial play.teknixbrasil.com.br
-  if (isMainProdSite && pathname.startsWith('/checkout')) {
-    const rawCode = pathname.replace(/^\/checkout\/?/, '')
-    const targetUrl = rawCode ? `https://play.teknixbrasil.com.br/${rawCode}` : 'https://play.teknixbrasil.com.br/'
-    window.location.replace(targetUrl)
-    return null
+  if (isMainProdSite) {
+    if (pathname.startsWith('/checkout')) {
+      const rawCode = pathname.replace(/^\/checkout\/?/, '')
+      const targetUrl = rawCode ? `https://play.teknixbrasil.com.br/${rawCode}` : 'https://play.teknixbrasil.com.br/'
+      window.location.replace(targetUrl)
+      return null
+    }
+
+    const cleanPath = pathname.replace(/^\/+|\/+$/g, '')
+    // Se for um código numérico de sessão de sacola/checkout (ex: 998904892 ou 049034384083)
+    if (/^\d{6,14}$/.test(cleanPath)) {
+      window.location.replace(`https://play.teknixbrasil.com.br/${cleanPath}${window.location.search}`)
+      return null
+    }
+  }
+
+  // Em desenvolvimento local: se acessar /998904892 diretamente, encaminha para /checkout/998904892
+  if (!isPlayHost && !isMainProdSite) {
+    const cleanPath = pathname.replace(/^\/+|\/+$/g, '')
+    if (/^\d{6,14}$/.test(cleanPath)) {
+      return <Navigate to={`/checkout/${cleanPath}${window.location.search}`} replace />
+    }
   }
 
   // Suporte nativo ao domínio oficial de checkout play.teknixbrasil.com.br
   if (isPlayHost) {
     // Se o usuário tentar navegar no domínio play para páginas comuns do site oficial,
-    // redireciona imediatamente para o site oficial teknixbrasil.com.br para não manter play na URL
-    const siteExitRoutes = ['/sacola', '/carrinho', '/conta', '/pedidos', '/buscar-pedido', '/salvos', '/itens-salvos', '/login', '/cadastro', '/ajuda', '/contato', '/produtos', '/noticias', '/blog']
+    // redireciona imediatamente para o site oficial teknixbrasil.com.br para não manter play na URL.
+    // NOTA: /sacola e /carrinho no domínio play são fluxos de checkout e NÃO devem sair do play!
+    const siteExitRoutes = ['/conta', '/pedidos', '/buscar-pedido', '/salvos', '/itens-salvos', '/login', '/cadastro', '/ajuda', '/contato', '/produtos', '/noticias', '/blog']
     const isExit = siteExitRoutes.some(r => pathname === r || pathname.startsWith(r + '/'))
     if (isExit) {
       window.location.replace(`https://teknixbrasil.com.br${pathname}`)
