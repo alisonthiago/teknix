@@ -190,35 +190,44 @@ serve(async (req) => {
     // =========================================================
     // 6. Marca evento como processado
     // =========================================================
-    await supabaseClient
-      .from('webhook_events')
-      .update({ processed: true, updated_at: new Date().toISOString() })
-      .eq('event_id', dedupeKey)
+    try {
+      await supabaseClient
+        .from('webhook_events')
+        .update({ processed: true, updated_at: new Date().toISOString() })
+        .eq('event_id', dedupeKey)
+    } catch {
+      // Ignora erro de webhook_events se a tabela for opcional
+    }
 
     // =========================================================
     // 7. Registra log de auditoria
     // =========================================================
-    await supabaseClient.from('integration_logs').insert({
-      provider_id: 'mercado_pago',
-      category: 'payment',
-      action: `webhook.${eventType}`,
-      status: 'success',
-      order_id: updatedOrder?.id || orderId,
-      order_number: updatedOrder?.order_number,
-      response_payload: {
-        resourceId,
-        mpStatus,
-        mpStatusDetail,
-        newOrderStatus,
-        newPaymentStatus,
-        isOrderTopic
-      },
-      created_at: new Date().toISOString()
-    }).catch(() => {/* non-critical audit log */})
+    try {
+      await supabaseClient.from('integration_logs').insert({
+        provider_id: 'mercado_pago',
+        category: 'payment',
+        action: `webhook.${eventType}`,
+        status: 'success',
+        order_id: updatedOrder?.id || orderId,
+        order_number: updatedOrder?.order_number,
+        response_payload: {
+          resourceId,
+          mpStatus,
+          mpStatusDetail,
+          newOrderStatus,
+          newPaymentStatus,
+          isOrderTopic
+        },
+        created_at: new Date().toISOString()
+      })
+    } catch {
+      // Ignora log não-crítico
+    }
 
     return new Response(
       JSON.stringify({
         success: true,
+        message: 'Notificação recebida com sucesso',
         resourceId,
         mpStatus,
         newOrderStatus,
@@ -228,10 +237,10 @@ serve(async (req) => {
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (err: any) {
-    console.error('[MP Webhook] Erro crítico:', err)
+    console.error('[MP Webhook] Erro:', err)
     return new Response(
-      JSON.stringify({ success: false, error: err.message }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ success: true, message: 'Recebido com aviso', error: err.message }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
 })
