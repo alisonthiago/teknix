@@ -6,6 +6,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../hooks/useAuth'
 import { CORE_CATEGORIES } from '../services/categories'
+import { getCustomerByUserId, type Customer } from '../services/customer'
 import CepDeliveryModal from './CepDeliveryModal'
 import './CasasBahiaHeader.css'
 import './StorefrontResponsive.css'
@@ -82,14 +83,82 @@ function getCategoryIcon(id: string) {
 }
 
 
+function extractAccountData(user: any, customer?: Customer | null) {
+  if (!user) {
+    return { firstName: 'Cliente', fullName: 'Cliente', avatarUrl: '' }
+  }
+
+  const meta = user.user_metadata || {}
+  const identityData = user.identities?.[0]?.identity_data || {}
+
+  // 1. Extração do Nome Completo (Google OAuth, cadastro ou email)
+  const rawFullName = 
+    customer?.name ||
+    meta.full_name ||
+    meta.name ||
+    identityData.full_name ||
+    identityData.name ||
+    (meta.given_name ? `${meta.given_name} ${meta.family_name || ''}`.trim() : '') ||
+    (identityData.given_name ? `${identityData.given_name} ${identityData.family_name || ''}`.trim() : '') ||
+    customer?.first_name ||
+    meta.given_name ||
+    meta.first_name ||
+    user.email?.split('@')[0] ||
+    'Cliente'
+
+  // 2. Extração do Primeiro Nome para Saudação
+  const rawFirstName =
+    customer?.first_name ||
+    meta.given_name ||
+    meta.first_name ||
+    identityData.given_name ||
+    identityData.first_name ||
+    rawFullName.trim().split(/\s+/)[0] ||
+    'Cliente'
+
+  // Limpa pontuação se veio de prefixo de e-mail (ex: "alison.thiago" -> "Alison")
+  const cleanFirst = rawFirstName.split(/[._-]/)[0] || 'Cliente'
+  const formattedFirst = cleanFirst.charAt(0).toUpperCase() + cleanFirst.slice(1).toLowerCase()
+
+  // 3. Extração do Avatar Oficial (inclui picture do Google OAuth e avatar_url do Supabase)
+  const avatarUrl =
+    (typeof meta.avatar_url === 'string' && meta.avatar_url) ||
+    (typeof meta.picture === 'string' && meta.picture) ||
+    (typeof identityData.avatar_url === 'string' && identityData.avatar_url) ||
+    (typeof identityData.picture === 'string' && identityData.picture) ||
+    ''
+
+  return {
+    firstName: formattedFirst,
+    fullName: rawFullName,
+    avatarUrl
+  }
+}
+
 export default function TeknixHeader() {
   const navigate = useNavigate()
   const { totalItems } = useCart()
   const { user, signOut } = useAuth()
   const location = useLocation()
   const isHome = location.pathname === '/'
-  const accountName = String(user?.user_metadata?.full_name || user?.user_metadata?.name || user?.user_metadata?.first_name || user?.email?.split('@')[0] || 'Cliente').split(' ')[0]
-  const profileAvatar = typeof user?.user_metadata?.avatar_url === 'string' ? user.user_metadata.avatar_url : ''
+
+  const [dbCustomer, setDbCustomer] = useState<Customer | null>(null)
+
+  useEffect(() => {
+    if (!user?.id) {
+      setDbCustomer(null)
+      return
+    }
+    let active = true
+    getCustomerByUserId(user.id)
+      .then(cust => {
+        if (active && cust) setDbCustomer(cust)
+      })
+      .catch(() => {})
+    return () => { active = false }
+  }, [user?.id])
+
+  const account = extractAccountData(user, dbCustomer)
 
   const [searchTerm, setSearchTerm] = useState('')
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -336,12 +405,16 @@ export default function TeknixHeader() {
                 <Editable as={Link} widgetId="chrome:header:account" globalKey="chrome:header:account" widgetType="button" label="Acesso à conta" renderContent={false}
                   to={user ? '/conta' : '/login'}
                   className="dsvia-account-capsule"
-                  title={user ? 'Minha Conta' : 'Acesse sua conta'}
+                  title={user ? `Minha Conta (${account.fullName})` : 'Acesse sua conta'}
                   onClick={(event: any) => { if (user) { event.preventDefault(); setIsAccountOpen(open => !open) } }}
                   aria-expanded={user ? isAccountOpen : undefined}
                 >
-                  {profileAvatar ? (
-                    <img className="dsvia-account-avatar" src={profileAvatar} alt="Foto de perfil" />
+                  {account.avatarUrl ? (
+                    <img className="dsvia-account-avatar" src={account.avatarUrl} alt="Foto de perfil" referrerPolicy="no-referrer" />
+                  ) : user ? (
+                    <div className="dsvia-account-initials-badge">
+                      {account.firstName.charAt(0).toUpperCase()}
+                    </div>
                   ) : accountEdit?.content?.icon ? (
                     renderDynamicIcon(String(accountEdit.content.icon), Number(accountEdit.content.icon_size) || 18, String(accountEdit.content.icon_color || 'currentColor'))
                   ) : (
@@ -351,7 +424,10 @@ export default function TeknixHeader() {
                   )}
                   <div className="dsvia-account-user-text">
                     {user ? (
-                      <span className="dsvia-account-greeting">Olá, {accountName}</span>
+                      <>
+                        <span className="dsvia-account-greeting">Olá, {account.firstName}</span>
+                        <span className="dsvia-account-subtext">Minha conta</span>
+                      </>
                     ) : (
                       <>
                         <span className="dsvia-account-greeting">Boas-vindas :)</span>
@@ -363,10 +439,18 @@ export default function TeknixHeader() {
 
                 {user && isAccountOpen && (
                   <div className="dsvia-account-popover" role="menu">
+                    <div style={{ padding: '8px 12px 10px', borderBottom: '1px solid #f0f0f0', marginBottom: '6px' }}>
+                      <div style={{ fontWeight: 600, fontSize: '13px', color: '#1d1d1f', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {account.fullName}
+                      </div>
+                      <div style={{ fontSize: '11px', color: '#86868b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {user.email}
+                      </div>
+                    </div>
                     <Link to="/conta" role="menuitem" onClick={() => setIsAccountOpen(false)}>Minha conta</Link>
                     <Link to="/pedidos" role="menuitem" onClick={() => setIsAccountOpen(false)}>Meus pedidos</Link>
                     <Link to="/conta/dados-cadastrais" role="menuitem" onClick={() => setIsAccountOpen(false)}>Dados cadastrais</Link>
-                    <button type="button" role="menuitem" onClick={handleSignOut}>Sair</button>
+                    <button type="button" role="menuitem" onClick={handleSignOut}>Sair da conta</button>
                   </div>
                 )}
 
@@ -495,7 +579,7 @@ export default function TeknixHeader() {
                   )}
                 </Link>
                 <span className="tkn-drawer-greeting">
-                  {user ? `Olá, ${accountName}` : 'Olá! Seja bem-vindo'}
+                  {user ? `Olá, ${account.firstName}` : 'Olá! Seja bem-vindo'}
                 </span>
               </div>
               <button
@@ -514,11 +598,11 @@ export default function TeknixHeader() {
             {/* Banner rápido de usuário / Login */}
             <div className="tkn-drawer-user-strip">
               <div className="tkn-drawer-user-meta">
-                {profileAvatar ? <img className="tkn-drawer-user-avatar" src={profileAvatar} alt="Foto de perfil" /> : <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                {account.avatarUrl ? <img className="tkn-drawer-user-avatar" src={account.avatarUrl} alt="Foto de perfil" referrerPolicy="no-referrer" /> : <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                   <circle cx="12" cy="7" r="4" />
                 </svg>}
-                <span>{user ? accountName : 'Sua conta'}</span>
+                <span>{user ? account.fullName : 'Sua conta'}</span>
               </div>
               <Link
                 to={user ? '/conta' : '/login'}
