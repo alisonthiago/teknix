@@ -17,21 +17,61 @@ import './CheckoutReference.css'
 const money = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 const emptyAddress = { name: '', street: '', number: '', complement: '', neighborhood: '', city: '', state: '', zipCode: '' }
 
-// Mercado Pago SDK loader (loads once)
+// Mercado Pago Public Key oficial TEKNIX (fallback seguro para frontend)
+const MP_DEFAULT_PUBLIC_KEY = 'APP_USR-bef9e18f-d642-4334-90c0-36ecbbb5c381'
+const MP_PUBLIC_KEY = (import.meta.env.VITE_MERCADO_PAGO_PUBLIC_KEY as string) || MP_DEFAULT_PUBLIC_KEY
+
+// Mercado Pago SDK loader (singleton resiliente)
+let mpInstance: any = null
 let mpSdkPromise: Promise<any> | null = null
-function loadMercadoPagoSdk(publicKey: string): Promise<any> {
+
+function loadMercadoPagoSdk(publicKey: string = MP_PUBLIC_KEY): Promise<any> {
+  if (mpInstance) return Promise.resolve(mpInstance)
   if (mpSdkPromise) return mpSdkPromise
+
   mpSdkPromise = new Promise((resolve, reject) => {
-    if ((window as any).MercadoPago) {
-      resolve(new (window as any).MercadoPago(publicKey))
+    if (typeof window === 'undefined') return reject(new Error('Window não disponível'))
+
+    const initInstance = () => {
+      try {
+        if ((window as any).MercadoPago) {
+          mpInstance = new (window as any).MercadoPago(publicKey, { locale: 'pt-BR' })
+          resolve(mpInstance)
+          return true
+        }
+      } catch (e) {
+        console.error('[MP SDK] Erro ao instanciar MercadoPago:', e)
+      }
+      return false
+    }
+
+    if (initInstance()) return
+
+    const existing = document.querySelector('script[src*="mercadopago.com"]')
+    if (existing) {
+      existing.addEventListener('load', () => {
+        if (!initInstance()) reject(new Error('Falha ao instanciar SDK do Mercado Pago.'))
+      })
+      existing.addEventListener('error', () => {
+        mpSdkPromise = null
+        reject(new Error('Falha ao carregar script do Mercado Pago.'))
+      })
       return
     }
+
     const script = document.createElement('script')
     script.src = 'https://sdk.mercadopago.com/js/v2'
-    script.onload = () => resolve(new (window as any).MercadoPago(publicKey))
-    script.onerror = () => reject(new Error('Falha ao carregar SDK do Mercado Pago'))
+    script.async = true
+    script.onload = () => {
+      if (!initInstance()) reject(new Error('Falha ao instanciar SDK do Mercado Pago.'))
+    }
+    script.onerror = () => {
+      mpSdkPromise = null
+      reject(new Error('Falha ao baixar SDK do Mercado Pago.'))
+    }
     document.head.appendChild(script)
   })
+
   return mpSdkPromise
 }
 
@@ -197,35 +237,46 @@ function CardFields({ onToken, onError, total, busy }: CardFieldsProps) {
   const mpRef = useRef<any>(null)
 
   useEffect(() => {
-    const pk = import.meta.env.VITE_MERCADO_PAGO_PUBLIC_KEY
-    if (!pk) return
-    loadMercadoPagoSdk(pk).then(mp => { mpRef.current = mp }).catch(() => {})
+    loadMercadoPagoSdk(MP_PUBLIC_KEY)
+      .then(mp => { mpRef.current = mp })
+      .catch(err => {
+        console.warn('[checkout] Aviso ao carregar Mercado Pago SDK:', err)
+      })
   }, [])
 
   const brand = detectCardBrand(cardNumber)
 
   const handleTokenize = async () => {
-    const [month, year] = expiry.split('/')
+    const [month, year] = (expiry || '').split('/')
     if (!cardNumber || !cardName || !month || !year || !cvv || !docNumber) {
       onError('Preencha todos os dados do cartão.')
       return
     }
     setTokenizing(true)
     try {
-      const mp = mpRef.current
-      if (!mp) throw new Error('SDK do Mercado Pago não carregado.')
+      let mp = mpRef.current
+      if (!mp) {
+        mp = await loadMercadoPagoSdk(MP_PUBLIC_KEY)
+        mpRef.current = mp
+      }
+      if (!mp) throw new Error('Não foi possível conectar com o Mercado Pago. Verifique sua conexão e tente novamente.')
+
+      const cleanMonth = month.trim().padStart(2, '0')
+      const cleanYear = year.trim().length === 2 ? '20' + year.trim() : year.trim()
+
       const token = await mp.createCardToken({
         cardNumber: cardNumber.replace(/\s/g, ''),
-        cardholderName: cardName.toUpperCase(),
-        cardExpirationMonth: month,
-        cardExpirationYear: year.length === 2 ? '20' + year : year,
-        securityCode: cvv,
+        cardholderName: cardName.trim().toUpperCase(),
+        cardExpirationMonth: cleanMonth,
+        cardExpirationYear: cleanYear,
+        securityCode: cvv.trim(),
         identificationType: 'CPF',
         identificationNumber: docNumber.replace(/\D/g, '')
       })
-      if (!token?.id) throw new Error('Falha ao tokenizar o cartão. Verifique os dados.')
+      if (!token?.id) throw new Error('Falha ao tokenizar o cartão. Verifique se os dados estão corretos.')
       onToken(token.id, brand, installments)
     } catch (err: any) {
+      console.error('[checkout] Erro createCardToken:', err)
       onError(err.message || 'Erro ao processar cartão.')
     } finally {
       setTokenizing(false)
