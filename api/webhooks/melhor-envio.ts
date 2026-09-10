@@ -127,6 +127,14 @@ function internalStatus(event: string): string | null {
 }
 
 export default async function handler(request: VercelRequest, response: VercelResponse) {
+  if (request.method === 'GET') {
+    return response.status(200).json({
+      status: 'online',
+      service: 'Melhor Envio Webhook',
+      message: 'Endpoint ativo. Aguardando eventos POST.',
+    })
+  }
+
   if (request.method !== 'POST') return response.status(405).json({ error: 'Método não permitido' })
 
   const correlationId = header(request, 'x-request-id') || randomUUID()

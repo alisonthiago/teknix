@@ -191,3 +191,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ received: true, processed: false, correlationId }, { status: 200 })
   }
 }
+
+export async function GET() {
+  return NextResponse.json({
+    status: 'online',
+    service: 'Melhor Envio Webhook',
+    message: 'Endpoint ativo. Aguardando eventos POST.',
+  }, { status: 200 })
+}
