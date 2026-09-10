@@ -3,7 +3,16 @@
   "framework": "vite",
   "buildCommand": "pnpm --filter @teknix/site build",
   "outputDirectory": "apps/site/dist",
+  "headers": [
+    {
+      "source": "/integracoes/melhor-envio/teste",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
+      ]
+    }
+  ],
   "rewrites": [
+    { "source": "/webhooks/melhor-envio", "destination": "/api/webhooks/melhor-envio" },
     { "source": "/(.*)", "destination": "/" }
   ]
 }
