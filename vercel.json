@@ -13,6 +13,9 @@
   ],
   "rewrites": [
     { "source": "/webhooks/melhor-envio", "destination": "/api/webhooks/melhor-envio" },
-    { "source": "/(.*)", "destination": "/" }
+    {
+      "source": "/((?!api(?:/|$)|webhooks(?:/|$)|oauth(?:/|$)).*)",
+      "destination": "/"
+    }
   ]
 }
