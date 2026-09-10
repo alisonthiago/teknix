@@ -44,7 +44,7 @@ function safeEqual(a: string, b: string) {
   return left.length === right.length && timingSafeEqual(left, right)
 }
 
-function isRegistrationProbe(body: string, userAgent: string | null): boolean {
+function isRegistrationProbe(body: string): boolean {
   const trimmed = body.trim()
   if (!trimmed) return true
   try {
@@ -52,7 +52,9 @@ function isRegistrationProbe(body: string, userAgent: string | null): boolean {
     if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return false
     const keys = Object.keys(payload)
     if (keys.length === 0) return true
-    return userAgent === 'Melhor Envio Webhooks/1.0' && !keys.includes('event') && !keys.includes('data')
+    // O probe de cadastro pode trazer metadados, mas não possui o envelope de
+    // evento. Não depender do User-Agent evita rejeitar variações do cliente.
+    return !keys.includes('event') && !keys.includes('data')
   } catch {
     return false
   }
@@ -99,9 +101,9 @@ export async function POST(request: NextRequest) {
 
   // The Melhor Envio dashboard sends an unsigned probe when registering a URL.
   // Only an empty probe is accepted; event payloads remain signature-protected.
-  if (!signature && isRegistrationProbe(rawBody, request.headers.get('user-agent'))) {
+  if (!signature && isRegistrationProbe(rawBody)) {
     console.info('[Melhor Envio webhook] registration probe accepted', { correlationId })
-    return NextResponse.json({ ok: true }, { status: 200 })
+    return NextResponse.json({ received: true }, { status: 200 })
   }
 
   if (!secret || !signature) {
