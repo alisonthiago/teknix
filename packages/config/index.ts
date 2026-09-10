@@ -2,7 +2,7 @@ export * from './src/index'
 
 export const config = {
   whatsapp: {
-    number: '5511999999999',
+    number: '5511998887766',
     get link() {
       return `https://wa.me/${this.number}`
     },

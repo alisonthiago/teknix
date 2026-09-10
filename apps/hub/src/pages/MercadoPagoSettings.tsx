@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react'
 import { CheckCircle2, ShieldCheck, Key, CreditCard, QrCode, FileText, Save } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import './MercadoPagoSettings.css'
+import { notifyHub } from '../lib/hubNotifications'
 
 export default function MercadoPagoSettings() {
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [settings, setSettings] = useState({
     public_key: 'APP_USR-6ef8f3db-6d35-4701-86f7-8199378ec0c7',
@@ -16,12 +17,42 @@ export default function MercadoPagoSettings() {
     max_installments: 12,
   })
 
+  useEffect(() => {
+    let mounted = true
+    void supabase.from('store_payment_settings').select('*').eq('id', 'default').maybeSingle().then(({ data, error }) => {
+      if (!mounted) return
+      if (error) {
+        console.warn('[Mercado Pago] Não foi possível carregar as configurações:', error.message)
+      } else if (data) {
+        setSettings(current => ({ ...current, ...data }))
+      }
+      setLoading(false)
+    }, error => {
+      if (!mounted) return
+      console.warn('[Mercado Pago] Não foi possível carregar as configurações:', error)
+      setLoading(false)
+    })
+    return () => { mounted = false }
+  }, [])
+
   const handleSave = async () => {
     setSaving(true)
-    setTimeout(() => {
-      setSaving(false)
-      alert('Configurações do Mercado Pago salvas com sucesso!')
-    }, 600)
+    const { error } = await supabase.from('store_payment_settings').upsert({
+      id: 'default',
+      enable_pix: settings.enable_pix,
+      pix_discount_percent: settings.pix_discount_percent,
+      enable_credit_card: settings.enable_credit_card,
+      enable_boleto: settings.enable_boleto,
+      max_installments: settings.max_installments,
+      updated_at: new Date().toISOString()
+    })
+    setSaving(false)
+    if (error) {
+      notifyHub('Não foi possível salvar. Aplique a migration store_payment_settings no Supabase.')
+      console.error('[Mercado Pago] Falha ao salvar:', error)
+      return
+    }
+    notifyHub('Configurações do Mercado Pago salvas com sucesso!')
   }
 
   return (
@@ -33,7 +64,7 @@ export default function MercadoPagoSettings() {
           <p>Configure credenciais e métodos de pagamento da sua loja própria.</p>
         </div>
         <div className="header-actions">
-          <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
+          <button className="btn btn-primary" onClick={handleSave} disabled={loading || saving}>
             <Save size={14} /> {saving ? 'Salvando...' : 'Salvar Alterações'}
           </button>
         </div>

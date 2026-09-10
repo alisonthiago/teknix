@@ -517,7 +517,7 @@
   list-style: none;
   padding: 0;
   margin: 0;
-  font-size: var(--tkn-text-13);
+  font-size: 11px;
 }
 
 .ui.breadcrumb li a {
@@ -538,7 +538,7 @@
 .ui.breadcrumb .active-breadcrumb {
   color: #141414;
   font-weight: var(--tkn-weight-medium);
-  max-width: 420px;
+  max-width: 320px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2845,23 +2845,27 @@
 .ml-pdp-btn-notify-stock {
   width: 100%;
   height: 48px;
-  background: #1a1a1a;
+  background: #00a650;
   color: #ffffff;
-  border: none;
-  border-radius: 8px;
+  border: 1px solid #008f45;
+  border-radius: 10px;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.15s ease, transform 0.1s ease;
+  transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
   font-family: inherit;
   letter-spacing: -0.01em;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  box-shadow: 0 3px 8px rgba(0, 166, 80, 0.18);
 }
 
-.ml-pdp-btn-notify-stock:hover { opacity: 0.88; }
+.ml-pdp-btn-notify-stock:hover {
+  background: #008f45;
+  box-shadow: 0 5px 12px rgba(0, 166, 80, 0.24);
+}
 .ml-pdp-btn-notify-stock:active { transform: scale(0.99); }
 
 .ml-pdp-btn-cart {

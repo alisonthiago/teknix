@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   CreditCard, Truck, MapPin, FileText, Phone, MessageSquare, Mail,
   ShoppingCart, Users, Globe, Code, Shuffle, Edit3, ChevronLeft, Save, ShieldCheck
 } from 'lucide-react'
 import CollaboratorsPermissionsTab from '../components/CollaboratorsPermissionsTab'
+import { notifyHub } from '../lib/hubNotifications'
+import { DEFAULT_WHATSAPP_SETTINGS, loadWhatsappSettings, saveWhatsappSettings } from '../services/storeSettings'
 import './SettingsHub.css'
 
 export default function SettingsHub() {
@@ -22,11 +24,7 @@ export default function SettingsHub() {
     address: 'Av. Paulista, 1000 - São Paulo/SP'
   })
 
-  const [whatsappData, setWhatsappData] = useState({
-    enabled: true,
-    phoneNumber: '5511998887766',
-    defaultMessage: 'Olá! Vim do site TEKNIX e gostaria de tirar uma dúvida sobre os produtos.'
-  })
+  const [whatsappData, setWhatsappData] = useState(DEFAULT_WHATSAPP_SETTINGS)
 
   const [checkoutData, setCheckoutData] = useState({
     requireCpf: true,
@@ -55,12 +53,42 @@ export default function SettingsHub() {
     sslStatus: 'Ativo e Seguro (HTTPS)'
   })
 
-  function handleSave() {
+  const [checkoutMessage, setCheckoutMessage] = useState('Agradecemos sua preferência pela TEKNIX! Seu pedido será postado em até 24h úteis.')
+
+  useEffect(() => {
+    loadWhatsappSettings().then(setWhatsappData).catch(() => notifyHub('Não foi possível carregar as configurações do WhatsApp.', 'error'))
+  }, [])
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('teknix:hub:settings')
+      if (!saved) return
+      const data = JSON.parse(saved)
+      if (data.contactData) setContactData(prev => ({ ...prev, ...data.contactData }))
+      if (data.checkoutData) setCheckoutData(prev => ({ ...prev, ...data.checkoutData }))
+      if (typeof data.checkoutMessage === 'string') setCheckoutMessage(data.checkoutMessage)
+      if (data.nfeData) setNfeData(prev => ({ ...prev, ...data.nfeData }))
+      if (data.scriptsData) setScriptsData(prev => ({ ...prev, ...data.scriptsData }))
+      if (data.domainData) setDomainData(prev => ({ ...prev, ...data.domainData }))
+    } catch {
+      notifyHub('Não foi possível carregar as configurações salvas.', 'error')
+    }
+  }, [])
+
+  async function handleSave() {
     setSaving(true)
-    setTimeout(() => {
+    try {
+      await saveWhatsappSettings(whatsappData)
+      localStorage.setItem('teknix:hub:settings', JSON.stringify({
+        contactData, checkoutData, checkoutMessage, nfeData, scriptsData, domainData
+      }))
+      window.dispatchEvent(new Event('teknix:settings-updated'))
       setSaving(false)
-      alert('Configurações salvas com sucesso!')
-    }, 600)
+      notifyHub('Configurações salvas com sucesso!')
+    } catch {
+      setSaving(false)
+      notifyHub('Não foi possível salvar as configurações no Supabase.', 'error')
+    }
   }
 
   return (
@@ -341,6 +369,19 @@ export default function SettingsHub() {
                   />
                 </div>
 
+                <div>
+                  <label className="settings-label" htmlFor="whatsapp-position">Posição na tela</label>
+                  <select
+                    id="whatsapp-position"
+                    className="settings-select"
+                    value={whatsappData.position}
+                    onChange={(e) => setWhatsappData({ ...whatsappData, position: e.target.value as 'br' | 'bl' })}
+                  >
+                    <option value="br">Canto inferior direito</option>
+                    <option value="bl">Canto inferior esquerdo</option>
+                  </select>
+                </div>
+
                 <button className="btn btn-primary" style={{ alignSelf: 'flex-start' }} onClick={handleSave} disabled={saving}>
                   {saving ? 'Salvando...' : 'Salvar Configurações'}
                 </button>
@@ -513,6 +554,31 @@ export default function SettingsHub() {
             </>
           )}
 
+          {activeSection === 'checkout-message' && (
+            <>
+              <div className="settings-header-box">
+                <div>
+                  <h1 className="settings-main-title">Mensagem para clientes</h1>
+                  <p className="settings-main-subtitle">Defina a mensagem exibida ao cliente após a finalização do pedido.</p>
+                </div>
+                <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
+                  {saving ? 'Salvando...' : 'Salvar'}
+                </button>
+              </div>
+              <div className="settings-card">
+                <label className="settings-label" htmlFor="checkout-message">Mensagem de confirmação</label>
+                <textarea
+                  id="checkout-message"
+                  className="settings-textarea"
+                  value={checkoutMessage}
+                  onChange={event => setCheckoutMessage(event.target.value)}
+                  maxLength={240}
+                />
+                <span className="settings-hint">{checkoutMessage.length}/240 caracteres</span>
+              </div>
+            </>
+          )}
+
           {/* Permissões dos Colaboradores (Equipe) */}
           {activeSection === 'users' && (
             <CollaboratorsPermissionsTab />
@@ -535,7 +601,7 @@ export default function SettingsHub() {
                 <button
                   type="button"
                   style={{ background: 'none', border: 'none', color: '#2563eb', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer', textAlign: 'left', display: 'inline-flex', alignItems: 'center', gap: 4 }}
-                  onClick={() => alert('Habilitar vendas para novos países')}
+                  onClick={() => notifyHub('A habilitação de novos países será configurada em breve.', 'info')}
                 >
                   ⊕ Habilitar outro país
                 </button>
@@ -688,46 +754,6 @@ export default function SettingsHub() {
             </>
           )}
 
-          {/* Botão de WhatsApp */}
-          {activeSection === 'whatsapp' && (
-            <>
-              <div className="settings-header-box" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                <div>
-                  <h1 className="settings-main-title">Botão de WhatsApp</h1>
-                  <p className="settings-main-subtitle">Adicione o botão flutuante do WhatsApp para atender seus clientes diretamente na loja.</p>
-                </div>
-                <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
-                  {saving ? 'Salvando...' : 'Salvar'}
-                </button>
-              </div>
-
-              <div className="settings-card">
-                <label className="toggle-switch-label">
-                  <input type="checkbox" className="toggle-switch-input" defaultChecked />
-                  Exibir botão flutuante de WhatsApp na loja
-                </label>
-
-                <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>Número com DDD</label>
-                  <input className="settings-input" placeholder="Ex.: (11) 99888-7766" defaultValue="(11) 99888-7766" />
-                </div>
-
-                <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>Mensagem inicial pré-definida</label>
-                  <input className="settings-input" defaultValue="Olá! Gostaria de tirar dúvidas sobre os produtos da TEKNIX." />
-                </div>
-
-                <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>Posição na tela</label>
-                  <select className="settings-input">
-                    <option value="br">Canto inferior direito</option>
-                    <option value="bl">Canto inferior esquerdo</option>
-                  </select>
-                </div>
-              </div>
-            </>
-          )}
-
           {/* E-mails automáticos */}
           {activeSection === 'emails' && (
             <>
@@ -823,7 +849,7 @@ export default function SettingsHub() {
           )}
 
           {/* Campos Personalizados */}
-          {activeSection === 'custom_fields' && (
+          {activeSection === 'custom-fields' && (
             <>
               <div className="settings-header-box" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                 <div>

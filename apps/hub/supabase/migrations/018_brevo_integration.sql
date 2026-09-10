@@ -58,7 +58,7 @@ COMMIT;
 --
 --    UPDATE public.integration_configs
 --    SET
---      credentials = '{"apiKey": "xkeysib-SUA-CHAVE-REAL-AQUI"}'::jsonb,
+--      credentials = '{"apiKey": "YOUR_BREVO_API_KEY"}'::jsonb,
 --      status = 'connected'
 --    WHERE id = 'brevo';
 --

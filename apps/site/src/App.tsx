@@ -8,6 +8,7 @@ import { AuthProvider } from './hooks/useAuth'
 import { CartProvider } from './context/CartContext'
 import { FavoritesProvider } from './context/FavoritesContext'
 import { CompareProvider } from './context/CompareContext'
+import { useEffect, useState } from 'react'
 
 import Contact from './pages/Contact'
 import PagePreview from './pages/PagePreview'
@@ -39,12 +40,14 @@ import HelpCenter from './pages/HelpCenter'
 import HelpTopic from './pages/HelpTopic'
 import LegalPage from './pages/LegalPage'
 import EmailPreview from './pages/EmailPreview'
+import MelhorEnvioTest from './pages/MelhorEnvioTest'
 import './App.css'
 
 import TeknixHeader from './components/TeknixHeader'
 import TeknixFooter from './components/TeknixFooter'
 import CartTray from './components/CartTray'
 import CompareTray from './components/CompareTray'
+import WhatsAppFloat from './components/WhatsAppFloat'
 import { Ads } from './components/Ads'
 import CookieNotice from './components/CookieNotice'
 import NewsHeader from './components/NewsHeader'
@@ -91,6 +94,7 @@ export function SiteLayout({ children, hideHeader, hideFooter }: { children: Rea
       {!hideFooter && <TeknixFooter />}
       {pathname !== '/sacola' && !isHelp && <CartTray />}
       <CompareTray />
+      <WhatsAppFloat />
     </div>
   )
 }
@@ -98,6 +102,28 @@ export function SiteLayout({ children, hideHeader, hideFooter }: { children: Rea
 function LegacyProductRedirect() {
   const { slug = '' } = useParams()
   return <Navigate to={`/${encodeURIComponent(slug)}`} replace />
+}
+
+function CheckoutEntryTransition() {
+  const [ready, setReady] = useState(false)
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setReady(true), 3000)
+    return () => window.clearTimeout(timer)
+  }, [])
+
+  if (!ready) {
+    return (
+      <div className="checkout-entry-transition" role="status" aria-live="polite">
+        <div className="checkout-entry-transition__content">
+          <strong>Preparando tudo para sua compra</strong>
+          <span className="checkout-entry-transition__loader" aria-hidden="true" />
+        </div>
+      </div>
+    )
+  }
+
+  return <NativePageCanvas><Checkout /></NativePageCanvas>
 }
 
 
@@ -191,6 +217,8 @@ function App() {
           <CompareProvider>
             <CookieNotice />
             <SiteStandards><PageScope key={pathname} path={pathname}><Routes>
+              {/* Ambiente privado de homologação, fora do layout e da navegação pública. */}
+              <Route path="/integracoes/melhor-envio/teste" element={<MelhorEnvioTest />} />
               <Route path="/preview/:id" element={<SiteLayout><PagePreview /></SiteLayout>} />
               <Route path="/__widget-preview/:id" element={<SiteLayout><WidgetPreview /></SiteLayout>} />
               {/* 0. Home oficial */}
@@ -226,8 +254,8 @@ function App() {
               <Route path="/institucional/*" element={<DynamicPage />} />
 
               {/* 4. Checkout Oficial */}
-              <Route path="/checkout" element={<NativePageCanvas><Checkout /></NativePageCanvas>} />
-              <Route path="/checkout/:code" element={<NativePageCanvas><Checkout /></NativePageCanvas>} />
+              <Route path="/checkout" element={<CheckoutEntryTransition />} />
+              <Route path="/checkout/:code" element={<CheckoutEntryTransition />} />
 
               {/* 4b. Pré-visualizador dos Templates de E-mail Brevo */}
               <Route path="/email-preview" element={<EmailPreview />} />

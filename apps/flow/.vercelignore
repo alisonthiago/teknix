@@ -1,0 +1,24 @@
+# Local dependencies and package-manager caches
+node_modules/
+.pnpm-store/
+.turbo/
+
+# Local build output and framework caches
+.next/
+dist/
+build/
+
+# Test, coverage, and transient caches
+.cache/
+coverage/
+supabase/.temp/
+
+# Local metadata and temporary files
+.vercel/
+*.tsbuildinfo
+*.log
+.DS_Store
+Thumbs.db
+
+# Local environment files (Vercel Environment Variables remain available)
+.env*

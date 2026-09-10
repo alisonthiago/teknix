@@ -5,7 +5,7 @@
 .integrations-container {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
   width: 100%;
   max-width: var(--tk-content-max-width, 1140px);
   margin: 0 auto;
@@ -19,11 +19,11 @@
   background: #ffffff;
   border: 1px solid var(--tk-color-border, #e5e7eb);
   border-radius: var(--tk-radius-card, 12px);
-  padding: 20px 24px;
+  padding: 22px 24px;
   box-shadow: var(--tk-shadow-card);
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
 }
 
 .health-header {
@@ -36,6 +36,24 @@
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.health-last-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #64748b;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.health-last-check::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 3px #dcfce7;
 }
 
 .health-pulse-dot {
@@ -56,17 +74,36 @@
 .health-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
+  gap: 10px;
 }
 
 .health-item {
-  background: var(--tk-color-surface-hover, #f9fafb);
+  background: linear-gradient(180deg, #ffffff 0%, var(--tk-color-surface-hover, #f9fafb) 100%);
   border: 1px solid var(--tk-color-border-subtle, #f3f4f6);
-  border-radius: 8px;
-  padding: 12px 14px;
+  border-radius: 10px;
+  padding: 13px 14px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 7px;
+}
+
+.health-item-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.health-item-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 7px;
+  background: #ffffff;
+  border: 1px solid #eef0f2;
 }
 
 .health-item-label {
@@ -75,6 +112,9 @@
   color: var(--tk-color-text-tertiary, #9ca3af);
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .health-item-status {
@@ -128,24 +168,25 @@
 .integrations-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 20px;
+  gap: 16px;
 }
 
 .integration-card {
   background: #ffffff;
   border: 1px solid var(--tk-color-border, #e5e7eb);
-  border-radius: var(--tk-radius-card, 12px);
-  padding: 22px;
+  border-radius: 14px;
+  padding: 20px;
   box-shadow: var(--tk-shadow-card);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 16px;
+  gap: 14px;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .integration-card:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  transform: translateY(-1px);
 }
 
 .card-top {
@@ -156,15 +197,16 @@
 }
 
 .card-logo {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background: #f9fafb;
-  border: 1px solid #f3f4f6;
+  background: #ffffff;
+  border: 1px solid #e9edf2;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
 }
 
 .card-icon-box {
@@ -185,7 +227,7 @@
 
 .card-title {
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 650;
   color: var(--tk-color-text-primary, #000000);
   margin: 0;
 }
@@ -237,7 +279,7 @@
   color: var(--tk-color-text-secondary, #6b7280);
   line-height: 1.4;
   border-top: 1px solid #f3f4f6;
-  padding-top: 12px;
+  padding-top: 14px;
 }
 
 .card-help {

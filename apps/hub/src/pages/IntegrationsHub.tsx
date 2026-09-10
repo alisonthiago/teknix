@@ -25,6 +25,16 @@ const INTEGRATION_DOCS: Record<string, { url: string; label: string }> = {
   frenet: { url: 'https://docs.frenet.com.br/docs/getting-started', label: 'Documentação Frenet' },
 }
 
+function getLastHealthCheckTime(configs: IntegrationConfig[]) {
+  const latest = configs
+    .map(config => config.lastHealthCheckAt)
+    .filter(Boolean)
+    .sort()
+    .at(-1)
+
+  return latest ? new Date(latest).toLocaleTimeString() : 'aguardando primeira verificação'
+}
+
 export default function IntegrationsHub() {
   const [configs, setConfigs] = useState<IntegrationConfig[]>([])
   const [logs, setLogs] = useState<IntegrationLog[]>([])
@@ -52,11 +62,24 @@ export default function IntegrationsHub() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    loadData()
+    loadData(true)
+
+    // Atualização silenciosa: mantém os status sincronizados sem trocar a tela
+    // para um estado de loading a cada verificação.
+    const refreshInterval = window.setInterval(() => loadData(false), 60_000)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') loadData(false)
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => {
+      window.clearInterval(refreshInterval)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
   }, [])
 
-  async function loadData() {
-    setLoading(true)
+  async function loadData(showLoading = false) {
+    if (showLoading) setLoading(true)
     try {
       const [cfgs, ls] = await Promise.all([
         IntegrationStorage.getConfigs(),
@@ -67,7 +90,7 @@ export default function IntegrationsHub() {
     } catch (e) {
       console.error('[IntegrationsHub] Erro ao carregar dados:', e)
     } finally {
-      setLoading(false)
+      if (showLoading) setLoading(false)
     }
   }
 
@@ -90,7 +113,7 @@ export default function IntegrationsHub() {
       alert(`Erro ao testar ${config.name}: ${err.message}`)
     } finally {
       setTestingId(null)
-      loadData()
+      loadData(false)
     }
   }
 
@@ -102,7 +125,7 @@ export default function IntegrationsHub() {
         FocusNfeService.testConnection(),
         MelhorEnvioService.testConnection()
       ])
-      loadData()
+      loadData(false)
     } finally {
       setSyncingAll(false)
     }
@@ -206,15 +229,18 @@ export default function IntegrationsHub() {
               Status Operacional dos Serviços em Tempo Real
             </h2>
           </div>
-          <span style={{ fontSize: '12px', color: '#6b7280' }}>
-            Última checagem: {new Date().toLocaleTimeString()}
+            <span className="health-last-check">
+            Última checagem: {getLastHealthCheckTime(configs)}
           </span>
         </div>
 
         <div className="health-grid">
           {configs.map(cfg => (
             <div key={cfg.id} className="health-item">
-              <span className="health-item-label">{cfg.name}</span>
+              <div className="health-item-heading">
+                <span className="health-item-logo"><IntegrationLogoRenderer code={cfg.id} size={24} /></span>
+                <span className="health-item-label">{cfg.name}</span>
+              </div>
               <div className="health-item-status">
                 {cfg.status === 'connected' && <><CheckCircle2 size={15} color="#00cc6a" /> <span style={{ color: '#008744' }}>Conectado</span></>}
                 {cfg.status === 'sandbox' && <><CheckCircle2 size={15} color="#eab308" /> <span style={{ color: '#b78103' }}>Sandbox</span></>}

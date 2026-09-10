@@ -500,7 +500,7 @@ export default function BlogEditor() {
 
           {/* Slug */}
           <div className="blog-slug-row">
-            <span className="blog-slug-prefix">http://localhost:5173/blog/</span>
+            <span className="blog-slug-prefix">https://teknixbrasil.com.br/blog/</span>
             <input
               className="blog-slug-input"
               value={slug}
@@ -609,7 +609,7 @@ export default function BlogEditor() {
               <div className="blog-seo-preview">
                 <p className="seo-preview-label">Preview no Google</p>
                 <div className="seo-preview-card">
-                  <div className="seo-preview-url">localhost:5173/blog/{slug || 'url-do-post'}</div>
+                  <div className="seo-preview-url">teknixbrasil.com.br/blog/{slug || 'url-do-post'}</div>
                   <div className="seo-preview-title">{seoTitle || title || 'Título do post'}</div>
                   <div className="seo-preview-desc">{seoDesc || summary || 'Descrição do post...'}</div>
                 </div>

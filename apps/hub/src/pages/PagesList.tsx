@@ -400,7 +400,7 @@ export default function PagesList() {
   )
 
   const currentSlugClean = (slug || (dialog?.kind === 'create' ? `/${slugify(title)}` : '')).replace(/^\/+/, '')
-  const publicPreviewUrl = `${siteOrigin || 'http://localhost:5173'}/${currentSlugClean}`
+  const publicPreviewUrl = `https://teknixbrasil.com.br/${currentSlugClean}`
   const isReservedRoute = currentSlugClean ? RESERVED_ROUTES.includes(currentSlugClean.split('/')[0]) : false
 
   return (
@@ -516,14 +516,14 @@ export default function PagesList() {
               justifyContent: 'space-between',
               padding: '20px 24px',
               borderBottom: '1px solid #f0f0f2',
-              background: '#fafafc'
+              background: '#ffffff'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <div style={{
                   width: 36,
                   height: 36,
                   borderRadius: 10,
-                  background: '#e8f2ff',
+                  background: '#ffffff',
                   color: '#1f2328',
                   display: 'flex',
                   alignItems: 'center',
@@ -644,7 +644,7 @@ export default function PagesList() {
               {/* Card de Prévia da URL Oficial no SITE (Porta 5173) */}
               <div style={{
                 padding: '12px 14px',
-                background: '#f8fafc',
+                background: '#ffffff',
                 border: '1px solid #e2e8f0',
                 borderRadius: 10,
                 display: 'flex',
@@ -657,7 +657,7 @@ export default function PagesList() {
                     width: 30,
                     height: 30,
                     borderRadius: 8,
-                    background: '#e0f2fe',
+                    background: '#ffffff',
                     color: '#0284c7',
                     display: 'flex',
                     alignItems: 'center',
@@ -688,7 +688,7 @@ export default function PagesList() {
                   fontWeight: 700,
                   padding: '3px 8px',
                   borderRadius: 6,
-                  background: '#e0f2fe',
+                  background: '#ffffff',
                   color: '#0369a1',
                   whiteSpace: 'nowrap',
                   flexShrink: 0
@@ -754,7 +754,7 @@ export default function PagesList() {
                             padding: '12px 10px',
                             borderRadius: 10,
                             border: isSelected ? '2px solid #1f2328' : '1px solid #e5e5ea',
-                            background: isSelected ? '#f5f9ff' : '#ffffff',
+                            background: '#ffffff',
                             cursor: 'pointer',
                             transition: 'all 0.15s ease',
                             display: 'flex',
@@ -767,7 +767,7 @@ export default function PagesList() {
                               width: 26,
                               height: 26,
                               borderRadius: 6,
-                              background: isSelected ? '#1f2328' : '#f5f5f7',
+                              background: '#ffffff',
                               color: isSelected ? '#ffffff' : '#6e6e73',
                               display: 'flex',
                               alignItems: 'center',
@@ -798,7 +798,7 @@ export default function PagesList() {
               justifyContent: 'flex-end',
               gap: 10,
               padding: '16px 24px',
-              background: '#fafafc',
+              background: '#ffffff',
               borderTop: '1px solid #f0f0f2'
             }}>
               <button
@@ -823,9 +823,6 @@ export default function PagesList() {
                 disabled={busy || !title.trim() || !slug.trim() || isReservedRoute}
                 className="pages-primary-btn"
                 style={{
-                  padding: '9px 20px',
-                  fontSize: 13,
-                  fontWeight: 600,
                   opacity: (busy || !title.trim() || !slug.trim() || isReservedRoute) ? 0.5 : 1,
                   cursor: (busy || !title.trim() || !slug.trim() || isReservedRoute) ? 'not-allowed' : 'pointer'
                 }}
@@ -882,7 +879,7 @@ export default function PagesList() {
                     </div>
                   </td>
                   <td>
-                    <code style={{ fontSize: 11.5, color: '#4b5563', background: '#f3f4f6', padding: '3px 8px', borderRadius: 4, fontFamily: 'ui-monospace, monospace' }}>
+                    <code style={{ fontSize: 11.5, color: '#4b5563', background: '#ffffff', border: '1px solid #e5e7eb', padding: '3px 8px', borderRadius: 4, fontFamily: 'ui-monospace, monospace' }}>
                       {e.path}
                     </code>
                   </td>

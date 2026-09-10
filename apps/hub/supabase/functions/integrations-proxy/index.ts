@@ -790,10 +790,7 @@ serve(async (req) => {
 
       else if (action === 'calculate_quote') {
         if (!token) {
-          result = [
-            { id: 1, name: 'Correios SEDEX', price: 25.00, delivery_time: 2, company: { name: 'Correios' } },
-            { id: 2, name: 'Correios PAC', price: 15.00, delivery_time: 6, company: { name: 'Correios' } }
-          ]
+          result = { status: 'pending_credentials', quotes: [], message: 'Credencial do Melhor Envio não configurada no servidor.' }
         } else {
           const res = await fetch(`${baseUrl}/me/shipment/calculate`, {
             method: 'POST',
@@ -805,7 +802,10 @@ serve(async (req) => {
             body: JSON.stringify(payload)
           })
           const data = await res.json()
-          result = Array.isArray(data) ? data.filter((q: any) => !q.error) : []
+          const quotes = Array.isArray(data) ? data.filter((q: any) => !q.error) : []
+          result = res.ok
+            ? { status: isSandbox ? 'sandbox' : 'connected', quotes }
+            : { status: 'error', quotes: [], message: 'A API do Melhor Envio recusou a cotação.' }
         }
       }
 
@@ -913,6 +913,7 @@ serve(async (req) => {
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (err: any) {
+    console.error('[integrations-proxy] Erro técnico:', err)
     return new Response(
       JSON.stringify({ success: false, error: err.message || 'Erro interno no proxy de integrações' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

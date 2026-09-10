@@ -39,6 +39,7 @@
 
 .search-bar input {
   width: 100%;
+  min-height: 44px;
   padding: 8px 14px 8px 36px;
   border: 1px solid var(--tk-color-border-dark, #d1d5db);
   border-radius: var(--tk-radius-btn, 8px);

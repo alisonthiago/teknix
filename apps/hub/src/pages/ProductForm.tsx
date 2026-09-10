@@ -773,9 +773,6 @@ export default function ProductForm() {
               onClick={() => handleSubmit(undefined, true)}
               disabled={saving}
               style={{
-                background: form.published ? '#059669' : '#000000',
-                borderColor: form.published ? '#059669' : '#000000',
-                color: '#ffffff',
                 fontWeight: 600,
                 transition: 'all 0.2s ease'
               }}
@@ -1679,8 +1676,8 @@ export default function ProductForm() {
           <p className="card-subtitle">Controle a exibição deste produto na vitrine pública do site de forma independente do catálogo geral.</p>
           
           <div style={{
-            background: form.published ? '#f0fdf4' : '#f8fafc',
-            border: `1.5px solid ${form.published ? '#86efac' : '#e2e8f0'}`,
+            background: '#ffffff',
+            border: '1.5px solid #e5e7eb',
             borderRadius: 10,
             padding: '16px',
             marginBottom: 20,
@@ -2732,9 +2729,6 @@ export default function ProductForm() {
             onClick={() => handleSubmit(undefined, true)}
             disabled={saving}
             style={{
-              background: form.published ? '#059669' : '#000000',
-              borderColor: form.published ? '#059669' : '#000000',
-              color: '#ffffff',
               fontWeight: 600,
               transition: 'all 0.2s ease'
             }}

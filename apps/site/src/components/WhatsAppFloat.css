@@ -5,6 +5,8 @@
   z-index: 90;
 }
 
+.whatsapp-float.left { right: auto; left: 24px; }
+
 .whatsapp-btn {
   width: 56px;
   height: 56px;
@@ -40,6 +42,8 @@
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
   overflow: hidden;
 }
+
+.whatsapp-float.left .whatsapp-popup { right: auto; left: 0; }
 
 .whatsapp-popup-header {
   display: flex;

@@ -3271,9 +3271,11 @@
   transition: all 0.25s ease;
 }
 
-.floatingWpp:hover {
-  transform: scale(1.08);
-  box-shadow: 0 10px 28px rgba(37, 211, 102, 0.5);
+.floatingWpp-bl { right: auto; left: 24px; }
+.floatingWpp-mark {
+  width: 34px;
+  height: 34px;
+  display: block;
 }
 
 /* ── RESPONSIVIDADE ── */

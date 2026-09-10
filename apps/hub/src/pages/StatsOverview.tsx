@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Calendar,
   SlidersHorizontal,
@@ -14,12 +14,104 @@ import {
   Smartphone,
   Laptop
 } from 'lucide-react'
+import { supabase } from '../lib/supabase'
 import './StatsOverview.css'
+
+interface HubOrder {
+  id: string
+  total?: number | null
+  status?: string | null
+  created_at: string
+  customer_name?: string | null
+}
+
+const INVALID_ORDER_STATUSES = new Set(['cancelled', 'canceled', 'refunded', 'cancelado', 'estornado'])
 
 export default function StatsOverview() {
   const [activeTab, setActiveTab] = useState<'general' | 'products' | 'sales' | 'visits' | 'live' | 'coupons'>('general')
   const [period, setPeriod] = useState('7days')
   const [comparison, setComparison] = useState('none')
+  const [orders, setOrders] = useState<HubOrder[]>([])
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
+
+  useEffect(() => {
+    let mounted = true
+
+    async function loadOrders() {
+      const { data } = await supabase
+        .from('store_orders')
+        .select('id, total, status, created_at, customer_name')
+        .order('created_at', { ascending: false })
+        .limit(1000)
+      if (mounted && data) {
+        setOrders(data as HubOrder[])
+        setLastUpdated(new Date())
+      }
+    }
+
+    loadOrders()
+    const interval = window.setInterval(loadOrders, activeTab === 'live' ? 15000 : 60000)
+    const channel = supabase
+      .channel('hub-statistics-orders')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'store_orders' }, loadOrders)
+      .subscribe()
+
+    return () => {
+      mounted = false
+      window.clearInterval(interval)
+      void supabase.removeChannel(channel)
+    }
+  }, [activeTab])
+
+  const validOrders = useMemo(
+    () => orders.filter(order => !INVALID_ORDER_STATUSES.has((order.status || '').toLowerCase())),
+    [orders],
+  )
+
+  const periodOrders = useMemo(() => {
+    const now = Date.now()
+    const start = period === 'today'
+      ? new Date(new Date().setHours(0, 0, 0, 0)).getTime()
+      : period === 'yesterday'
+        ? new Date(new Date().setHours(0, 0, 0, 0)).getTime() - 86400000
+        : period === '30days'
+          ? now - 30 * 86400000
+          : period === 'this_month'
+            ? new Date(new Date().getFullYear(), new Date().getMonth(), 1).getTime()
+            : period === 'last_month'
+              ? new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1).getTime()
+              : period === 'year'
+                ? new Date(new Date().getFullYear(), 0, 1).getTime()
+                : now - 7 * 86400000
+    const end = period === 'yesterday'
+      ? new Date(new Date().setHours(0, 0, 0, 0)).getTime()
+      : period === 'last_month'
+        ? new Date(new Date().getFullYear(), new Date().getMonth(), 1).getTime()
+        : Infinity
+    return validOrders.filter(order => {
+      const time = new Date(order.created_at).getTime()
+      return time >= start && time < end
+    })
+  }, [period, validOrders])
+
+  const metrics = useMemo(() => {
+    const revenue = periodOrders.reduce((sum, order) => sum + Number(order.total ?? 0), 0)
+    const buyers = new Set(periodOrders.map(order => order.customer_name).filter(Boolean)).size
+    return {
+      orders: periodOrders.length,
+      revenue,
+      ticket: periodOrders.length ? revenue / periodOrders.length : 0,
+      buyers: buyers || periodOrders.length,
+    }
+  }, [periodOrders])
+
+  const liveOrders = useMemo(() => {
+    const cutoff = Date.now() - 5 * 60 * 1000
+    return validOrders.filter(order => new Date(order.created_at).getTime() >= cutoff)
+  }, [validOrders, lastUpdated])
+
+  const money = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+  const updatedLabel = lastUpdated ? lastUpdated.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : 'aguardando dados'
 
   return (
     <div className="stats-page-container">
@@ -118,7 +210,7 @@ export default function StatsOverview() {
             <div className="stats-header-row">
               <h1 className="stats-title">Visão geral</h1>
               <div className="stats-timestamp">
-                <Clock size={14} /> Última atualização: 25/08 - 23:44
+                <Clock size={14} /> Atualizado às {updatedLabel}
               </div>
             </div>
 
@@ -133,8 +225,8 @@ export default function StatsOverview() {
                   <MoreVertical size={16} className="stat-card-dots" />
                 </div>
                 <div>
-                  <div className="stat-card-value">1.428</div>
-                  <div className="stat-card-hint" style={{ color: '#059669', fontWeight: 600, marginTop: 4 }}>+12.4% vs período anterior</div>
+                   <div className="stat-card-value">—</div>
+                   <div className="stat-card-hint" style={{ marginTop: 4 }}>Fonte de visitas não configurada</div>
                 </div>
               </div>
 
@@ -144,8 +236,8 @@ export default function StatsOverview() {
                   <MoreVertical size={16} className="stat-card-dots" />
                 </div>
                 <div>
-                  <div className="stat-card-value">34</div>
-                  <div className="stat-card-hint" style={{ color: '#059669', fontWeight: 600, marginTop: 4 }}>2.38% taxa de conversão</div>
+                   <div className="stat-card-value">{metrics.orders}</div>
+                   <div className="stat-card-hint" style={{ marginTop: 4 }}>Pedidos aprovados no período</div>
                 </div>
               </div>
 
@@ -155,8 +247,8 @@ export default function StatsOverview() {
                   <MoreVertical size={16} className="stat-card-dots" />
                 </div>
                 <div>
-                  <div className="stat-card-value">R$ 14.890,00</div>
-                  <div className="stat-card-hint" style={{ color: '#059669', fontWeight: 600, marginTop: 4 }}>+18.2% de faturamento</div>
+                   <div className="stat-card-value">{money(metrics.revenue)}</div>
+                   <div className="stat-card-hint" style={{ marginTop: 4 }}>Receita consolidada de todos os canais</div>
                 </div>
               </div>
 
@@ -166,7 +258,7 @@ export default function StatsOverview() {
                   <MoreVertical size={16} className="stat-card-dots" />
                 </div>
                 <div>
-                  <div className="stat-card-value">R$ 437,94</div>
+                   <div className="stat-card-value">{money(metrics.ticket)}</div>
                   <div className="stat-card-hint">Valor médio por pedido pago</div>
                 </div>
               </div>
@@ -178,38 +270,38 @@ export default function StatsOverview() {
                   <span className="stat-card-label">Comportamento dos visitantes <Info size={14} className="stat-card-info-icon" /></span>
                   <MoreVertical size={16} className="stat-card-dots" />
                 </div>
-                <div className="visitor-funnel">
+                <div className="visitor-funnel visitor-timeline">
                   <div className="visitor-funnel-step">
                     <div className="visitor-funnel-label">
-                      <span>Visitantes no site</span><span>1.428 (100%)</span>
+                      <span>Visitantes no site</span><span>Não disponível</span>
                     </div>
                     <div className="visitor-funnel-track"><div className="visitor-funnel-fill blue" style={{ width: '100%' }}></div>
                     </div>
                   </div>
                   <div className="visitor-funnel-step">
                     <div className="visitor-funnel-label">
-                      <span>Adicionaram ao carrinho</span><span>184 (12.8%)</span>
+                      <span>Pedidos criados</span><span>{metrics.orders}</span>
                     </div>
-                    <div className="visitor-funnel-track"><div className="visitor-funnel-fill purple" style={{ width: '12.8%' }}></div>
-                    </div>
-                  </div>
-                  <div className="visitor-funnel-step">
-                    <div className="visitor-funnel-label">
-                      <span>Iniciaram Checkout</span><span>72 (5.0%)</span>
-                    </div>
-                    <div className="visitor-funnel-track"><div className="visitor-funnel-fill orange" style={{ width: '5%' }}></div>
+                    <div className="visitor-funnel-track"><div className="visitor-funnel-fill purple" style={{ width: `${Math.min(100, metrics.orders * 4)}%` }}></div>
                     </div>
                   </div>
                   <div className="visitor-funnel-step">
                     <div className="visitor-funnel-label">
-                      <span>Pedidos Concluídos</span><span>34 (2.38%)</span>
+                      <span>Clientes identificados</span><span>{metrics.buyers}</span>
                     </div>
-                    <div className="visitor-funnel-track"><div className="visitor-funnel-fill green" style={{ width: '2.38%' }}></div>
+                    <div className="visitor-funnel-track"><div className="visitor-funnel-fill orange" style={{ width: `${Math.min(100, metrics.buyers * 4)}%` }}></div>
+                    </div>
+                  </div>
+                  <div className="visitor-funnel-step">
+                    <div className="visitor-funnel-label">
+                      <span>Receita gerada</span><span>{money(metrics.revenue)}</span>
+                    </div>
+                    <div className="visitor-funnel-track"><div className="visitor-funnel-fill green" style={{ width: metrics.revenue ? '100%' : '0%' }}></div>
                     </div>
                   </div>
                 </div>
                 <div style={{ fontSize: '0.78rem', color: 'var(--apple-text-secondary, #86868b)', borderTop: '1px solid #f3f4f6', paddingTop: 10 }}>
-                  Funil de conversão da loja em tempo real.
+                  O sistema de visitas ainda não está conectado; os eventos abaixo representam o fluxo real de pedidos.
                 </div>
               </div>
 
@@ -219,8 +311,8 @@ export default function StatsOverview() {
                     <span className="stat-card-label">Visitas a vendas <Info size={14} className="stat-card-info-icon" /></span>
                     <MoreVertical size={16} className="stat-card-dots" />
                   </div>
-                  <div className="stat-card-value" style={{ color: '#059669' }}>2.38%</div>
-                  <div className="stat-card-hint">Média do e-commerce: 1.8%</div>
+                   <div className="stat-card-value" style={{ color: '#059669' }}>—</div>
+                   <div className="stat-card-hint">Visitantes não disponíveis</div>
                 </div>
 
                 <div className="stat-card" style={{ minHeight: 'auto' }}>
@@ -228,8 +320,8 @@ export default function StatsOverview() {
                     <span className="stat-card-label">Visitas a carrinhos criados <Info size={14} className="stat-card-info-icon" /></span>
                     <MoreVertical size={16} className="stat-card-dots" />
                   </div>
-                  <div className="stat-card-value" style={{ color: '#2563eb' }}>12.88%</div>
-                  <div className="stat-card-hint">Taxa de intenção de compra</div>
+                   <div className="stat-card-value" style={{ color: '#2563eb' }}>{metrics.orders}</div>
+                   <div className="stat-card-hint">Pedidos no período selecionado</div>
                 </div>
               </div>
             </div>
@@ -246,23 +338,23 @@ export default function StatsOverview() {
             <div className="stats-dual-grid">
               <div className="stat-card" style={{ minHeight: 180, justifyContent: 'center', alignItems: 'center' }}>
                 <Eye size={36} color="#2563eb" />
-                <div className="stat-card-value" style={{ marginTop: 8 }}>1.428</div>
-                <div style={{ fontSize: '0.82rem', color: '#6b7280' }}>Total de Visitas Únicas</div>
+                <div className="stat-card-value" style={{ marginTop: 8 }}>—</div>
+                <div style={{ fontSize: '0.82rem', color: '#6b7280' }}>Fonte de visitas não configurada</div>
               </div>
 
               <div className="stat-card" style={{ minHeight: 180 }}>
-                <h3 style={{ fontSize: '0.92rem', fontWeight: 700, margin: '0 0 10px 0' }}>Top 100 visitas ao catálogo</h3>
+                <h3 style={{ fontSize: '0.92rem', fontWeight: 700, margin: '0 0 10px 0' }}>Visitas ao catálogo</h3>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', padding: '6px 0', borderBottom: '1px solid #f3f4f6' }}>
-                  <span>/produtos/parafusadeira-impacto-12v</span>
-                  <strong>612 visitas</strong>
+                  <span>Dados de páginas</span>
+                  <strong>Não disponível</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', padding: '6px 0', borderBottom: '1px solid #f3f4f6' }}>
-                  <span>/produtos/disco-corte-diamantado</span>
-                  <strong>384 visitas</strong>
+                  <span>Dados de páginas</span>
+                  <strong>Não disponível</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', padding: '6px 0' }}>
-                  <span>/ferramentas-eletricas</span>
-                  <strong>245 visitas</strong>
+                  <span>Dados de páginas</span>
+                  <strong>Não disponível</strong>
                 </div>
               </div>
             </div>
@@ -273,12 +365,12 @@ export default function StatsOverview() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', padding: '16px 0' }}>
                   <div style={{ textAlign: 'center' }}>
                     <Smartphone size={28} color="#2563eb" />
-                    <div style={{ fontWeight: 800, fontSize: '1.2rem', marginTop: 4 }}>74%</div>
+                    <div style={{ fontWeight: 800, fontSize: '1.2rem', marginTop: 4 }}>—</div>
                     <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>Mobile / Celular</div>
                   </div>
                   <div style={{ textAlign: 'center' }}>
                     <Laptop size={28} color="#7c3aed" />
-                    <div style={{ fontWeight: 800, fontSize: '1.2rem', marginTop: 4 }}>26%</div>
+                    <div style={{ fontWeight: 800, fontSize: '1.2rem', marginTop: 4 }}>—</div>
                     <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>Desktop / Computador</div>
                   </div>
                 </div>
@@ -289,11 +381,11 @@ export default function StatsOverview() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem' }}>
                     <span>Novos visitantes</span>
-                    <strong>82% (1.171)</strong>
+                    <strong>Não disponível</strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem' }}>
                     <span>Visitantes recorrentes</span>
-                    <strong>18% (257)</strong>
+                    <strong>Não disponível</strong>
                   </div>
                 </div>
               </div>
@@ -307,28 +399,28 @@ export default function StatsOverview() {
             <div className="stats-header-row">
               <h1 className="stats-title">Tempo real</h1>
             </div>
-            <p className="stats-subtitle">Atividade nos últimos 5 minutos</p>
+            <p className="stats-subtitle">Pedidos recebidos nos últimos 5 minutos · atualização automática a cada 15 segundos</p>
 
             <div className="stats-dual-grid">
               <div className="stat-card" style={{ minHeight: 180 }}>
-                <h3 style={{ fontSize: '0.92rem', fontWeight: 700, margin: '0 0 8px 0' }}>Comportamento dos visitantes (Agora)</h3>
+                  <h3 style={{ fontSize: '0.92rem', fontWeight: 700, margin: '0 0 8px 0' }}>Atividade de pedidos (agora)</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '10px 0' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem' }}>
-                    <span>Navegando na Home</span><strong>9 visitantes</strong>
+                    <span>Pedidos nos últimos 5 min</span><strong>{liveOrders.length}</strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem' }}>
-                    <span>Visualizando Produtos</span><strong>14 visitantes</strong>
+                    <span>Clientes identificados</span><strong>{new Set(liveOrders.map(order => order.customer_name).filter(Boolean)).size}</strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem' }}>
-                    <span>No Carrinho / Checkout</span><strong>3 visitantes</strong>
+                    <span>Receita recebida</span><strong>{money(liveOrders.reduce((sum, order) => sum + Number(order.total ?? 0), 0))}</strong>
                   </div>
                 </div>
               </div>
 
               <div className="stat-card" style={{ minHeight: 180, justifyContent: 'center', alignItems: 'center' }}>
                 <Activity size={36} color="#059669" />
-                <div className="stat-card-value" style={{ marginTop: 8, color: '#059669' }}>26</div>
-                <div style={{ fontSize: '0.82rem', color: '#6b7280' }}>Usuários Ativos Agora no Site</div>
+                <div className="stat-card-value" style={{ marginTop: 8, color: '#059669' }}>{liveOrders.length}</div>
+                <div style={{ fontSize: '0.82rem', color: '#6b7280' }}>Pedidos recebidos nos últimos 5 minutos</div>
               </div>
             </div>
           </>

@@ -1,6 +1,7 @@
 -- ==============================================================================
 -- TEKNIX — MASTER PRODUCTION SETUP & MIGRATIONS SCRIPT
 -- ==============================================================================
+
 -- Este script unifica e consolida TODAS as migrations do ecossistema TEKNIX
 -- para execução direta no SQL Editor do Supabase Dashboard com privilégio SERVICE_ROLE / postgres.
 --
@@ -32,6 +33,54 @@ $$;
 
 REVOKE EXECUTE ON FUNCTION public.fn_is_hub_admin() FROM anon;
 GRANT EXECUTE ON FUNCTION public.fn_is_hub_admin() TO authenticated;
+
+-- ==============================================================================
+-- BLOCO 020: CONFIGURAÇÕES COMPARTILHADAS DA LOJA (WHATSAPP)
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS public.store_settings (
+  id TEXT PRIMARY KEY DEFAULT 'default',
+  whatsapp_enabled BOOLEAN NOT NULL DEFAULT true,
+  whatsapp_phone TEXT NOT NULL DEFAULT '5511998887766',
+  whatsapp_message TEXT NOT NULL DEFAULT 'Olá! Vim do site TEKNIX e gostaria de tirar uma dúvida sobre os produtos.',
+  whatsapp_position TEXT NOT NULL DEFAULT 'br' CHECK (whatsapp_position IN ('br', 'bl')),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+INSERT INTO public.store_settings (id) VALUES ('default') ON CONFLICT (id) DO NOTHING;
+ALTER TABLE public.store_settings ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "public_read_store_settings" ON public.store_settings;
+CREATE POLICY "public_read_store_settings" ON public.store_settings FOR SELECT TO anon, authenticated USING (id = 'default');
+DROP POLICY IF EXISTS "hub_admin_manage_store_settings" ON public.store_settings;
+CREATE POLICY "hub_admin_manage_store_settings" ON public.store_settings FOR ALL TO authenticated USING (public.fn_is_hub_admin()) WITH CHECK (public.fn_is_hub_admin());
+
+-- ==============================================================================
+-- BLOCO 019: CONFIGURAÇÕES PÚBLICAS DOS MEIOS DE PAGAMENTO
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS public.store_payment_settings (
+  id TEXT PRIMARY KEY DEFAULT 'default',
+  enable_pix BOOLEAN NOT NULL DEFAULT true,
+  pix_discount_percent NUMERIC(5,2) NOT NULL DEFAULT 5,
+  enable_credit_card BOOLEAN NOT NULL DEFAULT true,
+  enable_boleto BOOLEAN NOT NULL DEFAULT false,
+  max_installments INTEGER NOT NULL DEFAULT 12,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+INSERT INTO public.store_payment_settings (id)
+VALUES ('default')
+ON CONFLICT (id) DO NOTHING;
+
+ALTER TABLE public.store_payment_settings ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "public_read_store_payment_settings" ON public.store_payment_settings;
+CREATE POLICY "public_read_store_payment_settings"
+  ON public.store_payment_settings FOR SELECT TO anon, authenticated
+  USING (id = 'default');
+
+DROP POLICY IF EXISTS "hub_admin_manage_store_payment_settings" ON public.store_payment_settings;
+CREATE POLICY "hub_admin_manage_store_payment_settings"
+  ON public.store_payment_settings FOR ALL TO authenticated
+  USING (public.fn_is_hub_admin())
+  WITH CHECK (public.fn_is_hub_admin());
 
 -- ==============================================================================
 -- BLOCO 1: THEMES & DESIGN SYSTEM

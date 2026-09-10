@@ -14,6 +14,7 @@ import { OfferCountdown } from './ProductSignals'
 import { getProducts } from '../services/products'
 import { storefrontCard } from '../services/storefrontCommerce'
 import type { Product } from '../types/database'
+import { DEFAULT_WHATSAPP_SETTINGS, loadWhatsappSettings, type WhatsappSettings } from '../services/storeSettings'
 
 interface MosaicoCategory {
   name: string
@@ -118,6 +119,7 @@ const DEFAULT_FLASH_SALE_CONTENT = {
 export default function StorefrontHome() {
   // State das vitrines oficiais
   const [toastMessage] = useState<string | null>(null)
+  const [whatsappSettings, setWhatsappSettings] = useState<WhatsappSettings | null>(null)
   const [rawProducts, setRawProducts] = useState<Product[]>([])
   const [catalogProducts, setCatalogProducts] = useState<CbProductItem[]>([])
 
@@ -128,6 +130,16 @@ export default function StorefrontHome() {
       const published = products.filter(p => p.store_meta?.published !== false)
       setRawProducts(published)
       setCatalogProducts(published.map(storefrontCard))
+    })
+    return () => { cancelled = true }
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    loadWhatsappSettings().then(settings => {
+      if (!cancelled) setWhatsappSettings(settings)
+    }).catch(() => {
+      if (!cancelled) setWhatsappSettings(DEFAULT_WHATSAPP_SETTINGS)
     })
     return () => { cancelled = true }
   }, [])
@@ -880,18 +892,20 @@ export default function StorefrontHome() {
       <CompareTray />
 
       {/* ── 13. FLOATING WHATSAPP BUTTON ── */}
-      <a
-        href="https://api.whatsapp.com/send?phone=5546999155875&text=Ol%C3%A1%2C%20estou%20no%20site%20da%20TEKNIX"
-        target="_blank"
-        rel="noreferrer"
-        className="floatingWpp"
-        title="Fale conosco no WhatsApp"
-        aria-label="Fale conosco no WhatsApp"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-        </svg>
-      </a>
+      {whatsappSettings?.enabled && /^\d{10,15}$/.test(whatsappSettings.phoneNumber.replace(/\D/g, '')) && (
+        <a
+          href={`https://api.whatsapp.com/send?phone=${whatsappSettings.phoneNumber.replace(/\D/g, '')}&text=${encodeURIComponent(whatsappSettings.defaultMessage)}`}
+          target="_blank"
+          rel="noreferrer"
+          className={`floatingWpp floatingWpp-${whatsappSettings.position}`}
+          title="Fale conosco no WhatsApp"
+          aria-label="Fale conosco no WhatsApp"
+        >
+          <svg className="floatingWpp-mark" viewBox="0 0 32 32" aria-hidden="true">
+            <path fill="#fff" d="M16 3.2A12.8 12.8 0 0 0 5.08 22.7L3.2 28.8l6.3-1.84A12.8 12.8 0 1 0 16 3.2Zm0 23.32a10.5 10.5 0 0 1-5.35-1.46l-.38-.23-3.74 1.09 1.12-3.63-.25-.4A10.5 10.5 0 1 1 16 26.52Zm5.76-7.86c-.31-.16-1.83-.9-2.11-1-.28-.1-.49-.16-.7.16-.21.31-.8 1-.98 1.2-.18.21-.36.23-.67.08-.31-.16-1.32-.49-2.51-1.56-.93-.83-1.56-1.86-1.74-2.17-.18-.31-.02-.48.14-.64.14-.14.31-.36.46-.54.15-.18.2-.31.31-.52.1-.21.05-.39-.03-.54-.08-.16-.7-1.68-.96-2.3-.25-.6-.51-.52-.7-.53h-.59c-.21 0-.54.08-.82.39-.28.31-1.07 1.05-1.07 2.57s1.09 2.98 1.24 3.19c.15.21 2.14 3.27 5.18 4.58.72.31 1.28.5 1.72.64.72.23 1.38.2 1.9.12.58-.09 1.83-.75 2.09-1.47.26-.72.26-1.34.18-1.47-.08-.13-.28-.21-.59-.36Z"/>
+          </svg>
+        </a>
+      )}
 
       {/* Floating pill de pré-visualização quando ?ads-edit=1 */}
       {typeof window !== 'undefined' && (new URLSearchParams(window.location.search).get('ads-edit') === '1' || new URLSearchParams(window.location.search).get('editor') === '1') && (

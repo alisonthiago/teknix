@@ -303,23 +303,24 @@
   display: flex;
   align-items: center;
   gap: var(--tkn-space-8);
-  background: #f3f4f6;
-  border-radius: 6px;
-  padding: 6px 10px;
+  background: #f7f7f7;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  padding: 7px 11px;
   color: var(--tkn-black);
   text-decoration: none;
   font-size: var(--tkn-text-13);
   font-weight: var(--tkn-weight-medium);
   font-family: var(--cb-font);
-  transition: background 0.15s ease;
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
-.dsvia-account-user-text { display:flex; min-width:0; flex-direction:column; align-items:flex-start; line-height:1.14; }
-.dsvia-account-greeting { font-size:11px; font-weight:600; white-space:nowrap; }
-.dsvia-account-subtext { font-size:10px; color:#667085; white-space:nowrap; }
+.dsvia-account-user-text { display:flex; min-width:0; flex-direction:column; align-items:flex-start; line-height:1.18; }
+.dsvia-account-greeting { font-size:12px; font-weight:700; white-space:nowrap; }
+.dsvia-account-subtext { font-size:11px; color:#667085; white-space:nowrap; }
 .dsvia-account-menu { position:relative; }
-.dsvia-account-popover { position:absolute; z-index:100; top:calc(100% + 8px); right:0; width:184px; padding:var(--tkn-space-8); border:1px solid #e2e2e2; border-radius:10px; background:#fff; box-shadow:0 12px 28px rgb(0 0 0 / .12); }
-.dsvia-account-popover :is(a,button) { display:block; width:100%; box-sizing:border-box; padding:10px 12px; border:0; border-radius:6px; background:transparent; color:#202020; font:inherit; font-size:var(--tkn-text-13); text-align:left; text-decoration:none; cursor:pointer; }
-.dsvia-account-popover :is(a,button):hover,.dsvia-account-popover :is(a,button):focus-visible { background:#f3f3f3; outline:0; }
+.dsvia-account-popover { position:absolute; z-index:100; top:calc(100% + 10px); right:0; width:240px; padding:8px; border:1px solid #e2e5e9; border-radius:14px; background:#fff; box-shadow:0 18px 42px rgb(15 23 42 / .16); }
+.dsvia-account-popover :is(a,button) { display:block; width:100%; box-sizing:border-box; padding:11px 12px; border:0; border-radius:8px; background:transparent; color:#202020; font:inherit; font-size:var(--tkn-text-13); text-align:left; text-decoration:none; cursor:pointer; }
+.dsvia-account-popover :is(a,button):hover,.dsvia-account-popover :is(a,button):focus-visible { background:#f5f6f7; outline:0; }
 .dsvia-account-popover button { margin-top:var(--tkn-space-4); border-top:1px solid #ececec; border-radius:0; color:#a43a2e; }
 
 /* Menu de entrada: aparece apenas ao passar o mouse ou navegar pelo teclado. */
@@ -361,6 +362,7 @@
 .dsvia-account-capsule:is(:hover, :focus-visible) :is(.dsvia-account-greeting, .dsvia-account-subtext) {
   color: #000000;
 }
+.dsvia-account-capsule:is(:hover, :focus-visible) { border-color:#d2d2d2; box-shadow:0 4px 12px rgba(15,23,42,.08); }
 .dsvia-header-inner :is(.dsvia-cep-trigger, .dsvia-account-capsule, .dsvia-icon-action):focus-visible {
   outline: 2px solid #000000;
   outline-offset: 3px;
@@ -1614,12 +1616,13 @@
   }
 
   .dsvia-account-user-text {
-    display: none;
+    display: flex;
   }
 
   .dsvia-account-capsule {
     background: transparent;
-    padding: 0;
+    border-color: transparent;
+    padding: 4px 5px;
   }
 
   .dsvia-guest-popover { display: none !important; }

@@ -1,23 +1,29 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './WhatsAppFloat.css'
+import { DEFAULT_WHATSAPP_SETTINGS, loadWhatsappSettings, type WhatsappSettings } from '../services/storeSettings'
 
 export default function WhatsAppFloat() {
   const [isOpen, setIsOpen] = useState(false)
+  const [settings, setSettings] = useState<WhatsappSettings | null>(null)
 
-  const quickMessages = [
-    'Olá! Vim pelo site e tenho interesse em um produto.',
-    'Gostaria de saber mais sobre as ferramentas.',
-    'Preciso de ajuda para escolher o produto certo.',
-  ]
+  useEffect(() => {
+    let cancelled = false
+    loadWhatsappSettings().then(value => { if (!cancelled) setSettings(value) }).catch(() => {
+      if (!cancelled) setSettings(DEFAULT_WHATSAPP_SETTINGS)
+    })
+    return () => { cancelled = true }
+  }, [])
+
+  if (!settings?.enabled || !/^\d{10,15}$/.test(settings.phoneNumber.replace(/\D/g, ''))) return null
 
   const handleSendMessage = (message?: string) => {
-    const text = message || 'Olá! Vim pelo site e tenho interesse em um produto.'
-    window.open(`https://wa.me/5511999999999?text=${encodeURIComponent(text)}`, '_blank')
+    const text = message || settings.defaultMessage
+    window.open(`https://wa.me/${settings.phoneNumber.replace(/\D/g, '')}?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer')
     setIsOpen(false)
   }
 
   return (
-    <div className="whatsapp-float">
+    <div className={`whatsapp-float ${settings.position === 'bl' ? 'left' : ''}`}>
       {isOpen && (
         <div className="whatsapp-popup">
           <div className="whatsapp-popup-header">
@@ -29,11 +35,7 @@ export default function WhatsAppFloat() {
           </div>
           <div className="whatsapp-popup-body">
             <p>Como podemos ajudar?</p>
-            {quickMessages.map((msg, i) => (
-              <button key={i} className="whatsapp-quick" onClick={() => handleSendMessage(msg)}>
-                {msg}
-              </button>
-            ))}
+            <button className="whatsapp-quick" onClick={() => handleSendMessage()}>{settings.defaultMessage}</button>
           </div>
         </div>
       )}

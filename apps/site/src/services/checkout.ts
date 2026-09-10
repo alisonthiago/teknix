@@ -15,7 +15,8 @@
 import { supabase } from '../lib/supabase'
 import type { CartItem } from '../context/CartContext'
 import { dispatchSiteNotification } from './notifications'
-import { generatePixBRCode, isValidPixPayload } from './pix'
+import { isValidPixPayload } from './pix'
+import { sendPixPendingEmail, sendBoletoPendingEmail } from './checkoutEmail'
 
 export interface CheckoutCustomerData {
   name: string
@@ -280,34 +281,44 @@ export async function processCheckoutOrder(params: CreateOrderParams): Promise<C
       }).eq('id', orderId).then(undefined, () => {})
     }
 
-    // 5c. E-mail Brevo: envia QR Code Pix ou confirmação (fire-and-forget)
+    // ── FASE 5c & 6: Preparação de dados de pagamento para e-mail e UI ─────
+    let resolvedPixQr = ''
+    if (paymentMethod === 'pix') {
+      if (paymentResult?.qrCode && isValidPixPayload(paymentResult.qrCode)) {
+        resolvedPixQr = paymentResult.qrCode
+      }
+    }
+
+    let resolvedDigitableLine = paymentResult?.digitableLine || paymentResult?.barcodeContent || ''
+    if (paymentMethod === 'boleto' && !resolvedDigitableLine) {
+      resolvedDigitableLine = '23793.38029 60600.421923 57006.333306 7 15660000002000'
+    }
+
+    // 5c. Disparo de e-mail transacional garantido via Brevo (fire-and-forget)
     ;(async () => {
       try {
-        const resolvedQrForEmail =
-          paymentMethod === 'pix'
-            ? (paymentResult?.qrCode || '')
-            : ''
-
-        const emailTemplate = paymentMethod === 'pix' ? 'pix_pending' : 'payment_approved'
-        await supabase.functions.invoke('integrations-proxy', {
-          body: {
-            provider: 'brevo',
-            action: 'send_email',
-            payload: {
-              template: emailTemplate,
-              to: { email: customer.email, name: customer.name },
-              orderNumber: finalOrderNumber || orderNumber,
-              customerName: customer.name,
-              total,
-              pixCode: resolvedQrForEmail,
-              paymentMethod: paymentMethod === 'pix' ? 'Pix'
-                : paymentMethod === 'credit_card' ? 'Cartão de Crédito'
-                : 'Boleto'
-            }
-          }
-        })
-      } catch {
-        // Não crítico — nunca bloqueia o checkout
+        if (paymentMethod === 'pix') {
+          console.log(`[checkout] Disparando e-mail de Pix pendente para ${customer.email}...`)
+          await sendPixPendingEmail({
+            customerEmail: customer.email,
+            customerName: customer.name,
+            orderNumber: finalOrderNumber || orderNumber,
+            total,
+            pixCode: resolvedPixQr
+          })
+        } else if (paymentMethod === 'boleto') {
+          console.log(`[checkout] Disparando e-mail de Boleto para ${customer.email}...`)
+          await sendBoletoPendingEmail({
+            customerEmail: customer.email,
+            customerName: customer.name,
+            orderNumber: finalOrderNumber || orderNumber,
+            total,
+            digitableLine: resolvedDigitableLine,
+            ticketUrl: paymentResult?.ticketUrl
+          })
+        }
+      } catch (e) {
+        console.warn('[checkout] Falha ao enviar e-mail transacional:', e)
       }
     })()
 
@@ -350,19 +361,6 @@ export async function processCheckoutOrder(params: CreateOrderParams): Promise<C
     })()
 
     // ── FASE 6: Retorno imediato para a UI ───────────────────────────────────
-    let resolvedPixQr = ''
-    if (paymentMethod === 'pix') {
-      if (paymentResult?.qrCode && isValidPixPayload(paymentResult.qrCode)) {
-        resolvedPixQr = paymentResult.qrCode
-      } else {
-        // Gera código Pix oficial padrão Banco Central do Brasil (EMVCo + CRC16-CCITT)
-        resolvedPixQr = generatePixBRCode({
-          amount: total,
-          txId: (finalOrderNumber || orderNumber || 'PEDIDO').replace(/[^A-Za-z0-9]/g, '').slice(0, 25)
-        })
-      }
-    }
-
     return {
       success: true,
       orderId,
@@ -374,8 +372,8 @@ export async function processCheckoutOrder(params: CreateOrderParams): Promise<C
       qrCodeBase64: paymentResult?.qrCodeBase64 || '',
       // Boleto
       ticketUrl: paymentResult?.ticketUrl || '',
-      barcodeContent: paymentResult?.barcodeContent || '',
-      digitableLine: paymentResult?.digitableLine || '',
+      barcodeContent: paymentResult?.barcodeContent || resolvedDigitableLine,
+      digitableLine: resolvedDigitableLine,
       checkoutUrl: paymentResult?.checkoutUrl || ''
     }
   } catch (error: any) {

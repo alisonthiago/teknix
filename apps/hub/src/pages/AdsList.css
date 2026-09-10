@@ -155,13 +155,14 @@
   flex: 1;
   min-width: 240px;
   color: #9ca3af;
+  min-height: 44px;
 }
 
 .ads-search-input {
   flex: 1;
   border: none;
   outline: none;
-  padding: 10px 0;
+  padding: 12px 0;
   font-size: 14px;
   color: #000000;
   background: transparent;

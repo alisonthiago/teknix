@@ -4,6 +4,7 @@
    ========================================================================== */
 
 import { useState } from 'react'
+import { Bell, CheckCircle2 } from 'lucide-react'
 import { storeClient } from '../services/products'
 import './StockNotifyModal.css'
 
@@ -21,12 +22,10 @@ export default function StockNotifyModal({ productId, productName, onClose }: St
   const [error, setError] = useState('')
 
   function formatWhatsApp(value: string) {
-    // Remove tudo que não é número
-    const numbers = value.replace(/\D/g, '')
+    const numbers = value.replace(/\D/g, '').slice(0, 11)
     if (numbers.length <= 2) return numbers
     if (numbers.length <= 7) return `(${numbers.slice(0, 2)}) ${numbers.slice(2)}`
-    if (numbers.length <= 11) return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7)}`
-    return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`
+    return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7)}`
   }
 
   function handleWhatsAppChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -50,17 +49,18 @@ export default function StockNotifyModal({ productId, productName, onClose }: St
 
     setLoading(true)
 
+    const phoneWithCountry = rawWpp.startsWith('55') ? rawWpp : `55${rawWpp}`
+
     const newNotification = {
       id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
       product_id: String(productId),
       product_name: productName,
       email: email.trim().toLowerCase(),
-      whatsapp: rawWpp,
+      whatsapp: phoneWithCountry,
       notified: false,
       created_at: new Date().toISOString(),
     }
 
-    // Salva cópia local para resiliência imediata
     try {
       const existing = JSON.parse(localStorage.getItem('teknix_stock_notifications') || '[]')
       localStorage.setItem('teknix_stock_notifications', JSON.stringify([newNotification, ...existing]))
@@ -84,7 +84,6 @@ export default function StockNotifyModal({ productId, productName, onClose }: St
       setSuccess(true)
     } catch (err: unknown) {
       console.warn('[StockNotifyModal] Salvo em contingência local:', err)
-      // Mesmo se o banco falhar, foi salvo no navegador local
       setSuccess(true)
     } finally {
       setLoading(false)
@@ -102,7 +101,9 @@ export default function StockNotifyModal({ productId, productName, onClose }: St
 
         {success ? (
           <div className="stock-notify-success">
-            <div className="stock-notify-success-icon">🎉</div>
+            <div className="stock-notify-success-icon">
+              <CheckCircle2 size={40} />
+            </div>
             <p className="stock-notify-success-title">Tudo certo!</p>
             <p className="stock-notify-success-text">
               Você será avisado por <strong>e-mail</strong> e <strong>WhatsApp</strong> assim que o produto estiver disponível.
@@ -113,7 +114,9 @@ export default function StockNotifyModal({ productId, productName, onClose }: St
           </div>
         ) : (
           <>
-            <div className="stock-notify-icon">🔔</div>
+            <div className="stock-notify-icon">
+              <Bell size={24} />
+            </div>
             <h2 className="stock-notify-title">Avise-me quando chegar</h2>
             <p className="stock-notify-product-name">{productName}</p>
 
@@ -135,7 +138,7 @@ export default function StockNotifyModal({ productId, productName, onClose }: St
               <div>
                 <label className="stock-notify-label" htmlFor="sn-whatsapp">WhatsApp</label>
                 <div className="stock-notify-input-row">
-                  <span className="stock-notify-flag">🇧🇷</span>
+                  <span className="stock-notify-prefix">+55</span>
                   <input
                     id="sn-whatsapp"
                     type="tel"
@@ -144,7 +147,7 @@ export default function StockNotifyModal({ productId, productName, onClose }: St
                     onChange={handleWhatsAppChange}
                     inputMode="numeric"
                     maxLength={16}
-                    autoComplete="tel"
+                    autoComplete="tel-national"
                   />
                 </div>
               </div>

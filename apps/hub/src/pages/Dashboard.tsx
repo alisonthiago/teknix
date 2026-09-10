@@ -80,7 +80,6 @@ export default function Dashboard() {
         const { data } = await supabase
           .from('orders')
           .select('id, buyer_name, total, status, created_at, marketplace, product_name, product_image, sku, marketplace_order_id')
-          .is('marketplace', null)
           .order('created_at', { ascending: false })
           .limit(5)
         if (data && data.length > 0) setRecentOrders(data)
@@ -151,7 +150,6 @@ export default function Dashboard() {
     },
   ]
 
-  // Não apresentar pedidos de marketplace como vendas do SITE.
   const displayOrders = recentOrders
 
   return (
@@ -167,7 +165,9 @@ export default function Dashboard() {
           />
         </div>
         <div>
-          <h1 className="dash-welcome-name">Olá, {userNickname}</h1>
+          <h1 className="dash-welcome-name">
+            Olá, {userNickname} <span className="dash-welcome-emoji" aria-hidden="true">👋</span>
+          </h1>
           <p className="dash-welcome-sub">Bem-vindo de volta!</p>
         </div>
       </div>
@@ -277,7 +277,7 @@ export default function Dashboard() {
       <div className="dash-metrics-grid">
         {/* Card Faturamento (tabs) */}
         <div className="mp-card-flush dash-faturamento-card">
-          <div style={{ padding: '20px 24px 0' }}>
+          <div className="dash-faturamento-heading">
             <div className="mp-card-tabs">
               {(['faturamento', 'vendas', 'lucro'] as const).map(t => (
                 <button

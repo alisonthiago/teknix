@@ -89,6 +89,7 @@ export function usePermissions() {
     if (pathname.startsWith('/hub/pedidos')) return can('orders.view')
     if (pathname.startsWith('/hub/clientes')) return can('customers.view')
     if (pathname.startsWith('/hub/financeiro')) return can('finance.view')
+    if (pathname.startsWith('/hub/pagamentos')) return can('mercado_pago.view')
     if (pathname.startsWith('/hub/mercado-pago')) return can('mercado_pago.view')
     if (pathname.startsWith('/hub/mercado-livre') || pathname.startsWith('/hub/shopee') || pathname.startsWith('/hub/amazon') || pathname.startsWith('/hub/magalu') || pathname.startsWith('/hub/integracoes')) {
       return can('integrations.view')

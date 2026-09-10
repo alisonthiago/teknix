@@ -104,13 +104,14 @@
   flex: 1;
   min-width: 200px;
   color: #9ca3af;
+  min-height: 44px;
 }
 
 .blog-search-input {
   flex: 1;
   border: none;
   outline: none;
-  padding: 10px 0;
+  padding: 12px 0;
   font-size: 14px;
   color: #000000;
   background: transparent;
@@ -119,7 +120,8 @@
 .blog-status-tabs {
   display: flex;
   gap: 4px;
-  background: #f3f4f6;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
   border-radius: 8px;
   padding: 4px;
 }

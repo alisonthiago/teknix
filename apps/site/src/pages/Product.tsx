@@ -1098,7 +1098,7 @@ Principais Destaques:
                       className="ml-pdp-btn-notify-stock"
                       onClick={() => setShowStockNotifyModal(true)}
                     >
-                      🔔 Quero ser avisado
+                      Quero ser avisado
                     </button>
                   )}
                 </div>

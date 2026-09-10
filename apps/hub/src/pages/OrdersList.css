@@ -8,17 +8,22 @@
 
 .orders-tabs {
   display: flex;
-  gap: 6px;
-  border-bottom: 1px solid var(--tk-color-border, #e5e5e7);
-  padding-bottom: 0;
+  align-items: center;
+  gap: 4px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 4px;
+  border: 1px solid var(--tk-color-border, #e5e5e7);
+  border-radius: 10px;
+  background: var(--tk-color-surface, #ffffff);
   overflow-x: auto;
 }
 
 .tab-btn {
   padding: 8px 12px;
-  background: none;
+  background: transparent;
   border: none;
-  border-bottom: 2px solid transparent;
+  border-radius: 7px;
   color: var(--tk-color-text-secondary, #6e6e73);
   font-weight: 500;
   font-size: 0.8125rem;
@@ -32,8 +37,9 @@
 }
 
 .tab-btn.active {
-  color: #1f2328;
-  border-bottom-color: #1f2328;
+  color: #ffffff;
+  background: var(--tk-color-primary, #347ff2);
+  border-bottom-color: transparent;
   font-weight: 600;
 }
 

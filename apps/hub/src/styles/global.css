@@ -53,6 +53,9 @@ select {
 .hub-layout :where(h1, h2, h3, h4, h5, h6, strong, b, th) { font-weight: 500; }
 .hub-layout :where(.btn, button, label, th) { font-weight: 400; }
 .hub-layout :where(input, select, textarea, table, button) { font-family: inherit; letter-spacing: 0; }
+.hub-layout :where(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="submit"]):not([type="button"]), select) {
+  min-height: 44px;
+}
 .hub-layout :where(.page-header, .data-table-container, .table-wrapper, .pages-table-wrapper, .stat-card, .stat-card-large, .finance-kpi-card, .finance-table-card, .category-tree-card) { margin-bottom: 8px; }
 
 /* ── FLOW Universal Table & List Standards ── */
@@ -266,6 +269,27 @@ p {
 .btn-secondary:hover {
   background: #f5f5f5;
   color: #1f2328;
+}
+
+/* ── Hub action button sizing ──
+   Keep each button's existing color while standardizing its geometry and type. */
+.hub-layout .btn-primary,
+.hub-layout .btn-secondary,
+.hub-layout .pages-primary-btn,
+.hub-layout .blog-new-btn,
+.hub-layout .blog-tool-btn,
+.hub-layout .ads-new-btn,
+.hub-layout .ads-analytics-btn {
+  box-sizing: border-box;
+  height: 44px;
+  min-height: 44px;
+  padding: 0 20px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  justify-content: center;
+  align-items: center;
 }
 
 .btn-brand {

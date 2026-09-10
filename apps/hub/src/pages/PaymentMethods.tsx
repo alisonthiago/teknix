@@ -1,6 +1,9 @@
 import { useState } from 'react'
-import { Check, ExternalLink, Settings, Key, CheckCircle2 } from 'lucide-react'
+import { Check, ExternalLink, Settings, Key, CheckCircle2, ChevronDown } from 'lucide-react'
 import './PaymentMethods.css'
+import MercadoPagoSettings from './MercadoPagoSettings'
+import { usePermissions } from '../hooks/usePermissions'
+import { notifyHub } from '../lib/hubNotifications'
 
 interface Gateway {
   id: string
@@ -16,12 +19,52 @@ interface Gateway {
   credentials?: Record<string, string>
 }
 
+function GatewayLogo({ gateway }: { gateway: Gateway }) {
+  const labels: Record<string, string> = {
+    teknix_pay: 'TEKNIX Pay',
+    mercado_pago: 'Mercado Pago',
+    paypal: 'PayPal',
+    cielo: 'Cielo',
+    custom_transfer: 'Manual / PIX',
+    pagarme: 'Pagar.me'
+  }
+
+  const imageByGateway: Record<string, string> = {
+    teknix_pay: '/assets/payment-gateways/teknix-pay.png',
+    mercado_pago: '/assets/payment-gateways/mercado-pago.png',
+    paypal: '/assets/payment-gateways/paypal.png',
+    cielo: '/assets/payment-gateways/cielo.png',
+    custom_transfer: '/assets/payment-gateways/transferencia-pix.png',
+    pagarme: '/assets/payment-gateways/pagarme.png'
+  }
+
+  return (
+    <span className={`gateway-logo gateway-logo-${gateway.id}`} role="img" aria-label={labels[gateway.id] || gateway.logoText}>
+      <img src={imageByGateway[gateway.id]} alt="" />
+    </span>
+  )
+}
+
+function GatewayLogoVisual({ gatewayId, label }: { gatewayId: string; label: string }) {
+  const imageByGateway: Record<string, string> = {
+    mercado_pago: '/assets/payment-gateways/mercado-pago.png'
+  }
+
+  return (
+    <span className={`gateway-logo gateway-logo-${gatewayId}`} role="img" aria-label={label}>
+      <img src={imageByGateway[gatewayId]} alt={label} />
+    </span>
+  )
+}
+
 export default function PaymentMethods() {
+  const { can } = usePermissions()
   const [activeTab, setActiveTab] = useState<'all' | 'active' | 'inactive' | 'pending'>('all')
   const [selectedGateway, setSelectedGateway] = useState<Gateway | null>(null)
   const [credentialsForm, setCredentialsForm] = useState<Record<string, string>>({})
   const [testResult, setTestResult] = useState<string | null>(null)
   const [testing, setTesting] = useState(false)
+  const [mercadoPagoOpen, setMercadoPagoOpen] = useState(true)
 
   const [gateways, setGateways] = useState<Gateway[]>([
     {
@@ -162,7 +205,7 @@ export default function PaymentMethods() {
       }
       return g
     }))
-    alert(`Credenciais da API do ${selectedGateway.name} salvas com sucesso! Gateway ativado.`)
+    notifyHub(`Credenciais da API do ${selectedGateway.name} salvas com sucesso! Gateway ativado.`)
     setSelectedGateway(null)
   }
 
@@ -172,10 +215,12 @@ export default function PaymentMethods() {
     setTimeout(() => {
       setTesting(false)
       setTestResult('success')
+      notifyHub('Conexão com a API estabelecida com sucesso! Chaves válidas.')
     }, 800)
   }
 
   function handleToggleGateway(id: string) {
+    const gateway = gateways.find(g => g.id === id)
     setGateways(gateways.map(g => {
       if (g.id === id) {
         const nextStatus = g.status === 'active' ? 'inactive' : 'active'
@@ -183,6 +228,9 @@ export default function PaymentMethods() {
       }
       return g
     }))
+    if (gateway) {
+      notifyHub(`${gateway.name} ${gateway.status === 'active' ? 'desativado' : 'ativado'} com sucesso.`)
+    }
   }
 
   const filteredGateways = gateways.filter(g => {
@@ -202,25 +250,35 @@ export default function PaymentMethods() {
 
         {/* Tabs */}
         <div className="payments-tabs">
-          <button
-            className={`payment-tab-btn ${activeTab === 'all' ? 'active' : ''}`}
-            onClick={() => setActiveTab('all')}
-          >
+          <button className={`payment-tab-btn ${activeTab === 'all' ? 'active' : ''}`} onClick={() => setActiveTab('all')}>
             Todos <span className="tab-badge">{gateways.length}</span>
           </button>
-          <button
-            className={`payment-tab-btn ${activeTab === 'active' ? 'active' : ''}`}
-            onClick={() => setActiveTab('active')}
-          >
+          <button className={`payment-tab-btn ${activeTab === 'active' ? 'active' : ''}`} onClick={() => setActiveTab('active')}>
             Ativados <span className="tab-badge">{gateways.filter(g => g.status === 'active').length}</span>
           </button>
-          <button
-            className={`payment-tab-btn ${activeTab === 'inactive' ? 'active' : ''}`}
-            onClick={() => setActiveTab('inactive')}
-          >
+          <button className={`payment-tab-btn ${activeTab === 'inactive' ? 'active' : ''}`} onClick={() => setActiveTab('inactive')}>
             Desativados <span className="tab-badge">{gateways.filter(g => g.status === 'inactive').length}</span>
           </button>
         </div>
+
+        {can('mercado_pago.manage') && (
+          <section className="payments-admin-section">
+            <button
+              type="button"
+              className="payments-admin-heading"
+              aria-expanded={mercadoPagoOpen}
+              onClick={() => setMercadoPagoOpen(open => !open)}
+            >
+              <div className="payments-admin-title">
+              <span className="payments-section-kicker">Administração do gateway</span>
+              <h2><GatewayLogoVisual gatewayId="mercado_pago" label="Mercado Pago" /></h2>
+              <p>Credenciais e métodos do checkout ficam nesta área exclusiva para administradores.</p>
+              </div>
+              <ChevronDown className={mercadoPagoOpen ? 'is-open' : ''} size={22} aria-hidden="true" />
+            </button>
+            {mercadoPagoOpen && <MercadoPagoSettings />}
+          </section>
+        )}
 
         {/* List of Gateways */}
         <div className="gateways-list">
@@ -228,9 +286,7 @@ export default function PaymentMethods() {
             <div key={gw.id} className="gateway-card">
               <div className="gateway-card-top">
                 <div className="gateway-brand">
-                  <div className="gateway-logo-box" style={{ color: gw.logoColor, background: gw.logoBg }}>
-                    {gw.logoText}
-                  </div>
+                  <GatewayLogo gateway={gw} />
                   <div>
                     <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: '#000000' }}>{gw.name}</h3>
                   </div>

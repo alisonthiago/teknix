@@ -48,6 +48,14 @@
   letter-spacing: -0.02em;
 }
 
+.dash-welcome-emoji {
+  display: inline-block;
+  margin-left: 4px;
+  font-size: 0.82em;
+  line-height: 1;
+  vertical-align: 0.08em;
+}
+
 .dash-welcome-sub {
   font-size: 13px;
   color: #666666;
@@ -493,6 +501,15 @@
 .dash-faturamento-card {
   display: flex;
   flex-direction: column;
+}
+
+.dash-faturamento-heading {
+  padding: 24px 24px 8px;
+}
+
+.dash-faturamento-card > div:last-child {
+  padding-top: 16px !important;
+  padding-bottom: 24px !important;
 }
 
 .dash-dark-card {

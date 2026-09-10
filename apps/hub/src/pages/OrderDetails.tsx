@@ -322,11 +322,11 @@ export default function OrderDetails() {
               </div>
 
               {/* Dados de Pagamento */}
-              <div style={{ marginTop: 20, padding: '16px', background: '#f5f5f7', borderRadius: 10 }}>
-                <div style={{ fontSize: 12, color: '#86868b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>
+              <div className="payment-details-panel">
+                <div className="payment-details-title">
                   Dados do Pagamento
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 20px' }}>
+                <div className="payment-details-grid">
                   <div>
                     <div style={{ fontSize: 11, color: '#aaa' }}>Método</div>
                     <div style={{ fontSize: 13, fontWeight: 600, color: '#1d1d1f' }}>{order.payment_method || '—'}</div>

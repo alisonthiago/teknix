@@ -14,7 +14,6 @@ import ShippingSettings from './pages/ShippingSettings'
 import CustomersList from './pages/CustomersList'
 import CustomerDetails from './pages/CustomerDetails'
 import FinanceOverview from './pages/FinanceOverview'
-import MercadoPagoSettings from './pages/MercadoPagoSettings'
 import PaymentMethods from './pages/PaymentMethods'
 import SettingsHub from './pages/SettingsHub'
 import CouponsList from './pages/CouponsList'
@@ -91,7 +90,7 @@ function App() {
             <Route path="/hub/amazon" element={<MarketplaceChannelHub defaultChannel="amazon" />} />
             <Route path="/hub/magalu" element={<MarketplaceChannelHub defaultChannel="magalu" />} />
             <Route path="/hub/integracoes/:channelId" element={<MarketplaceChannelHub />} />
-            <Route path="/hub/mercado-pago" element={<MercadoPagoSettings />} />
+            <Route path="/hub/mercado-pago" element={<Navigate to="/hub/pagamentos" replace />} />
             <Route path="/hub/whatsapp" element={<WhatsAppHub />} />
             <Route path="/hub/usuarios" element={<UserEdit />} />
             <Route path="/hub/integracoes" element={<IntegrationsHub />} />

@@ -13,6 +13,19 @@
 .tkn-checkout-top > div { min-height:64px; display:flex; align-items:center; justify-content:space-between; gap:24px; }
 .tkn-checkout-top img { display:block; max-height:40px; }
 .tkn-checkout-top nav { display:flex; align-items:center; gap:24px; font-size:13px; }
+.tkn-checkout-auth-slot { display:inline-block; width:72px; height:28px; border-radius:999px; background:rgb(0 0 0 / .08); }
+.tkn-checkout-login-link {
+  display:inline-flex;
+  align-items:center;
+  min-height:32px;
+  padding:0 12px;
+  border-radius:999px;
+  background:#111;
+  color:#b5f500;
+  font-weight:700;
+  text-decoration:none;
+}
+.tkn-checkout-login-link:hover { opacity:.9; text-decoration:none; }
 .tkn-checkout-account-menu { position:relative; }
 .tkn-checkout-account-menu > summary { list-style:none; display:flex; align-items:center; gap:8px; cursor:pointer; }
 .tkn-checkout-account-menu > summary::-webkit-details-marker { display:none; }
@@ -52,6 +65,8 @@
 .tkn-checkout-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
 .tkn-checkout-fields label { display:flex; flex-direction:column; gap:8px; font-size:13px; color:#555; text-transform:none; letter-spacing:0; }
 .tkn-checkout-fields :is(input,select) { width:100%; min-width:0; box-sizing:border-box; height:44px; padding:10px 12px; border:1px solid #d5d5d5; border-radius:8px; background:#fff; color:#333; font:inherit; font-size:16px; }
+.tkn-checkout-fields input.is-invalid { border-color:#d93025; box-shadow:0 0 0 1px #d93025; }
+.tkn-checkout-field-error { color:#d93025; font-size:12px; line-height:1.3; }
 .tkn-checkout-wide { grid-column:1/-1; }
 .tkn-checkout-cep-note { margin:0; font-size:12px; color:#777; }
 .tkn-checkout-edit-actions { display:flex; gap:16px; align-items:center; }
@@ -60,7 +75,7 @@
 .tkn-checkout-shipping > div { display:flex; justify-content:space-between; gap:16px; font-size:14px; }
 .tkn-checkout-shipping p { font-size:12px; color:#888; margin:12px 0 0; }
 .tkn-checkout-payment { display:flex; gap:16px; align-items:center; padding:16px 12px; border:1px solid transparent; border-radius:12px; cursor:pointer; font-size:14px; }
-.tkn-checkout-payment + .tkn-checkout-payment { margin-top:8px; }
+.tkn-checkout-payment + .tkn-checkout-payment { margin-top:0; }
 .tkn-checkout-payment.is-selected { border-color:#3483fa; background:#fafcff; }
 .tkn-checkout-payment input { accent-color:#3483fa; width:17px; height:17px; flex-shrink:0; margin:0; }
 .tkn-checkout-payment-icon { display:block; width:40px; height:40px; flex-shrink:0; object-fit:contain; }
@@ -89,9 +104,44 @@
 .tkn-checkout-coupon-form input { min-width:0; flex:1; height:38px; padding:0 8px; border:0; outline:0; font:inherit; font-size:14px; }
 .tkn-checkout-coupon-form button { padding:0 14px; border:0; border-radius:6px; background:#e6f0ff; color:#2474e8; font:inherit; font-size:13px; cursor:pointer; }
 .tkn-checkout-coupon-notice { margin-top:12px !important; color:#2474e8 !important; font-size:13px !important; }
-.tkn-checkout-primary { display:flex; align-items:center; justify-content:center; width:100%; box-sizing:border-box; border:0; border-radius:6px; min-height:48px; padding:12px 16px; background:#3483fa; color:white; font-family:inherit; font-size:14px; cursor:pointer; text-align:center; }
-.tkn-checkout-primary:hover { background:#246dde; }
+.tkn-checkout-primary { display:flex; align-items:center; justify-content:center; width:100%; box-sizing:border-box; border:0; border-radius:6px; min-height:48px; padding:12px 16px; background:#b5f500; color:#111; font-family:inherit; font-size:14px; font-weight:700; cursor:pointer; text-align:center; }
+.tkn-checkout-primary:hover { background:#a3de00; }
 .tkn-checkout-primary:disabled { opacity:.6; cursor:wait; }
+.tkn-checkout-phone-field { display:flex; flex-direction:column; gap:8px; }
+.tkn-checkout-phone-row {
+  display:flex;
+  align-items:center;
+  gap:0;
+  height:44px;
+  border:1px solid #d5d5d5;
+  border-radius:8px;
+  background:#fff;
+  overflow:hidden;
+}
+.tkn-checkout-phone-row:focus-within {
+  border-color:#3483fa;
+  box-shadow:0 0 0 1px #3483fa;
+}
+.tkn-checkout-phone-prefix {
+  flex:0 0 auto;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:52px;
+  height:100%;
+  padding:0 10px;
+  border-right:1px solid #e5e5e5;
+  background:#f7f7f7;
+  color:#333;
+  font-size:14px;
+  font-weight:600;
+}
+.tkn-checkout-phone-row input {
+  border:0 !important;
+  height:100% !important;
+  box-shadow:none !important;
+  border-radius:0 !important;
+}
 .tkn-checkout-safe { display:flex; align-items:center; justify-content:center; gap:8px; font-size:12px; color:#888; line-height:1.5; margin:16px 0; }
 .tkn-checkout-summary > .tkn-checkout-link { display:block; text-align:center; }
 .tkn-checkout-error,.tkn-checkout-notice { background:#fff5f3; color:#923d2f; padding:12px; font-size:13px; line-height:1.5; border-radius:8px; overflow-wrap:anywhere; }
@@ -106,10 +156,10 @@
 @media(max-width:600px) {
   .tkn-checkout-shell { padding-inline:16px; }
   .tkn-checkout-main { padding-block:24px 150px; }
-  .tkn-checkout-top nav { gap:16px; font-size:12px; }
-  .tkn-checkout-top nav > a { display:none; }
-  .tkn-checkout-account-name,.tkn-checkout-account-menu > summary > svg { display:none; }
-  .tkn-checkout-account-name { max-width:82px; }
+  .tkn-checkout-top nav { gap:12px; font-size:12px; }
+  .tkn-checkout-contact-link { display:none; }
+  .tkn-checkout-login-link { display:inline-flex; }
+  .tkn-checkout-account-name { max-width:96px; }
   .tkn-checkout-top img { width:100px; }
   .tkn-checkout-card { padding:16px; border-radius:16px; }
   .tkn-checkout-fields { grid-template-columns:minmax(0,1fr); }
@@ -205,6 +255,528 @@
   font-size: 12px;
   font-weight: 500;
 }
+
+/* ==========================================================================
+   NOVO DESIGN PROFISSIONAL — CARD PRINCIPAL
+   ========================================================================== */
+
+.tkn-pay-card {
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #e5e5ea;
+  border-radius: 20px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04);
+  overflow: hidden;
+}
+
+/* Topo: método + status + timer */
+.tkn-pay-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid #f2f2f7;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.tkn-pay-top-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.tkn-pay-method-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #e6faf7;
+  color: #00796b;
+  border: 1px solid #b2dfdb;
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.1px;
+}
+
+.tkn-pay-status-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #86868b;
+  font-weight: 500;
+}
+
+.tkn-pay-timer {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #48484a;
+  font-variant-numeric: tabular-nums;
+  background: #f5f5f7;
+  border: 1px solid #e5e5ea;
+  border-radius: 10px;
+  padding: 5px 12px;
+  transition: all 0.3s ease;
+}
+
+.tkn-pay-timer.is-expiring {
+  background: #fff8e6;
+  border-color: #fcd34d;
+  color: #92400e;
+  animation: timerPulse 1.2s infinite;
+}
+
+/* Barra de progresso */
+.tkn-pay-progress-rail {
+  height: 3px;
+  background: #f2f2f7;
+  width: 100%;
+}
+
+.tkn-pay-progress-fill {
+  height: 100%;
+  background: #00b09b;
+  transition: width 1s linear, background 0.5s;
+}
+
+.tkn-pay-progress-fill.is-expiring {
+  background: linear-gradient(90deg, #f59e0b, #ef4444);
+}
+
+/* Body 2 colunas */
+.tkn-pay-body {
+  display: grid;
+  grid-template-columns: 1fr 220px;
+  gap: 0;
+  min-height: 340px;
+}
+
+/* Coluna info (esquerda) */
+.tkn-pay-col-info {
+  padding: 28px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  border-right: 1px solid #f2f2f7;
+}
+
+.tkn-pay-headline-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #86868b;
+  margin: 0 0 4px;
+}
+
+.tkn-pay-headline-amount {
+  font-size: 32px;
+  font-weight: 800;
+  color: #111;
+  letter-spacing: -0.8px;
+  line-height: 1.1;
+  margin: 0 0 6px;
+}
+
+.tkn-pay-headline-order {
+  font-size: 13px;
+  color: #6e6e73;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Steps */
+.tkn-pay-steps-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #48484a;
+  margin: 0 0 12px;
+}
+
+.tkn-pay-step-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.tkn-pay-step-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #111;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.tkn-pay-step-label {
+  font-size: 13px;
+  color: #3a3a3c;
+  line-height: 1.45;
+}
+
+/* Bloco de cópia */
+.tkn-pay-copy-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.tkn-pay-copy-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #48484a;
+  margin: 0;
+}
+
+.tkn-pay-code-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f9f9fb;
+  border: 1px solid #e5e5ea;
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+
+.tkn-pay-code-text {
+  flex: 1;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  color: #3a3a3c;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.tkn-pay-copy-btn-inline {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid #e5e5ea;
+  background: #fff;
+  color: #48484a;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tkn-pay-copy-btn-inline:hover { background: #f2f2f7; }
+.tkn-pay-copy-btn-inline.copied { background: #e8fdf5; border-color: #6ee7b7; color: #059669; }
+
+.tkn-pay-copy-btn-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  border: none;
+  border-radius: 12px;
+  background: #111;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  letter-spacing: -0.1px;
+}
+
+.tkn-pay-copy-btn-main:hover { background: #2c2c2e; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.18); }
+.tkn-pay-copy-btn-main.copied { background: #059669; }
+
+/* Coluna QR (direita) */
+.tkn-pay-col-qr {
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  background: #fafafa;
+}
+
+.tkn-pay-qr-wrap {
+  width: 180px;
+  height: 180px;
+  background: #fff;
+  border: 1px solid #e5e5ea;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+.tkn-pay-qr-img {
+  width: 164px;
+  height: 164px;
+  display: block;
+  object-fit: contain;
+}
+
+.tkn-pay-qr-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #86868b;
+}
+
+.tkn-pay-qr-hint {
+  font-size: 11px;
+  color: #86868b;
+  text-align: center;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.tkn-pay-radar-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: auto;
+}
+
+.tkn-pay-radar {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.tkn-pay-radar-label {
+  font-size: 11px;
+  color: #16a34a;
+  font-weight: 500;
+}
+
+/* Footer do card */
+.tkn-pay-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 24px 20px;
+  border-top: 1px solid #f2f2f7;
+}
+
+.tkn-pay-btn-orders {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 40px;
+  border-radius: 10px;
+  background: #f5f5f7;
+  color: #1d1d1f;
+  border: 1px solid #e5e5ea;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.tkn-pay-btn-orders:hover { background: #e8e8ed; }
+
+.tkn-pay-link-help {
+  font-size: 12px;
+  color: #6e6e73;
+  text-decoration: none;
+}
+.tkn-pay-link-help:hover { color: #1d1d1f; text-decoration: underline; }
+
+/* Responsivo: 1 coluna em mobile */
+@media (max-width: 600px) {
+  .tkn-pay-body {
+    grid-template-columns: 1fr;
+  }
+  .tkn-pay-col-qr {
+    border-right: none;
+    border-top: 1px solid #f2f2f7;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 20px 16px;
+  }
+  .tkn-pay-col-info { padding: 20px 16px; }
+  .tkn-pay-top-bar { padding: 12px 16px; }
+  .tkn-pay-footer { padding: 14px 16px 18px; }
+}
+
+/* ==========================================================================
+   BOLETO — CARD CLEAN BANCÁRIO
+   ========================================================================== */
+
+.tkn-boleto-card {
+  /* usa tkn-pay-card como base */
+}
+
+/* Topo confirmação */
+.tkn-boleto-confirm-top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px 18px;
+  border-bottom: 1px solid #f2f2f7;
+}
+
+.tkn-boleto-confirm-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #16a34a;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.25);
+}
+
+.tkn-boleto-confirm-title {
+  font-size: 14px;
+  color: #48484a;
+  margin: 0 0 3px;
+  font-weight: 500;
+}
+
+.tkn-boleto-confirm-amount {
+  font-size: 26px;
+  font-weight: 800;
+  color: #111;
+  letter-spacing: -0.5px;
+  margin: 0;
+}
+
+/* Código de barras */
+.tkn-boleto-barcode-block {
+  padding: 20px 24px 16px;
+  border-bottom: 1px dashed #e5e5ea;
+  overflow: hidden;
+}
+
+.tkn-barcode-svg {
+  width: 100%;
+  height: 56px;
+  display: block;
+}
+
+/* Linha digitável */
+.tkn-boleto-line-block {
+  padding: 18px 24px;
+  border-bottom: 1px solid #f2f2f7;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tkn-boleto-block-label {
+  font-size: 13px;
+  color: #48484a;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.tkn-boleto-code-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tkn-boleto-code-text {
+  flex: 1;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  color: #3a3a3c;
+  word-break: break-all;
+  line-height: 1.6;
+}
+
+.tkn-boleto-copy-inline {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid #e5e5ea;
+  background: #f5f5f7;
+  color: #48484a;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.tkn-boleto-copy-inline:hover { background: #e8e8ed; }
+.tkn-boleto-copy-inline.copied { background: #e8fdf5; border-color: #6ee7b7; color: #059669; }
+
+/* Link imprimir */
+.tkn-boleto-print-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: #3483fa;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: none;
+}
+
+.tkn-boleto-print-inline:hover { text-decoration: underline; }
+
+/* Informações */
+.tkn-boleto-info-block {
+  padding: 18px 24px;
+  background: #fafafa;
+  border-top: 1px solid #f2f2f7;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tkn-boleto-info-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: #48484a;
+  line-height: 1.45;
+}
+
+.tkn-boleto-info-row svg { flex-shrink: 0; margin-top: 1px; }
+
+/* Print */
+@media print {
+  .tkn-pay-top-bar, .tkn-pay-footer, .tkn-boleto-print-inline,
+  .tkn-pay-copy-btn-main, .tkn-checkout-top, .tkn-checkout-footer,
+  .tkn-checkout-summary { display: none !important; }
+  .tkn-pay-card { box-shadow: none !important; border-color: #ccc !important; }
+  .tkn-checkout-success-wrapper { margin: 0 !important; max-width: 100% !important; }
+}
+
 
 .tkn-pix-amount-row {
   display: flex;
@@ -557,31 +1129,573 @@
   text-decoration: underline;
 }
 
-/* Boleto Specific */
-.tkn-boleto-action-section {
+/* ==========================================================================
+   PIX TIMER — BARRA DE PROGRESSO
+   ========================================================================== */
+.tkn-pix-progress-bar-wrap {
   width: 100%;
+  height: 4px;
+  background: #e8e8ed;
+  border-radius: 4px;
+  overflow: hidden;
 }
 
-.tkn-boleto-primary-btn {
+.tkn-pix-progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00bdae, #008a7b);
+  border-radius: 4px;
+  transition: width 1s linear, background 0.5s ease;
+}
+
+.tkn-pix-progress-expiring {
+  background: linear-gradient(90deg, #f59e0b, #ef4444) !important;
+}
+
+.tkn-pix-timer-expiring {
+  background: #fef3c7 !important;
+  color: #92400e !important;
+  border: 1px solid #fde68a;
+  animation: timerPulse 1s infinite;
+}
+
+@keyframes timerPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* ============================================================================
+   CHECKOUT REFINEMENT — layout mais amplo e leitura mais direta
+   ============================================================================ */
+.tkn-checkout-shell {
+  max-width: 1320px;
+  padding-inline: clamp(20px, 4vw, 48px);
+}
+
+.tkn-checkout-main {
+  padding-block: 24px 56px;
+}
+
+.tkn-checkout-grid {
+  grid-template-columns: minmax(0, 1.8fr) minmax(320px, 0.95fr);
+  gap: clamp(24px, 3vw, 40px);
+}
+
+.tkn-checkout-success-wrapper {
+  max-width: 760px;
+  margin: 24px auto 56px;
+  padding-inline: 20px;
+}
+
+.tkn-checkout-success-wrapper.is-pix-confirming {
+  min-height: min(70vh, 620px);
+  display: grid;
+  place-items: center;
+  padding-inline: 20px;
+}
+
+.tkn-pix-confirmation {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  color: #08783d;
+  text-align: center;
+  animation: tkn-pix-confirmation-in 0.28s ease-out both;
+}
+
+.tkn-pix-confirmation-icon {
+  display: grid;
+  place-items: center;
+  width: 68px;
+  height: 68px;
+  border: 2px solid #00a650;
+  border-radius: 50%;
+  color: #00a650;
+  animation: tkn-pix-confirmation-pop 0.5s ease-out both;
+}
+
+.tkn-pix-confirmation strong {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+@keyframes tkn-pix-confirmation-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes tkn-pix-confirmation-pop {
+  0% { opacity: 0; transform: scale(0.65); }
+  70% { transform: scale(1.08); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.tkn-mp-card {
+  border-radius: 20px;
+  padding: 28px clamp(24px, 4vw, 40px);
+  gap: 22px;
+  box-shadow: 0 18px 45px -24px rgba(15, 23, 42, 0.34), 0 2px 8px rgba(15, 23, 42, 0.06);
+}
+
+.tkn-mp-top-row {
+  padding-bottom: 18px;
+  border-bottom: 1px solid #eef1f3;
+}
+
+.tkn-mp-amount-block {
+  padding: 2px 0;
+}
+
+.tkn-mp-amount-value {
+  font-size: clamp(32px, 5vw, 42px);
+  letter-spacing: -1.2px;
+}
+
+.tkn-mp-qr-section {
+  padding: 2px 0;
+}
+
+.tkn-mp-qr-frame {
+  padding: 12px;
+  border-radius: 16px;
+}
+
+.tkn-mp-qr-img {
+  width: min(260px, 62vw);
+  height: min(260px, 62vw);
+}
+
+.tkn-mp-qr-caption {
+  max-width: 430px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+.tkn-mp-code-box,
+.tkn-mp-steps-card,
+.tkn-mp-email-notice {
+  border-radius: 14px;
+}
+
+@media (max-width: 760px) {
+  #root .tkn-checkout-content > .tkn-checkout-card,
+  #root .tkn-checkout-content section.tkn-checkout-card {
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  #root .tkn-checkout-content section.tkn-checkout-card#payment-title {
+    height: auto !important;
+  }
+
+  #root .tkn-checkout-content section.tkn-checkout-card > .tkn-checkout-payment {
+    display: flex !important;
+    width: 100% !important;
+    height: 64px !important;
+    min-height: 64px !important;
+    max-height: 64px !important;
+    margin: 0 0 8px !important;
+  }
+
+  #root .tkn-checkout-content section.tkn-checkout-card > .tkn-checkout-payment:last-child {
+    margin-bottom: 0 !important;
+  }
+
+  .tkn-checkout-success-wrapper {
+    margin-top: 12px;
+    padding-inline: 12px;
+  }
+
+  .tkn-mp-card {
+    padding: 22px 18px;
+    gap: 18px;
+  }
+
+  .tkn-mp-top-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+/* Ajuste exclusivo do card Pix exibido após a criação do pedido. */
+.tkn-checkout-success-wrapper:has(.tkn-mp-pix-card) {
+  max-width: 760px;
+}
+
+.tkn-checkout-success-wrapper .tkn-mp-pix-card {
+  width: min(620px, 100%) !important;
+  max-width: 620px !important;
+  margin: 0 auto;
+  padding: 32px clamp(24px, 4vw, 40px) !important;
+  border: 1px solid #dfe7e3 !important;
+  border-radius: 22px !important;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfefd 100%);
+  box-shadow: 0 16px 40px rgba(18, 72, 48, 0.10), 0 2px 8px rgba(15, 23, 42, 0.05);
+}
+
+.tkn-checkout-success-wrapper .tkn-mp-pix-card .tkn-mp-top-row {
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 4px;
+  padding: 0 0 20px;
+  border-bottom: 1px solid #e8efeb;
+}
+
+.tkn-checkout-success-wrapper .tkn-mp-pix-card .tkn-mp-badge-pix {
+  gap: 9px;
+  padding: 9px 14px;
+  background: #f3fbf6;
+  border: 1px solid #cfe9d8;
+  border-radius: 12px;
+  color: #08783d;
+  font-size: 15px;
+  font-weight: 700;
+  box-shadow: none;
+}
+
+.tkn-checkout-success-wrapper .tkn-mp-pix-card .tkn-mp-badge-pix svg {
+  flex: 0 0 auto;
+}
+
+.tkn-checkout-success-wrapper .tkn-mp-pix-card .tkn-mp-badge-timer {
+  min-height: 38px;
+  margin-left: auto;
+  padding: 7px 12px;
+  background: #ffffff;
+  border: 1px solid #dfe7e3;
+  border-radius: 10px;
+  color: #53665a;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tkn-checkout-success-wrapper .tkn-mp-pix-card .tkn-mp-badge-timer svg {
+  color: #718477;
+}
+
+.tkn-checkout-success-wrapper .tkn-mp-pix-card .tkn-mp-amount-value {
+  color: #111111;
+}
+
+.tkn-checkout-success-wrapper .tkn-mp-pix-card .tkn-mp-qr-frame {
+  padding: 16px;
+  border: 1px solid #e3ebe6;
+  border-radius: 18px;
+  box-shadow: 0 8px 20px rgba(18, 72, 48, 0.08);
+}
+
+.tkn-checkout-success-wrapper .tkn-mp-pix-card .tkn-mp-qr-caption {
+  color: #53665a;
+}
+
+.tkn-checkout-success-wrapper .tkn-mp-pix-card .tkn-mp-btn-blue {
+  background: #0071e3;
+  border-color: #0071e3;
+  box-shadow: 0 6px 14px rgba(0, 113, 227, 0.22);
+}
+
+.tkn-checkout-success-wrapper .tkn-mp-pix-card .tkn-mp-btn-blue:hover {
+  background: #005bb5;
+  border-color: #005bb5;
+}
+
+.tkn-checkout-success-wrapper .tkn-mp-pix-card .tkn-mp-btn-blue:disabled {
+  background: #b8c2bc;
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+@media (max-width: 760px) {
+  .tkn-checkout-success-wrapper .tkn-mp-pix-card .tkn-mp-top-row {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .tkn-checkout-success-wrapper .tkn-mp-pix-card .tkn-mp-badge-timer {
+    width: fit-content;
+    margin-left: 0;
+  }
+
+  .tkn-checkout-success-wrapper .tkn-mp-pix-card .tkn-mp-badge-pix,
+  .tkn-checkout-success-wrapper .tkn-mp-pix-card .tkn-mp-badge-timer,
+  .tkn-checkout-success-wrapper .tkn-mp-pix-card .tkn-mp-badge-approved {
+    width: 100%;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+
+  .tkn-checkout-success-wrapper .tkn-mp-pix-card .tkn-mp-amount-value { font-size: 28px; }
+
+  .tkn-checkout-success-wrapper .tkn-mp-pix-card {
+    width: 100% !important;
+    padding: 24px 18px !important;
+  }
+}
+
+/* ==========================================================================
+   BOLETO — DESIGN ESTILO MERCADO PAGO
+   ========================================================================== */
+
+/* Card container principal */
+.tkn-boleto-mp-card {
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 24px;
+  box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.10), 0 1px 3px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Header com fundo no estilo MP (azul-marinho profissional) */
+.tkn-boleto-mp-header {
+  background: linear-gradient(135deg, #009ee3 0%, #0070ba 100%);
+  padding: 28px 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  color: white;
+}
+
+.tkn-boleto-mp-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tkn-boleto-mp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 7px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.1px;
+  color: #fff;
+}
+
+.tkn-boleto-mp-countdown {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+
+.tkn-boleto-mp-amount {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tkn-boleto-mp-amount-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.tkn-boleto-mp-amount-val {
+  font-size: 36px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -1px;
+  line-height: 1.1;
+}
+
+.tkn-boleto-mp-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.85);
+  flex-wrap: wrap;
+}
+
+.tkn-boleto-mp-sep {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.tkn-boleto-mp-due {
+  font-weight: 500;
+}
+
+.tkn-boleto-mp-status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+/* Seção do Código de Barras */
+.tkn-boleto-barcode-section {
+  padding: 24px 28px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid #f0f0f2;
+  background: #fafafa;
+}
+
+.tkn-boleto-barcode-wrap {
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  border: 1px solid #e5e5ea;
+  border-radius: 12px;
+  padding: 16px 20px;
+  box-sizing: border-box;
+}
+
+.tkn-barcode-svg {
+  width: 100%;
+  height: 60px;
+  display: block;
+}
+
+.tkn-boleto-barcode-hint {
+  font-size: 11px;
+  color: #86868b;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+/* Seção Linha Digitável */
+.tkn-boleto-line-section {
+  padding: 20px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-bottom: 1px solid #f0f0f2;
+}
+
+.tkn-boleto-line-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tkn-boleto-line-label {
+  font-size: 11px;
+  font-weight: 800;
+  color: #1d1d1f;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.tkn-boleto-line-sub {
+  font-size: 10px;
+  font-weight: 500;
+  color: #86868b;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.tkn-boleto-input-box {
+  background: #fbfbfd !important;
+}
+
+/* Botão Imprimir */
+.tkn-boleto-print-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  width: 100%;
-  min-height: 48px;
+  margin: 0 28px;
+  min-height: 46px;
+  border: 1.5px solid #e5e5ea;
   border-radius: 12px;
-  background: #1d1d1f;
-  color: #ffffff;
-  font-size: 15px;
+  background: #f5f5f7;
+  color: #1d1d1f;
+  font-size: 14px;
   font-weight: 600;
-  text-decoration: none;
+  font-family: inherit;
+  cursor: pointer;
   transition: all 0.15s ease;
 }
 
-.tkn-boleto-primary-btn:hover {
-  background: #000000;
+.tkn-boleto-print-btn:hover {
+  background: #e8e8ed;
+  border-color: #d0d0d5;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* Seção Informações */
+.tkn-boleto-mp-info {
+  padding: 20px 28px;
+  border-top: 1px solid #f0f0f2;
+  background: #fbfbfd;
+}
+
+.tkn-boleto-mp-info-title {
+  font-size: 11px;
+  font-weight: 800;
+  color: #1d1d1f;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  margin: 0 0 14px;
+}
+
+.tkn-boleto-mp-step-num {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #009ee3;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* Footer Actions do Boleto */
+.tkn-boleto-mp-card .tkn-pix-footer-actions {
+  padding: 20px 28px 24px;
+  border-top: 1px solid #f0f0f2;
+}
+
+/* Print styles — oculta tudo exceto o boleto */
+@media print {
+  body > *:not(#root) { display: none; }
+  .tkn-checkout-top,
+  .tkn-checkout-summary,
+  .tkn-checkout-footer,
+  .tkn-pix-footer-actions,
+  .tkn-boleto-print-btn { display: none !important; }
+  .tkn-checkout-success-wrapper { margin: 0 !important; padding: 0 !important; max-width: 100% !important; }
+  .tkn-boleto-mp-card { border: none !important; box-shadow: none !important; }
 }
 
 @keyframes radarPulse {
@@ -607,8 +1721,8 @@
 .tkn-card-fields {
   margin-top: 16px;
   padding: 16px;
-  background: #f7f9ff;
-  border: 1px solid #dce8ff;
+  background: #f7f7f7;
+  border: 1px solid #e3e3e3;
   border-radius: 14px;
 }
 .tkn-card-brand-row {
@@ -617,7 +1731,7 @@
   gap: 8px;
   font-size: 13px;
   font-weight: 600;
-  color: #3483fa;
+  color: #666666;
   margin-bottom: 16px;
 }
 .tkn-card-brand-name {
@@ -625,3 +1739,1304 @@
   letter-spacing: .5px;
 }
 
+/* ==========================================================================
+   NOVO DESIGN 1:1 PIX INSTANTÂNEO & BOLETO OFICIAL TEKNIX
+   ========================================================================== */
+
+.tkn-pix-master-card,
+.tkn-boleto-master-card {
+  max-width: 620px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid #e5e5ea;
+  border-radius: 24px;
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Header de Valor e Pedido */
+.tkn-pix-header-section {
+  padding: 32px 32px 20px;
+  text-align: left;
+}
+
+.tkn-pix-val-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #86868b;
+  margin: 0 0 6px 0;
+}
+
+.tkn-pix-val-amount {
+  font-size: 38px;
+  font-weight: 800;
+  color: #111111;
+  letter-spacing: -1px;
+  line-height: 1.1;
+  margin: 0 0 10px 0;
+}
+
+.tkn-pix-status-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6e6e73;
+}
+
+.tkn-pix-order-badge {
+  color: #48484a;
+  font-weight: 600;
+}
+
+.tkn-pix-sep {
+  color: #c7c7cc;
+}
+
+.tkn-pix-awaiting-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #d97706;
+  font-weight: 600;
+}
+
+.tkn-awaiting-boleto {
+  color: #0071e3 !important;
+}
+
+.tkn-pix-pulsing-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f59e0b;
+  box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5);
+  animation: tknPulseAmber 1.8s infinite;
+}
+
+.tkn-dot-blue {
+  background: #0071e3 !important;
+  box-shadow: 0 0 0 0 rgba(0, 113, 227, 0.5) !important;
+  animation: tknPulseBlue 1.8s infinite !important;
+}
+
+@keyframes tknPulseAmber {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+}
+
+@keyframes tknPulseBlue {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 113, 227, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(0, 113, 227, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 113, 227, 0); }
+}
+
+.tkn-pix-divider {
+  height: 1px;
+  background: #f2f2f7;
+  margin: 0 32px 24px;
+}
+
+/* Área Central QR Code com Cantos Teal */
+.tkn-pix-qr-center-area {
+  text-align: center;
+  padding: 0 32px 28px;
+}
+
+.tkn-pix-frame-wrap {
+  position: relative;
+  display: inline-block;
+  padding: 16px;
+  background: #ffffff;
+  border-radius: 20px;
+}
+
+.tkn-pix-corner {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border-color: #00b09b;
+  border-style: solid;
+  pointer-events: none;
+}
+
+.tkn-pix-corner-tl {
+  top: 4px;
+  left: 4px;
+  border-width: 3.5px 0 0 3.5px;
+  border-top-left-radius: 12px;
+}
+
+.tkn-pix-corner-tr {
+  top: 4px;
+  right: 4px;
+  border-width: 3.5px 3.5px 0 0;
+  border-top-right-radius: 12px;
+}
+
+.tkn-pix-corner-bl {
+  bottom: 4px;
+  left: 4px;
+  border-width: 0 0 3.5px 3.5px;
+  border-bottom-left-radius: 12px;
+}
+
+.tkn-pix-corner-br {
+  bottom: 4px;
+  right: 4px;
+  border-width: 0 3.5px 3.5px 0;
+  border-bottom-right-radius: 12px;
+}
+
+.tkn-pix-qr-render {
+  display: block;
+  width: 250px;
+  height: 250px;
+  border-radius: 10px;
+  margin: 0 auto;
+}
+
+.tkn-pix-qr-instruction {
+  font-size: 14px;
+  color: #6e6e73;
+  margin: 16px auto 0;
+  max-width: 380px;
+  line-height: 1.45;
+}
+
+/* Seção Copia e Cola */
+.tkn-pix-copy-section {
+  padding: 0 32px 24px;
+}
+
+.tkn-pix-copy-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.tkn-pix-copy-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #1d1d1f;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.tkn-pix-copy-hint {
+  font-size: 11px;
+  font-weight: 600;
+  color: #86868b;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.tkn-pix-copy-box {
+  background: #fbfbfd;
+  border: 1px solid #e5e5ea;
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tkn-pix-copy-code-area {
+  background: #ffffff;
+  border: 1px solid #d1d1d6;
+  border-radius: 10px;
+  padding: 12px 14px;
+  max-height: 64px;
+  overflow: hidden;
+}
+
+.tkn-pix-copy-code-area code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  color: #1d1d1f;
+  word-break: break-all;
+  display: block;
+  line-height: 1.4;
+}
+
+.tkn-pix-action-btn {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #0071e3;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.25);
+}
+
+.tkn-pix-action-btn:hover {
+  background: #0077ed;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 113, 227, 0.35);
+}
+
+.tkn-pix-action-btn.is-copied {
+  background: #16a34a;
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.25);
+}
+
+/* Banner de E-mail Transacional */
+.tkn-pay-email-banner {
+  margin: 0 32px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: #f0f7ff;
+  border: 1px solid #d0e5ff;
+  border-radius: 14px;
+}
+
+.tkn-pay-email-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #0071e3;
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.tkn-pay-email-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #005bb5;
+  margin: 0 0 2px;
+}
+
+.tkn-pay-email-sub {
+  font-size: 12px;
+  color: #48484a;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Card Como Pagar */
+.tkn-pix-steps-card {
+  margin: 0 32px 24px;
+  background: #fafafc;
+  border: 1px solid #f0f0f4;
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.tkn-pix-steps-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #1d1d1f;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin: 0 0 14px 0;
+}
+
+.tkn-pix-step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.tkn-pix-step-item:last-child {
+  margin-bottom: 0;
+}
+
+.tkn-pix-step-number {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #0071e3;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.tkn-pix-step-desc {
+  font-size: 13px;
+  color: #48484a;
+  line-height: 1.45;
+}
+
+/* Boleto Specific */
+.tkn-pill-boleto {
+  background: #f3f4f6 !important;
+  color: #1f2937 !important;
+  border-color: #e5e7eb !important;
+}
+
+.tkn-boleto-barcode-center {
+  padding: 0 32px 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.tkn-boleto-barcode-center svg {
+  max-width: 440px;
+  height: 52px;
+}
+
+.tkn-boleto-code-font code {
+  font-size: 14px !important;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+.tkn-boleto-actions-center {
+  padding: 0 32px 20px;
+  text-align: center;
+}
+
+.tkn-btn-view-boleto {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #ffffff;
+  color: #0071e3;
+  border: 1.5px solid #0071e3;
+  border-radius: 12px;
+  padding: 13px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tkn-btn-view-boleto:hover {
+  background: #f0f7ff;
+  border-color: #005bb5;
+  color: #005bb5;
+}
+
+/* Modal do Boleto Oficial */
+.tkn-boleto-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.tkn-boleto-modal-content {
+  background: #ffffff;
+  width: 100%;
+  max-width: 780px;
+  max-height: 90vh;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.tkn-boleto-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  border-bottom: 1px solid #e5e5ea;
+  background: #fbfbfd;
+}
+
+.tkn-boleto-modal-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1d1d1f;
+}
+
+.tkn-boleto-modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tkn-btn-modal-print {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #0071e3;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tkn-btn-modal-print:hover {
+  background: #0077ed;
+}
+
+.tkn-btn-modal-close {
+  background: #e5e5ea;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  color: #48484a;
+}
+
+.tkn-btn-modal-close:hover {
+  background: #d1d1d6;
+}
+
+/* Documento Printable Slip */
+.tkn-boleto-printable-slip {
+  padding: 32px;
+  background: #ffffff;
+  color: #000000;
+  font-family: Arial, sans-serif;
+}
+
+.tkn-b-slip-bank-header {
+  display: flex;
+  align-items: center;
+  border-bottom: 2px solid #000;
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+.tkn-b-slip-bank-logo {
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  padding-right: 16px;
+  border-right: 2px solid #000;
+}
+
+.tkn-b-slip-bank-code {
+  font-size: 18px;
+  font-weight: 800;
+  padding: 0 16px;
+  border-right: 2px solid #000;
+}
+
+.tkn-b-slip-digitable {
+  font-family: monospace;
+  font-size: 15px;
+  font-weight: 700;
+  padding-left: 16px;
+  letter-spacing: 0.5px;
+}
+
+.tkn-b-slip-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.tkn-b-td {
+  border: 1px solid #666;
+  padding: 6px 8px;
+  vertical-align: top;
+}
+
+.tkn-b-label {
+  display: block;
+  font-size: 9px;
+  color: #555;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.tkn-b-val {
+  display: block;
+  font-size: 12px;
+  color: #000;
+}
+
+.tkn-b-highlight {
+  background: #fafafa;
+}
+
+.tkn-b-highlight .tkn-b-val {
+  font-size: 14px;
+}
+
+.tkn-b-instructions {
+  font-size: 11px;
+}
+
+.tkn-b-inst-p {
+  margin: 4px 0;
+  color: #333;
+}
+
+.tkn-b-payer {
+  background: #fbfbfd;
+}
+
+.tkn-b-slip-barcode-area {
+  padding-top: 16px;
+  text-align: left;
+}
+
+.tkn-b-slip-barcode-area svg {
+  height: 60px;
+  max-width: 480px;
+}
+
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  #printable-boleto, #printable-boleto * {
+    visibility: visible !important;
+  }
+  #printable-boleto {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    padding: 0 !important;
+  }
+  .tkn-boleto-modal-overlay {
+    position: static !important;
+    background: none !important;
+  }
+  .tkn-boleto-modal-header {
+    display: none !important;
+  }
+}
+
+/* ==========================================================================
+   MERCADO PAGO 1:1 OFFICIAL LAYOUT (PIX & BOLETO)
+   ========================================================================== */
+.tkn-mp-card {
+  width: 100%;
+  max-width: 540px;
+  margin: 16px auto 48px;
+  background: #ffffff;
+  border: 1px solid #e9ecef;
+  border-radius: 24px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+  padding: 32px;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  text-align: left;
+}
+
+/* Pix: composição mais limpa e centralizada, conforme a referência visual. */
+.tkn-mp-pix-card {
+  width: min(456px, calc(100% - 32px)) !important;
+  max-width: 456px !important;
+  margin: 28px auto 48px;
+  padding: 24px !important;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.tkn-mp-pix-card .tkn-mp-top-row {
+  margin-bottom: 18px;
+}
+
+.tkn-mp-pix-card .tkn-mp-amount-value {
+  font-size: 30px;
+  line-height: 1.15;
+}
+
+.tkn-mp-pix-card .tkn-mp-qr-img,
+.tkn-mp-pix-card .tkn-mp-qr-skeleton {
+  width: 220px;
+  height: 220px;
+}
+
+.tkn-mp-pix-card .tkn-mp-qr-section {
+  margin-bottom: 22px;
+}
+
+.tkn-mp-pix-card .tkn-mp-copia-cola-block {
+  margin-bottom: 18px;
+}
+
+/* Top Row (Badges) */
+.tkn-mp-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.tkn-mp-badge-pix {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: linear-gradient(135deg, #e0faf2 0%, #c9f5e6 100%);
+  color: #007a5e;
+  border: 1.5px solid #7dd9be;
+  border-radius: 20px;
+  padding: 8px 16px 8px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  letter-spacing: -0.1px;
+  box-shadow: 0 2px 8px rgba(0, 176, 155, 0.15);
+  transition: box-shadow 0.2s ease;
+}
+
+.tkn-mp-badge-pix svg {
+  flex-shrink: 0;
+  filter: drop-shadow(0 1px 2px rgba(0, 138, 123, 0.2));
+}
+
+.tkn-mp-badge-timer {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f4f4f6;
+  color: #555555;
+  border-radius: 12px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  border: 1px solid #e5e7eb;
+  white-space: nowrap;
+  transition: color .2s ease, background .2s ease, border-color .2s ease;
+}
+
+.tkn-mp-badge-timer.is-expiring { color: #a16207; background: #fffbeb; border-color: #fcd34d; }
+.tkn-mp-badge-approved {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid #86efac;
+  border-radius: 12px;
+  background: #f0fdf4;
+  color: #15803d;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Amount Block */
+.tkn-mp-amount-block {
+  margin-bottom: 20px;
+}
+
+.tkn-mp-amount-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #666666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+.tkn-mp-amount-label.is-approved { color: #15803d; }
+
+.tkn-mp-amount-value {
+  font-size: 40px;
+  font-weight: 800;
+  color: #111111;
+  letter-spacing: -1px;
+  line-height: 1.1;
+  margin: 0 0 8px 0;
+}
+
+.tkn-mp-order-status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #555555;
+}
+
+.tkn-mp-order-num {
+  font-weight: 600;
+}
+
+.tkn-mp-dot-sep {
+  color: #c7c7cc;
+}
+
+.tkn-mp-status-awaiting {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #d97706;
+  font-weight: 600;
+}
+.tkn-mp-status-approved { display: inline-flex; align-items: center; gap: 6px; color: #15803d; font-weight: 700; }
+
+.tkn-mp-pulsing-amber-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f59e0b;
+  animation: tknPulseAmber 1.8s infinite;
+}
+.tkn-mp-payment-approved {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: -4px 0 4px;
+  padding: 14px 16px;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  background: #f0fdf4;
+  color: #166534;
+}
+.tkn-mp-payment-approved > svg { flex: 0 0 auto; margin-top: 1px; }
+.tkn-mp-payment-approved strong, .tkn-mp-payment-approved span { display: block; }
+.tkn-mp-payment-approved strong { font-size: 14px; }
+.tkn-mp-payment-approved span { margin-top: 3px; color: #3f6f4c; font-size: 12px; line-height: 1.45; }
+
+.tkn-mp-divider {
+  height: 1px;
+  background: #f0f0f2;
+  margin: 20px 0 24px 0;
+}
+
+/* QR Code Section */
+.tkn-mp-qr-section {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.tkn-mp-qr-frame {
+  position: relative;
+  display: inline-block;
+  padding: 16px;
+  background: #ffffff;
+}
+
+.tkn-mp-bracket {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border-color: #00b09b;
+  border-style: solid;
+  pointer-events: none;
+}
+
+.tkn-mp-bracket-tl {
+  top: 4px;
+  left: 4px;
+  border-width: 3px 0 0 3px;
+  border-top-left-radius: 8px;
+}
+
+.tkn-mp-bracket-tr {
+  top: 4px;
+  right: 4px;
+  border-width: 3px 3px 0 0;
+  border-top-right-radius: 8px;
+}
+
+.tkn-mp-bracket-bl {
+  bottom: 4px;
+  left: 4px;
+  border-width: 0 0 3px 3px;
+  border-bottom-left-radius: 8px;
+}
+
+.tkn-mp-bracket-br {
+  bottom: 4px;
+  right: 4px;
+  border-width: 0 3px 3px 0;
+  border-bottom-right-radius: 8px;
+}
+
+.tkn-mp-qr-img {
+  display: block;
+  width: 260px;
+  height: 260px;
+  margin: 0 auto;
+}
+
+.tkn-mp-qr-skeleton {
+  width: 260px;
+  height: 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #888;
+  font-size: 13px;
+}
+
+.tkn-mp-qr-caption {
+  font-size: 13px;
+  color: #666666;
+  max-width: 340px;
+  margin: 14px auto 0;
+  line-height: 1.45;
+}
+
+/* Copia e Cola Block */
+.tkn-mp-copia-cola-block {
+  margin-bottom: 24px;
+}
+
+.tkn-mp-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.tkn-mp-header-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #111111;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.tkn-mp-header-sub {
+  font-size: 11px;
+  font-weight: 600;
+  color: #888888;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.tkn-mp-code-box {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 16px;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.tkn-mp-code-inner {
+  background: #f9fafb;
+  border: 1px solid #e2e5e9;
+  border-radius: 10px;
+  padding: 14px 16px;
+  max-height: 80px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.tkn-mp-code-inner code {
+  font-family: 'Inter', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: #1a1a2e;
+  word-break: break-all;
+  display: block;
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+  user-select: all;
+}
+
+.tkn-mp-btn-blue {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 14px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tkn-mp-btn-blue:hover {
+  background: #1d4ed8;
+}
+
+.tkn-mp-btn-blue.is-copied {
+  background: #16a34a !important;
+}
+
+/* Email notice */
+.tkn-mp-email-notice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f0f7ff;
+  border: 1px solid #d0e5ff;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 12px;
+  color: #005bb5;
+  margin-bottom: 24px;
+}
+
+/* Steps Card ("COMO PAGAR:" / "INFORMAÇÕES IMPORTANTES:") */
+.tkn-mp-steps-card {
+  background: #fbfbfc;
+  border: 1px solid #f0f0f4;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.tkn-mp-steps-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #111111;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin: 0 0 16px 0;
+}
+
+.tkn-mp-step-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.tkn-mp-step-row:last-child {
+  margin-bottom: 0;
+}
+
+.tkn-mp-step-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.tkn-mp-step-texts strong {
+  display: block;
+  font-size: 14px;
+  color: #111111;
+  margin-bottom: 2px;
+}
+
+.tkn-mp-step-texts p {
+  font-size: 13px;
+  color: #666666;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Boleto Dark Top Button */
+.tkn-mp-boleto-top-btn-wrap {
+  margin-bottom: 24px;
+}
+
+.tkn-mp-btn-dark-print {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #1f1f23;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 14px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tkn-mp-btn-dark-print:hover {
+  background: #333338;
+}
+
+/* Footer Actions */
+.tkn-mp-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.tkn-mp-btn-orders {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #f2f2f5;
+  color: #111111;
+  text-decoration: none;
+  border-radius: 12px;
+  padding: 14px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.tkn-mp-btn-orders:hover {
+  background: #e5e5ea;
+}
+
+.tkn-mp-link-help {
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.tkn-mp-link-help:hover {
+  text-decoration: underline;
+}
+
+/* Mobile: evita overflow horizontal no card Pix e no formulário do checkout. */
+@media (max-width: 760px) {
+  #root .tkn-checkout,
+  #root .tkn-checkout-main,
+  #root .tkn-checkout-shell,
+  #root .tkn-checkout-grid,
+  #root .tkn-checkout-content,
+  #root .tkn-checkout-success-wrapper,
+  #root .tkn-mp-pix-card {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  #root .tkn-checkout-shell {
+    width: 100%;
+    padding-inline: 12px;
+  }
+
+  #root .tkn-checkout-main {
+    width: 100%;
+    padding: 16px 0 120px;
+    overflow-x: hidden;
+  }
+
+  #root .tkn-checkout-grid {
+    width: 100%;
+    display: block;
+  }
+
+  #root .tkn-checkout-success-wrapper {
+    width: 100%;
+    margin: 8px auto 32px;
+    padding-inline: 8px;
+  }
+
+  #root .tkn-checkout-success-wrapper .tkn-mp-pix-card,
+  #root .tkn-mp-pix-card {
+    width: 100% !important;
+    margin: 0 auto 28px;
+    padding: 20px 16px !important;
+    border-radius: 18px !important;
+    overflow: hidden;
+  }
+
+  /* Os cards do formulário precisam respeitar a largura real do viewport,
+     inclusive quando o checkout é renderizado dentro de wrappers editáveis. */
+  #root .tkn-checkout-content .tkn-checkout-card {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    margin-inline: 0;
+    padding: 16px;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  #root .tkn-checkout-content .tkn-checkout-card h2 {
+    margin-bottom: 18px;
+  }
+
+  #root .tkn-checkout-content .tkn-checkout-card .tkn-checkout-payment {
+    display: flex !important;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+    gap: 10px;
+    padding: 14px 10px;
+    min-height: 64px;
+    height: 64px !important;
+    height: auto !important;
+    max-height: 76px;
+    flex: 0 0 auto;
+    align-self: flex-start;
+    justify-content: flex-start !important;
+    overflow: hidden;
+  }
+
+  #root .tkn-checkout-content .tkn-checkout-payment-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  #root .tkn-checkout-content .tkn-checkout-payment small {
+    line-height: 1.35;
+  }
+
+  #root .tkn-checkout-content .tkn-checkout-payment > span {
+    display: block !important;
+    flex: 1 1 auto !important;
+    width: auto !important;
+    height: auto !important;
+    max-height: none !important;
+    white-space: normal;
+  }
+
+  #root .tkn-checkout-content .tkn-checkout-card .tkn-checkout-payment > span {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  #root .tkn-checkout-content .tkn-checkout-card .tkn-checkout-payment.is-selected {
+    border-color: #d2d2d2;
+    background: #f7f7f7;
+  }
+
+  .tkn-checkout-loading-overlay {
+    width: 100vw;
+    min-width: 100vw;
+    max-width: 100vw;
+    min-height: 100dvh;
+    box-sizing: border-box;
+    overflow: hidden;
+    background: #f7f7f7 !important;
+  }
+
+  .tkn-checkout-loading-content {
+    width: min(calc(100vw - 32px), 360px);
+    max-width: calc(100vw - 32px);
+    box-sizing: border-box;
+    overflow-wrap: anywhere;
+  }
+
+  #root .tkn-mp-pix-card .tkn-mp-top-row {
+    width: 100%;
+    align-items: stretch;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+
+  #root .tkn-mp-pix-card .tkn-mp-badge-pix,
+  #root .tkn-mp-pix-card .tkn-mp-badge-timer,
+  #root .tkn-mp-pix-card .tkn-mp-badge-approved {
+    width: 100%;
+    min-width: 0;
+    justify-content: center;
+    box-sizing: border-box;
+    white-space: normal;
+    text-align: center;
+  }
+
+  #root .tkn-mp-pix-card .tkn-mp-amount-value {
+    max-width: 100%;
+    font-size: clamp(24px, 8vw, 30px);
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+  }
+
+  #root .tkn-mp-pix-card .tkn-mp-order-status-row {
+    width: 100%;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 6px 8px;
+    line-height: 1.4;
+  }
+
+  #root .tkn-mp-pix-card .tkn-mp-order-num,
+  #root .tkn-mp-pix-card .tkn-mp-status-awaiting,
+  #root .tkn-mp-pix-card .tkn-mp-status-approved {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  #root .tkn-mp-pix-card .tkn-mp-dot-sep {
+    display: none;
+  }
+
+  #root .tkn-mp-pix-card .tkn-mp-qr-img,
+  #root .tkn-mp-pix-card .tkn-mp-qr-skeleton {
+    width: min(220px, 68vw);
+    height: min(220px, 68vw);
+  }
+
+  #root .tkn-mp-pix-card .tkn-mp-section-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  #root .tkn-mp-pix-card .tkn-mp-header-title,
+  #root .tkn-mp-pix-card .tkn-mp-header-sub {
+    max-width: 100%;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+  }
+
+  #root .tkn-mp-pix-card .tkn-mp-email-notice,
+  #root .tkn-mp-pix-card .tkn-mp-payment-approved {
+    align-items: flex-start;
+    min-width: 0;
+  }
+
+  #root .tkn-mp-pix-card .tkn-mp-email-notice span,
+  #root .tkn-mp-pix-card .tkn-mp-payment-approved div,
+  #root .tkn-mp-pix-card .tkn-mp-step-texts {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  #root #tkn-checkout-form,
+  #root #tkn-checkout-form * {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  #root #tkn-checkout-form input,
+  #root #tkn-checkout-form select,
+  #root #tkn-checkout-form textarea {
+    min-width: 0;
+    width: 100%;
+  }
+}

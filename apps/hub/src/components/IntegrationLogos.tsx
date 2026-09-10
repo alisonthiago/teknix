@@ -266,12 +266,12 @@ export function IntegrationLogoRenderer({
   className?: string
 }) {
   const c = code.toLowerCase()
-  if (c.includes('mercado') || c.includes('meli') || c.includes('ml') || c.includes('mercadolivre')) return <MercadoLivreLogo size={size} className={className} />
+  if (c.includes('pago') || c.includes('mercado_pago') || c.includes('mercado-pago')) return <MercadoPagoLogo size={size} className={className} />
+  if (c.includes('mercado') || c.includes('meli') || c === 'ml' || c.includes('mercadolivre')) return <MercadoLivreLogo size={size} className={className} />
   if (c.includes('shopee')) return <ShopeeLogo size={size} className={className} />
   if (c.includes('amazon')) return <AmazonLogo size={size} className={className} />
   if (c.includes('magalu') || c.includes('magazine')) return <MagaluLogo size={size} className={className} />
   if (c.includes('whats') || c.includes('zap')) return <WhatsAppLogo size={size} className={className} />
-  if (c.includes('pago') || c.includes('mercado_pago') || c.includes('mercado-pago')) return <MercadoPagoLogo size={size} className={className} />
   if (c.includes('asaas')) return <AsaasLogo size={size} className={className} />
   if (c.includes('focus') || c.includes('nfe')) return <FocusNfeLogo size={size} className={className} />
   if (c.includes('melhor') || c.includes('envio')) return <MelhorEnvioLogo size={size} className={className} />

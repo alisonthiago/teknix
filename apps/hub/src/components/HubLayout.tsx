@@ -3,6 +3,7 @@ import { Link, useLocation, Outlet } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { usePermissions } from '../hooks/usePermissions'
 import AccessDenied from './AccessDenied'
+import HubToast from './HubToast'
 import {
   MercadoLivreLogo,
   ShopeeLogo,
@@ -142,7 +143,7 @@ export default function HubLayout() {
       section: 'Financeiro',
       items: [
         { icon: 'dollar', label: 'Financeiro', path: '/hub/financeiro', perm: 'finance.view' },
-        { icon: 'creditCard', label: 'Mercado Pago', path: '/hub/mercado-pago', perm: 'mercado_pago.view' },
+        { icon: 'creditCard', label: 'Pagamentos', path: '/hub/pagamentos', perm: 'mercado_pago.view' },
       ]
     },
     {
@@ -175,6 +176,7 @@ export default function HubLayout() {
 
   return (
     <div className={`hub-layout ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
+      <HubToast />
 
       {/* ── Sidebar (estilo visual FLOW, funcionalidade original) ── */}
       <aside className="hub-sidebar">
@@ -252,9 +254,11 @@ export default function HubLayout() {
                 <line x1="3" y1="18" x2="21" y2="18"/>
               </svg>
             </button>
-            <h1 className="hub-page-title">
-              {getPageTitle(location.pathname)}
-            </h1>
+            {location.pathname.includes('/avisos-estoque') ? null : (
+              <h1 className="hub-page-title">
+                {getPageTitle(location.pathname)}
+              </h1>
+            )}
           </div>
 
           <div className="hub-header-right">
@@ -364,6 +368,7 @@ function getPageTitle(pathname: string): string {
   if (pathname.includes('/pedidos')) return 'Pedidos'
   if (pathname.includes('/clientes')) return 'Clientes'
   if (pathname.includes('/financeiro')) return 'Financeiro'
+  if (pathname.includes('/pagamentos')) return 'Pagamentos'
   if (pathname.includes('/mercado-livre')) return 'Mercado Livre'
   if (pathname.includes('/shopee')) return 'Shopee'
   if (pathname.includes('/amazon')) return 'Amazon'

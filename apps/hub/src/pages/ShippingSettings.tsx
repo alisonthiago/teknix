@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { notifyHub } from '../lib/hubNotifications'
 import './ShippingSettings.css'
 
 interface ShippingConfig {
@@ -40,7 +42,15 @@ const initialConfig: ShippingConfig = {
 }
 
 export default function ShippingSettings() {
-  const [config, setConfig] = useState<ShippingConfig>(initialConfig)
+  const navigate = useNavigate()
+  const [config, setConfig] = useState<ShippingConfig>(() => {
+    try {
+      const saved = localStorage.getItem('teknix:hub:shipping')
+      return saved ? { ...initialConfig, ...JSON.parse(saved) } : initialConfig
+    } catch {
+      return initialConfig
+    }
+  })
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<{type: 'success' | 'error', text: string} | null>(null)
 
@@ -51,14 +61,17 @@ export default function ShippingSettings() {
   function handleSave() {
     setSaving(true)
     setMessage(null)
-    
-    // Simulating API call
-    setTimeout(() => {
+    try {
+      localStorage.setItem('teknix:hub:shipping', JSON.stringify(config))
       setSaving(false)
       setMessage({ type: 'success', text: 'Configurações de entrega salvas com sucesso!' })
-      
+      notifyHub('Configurações de entrega salvas com sucesso!')
       setTimeout(() => setMessage(null), 3000)
-    }, 1000)
+    } catch {
+      setSaving(false)
+      setMessage({ type: 'error', text: 'Não foi possível salvar as configurações de entrega.' })
+      notifyHub('Não foi possível salvar as configurações de entrega.', 'error')
+    }
   }
 
   return (
@@ -285,7 +298,7 @@ export default function ShippingSettings() {
               <div className="integration-icon">🚛</div>
               <h4>Conecte sua conta Kangu ou Melhor Envio</h4>
               <p>O módulo de transportadoras é gerido via integrações para calcular centenas de tabelas automaticamente.</p>
-              <button className="btn btn-secondary">Explorar Integrações</button>
+              <button className="btn btn-secondary" onClick={() => navigate('/hub/integracoes')}>Explorar Integrações</button>
             </div>
           </div>
         </div>

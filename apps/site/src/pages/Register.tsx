@@ -9,7 +9,7 @@ import './Register.css'
 export default function Register() {
   const [params] = useSearchParams()
   const navigate = useNavigate()
-  const { signUp, signInWithGoogle, user } = useAuth()
+  const { signUp, signInWithGoogle, user, loading: authLoading } = useAuth()
   const redirectTarget = params.get('redirect') || '/conta'
   const documentNumber = params.get('document') || ''
   const initialEmail = params.get('email') || ''
@@ -69,18 +69,23 @@ export default function Register() {
     <main className="register-page">
       <header className="register-topbar">
         <Link to="/" aria-label="Ir para a página inicial"><Editable as="img" widgetId="register-1" src="/teknix-logo.svg" alt="TEKNIX" /></Link>
+        {authLoading ? null : user ? (
+          <Link className="register-account-link" to="/conta">Minha conta</Link>
+        ) : (
+          <Link className="register-account-link" to="/login">Entrar</Link>
+        )}
       </header>
       <div className="register-layout">
         <aside className="register-benefits" aria-label="Vantagens da conta TEKNIX">
           <div>
             <span className="register-kicker">CONTA TEKNIX</span>
             <Editable as="h2" widgetId="register-2">Compre com mais praticidade.</Editable>
-            <Editable as="p" widgetId="register-3">Crie sua conta para acompanhar seus pedidos, salvar produtos e receber ofertas relevantes.</Editable>
+            <Editable as="p" widgetId="register-3">Crie sua conta para acompanhar pedidos, salvar produtos e receber ofertas.</Editable>
           </div>
           <ul>
-            <li><Check size={18} /> Acompanhe seus pedidos</li>
-            <li><Check size={18} /> Salve seus produtos favoritos</li>
-            <li><Check size={18} /> Finalize suas compras mais rápido</li>
+            <li><Check size={16} /> Acompanhe pedidos</li>
+            <li><Check size={16} /> Salve favoritos</li>
+            <li><Check size={16} /> Compre mais rápido</li>
           </ul>
         </aside>
         <Editable content={{}} as="section" widgetId="register-4" className="register-form-area">
@@ -104,7 +109,13 @@ export default function Register() {
           <form className="register-form" onSubmit={handleSubmit}>
             {error && <div className="register-error" role="alert">{error}</div>}
             <label>Nome completo<input value={name} onChange={event => setName(event.target.value)} placeholder="Insira seu nome completo" autoComplete="name" /></label>
-            <label>Celular com DDD<input value={phone} onChange={event => setPhone(event.target.value)} placeholder="(00) 00000-0000" inputMode="tel" autoComplete="tel" /></label>
+            <label>
+              Celular com DDD
+              <div className="register-phone-row">
+                <span className="register-phone-prefix">+55</span>
+                <input value={phone} onChange={event => setPhone(event.target.value)} placeholder="(00) 00000-0000" inputMode="tel" autoComplete="tel-national" />
+              </div>
+            </label>
             <label>Data de nascimento<input value={birthDate} onChange={event => setBirthDate(event.target.value)} type="date" autoComplete="bday" /></label>
             <label>E-mail<input value={email} onChange={event => setEmail(event.target.value)} type="email" placeholder="seuemail@dominio.com.br" autoComplete="email" /></label>
             <label>Confirme o e-mail<input value={confirmEmail} onChange={event => setConfirmEmail(event.target.value)} type="email" placeholder="Digite novamente seu e-mail" autoComplete="email" /></label>

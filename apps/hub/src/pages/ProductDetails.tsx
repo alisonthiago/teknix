@@ -405,22 +405,36 @@ export default function ProductDetails() {
   const storeMeta = Array.isArray((product as any).store_meta) ? (product as any).store_meta[0] : (product as any).store_meta
   const editorial = (product as any).editorial_showcase || (productSpecs as any)?.editorial_showcase || {}
   const presentationImages = Array.isArray((editorial as any).presentation_images) ? (editorial as any).presentation_images : []
+  const imageValue = (image: any): string[] => {
+    if (typeof image === 'string') return [image]
+    if (!image || typeof image !== 'object') return []
+    return [image.url, image.image_url, image.src].filter(
+      (value): value is string => typeof value === 'string' && value.trim().length > 0
+    )
+  }
   const editorialImages = [
-    (editorial as any)?.hero?.image_url,
-    (editorial as any)?.performance?.image_url,
-    ...presentationImages,
+    ...imageValue((editorial as any)?.hero?.image_url),
+    ...imageValue((editorial as any)?.performance?.image_url),
+    ...presentationImages.flatMap(imageValue),
   ]
   const relatedImages = Array.isArray((product as any).product_images)
     ? (product as any).product_images
       .slice()
       .sort((a: any, b: any) => (a.sort_order ?? a.display_order ?? 0) - (b.sort_order ?? b.display_order ?? 0))
-      .map((image: any) => image.url)
+      .flatMap(imageValue)
     : []
+  const productImages = Array.isArray((product as any).images)
+    ? (product as any).images.flatMap(imageValue)
+    : imageValue((product as any).images)
+  const specificationImages = Array.isArray(productSpecs)
+    ? productSpecs.flatMap(imageValue)
+    : imageValue((productSpecs as any).gallery_images)
+  const metadataImages = imageValue((storeMeta as any)?.gallery_images)
   const galleryImages = [
     ...relatedImages,
-    ...((product as any).images || []),
-    ...(Array.isArray(productSpecs) ? productSpecs : ((productSpecs as any).gallery_images || [])),
-    ...((storeMeta as any)?.gallery_images || []),
+    ...productImages,
+    ...specificationImages,
+    ...metadataImages,
     ...editorialImages,
   ].filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
   const imgUrl = galleryImages[0] || product.main_image || product.image_url || ''
