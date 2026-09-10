@@ -44,6 +44,17 @@ function safeEqual(a: string, b: string) {
   return left.length === right.length && timingSafeEqual(left, right)
 }
 
+function isRegistrationProbe(body: string): boolean {
+  const trimmed = body.trim()
+  if (!trimmed) return true
+  try {
+    const payload = JSON.parse(trimmed) as unknown
+    return Boolean(payload && typeof payload === 'object' && !Array.isArray(payload) && Object.keys(payload).length === 0)
+  } catch {
+    return false
+  }
+}
+
 function sanitisePayload(payload: Payload) {
   const data = payload.data || {}
   return {
@@ -82,6 +93,13 @@ export async function POST(request: NextRequest) {
   const rawBody = await request.text()
   const secret = process.env.MELHOR_ENVIO_WEBHOOK_SECRET
   const signature = request.headers.get('x-me-signature')
+
+  // The Melhor Envio dashboard sends an unsigned probe when registering a URL.
+  // Only an empty probe is accepted; event payloads remain signature-protected.
+  if (!signature && isRegistrationProbe(rawBody)) {
+    console.info('[Melhor Envio webhook] registration probe accepted', { correlationId })
+    return NextResponse.json({ ok: true }, { status: 200 })
+  }
 
   if (!secret || !signature) {
     return NextResponse.json({ received: false, error: 'Webhook não configurado' }, { status: 401 })

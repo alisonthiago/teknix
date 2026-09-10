@@ -80,6 +80,17 @@ function requestDiagnostics(request: VercelRequest, body: string, signature: str
   }
 }
 
+function isRegistrationProbe(body: string): boolean {
+  const trimmed = body.trim()
+  if (!trimmed) return true
+  try {
+    const payload = JSON.parse(trimmed) as unknown
+    return Boolean(payload && typeof payload === 'object' && !Array.isArray(payload) && Object.keys(payload).length === 0)
+  } catch {
+    return false
+  }
+}
+
 function sanitisePayload(payload: Payload) {
   const data = payload.data || {}
   return {
@@ -126,6 +137,13 @@ export default async function handler(request: VercelRequest, response: VercelRe
   const diagnostics = requestDiagnostics(request, body, signature)
 
   console.info('[Melhor Envio webhook] request received', { correlationId, ...diagnostics })
+
+  // The Melhor Envio dashboard sends an unsigned probe when registering a URL.
+  // Only an empty probe is accepted; event payloads remain signature-protected.
+  if (!signature && isRegistrationProbe(body)) {
+    console.info('[Melhor Envio webhook] registration probe accepted', { correlationId })
+    return response.status(200).json({ ok: true })
+  }
 
   if (!secret || !signature) {
     console.warn('[Melhor Envio webhook] rejected: missing authentication', { correlationId, ...diagnostics })
