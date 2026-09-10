@@ -1,5 +1,12 @@
 {
   "framework": "nextjs",
+  "buildCommand": "pnpm build",
+  "rewrites": [
+    {
+      "source": "/webhooks/melhor-envio",
+      "destination": "/api/webhooks/melhor-envio"
+    }
+  ],
   "crons": [
     {
       "path": "/api/cron/refresh-tokens",

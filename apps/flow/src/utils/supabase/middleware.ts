@@ -15,6 +15,13 @@ const ROUTE_PERMISSIONS: Record<string, string> = {
 const ADMIN_ONLY_ROUTES = ['/users']
 
 export async function updateSession(request: NextRequest) {
+  // Webhooks are called by Melhor Envio without a user session. Keep this
+  // endpoint public; authentication and signature validation happen in the
+  // route handler itself.
+  if (/^\/webhooks\/melhor-envio\/?$/.test(request.nextUrl.pathname)) {
+    return NextResponse.next()
+  }
+
   let supabaseResponse = NextResponse.next({
     request,
   })
