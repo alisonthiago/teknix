@@ -4,8 +4,8 @@
 -- Registra o provedor Brevo na tabela integration_configs
 -- para que o integrations-proxy possa buscar a API key.
 --
--- IMPORTANTE: Substitua 'SUA_API_KEY_BREVO_AQUI' pela API key real
--- obtida em app.brevo.com > SMTP & API > API Keys
+-- A API key não deve ser colocada nesta migration. Configure-a somente
+-- no ambiente seguro ou pelo Hub após a migration.
 -- ============================================================
 
 BEGIN;
@@ -17,8 +17,8 @@ INSERT INTO public.integration_configs (
   category,
   environment,
   status,
+  enabled,
   credentials,
-  settings,
   created_at,
   updated_at
 )
@@ -28,23 +28,14 @@ VALUES (
   'email',
   'production',
   'pending_credentials',
-  '{"apiKey": ""}'::jsonb,  -- Preencher com a API key real do Brevo
-  '{
-    "senderEmail": "noreply@teknixbrasil.com.br",
-    "senderName": "TEKNIX",
-    "templates": {
-      "pix_pending": "Aguardando pagamento Pix — inclui código copia e cola",
-      "payment_approved": "Pagamento aprovado — confirmação de compra",
-      "order_shipped": "Pedido enviado — com código de rastreamento"
-    }
-  }'::jsonb,
+  false,
+  '{"apiKey": ""}'::jsonb,
   now(),
   now()
 )
 ON CONFLICT (id) DO UPDATE SET
   name = EXCLUDED.name,
   category = EXCLUDED.category,
-  settings = EXCLUDED.settings,
   updated_at = now();
 
 COMMIT;
@@ -59,7 +50,8 @@ COMMIT;
 --    UPDATE public.integration_configs
 --    SET
 --      credentials = '{"apiKey": "YOUR_BREVO_API_KEY"}'::jsonb,
---      status = 'connected'
+--      status = 'connected',
+--      enabled = true
 --    WHERE id = 'brevo';
 --
 -- 4. Ou via Hub > Integrações > Brevo > Configurar
