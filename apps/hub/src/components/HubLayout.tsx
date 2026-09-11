@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { usePermissions } from '../hooks/usePermissions'
@@ -86,10 +86,61 @@ function HubLayoutContent() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [showUserDropdown, setShowUserDropdown] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
+  const [notificationTab, setNotificationTab] = useState<'all' | 'unread'>('all')
+  const notifDropdownRef = useRef<HTMLDivElement>(null)
+  const userDropdownRef = useRef<HTMLDivElement>(null)
   const location = useLocation()
   const navigate = useNavigate()
 
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useHubNotifications()
+
+  // Fechar popup de notificações e usuário ao clicar fora ou apertar Esc
+  useEffect(() => {
+    function handleDocumentClick(e: MouseEvent) {
+      if (notifDropdownRef.current && !notifDropdownRef.current.contains(e.target as Node)) {
+        setShowNotifications(false)
+      }
+      if (userDropdownRef.current && !userDropdownRef.current.contains(e.target as Node)) {
+        setShowUserDropdown(false)
+      }
+    }
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        setShowNotifications(false)
+        setShowUserDropdown(false)
+      }
+    }
+
+    if (showNotifications || showUserDropdown) {
+      document.addEventListener('mousedown', handleDocumentClick)
+      document.addEventListener('keydown', handleKeyDown)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleDocumentClick)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [showNotifications, showUserDropdown])
+
+  function formatRelativeTime(dateStr: string) {
+    try {
+      const date = new Date(dateStr)
+      const diffMs = Date.now() - date.getTime()
+      const diffSec = Math.floor(diffMs / 1000)
+      if (diffSec < 60) return 'Agora mesmo'
+      const mins = Math.floor(diffSec / 60)
+      if (mins < 60) return `${mins}m atrás`
+      const hours = Math.floor(mins / 60)
+      if (hours < 24) return `${hours}h atrás`
+      const days = Math.floor(hours / 24)
+      if (days === 1) return 'Ontem'
+      if (days < 7) return `${days}d atrás`
+      return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
+    } catch {
+      return 'Recente'
+    }
+  }
 
   const { can, canAccessRoute, role, isMaster } = usePermissions()
 
@@ -304,7 +355,7 @@ function HubLayoutContent() {
 
           <div className="hub-header-right">
             {/* Lime Capsule Pill (FLOW 1:1) */}
-            <div style={{ position: 'relative' }}>
+            <div style={{ position: 'relative' }} ref={notifDropdownRef}>
               <div className="mp-header-pill-hub">
                 {/* Chat Interno TEKNIX (1:1 com FLOW) */}
                 <HubChatPillButton />
@@ -347,36 +398,72 @@ function HubLayoutContent() {
 
               {showNotifications && (
                 <div className="flow-notification-dropdown" onClick={e => e.stopPropagation()}>
+                  {/* Mercado Livre Notification Center Header */}
                   <div className="flow-notification-header">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <strong>Alertas & Notificações</strong>
-                      {unreadCount > 0 && <span>{unreadCount} nova{unreadCount > 1 ? 's' : ''}</span>}
+                    <div className="flow-notification-top-row">
+                      <h3 className="flow-notification-title">Notificações</h3>
+                      {unreadCount > 0 && (
+                        <button
+                          type="button"
+                          className="flow-notification-mark-read-btn"
+                          onClick={() => markAllAsRead()}
+                        >
+                          Marcar todas como lidas
+                        </button>
+                      )}
                     </div>
-                    {unreadCount > 0 && (
+                    <div className="flow-notification-tabs">
                       <button
                         type="button"
-                        onClick={() => markAllAsRead()}
-                        style={{
-                          background: 'transparent',
-                          border: 'none',
-                          color: '#2563eb',
-                          fontSize: '11.5px',
-                          cursor: 'pointer',
-                          fontWeight: 600,
-                          padding: '2px 4px'
-                        }}
+                        className={`flow-notification-tab ${notificationTab === 'all' ? 'active' : ''}`}
+                        onClick={() => setNotificationTab('all')}
                       >
-                        Marcar todas como lidas
+                        Todas
                       </button>
-                    )}
+                      <button
+                        type="button"
+                        className={`flow-notification-tab ${notificationTab === 'unread' ? 'active' : ''}`}
+                        onClick={() => setNotificationTab('unread')}
+                      >
+                        Não lidas
+                        {unreadCount > 0 && (
+                          <span className="flow-notification-tab-badge">{unreadCount}</span>
+                        )}
+                      </button>
+                    </div>
                   </div>
+
+                  {/* Notification Items List */}
                   <div className="flow-notification-list">
-                    {notifications.length === 0 ? (
-                      <div style={{ padding: '28px 16px', textAlign: 'center', color: '#6b7280', fontSize: '13px' }}>
-                        Nenhuma notificação no momento.
-                      </div>
-                    ) : (
-                      notifications.slice(0, 15).map((item) => {
+                    {(() => {
+                      const list = notificationTab === 'unread'
+                        ? notifications.filter(n => !n.is_read)
+                        : notifications
+
+                      if (list.length === 0) {
+                        return (
+                          <div className="flow-notification-empty">
+                            <div className="flow-notification-empty-icon">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width="22" height="22">
+                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                              </svg>
+                            </div>
+                            <p className="flow-notification-empty-title">
+                              {notificationTab === 'unread'
+                                ? 'Nenhuma notificação não lida'
+                                : 'Você não tem notificações'}
+                            </p>
+                            <p className="flow-notification-empty-desc">
+                              {notificationTab === 'unread'
+                                ? 'Você leu todas as notificações recentes.'
+                                : 'Atualizações sobre vendas, pedidos e novidades aparecerão aqui.'}
+                            </p>
+                          </div>
+                        )
+                      }
+
+                      return list.slice(0, 18).map((item) => {
                         const mod = String(item.module || '').toLowerCase()
                         const type = String(item.type || '').toLowerCase()
                         const isSale = mod === 'sale' || mod === 'order' || type === 'order'
@@ -387,33 +474,91 @@ function HubLayoutContent() {
                         const isInvoice = mod === 'invoice'
                         const isError = type === 'error'
 
-                        let iconSymbol: React.ReactElement = <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5 9.5 17 19 7.5" /></svg>
-                        let iconBg = '#ecfdf5'
-                        let iconColor = '#059669'
+                        let iconSymbol: React.ReactElement = (
+                          <svg viewBox="0 0 24 24">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                          </svg>
+                        )
+                        let iconBg = '#f0f4f8'
+                        let iconColor = '#475569'
 
-                        if (isSale) { iconSymbol = <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="20" r="1" /><circle cx="19" cy="20" r="1" /><path d="M3 4h2l2.4 10.2a2 2 0 0 0 2 1.5h7.8a2 2 0 0 0 1.9-1.5L21 8H6" /></svg>; iconBg = '#ecfdf5'; iconColor = '#059669' }
-                        else if (isPix || isPayment) { iconSymbol = <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2" /><path d="M2.5 9h19M6 14h4" /></svg>; iconBg = '#eff6ff'; iconColor = '#2563eb' }
-                        else if (isStock) { iconSymbol = <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z" /><path d="m4.5 7.5 7.5 4 7.5-4M12 12v9" /></svg>; iconBg = '#fffbeb'; iconColor = '#d97706' }
-                        else if (isShipment) { iconSymbol = <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h11v10H3zM14 10h4l3 3v3h-7z" /><circle cx="7" cy="19" r="1.5" /><circle cx="18" cy="19" r="1.5" /></svg>; iconBg = '#f0f9ff'; iconColor = '#0284c7' }
-                        else if (isInvoice) { iconSymbol = <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z" /><path d="M9 8h6M9 12h6" /></svg>; iconBg = '#f5f3ff'; iconColor = '#7c3aed' }
-                        else if (isError) { iconSymbol = <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.8 20h18.4L12 3Z" /><path d="M12 9v5M12 17h.01" /></svg>; iconBg = '#fef2f2'; iconColor = '#dc2626' }
+                        if (isSale) {
+                          // Mercado Livre green cart
+                          iconSymbol = (
+                            <svg viewBox="0 0 24 24">
+                              <circle cx="9" cy="20" r="1.5"/>
+                              <circle cx="19" cy="20" r="1.5"/>
+                              <path d="M2.5 3h3l2.4 10.5a2 2 0 0 0 2 1.5h7.6a2 2 0 0 0 1.9-1.4l2.1-8.6H6.5"/>
+                            </svg>
+                          )
+                          iconBg = '#e8f8ee'
+                          iconColor = '#00a650'
+                        } else if (isPix || isPayment) {
+                          // Mercado Pago blue payment
+                          iconSymbol = (
+                            <svg viewBox="0 0 24 24">
+                              <rect x="2.5" y="5" width="19" height="14" rx="2.5"/>
+                              <line x1="2.5" y1="10" x2="21.5" y2="10"/>
+                              <line x1="6" y1="15" x2="10" y2="15"/>
+                            </svg>
+                          )
+                          iconBg = '#ebf3fe'
+                          iconColor = '#2563eb'
+                        } else if (isStock) {
+                          // Amber stock box
+                          iconSymbol = (
+                            <svg viewBox="0 0 24 24">
+                              <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
+                              <path d="m3.3 7 8.7 5 8.7-5"/>
+                              <path d="M12 22V12"/>
+                            </svg>
+                          )
+                          iconBg = '#fff5e5'
+                          iconColor = '#ea580c'
+                        } else if (isShipment) {
+                          // Mercado Envios delivery truck
+                          iconSymbol = (
+                            <svg viewBox="0 0 24 24">
+                              <rect x="2" y="4" width="13" height="11" rx="1.5"/>
+                              <polygon points="15 8 19 8 22 12 22 15 15 15 15 8"/>
+                              <circle cx="6" cy="18.5" r="2"/>
+                              <circle cx="18" cy="18.5" r="2"/>
+                            </svg>
+                          )
+                          iconBg = '#e5f5fc'
+                          iconColor = '#0284c7'
+                        } else if (isInvoice) {
+                          // Fiscal purple invoice
+                          iconSymbol = (
+                            <svg viewBox="0 0 24 24">
+                              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                              <polyline points="14 2 14 8 20 8"/>
+                              <line x1="16" y1="13" x2="8" y2="13"/>
+                              <line x1="16" y1="17" x2="8" y2="17"/>
+                            </svg>
+                          )
+                          iconBg = '#f3ebff'
+                          iconColor = '#7c3aed'
+                        } else if (isError) {
+                          // Red alert
+                          iconSymbol = (
+                            <svg viewBox="0 0 24 24">
+                              <circle cx="12" cy="12" r="10"/>
+                              <line x1="12" y1="8" x2="12" y2="12"/>
+                              <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                          )
+                          iconBg = '#feeaea'
+                          iconColor = '#dc2626'
+                        }
 
-                        const diffMs = Date.now() - new Date(item.created_at).getTime()
-                        const mins = Math.floor(diffMs / 60000)
-                        let timeStr = 'agora'
-                        if (mins >= 1 && mins < 60) timeStr = `${mins}m atrás`
-                        else if (mins >= 60 && mins < 1440) timeStr = `${Math.floor(mins / 60)}h atrás`
-                        else if (mins >= 1440) timeStr = `${Math.floor(mins / 1440)}d atrás`
+                        const timeStr = formatRelativeTime(item.created_at)
 
                         return (
                           <div
-                            className="flow-notification-item"
                             key={item.id}
-                            style={{
-                              cursor: 'pointer',
-                              background: item.is_read ? '#ffffff' : '#f0fdf4',
-                              borderColor: item.is_read ? '#e8ebef' : '#86efac'
-                            }}
+                            className={`flow-notification-item ${item.is_read ? 'read' : 'unread'}`}
                             onClick={() => {
                               if (!item.is_read) markAsRead(item.id)
                               setShowNotifications(false)
@@ -424,20 +569,26 @@ function HubLayoutContent() {
                               {iconSymbol}
                             </div>
                             <div className="flow-notification-content">
-                              <div className="flow-notification-text">
-                                <strong style={{ fontWeight: item.is_read ? 500 : 700 }}>{item.title}</strong>
-                                {item.message && <span> — {item.message}</span>}
-                              </div>
-                              <small>{timeStr}</small>
+                              <h4 className="flow-notification-item-title">{item.title}</h4>
+                              {item.message && (
+                                <p className="flow-notification-item-desc">{item.message}</p>
+                              )}
+                              <span className="flow-notification-item-time">{timeStr}</span>
                             </div>
-                            {!item.is_read && <i />}
+                            {!item.is_read && <span className="flow-notification-dot" title="Não lida" />}
                           </div>
                         )
                       })
-                    )}
+                    })()}
                   </div>
-                  <Link to="/hub/notificacoes" onClick={() => setShowNotifications(false)} className="flow-notification-footer">
-                    Ver histórico completo de notificações →
+
+                  {/* Modeless Footer */}
+                  <Link
+                    to="/hub/notificacoes"
+                    onClick={() => setShowNotifications(false)}
+                    className="flow-notification-footer"
+                  >
+                    Ver todas as notificações →
                   </Link>
                 </div>
               )}
