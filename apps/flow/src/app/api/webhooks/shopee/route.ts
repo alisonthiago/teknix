@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
       const totalAmount = Number(body.data.total_amount || body.data.escrow_amount || 0)
 
       await supabase.from('notifications').insert({
-        title: `🛒 Nova Venda Shopee: ${orderNumber}`,
+        title: `Nova Venda Shopee: ${orderNumber}`,
         message: `Novo pedido de R$ ${totalAmount.toFixed(2)} recebido da Shopee.`,
         type: 'ORDER',
         metadata: { order_number: orderNumber, channel: 'Shopee' }

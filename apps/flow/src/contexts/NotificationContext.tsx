@@ -120,7 +120,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         const imageUrl = items[0]?.products?.image_url || ''
         syntheticSaleNotifs.push({
           id: `synth-${o.id}`,
-          title: `🛒 Nova Venda: ${o.order_number}`,
+          title: `Nova Venda: ${o.order_number}`,
           message: `${o.customer_name || 'Cliente'} comprou R$ ${Number(o.total_amount || 0).toFixed(2)} no Mercado Livre.`,
           type: 'success',
           is_read: false,

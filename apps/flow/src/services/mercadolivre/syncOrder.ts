@@ -316,7 +316,7 @@ export async function syncOrder(resource: string, sellerId: string) {
   await supabase.from('notifications').insert({
     user_id: userId,
     type: 'NEW_SALE',
-    title: `🛒 Nova Venda: ${orderNumber}`,
+    title: `Nova Venda: ${orderNumber}`,
     message: `${customerName} comprou R$ ${totalAmount.toFixed(2)} no Mercado Livre.`,
     marketplace_id: 'mercadolivre',
     resource: 'order',

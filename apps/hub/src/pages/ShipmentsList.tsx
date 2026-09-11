@@ -389,8 +389,12 @@ export default function ShipmentsList() {
                   ) : <div className="empty-items-notice">Itens vinculados a store_order_items.</div>}
                 </div>
                 <div className="package-specs-summary">
-                  <span className="spec-tag">📦 Pacote padrão: 30x20x15 cm</span>
-                  <span className="spec-tag">⚖️ Peso estimado: 1.2 kg</span>
+                  <span className="spec-tag" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                    <Package size={13} /> Pacote padrão: 30x20x15 cm
+                  </span>
+                  <span className="spec-tag" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="m16 10-4 4-4-4"/></svg> Peso estimado: 1.2 kg
+                  </span>
                 </div>
               </div>
 

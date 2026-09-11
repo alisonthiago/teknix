@@ -123,6 +123,14 @@ function HubLayoutContent() {
     }
   }, [showNotifications, showUserDropdown])
 
+  function cleanNotificationText(text: string): string {
+    if (!text) return ''
+    return text
+      .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F1E0}-\u{1F1FF}\u{1F900}-\u{1F9FF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}]/gu, '')
+      .replace(/^[\s\-–—:•]+/, '')
+      .trim()
+  }
+
   function formatRelativeTime(dateStr: string) {
     try {
       const date = new Date(dateStr)
@@ -569,9 +577,9 @@ function HubLayoutContent() {
                               {iconSymbol}
                             </div>
                             <div className="flow-notification-content">
-                              <h4 className="flow-notification-item-title">{item.title}</h4>
+                              <h4 className="flow-notification-item-title">{cleanNotificationText(item.title)}</h4>
                               {item.message && (
-                                <p className="flow-notification-item-desc">{item.message}</p>
+                                <p className="flow-notification-item-desc">{cleanNotificationText(item.message)}</p>
                               )}
                               <span className="flow-notification-item-time">{timeStr}</span>
                             </div>

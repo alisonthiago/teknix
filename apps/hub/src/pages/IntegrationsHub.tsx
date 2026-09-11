@@ -412,10 +412,30 @@ export default function IntegrationsHub() {
                   <span className="card-category-badge">{CATEGORY_LABELS[config.category] || config.category}</span>
                 </div>
                 <span className={`card-status-badge ${config.status}`}>
-                  {config.status === 'connected' && '🟢 Conectado'}
-                  {config.status === 'sandbox' && '🟡 Homologação'}
-                  {config.status === 'pending_credentials' && '⚪ Disponível'}
-                  {config.status === 'error' && '🔴 Falha'}
+                  {config.status === 'connected' && (
+                    <>
+                      <svg width="8" height="8" viewBox="0 0 8 8" fill="#16a34a" style={{ display: 'inline-block', marginRight: 4 }}><circle cx="4" cy="4" r="4"/></svg>
+                      Conectado
+                    </>
+                  )}
+                  {config.status === 'sandbox' && (
+                    <>
+                      <svg width="8" height="8" viewBox="0 0 8 8" fill="#ca8a04" style={{ display: 'inline-block', marginRight: 4 }}><circle cx="4" cy="4" r="4"/></svg>
+                      Homologação
+                    </>
+                  )}
+                  {config.status === 'pending_credentials' && (
+                    <>
+                      <svg width="8" height="8" viewBox="0 0 8 8" fill="#9ca3af" style={{ display: 'inline-block', marginRight: 4 }}><circle cx="4" cy="4" r="4"/></svg>
+                      Disponível
+                    </>
+                  )}
+                  {config.status === 'error' && (
+                    <>
+                      <svg width="8" height="8" viewBox="0 0 8 8" fill="#dc2626" style={{ display: 'inline-block', marginRight: 4 }}><circle cx="4" cy="4" r="4"/></svg>
+                      Falha
+                    </>
+                  )}
                 </span>
               </div>
 
@@ -805,8 +825,9 @@ export default function IntegrationsHub() {
                       }}
                     />
                     {editingConfig.has_credentials && !editingConfig.credentials?.[f.key] && (
-                      <span style={{ fontSize: '11px', color: '#16a34a', marginTop: '3px', display: 'block' }}>
-                        🔒 Credencial armazenada com segurança no servidor. Digite apenas se desejar substituir.
+                      <span style={{ fontSize: '11px', color: '#16a34a', marginTop: '3px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        Credencial armazenada com segurança no servidor. Digite apenas se desejar substituir.
                       </span>
                     )}
                   </div>

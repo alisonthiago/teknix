@@ -151,7 +151,7 @@ export default function Dashboard() {
         </div>
         <div>
           <h1 className="dash-welcome-name">
-            Olá, {userNickname} <span className="dash-welcome-emoji" aria-hidden="true">👋</span>
+            Olá, {userNickname}
           </h1>
           <p className="dash-welcome-sub">Bem-vindo de volta!</p>
         </div>

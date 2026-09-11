@@ -185,11 +185,11 @@ const AVAILABLE_INTEGRATIONS: AvailableIntegration[] = [
 
 const CATEGORY_TABS = [
   { key: 'all', label: 'Todas as Integrações' },
-  { key: 'payment', label: '💳 Pagamentos' },
-  { key: 'fiscal', label: '🧾 Fiscal & NF-e' },
-  { key: 'shipping', label: '🚚 Envios & Fretes' },
-  { key: 'channel', label: '🛒 Canais & Lojas' },
-  { key: 'communication', label: '💬 Comunicação' }
+  { key: 'payment', label: 'Pagamentos' },
+  { key: 'fiscal', label: 'Fiscal & NF-e' },
+  { key: 'shipping', label: 'Envios & Fretes' },
+  { key: 'channel', label: 'Canais & Lojas' },
+  { key: 'communication', label: 'Comunicação' }
 ]
 
 export default function IntegrationsAdd() {
@@ -373,11 +373,20 @@ export default function IntegrationsAdd() {
                   <span className="card-category-badge">{item.category}</span>
                 </div>
                 {isConnected ? (
-                  <span className="card-status-badge connected">🟢 Conectado</span>
+                  <span className="card-status-badge connected">
+                    <svg width="8" height="8" viewBox="0 0 8 8" fill="#16a34a" style={{ display: 'inline-block', marginRight: 4 }}><circle cx="4" cy="4" r="4"/></svg>
+                    Conectado
+                  </span>
                 ) : isSandbox ? (
-                  <span className="card-status-badge sandbox">🟡 Sandbox Ativo</span>
+                  <span className="card-status-badge sandbox">
+                    <svg width="8" height="8" viewBox="0 0 8 8" fill="#ca8a04" style={{ display: 'inline-block', marginRight: 4 }}><circle cx="4" cy="4" r="4"/></svg>
+                    Sandbox Ativo
+                  </span>
                 ) : (
-                  <span className="card-status-badge pending_credentials">⚪ Sem Credenciais</span>
+                  <span className="card-status-badge pending_credentials">
+                    <svg width="8" height="8" viewBox="0 0 8 8" fill="#9ca3af" style={{ display: 'inline-block', marginRight: 4 }}><circle cx="4" cy="4" r="4"/></svg>
+                    Sem Credenciais
+                  </span>
                 )}
               </div>
 

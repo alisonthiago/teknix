@@ -307,7 +307,14 @@ export default function ShippingSettings() {
               <p className="card-subtitle">Jadlog, Azul Cargo, Total Express</p>
             </div>
             <div className="card-body empty-integration">
-              <div className="integration-icon">🚛</div>
+              <div className="integration-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="4" width="13" height="11" rx="1.5"/>
+                  <polygon points="15 8 19 8 22 12 22 15 15 15 15 8"/>
+                  <circle cx="6" cy="18.5" r="2"/>
+                  <circle cx="18" cy="18.5" r="2"/>
+                </svg>
+              </div>
               <h4>Conecte sua conta Kangu ou Melhor Envio</h4>
               <p>O módulo de transportadoras é gerido via integrações para calcular centenas de tabelas automaticamente.</p>
               <button className="btn btn-secondary" onClick={() => navigate('/hub/integracoes')}>Explorar Integrações</button>

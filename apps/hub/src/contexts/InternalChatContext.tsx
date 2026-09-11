@@ -533,7 +533,7 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
 
       // Notificação sonora / toast se a mensagem for de outro colaborador
       if (!isOwn) {
-        notifyHub(`💬 ${msg.sender_name || 'Chat Interno'}: ${msg.content || 'Nova mensagem'}`, 'info')
+        notifyHub(`${msg.sender_name || 'Chat Interno'}: ${msg.content || 'Nova mensagem'}`, 'info')
       }
 
       // Atualiza mensagens da conversa

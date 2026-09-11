@@ -70,7 +70,7 @@ export async function notifyNewSale(orderNumber: string, channel: string, amount
     category: 'vendas',
     severity: 'success',
     module: 'sales',
-    title: `🛒 Nova Venda — ${channel}`,
+    title: `Nova Venda — ${channel}`,
     message: `Pedido #${orderNumber} de R$ ${amount.toFixed(2).replace('.', ',')}${customerName ? ` para ${customerName}` : ''}.`,
     metadata: { orderNumber, channel, amount }
   })
@@ -83,7 +83,7 @@ export async function notifyStockAlert(productName: string, sku: string, stock: 
     category: 'estoque',
     severity: isOut ? 'critical' : 'warning',
     module: 'products',
-    title: isOut ? '🚨 Produto Sem Estoque' : '⚠️ Estoque Baixo',
+    title: isOut ? 'Produto Sem Estoque' : 'Estoque Baixo',
     message: isOut
       ? `O produto "${productName}" (SKU: ${sku}) atingiu 0 unidades.`
       : `O produto "${productName}" (SKU: ${sku}) está com apenas ${stock} unidade(s) disponível(is).`,
@@ -97,19 +97,19 @@ export async function notifyIntegrationStatus(marketplace: string, action: 'CONN
 
   switch (action) {
     case 'CONNECTED':
-      title = `✅ ${marketplace} Conectado`
+      title = `${marketplace} Conectado`
       severity = 'success'
       break
     case 'DISCONNECTED':
-      title = `🔌 ${marketplace} Desconectado`
+      title = `${marketplace} Desconectado`
       severity = 'warning'
       break
     case 'SYNC_SUCCESS':
-      title = `🔄 Sincronização Concluída — ${marketplace}`
+      title = `Sincronização Concluída — ${marketplace}`
       severity = 'success'
       break
     case 'ERROR':
-      title = `🚨 Erro na Integração — ${marketplace}`
+      title = `Erro na Integração — ${marketplace}`
       severity = 'error'
       break
   }
