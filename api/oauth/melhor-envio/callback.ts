@@ -68,6 +68,16 @@ export default async function handler(request: VercelRequest, response: VercelRe
   const state = requestUrl.searchParams.get('state')
   const providerError = requestUrl.searchParams.get('error')
 
+  if (!code && !state) {
+    return response.status(200).json({
+      status: 'online',
+      service: 'Melhor Envio OAuth Callback',
+      message: 'Endpoint de callback ativo. Aguardando retorno da autorização do Melhor Envio.',
+      ready: true,
+      authorizeUrl: 'https://api.teknixbrasil.com.br/oauth/melhor-envio/authorize'
+    })
+  }
+
   if (!hasMatchingState(request, state)) return errorResponse(response, 400, 'State OAuth inválido.')
   if (providerError) return errorResponse(response, 400, 'O Melhor Envio recusou a autorização.')
   if (!code) return errorResponse(response, 400, 'Código de autorização ausente.')

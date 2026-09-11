@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Check, ExternalLink, Settings, Key, CheckCircle2, ChevronDown } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Check, ExternalLink, Settings, Key, CheckCircle2, ChevronDown, ChevronLeft } from 'lucide-react'
 import './PaymentMethods.css'
 import MercadoPagoSettings from './MercadoPagoSettings'
 import { usePermissions } from '../hooks/usePermissions'
@@ -30,24 +31,24 @@ function GatewayLogo({ gateway }: { gateway: Gateway }) {
   }
 
   const imageByGateway: Record<string, string> = {
-    teknix_pay: '/assets/payment-gateways/teknix-pay.png',
-    mercado_pago: '/assets/payment-gateways/mercado-pago.png',
-    paypal: '/assets/payment-gateways/paypal.png',
-    cielo: '/assets/payment-gateways/cielo.png',
-    custom_transfer: '/assets/payment-gateways/transferencia-pix.png',
-    pagarme: '/assets/payment-gateways/pagarme.png'
+    teknix_pay: '/logos/teknix-pay.svg',
+    mercado_pago: '/logos/mercado-pago.svg',
+    paypal: '/logos/paypal.svg',
+    cielo: '/logos/cielo.svg',
+    custom_transfer: '/logos/pix.svg',
+    pagarme: '/logos/pagarme.svg'
   }
 
   return (
     <span className={`gateway-logo gateway-logo-${gateway.id}`} role="img" aria-label={labels[gateway.id] || gateway.logoText}>
-      <img src={imageByGateway[gateway.id]} alt="" />
+      <img src={imageByGateway[gateway.id]} alt={labels[gateway.id] || gateway.logoText} />
     </span>
   )
 }
 
 function GatewayLogoVisual({ gatewayId, label }: { gatewayId: string; label: string }) {
   const imageByGateway: Record<string, string> = {
-    mercado_pago: '/assets/payment-gateways/mercado-pago.png'
+    mercado_pago: '/logos/mercado-pago.svg'
   }
 
   return (
@@ -58,6 +59,7 @@ function GatewayLogoVisual({ gatewayId, label }: { gatewayId: string; label: str
 }
 
 export default function PaymentMethods() {
+  const navigate = useNavigate()
   const { can } = usePermissions()
   const [activeTab, setActiveTab] = useState<'all' | 'active' | 'inactive' | 'pending'>('all')
   const [selectedGateway, setSelectedGateway] = useState<Gateway | null>(null)
@@ -244,8 +246,21 @@ export default function PaymentMethods() {
         
         {/* Header */}
         <div className="payments-header">
-          <h1 className="payments-title">Meios de pagamento</h1>
-          <p className="payments-subtitle">Configure as credenciais das APIs de pagamento para receber via PIX, Cartão e Boleto na sua loja.</p>
+          <div className="title-with-back" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <button
+              type="button"
+              className="btn-back-to-settings"
+              onClick={() => navigate('/hub/configuracoes')}
+              title="Voltar para Configurações"
+              aria-label="Voltar para Configurações"
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <div>
+              <h1 className="payments-title">Meios de pagamento</h1>
+              <p className="payments-subtitle">Configure as credenciais das APIs de pagamento para receber via PIX, Cartão e Boleto na sua loja.</p>
+            </div>
+          </div>
         </div>
 
         {/* Tabs */}

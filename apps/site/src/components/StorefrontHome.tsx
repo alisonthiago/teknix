@@ -232,107 +232,7 @@ export default function StorefrontHome() {
 
   const money = (val: number) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 
-  // Produtos padrão de referência para Ofertas Relâmpago (Ferramentas reais do catálogo TEKNIX)
-  const defaultFlashSaleTools = [
-    {
-      id: 'b5ec9f54-f942-4e7f-bd2c-a78b269e6f59',
-      sku: 'MLB7453209398',
-      to: '/produtos/MLB7453209398',
-      title: 'Kit Parafusadeira Chave Fenda Elétrica 30 Peças Lançamento',
-      img: 'https://http2.mlstatic.com/D_985226-MLA115019108190_082026-O.jpg',
-      oldPrice: 'R$ 149,90',
-      discount: 'Baixou 20%',
-      price: 'R$ 119,90',
-      ratingCount: '(182)',
-      pixInfo: 'Exclusivo Pix com desconto'
-    },
-    {
-      id: '4bae4104-dadb-44e1-98b0-8e3128eb7222',
-      sku: 'MLB7451225922',
-      to: '/produtos/MLB7451225922',
-      title: 'Kit Jogo De Ferramentas Chave Catraca Soquete Crv 46 Peças',
-      img: 'https://http2.mlstatic.com/D_955140-MLA100095920631_122025-O.jpg',
-      oldPrice: 'R$ 79,90',
-      discount: 'Baixou 25%',
-      price: 'R$ 59,90',
-      ratingCount: '(314)',
-      pixInfo: 'Exclusivo Pix com desconto'
-    },
-    {
-      id: '23d47105-f47f-471c-9e86-76992d5cfdee',
-      sku: 'MLB7441762656',
-      to: '/produtos/MLB7441762656',
-      title: 'Esmerilhadeira Angular Sem Fio 21v 125mm Bomvink 860w 2 Baterias',
-      img: 'https://http2.mlstatic.com/D_843763-MLA99938277957_112025-O.jpg',
-      oldPrice: 'R$ 359,00',
-      discount: 'Baixou 17%',
-      price: 'R$ 299,00',
-      ratingCount: '(95)',
-      pixInfo: 'Exclusivo Pix com desconto'
-    },
-    {
-      id: 'a9b4e10a-2178-4464-97ea-5894d484369f',
-      sku: 'MLB5108941105',
-      to: '/produtos/MLB5108941105',
-      title: 'Chave Impacto Bomvink 21v 4000mah Furadeira Parafusadeira 3 Modos',
-      img: 'https://http2.mlstatic.com/D_740212-MLA99989847147_112025-O.jpg',
-      oldPrice: 'R$ 389,00',
-      discount: 'Baixou 15%',
-      price: 'R$ 329,90',
-      ratingCount: '(240)',
-      pixInfo: 'Exclusivo Pix com desconto'
-    },
-    {
-      id: '7f4d99a8-228e-40b3-8dae-d18c0844ee71',
-      sku: 'MLB7451232960',
-      to: '/produtos/MLB7451232960',
-      title: 'Nível A Laser Verde De Alta Precisão Bomvink Bom-6210',
-      img: 'https://http2.mlstatic.com/D_616288-MLA116397354503_082026-O.webp',
-      oldPrice: 'R$ 199,90',
-      discount: 'Baixou 15%',
-      price: 'R$ 169,90',
-      ratingCount: '(88)',
-      pixInfo: 'Exclusivo Pix com desconto'
-    },
-    {
-      id: 'd49fd093-1981-4359-8e54-0e76ee268629',
-      sku: 'MLB5090385757',
-      to: '/produtos/MLB5090385757',
-      title: 'Lava Jato Lavadora Portátil De Alta Pressão 21v 2x Baterias',
-      img: 'https://http2.mlstatic.com/D_952794-MLA115069823794_082026-O.jpg',
-      oldPrice: 'R$ 219,00',
-      discount: 'Baixou 18%',
-      price: 'R$ 179,00',
-      ratingCount: '(156)',
-      pixInfo: 'Exclusivo Pix com desconto'
-    },
-    {
-      id: '7c2567f5-0f3c-4449-bb27-97953bf1f14d',
-      sku: 'MLB5090390057',
-      to: '/produtos/MLB5090390057',
-      title: 'Aspirador De Pó E Água 15 Litros 1400w Seco Úmido Prateado 127v',
-      img: 'https://http2.mlstatic.com/D_924828-MLA115307655059_072026-O.jpg',
-      oldPrice: 'R$ 449,00',
-      discount: 'Baixou 16%',
-      price: 'R$ 379,00',
-      ratingCount: '(71)',
-      pixInfo: 'Exclusivo Pix com desconto'
-    },
-    {
-      id: 'ce02a36a-272c-480f-81a3-69e6648ab857',
-      sku: 'MLB7477196164',
-      to: '/produtos/MLB7477196164',
-      title: 'Kit Multifuncional Brocas Bits Soquetes 111 Peças - Bomvink',
-      img: 'https://http2.mlstatic.com/D_923267-MLB116538684083_082026-O.jpg',
-      oldPrice: 'R$ 119,90',
-      discount: 'Baixou 25%',
-      price: 'R$ 89,90',
-      ratingCount: '(112)',
-      pixInfo: 'Exclusivo Pix com desconto'
-    }
-  ]
-
-  // ── 1. PRODUTOS DAS OFERTAS RELÂMPAGO (AUTOMÁTICO / MANUAL / CATÁLOGO) ──
+  // ── 1. PRODUTOS DAS OFERTAS RELÂMPAGO (SOMENTE DADOS REAIS DO SUPABASE — ZERO MOCK) ──
   const flashSaleItems = useMemo(() => {
     let targetList: any[] = []
     const source = (fsc.product_source as string) || 'auto'
@@ -340,216 +240,50 @@ export default function StorefrontHome() {
     if (source === 'manual' && fsc.manual_skus) {
       const skus = String(fsc.manual_skus).split(',').map(s => s.trim().toLowerCase()).filter(Boolean)
       targetList = rawProducts.filter(p => skus.includes(String(p.sku || '').toLowerCase()) || skus.includes(String(p.id || '').toLowerCase()))
-      if (targetList.length === 0) {
-        targetList = defaultFlashSaleTools.filter(p => skus.includes(String(p.id).toLowerCase()) || skus.includes(String((p as any).sku || '').toLowerCase()))
-      }
     } else if (source === 'catalog') {
-      targetList = rawProducts.length > 0 ? rawProducts : defaultFlashSaleTools
+      targetList = rawProducts
     } else {
-      // 'auto' (produtos em oferta ou com desconto)
+      // 'auto' (produtos reais com oferta ativa ou desconto promocional)
       const offerProducts = rawProducts.filter(p => {
         const hasOfferFlag = Boolean(p.commerce?.offerEnabled)
         const hasPromo = Boolean(p.promo_price && Number(p.promo_price) < Number(p.price))
         const hasBadgeOffer = p.commerce?.badge === 'daily' || p.commerce?.badge === 'special'
         return hasOfferFlag || hasPromo || hasBadgeOffer
       })
-      targetList = offerProducts.length > 0 ? offerProducts : (rawProducts.length > 0 ? rawProducts : defaultFlashSaleTools)
+      targetList = offerProducts.length > 0 ? offerProducts : rawProducts
     }
 
     if (targetList.length === 0) {
-      return defaultFlashSaleTools
+      return []
     }
 
     const maxItems = Number(fsc.limit) || 8
 
     return targetList.slice(0, maxItems).map(p => {
-      if (p.price && !p.name) {
-        return p
-      }
       const base = Number(p.price) || 0
       const rawPromo = Number(p.promo_price) || 0
-      const promo = rawPromo > 0 && rawPromo < base ? rawPromo : (base > 0 ? Math.round(base * 0.85 * 100) / 100 : 99.90)
+      const promo = rawPromo > 0 && rawPromo < base ? rawPromo : base
       const hasDiscount = promo < base && base > 0
-      const discountPct = hasDiscount ? Math.round(((base - promo) / base) * 100) : (p.commerce?.badge === 'bestseller' ? null : 15)
+      const discountPct = hasDiscount ? Math.round(((base - promo) / base) * 100) : null
 
       return {
         id: p.id,
         sku: p.sku,
-        to: `/produtos/${encodeURIComponent(p.sku || p.id)}`,
+        to: `/${encodeURIComponent(p.sku || p.slug || p.id)}`,
         title: p.name,
-        img: p.image_url || p.images?.[0] || 'https://http2.mlstatic.com/D_985226-MLA115019108190_082026-O.jpg',
-        oldPrice: base > promo ? money(base) : (promo ? money(Math.round(promo * 1.18 * 100) / 100) : null),
+        img: p.image_url || p.images?.[0] || '',
+        oldPrice: hasDiscount ? money(base) : null,
         discount: discountPct ? `Baixou ${discountPct}%` : 'Destaque',
-        price: money(promo),
-        ratingCount: '(120)',
+        price: money(promo || base),
+        ratingCount: p.store_meta?.reviews_count ? `(${p.store_meta.reviews_count})` : null,
         pixInfo: (fsc.pix_text as string) || 'à vista no Pix com desconto'
       }
     })
   }, [rawProducts, fsc.product_source, fsc.manual_skus, fsc.limit, fsc.pix_text])
 
-  // ── 2. PRODUTOS DA VITRINE: PRODUTOS EM DESTAQUE (FERRAMENTAS REAIS DO CATÁLOGO) ──
-  const defaultFeaturedTools: CbProductItem[] = [
-    {
-      id: 'b5ec9f54-f942-4e7f-bd2c-a78b269e6f59',
-      title: 'Kit Parafusadeira Chave Fenda Elétrica 30 Peças Lançamento',
-      img: 'https://http2.mlstatic.com/D_985226-MLA115019108190_082026-O.jpg',
-      to: '/produtos/MLB7453209398',
-      reviews: '(182)',
-      oldPrice: 'R$ 149,90',
-      discountBadge: '20% OFF',
-      installments: '3x de R$ 39,97 sem juros',
-      pricePix: 'R$ 119,90',
-      hasNoPixLabel: true,
-      bottomTags: [{ text: 'Frete grátis', type: 'green' }]
-    },
-    {
-      id: '4bae4104-dadb-44e1-98b0-8e3128eb7222',
-      title: 'Kit Jogo De Ferramentas Chave Catraca Soquete Crv 46 Peças',
-      img: 'https://http2.mlstatic.com/D_955140-MLA100095920631_122025-O.jpg',
-      to: '/produtos/MLB7451225922',
-      reviews: '(314)',
-      oldPrice: 'R$ 79,90',
-      discountBadge: '25% OFF',
-      installments: '2x de R$ 29,95 sem juros',
-      pricePix: 'R$ 59,90',
-      hasNoPixLabel: true,
-      bottomTags: [{ text: 'Lançamento', type: 'blue' }]
-    },
-    {
-      id: '23d47105-f47f-471c-9e86-76992d5cfdee',
-      title: 'Esmerilhadeira Angular Sem Fio 21v 125mm Bomvink 860w 2 Baterias',
-      img: 'https://http2.mlstatic.com/D_843763-MLA99938277957_112025-O.jpg',
-      to: '/produtos/MLB7441762656',
-      reviews: '(95)',
-      oldPrice: 'R$ 359,00',
-      discountBadge: '17% OFF',
-      installments: '6x de R$ 49,83 sem juros',
-      pricePix: 'R$ 299,00',
-      hasNoPixLabel: true,
-      bottomTags: [{ text: 'Frete grátis', type: 'green' }]
-    },
-    {
-      id: 'a9b4e10a-2178-4464-97ea-5894d484369f',
-      title: 'Chave Impacto Bomvink 21v 4000mah Furadeira Parafusadeira 3 Modos',
-      img: 'https://http2.mlstatic.com/D_740212-MLA99989847147_112025-O.jpg',
-      to: '/produtos/MLB5108941105',
-      reviews: '(240)',
-      oldPrice: 'R$ 389,00',
-      discountBadge: '15% OFF',
-      installments: '6x de R$ 54,98 sem juros',
-      pricePix: 'R$ 329,90',
-      hasNoPixLabel: true,
-      bottomTags: [{ text: 'Mais Vendido', type: 'blue' }]
-    },
-    {
-      id: '7f4d99a8-228e-40b3-8dae-d18c0844ee71',
-      title: 'Nível A Laser Verde De Alta Precisão Bomvink Bom-6210',
-      img: 'https://http2.mlstatic.com/D_616288-MLA116397354503_082026-O.webp',
-      to: '/produtos/MLB7451232960',
-      reviews: '(88)',
-      oldPrice: 'R$ 199,90',
-      discountBadge: '15% OFF',
-      installments: '3x de R$ 56,63 sem juros',
-      pricePix: 'R$ 169,90',
-      hasNoPixLabel: true,
-      bottomTags: [{ text: 'Alta Precisão', type: 'blue' }]
-    },
-    {
-      id: 'd49fd093-1981-4359-8e54-0e76ee268629',
-      title: 'Lava Jato Lavadora Portátil De Alta Pressão 21v 2x Baterias',
-      img: 'https://http2.mlstatic.com/D_952794-MLA115069823794_082026-O.jpg',
-      to: '/produtos/MLB5090385757',
-      reviews: '(156)',
-      oldPrice: 'R$ 219,00',
-      discountBadge: '18% OFF',
-      installments: '4x de R$ 44,75 sem juros',
-      pricePix: 'R$ 179,00',
-      hasNoPixLabel: true,
-      bottomTags: [{ text: 'Frete grátis', type: 'green' }]
-    }
-  ]
 
-  // ── 3. PRODUTOS DA VITRINE: EXPLORE NOSSOS PRODUTOS (FERRAMENTAS REAIS DO CATÁLOGO) ──
-  const defaultRecommendedTools: CbProductItem[] = [
-    {
-      id: '7c2567f5-0f3c-4449-bb27-97953bf1f14d',
-      title: 'Aspirador De Pó E Água 15 Litros 1400w Seco Úmido Prateado 127v',
-      img: 'https://http2.mlstatic.com/D_924828-MLA115307655059_072026-O.jpg',
-      to: '/produtos/MLB5090390057',
-      reviews: '(71)',
-      oldPrice: 'R$ 449,00',
-      discountBadge: '16% OFF',
-      installments: '8x de R$ 47,38 sem juros',
-      pricePix: 'R$ 379,00',
-      hasNoPixLabel: true,
-      bottomTags: [{ text: 'Frete grátis', type: 'green' }]
-    },
-    {
-      id: 'ce02a36a-272c-480f-81a3-69e6648ab857',
-      title: 'Kit Multifuncional Brocas Bits Soquetes 111 Peças - Bomvink',
-      img: 'https://http2.mlstatic.com/D_923267-MLB116538684083_082026-O.jpg',
-      to: '/produtos/MLB7477196164',
-      reviews: '(112)',
-      oldPrice: 'R$ 119,90',
-      discountBadge: '25% OFF',
-      installments: '2x de R$ 44,95 sem juros',
-      pricePix: 'R$ 89,90',
-      hasNoPixLabel: true,
-      bottomTags: [{ text: 'Maleta Completa', type: 'blue' }]
-    },
-    {
-      id: '29a02332-1cca-4986-965a-65871d2ba3fd',
-      title: 'Carrinho Mão Dobrável Transporte Carga 75kg Alumínio Amarelo',
-      img: 'https://http2.mlstatic.com/D_879152-MLA110117053703_042026-O.webp',
-      to: '/produtos/MLB7452280950',
-      reviews: '(94)',
-      oldPrice: 'R$ 219,00',
-      discountBadge: '18% OFF',
-      installments: '3x de R$ 59,97 sem juros',
-      pricePix: 'R$ 179,90',
-      hasNoPixLabel: true,
-      bottomTags: [{ text: 'Suporta 75kg', type: 'blue' }]
-    },
-    {
-      id: 'ce723f88-40b9-4f08-8cac-cd621aa5768f',
-      title: 'Parafusadeira E Furadeira Sem Fio Bomvink Bom-9960 12v',
-      img: 'https://http2.mlstatic.com/D_771637-MLA104005773378_012026-O.jpg',
-      to: '/produtos/MLB5083113087',
-      reviews: '(205)',
-      oldPrice: 'R$ 159,90',
-      discountBadge: '19% OFF',
-      installments: '3x de R$ 43,30 sem juros',
-      pricePix: 'R$ 129,90',
-      hasNoPixLabel: true,
-      bottomTags: [{ text: 'Bateria Inclusa', type: 'blue' }]
-    },
-    {
-      id: '140dfaa8-0887-490b-b361-d9f445420817',
-      title: 'Alicate Universal 6 Polegadas Aço Emborrachado Resistente',
-      img: 'https://http2.mlstatic.com/D_632061-MLA101353082881_122025-O.jpg',
-      to: '/produtos/MLB5088313513',
-      reviews: '(432)',
-      oldPrice: 'R$ 39,90',
-      discountBadge: '25% OFF',
-      installments: 'R$ 29,90 à vista',
-      pricePix: 'R$ 29,90',
-      hasNoPixLabel: true,
-      bottomTags: [{ text: 'Aço Forjado', type: 'blue' }]
-    },
-    {
-      id: '822509d1-2ecd-4f27-b3af-4ae3cc13f70c',
-      title: 'Kit Brocas Madeira, Concreto e Metal Profissional Multiuso',
-      img: 'https://http2.mlstatic.com/D_859843-MLA113141150858_072026-O.jpg',
-      to: '/produtos/MLB7480648508',
-      reviews: '(148)',
-      oldPrice: 'R$ 139,90',
-      discountBadge: '21% OFF',
-      installments: '2x de R$ 54,95 sem juros',
-      pricePix: 'R$ 109,90',
-      hasNoPixLabel: true,
-      bottomTags: [{ text: 'Jogo Completo', type: 'blue' }]
-    }
-  ]
+  // Vitrines usam apenas produtos reais do catálogo — sem fallback hardcoded
+
 
   // ── Renderizador das Vitrines Verticais 1:1 (Compre hoje e Retire em 2h / Ofertas Mais Vendidas do Mês) ──
   const renderCbVerticalShelf = (
@@ -744,142 +478,144 @@ export default function StorefrontHome() {
       {/* Faixa compacta administrável: imagem única ou carrossel. */}
       <Ads position="home-promo-strip" />
 
-      {/* ── 5. OFERTAS RELÂMPAGO ⚡ COM CRONÔMETRO (1:1 COM SCREENSHOT 1) ── */}
-      <Editable
-        as="div"
-        widgetId="home-flash-sale"
-        label="Ofertas Relâmpago (com Cronômetro)"
-        widgetType="flashSaleSection"
-        className="ui container fluid flash-sale-section"
-        id="ofertas-relampago"
-        content={DEFAULT_FLASH_SALE_CONTENT}
-        style={fss.background_color ? { backgroundColor: fss.background_color } : undefined}
-      >
-        <div className="ui container">
-          <div className="flash-sale-header">
-            <div className="flash-sale-title-group">
-              <h2 className="flash-sale-title" style={fss.title_color ? { color: fss.title_color } : undefined}>
-                {String(fsc.title || 'Ofertas Relâmpago')}
-              </h2>
-              {fsc.show_bolt !== false && (
-                <svg
-                  viewBox="0 0 24 24"
-                  width={Number(fsc.bolt_size || 22)}
-                  height={Number(fsc.bolt_size || 22)}
-                  fill={fss.bolt_color || fsc.bolt_color || '#dc2626'}
-                  className="flash-sale-bolt"
-                >
-                  <path d="M11 21h-1l1-7H7.5c-.58 0-.57-.32-.38-.66.19-.34.05-.08.07-.12C8.48 10.94 10.42 7.54 13 3h1l-1 7h3.5c.49 0 .56.33.47.51l-.07.15C12.96 17.55 11 21 11 21z" />
-                </svg>
+      {/* ── 5. OFERTAS RELÂMPAGO ⚡ (SOMENTE SE HOUVER PRODUTOS REAIS CADASTRADOS) ── */}
+      {flashSaleItems.length > 0 && (
+        <Editable
+          as="div"
+          widgetId="home-flash-sale"
+          label="Ofertas Relâmpago (com Cronômetro)"
+          widgetType="flashSaleSection"
+          className="ui container fluid flash-sale-section"
+          id="ofertas-relampago"
+          content={DEFAULT_FLASH_SALE_CONTENT}
+          style={fss.background_color ? { backgroundColor: fss.background_color } : undefined}
+        >
+          <div className="ui container">
+            <div className="flash-sale-header">
+              <div className="flash-sale-title-group">
+                <h2 className="flash-sale-title" style={fss.title_color ? { color: fss.title_color } : undefined}>
+                  {String(fsc.title || 'Ofertas Relâmpago')}
+                </h2>
+                {fsc.show_bolt !== false && (
+                  <svg
+                    viewBox="0 0 24 24"
+                    width={Number(fsc.bolt_size || 22)}
+                    height={Number(fsc.bolt_size || 22)}
+                    fill={fss.bolt_color || fsc.bolt_color || '#dc2626'}
+                    className="flash-sale-bolt"
+                  >
+                    <path d="M11 21h-1l1-7H7.5c-.58 0-.57-.32-.38-.66.19-.34.05-.08.07-.12C8.48 10.94 10.42 7.54 13 3h1l-1 7h3.5c.49 0 .56.33.47.51l-.07.15C12.96 17.55 11 21 11 21z" />
+                  </svg>
+                )}
+              </div>
+
+              {fsc.show_timer !== false && (
+                <div className="flash-sale-timer-wrap">
+                  <span className="flash-sale-timer-label" style={fss.timer_label_color ? { color: fss.timer_label_color } : undefined}>
+                    {String(fsc.timer_label || 'As ofertas se encerram em:')}
+                  </span>
+                  <OfferCountdown
+                    seconds={countdownSeconds}
+                    badgeTitle={String(fsc.countdown_title || 'OFERTA RELÂMPAGO')}
+                    badgeBg={fss.countdown_badge_bg}
+                    badgeColor={fss.countdown_badge_color}
+                    boxBg={fss.countdown_box_bg}
+                    boxColor={fss.countdown_box_color}
+                  />
+                </div>
               )}
             </div>
 
-            {fsc.show_timer !== false && (
-              <div className="flash-sale-timer-wrap">
-                <span className="flash-sale-timer-label" style={fss.timer_label_color ? { color: fss.timer_label_color } : undefined}>
-                  {String(fsc.timer_label || 'As ofertas se encerram em:')}
-                </span>
-                <OfferCountdown
-                  seconds={countdownSeconds}
-                  badgeTitle={String(fsc.countdown_title || 'OFERTA RELÂMPAGO')}
-                  badgeBg={fss.countdown_badge_bg}
-                  badgeColor={fss.countdown_badge_color}
-                  boxBg={fss.countdown_box_bg}
-                  boxColor={fss.countdown_box_color}
-                />
+            {/* Carrossel Horizontal Compacto de Produtos em Oferta */}
+            <div className="flash-sale-cards-track-wrap">
+              <div className="flash-sale-cards-track" ref={flashSaleTrackRef}>
+                {flashSaleItems.map((p) => (
+                  <Link
+                    key={p.id}
+                    to={p.to || `/${encodeURIComponent((p as any).sku || (p as any).slug || p.id)}`}
+                    className="flash-sale-card-item"
+                    style={{
+                      textDecoration: 'none',
+                      color: 'inherit',
+                      ...(fss.card_bg ? { background: fss.card_bg } : {}),
+                      ...(fss.card_border ? { borderColor: fss.card_border } : {})
+                    }}
+                  >
+                    <div className="flash-sale-card-img-box">
+                      <img src={p.img} alt={p.title} loading="lazy" />
+                    </div>
+                    <div className="flash-sale-card-info">
+                      <h3 className="flash-sale-card-title" style={fss.card_title_color ? { color: fss.card_title_color } : undefined}>
+                        {p.title}
+                      </h3>
+                      {fsc.show_stars !== false && p.ratingCount && (
+                        <div className="cb-stars-row">
+                          <span className="cb-star" style={fss.stars_color ? { color: fss.stars_color } : undefined}>★</span>
+                          <span className="cb-star" style={fss.stars_color ? { color: fss.stars_color } : undefined}>★</span>
+                          <span className="cb-star" style={fss.stars_color ? { color: fss.stars_color } : undefined}>★</span>
+                          <span className="cb-star" style={fss.stars_color ? { color: fss.stars_color } : undefined}>★</span>
+                          <span className="cb-star" style={fss.stars_color ? { color: fss.stars_color } : undefined}>★</span>
+                          <span className="cb-reviews-count">{p.ratingCount}</span>
+                        </div>
+                      )}
+                      <div className="flash-sale-card-price-row">
+                        {fsc.show_old_price !== false && p.oldPrice && (
+                          <span className="flash-sale-old-price" style={fss.old_price_color ? { color: fss.old_price_color } : undefined}>
+                            {p.oldPrice}
+                          </span>
+                        )}
+                        {fsc.show_discount_badge !== false && p.discount && (
+                          <span
+                            className="flash-sale-discount-badge"
+                            style={{
+                              ...(fss.discount_badge_bg ? { background: fss.discount_badge_bg } : {}),
+                              ...(fss.discount_badge_color ? { color: fss.discount_badge_color } : {})
+                            }}
+                          >
+                            {p.discount}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flash-sale-main-price" style={fss.price_color ? { color: fss.price_color } : undefined}>
+                        {p.price}
+                      </div>
+                      {fsc.show_pix !== false && Boolean(p.pixInfo || fsc.pix_text) && (
+                        <div className="flash-sale-pix-info" style={fss.pix_color ? { color: fss.pix_color } : undefined}>
+                          {String(fsc.pix_text || p.pixInfo)}
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                ))}
               </div>
-            )}
-          </div>
-
-          {/* Carrossel Horizontal Compacto de Produtos em Oferta */}
-          <div className="flash-sale-cards-track-wrap">
-            <div className="flash-sale-cards-track" ref={flashSaleTrackRef}>
-              {flashSaleItems.map((p) => (
-                <Link
-                  key={p.id}
-                  to={p.to || `/produtos/${encodeURIComponent((p as any).sku || p.id)}`}
-                  className="flash-sale-card-item"
+              {fsc.show_arrow !== false && (
+                <button
+                  className="flash-sale-next-arrow"
+                  aria-label="Próximas ofertas"
                   style={{
-                    textDecoration: 'none',
-                    color: 'inherit',
-                    ...(fss.card_bg ? { background: fss.card_bg } : {}),
-                    ...(fss.card_border ? { borderColor: fss.card_border } : {})
+                    ...(fss.arrow_bg ? { background: fss.arrow_bg } : {}),
+                    ...(fss.arrow_border ? { borderColor: fss.arrow_border } : {})
+                  }}
+                  onClick={() => {
+                    const track = flashSaleTrackRef.current
+                    if (track) track.scrollTo({ left: track.scrollLeft + track.clientWidth >= track.scrollWidth - 2 ? 0 : track.scrollLeft + track.clientWidth, behavior: 'smooth' })
                   }}
                 >
-                  <div className="flash-sale-card-img-box">
-                    <img src={p.img} alt={p.title} loading="lazy" />
-                  </div>
-                  <div className="flash-sale-card-info">
-                    <h3 className="flash-sale-card-title" style={fss.card_title_color ? { color: fss.card_title_color } : undefined}>
-                      {p.title}
-                    </h3>
-                    {fsc.show_stars !== false && p.ratingCount && (
-                      <div className="cb-stars-row">
-                        <span className="cb-star" style={fss.stars_color ? { color: fss.stars_color } : undefined}>★</span>
-                        <span className="cb-star" style={fss.stars_color ? { color: fss.stars_color } : undefined}>★</span>
-                        <span className="cb-star" style={fss.stars_color ? { color: fss.stars_color } : undefined}>★</span>
-                        <span className="cb-star" style={fss.stars_color ? { color: fss.stars_color } : undefined}>★</span>
-                        <span className="cb-star" style={fss.stars_color ? { color: fss.stars_color } : undefined}>★</span>
-                        <span className="cb-reviews-count">{p.ratingCount}</span>
-                      </div>
-                    )}
-                    <div className="flash-sale-card-price-row">
-                      {fsc.show_old_price !== false && p.oldPrice && (
-                        <span className="flash-sale-old-price" style={fss.old_price_color ? { color: fss.old_price_color } : undefined}>
-                          {p.oldPrice}
-                        </span>
-                      )}
-                      {fsc.show_discount_badge !== false && p.discount && (
-                        <span
-                          className="flash-sale-discount-badge"
-                          style={{
-                            ...(fss.discount_badge_bg ? { background: fss.discount_badge_bg } : {}),
-                            ...(fss.discount_badge_color ? { color: fss.discount_badge_color } : {})
-                          }}
-                        >
-                          {p.discount}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flash-sale-main-price" style={fss.price_color ? { color: fss.price_color } : undefined}>
-                      {p.price}
-                    </div>
-                    {fsc.show_pix !== false && (p.pixInfo || fsc.pix_text) && (
-                      <div className="flash-sale-pix-info" style={fss.pix_color ? { color: fss.pix_color } : undefined}>
-                        {String(fsc.pix_text || p.pixInfo)}
-                      </div>
-                    )}
-                  </div>
-                </Link>
-              ))}
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke={fss.arrow_color || '#0033c6'} strokeWidth="2.5">
+                    <path d="M9 18l6-6-6-6" />
+                  </svg>
+                </button>
+              )}
             </div>
-            {fsc.show_arrow !== false && (
-              <button
-                className="flash-sale-next-arrow"
-                aria-label="Próximas ofertas"
-                style={{
-                  ...(fss.arrow_bg ? { background: fss.arrow_bg } : {}),
-                  ...(fss.arrow_border ? { borderColor: fss.arrow_border } : {})
-                }}
-                onClick={() => {
-                  const track = flashSaleTrackRef.current
-                  if (track) track.scrollTo({ left: track.scrollLeft + track.clientWidth >= track.scrollWidth - 2 ? 0 : track.scrollLeft + track.clientWidth, behavior: 'smooth' })
-                }}
-              >
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke={fss.arrow_color || '#0033c6'} strokeWidth="2.5">
-                  <path d="M9 18l6-6-6-6" />
-                </svg>
-              </button>
-            )}
           </div>
-        </div>
-      </Editable>
+        </Editable>
+      )}
 
       {/* ── 6. VITRINE 1: PRODUTOS EM DESTAQUE ── */}
-      {renderCbVerticalShelf('featured', 'Produtos em destaque', catalogProducts.length ? catalogProducts.slice(0, 6) : defaultFeaturedTools)}
+      {catalogProducts.length > 0 && renderCbVerticalShelf('featured', 'Produtos em destaque', catalogProducts.slice(0, 6))}
 
       {/* ── 7. VITRINE 2: EXPLORE NOSSOS PRODUTOS ── */}
-      {renderCbVerticalShelf('recommended', 'Explore nossos produtos', catalogProducts.length > 6 ? catalogProducts.slice(6, 12) : defaultRecommendedTools)}
+      {catalogProducts.length > 6 && renderCbVerticalShelf('recommended', 'Explore nossos produtos', catalogProducts.slice(6, 12))}
 
       {/* ── 14. RODAPÉ OFICIAL CASAS BAHIA COMPLETO ── */}
       <Ads position="global-footer" />

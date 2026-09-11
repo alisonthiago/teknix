@@ -1,6 +1,25 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import {
+  FileText,
+  Download,
+  ExternalLink,
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  XCircle,
+  Printer,
+  RefreshCw,
+  Ban,
+  Send,
+  FileCheck,
+  ShieldAlert,
+} from 'lucide-react'
+import { FiscalService, StoreInvoice, StoreReceipt, FiscalValidationResult } from '../services/fiscal/FiscalService'
+import { OrderWorkflow } from '../services/orderWorkflow'
+import { ReceiptModal } from '../components/ReceiptModal'
+import { HubNotificationService } from '../services/notificationService'
 import './OrderDetails.css'
 
 // Tipagem para store_orders (loja própria — separado do FLOW)
@@ -36,6 +55,8 @@ interface StoreOrder {
   delivery_address: string | null
   origin: string | null
   notes: string | null
+  fiscal_preference?: 'none' | 'receipt' | 'nfe' | 'both'
+  fiscal_status?: string
   created_at: string
   updated_at: string
   items?: StoreOrderItem[]
@@ -48,6 +69,18 @@ export default function OrderDetails() {
   const [updating, setUpdating] = useState(false)
   const [statusMsg, setStatusMsg] = useState('')
 
+  // Estados Fiscais
+  const [invoice, setInvoice] = useState<StoreInvoice | null>(null)
+  const [receipt, setReceipt] = useState<StoreReceipt | null>(null)
+  const [validation, setValidation] = useState<FiscalValidationResult | null>(null)
+  const [fiscalLoading, setFiscalLoading] = useState(false)
+  const [fiscalMsg, setFiscalMsg] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null)
+  const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false)
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false)
+  const [cancelReason, setCancelReason] = useState('')
+  const [selectedEnv, setSelectedEnv] = useState<'homologacao' | 'producao'>('homologacao')
+
+
   useEffect(() => {
     fetchOrder()
   }, [id])
@@ -55,14 +88,25 @@ export default function OrderDetails() {
   async function fetchOrder() {
     setLoading(true)
     try {
-      const { data, error } = await supabase
-        .from('store_orders')
-        .select('*, items:store_order_items(*)')
-        .eq('id', id)
-        .single()
+      let query = supabase.from('store_orders').select('*, items:store_order_items(*)')
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id || '')
+      if (isUuid) {
+        query = query.eq('id', id)
+      } else {
+        query = query.eq('order_number', id)
+      }
+      const { data, error } = await query.maybeSingle()
 
       if (!error && data) {
         setOrder(data as StoreOrder)
+        // Busca documentos fiscais vinculados
+        const [inv, rec] = await Promise.all([
+          FiscalService.getInvoiceByOrderId(data.id),
+          FiscalService.getReceiptByOrderId(data.id),
+        ])
+        setInvoice(inv)
+        setReceipt(rec)
+        setValidation(FiscalService.validateOrder(data))
       } else {
         setOrder(null)
         console.warn('[OrderDetails] Pedido não encontrado:', error?.message)
@@ -74,18 +118,129 @@ export default function OrderDetails() {
     setLoading(false)
   }
 
+  async function handlePreferenceChange(pref: 'none' | 'receipt' | 'nfe' | 'both') {
+    if (!order) return
+    try {
+      await FiscalService.updateFiscalPreference(order.id, pref)
+      setOrder({ ...order, fiscal_preference: pref })
+      setFiscalMsg({ type: 'success', text: `Preferência alterada para "${getPreferenceLabel(pref)}"` })
+    } catch (err: any) {
+      setFiscalMsg({ type: 'error', text: err.message })
+    }
+  }
+
+  async function handleEmitNfe() {
+    if (!order) return
+    setFiscalLoading(true)
+    setFiscalMsg(null)
+    try {
+      const res = await FiscalService.emitNfe(order.id, selectedEnv)
+      setFiscalMsg({
+        type: 'success',
+        text: `NF-e enviada para a SEFAZ! Status: ${res.status.toUpperCase()} (Ref: ${res.reference})`,
+      })
+      HubNotificationService.notifyInvoiceAuthorized(
+        res.reference || order.id,
+        res.reference || order.order_number || '000001',
+        order.id
+      ).catch(() => {})
+      await fetchOrder()
+    } catch (err: any) {
+      setFiscalMsg({ type: 'error', text: err.message })
+      await fetchOrder()
+    } finally {
+      setFiscalLoading(false)
+    }
+  }
+
+  async function handleGenerateReceipt() {
+    if (!order) return
+    setFiscalLoading(true)
+    setFiscalMsg(null)
+    try {
+      const rec = await FiscalService.generateReceipt(order.id)
+      setReceipt(rec)
+      setFiscalMsg({ type: 'success', text: `Recibo ${rec.receipt_number} gerado com sucesso!` })
+      setIsReceiptModalOpen(true)
+      await fetchOrder()
+    } catch (err: any) {
+      setFiscalMsg({ type: 'error', text: err.message })
+    } finally {
+      setFiscalLoading(false)
+    }
+  }
+
+  async function handleGenerateBoth() {
+    if (!order) return
+    setFiscalLoading(true)
+    setFiscalMsg(null)
+    try {
+      await FiscalService.generateReceipt(order.id)
+      await FiscalService.emitNfe(order.id, selectedEnv)
+      setFiscalMsg({ type: 'success', text: 'Recibo gerado e NF-e submetida à SEFAZ com sucesso!' })
+      await fetchOrder()
+    } catch (err: any) {
+      setFiscalMsg({ type: 'error', text: err.message })
+      await fetchOrder()
+    } finally {
+      setFiscalLoading(false)
+    }
+  }
+
+  async function handleConfirmCancelNfe() {
+    if (!invoice || !cancelReason.trim() || cancelReason.trim().length < 15) {
+      alert('A justificativa deve ter no mínimo 15 caracteres.')
+      return
+    }
+    setFiscalLoading(true)
+    try {
+      const res = await FiscalService.cancelNfe(invoice.reference, cancelReason)
+      setFiscalMsg({ type: 'success', text: res.message || 'NF-e cancelada com sucesso na SEFAZ' })
+      setIsCancelModalOpen(false)
+      setCancelReason('')
+      await fetchOrder()
+    } catch (err: any) {
+      setFiscalMsg({ type: 'error', text: err.message })
+    } finally {
+      setFiscalLoading(false)
+    }
+  }
+
+  function getPreferenceLabel(pref?: string) {
+    switch (pref) {
+      case 'receipt': return 'Apenas Recibo'
+      case 'nfe': return 'Nota Fiscal (NF-e)'
+      case 'both': return 'Recibo + NF-e'
+      case 'none': return 'Nenhum'
+      default: return 'Nota Fiscal (NF-e)'
+    }
+  }
+
   async function handleUpdateStatus(newStatus: string) {
     if (!order || !id) return
     setUpdating(true)
     setStatusMsg('')
     try {
-      const { error } = await supabase
-        .from('store_orders')
-        .update({ status: newStatus, updated_at: new Date().toISOString() })
-        .eq('id', id)
+      if (newStatus === 'paid') {
+        const res = await OrderWorkflow.confirmOrderPayment(id, {
+          source: 'manual',
+          notes: 'Pagamento confirmado manualmente no TEKNIX HUB'
+        })
+        if (!res.success) throw new Error(res.message || res.error)
+        setStatusMsg(res.message)
+      } else if (['preparing', 'shipped', 'delivered', 'cancelled'].includes(newStatus)) {
+        const res = await OrderWorkflow.updateShippingStatus(id, newStatus as any)
+        if (!res.success) throw new Error(res.message || res.error)
+        setStatusMsg(res.message)
+      } else {
+        const { error } = await supabase
+          .from('store_orders')
+          .update({ status: newStatus, updated_at: new Date().toISOString() })
+          .eq('id', id)
 
-      if (error) throw error
-      setStatusMsg(`Status atualizado para "${getOrderStatusLabel(newStatus)}"`)
+        if (error) throw error
+        setStatusMsg(`Status atualizado para "${getOrderStatusLabel(newStatus)}"`)
+      }
       await fetchOrder()
     } catch (err: any) {
       setStatusMsg(`Erro: ${err.message}`)
@@ -354,6 +509,316 @@ export default function OrderDetails() {
             </div>
           </div>
 
+          {/* ================================================================ */}
+          {/* SEÇÃO OFICIAL: DOCUMENTOS / FISCAL (HUB) */}
+          {/* ================================================================ */}
+          <div className="detail-card fiscal-card">
+            <div className="card-header fiscal-card-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <FileText size={18} color="#0f172a" />
+                <h3>Documentos / Fiscal</h3>
+              </div>
+              <span className={`fiscal-header-badge inv-badge-${invoice?.status || order.fiscal_status || 'pending'}`}>
+                {invoice?.status === 'autorizada' && <CheckCircle2 size={13} />}
+                {invoice?.status === 'processando' && <Clock size={13} />}
+                {invoice?.status === 'rejeitada' && <XCircle size={13} />}
+                {invoice?.status === 'cancelada' && <Ban size={13} />}
+                {invoice?.status === 'dados_incompletos' && <AlertTriangle size={13} />}
+                {invoice?.status?.toUpperCase() || 'NÃO EMITIDA'}
+              </span>
+            </div>
+
+            <div className="card-body">
+              {/* Feedback de ações fiscais */}
+              {fiscalMsg && (
+                <div
+                  style={{
+                    padding: '10px 14px',
+                    borderRadius: 8,
+                    marginBottom: 16,
+                    fontSize: 13,
+                    fontWeight: 600,
+                    background: fiscalMsg.type === 'success' ? '#dcfce7' : fiscalMsg.type === 'error' ? '#fee2e2' : '#f1f5f9',
+                    color: fiscalMsg.type === 'success' ? '#15803d' : fiscalMsg.type === 'error' ? '#b91c1c' : '#334155',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                  }}
+                >
+                  {fiscalMsg.type === 'success' ? <CheckCircle2 size={16} /> : <AlertTriangle size={16} />}
+                  <span>{fiscalMsg.text}</span>
+                </div>
+              )}
+
+              {/* 1. Preferência de Documento da Loja */}
+              <div className="fiscal-pref-container">
+                <span className="fiscal-pref-label">Tipo de Documento / Preferência:</span>
+                <div className="fiscal-pref-pills">
+                  {(['nfe', 'receipt', 'both', 'none'] as const).map((p) => (
+                    <button
+                      key={p}
+                      className={`fiscal-pref-btn ${(order.fiscal_preference || 'nfe') === p ? 'active' : ''}`}
+                      onClick={() => handlePreferenceChange(p)}
+                    >
+                      {getPreferenceLabel(p)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 2. Alerta se dados fiscais estiverem incompletos */}
+              {validation && !validation.valid && (
+                <div className="fiscal-alert-box fiscal-alert-warning">
+                  <AlertTriangle size={20} className="fiscal-alert-icon" />
+                  <div className="fiscal-alert-content">
+                    <h4>Dados fiscais incompletos para emissão da NF-e</h4>
+                    <p style={{ margin: 0, fontSize: '0.8rem' }}>
+                      A SEFAZ exige que os seguintes campos estejam preenchidos antes de autorizar a emissão:
+                    </p>
+                    <ul className="fiscal-alert-list">
+                      {validation.missingFields.map((f, i) => (
+                        <li key={i}>{f}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {/* 3. Alerta de rejeição da SEFAZ se houver */}
+              {invoice?.status === 'rejeitada' && invoice.rejection_message && (
+                <div className="fiscal-alert-box fiscal-alert-error">
+                  <XCircle size={20} className="fiscal-alert-icon" />
+                  <div className="fiscal-alert-content">
+                    <h4>Rejeição SEFAZ ({invoice.rejection_code || 'Erro'})</h4>
+                    <p style={{ margin: 0, fontSize: '0.82rem' }}>{invoice.rejection_message}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* 4. Subcards Grid: Recibo & NF-e */}
+              <div className="fiscal-docs-grid">
+                {/* SUBCARD RECIBO */}
+                <div className="fiscal-subcard">
+                  <div>
+                    <div className="fiscal-subcard-header">
+                      <span className="fiscal-subcard-title">
+                        <FileCheck size={16} color="#2563eb" /> Recibo Comercial
+                      </span>
+                      <span className={`inv-badge ${receipt ? 'inv-badge-authorized' : 'inv-badge-pending'}`}>
+                        {receipt ? 'GERADO' : 'NÃO GERADO'}
+                      </span>
+                    </div>
+
+                    {receipt ? (
+                      <div>
+                        <div className="fiscal-meta-item">
+                          <strong>Número:</strong> {receipt.receipt_number}
+                        </div>
+                        <div className="fiscal-meta-item">
+                          <strong>Data de Geração:</strong> {formatDate(receipt.generated_at)}
+                        </div>
+                        <div className="fiscal-meta-item">
+                          <strong>Valor:</strong> {formatPrice(receipt.total)}
+                        </div>
+                        <div className="fiscal-meta-item">
+                          <strong>Status:</strong> {receipt.status?.toUpperCase()}
+                        </div>
+                      </div>
+                    ) : (
+                      <p style={{ fontSize: '0.82rem', color: '#64748b', margin: '8px 0' }}>
+                        Recibo comercial com dados da TEKNIX, cliente, itens e forma de pagamento.
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="fiscal-subcard-actions">
+                    {receipt ? (
+                      <>
+                        <button
+                          className="btn-fiscal-action primary"
+                          onClick={() => setIsReceiptModalOpen(true)}
+                        >
+                          <Printer size={14} /> Visualizar / Imprimir
+                        </button>
+                        <button
+                          className="btn-fiscal-action secondary"
+                          onClick={handleGenerateReceipt}
+                          disabled={fiscalLoading}
+                        >
+                          <RefreshCw size={14} className={fiscalLoading ? 'spin' : ''} /> Atualizar
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        className="btn-fiscal-action primary"
+                        onClick={handleGenerateReceipt}
+                        disabled={fiscalLoading}
+                      >
+                        <FileText size={14} /> Gerar Recibo
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* SUBCARD NF-e */}
+                <div className="fiscal-subcard">
+                  <div>
+                    <div className="fiscal-subcard-header">
+                      <span className="fiscal-subcard-title">
+                        <FileText size={16} color="#059669" /> Nota Fiscal (NF-e)
+                      </span>
+                      <span className={`inv-badge inv-badge-${invoice?.status || 'pending'}`}>
+                        {invoice?.status?.toUpperCase() || 'NÃO EMITIDA'}
+                      </span>
+                    </div>
+
+                    {invoice ? (
+                      <div>
+                        <div className="fiscal-meta-item">
+                          <strong>Referência:</strong> {invoice.reference}
+                        </div>
+                        {invoice.numero && (
+                          <div className="fiscal-meta-item">
+                            <strong>Número / Série:</strong> Nº {invoice.numero} (Série {invoice.serie || 1})
+                          </div>
+                        )}
+                        <div className="fiscal-meta-item">
+                          <strong>Ambiente:</strong>{' '}
+                          <span className={`inv-env-badge inv-env-${invoice.ambiente || 'homologacao'}`}>
+                            {invoice.ambiente === 'producao' ? 'PRODUÇÃO' : 'HOMOLOGAÇÃO'}
+                          </span>
+                        </div>
+                        {invoice.protocolo && (
+                          <div className="fiscal-meta-item">
+                            <strong>Protocolo SEFAZ:</strong> {invoice.protocolo}
+                          </div>
+                        )}
+                        {invoice.issued_at && (
+                          <div className="fiscal-meta-item">
+                            <strong>Data Emissão:</strong> {formatDate(invoice.issued_at)}
+                          </div>
+                        )}
+                        {invoice.chave && (
+                          <div className="fiscal-meta-item">
+                            <strong>Chave de Acesso:</strong>
+                            <div
+                              className="fiscal-key-box"
+                              title="Clique para copiar"
+                              onClick={() => {
+                                navigator.clipboard.writeText(invoice.chave || '')
+                                alert('Chave de acesso copiada!')
+                              }}
+                            >
+                              {invoice.chave}
+                            </div>
+                          </div>
+                        )}
+                        {invoice.status === 'cancelada' && invoice.cancellation_reason && (
+                          <div className="fiscal-meta-item" style={{ color: '#dc2626' }}>
+                            <strong>Justificativa Cancelamento:</strong> {invoice.cancellation_reason}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div>
+                        <p style={{ fontSize: '0.82rem', color: '#64748b', margin: '4px 0 10px' }}>
+                          Emissão direta via SEFAZ com integração Focus NFe.
+                        </p>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.8rem' }}>
+                          <label style={{ fontWeight: 600, color: '#334155' }}>Ambiente:</label>
+                          <select
+                            className="form-select"
+                            style={{ padding: '4px 8px', fontSize: '0.8rem', borderRadius: 6 }}
+                            value={selectedEnv}
+                            onChange={(e) => setSelectedEnv(e.target.value as any)}
+                          >
+                            <option value="homologacao">Homologação (Testes SEFAZ)</option>
+                            <option value="producao">Produção Oficial</option>
+                          </select>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="fiscal-subcard-actions">
+                    {/* Ações conforme o estado da NF-e */}
+                    {(!invoice || invoice.status === 'nao_emitida' || invoice.status === 'dados_incompletos') && (
+                      <>
+                        <button
+                          className="btn-fiscal-action primary"
+                          onClick={handleEmitNfe}
+                          disabled={fiscalLoading || (validation ? !validation.valid : false)}
+                          title={validation && !validation.valid ? 'Preencha os campos obrigatórios' : 'Emitir NF-e'}
+                        >
+                          <FileText size={14} /> Emitir NF-e
+                        </button>
+                        <button
+                          className="btn-fiscal-action secondary"
+                          onClick={handleGenerateBoth}
+                          disabled={fiscalLoading || (validation ? !validation.valid : false)}
+                        >
+                          Gerar Ambos
+                        </button>
+                      </>
+                    )}
+
+                    {invoice?.status === 'processando' && (
+                      <button
+                        className="btn-fiscal-action secondary"
+                        onClick={fetchOrder}
+                        disabled={fiscalLoading}
+                      >
+                        <RefreshCw size={14} className={fiscalLoading ? 'spin' : ''} /> Consultar Status
+                      </button>
+                    )}
+
+                    {invoice?.status === 'autorizada' && (
+                      <>
+                        {invoice.danfe_url && (
+                          <a
+                            href={invoice.danfe_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn-fiscal-action primary"
+                          >
+                            <FileText size={14} /> Ver DANFE
+                          </a>
+                        )}
+                        {invoice.xml_url && (
+                          <a
+                            href={invoice.xml_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn-fiscal-action secondary"
+                          >
+                            <Download size={14} /> Baixar XML
+                          </a>
+                        )}
+                        <button
+                          className="btn-fiscal-action danger"
+                          onClick={() => setIsCancelModalOpen(true)}
+                          disabled={fiscalLoading}
+                        >
+                          <Ban size={14} /> Cancelar NF-e
+                        </button>
+                      </>
+                    )}
+
+                    {invoice?.status === 'rejeitada' && (
+                      <button
+                        className="btn-fiscal-action primary"
+                        onClick={handleEmitNfe}
+                        disabled={fiscalLoading}
+                      >
+                        <RefreshCw size={14} className={fiscalLoading ? 'spin' : ''} /> Reprocessar NF-e
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Endereço de Entrega */}
           {order.delivery_address && (
             <div className="detail-card">
@@ -459,6 +924,49 @@ export default function OrderDetails() {
 
         </div>
       </div>
+
+      {/* MODAL DO RECIBO COMERCIAL */}
+      <ReceiptModal
+        isOpen={isReceiptModalOpen}
+        onClose={() => setIsReceiptModalOpen(false)}
+        order={order}
+        receipt={receipt}
+      />
+
+      {/* MODAL DE CANCELAMENTO DE NF-E */}
+      {isCancelModalOpen && (
+        <div className="cancel-modal-backdrop" onClick={() => setIsCancelModalOpen(false)}>
+          <div className="cancel-modal-content" onClick={(e) => e.stopPropagation()}>
+            <h3>Cancelar NF-e #{invoice?.numero || invoice?.reference}</h3>
+            <p>
+              A SEFAZ exige uma justificativa com no mínimo 15 caracteres para homologar o cancelamento.
+              Esta operação é irreversível.
+            </p>
+            <textarea
+              className="cancel-textarea"
+              placeholder="Descreva o motivo do cancelamento (ex: Desistência da compra pelo cliente com estorno efetuado)..."
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+            />
+            <div className="cancel-modal-actions">
+              <button
+                className="btn-fiscal-action secondary"
+                onClick={() => setIsCancelModalOpen(false)}
+                disabled={fiscalLoading}
+              >
+                Voltar
+              </button>
+              <button
+                className="btn-fiscal-action danger"
+                onClick={handleConfirmCancelNfe}
+                disabled={fiscalLoading || cancelReason.trim().length < 15}
+              >
+                {fiscalLoading ? 'Cancelando...' : 'Confirmar Cancelamento'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

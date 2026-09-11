@@ -4,7 +4,7 @@ import { useState } from 'react'
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, MoreHorizontal, Package, TrendingUp, ShoppingCart, Store, Clock, FileText, Share2, Pencil } from 'lucide-react'
+import { ArrowLeft, MoreHorizontal, Package, TrendingUp, ShoppingCart, Store, Clock, FileText, Share2, Pencil, CheckCircle2, ExternalLink, ShieldAlert, Award, RefreshCw, DollarSign, Layers, Globe, Plus, Search, Sparkles, Tag } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import type { ProductDetail } from '@/lib/detail-types'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
@@ -511,45 +511,820 @@ function ComprasTab({ product }: { product: ProductDetail }) {
 }
 
 function MarketplacesTab({ product }: { product: ProductDetail }) {
+  const router = useRouter()
+  // Modal de Ajuste de Preço
+  const [modalData, setModalData] = useState<{
+    open: boolean
+    title: string
+    currentPrice: number
+    listingId?: string
+    isSite?: boolean
+    channelName: string
+    externalId: string
+  } | null>(null)
+
+  const [inputPrice, setInputPrice] = useState('')
+  const [inputReason, setInputReason] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+
+  // Modal de Nova Oferta / Publicação de Canal
+  const [publishModalOpen, setPublishModalOpen] = useState(false)
+  const [selectedChannel, setSelectedChannel] = useState<'mercadolivre' | 'shopee' | 'magalu'>('mercadolivre')
+  const [mlMode, setMlMode] = useState<'CATALOG' | 'TRADITIONAL'>('CATALOG')
+  const [catalogSearchQuery, setCatalogSearchQuery] = useState('')
+  const [catalogSearching, setCatalogSearching] = useState(false)
+  const [catalogCandidates, setCatalogCandidates] = useState<any[]>([])
+  const [selectedCatalogId, setSelectedCatalogId] = useState('')
+  const [offerPrice, setOfferPrice] = useState('')
+  const [listingType, setListingType] = useState<'gold_special' | 'gold_pro'>('gold_special')
+  const [customTitle, setCustomTitle] = useState('')
+  const [publishLoading, setPublishLoading] = useState(false)
+  const [publishFeedback, setPublishFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+
+  const triggerCatalogSearch = async (overrideQuery?: string) => {
+    setCatalogSearching(true)
+    try {
+      const res = await fetch('/api/mercadolivre/catalog/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: overrideQuery ?? (catalogSearchQuery || product.name),
+          gtin: product.ean && product.ean !== '—' ? product.ean : undefined,
+          brand: product.brand && product.brand !== '—' ? product.brand : undefined,
+          model: product.model && product.model !== '—' ? product.model : undefined
+        })
+      })
+      const json = await res.json()
+      if (json.candidates && json.candidates.length > 0) {
+        setCatalogCandidates(json.candidates)
+        if (!selectedCatalogId) {
+          setSelectedCatalogId(json.candidates[0].catalog_product_id)
+        }
+      }
+    } catch (e) {
+      console.warn('Erro na busca do catálogo:', e)
+    } finally {
+      setCatalogSearching(false)
+    }
+  }
+
+  const handlePublishOffer = async () => {
+    const numPrice = Number(offerPrice.replace(',', '.'))
+    if (!numPrice || numPrice <= 0) {
+      setPublishFeedback({ type: 'error', text: 'Informe um preço válido para a oferta.' })
+      return
+    }
+
+    if (selectedChannel === 'mercadolivre' && mlMode === 'CATALOG' && !selectedCatalogId) {
+      setPublishFeedback({ type: 'error', text: 'Selecione ou informe um Catalog Product ID válido do Mercado Livre.' })
+      return
+    }
+
+    setPublishLoading(true)
+    setPublishFeedback(null)
+
+    try {
+      const res = await fetch('/api/marketplaces/publish-offer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productId: product.id,
+          channel: selectedChannel,
+          mode: mlMode,
+          catalogProductId: selectedCatalogId,
+          price: numPrice,
+          listingType,
+          title: customTitle || product.name
+        })
+      })
+
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || 'Erro ao publicar oferta')
+
+      setPublishFeedback({
+        type: 'success',
+        text: json.message || 'Oferta criada e vinculada com sucesso ao produto central!'
+      })
+
+      setTimeout(() => {
+        setPublishModalOpen(false)
+        router.refresh()
+      }, 1400)
+    } catch (err: any) {
+      setPublishFeedback({ type: 'error', text: err.message || 'Falha ao criar oferta' })
+    } finally {
+      setPublishLoading(false)
+    }
+  }
+
+  const listings = product.channel_listings && product.channel_listings.length > 0
+    ? product.channel_listings
+    : product.marketplaces.map(mp => ({
+        id: mp.listing_id,
+        channel: 'mercadolivre',
+        channel_name: mp.name,
+        account_name: mp.account_name,
+        listing_id: mp.listing_id,
+        external_id: mp.listing_id,
+        title: product.name,
+        price: mp.price,
+        stock: mp.stock,
+        status: mp.status,
+        sold_quantity: 0,
+        total_revenue: 0,
+        permalink: null,
+        thumbnail_url: null,
+        last_sync: mp.last_sync,
+        is_best_seller: false
+      }))
+
+  const openPriceModal = (item: {
+    title: string
+    currentPrice: number
+    listingId?: string
+    isSite?: boolean
+    channelName: string
+    externalId: string
+  }) => {
+    setModalData({ open: true, ...item })
+    setInputPrice(String(item.currentPrice))
+    setInputReason('')
+    setFeedback(null)
+  }
+
+  const handleSavePrice = async () => {
+    if (!modalData) return
+    const numPrice = Number(inputPrice.replace(',', '.'))
+    if (isNaN(numPrice) || numPrice < 0) {
+      setFeedback({ type: 'error', text: 'Informe um valor numérico válido.' })
+      return
+    }
+
+    setLoading(true)
+    setFeedback(null)
+
+    try {
+      const res = await fetch(`/api/products/${product.id}/price`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          listingId: modalData.listingId,
+          isSitePrice: modalData.isSite,
+          newPrice: numPrice,
+          reason: inputReason || (modalData.isSite ? 'Ajuste manual site' : `Ajuste manual ${modalData.externalId}`)
+        })
+      })
+
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || 'Erro ao atualizar preço')
+
+      setFeedback({
+        type: 'success',
+        text: `Preço atualizado com sucesso para ${formatBRL(numPrice)}! Os demais canais e anúncios foram rigorosamente preservados.`
+      })
+
+      setTimeout(() => {
+        setModalData(null)
+        router.refresh()
+      }, 1400)
+    } catch (err: any) {
+      setFeedback({ type: 'error', text: err.message || 'Falha ao salvar' })
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 gap-3">
-        {product.marketplaces.map(mp => (
-          <div key={mp.listing_id} className="bg-white border border-[#e6e6e6] rounded-md p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <MarketplaceLogo name={mp.name} className="w-8 h-8" />
-                <div>
-                  <div className="text-[13px] font-medium text-[#333] flex items-center gap-1.5">
-                    {mp.name}
-                    {mp.account_name && mp.account_name !== '—' && (
-                      <span className="text-[9px] bg-[#f5f5f5] text-[#666] px-1.5 py-0.5 rounded font-normal">
-                        {mp.account_name}
-                      </span>
-                    )}
+    <div className="space-y-5">
+      {/* Banner Informativo de Arquitetura */}
+      <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-2xl p-5 shadow-2xs">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <Layers className="w-4 h-4 text-[#2563eb]" />
+              <h4 className="text-sm font-extrabold text-[#0f172a]">
+                Gestão Multicanal: 1 Produto Central → Ofertas Independentes
+              </h4>
+            </div>
+            <p className="text-xs text-[#64748b] leading-relaxed max-w-2xl">
+              Este produto físico central compartilha seu estoque físico (<strong className="text-[#0f172a]">{product.stock.physical} unidades</strong>) entre o Site Próprio, Catálogo Oficial do Mercado Livre e demais marketplaces. Cada oferta possui seu próprio preço independente.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="px-3 py-1.5 bg-white border border-[#cbd5e1] rounded-xl text-center">
+              <div className="text-[10px] text-[#64748b] uppercase font-bold">Estoque Central</div>
+              <div className="text-sm font-black text-[#0f172a]">{product.stock.physical} un</div>
+            </div>
+            <div className="px-3 py-1.5 bg-white border border-[#cbd5e1] rounded-xl text-center">
+              <div className="text-[10px] text-[#64748b] uppercase font-bold">Total Ofertas</div>
+              <div className="text-sm font-black text-[#2563eb]">{listings.length + (product.site_published ? 1 : 0)}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Canal 1: Loja Própria TEKNIX (SITE) */}
+      <div className="bg-white border border-[#e6e6e6] rounded-2xl p-5 shadow-xs">
+        <div className="flex items-center justify-between pb-3 border-b border-[#f1f5f9]">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-[#0f172a] text-white flex items-center justify-center font-bold text-xs shadow-xs">
+              SITE
+            </div>
+            <div>
+              <div className="text-sm font-bold text-[#0f172a] flex items-center gap-2">
+                Loja Oficial TEKNIX (Site Próprio)
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#f0fdf4] text-[#16a34a] border border-[#bbf7d0]">
+                  Publicado
+                </span>
+              </div>
+              <div className="text-xs text-[#64748b]">Canal Direto D2C • teknixbrasil.com.br</div>
+            </div>
+          </div>
+
+          <button
+            onClick={() => openPriceModal({
+              title: product.name,
+              currentPrice: product.site_price || product.pricing.current_price,
+              isSite: true,
+              channelName: 'Loja Oficial TEKNIX (SITE)',
+              externalId: product.sku
+            })}
+            className="px-3.5 py-1.5 bg-[#0f172a] hover:bg-[#1e293b] text-white text-xs font-bold rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+          >
+            <DollarSign className="w-3.5 h-3.5" /> Ajustar Preço no Site
+          </button>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
+          <div>
+            <div className="text-[11px] font-medium text-[#64748b]">Preço no Site</div>
+            <div className="text-base font-black text-[#0f172a] mt-0.5">
+              {formatBRL(product.site_price || product.pricing.current_price)}
+            </div>
+          </div>
+          <div>
+            <div className="text-[11px] font-medium text-[#64748b]">Estoque Compartilhado</div>
+            <div className="text-base font-bold text-[#16a34a] mt-0.5">{product.stock.physical} un</div>
+          </div>
+          <div>
+            <div className="text-[11px] font-medium text-[#64748b]">Canal Isolado</div>
+            <div className="text-xs text-[#64748b] mt-1 flex items-center gap-1">
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#16a34a]" /> Não afeta Marketplaces
+            </div>
+          </div>
+          <div>
+            <div className="text-[11px] font-medium text-[#64748b]">Checkout</div>
+            <div className="text-xs font-bold text-[#2563eb] mt-1">Teknix Play Ativo</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Canal 2+: Marketplaces e suas ofertas */}
+      <div className="space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1">
+          <div>
+            <h3 className="text-sm font-bold text-[#0f172a] flex items-center gap-2">
+              <Store className="w-4 h-4 text-[#64748b]" /> Ofertas & Publicações nos Marketplaces ({listings.length})
+            </h3>
+            <p className="text-xs text-[#64748b]">
+              Venda no Catálogo Oficial (Buy Box) ou crie anúncios tradicionais com preços independentes
+            </p>
+          </div>
+
+          <button
+            onClick={() => {
+              setPublishModalOpen(true)
+              setOfferPrice(String(product.pricing.current_price || product.site_price || ''))
+              setCustomTitle(product.name)
+              triggerCatalogSearch()
+            }}
+            className="px-4 py-2 bg-[#0f172a] hover:bg-[#1e293b] text-white text-xs font-bold rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
+          >
+            <Plus className="w-3.5 h-3.5" /> Publicar Nova Oferta / Canal
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 gap-3">
+          {listings.map(l => (
+            <div
+              key={l.id || l.listing_id}
+              className={`bg-white border rounded-2xl p-5 shadow-xs transition-all ${
+                l.is_best_seller ? 'border-[#f59e0b] ring-1 ring-[#f59e0b]/30' : 'border-[#e6e6e6]'
+              }`}
+            >
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-[#f1f5f9]">
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5">
+                    <MarketplaceLogo name={l.channel_name || 'Mercado Livre'} className="w-7 h-7" />
                   </div>
-                  <div className="text-xs font-mono text-[#999]">ID: {mp.listing_id}</div>
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-sm font-bold text-[#0f172a]">{l.title || product.name}</span>
+                      {l.is_best_seller && (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#fef3c7] text-[#92400e] border border-[#fde68a]">
+                          <Award className="w-3 h-3 text-[#f59e0b]" /> MELHOR ANÚNCIO
+                        </span>
+                      )}
+                      {(l as any).catalog_product_id && (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#eff6ff] text-[#1d4ed8] border border-[#bfdbfe]">
+                          <Sparkles className="w-3 h-3 text-[#2563eb]" /> Catálogo Oficial
+                        </span>
+                      )}
+                      <MarketplaceStatusBadge status={l.status.toUpperCase()} />
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-3 text-xs text-[#64748b] mt-1 font-mono">
+                      <span>ID: <strong className="text-[#0f172a]">{l.listing_id || l.external_id}</strong></span>
+                      {(l as any).catalog_product_id && (
+                        <>
+                          <span className="text-[#cbd5e1]">•</span>
+                          <span>Catalog ID: <strong className="text-[#2563eb]">{(l as any).catalog_product_id}</strong></span>
+                        </>
+                      )}
+                      {l.account_name && (
+                        <>
+                          <span className="text-[#cbd5e1]">•</span>
+                          <span className="font-sans">Conta: <strong className="text-[#0f172a]">{l.account_name}</strong></span>
+                        </>
+                      )}
+                      {l.permalink && (
+                        <>
+                          <span className="text-[#cbd5e1]">•</span>
+                          <a
+                            href={l.permalink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-sans text-[#2563eb] hover:underline inline-flex items-center gap-1"
+                          >
+                            Ver anúncio oficial <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 self-end md:self-auto">
+                  <button
+                    onClick={() => openPriceModal({
+                      title: l.title || product.name,
+                      currentPrice: l.price,
+                      listingId: l.id,
+                      channelName: l.channel_name || 'Mercado Livre',
+                      externalId: l.listing_id || l.external_id
+                    })}
+                    className="px-3.5 py-1.5 bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#0f172a] text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Pencil className="w-3.5 h-3.5 text-[#64748b]" /> Editar Preço
+                  </button>
                 </div>
               </div>
-              <MarketplaceStatusBadge status={mp.status} />
+
+              {/* Métricas da Oferta */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
+                <div>
+                  <div className="text-[11px] font-medium text-[#64748b]">Preço Desta Oferta</div>
+                  <div className="text-base font-black text-[#0f172a] mt-0.5">
+                    {formatBRL(l.price)}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[11px] font-medium text-[#64748b]">Total Vendido (Oferta)</div>
+                  <div className="text-base font-bold text-[#0f172a] mt-0.5">
+                    {l.sold_quantity} un
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[11px] font-medium text-[#64748b]">Faturamento Acumulado</div>
+                  <div className="text-base font-bold text-[#16a34a] mt-0.5">
+                    {formatBRL(l.total_revenue || (l.sold_quantity * l.price))}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[11px] font-medium text-[#64748b]">Última Sincronização</div>
+                  <div className="text-xs text-[#64748b] mt-1 font-mono">
+                    {new Date(l.last_sync).toLocaleString('pt-BR')}
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="grid grid-cols-3 gap-4 mt-3 pt-3 border-t border-[#f5f5f5]">
+          ))}
+        </div>
+      </div>
+
+      {/* Modal 1: Nova Oferta / Publicar no Canal (com Buy Box do Catálogo) */}
+      {publishModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-[#e2e8f0] max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-start justify-between mb-4">
               <div>
-                <div className="text-xs text-[#999]">Preço</div>
-                <div className="text-[13px] font-medium text-[#333]">{formatBRL(mp.price)}</div>
+                <span className="text-[10px] font-extrabold uppercase text-[#2563eb] tracking-wider">
+                  Publicação Multicanal TEKNIX
+                </span>
+                <h3 className="text-lg font-extrabold text-[#0f172a] mt-0.5">
+                  Publicar Nova Oferta no Canal
+                </h3>
+                <p className="text-xs text-[#64748b] mt-0.5">
+                  Produto Central: <strong>{product.name}</strong> • Estoque: <strong>{product.stock.physical} un</strong>
+                </p>
               </div>
+              <button
+                onClick={() => setPublishModalOpen(false)}
+                className="text-[#94a3b8] hover:text-[#0f172a] text-lg font-bold p-1 cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Seleção do Canal */}
               <div>
-                <div className="text-xs text-[#999]">Estoque</div>
-                <div className="text-[13px] font-medium text-[#333]">{mp.stock}</div>
+                <label className="block text-xs font-bold text-[#0f172a] mb-2">Selecione o Canal de Destino</label>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedChannel('mercadolivre')
+                      triggerCatalogSearch()
+                    }}
+                    className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-1 ${
+                      selectedChannel === 'mercadolivre'
+                        ? 'border-[#0f172a] bg-[#f8fafc] ring-2 ring-[#0f172a]/20'
+                        : 'border-[#e2e8f0] hover:border-[#cbd5e1]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <MarketplaceLogo name="Mercado Livre" className="w-4 h-4" />
+                      <span className="text-xs font-bold text-[#0f172a]">Mercado Livre</span>
+                    </div>
+                    <span className="text-[10px] text-[#64748b]">Catálogo Buy Box</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setSelectedChannel('shopee')}
+                    className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-1 ${
+                      selectedChannel === 'shopee'
+                        ? 'border-[#0f172a] bg-[#f8fafc] ring-2 ring-[#0f172a]/20'
+                        : 'border-[#e2e8f0] hover:border-[#cbd5e1]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <MarketplaceLogo name="Shopee" className="w-4 h-4" />
+                      <span className="text-xs font-bold text-[#0f172a]">Shopee</span>
+                    </div>
+                    <span className="text-[10px] text-[#64748b]">Anúncio Shopee</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setSelectedChannel('magalu')}
+                    className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-1 ${
+                      selectedChannel === 'magalu'
+                        ? 'border-[#0f172a] bg-[#f8fafc] ring-2 ring-[#0f172a]/20'
+                        : 'border-[#e2e8f0] hover:border-[#cbd5e1]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <MarketplaceLogo name="Magazine Luiza" className="w-4 h-4" />
+                      <span className="text-xs font-bold text-[#0f172a]">Magalu</span>
+                    </div>
+                    <span className="text-[10px] text-[#64748b]">Open API SKU</span>
+                  </button>
+                </div>
               </div>
-              <div>
-                <div className="text-xs text-[#999]">Última sincronização</div>
-                <div className="text-[11px] text-[#666]">{new Date(mp.last_sync).toLocaleString('pt-BR')}</div>
+
+              {/* Se for Mercado Livre: Escolha de Modo (Catálogo vs Tradicional) */}
+              {selectedChannel === 'mercadolivre' && (
+                <div className="space-y-3 pt-2 border-t border-[#f1f5f9]">
+                  <label className="block text-xs font-bold text-[#0f172a]">Modo de Publicação no Mercado Livre</label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div
+                      onClick={() => setMlMode('CATALOG')}
+                      className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
+                        mlMode === 'CATALOG'
+                          ? 'border-[#2563eb] bg-[#eff6ff] ring-2 ring-[#2563eb]/20'
+                          : 'border-[#e2e8f0] hover:border-[#cbd5e1]'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="radio"
+                          name="mlMode"
+                          checked={mlMode === 'CATALOG'}
+                          onChange={() => setMlMode('CATALOG')}
+                          className="text-[#2563eb]"
+                        />
+                        <span className="text-xs font-bold text-[#0f172a]">Vender no Catálogo (Buy Box)</span>
+                      </div>
+                      <p className="text-[11px] text-[#64748b] mt-1.5 leading-tight">
+                        Aproveite a ficha oficial existente com tráfego e avaliações para disputar a primeira opção de compra.
+                      </p>
+                    </div>
+
+                    <div
+                      onClick={() => setMlMode('TRADITIONAL')}
+                      className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
+                        mlMode === 'TRADITIONAL'
+                          ? 'border-[#0f172a] bg-[#f8fafc] ring-2 ring-[#0f172a]/20'
+                          : 'border-[#e2e8f0] hover:border-[#cbd5e1]'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="radio"
+                          name="mlMode"
+                          checked={mlMode === 'TRADITIONAL'}
+                          onChange={() => setMlMode('TRADITIONAL')}
+                          className="text-[#0f172a]"
+                        />
+                        <span className="text-xs font-bold text-[#0f172a]">Criar Anúncio Tradicional</span>
+                      </div>
+                      <p className="text-[11px] text-[#64748b] mt-1.5 leading-tight">
+                        Publicação independente com fotos, ficha e título próprios.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Se Catálogo: Resultados da busca automática */}
+                  {mlMode === 'CATALOG' && (
+                    <div className="space-y-2 pt-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-[#0f172a] flex items-center gap-1.5">
+                          <Search className="w-3.5 h-3.5 text-[#2563eb]" /> Produto Encontrado no Catálogo do ML:
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => triggerCatalogSearch()}
+                          className="text-[11px] text-[#2563eb] hover:underline font-bold"
+                        >
+                          {catalogSearching ? 'Buscando...' : 'Atualizar Busca'}
+                        </button>
+                      </div>
+
+                      {catalogCandidates.length > 0 ? (
+                        <div className="space-y-2">
+                          {catalogCandidates.map(c => (
+                            <div
+                              key={c.catalog_product_id}
+                              onClick={() => setSelectedCatalogId(c.catalog_product_id)}
+                              className={`p-3 rounded-xl border flex items-center justify-between gap-3 cursor-pointer transition-all ${
+                                selectedCatalogId === c.catalog_product_id
+                                  ? 'border-[#2563eb] bg-[#eff6ff]'
+                                  : 'border-[#e2e8f0] hover:border-[#cbd5e1]'
+                              }`}
+                            >
+                              <div className="flex items-center gap-3 min-w-0">
+                                <div className="w-10 h-10 rounded-lg bg-white border border-[#e2e8f0] flex items-center justify-center shrink-0 overflow-hidden">
+                                  {c.thumbnail ? (
+                                    <img src={c.thumbnail} alt="" className="w-full h-full object-contain p-0.5" />
+                                  ) : (
+                                    <Package className="w-4 h-4 text-[#94a3b8]" />
+                                  )}
+                                </div>
+                                <div className="min-w-0">
+                                  <div className="text-xs font-bold text-[#0f172a] truncate">{c.title}</div>
+                                  <div className="text-[10px] text-[#64748b] font-mono">
+                                    Catalog ID: <strong>{c.catalog_product_id}</strong> • Confiança: {c.confidence}%
+                                  </div>
+                                </div>
+                              </div>
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white text-[#2563eb] border border-[#bfdbfe] shrink-0">
+                                {selectedCatalogId === c.catalog_product_id ? 'Selecionado' : 'Usar Este'}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="p-3 bg-[#f8fafc] border border-dashed border-[#cbd5e1] rounded-xl text-center text-xs text-[#64748b]">
+                          {catalogSearching ? 'Pesquisando produtos oficiais no catálogo...' : 'Nenhum item automático retornado. Você pode digitar o Catalog ID abaixo.'}
+                        </div>
+                      )}
+
+                      <div>
+                        <label className="block text-[11px] font-medium text-[#64748b] mb-1">
+                          Catalog Product ID (MLB...)
+                        </label>
+                        <input
+                          type="text"
+                          value={selectedCatalogId}
+                          onChange={e => setSelectedCatalogId(e.target.value)}
+                          placeholder="Ex: MLB28472948"
+                          className="w-full px-3 py-2 text-xs font-mono bg-white border border-[#cbd5e1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f172a]"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Se Tradicional: Título Customizado */}
+                  {mlMode === 'TRADITIONAL' && (
+                    <div>
+                      <label className="block text-xs font-bold text-[#0f172a] mb-1">Título do Anúncio Tradicional</label>
+                      <input
+                        type="text"
+                        value={customTitle}
+                        onChange={e => setCustomTitle(e.target.value)}
+                        placeholder="Ex: Hollyland Lark M2 Microfone Duplo Sem Fio"
+                        className="w-full px-3.5 py-2 text-xs bg-white border border-[#cbd5e1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f172a]"
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Se for Shopee ou Magalu: Informações do Canal */}
+              {selectedChannel !== 'mercadolivre' && (
+                <div className="p-3.5 bg-[#f8fafc] border border-[#e2e8f0] rounded-xl space-y-1">
+                  <div className="text-xs font-bold text-[#0f172a]">
+                    Modo: {selectedChannel === 'shopee' ? 'Publicação de Produto/Anúncio Shopee' : 'Publicação de Produto/SKU Magalu'}
+                  </div>
+                  <p className="text-[11px] text-[#64748b]">
+                    Esta oferta será criada e associada ao produto central, debitando do estoque físico único ({product.stock.physical} un).
+                  </p>
+                </div>
+              )}
+
+              {/* Preço e Tipo de Oferta */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-[#f1f5f9]">
+                <div>
+                  <label className="block text-xs font-bold text-[#0f172a] mb-1">Preço da Oferta (R$)</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-[#64748b]">R$</span>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={offerPrice}
+                      onChange={e => setOfferPrice(e.target.value)}
+                      placeholder="0.00"
+                      className="w-full pl-9 pr-3 py-2 text-sm font-bold bg-white border border-[#cbd5e1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f172a]"
+                    />
+                  </div>
+                  <span className="text-[10px] text-[#64748b] mt-0.5 block">Preço isolado deste canal</span>
+                </div>
+
+                {selectedChannel === 'mercadolivre' && (
+                  <div>
+                    <label className="block text-xs font-bold text-[#0f172a] mb-1">Tipo de Anúncio no ML</label>
+                    <select
+                      value={listingType}
+                      onChange={e => setListingType(e.target.value as any)}
+                      className="w-full px-3 py-2 text-xs bg-white border border-[#cbd5e1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f172a] cursor-pointer"
+                    >
+                      <option value="gold_special">Clássico (gold_special)</option>
+                      <option value="gold_pro">Premium - 10x sem juros (gold_pro)</option>
+                    </select>
+                  </div>
+                )}
+              </div>
+
+              {/* Callout de Garantia de Isolamento */}
+              <div className="p-3 bg-[#eff6ff] border border-[#bfdbfe] rounded-xl flex items-start gap-2.5">
+                <ShieldAlert className="w-4 h-4 text-[#2563eb] shrink-0 mt-0.5" />
+                <p className="text-[11px] text-[#1e40af] leading-relaxed">
+                  <strong>Regra Permanente TEKNIX:</strong> O estoque físico central único ({product.stock.physical} un) será debitado a cada venda. O preço desta oferta é 100% independente e não alterará o SITE próprio nem os demais anúncios.
+                </p>
+              </div>
+
+              {publishFeedback && (
+                <div className={`p-3 rounded-xl text-xs font-medium ${
+                  publishFeedback.type === 'success'
+                    ? 'bg-[#f0fdf4] text-[#16a34a] border border-[#bbf7d0]'
+                    : 'bg-[#fef2f2] text-[#dc2626] border border-[#fecaca]'
+                }`}>
+                  {publishFeedback.text}
+                </div>
+              )}
+
+              <div className="flex items-center justify-end gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setPublishModalOpen(false)}
+                  disabled={publishLoading}
+                  className="px-4 py-2 text-xs font-semibold text-[#64748b] hover:text-[#0f172a] rounded-xl transition-colors cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handlePublishOffer}
+                  disabled={publishLoading}
+                  className="px-5 py-2 bg-[#0f172a] hover:bg-[#1e293b] text-white text-xs font-bold rounded-xl transition-all shadow-xs disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
+                >
+                  {publishLoading && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
+                  Confirmar e Criar Oferta
+                </button>
               </div>
             </div>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
+
+      {/* Modal 2: Alteração de Preço com Regra de Isolamento */}
+      {modalData?.open && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-[#e2e8f0] animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <span className="text-[10px] font-extrabold uppercase text-[#2563eb] tracking-wider">
+                  Isolamento de Preço • {modalData.channelName}
+                </span>
+                <h3 className="text-base font-extrabold text-[#0f172a] mt-0.5">
+                  Ajustar Preço Individual
+                </h3>
+                <p className="text-xs font-mono text-[#64748b]">Anúncio: {modalData.externalId}</p>
+              </div>
+              <button
+                onClick={() => setModalData(null)}
+                className="text-[#94a3b8] hover:text-[#0f172a] text-lg font-bold p-1 cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-3.5">
+                <div className="text-xs text-[#64748b]">Preço atual:</div>
+                <div className="text-lg font-black text-[#0f172a]">
+                  {formatBRL(modalData.currentPrice)}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-[#0f172a] mb-1.5">
+                  Novo Preço (R$)
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-[#64748b]">R$</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={inputPrice}
+                    onChange={e => setInputPrice(e.target.value)}
+                    placeholder="0.00"
+                    className="w-full pl-11 pr-4 py-2.5 text-base font-bold bg-white border border-[#cbd5e1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f172a]"
+                    autoFocus
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[#64748b] mb-1.5">
+                  Motivo da Alteração (Opcional)
+                </label>
+                <input
+                  type="text"
+                  value={inputReason}
+                  onChange={e => setInputReason(e.target.value)}
+                  placeholder="Ex: Campanha de preço agressivo, teste de margem..."
+                  className="w-full px-3.5 py-2 text-xs bg-white border border-[#cbd5e1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f172a]"
+                />
+              </div>
+
+              {/* Callout de Garantia de Isolamento */}
+              <div className="p-3 bg-[#eff6ff] border border-[#bfdbfe] rounded-xl flex items-start gap-2.5">
+                <ShieldAlert className="w-4 h-4 text-[#2563eb] shrink-0 mt-0.5" />
+                <p className="text-[11px] text-[#1e40af] leading-relaxed">
+                  <strong>Regra de Isolamento:</strong> Esta alteração será aplicada <em>somente</em> a este anúncio. Os outros anúncios do Mercado Livre e o preço da loja própria TEKNIX não sofrerão nenhuma alteração.
+                </p>
+              </div>
+
+              {feedback && (
+                <div className={`p-3 rounded-xl text-xs font-medium ${
+                  feedback.type === 'success'
+                    ? 'bg-[#f0fdf4] text-[#16a34a] border border-[#bbf7d0]'
+                    : 'bg-[#fef2f2] text-[#dc2626] border border-[#fecaca]'
+                }`}>
+                  {feedback.text}
+                </div>
+              )}
+
+              <div className="flex items-center justify-end gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setModalData(null)}
+                  disabled={loading}
+                  className="px-4 py-2 text-xs font-semibold text-[#64748b] hover:text-[#0f172a] rounded-xl transition-colors cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSavePrice}
+                  disabled={loading}
+                  className="px-5 py-2 bg-[#0f172a] hover:bg-[#1e293b] text-white text-xs font-bold rounded-xl transition-all shadow-xs disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
+                >
+                  {loading && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
+                  Confirmar Novo Preço
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -740,22 +1515,25 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
               {/* Price & Stock Quick Highlight Cards */}
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 bg-white border border-[#e6e6e6] rounded-2xl mb-2 shadow-2xs">
                 <div>
-                  <span className="text-[10px] uppercase font-bold text-[#64748b] tracking-wider">Preço no Mercado Livre</span>
-                  <div className="text-xl font-black text-[#0f172a] mt-0.5">
-                    {formatBRL(product.pricing.current_price || product.costs.real || 0)}
-                  </div>
-                </div>
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-[#64748b] tracking-wider">Estoque Disponível</span>
+                  <span className="text-[10px] uppercase font-bold text-[#64748b] tracking-wider">Estoque Físico Central</span>
                   <div className={`text-xl font-black mt-0.5 ${product.stock.physical > 0 ? 'text-[#16a34a]' : 'text-[#dc2626]'}`}>
                     {product.stock.physical} unidades
                   </div>
+                  <div className="text-[11px] text-[#64748b] mt-0.5">Disponível: <strong>{product.stock.available} un</strong></div>
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-[#64748b] tracking-wider">Preço Loja Oficial (Site)</span>
+                  <div className="text-xl font-black text-[#0f172a] mt-0.5">
+                    {formatBRL(product.site_price || product.pricing.current_price || product.costs.real || 0)}
+                  </div>
+                  <div className="text-[11px] text-[#2563eb] mt-0.5 font-medium">Canal D2C Direto</div>
                 </div>
                 <div className="hidden sm:block">
-                  <span className="text-[10px] uppercase font-bold text-[#64748b] tracking-wider">Margem / Lucro</span>
-                  <div className="text-xl font-black text-[#2563eb] mt-0.5">
-                    {product.pricing.margin ? `${product.pricing.margin}%` : 'Ativo'}
+                  <span className="text-[10px] uppercase font-bold text-[#64748b] tracking-wider">Anúncios & Marketplaces</span>
+                  <div className="text-xl font-black text-[#0f172a] mt-0.5">
+                    {(product.channel_listings?.length || product.marketplaces.length) + (product.site_published ? 1 : 0)} canais
                   </div>
+                  <div className="text-[11px] text-[#16a34a] mt-0.5 font-medium">Preços Independentes</div>
                 </div>
               </div>
             </div>
@@ -765,7 +1543,7 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-4">
         <StatBox label="Vendas" value={String(product.summary.total_sales)} />
-        <StatBox label="Estoque" value={String(product.stock.physical)} />
+        <StatBox label="Estoque Central" value={`${product.stock.physical} un`} />
         <StatBox label="Faturamento" value={formatBRL(product.summary.total_revenue)} />
         <StatBox label="Lucro" value={formatBRL(product.summary.total_profit)} />
         <StatBox label="Margem" value={`${product.summary.avg_margin}%`} />
@@ -775,10 +1553,10 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
       <Tabs defaultValue="visao-geral">
         <TabsList>
           <TabsTrigger value="visao-geral"><Package className="w-3.5 h-3.5 mr-1 inline" /> Visão geral</TabsTrigger>
+          <TabsTrigger value="marketplaces"><Store className="w-3.5 h-3.5 mr-1 inline" /> Multicanal & Anúncios</TabsTrigger>
           <TabsTrigger value="vendas"><TrendingUp className="w-3.5 h-3.5 mr-1 inline" /> Vendas</TabsTrigger>
           <TabsTrigger value="estoque"><ShoppingCart className="w-3.5 h-3.5 mr-1 inline" /> Estoque</TabsTrigger>
           <TabsTrigger value="compras"><Store className="w-3.5 h-3.5 mr-1 inline" /> Compras</TabsTrigger>
-          <TabsTrigger value="marketplaces"><Store className="w-3.5 h-3.5 mr-1 inline" /> Marketplaces</TabsTrigger>
           <TabsTrigger value="historico"><Clock className="w-3.5 h-3.5 mr-1 inline" /> Histórico</TabsTrigger>
         </TabsList>
         <TabsContent value="visao-geral"><VisaoGeralTab product={product} /></TabsContent>

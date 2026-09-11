@@ -58,6 +58,35 @@
   gap: 4px;
 }
 
+.title-with-back {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.btn-back-to-settings {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  color: #111827;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.btn-back-to-settings:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  color: #0071e3;
+  transform: translateX(-1px);
+}
+
 .payments-title {
   font-size: 1.45rem;
   font-weight: 700;
@@ -172,8 +201,12 @@
 }
 
 .gateway-logo {
-  width: 180px;
-  height: 44px;
+  width: 152px;
+  height: 48px;
+  padding: 6px 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fff;
   flex: 0 0 auto;
   display: flex;
   align-items: center;
@@ -184,6 +217,27 @@
   height: 100%;
   object-fit: contain;
   object-position: left center;
+}
+
+.gateway-logo img[src$=".svg"] {
+  object-position: center;
+}
+
+.gateway-logo-teknix_pay img {
+  width: 125px;
+}
+
+@media (max-width: 680px) {
+  .gateway-card-top,
+  .gateway-card-bottom {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .gateway-badges {
+    flex-wrap: wrap;
+  }
 }
 
 .gateway-badges {

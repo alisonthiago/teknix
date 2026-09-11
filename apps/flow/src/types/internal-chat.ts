@@ -18,6 +18,7 @@ export interface ChatMember {
   role?: string
   photo_url?: string
   online?: boolean
+  presenceStatus?: string
   last_activity?: string
 }
 

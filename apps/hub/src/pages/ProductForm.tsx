@@ -168,7 +168,7 @@ export default function ProductForm() {
 
   async function fetchCategories() {
     try {
-      const { data } = await supabase.from('categories').select('id, name').order('name')
+      const { data } = await supabase.from('store_categories').select('id, name').order('name')
       if (data) setCategories(data)
     } catch (e) {
       console.error(e)
@@ -177,55 +177,12 @@ export default function ProductForm() {
 
   const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str)
 
-  const MOCK_PRODUCTS: Record<string, any> = {
-    'demo-1': {
-      id: 'demo-1',
-      name: 'Parafusadeira e Furadeira de Impacto 12V Bivolt TEKNIX',
-      slug: 'parafusadeira-impacto-12v',
-      sku: 'TKN-FUR-12V',
-      sell_price: 45.00,
-      promo_price: 39.90,
-      has_promo: true,
-      cost_price: 22.50,
-      stock_quantity: 100,
-      main_image: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=800&auto=format&fit=crop&q=80',
-      images: ['https://images.unsplash.com/photo-1504148455328-c376907d081c?w=800&auto=format&fit=crop&q=80'],
-      description: 'A Parafusadeira e Furadeira de Impacto TEKNIX 12V Bivolt oferece máxima precisão e autonomia para montagens, reformas e manutenções pesadas. Compacta, ergonômica e com controle eletrônico de torque.',
-      short_description: 'Alta potência e torque para perfurações em alvenaria, madeira e metal.',
-      status: 'active',
-      brand: 'TEKNIX',
-      featured: true,
-      category_id: '1'
-    },
-    'demo-2': {
-      id: 'demo-2',
-      name: 'Disco de Corte Diamantado Extra Fino 110mm',
-      slug: 'disco-corte-diamantado',
-      sku: 'TKN-DISC-110',
-      sell_price: 18.50,
-      promo_price: 15.00,
-      has_promo: true,
-      cost_price: 8.20,
-      stock_quantity: 24,
-      main_image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800&auto=format&fit=crop&q=80',
-      images: ['https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800&auto=format&fit=crop&q=80'],
-      description: 'Disco diamantado extra fino para corte a seco ou refrigerado de porcelanatos, pisos cerâmicos e mármores.',
-      short_description: 'Corte rápido, sem rebarbas e com alta durabilidade.',
-      status: 'active',
-      brand: 'TEKNIX',
-      category_id: '2'
-    }
-  }
-
   async function loadProduct(productId: string) {
     setLoading(true)
     try {
-      if (MOCK_PRODUCTS[productId] || !isUUID(productId)) {
-        const mock = MOCK_PRODUCTS[productId] || MOCK_PRODUCTS['demo-1']
-        setForm(prev => ({
-          ...prev,
-          ...mock
-        }))
+      if (!isUUID(productId)) {
+        setMessage({ type: 'error', text: 'Identificador de produto inválido.' })
+        setLoading(false)
         return
       }
 
@@ -296,11 +253,7 @@ export default function ProductForm() {
         })
       }
     } catch (e: any) {
-      if (MOCK_PRODUCTS[productId]) {
-        setForm(prev => ({ ...prev, ...MOCK_PRODUCTS[productId] }))
-      } else {
-        setMessage({ type: 'error', text: 'Erro ao carregar produto: ' + e.message })
-      }
+      setMessage({ type: 'error', text: 'Erro ao carregar produto: ' + e.message })
     } finally {
       setLoading(false)
     }
@@ -472,7 +425,7 @@ export default function ProductForm() {
     if (!newCategoryName.trim()) return
     try {
       const slug = newCategoryName.toLowerCase().replace(/\s+/g, '-')
-      const { data, error } = await supabase.from('categories').insert({ name: newCategoryName, slug, active: true }).select().single()
+      const { data, error } = await supabase.from('store_categories').insert({ name: newCategoryName, slug, status: 'active' }).select().single()
       if (error) throw error
       if (data) {
         setCategories(prev => [...prev, data])

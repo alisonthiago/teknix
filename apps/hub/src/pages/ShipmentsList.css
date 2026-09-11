@@ -1,0 +1,991 @@
+/* ==========================================================================
+   TEKNIX HUB — PÁGINA DE ENVIOS & EXPEDIÇÃO (Clean Apple Design System)
+   ========================================================================== */
+
+.shipments-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #1d1d1f;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Toast */
+.shipments-toast {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  z-index: 9999;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  animation: slideInToast 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideInToast {
+  from { transform: translateX(30px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.shipments-toast.success {
+  background: #10b981;
+  color: #ffffff;
+}
+
+.shipments-toast.error {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+/* Header */
+.shipments-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.title-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.icon-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #f0f4ff;
+  color: #347ff2;
+}
+
+.shipments-header-title h2 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: #1d1d1f;
+}
+
+.shipments-header-title p {
+  margin: 2px 0 0 0;
+  font-size: 0.85rem;
+  color: #86868b;
+}
+
+.shipments-header-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid #e5e5e7;
+  background: #ffffff;
+  color: #1d1d1f;
+}
+
+.shipments-header-actions .btn:hover {
+  background: #f5f5f7;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Métricas Operacionais */
+.shipments-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px;
+}
+
+.metric-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e5e5e7;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  border-color: #d2d2d7;
+}
+
+.metric-card .metric-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+}
+
+.metric-card.waiting .metric-icon { background: #fff8eb; color: #f59e0b; }
+.metric-card.ready .metric-icon { background: #eff6ff; color: #3b82f6; }
+.metric-card.shipped .metric-icon { background: #f5f3ff; color: #8b5cf6; }
+.metric-card.delivered .metric-icon { background: #f0fdf4; color: #10b981; }
+
+.metric-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.metric-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #86868b;
+}
+
+.metric-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin-top: 2px;
+}
+
+/* Toolbar */
+.shipments-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.shipments-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  background: #f5f5f7;
+  border-radius: 10px;
+  overflow-x: auto;
+}
+
+.tab-btn {
+  padding: 7px 14px;
+  background: transparent;
+  border: none;
+  border-radius: 7px;
+  color: #6e6e73;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.tab-btn:hover {
+  color: #1d1d1f;
+}
+
+.tab-btn.active {
+  background: #ffffff;
+  color: #1d1d1f;
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.search-box {
+  position: relative;
+  min-width: 280px;
+}
+
+.search-box svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #86868b;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 8px 12px 8px 36px;
+  border: 1px solid #e5e5e7;
+  border-radius: 8px;
+  font-size: 13px;
+  background: #ffffff;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.search-box input:focus {
+  border-color: #347ff2;
+}
+
+/* Tabela */
+.table-wrapper {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e5e5e7;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.data-table th {
+  padding: 12px 20px;
+  background: #fafafa;
+  font-size: 11px;
+  font-weight: 600;
+  color: #86868b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid #e5e5e7;
+}
+
+.data-table td {
+  padding: 14px 20px;
+  font-size: 13px;
+  border-bottom: 1px solid #f2f2f5;
+  vertical-align: middle;
+}
+
+.clickable-row {
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.clickable-row:hover {
+  background: #fbfbfd;
+}
+
+.clickable-row:last-child td {
+  border-bottom: none;
+}
+
+/* Células customizadas */
+.order-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.order-number {
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+.order-date {
+  font-size: 11px;
+  color: #86868b;
+  margin-top: 2px;
+}
+
+.customer-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.customer-name {
+  font-weight: 500;
+  color: #1d1d1f;
+}
+
+.customer-doc {
+  font-size: 11px;
+  color: #86868b;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.carrier-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.carrier-name {
+  font-weight: 500;
+  color: #1d1d1f;
+}
+
+.carrier-badge {
+  font-size: 10px;
+  font-weight: 600;
+  color: #0070f3;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.freight-price {
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+.free-freight {
+  color: #10b981;
+  font-weight: 600;
+}
+
+/* Badges */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge-warning { background: #fffbeb; color: #b45309; }
+.badge-info { background: #eff6ff; color: #1d4ed8; }
+.badge-primary { background: #f5f3ff; color: #6d28d9; }
+.badge-success { background: #f0fdf4; color: #15803d; }
+.badge-danger { background: #fef2f2; color: #b91c1c; }
+.badge-neutral { background: #f3f4f6; color: #4b5563; }
+
+/* Rastreio */
+.tracking-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f5f5f7;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.tracking-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+.btn-copy-mini {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  color: #86868b;
+  transition: color 0.15s;
+}
+
+.btn-copy-mini:hover {
+  color: #1d1d1f;
+}
+
+.no-tracking {
+  color: #86868b;
+  font-size: 13px;
+}
+
+/* Botões de Ação na Linha */
+.row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.btn-action-primary {
+  padding: 6px 12px;
+  background: #347ff2;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.btn-action-primary:hover {
+  background: #2563eb;
+}
+
+.btn-action-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #ffffff;
+  color: #1d1d1f;
+  border: 1px solid #e5e5e7;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-action-secondary:hover {
+  background: #f5f5f7;
+}
+
+.btn-action-ghost {
+  padding: 6px 12px;
+  background: transparent;
+  color: #347ff2;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-action-ghost:hover {
+  text-decoration: underline;
+}
+
+/* Estados vazios / carregamento */
+.table-loading, .table-empty {
+  text-align: center;
+  padding: 50px 20px;
+  color: #86868b;
+}
+
+.table-empty svg {
+  color: #d2d2d7;
+  margin-bottom: 10px;
+}
+
+.table-empty p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.spinner {
+  width: 22px;
+  height: 22px;
+  border: 2px solid #e5e5e7;
+  border-top-color: #347ff2;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 10px;
+}
+
+/* ==========================================================================
+   GAVETA LATERAL (DRAWER)
+   ========================================================================== */
+
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  justify-content: flex-end;
+  animation: fadeInOverlay 0.2s ease-out;
+}
+
+@keyframes fadeInOverlay {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.shipment-drawer {
+  width: 100%;
+  max-width: 540px;
+  height: 100%;
+  background: #fbfbfd;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12);
+  animation: slideDrawer 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideDrawer {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e5e7;
+}
+
+.drawer-pre-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #86868b;
+  letter-spacing: 0.05em;
+}
+
+.drawer-header h3 {
+  margin: 2px 0 0 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1d1d1f;
+}
+
+.drawer-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-close {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  color: #86868b;
+  display: flex;
+  align-items: center;
+  transition: all 0.15s;
+}
+
+.btn-close:hover {
+  background: #f5f5f7;
+  color: #1d1d1f;
+}
+
+.drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Cards na Gaveta */
+.drawer-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e5e5e7;
+  padding: 16px 18px;
+}
+
+.drawer-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  color: #1d1d1f;
+}
+
+.drawer-card-title svg {
+  color: #347ff2;
+}
+
+.drawer-card-title h4 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #6e6e73;
+}
+
+.drawer-fields-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.field-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.field-label {
+  font-size: 11px;
+  color: #86868b;
+}
+
+.field-value {
+  font-size: 13px;
+  color: #1d1d1f;
+}
+
+.font-medium { font-weight: 600; }
+.font-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+
+.address-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: #f9f9fb;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #333336;
+}
+
+.address-icon {
+  margin-top: 2px;
+  flex-shrink: 0;
+  color: #347ff2;
+}
+
+/* Lista de Produtos */
+.drawer-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.drawer-item-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f2f2f5;
+}
+
+.drawer-item-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.item-icon-box {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: #f5f5f7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6e6e73;
+}
+
+.item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.item-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+.item-meta {
+  font-size: 11px;
+  color: #86868b;
+  margin-top: 2px;
+}
+
+.item-total {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+.empty-items-notice {
+  font-size: 12px;
+  color: #86868b;
+  font-style: italic;
+}
+
+.package-specs-summary {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed #e5e5e7;
+}
+
+.spec-tag {
+  font-size: 11px;
+  background: #f5f5f7;
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: #555558;
+}
+
+/* Frete Contratado */
+.drawer-freight-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.freight-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.freight-row span {
+  color: #6e6e73;
+}
+
+.freight-row strong {
+  color: #1d1d1f;
+  font-weight: 600;
+}
+
+/* Card Destacado da Etiqueta */
+.highlight-card {
+  border: 1px solid #c7d9ff;
+  background: #f7faff;
+}
+
+.label-action-box {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.label-intro {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #4b5563;
+}
+
+.btn-generate-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 18px;
+  background: #347ff2;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.btn-generate-label:hover {
+  background: #2563eb;
+}
+
+.btn-generate-label:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.spinner-white {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* Caixa com etiqueta gerada */
+.label-ready-box {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.tracking-display {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: #ffffff;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #e0ebff;
+}
+
+.tracking-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6e6e73;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tracking-code-group {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tracking-bold {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1d1d1f;
+  letter-spacing: 0.03em;
+}
+
+.btn-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #f5f5f7;
+  border: 1px solid #e5e5e7;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #1d1d1f;
+  transition: all 0.15s;
+}
+
+.btn-copy:hover {
+  background: #eaeaea;
+}
+
+.label-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.btn-print-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 14px;
+  background: #1d1d1f;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-print-label:hover {
+  background: #333336;
+}
+
+.btn-track-external {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 14px;
+  background: #ffffff;
+  color: #347ff2;
+  border: 1px solid #c7d9ff;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.15s;
+}
+
+.btn-track-external:hover {
+  background: #edf3ff;
+}
+
+/* Ações manuais de status */
+.manual-status-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+  padding-top: 10px;
+  border-top: 1px solid #e0ebff;
+}
+
+.sub-label {
+  font-size: 11px;
+  color: #6e6e73;
+}
+
+.status-buttons-row {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-sub-action {
+  flex: 1;
+  padding: 7px 10px;
+  background: #ffffff;
+  border: 1px solid #d2d2d7;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #1d1d1f;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-sub-action:hover {
+  background: #f5f5f7;
+}
+
+.btn-sub-action.success {
+  color: #10b981;
+  border-color: #a7f3d0;
+}
+
+.btn-sub-action.success:hover {
+  background: #ecfdf5;
+}
+
+/* Rodapé da Gaveta */
+.drawer-footer {
+  padding: 16px 24px;
+  background: #ffffff;
+  border-top: 1px solid #e5e5e7;
+  display: flex;
+  justify-content: center;
+}
+
+.link-view-order {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #347ff2;
+  text-decoration: none;
+}
+
+.link-view-order:hover {
+  text-decoration: underline;
+}

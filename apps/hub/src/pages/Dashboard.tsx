@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Eye, EyeOff, Filter, ArrowRight, Package, ShoppingCart } from 'lucide-react'
+import { Eye, EyeOff, Filter, ArrowRight, Package, ShoppingCart, X } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import './Dashboard.css'
 
@@ -20,6 +20,7 @@ interface RecentOrder {
 export default function Dashboard() {
   const [tab, setTab] = useState<'faturamento' | 'vendas' | 'lucro'>('faturamento')
   const [hidden, setHidden] = useState(false)
+  const [showLiveMonitor, setShowLiveMonitor] = useState(false)
   const [period, setPeriod] = useState('30')
   const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([])
 
@@ -38,56 +39,78 @@ export default function Dashboard() {
   }, [])
 
   const [stats, setStats] = useState({
-    products: 4,
+    products: 0,
     orders: 0,
     revenue: 0,
     todayRevenue: 0.00,
-    urgent: 7,
-    toShip: 23,
+    urgent: 0,
+    toShip: 0,
     lowStock: 0,
     shipped: 0,
   })
 
   useEffect(() => {
-    async function loadStats() {
+    async function loadDashboardData() {
       try {
-        const [products, orders, siteOrders] = await Promise.all([
+        const [productsRes, storeOrdersRes, lowStockRes] = await Promise.all([
           supabase.from('products').select('id', { count: 'exact', head: true }),
-          // O painel representa somente as vendas da loja própria (SITE).
-          supabase.from('orders').select('id', { count: 'exact', head: true }).is('marketplace', null),
-          supabase.from('orders').select('total, total_amount, created_at, status').is('marketplace', null),
+          supabase.from('store_orders').select('*, items:store_order_items(*)').order('created_at', { ascending: false }),
+          supabase.from('products').select('id', { count: 'exact', head: true }).lte('stock', 3)
         ])
-        const rows = (siteOrders.data || []) as Array<{ total?: number; total_amount?: number; created_at: string; status?: string }>
-        const revenue = rows
-          .filter(row => !['cancelled', 'refunded'].includes((row.status || '').toLowerCase()))
-          .reduce((sum, row) => sum + Number(row.total_amount ?? row.total ?? 0), 0)
-        const todayKey = new Date().toISOString().slice(0, 10)
-        const todayRevenue = rows
-          .filter(row => row.created_at?.slice(0, 10) === todayKey && !['cancelled', 'refunded'].includes((row.status || '').toLowerCase()))
-          .reduce((sum, row) => sum + Number(row.total_amount ?? row.total ?? 0), 0)
-        setStats(prev => ({
-          ...prev,
-          products: products.count ?? prev.products,
-          orders: orders.count ?? prev.orders,
+
+        const ordersList = (storeOrdersRes.data || []) as any[]
+
+        // Faturamento acumulado de pedidos pagos/em processo
+        const validOrders = ordersList.filter(o =>
+          ['paid', 'approved', 'preparing', 'shipped', 'delivered'].includes((o.status || '').toLowerCase())
+        )
+        const revenue = validOrders.reduce((acc, o) => acc + Number(o.total || 0), 0)
+
+        // Faturamento de hoje
+        const todayStr = new Date().toISOString().slice(0, 10)
+        const todayRevenue = validOrders
+          .filter(o => (o.created_at || '').slice(0, 10) === todayStr)
+          .reduce((acc, o) => acc + Number(o.total || 0), 0)
+
+        // Contagens por estágio operacional
+        const urgentCount = ordersList.filter(o => (o.status || '').toLowerCase() === 'pending').length
+        const toShipCount = ordersList.filter(o => ['paid', 'approved', 'preparing'].includes((o.status || '').toLowerCase())).length
+        const shippedCount = ordersList.filter(o => ['shipped', 'delivered'].includes((o.status || '').toLowerCase())).length
+
+        setStats({
+          products: productsRes.count ?? 0,
+          orders: ordersList.length,
           revenue,
           todayRevenue,
-        }))
-      } catch {}
+          urgent: urgentCount,
+          toShip: toShipCount,
+          lowStock: lowStockRes.count ?? 0,
+          shipped: shippedCount,
+        })
+
+        // 5 pedidos mais recentes
+        const recentMapped: RecentOrder[] = ordersList.slice(0, 5).map(o => {
+          const firstItem = o.items?.[0]
+          return {
+            id: o.id,
+            buyer_name: o.customer_name || 'Cliente',
+            total: Number(o.total || 0),
+            status: o.status || 'pending',
+            created_at: o.created_at,
+            marketplace: o.origin || 'Loja Própria (SITE)',
+            product_name: firstItem ? `${firstItem.product_name || 'Produto'}${o.items.length > 1 ? ` (+${o.items.length - 1})` : ''}` : 'Pedido da Loja',
+            sku: firstItem?.sku || '',
+            marketplace_order_id: o.order_number
+          }
+        })
+
+        setRecentOrders(recentMapped)
+      } catch (err) {
+        console.error('[Dashboard] Erro ao carregar dados operacionais:', err)
+      }
     }
 
-    async function loadRecentOrders() {
-      try {
-        const { data } = await supabase
-          .from('orders')
-          .select('id, buyer_name, total, status, created_at, marketplace, product_name, product_image, sku, marketplace_order_id')
-          .order('created_at', { ascending: false })
-          .limit(5)
-        if (data && data.length > 0) setRecentOrders(data)
-      } catch {}
-    }
-
-    loadStats()
-    loadRecentOrders()
+    loadDashboardData()
   }, [])
 
   const fmtBRL = (v: number) =>
@@ -105,6 +128,7 @@ export default function Dashboard() {
       approved: { label: 'Aprovado', cls: 'badge-success' },
       paid: { label: 'Pago', cls: 'badge-success' },
       pending: { label: 'Pendente', cls: 'badge-warn' },
+      preparing: { label: 'Preparando', cls: 'badge-blue' },
       shipped: { label: 'Enviado', cls: 'badge-blue' },
       delivered: { label: 'Entregue', cls: 'badge-gray' },
       cancelled: { label: 'Cancelado', cls: 'badge-red' },
@@ -112,45 +136,6 @@ export default function Dashboard() {
     const s = map[status?.toLowerCase()] ?? { label: status, cls: 'badge-gray' }
     return <span className={`dash-badge ${s.cls}`}>{s.label}</span>
   }
-
-  // Demo orders if Supabase doesn't return real data
-  const DEMO_ORDERS: RecentOrder[] = [
-    {
-      id: '1', buyer_name: 'P20260115213218', total: 279.90, status: 'approved',
-      created_at: '2026-08-25T12:00:00Z', marketplace: 'Mercado Livre',
-      product_name: 'Lava Jato Lavadora Portátil De Alta Pressão 21v',
-      sku: 'LAVA-JATO-21V', marketplace_order_id: 'MLB-2000018111048714',
-    },
-    {
-      id: '2', buyer_name: 'jocimar Guarnier Bonicenha', total: 279.90, status: 'approved',
-      created_at: '2026-08-25T10:00:00Z', marketplace: 'Mercado Livre',
-      product_name: 'Lava Jato Lavadora Portátil De Alta Pressão 21v',
-      sku: 'LAVA-JATO-21V', marketplace_order_id: 'MLB-2000018110913428',
-    },
-    {
-      id: '3', buyer_name: 'MODI1537792', total: 129.90, status: 'approved',
-      created_at: '2026-08-24T18:00:00Z', marketplace: 'Mercado Livre',
-      product_name: 'Microfone De Lapela Sem Fio J6 Lavalier Tipo-c Ios Android Preto',
-      product_image: 'https://http2.mlstatic.com/D_873758-MLA99982359199_112025-O.jpg',
-      sku: 'MLB7449274490', marketplace_order_id: 'MLB-2000018103693808',
-    },
-    {
-      id: '4', buyer_name: 'MARIACLARANOGUEIRAZANIRATOE', total: 129.90, status: 'approved',
-      created_at: '2026-08-24T14:00:00Z', marketplace: 'Mercado Livre',
-      product_name: 'Microfone De Lapela Sem Fio J6 Lavalier Tipo-c Ios Android Preto',
-      product_image: 'https://http2.mlstatic.com/D_873758-MLA99982359199_112025-O.jpg',
-      sku: 'MLB7449274490', marketplace_order_id: 'MLB-2000018099521116',
-    },
-    {
-      id: '5', buyer_name: 'LAUROJRGOMES', total: 279.90, status: 'approved',
-      created_at: '2026-08-24T09:00:00Z', marketplace: 'Mercado Livre',
-      product_name: 'Chave Impacto 21v Bomvink Bom-9966 Cor Amarelo 127/220v',
-      product_image: 'https://http2.mlstatic.com/D_910176-MLA84473844235_052025-O.jpg',
-      sku: 'MLB7441647214', marketplace_order_id: 'MLB-2000018098629818',
-    },
-  ]
-
-  const displayOrders = recentOrders
 
   return (
     <div className="dash-page">
@@ -228,10 +213,10 @@ export default function Dashboard() {
             <span className="dash-hero-gross-label">Vendas Brutas</span>
             <span className="dash-hero-gross-val">R$ {fmtBRL(stats.revenue)}</span>
           </div>
-          <Link to="/hub/estatisticas" className="dash-hero-btn">
+          <button type="button" className="dash-hero-btn" onClick={() => setShowLiveMonitor(true)}>
             <span>Ir para o Monitor ao Vivo</span>
             <ArrowRight size={14} />
-          </Link>
+          </button>
         </div>
       </div>
 
@@ -355,51 +340,144 @@ export default function Dashboard() {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column' }}>
-          {displayOrders.map(order => (
-            <div key={order.id} className="dash-order-row">
-              {/* Thumbnail */}
-              <div className="dash-order-thumb">
-                {order.product_image
-                  ? <img src={order.product_image} alt={order.product_name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                  : <ShoppingCart size={18} color="#666" aria-hidden />}
-              </div>
-
-              {/* Nome + detalhes */}
-              <div className="dash-order-info">
-                <p className="mp-list-item-title" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {order.product_name}
-                </p>
-                <div className="dash-order-meta">
-                  <span className="dash-order-buyer">{order.buyer_name}</span>
-                  {order.sku && <><span className="dash-meta-dot">•</span><span className="dash-order-sku">SKU: {order.sku}</span></>}
-                  {statusBadge(order.status)}
-                </div>
-              </div>
-
-              {/* ID Marketplace + data */}
-              <div className="dash-order-id-col">
-                {order.marketplace_order_id && (
-                  <div style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: 13, color: '#111' }}>
-                    {order.marketplace_order_id}
-                  </div>
-                )}
-                <div style={{ fontSize: 12, color: '#888888', fontWeight: 500 }}>
-                  • {fmtDate(order.created_at)}
-                </div>
-              </div>
-
-              {/* Marketplace badge + Valor */}
-              <div className="dash-order-right">
-                <div className="dash-mp-badge">
-                  <img src="/logos/mercado-livre.svg" alt="Mercado Livre" style={{ width: 14, height: 14, objectFit: 'contain', flexShrink: 0 }} />
-                  <span>Mercado Livre</span>
-                </div>
-                <span className="dash-order-price">R$ {fmtBRL(order.total)}</span>
-              </div>
+          {recentOrders.length === 0 ? (
+            <div style={{ padding: '40px 20px', textAlign: 'center', color: '#888888' }}>
+              <ShoppingCart size={32} style={{ margin: '0 auto 12px', opacity: 0.4 }} />
+              <p style={{ fontWeight: 600, color: '#333333', fontSize: 15 }}>Nenhum pedido realizado ainda</p>
+              <p style={{ fontSize: 13, color: '#888888', marginTop: 4 }}>
+                As vendas do SITE e checkout aparecerão aqui em tempo real.
+              </p>
             </div>
-          ))}
+          ) : (
+            recentOrders.map(order => (
+              <div key={order.id} className="dash-order-row">
+                {/* Thumbnail */}
+                <div className="dash-order-thumb">
+                  {order.product_image
+                    ? <img src={order.product_image} alt={order.product_name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                    : <ShoppingCart size={18} color="#666" aria-hidden />}
+                </div>
+
+                {/* Nome + detalhes */}
+                <div className="dash-order-info">
+                  <p className="mp-list-item-title" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {order.product_name}
+                  </p>
+                  <div className="dash-order-meta">
+                    <span className="dash-order-buyer">{order.buyer_name}</span>
+                    {order.sku && <><span className="dash-meta-dot">•</span><span className="dash-order-sku">SKU: {order.sku}</span></>}
+                    {statusBadge(order.status)}
+                  </div>
+                </div>
+
+                {/* ID Marketplace + data */}
+                <div className="dash-order-id-col">
+                  {order.marketplace_order_id && (
+                    <div style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: 13, color: '#111' }}>
+                      {order.marketplace_order_id}
+                    </div>
+                  )}
+                  <div style={{ fontSize: 12, color: '#888888', fontWeight: 500 }}>
+                    • {fmtDate(order.created_at)}
+                  </div>
+                </div>
+
+                {/* Marketplace badge + Valor */}
+                <div className="dash-order-right">
+                  <div className="dash-mp-badge">
+                    <span>{order.marketplace || 'Loja Própria'}</span>
+                  </div>
+                  <span className="dash-order-price">R$ {fmtBRL(order.total)}</span>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
+
+      {showLiveMonitor && (
+        <div
+          className="dash-live-monitor-overlay"
+          role="presentation"
+          onMouseDown={event => {
+            if (event.target === event.currentTarget) setShowLiveMonitor(false)
+          }}
+        >
+          <aside className="dash-live-monitor-drawer" role="dialog" aria-modal="true" aria-labelledby="dash-live-monitor-title">
+            <div className="dash-live-monitor-header">
+              <div>
+                <span className="dash-live-monitor-eyebrow">Loja Própria TEKNIX</span>
+                <h2 id="dash-live-monitor-title">Monitor ao vivo</h2>
+              </div>
+              <button
+                type="button"
+                className="dash-live-monitor-close"
+                aria-label="Fechar monitor ao vivo"
+                onClick={() => setShowLiveMonitor(false)}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="dash-live-monitor-body">
+              <section className="dash-live-today-card">
+                <div className="dash-live-card-label"><span className="dash-live-dot"></span>Vendas de hoje</div>
+                <strong>{hidden ? '••••••' : `R$ ${fmtBRL(stats.todayRevenue)}`}</strong>
+                <span>{nowDate}, {nowTime}</span>
+              </section>
+
+              <section className="dash-live-summary-card">
+                <div className="dash-live-section-title">Resumo da loja</div>
+                <div className="dash-live-summary-row">
+                  <span>Vendas acumuladas</span>
+                  <strong>{hidden ? '••••••' : `R$ ${fmtBRL(stats.revenue)}`}</strong>
+                </div>
+                <div className="dash-live-summary-row">
+                  <span>Pedidos recebidos</span>
+                  <strong>{stats.orders}</strong>
+                </div>
+                <div className="dash-live-summary-row">
+                  <span>Produtos ativos</span>
+                  <strong>{stats.products}</strong>
+                </div>
+              </section>
+
+              <section className="dash-live-summary-card">
+                <div className="dash-live-section-title">Operação agora</div>
+                <div className="dash-live-operation-grid">
+                  <div><strong>{stats.urgent}</strong><span>Pendências</span></div>
+                  <div><strong>{stats.toShip}</strong><span>Para enviar</span></div>
+                  <div><strong>{stats.lowStock}</strong><span>Estoque baixo</span></div>
+                  <div><strong>{stats.shipped}</strong><span>Expedidos</span></div>
+                </div>
+              </section>
+
+              <section className="dash-live-orders-card">
+                <div className="dash-live-section-title">Últimos pedidos</div>
+                {recentOrders.length === 0 ? (
+                  <p className="dash-live-empty">Nenhum pedido recebido pela loja ainda.</p>
+                ) : (
+                  recentOrders.slice(0, 5).map(order => (
+                    <div className="dash-live-order" key={order.id}>
+                      <div className="dash-live-order-info">
+                        <strong>{order.product_name}</strong>
+                        <span>{order.buyer_name} • {fmtDate(order.created_at)}</span>
+                      </div>
+                      <strong>{hidden ? '••••' : `R$ ${fmtBRL(order.total)}`}</strong>
+                    </div>
+                  ))
+                )}
+              </section>
+            </div>
+
+            <div className="dash-live-monitor-footer">
+              <Link to="/hub/estatisticas" className="dash-live-full-link" onClick={() => setShowLiveMonitor(false)}>
+                Ver painel completo ao vivo <ArrowRight size={14} />
+              </Link>
+            </div>
+          </aside>
+        </div>
+      )}
     </div>
   )
 }

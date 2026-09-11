@@ -151,19 +151,23 @@ export default function AppleFeatureCardsGallery({
             }))
             setDbItems(mapped)
           } else {
-            setDbItems(DEFAULT_FEATURE_CARDS)
+            setDbItems([])
           }
         })
         .catch(() => {
-          if (isMounted) setDbItems(DEFAULT_FEATURE_CARDS)
+          if (isMounted) setDbItems([])
         })
       return () => { isMounted = false }
     }
   }, [dataSource, content.category, content.segment, content.limit])
 
-  const items = dataSource === 'dynamic' && dbItems.length > 0
+  const items = dataSource === 'dynamic'
     ? dbItems
-    : (Array.isArray(content.items) && content.items.length > 0 ? content.items : DEFAULT_FEATURE_CARDS)
+    : (Array.isArray(content.items) && content.items.length > 0 ? content.items : [])
+
+  if (items.length === 0) {
+    return null
+  }
 
   // Autoplay
   useEffect(() => {

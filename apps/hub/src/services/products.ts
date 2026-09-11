@@ -1,68 +1,7 @@
 import { supabase } from '../lib/supabase'
 import type { Product, Category } from '../types/database'
 
-export const TEKNIX_DEMO_PRODUCTS: Product[] = [
-  {
-    id: 'demo-1',
-    name: 'Parafusadeira e Furadeira de Impacto 12V Bivolt TEKNIX',
-    slug: 'parafusadeira-impacto-12v',
-    sku: 'TKN-FUR-12V',
-    price: 299.90,
-    promo_price: 249.90,
-    short_description: 'Máxima precisão e autonomia para montagens e manutenções pesadas.',
-    description: 'A Parafusadeira e Furadeira de Impacto TEKNIX 12V Bivolt oferece máxima precisão e autonomia para montagens, reformas e manutenções pesadas.',
-    image_url: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=800&auto=format&fit=crop&q=80',
-    images: ['https://images.unsplash.com/photo-1504148455328-c376907d081c?w=800&auto=format&fit=crop&q=80'],
-    brand: 'TEKNIX',
-    status: 'active',
-    active: true
-  },
-  {
-    id: 'demo-2',
-    name: 'Esmerilhadeira Angular 4.1/2" 850W TEKNIX Pro',
-    slug: 'esmerilhadeira-angular-850w',
-    sku: 'TKN-ESM-850',
-    price: 389.00,
-    promo_price: 349.00,
-    short_description: 'Corte rápido, sem rebarbas e com alta durabilidade em metais e alvenaria.',
-    description: 'Esmerilhadeira angular de alta rotação para cortes e desbastes exigentes com motor de 850W blindado contra poeira.',
-    image_url: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800&auto=format&fit=crop&q=80',
-    images: ['https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800&auto=format&fit=crop&q=80'],
-    brand: 'TEKNIX',
-    status: 'active',
-    active: true
-  },
-  {
-    id: 'demo-3',
-    name: 'Serra Mármore 1400W Alta Potência TEKNIX',
-    slug: 'serra-marmore-1400w',
-    sku: 'TKN-SRM-1400',
-    price: 449.00,
-    promo_price: 399.90,
-    short_description: 'Desempenho industrial e cortes precisos em porcelanatos e mármores.',
-    description: 'Serra mármore para cortes retos e em ângulo com motor reforçado de 1400W e ajuste rápido de profundidade.',
-    image_url: 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=800&auto=format&fit=crop&q=80',
-    images: ['https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=800&auto=format&fit=crop&q=80'],
-    brand: 'TEKNIX',
-    status: 'active',
-    active: true
-  },
-  {
-    id: 'demo-4',
-    name: 'Kit Maleta de Ferramentas e Brocas 111 Peças TEKNIX',
-    slug: 'kit-ferramentas-111-pecas',
-    sku: 'TKN-KIT-111',
-    price: 189.90,
-    promo_price: 159.90,
-    short_description: 'Kit profissional completo em maleta reforçada com soquetes e bits.',
-    description: 'Maleta organizadora resistente contendo jogo completo de brocas, soquetes, bits magnéticos e chave catraca.',
-    image_url: 'https://images.unsplash.com/photo-1530124566582-a618bc2615dc?w=800&auto=format&fit=crop&q=80',
-    images: ['https://images.unsplash.com/photo-1530124566582-a618bc2615dc?w=800&auto=format&fit=crop&q=80'],
-    brand: 'TEKNIX',
-    status: 'active',
-    active: true
-  }
-]
+export const TEKNIX_DEMO_PRODUCTS: Product[] = []
 
 export async function getProducts(options?: {
   category?: string
@@ -128,11 +67,10 @@ export async function getProducts(options?: {
       return allData as Product[]
     }
 
-    // Se ainda não houver produtos no banco, retorna o catálogo de demonstração TEKNIX
-    return TEKNIX_DEMO_PRODUCTS
+    return []
   } catch (err) {
     console.error('Error fetching products:', err)
-    return TEKNIX_DEMO_PRODUCTS
+    return []
   }
 }
 
@@ -153,17 +91,23 @@ export async function getProductBySlug(slug: string) {
 
 export async function getCategories() {
   const { data, error } = await supabase
-    .from('categories')
+    .from('store_categories')
     .select('*')
-    .eq('active', true)
-    .order('name')
+    .order('sort_order', { ascending: true })
 
   if (error) {
     console.error('Error fetching categories:', error)
     return []
   }
 
-  return data as Category[]
+  return (data || []).map((c: any) => ({
+    id: c.id,
+    name: c.name,
+    slug: c.slug,
+    description: c.description,
+    active: c.status === 'active' || c.active === true,
+    sort_order: c.sort_order
+  })) as unknown as Category[]
 }
 
 export async function getFeaturedProducts(limit = 4) {

@@ -126,10 +126,10 @@ export default function SettingsHub() {
         <div className="settings-group">
           <div className="settings-group-title">Documentos fiscais</div>
           <button
-            className={`settings-nav-item ${activeSection === 'nfe' ? 'active' : ''}`}
-            onClick={() => setActiveSection('nfe')}
+            className="settings-nav-item"
+            onClick={() => navigate('/hub/configuracoes/fiscal')}
           >
-            <FileText size={16} /> NF-e (Nota Fiscal)
+            <FileText size={16} /> NF-e (Nota Fiscal & SEFAZ)
           </button>
           <button
             className={`settings-nav-item ${activeSection === 'dce' ? 'active' : ''}`}
@@ -234,9 +234,19 @@ export default function SettingsHub() {
           {activeSection === 'contact' && (
             <>
               <div className="settings-header-box">
-                <div>
-                  <h1 className="settings-main-title">Informação de contato</h1>
-                  <p className="settings-subtitle">Dados cadastrais, canais de atendimento e endereço exibidos na loja.</p>
+                <div className="settings-title-with-back">
+                  <button
+                    type="button"
+                    className="btn-back-to-settings"
+                    onClick={() => navigate('/hub')}
+                    title="Voltar ao Painel"
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+                  <div>
+                    <h1 className="settings-main-title">Informação de contato</h1>
+                    <p className="settings-subtitle">Dados cadastrais, canais de atendimento e endereço exibidos na loja.</p>
+                  </div>
                 </div>
               </div>
 
@@ -334,8 +344,20 @@ export default function SettingsHub() {
           {activeSection === 'whatsapp' && (
             <>
               <div className="settings-header-box">
-                <h1 className="settings-main-title">Botão de WhatsApp</h1>
-                <p className="settings-main-subtitle">Exibe o ícone flutuante do WhatsApp no canto inferior do site público.</p>
+                <div className="settings-title-with-back">
+                  <button
+                    type="button"
+                    className="btn-back-to-settings"
+                    onClick={() => navigate('/hub')}
+                    title="Voltar ao Painel"
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+                  <div>
+                    <h1 className="settings-main-title">Botão de WhatsApp</h1>
+                    <p className="settings-main-subtitle">Exibe o ícone flutuante do WhatsApp no canto inferior do site público.</p>
+                  </div>
+                </div>
               </div>
 
               <div className="settings-card">
@@ -393,8 +415,20 @@ export default function SettingsHub() {
           {activeSection === 'nfe' && (
             <>
               <div className="settings-header-box">
-                <h1 className="settings-main-title">Nota Fiscal Eletrônica (NF-e)</h1>
-                <p className="settings-main-subtitle">Emissão automática e configurações fiscais integradas.</p>
+                <div className="settings-title-with-back">
+                  <button
+                    type="button"
+                    className="btn-back-to-settings"
+                    onClick={() => navigate('/hub')}
+                    title="Voltar ao Painel"
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+                  <div>
+                    <h1 className="settings-main-title">Nota Fiscal Eletrônica (NF-e)</h1>
+                    <p className="settings-main-subtitle">Emissão automática e configurações fiscais integradas.</p>
+                  </div>
+                </div>
               </div>
 
               <div className="settings-card">
@@ -442,9 +476,19 @@ export default function SettingsHub() {
           {activeSection === 'checkout' && (
             <>
               <div className="settings-header-box" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                <div>
-                  <h1 className="settings-main-title">Opções do checkout</h1>
-                  <p className="settings-main-subtitle">Configure as opções disponíveis para pedir dados adicionais ao seu cliente durante o processo de compra.</p>
+                <div className="settings-title-with-back">
+                  <button
+                    type="button"
+                    className="btn-back-to-settings"
+                    onClick={() => navigate('/hub')}
+                    title="Voltar ao Painel"
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+                  <div>
+                    <h1 className="settings-main-title">Opções do checkout</h1>
+                    <p className="settings-main-subtitle">Configure as opções disponíveis para pedir dados adicionais ao seu cliente durante o processo de compra.</p>
+                  </div>
                 </div>
                 <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
                   {saving ? 'Salvando...' : 'Salvar'}
@@ -557,9 +601,19 @@ export default function SettingsHub() {
           {activeSection === 'checkout-message' && (
             <>
               <div className="settings-header-box">
-                <div>
-                  <h1 className="settings-main-title">Mensagem para clientes</h1>
-                  <p className="settings-main-subtitle">Defina a mensagem exibida ao cliente após a finalização do pedido.</p>
+                <div className="settings-title-with-back">
+                  <button
+                    type="button"
+                    className="btn-back-to-settings"
+                    onClick={() => navigate('/hub')}
+                    title="Voltar ao Painel"
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+                  <div>
+                    <h1 className="settings-main-title">Mensagem para clientes</h1>
+                    <p className="settings-main-subtitle">Defina a mensagem exibida ao cliente após a finalização do pedido.</p>
+                  </div>
                 </div>
                 <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
                   {saving ? 'Salvando...' : 'Salvar'}
@@ -588,10 +642,22 @@ export default function SettingsHub() {
           {activeSection === 'languages' && (
             <>
               <div className="settings-header-box" style={{ marginBottom: 16 }}>
-                <h1 className="settings-main-title">Idiomas e moedas</h1>
-                <p className="settings-main-subtitle">
-                  Chegue mais longe! Configure diferentes moedas para administrar seus produtos e habilite sua loja para vendas em outros países.
-                </p>
+                <div className="settings-title-with-back">
+                  <button
+                    type="button"
+                    className="btn-back-to-settings"
+                    onClick={() => navigate('/hub')}
+                    title="Voltar ao Painel"
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+                  <div>
+                    <h1 className="settings-main-title">Idiomas e moedas</h1>
+                    <p className="settings-main-subtitle">
+                      Chegue mais longe! Configure diferentes moedas para administrar seus produtos e habilite sua loja para vendas em outros países.
+                    </p>
+                  </div>
+                </div>
               </div>
 
               {/* Países habilitados */}
@@ -651,7 +717,20 @@ export default function SettingsHub() {
           {activeSection === 'scripts' && (
             <>
               <div className="settings-header-box" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                <h1 className="settings-main-title">Códigos externos</h1>
+                <div className="settings-title-with-back">
+                  <button
+                    type="button"
+                    className="btn-back-to-settings"
+                    onClick={() => navigate('/hub')}
+                    title="Voltar ao Painel"
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+                  <div>
+                    <h1 className="settings-main-title">Códigos externos</h1>
+                    <p className="settings-main-subtitle">Scripts de rastreamento, Google Tag Manager e pixels de conversão.</p>
+                  </div>
+                </div>
                 <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
                   {saving ? 'Salvando...' : 'Salvar'}
                 </button>
@@ -729,8 +808,20 @@ export default function SettingsHub() {
           {activeSection === 'domains' && (
             <>
               <div className="settings-header-box">
-                <h1 className="settings-main-title">Domínios e SSL</h1>
-                <p className="settings-main-subtitle">Configure o endereço oficial da sua loja na internet.</p>
+                <div className="settings-title-with-back">
+                  <button
+                    type="button"
+                    className="btn-back-to-settings"
+                    onClick={() => navigate('/hub')}
+                    title="Voltar ao Painel"
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+                  <div>
+                    <h1 className="settings-main-title">Domínios e SSL</h1>
+                    <p className="settings-main-subtitle">Configure o endereço oficial da sua loja na internet.</p>
+                  </div>
+                </div>
               </div>
 
               <div className="settings-card">
@@ -758,9 +849,19 @@ export default function SettingsHub() {
           {activeSection === 'emails' && (
             <>
               <div className="settings-header-box" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                <div>
-                  <h1 className="settings-main-title">E-mails automáticos</h1>
-                  <p className="settings-main-subtitle">Notificações enviadas aos seus clientes em cada etapa da compra.</p>
+                <div className="settings-title-with-back">
+                  <button
+                    type="button"
+                    className="btn-back-to-settings"
+                    onClick={() => navigate('/hub')}
+                    title="Voltar ao Painel"
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+                  <div>
+                    <h1 className="settings-main-title">E-mails automáticos</h1>
+                    <p className="settings-main-subtitle">Notificações enviadas aos seus clientes em cada etapa da compra.</p>
+                  </div>
                 </div>
                 <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
                   {saving ? 'Salvando...' : 'Salvar'}
@@ -807,9 +908,19 @@ export default function SettingsHub() {
           {activeSection === 'dce' && (
             <>
               <div className="settings-header-box" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                <div>
-                  <h1 className="settings-main-title">DC-e (Declaração de Conteúdo Eletrônica)</h1>
-                  <p className="settings-main-subtitle">Documento para envios de pessoas físicas ou MEI sem exigência de NF-e.</p>
+                <div className="settings-title-with-back">
+                  <button
+                    type="button"
+                    className="btn-back-to-settings"
+                    onClick={() => navigate('/hub')}
+                    title="Voltar ao Painel"
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+                  <div>
+                    <h1 className="settings-main-title">DC-e (Declaração de Conteúdo Eletrônica)</h1>
+                    <p className="settings-main-subtitle">Documento para envios de pessoas físicas ou MEI sem exigência de NF-e.</p>
+                  </div>
                 </div>
                 <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
                   {saving ? 'Salvando...' : 'Salvar'}
@@ -829,9 +940,19 @@ export default function SettingsHub() {
           {activeSection === 'redirects' && (
             <>
               <div className="settings-header-box" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                <div>
-                  <h1 className="settings-main-title">Redirecionamentos 301 (SEO)</h1>
-                  <p className="settings-main-subtitle">Evite erros 404 ao migrar páginas antigas da sua loja para novos endereços.</p>
+                <div className="settings-title-with-back">
+                  <button
+                    type="button"
+                    className="btn-back-to-settings"
+                    onClick={() => navigate('/hub')}
+                    title="Voltar ao Painel"
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+                  <div>
+                    <h1 className="settings-main-title">Redirecionamentos 301 (SEO)</h1>
+                    <p className="settings-main-subtitle">Evite erros 404 ao migrar páginas antigas da sua loja para novos endereços.</p>
+                  </div>
                 </div>
                 <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
                   {saving ? 'Salvando...' : 'Salvar'}
@@ -852,9 +973,19 @@ export default function SettingsHub() {
           {activeSection === 'custom-fields' && (
             <>
               <div className="settings-header-box" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                <div>
-                  <h1 className="settings-main-title">Campos personalizados</h1>
-                  <p className="settings-main-subtitle">Crie campos extras no cadastro de clientes ou no checkout.</p>
+                <div className="settings-title-with-back">
+                  <button
+                    type="button"
+                    className="btn-back-to-settings"
+                    onClick={() => navigate('/hub')}
+                    title="Voltar ao Painel"
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+                  <div>
+                    <h1 className="settings-main-title">Campos personalizados</h1>
+                    <p className="settings-main-subtitle">Crie campos extras no cadastro de clientes ou no checkout.</p>
+                  </div>
                 </div>
                 <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
                   {saving ? 'Salvando...' : 'Salvar'}
@@ -872,8 +1003,20 @@ export default function SettingsHub() {
           {activeSection === 'distribution' && (
             <>
               <div className="settings-header-box">
-                <h1 className="settings-main-title">Centros de Distribuição</h1>
-                <p className="settings-main-subtitle">Locais de saída para cálculo de frete e estoque.</p>
+                <div className="settings-title-with-back">
+                  <button
+                    type="button"
+                    className="btn-back-to-settings"
+                    onClick={() => navigate('/hub')}
+                    title="Voltar ao Painel"
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+                  <div>
+                    <h1 className="settings-main-title">Centros de Distribuição</h1>
+                    <p className="settings-main-subtitle">Locais de saída para cálculo de frete e estoque.</p>
+                  </div>
+                </div>
               </div>
               <div className="settings-card">
                 <h3 className="settings-card-title">Matriz Principal</h3>

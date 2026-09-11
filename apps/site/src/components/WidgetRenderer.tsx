@@ -4342,7 +4342,11 @@ export function ProductCarouselDynamic({
     return <div style={{ padding: 40, textAlign: 'center', ...style }}><div className="spinner" /></div>
   }
 
-  const items = products.length > 0 ? products : [FALLBACK_PREVIEW_PRODUCT]
+  if (products.length === 0) {
+    return null
+  }
+
+  const items = products
 
   return (
     <div style={{ width: '100%', overflow: 'hidden', ...style }}>

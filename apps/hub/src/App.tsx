@@ -8,6 +8,7 @@ import ProductsList from './pages/ProductsList'
 import ProductForm from './pages/ProductForm'
 import ProductDetails from './pages/ProductDetails'
 import OrdersList from './pages/OrdersList'
+import ShipmentsList from './pages/ShipmentsList'
 import StockNotificationsList from './pages/StockNotificationsList'
 import OrderDetails from './pages/OrderDetails'
 import ShippingSettings from './pages/ShippingSettings'
@@ -28,6 +29,7 @@ import WhatsAppHub from './pages/WhatsAppHub'
 import MercadoLivreHub from './pages/MercadoLivreHub'
 import MarketplaceChannelHub from './pages/MarketplaceChannelHub'
 import IntegrationsHub from './pages/IntegrationsHub'
+import IntegrationsAdd from './pages/IntegrationsAdd'
 import PlaceholderPage from './pages/PlaceholderPage'
 import PagesList from './pages/PagesList'
 import BlogList from './pages/BlogList'
@@ -37,6 +39,10 @@ import BlogSeo from './pages/BlogSeo'
 import AdsList from './pages/AdsList'
 import AdsForm from './pages/AdsForm'
 import AdsAnalytics from './pages/AdsAnalytics'
+import InvoicesList from './pages/InvoicesList'
+import FiscalSettings from './pages/FiscalSettings'
+import NotificationsList from './pages/NotificationsList'
+import { HubNotificationProvider } from './contexts/HubNotificationContext'
 
 import LoadingScreen from './components/ui/LoadingScreen'
 
@@ -52,8 +58,9 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
+      <HubNotificationProvider>
+        <BrowserRouter>
+          <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<Navigate to="/hub" />} />
           <Route path="/produtos" element={<Navigate to="/hub/produtos" />} />
@@ -74,6 +81,7 @@ function App() {
             <Route path="/hub/tabelas-de-precos" element={<PriceTables />} />
             <Route path="/hub/assinaturas" element={<PlaceholderPage title="Assinaturas e Recorrência" />} />
             <Route path="/hub/pedidos" element={<OrdersList />} />
+            <Route path="/hub/envios" element={<ShipmentsList />} />
             <Route path="/hub/avisos-estoque" element={<StockNotificationsList />} />
             <Route path="/hub/pedidos/:id" element={<OrderDetails />} />
             <Route path="/hub/entregas" element={<ShippingSettings />} />
@@ -81,6 +89,8 @@ function App() {
             <Route path="/hub/clientes/:id" element={<CustomerDetails />} />
             <Route path="/hub/financeiro" element={<FinanceOverview />} />
             <Route path="/hub/pagamentos" element={<PaymentMethods />} />
+            <Route path="/hub/notas-fiscais" element={<InvoicesList />} />
+            <Route path="/hub/configuracoes/fiscal" element={<FiscalSettings />} />
             <Route path="/hub/descontos" element={<CouponsList />} />
             <Route path="/hub/cupons" element={<CouponsList />} />
             <Route path="/hub/promocoes" element={<PromotionsList />} />
@@ -89,6 +99,7 @@ function App() {
             <Route path="/hub/shopee" element={<MarketplaceChannelHub defaultChannel="shopee" />} />
             <Route path="/hub/amazon" element={<MarketplaceChannelHub defaultChannel="amazon" />} />
             <Route path="/hub/magalu" element={<MarketplaceChannelHub defaultChannel="magalu" />} />
+            <Route path="/hub/integracoes/add" element={<IntegrationsAdd />} />
             <Route path="/hub/integracoes/:channelId" element={<MarketplaceChannelHub />} />
             <Route path="/hub/mercado-pago" element={<Navigate to="/hub/pagamentos" replace />} />
             <Route path="/hub/whatsapp" element={<WhatsAppHub />} />
@@ -110,10 +121,12 @@ function App() {
             <Route path="/hub/ads/edit/:id" element={<AdsForm />} />
             <Route path="/hub/ads/analytics" element={<AdsAnalytics />} />
             <Route path="/hub/ads/analitcs" element={<Navigate to="/hub/ads/analytics" replace />} />
+            <Route path="/hub/notificacoes" element={<NotificationsList />} />
           </Route>
         
         </Routes>
       </BrowserRouter>
+      </HubNotificationProvider>
     </AuthProvider>
   )
 }

@@ -103,7 +103,7 @@
 }
 
 .data-table td {
-  padding: 20px 24px;
+  padding: 16px 20px;
   border-bottom: 1px solid #f5f5f5;
   font-size: 13.5px;
   color: #333333;
@@ -149,6 +149,60 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 230px;
+}
+
+.order-number {
+  color: #1d1d1f;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.payment-id {
+  margin-top: 4px;
+  color: #86868b;
+  font-family: monospace;
+  font-size: 10px;
+}
+
+.customer-cell > div:last-child {
+  min-width: 0;
+}
+
+.customer-name,
+.customer-email,
+.customer-document {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.customer-name {
+  color: #1d1d1f;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.customer-email {
+  max-width: 205px;
+  margin-top: 3px;
+  color: #686b73;
+  font-size: 11px;
+}
+
+.customer-document {
+  margin-top: 3px;
+  color: #989ba3;
+  font-family: monospace;
+  font-size: 10px;
+}
+
+.payment-method {
+  color: #1d1d1f;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .customer-avatar {

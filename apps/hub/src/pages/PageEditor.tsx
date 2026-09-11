@@ -8621,9 +8621,13 @@ export default function PageEditor() {
                           </ElementorAccordion>
                         )}
 
-                        {/* Seção Geral: Cores, Fundo e Borda para qualquer widget (NUNCA FICA VAZIO) */}
+                        {/* Seção Geral: Cores, Fundo, Tipografia e Borda para qualquer widget (NUNCA FICA VAZIO) */}
                         {!['container', 'grid'].includes(widgetType) && (
-                          <ElementorAccordion title="Aparência & Caixa Geral" icon={Palette} isOpen={openSections.s_gen_style === true} onToggle={() => toggleSection('s_gen_style')}>
+                          <ElementorAccordion title="Aparência & Caixa Geral" icon={Palette} isOpen={openSections.s_gen_style !== false} onToggle={() => toggleSection('s_gen_style')}>
+                            <TypographyControl
+                              schema={s}
+                              onChange={updates => patch({ schema: updates })}
+                            />
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                               <ControlRow label="Cor do Texto">
                                 <input type="color" value={String(s.color || '#1d1d1f')} onChange={e => patch({ schema: { color: e.target.value } })} style={{ width: '100%', height: 30, padding: 0 }} />
@@ -8998,6 +9002,9 @@ export default function PageEditor() {
             <span className={`topbar-status ${target?.row?.status === 'published' ? 'published' : 'draft'}`}>
               {dirty ? '● Não salvo' : target?.row?.status === 'published' ? '● Publicado' : '○ Rascunho'}
             </span>
+            <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 4, background: target?.row?.type === 'template' ? '#eff6ff' : '#f5f5f7', color: target?.row?.type === 'template' ? '#1d4ed8' : '#64748b', fontWeight: 600 }}>
+              {target?.row?.type === 'template' ? 'Template Padrão' : target?.row?.type === 'landing' ? 'Landing Page' : 'Página Normal'}
+            </span>
           </div>
           <div className="topbar-center">
             <div className="topbar-device-switcher">
@@ -9070,7 +9077,7 @@ export default function PageEditor() {
                     border: '1px solid #d2d2d7',
                     borderRadius: 8,
                     boxShadow: '0 8px 24px rgba(0,0,0,0.14)',
-                    minWidth: 260,
+                    minWidth: 280,
                     zIndex: 99999,
                     overflow: 'hidden',
                     padding: 4
@@ -9101,8 +9108,8 @@ export default function PageEditor() {
                   >
                     <div style={{ marginTop: 2 }}>{editScope === 'local' ? <Check size={14} color="#0071e3" /> : <div style={{ width: 14 }} />}</div>
                     <div>
-                      <div style={{ fontSize: 12, fontWeight: 600, color: '#1d1d1f' }}>Nesta página</div>
-                      <div style={{ fontSize: 11, color: '#86868b' }}>Publicar alterações apenas para esta página</div>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: '#1d1d1f' }}>Publicar nesta página (Página Normal)</div>
+                      <div style={{ fontSize: 11, color: '#86868b' }}>Publicar alterações apenas para esta página individual</div>
                     </div>
                   </button>
 
@@ -9128,8 +9135,8 @@ export default function PageEditor() {
                   >
                     <div style={{ marginTop: 2 }}>{editScope === 'global' ? <Check size={14} color="#0071e3" /> : <div style={{ width: 14 }} />}</div>
                     <div>
-                      <div style={{ fontSize: 12, fontWeight: 600, color: '#1d1d1f' }}>Padrão para todo o site</div>
-                      <div style={{ fontSize: 11, color: '#86868b' }}>Salvar e publicar como padrão em todas as páginas</div>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: '#1d1d1f' }}>Salvar como Modelo / Template Padrão</div>
+                      <div style={{ fontSize: 11, color: '#86868b' }}>Salvar e publicar como modelo padrão reutilizável</div>
                     </div>
                   </button>
 

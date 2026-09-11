@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Users,
   ShieldCheck,
@@ -9,6 +10,7 @@ import {
   AlertCircle,
   Lock,
   ChevronRight,
+  ChevronLeft,
   Trash2,
   RefreshCw,
   Eye,
@@ -28,6 +30,7 @@ import {
 import './CollaboratorsPermissionsTab.css'
 
 export default function CollaboratorsPermissionsTab() {
+  const navigate = useNavigate()
   const [collaborators, setCollaborators] = useState<CollaboratorProfile[]>([])
   const [selectedColabId, setSelectedColabId] = useState<string | null>(null)
   const [selectedRole, setSelectedRole] = useState<CollaboratorProfile['role']>('ADMIN')
@@ -224,11 +227,21 @@ export default function CollaboratorsPermissionsTab() {
     <div className="colab-permissions-container">
       {/* ── Header da Seção ── */}
       <div className="colab-header-row">
-        <div>
-          <h1 className="settings-main-title">Permissões dos Colaboradores</h1>
-          <p className="settings-main-subtitle">
-            Defina o perfil de acesso e controle exatamente o que cada membro da equipe pode visualizar, criar, editar, excluir ou publicar na loja.
-          </p>
+        <div className="settings-title-with-back">
+          <button
+            type="button"
+            className="btn-back-to-settings"
+            onClick={() => navigate('/hub')}
+            title="Voltar ao Painel"
+          >
+            <ChevronLeft size={20} />
+          </button>
+          <div>
+            <h1 className="settings-main-title">Permissões dos Colaboradores</h1>
+            <p className="settings-main-subtitle">
+              Defina o perfil de acesso e controle exatamente o que cada membro da equipe pode visualizar, criar, editar, excluir ou publicar na loja.
+            </p>
+          </div>
         </div>
         <button
           className="btn btn-primary"

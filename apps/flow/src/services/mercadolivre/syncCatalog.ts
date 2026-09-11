@@ -1,6 +1,8 @@
  
 import { createClient } from '@supabase/supabase-js'
 import { getValidTokenBySellerId } from './client'
+import { matchAndLinkExternalListing } from '../catalog/matcher'
+import { processSaleDeduction } from '../inventory/stockService'
 
 function getSupabase() {
   return createClient(
@@ -82,7 +84,7 @@ export async function syncMercadoLivreAccount(
             if (wrapper.code !== 200 || !wrapper.body) continue
             const item = wrapper.body
 
-            const sku = item.seller_custom_field || item.id
+            const sellerSku = item.seller_custom_field || null
             const title = item.title
             const price = Number(item.price) || 0
             const stock = Number(item.available_quantity) || 0
@@ -92,54 +94,44 @@ export async function syncMercadoLivreAccount(
             const gtinAttr = item.attributes?.find((a: any) => a.id === 'GTIN' || a.id === 'EAN')?.value_name || null
             const primaryPic = (item.pictures?.[0]?.secure_url || item.pictures?.[0]?.url || item.thumbnail || '').replace('http://', 'https://')
 
-            // Upsert into products
-            const { data: product } = await supabase
-              .from('products')
-              .upsert({
-                sku,
-                name: title,
-                brand: brandAttr,
-                model: modelAttr,
-                ean: gtinAttr,
-                image_url: primaryPic,
-                cost_purchase: Math.round(price * 0.6 * 100) / 100,
-                stock,
-                status: 'ACTIVE'
-              }, { onConflict: 'sku' })
-              .select('id')
-              .single()
+            // Vinculação Anti-Duplicação: NUNCA cria produto duplicado
+            const matchResult = await matchAndLinkExternalListing({
+              channel: 'mercadolivre',
+              externalId: item.id,
+              title,
+              price,
+              stock,
+              sellerSku,
+              gtin: gtinAttr,
+              brand: brandAttr,
+              model: modelAttr,
+              catalogProductId: item.catalog_product_id || null,
+              thumbnailUrl: primaryPic,
+              permalink: item.permalink,
+              marketplaceAccountId: sellerId
+            })
 
-            if (product?.id && item.pictures?.length) {
-              await supabase.from('product_images').delete().eq('product_id', product.id)
-              for (let pi = 0; pi < item.pictures.length; pi++) {
-                const picUrl = (item.pictures[pi].secure_url || item.pictures[pi].url || '').replace('http://', 'https://')
-                if (picUrl) {
-                  await supabase.from('product_images').insert({
-                    product_id: product.id,
-                    url: picUrl,
-                    is_primary: pi === 0,
-                    sort_order: pi
-                  })
+            // Se o produto central foi vinculado e não tem imagens, cadastra
+            if (matchResult.productId && item.pictures?.length) {
+              const { count } = await supabase
+                .from('product_images')
+                .select('*', { count: 'exact', head: true })
+                .eq('product_id', matchResult.productId)
+
+              if ((count || 0) === 0) {
+                for (let pi = 0; pi < item.pictures.length; pi++) {
+                  const picUrl = (item.pictures[pi].secure_url || item.pictures[pi].url || '').replace('http://', 'https://')
+                  if (picUrl) {
+                    await supabase.from('product_images').insert({
+                      product_id: matchResult.productId,
+                      url: picUrl,
+                      is_primary: pi === 0,
+                      sort_order: pi
+                    })
+                  }
                 }
               }
             }
-
-            // Upsert into marketplace_listings
-            await supabase
-              .from('marketplace_listings')
-              .upsert({
-                marketplace_id: marketplaceId,
-                product_id: product?.id || null,
-                seller_id: sellerId,
-                external_listing_id: item.id,
-                title,
-                price,
-                stock,
-                status: item.status,
-                permalink: item.permalink,
-                thumbnail_url: primaryPic,
-                last_synced_at: new Date().toISOString()
-              }, { onConflict: 'external_listing_id' })
 
             results.productsSynced++
           }
@@ -314,16 +306,65 @@ export async function syncMercadoLivreAccount(
             const itemPrice = Number(it.unit_price) || 0
             const itemFee = Number(it.sale_fee) || 0
 
-            const { data: product } = await supabase
-              .from('products')
-              .select('id, cost_purchase')
-              .eq('sku', itemSku)
-              .single()
+            // Localizar o produto central correspondente (por listing external_id ou SKU)
+            let resolvedProductId: string | null = null
+            let resolvedCost = 0
+
+            const itemId = it.item?.id
+            if (itemId) {
+              const { data: listingMatch } = await supabase
+                .from('marketplace_listings')
+                .select('product_id')
+                .or(`external_id.eq.${itemId},external_listing_id.eq.${itemId}`)
+                .maybeSingle()
+              if (listingMatch?.product_id) {
+                resolvedProductId = listingMatch.product_id
+              }
+            }
+
+            if (!resolvedProductId && itemSku) {
+              const { data: prodBySku } = await supabase
+                .from('products')
+                .select('id, cost_purchase')
+                .eq('sku', itemSku)
+                .maybeSingle()
+              if (prodBySku) {
+                resolvedProductId = prodBySku.id
+                resolvedCost = Number(prodBySku.cost_purchase || 0)
+              }
+            }
+
+            if (resolvedProductId && !resolvedCost) {
+              const { data: prodCost } = await supabase
+                .from('products')
+                .select('cost_purchase')
+                .eq('id', resolvedProductId)
+                .maybeSingle()
+              resolvedCost = Number(prodCost?.cost_purchase || 0)
+            }
+
+            // Baixa de estoque físico central idempotente para pedidos pagos
+            if (resolvedProductId && (ord.status === 'paid' || ord.status === 'confirmed')) {
+              try {
+                await processSaleDeduction({
+                  productId: resolvedProductId,
+                  channel: 'mercadolivre',
+                  listingExternalId: itemId || null,
+                  orderId: orderNumber,
+                  quantity: itemQty,
+                  unitPriceSold: itemPrice,
+                  customerName,
+                  soldAt: ord.date_created
+                })
+              } catch (stockErr: any) {
+                console.warn('[Sync ML] Stock deduction warning:', stockErr.message)
+              }
+            }
 
             if (dbOrderId) {
               await supabase.from('order_items').upsert({
                 order_id: dbOrderId,
-                product_id: product?.id || null,
+                product_id: resolvedProductId,
                 product_name: itemTitle,
                 sku: itemSku,
                 quantity: itemQty,
@@ -333,16 +374,15 @@ export async function syncMercadoLivreAccount(
             }
 
             if (dbSaleId) {
-              const cost = Number(product?.cost_purchase || 0)
-              const profit = (itemPrice * itemQty) - (cost * itemQty) - itemFee
+              const profit = (itemPrice * itemQty) - (resolvedCost * itemQty) - itemFee
               const margin = itemPrice > 0 ? (profit / (itemPrice * itemQty)) * 100 : 0
 
               await supabase.from('sale_items').upsert({
                 sale_id: dbSaleId,
-                product_id: product?.id || null,
+                product_id: resolvedProductId,
                 quantity: itemQty,
                 unit_price: itemPrice,
-                cost_at_sale: cost,
+                cost_at_sale: resolvedCost,
                 profit,
                 margin
               })

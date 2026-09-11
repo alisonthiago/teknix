@@ -32,117 +32,9 @@ export async function ensureCatalogAuth() {
   }
 }
 
-// Produtos padrão de referência sincronizados com o HUB
-export const HUB_FALLBACK_PRODUCTS: Product[] = [
-  {
-    id: 'macaco-hidraulico-garrafa-2t',
-    name: 'Macaco Hidráulico Tipo Garrafa 2 Toneladas Bovenau Profissional',
-    slug: 'macaco-hidraulico-tipo-garrafa-2-toneladas-bovenau',
-    sku: 'TKN-MCK-002',
-    price: 189.90,
-    promo_price: 159.90,
-    manage_stock: true,
-    stock: 25,
-    image_url: '/images/referencias/macaco-hidraulico.webp',
-    images: ['/images/referencias/macaco-hidraulico.webp'],
-    status: 'published',
-    brand: 'Bovenau',
-    category: 'Equipamentos Automotivos',
-    created_at: '2026-08-20T00:00:00Z',
-    description: 'Macaco hidráulico tipo garrafa capacidade 2 toneladas, ideal para oficinas, borracharias e manutenção automotiva com válvula de segurança integrada.',
-    short_description: 'Capacidade 2 Toneladas • Acionamento hidráulico suave • Bovenau'
-  },
-  {
-    id: 'morsa-bancada-giratoria-n4',
-    name: 'Morsa Torno de Bancada Giratória Nº 4 Base com Fixação Reforçada',
-    slug: 'morsa-torno-bancada-giratoria-n4',
-    sku: 'TKN-MRS-004',
-    price: 249.90,
-    promo_price: 219.90,
-    manage_stock: true,
-    stock: 18,
-    image_url: '/images/referencias/morsa-de-bancada.webp',
-    images: ['/images/referencias/morsa-de-bancada.webp'],
-    status: 'published',
-    brand: 'TEKNIX',
-    category: 'Ferramentas Manuais e Bancada',
-    created_at: '2026-08-20T00:00:00Z',
-    description: 'Morsa torno de bancada nº 4 com base giratória 360 graus em ferro fundido nodular de alta resistência.',
-    short_description: 'Base Giratória 360° • Ferro Fundido Nodular • Mordente Aço Temperado'
-  },
-  {
-    id: 'pistola-pintura-hvlp-600ml',
-    name: 'Pistola de Pintura Gravidade Profissional HVLP Bico 1.4mm Caneca 600ml',
-    slug: 'pistola-pintura-gravidade-hvlp-bico-14mm-600ml',
-    sku: 'TKN-PST-014',
-    price: 199.90,
-    promo_price: 169.90,
-    manage_stock: true,
-    stock: 32,
-    image_url: '/images/referencias/pistola-de-pintura.webp',
-    images: ['/images/referencias/pistola-de-pintura.webp'],
-    status: 'published',
-    brand: 'PDR',
-    category: 'Pintura e Repintura',
-    created_at: '2026-08-20T00:00:00Z',
-    description: 'Pistola de pintura profissional HVLP por gravidade com bico 1.4mm e copo de 600ml para acabamentos finos.',
-    short_description: 'Tecnologia HVLP • Bico 1.4mm Aço Inox • Caneca 600ml'
-  },
-  {
-    id: 'lixadeira-roto-orbital-125mm',
-    name: 'Lixadeira Roto Orbital Elétrica 125mm 300W com Coletor de Pó',
-    slug: 'lixadeira-roto-orbital-eletrica-125mm-300w',
-    sku: 'TKN-LIX-125',
-    price: 279.90,
-    promo_price: 239.90,
-    manage_stock: true,
-    stock: 20,
-    image_url: '/images/referencias/lixadeira.webp',
-    images: ['/images/referencias/lixadeira.webp'],
-    status: 'published',
-    brand: 'TEKNIX',
-    category: 'Ferramentas Elétricas',
-    created_at: '2026-08-20T00:00:00Z',
-    description: 'Lixadeira roto orbital de alta performance com velocidade variável e sistema integrado de aspiração de pó.',
-    short_description: 'Potência 300W • Disco 125mm • 6 Níveis de Velocidade'
-  },
-  {
-    id: 'b5ec9f54-f942-4e7f-bd2c-a78b269e6f59',
-    name: 'Kit Parafusadeira Chave Fenda Elétrica 30 Peças Lançamento',
-    slug: 'kit-parafusadeira-chave-fenda-eletrica-30-pecas',
-    sku: 'MLB7453209398',
-    price: 119.90,
-    promo_price: 99.90,
-    manage_stock: true,
-    stock: 30,
-    image_url: 'https://http2.mlstatic.com/D_985226-MLA115019108190_082026-O.jpg',
-    images: ['https://http2.mlstatic.com/D_985226-MLA115019108190_082026-O.jpg'],
-    status: 'published',
-    brand: 'Bomvink',
-    category: 'Ferramentas',
-    created_at: '2026-08-20T00:00:00Z',
-    description: 'A Parafusadeira Chave de Fenda Elétrica Bomvink BOM-9917 foi desenvolvida para facilitar tarefas do dia a dia com mais agilidade, precisão e conforto.',
-    short_description: 'Kit 30 peças com estojo organizador • Bateria recarregável'
-  },
-  {
-    id: '4bae4104-dadb-44e1-98b0-8e3128eb7222',
-    name: 'Kit Jogo De Ferramentas Chave Catraca Soquete Crv 46 Peças Sextavado',
-    slug: 'kit-ferramentas-catraca-soquete-crv-46-pecas',
-    sku: 'MLB7451225922',
-    price: 69.90,
-    promo_price: 54.90,
-    manage_stock: true,
-    stock: 45,
-    image_url: 'https://http2.mlstatic.com/D_955140-MLA100095920631_122025-O.jpg',
-    images: ['https://http2.mlstatic.com/D_955140-MLA100095920631_122025-O.jpg'],
-    status: 'published',
-    brand: 'Bomvink',
-    category: 'Ferramentas Manuais',
-    created_at: '2026-08-20T00:00:00Z',
-    description: 'Jogo de ferramentas catraca soquetes 46 peças em aço cromo vanádio de alta durabilidade.',
-    short_description: 'Aço CrV 46 peças • Maleta rígida reforçada'
-  }
-]
+// Catálogo gerenciado exclusivamente pelo HUB/Supabase — sem produtos hardcoded
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const HUB_FALLBACK_PRODUCTS: Product[] = []
 
 /**
  * Mapeia o produto garantindo a integridade dos dados:
@@ -174,7 +66,7 @@ function mapProduct(p: any): Product {
 
   const rawMeta = parseCatalogValue(p.store_meta)
   const meta = Array.isArray(rawMeta) ? rawMeta[0] : rawMeta as any
-  const rawPrice = meta?.sale_price ?? p.sell_price ?? p.sale_price ?? p.price
+  const rawPrice = meta?.sale_price ?? p.site_price ?? p.sell_price ?? p.sale_price ?? p.price
   const salePrice = (rawPrice !== undefined && rawPrice !== null && Number(rawPrice) > 0)
     ? Number(rawPrice)
     : (p.cost_purchase ? Number((Number(p.cost_purchase) * 1.6).toFixed(2)) : 149.90)
@@ -200,7 +92,7 @@ function mapProduct(p: any): Product {
     sell_price: salePrice,
     promo_price: promoPrice && Number(promoPrice) > 0 ? Number(promoPrice) : null,
     cost_purchase: p.cost_purchase ?? 0,
-    stock: p.stock_quantity ?? p.stock ?? 0,
+    stock: p.stock_quantity ?? Math.max(0, (Number(p.stock) || 0) - (Number(p.reserved_stock) || 0)),
     sku: p.sku || '',
     ean: p.ean || p.barcode || '',
     barcode: p.ean || p.barcode || '',
@@ -309,17 +201,9 @@ export async function getProducts(options?: {
 
   let mapped = dbData.map(mapProduct)
 
-  // Assegura a presença dos produtos cadastrados no HUB
-  const existingIds = new Set(mapped.map(p => p.id || p.sku))
-  for (const fallback of HUB_FALLBACK_PRODUCTS) {
-    if (!existingIds.has(fallback.id) && !existingIds.has(fallback.sku)) {
-      mapped.push(fallback)
-    }
-  }
-
-  // Filtro de publicação: oculta apenas se o lojista despublicou explicitamente no HUB
+  // Filtro de publicação: oculta apenas se o lojista despublicou explicitamente no HUB ou no FLOW
   if (options?.onlyPublished !== false) {
-    mapped = mapped.filter(p => p.store_meta?.published !== false)
+    mapped = mapped.filter(p => p.store_meta?.published !== false && (p as any).is_site_published !== false)
   }
 
   const segmentTerm = options?.segment || options?.category
@@ -394,11 +278,7 @@ export async function getProducts(options?: {
 export async function getProductById(id: string) {
   if (!id) return null
 
-  // 1. Verifica no fallback padrão
-  const fallback = HUB_FALLBACK_PRODUCTS.find(p => p.id === id || p.sku === id || p.slug === id)
-  if (fallback) return fallback
-
-  // 2. Garante autenticação de catálogo para permissão de leitura no Supabase RLS
+  // Garante autenticação de catálogo para permissão de leitura no Supabase RLS
   await ensureCatalogAuth()
   const keys = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
     ? ['id', 'sku', 'slug', 'mercadolivre_item_id']
@@ -448,24 +328,18 @@ export interface StoreCategory {
 }
 
 /**
- * Busca as categorias da origem única usada no menu, filtros e páginas.
- * Se a tabela não existir ou estiver vazia, retorna um fallback padrão.
+ * Busca as categorias da origem única usada no menu, filtros e páginas (store_categories).
+ * 100% dados reais do Supabase cadastrados pelo usuário.
  */
 export async function getStoreCategories(): Promise<StoreCategory[]> {
   try {
     const { data, error } = await supabase
-      .from('categories')
+      .from('store_categories')
       .select('*')
       .order('sort_order', { ascending: true })
 
     if (error || !data || data.length === 0) {
-      return [
-        { id: 'cat-ferramentas', name: 'Ferramentas Elétricas', slug: 'ferramentas-eletricas', active: true },
-        { id: 'cat-baterias', name: 'Baterias & Carregadores', slug: 'baterias-carregadores', active: true },
-        { id: 'cat-acessorios', name: 'Acessórios & Brocas', slug: 'acessorios-brocas', active: true },
-        { id: 'cat-limpeza', name: 'Aspiradores & Limpeza', slug: 'aspiradores-limpeza', active: true },
-        { id: 'cat-audio', name: 'Áudio & Microfones', slug: 'audio-microfones', active: true },
-      ]
+      return []
     }
 
     return data.map((c: any) => ({
@@ -476,15 +350,10 @@ export async function getStoreCategories(): Promise<StoreCategory[]> {
       image_url: c.image_url,
       parent_id: c.parent_id,
       display_order: c.sort_order,
-      active: c.active !== false,
+      active: c.status === 'active' || c.active === true,
     }))
-  } catch {
-    return [
-      { id: 'cat-ferramentas', name: 'Ferramentas Elétricas', slug: 'ferramentas-eletricas', active: true },
-      { id: 'cat-baterias', name: 'Baterias & Carregadores', slug: 'baterias-carregadores', active: true },
-      { id: 'cat-acessorios', name: 'Acessórios & Brocas', slug: 'acessorios-brocas', active: true },
-      { id: 'cat-limpeza', name: 'Aspiradores & Limpeza', slug: 'aspiradores-limpeza', active: true },
-      { id: 'cat-audio', name: 'Áudio & Microfones', slug: 'audio-microfones', active: true },
-    ]
+  } catch (err) {
+    console.error('Erro ao buscar categorias do banco:', err)
+    return []
   }
 }

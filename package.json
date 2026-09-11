@@ -8,8 +8,8 @@
     "dev": "turbo run dev",
     "dev:flow": "pnpm --filter @teknix/flow dev",
     "dev:hub": "pnpm --filter @teknix/hub dev",
-    "dev:site": "pnpm --filter @teknix/site dev",
-    "build": "turbo run build",
+    "build": "pnpm --filter @teknix/site build",
+    "build:all": "turbo run build",
     "build:flow": "pnpm --filter @teknix/flow build",
     "build:hub": "pnpm --filter @teknix/hub build",
     "build:site": "pnpm --filter @teknix/site build",
@@ -19,7 +19,9 @@
     "turbo": "^2.5.0"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.112.4"
+    "@supabase/supabase-js": "^2.112.4",
+    "@types/pg": "^8.23.1",
+    "pg": "^8.23.0"
   },
   "packageManager": "pnpm@9.15.0"
 }

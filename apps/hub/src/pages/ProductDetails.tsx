@@ -184,28 +184,7 @@ export default function ProductDetails() {
         if (bySku) {
           resolved = bySku
         } else {
-          resolved = {
-            id: productId,
-            name: 'Produto em Demonstração TEKNIX',
-            sku: 'TKN-PROD-DEMO',
-            brand: 'TEKNIX',
-            model: 'TX-2026',
-            category: 'Ferramentas',
-            cost_purchase: 120.00,
-            price: 199.90,
-            stock: 15,
-            min_stock: 2,
-            status: 'active',
-            notes: 'Produto registrado para visualização e gestão operacional no HUB.',
-            images: ['https://images.unsplash.com/photo-1504148455328-c376907d081c?w=600&auto=format&fit=crop&q=80'],
-            store_meta: {
-              published: true,
-              sale_price: 199.90,
-              slug: productId,
-              short_description: 'Ferramenta profissional com garantia oficial e alta durabilidade.',
-              store_description: 'Equipamento projetado para alto rendimento em oficinas e serviços industriais.'
-            }
-          }
+          resolved = null
         }
       }
 

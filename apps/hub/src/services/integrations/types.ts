@@ -16,8 +16,15 @@ export type IntegrationProviderId =
   | 'correios'
   | 'site_teknix'
   | 'mercadolivre'
+  | 'shopee'
+  | 'amazon'
+  | 'magalu'
+  | 'casas_bahia'
+  | 'brevo'
+  | 'whatsapp'
+  | 'roteia'
 
-export type IntegrationCategory = 'payment' | 'fiscal' | 'shipping' | 'channel'
+export type IntegrationCategory = 'payment' | 'fiscal' | 'shipping' | 'channel' | 'communication'
 
 export type IntegrationStatus = 'connected' | 'sandbox' | 'disconnected' | 'error' | 'pending_credentials'
 

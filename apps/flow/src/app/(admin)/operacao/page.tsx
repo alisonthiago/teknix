@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Download, Upload, Package, Truck, ShoppingCart, Warehouse, Eye, Edit, Trash2, ClipboardCheck, CheckCircle2, AlertTriangle, Building2, Ban, Printer, Share2 } from 'lucide-react'
+import Link from 'next/link'
+import { Plus, Download, Upload, Package, Truck, ShoppingCart, Warehouse, Eye, Edit, Trash2, ClipboardCheck, CheckCircle2, AlertTriangle, Building2, Ban, Printer, Share2, Layers } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { PageHeader, PrimaryButton, SecondaryButton, StatCard, SearchInput, ModuleTable, TableHead, Th, Td } from '@/components/ui/module'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
@@ -30,6 +31,24 @@ function ProductsTab() {
   const [situationFilter, setSituationFilter] = useState<'ALL' | 'ACTIVE' | 'PAUSED' | 'BLOCKED' | 'LOCKED' | 'BANNED' | 'OUT_OF_STOCK' | 'ERROR' | 'SYNC_ISSUE'>('ALL')
   const [shareProduct, setShareProduct] = useState<any | null>(null)
   const [activeActionMenuId, setActiveActionMenuId] = useState<string | null>(null)
+  const [pendingMatchesCount, setPendingMatchesCount] = useState(0)
+
+  // Carrega contagem de anúncios que precisam de vinculação
+  useEffect(() => {
+    async function fetchPendingCount() {
+      try {
+        const supabase = createClient()
+        const { count } = await supabase
+          .from('pending_product_matches')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'PENDING')
+        setPendingMatchesCount(count || 0)
+      } catch (e) {
+        // silence
+      }
+    }
+    fetchPendingCount()
+  }, [])
 
   // Fecha o menu de ações ao clicar em qualquer lugar fora dele
   useEffect(() => {
@@ -284,6 +303,24 @@ function ProductsTab() {
               <option value="SYNC_ISSUE">Problema Sync ({counts.SYNC_ISSUE})</option>
             </select>
 
+            {/* Botão Atalho para Vincular Anúncios */}
+            <Link
+              href="/marketplaces/vincular"
+              className={`h-[38px] px-3.5 border rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer ${
+                pendingMatchesCount > 0
+                  ? 'bg-[#fef2f2] text-[#dc2626] border-[#fecaca] hover:bg-[#fee2e2]'
+                  : 'bg-white hover:bg-[#f8fafc] text-[#0f172a] border-[#e2e8f0]'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5 text-[#2563eb]" />
+              Vincular Anúncios
+              {pendingMatchesCount > 0 && (
+                <span className="px-1.5 py-0.5 bg-[#ef4444] text-white text-[10px] font-black rounded-full leading-none">
+                  {pendingMatchesCount}
+                </span>
+              )}
+            </Link>
+
             {/* Ações em Lote ou Botões de Ação */}
             {selectedItems.length > 0 ? (
               <div className="flex items-center gap-2 bg-[#f5f5f5] px-3 py-1 rounded-xl border border-[#1f2328]/20 shadow-2xs">
@@ -405,11 +442,21 @@ function ProductsTab() {
                       <div className="flex flex-col justify-center min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <p className="font-medium text-[#111] text-[14.5px] leading-snug truncate max-w-lg">{p.name as string}</p>
-                          {((p.marketplace_listings as any)?.length > 0 || String(p.sku || '').startsWith('MLB')) && (
-                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#fffde7] text-[#856404] border border-[#ffeeba] text-[10px] font-medium shrink-0">
-                              <MarketplaceLogo name="Mercado Livre" className="w-3 h-3" /> ML
+                          {/* Badges dos Canais Conectados ao Produto Central */}
+                          {(p.is_site_published ?? true) && (
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-[#f1f5f9] text-[#0f172a] border border-[#cbd5e1] text-[10px] font-bold shrink-0">
+                              Site
                             </span>
                           )}
+                          {(() => {
+                            const mlCount = (p.marketplace_listings as any[])?.filter((l: any) => !l.channel || l.channel === 'mercadolivre' || l.marketplace_id === 'mercadolivre').length || (String(p.sku || '').startsWith('MLB') ? 1 : 0)
+                            if (mlCount === 0) return null
+                            return (
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#fffde7] text-[#856404] border border-[#ffeeba] text-[10px] font-medium shrink-0">
+                                <MarketplaceLogo name="Mercado Livre" className="w-3 h-3" /> ML {mlCount > 1 ? `(${mlCount})` : ''}
+                              </span>
+                            )
+                          })()}
                         </div>
                         <p className="text-[11px] text-[#777] leading-tight mt-0.5">{p.brand as string || 'Sem marca'}</p>
                       </div>

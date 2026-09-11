@@ -1,0 +1,800 @@
+/* ============================================================
+   TEKNIX HUB — HubDataTable — CSS GLOBAL ÚNICO
+   Padrão oficial para TODAS as tabelas administrativas do HUB
+   ============================================================ */
+
+/* ── Variáveis de design da tabela ── */
+:root {
+  /* Padrão visual das linhas de pedidos do Dashboard. */
+  --hub-table-row-height: 95px;
+  --hub-table-header-height: 48px;
+  --hub-table-font-size: 13.5px;
+  --hub-table-header-font-size: 12px;
+  --hub-table-padding-x: 18px;
+  --hub-table-border: 1px solid #f0f0f0;
+  --hub-table-border-radius: 14px;
+  --hub-table-bg: #ffffff;
+  --hub-table-row-hover: #fafafa;
+  --hub-table-header-bg: #ffffff;
+  --hub-table-header-color: #666666;
+  --hub-table-text: #111111;
+  --hub-table-text-muted: #666666;
+  --hub-checkbox-size: 15px;
+}
+
+/* ── Container da página ── */
+.hub-page-container {
+  width: 100%;
+  font-family: var(--hub-font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
+}
+
+.hub-page-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── Page Header ── */
+.hub-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: nowrap;
+  margin-bottom: 4px;
+  min-width: 0;
+}
+
+.hub-header-info h1 {
+  font-size: var(--hub-h1-size, 24px);
+  font-weight: var(--hub-h1-weight, 700);
+  color: var(--hub-h1-color, #111111);
+  letter-spacing: -0.015em;
+  margin: 0;
+  line-height: var(--hub-h1-line-height, 1.2);
+}
+
+.hub-header-info p {
+  font-size: var(--hub-desc-size, 13px);
+  font-weight: var(--hub-desc-weight, 400);
+  color: var(--hub-desc-color, #666666);
+  margin: 4px 0 0;
+  line-height: var(--hub-desc-line-height, 1.4);
+}
+
+.hub-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
+  margin-left: auto;
+  min-width: 0;
+  max-width: 70%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+.hub-header-actions::-webkit-scrollbar { display: none; }
+
+.hub-header-actions .hub-status-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  max-width: none;
+  overflow: visible;
+  white-space: nowrap;
+  scrollbar-width: thin;
+}
+
+/* ── Botões padrão HUB ── */
+.hub-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: var(--hub-btn-radius, 8px);
+  padding: 0 14px;
+  height: var(--hub-btn-height, 38px);
+  min-height: var(--hub-btn-height, 38px);
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-decoration: none;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.hub-btn-secondary {
+  background: #ffffff;
+  color: #333333;
+  border: 1px solid #e6e6e6;
+}
+.hub-btn-secondary:hover {
+  background: #f8fafc;
+  color: #111111;
+  border-color: #d1d5db;
+}
+
+.hub-btn-primary {
+  background: #1f2328;
+  color: #ffffff;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+.hub-btn-primary:hover {
+  background: #000000;
+  color: #ffffff;
+}
+
+.hub-btn-danger {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fca5a5;
+}
+.hub-btn-danger:hover {
+  background: #fee2e2;
+}
+
+/* ── Toolbar (busca + filtros + exportar) ── */
+.hub-table-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+  width: 100%;
+  height: 32px;
+  flex: 0 0 32px;
+  padding: 0;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  box-sizing: border-box;
+}
+
+.hub-table-toolbar::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .hub-page-header {
+    align-items: center;
+  }
+
+  .hub-header-actions {
+    margin-left: 0;
+    max-width: 70%;
+  }
+
+  .hub-header-actions .hub-status-tabs {
+    flex: 1 1 auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .hub-header-actions {
+    align-items: center;
+  }
+
+  .hub-header-actions .hub-status-tabs {
+    flex: 0 0 auto;
+  }
+
+  .hub-header-actions > .hub-btn {
+    flex: 0 0 auto;
+  }
+}
+
+.hub-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 7px;
+  padding: 0 9px;
+  height: 32px;
+  min-height: 32px;
+  line-height: 30px;
+  box-sizing: border-box;
+  flex: 0 0 min(420px, 32vw);
+  min-width: 160px;
+  width: min(420px, 100%);
+  max-width: 420px;
+  flex-shrink: 1;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+.hub-search-wrap:focus-within {
+  border-color: #9ca3af;
+}
+
+.hub-search-input {
+  border: none;
+  outline: none;
+  font-size: 10px;
+  color: #111111;
+  height: 30px;
+  min-height: 0;
+  min-width: 0;
+  padding: 0;
+  width: 100%;
+  background: transparent;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+.hub-search-input::placeholder {
+  color: #9ca3af;
+}
+
+.hub-toolbar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 400;
+  color: #374151;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 7px;
+  padding: 0 9px;
+  height: 32px;
+  flex: 0 0 auto;
+  cursor: pointer;
+  transition: all 0.12s;
+  white-space: nowrap;
+  font-family: inherit;
+}
+.hub-table-toolbar select.hub-toolbar-btn {
+  appearance: auto;
+  height: 32px;
+  min-height: 32px;
+  line-height: normal;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.hub-toolbar-btn:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+.hub-toolbar-btn.active {
+  background: #f0f0f0;
+  border-color: #9ca3af;
+}
+
+/* ── Export Menu ── */
+.hub-export-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 0;
+  flex: 0 0 auto;
+}
+
+.hub-export-btn {
+  min-width: 0;
+  justify-content: center;
+}
+.hub-export-xlsx svg { color: #16a34a; }
+.hub-export-pdf svg { color: #dc2626; }
+
+.hub-export-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  padding: 6px;
+  min-width: 180px;
+  z-index: 200;
+}
+
+.hub-export-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  transition: background 0.1s;
+}
+.hub-export-item:hover {
+  background: #f9fafb;
+}
+.hub-export-item .hub-export-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 5px;
+  border-radius: 4px;
+  margin-left: auto;
+}
+.hub-export-badge.xlsx {
+  background: #d1fae5;
+  color: #065f46;
+}
+.hub-export-badge.pdf {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* ── Contador de registros ── */
+.hub-table-count {
+  font-size: 0.82rem;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+/* ── Bulk Actions Bar (Padrão Oficial HUB: Branco, Clean) ── */
+.hub-bulk-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #ffffff;
+  color: #111111;
+  padding: 8px 16px;
+  min-height: 46px;
+  border: 1px solid #e6e6e6;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+  animation: hubBulkSlideIn 0.18s ease;
+}
+@keyframes hubBulkSlideIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.hub-bulk-count {
+  font-weight: 700;
+  font-size: 13px;
+  color: #1f2328;
+  padding: 4px 10px;
+  background: #f5f5f5;
+  border: 1px solid #e6e6e6;
+  border-radius: 6px;
+  margin-right: 4px;
+}
+.hub-bulk-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  border: 1px solid #e6e6e6;
+  cursor: pointer;
+  background: #ffffff;
+  color: #1f2328;
+  transition: all 0.12s ease;
+  font-family: inherit;
+}
+.hub-bulk-action-btn:hover {
+  background: #f8fafc;
+  border-color: #d1d5db;
+  color: #000000;
+}
+.hub-bulk-action-btn.danger {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #dc2626;
+}
+.hub-bulk-action-btn.danger:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #b91c1c;
+}
+.hub-bulk-clear {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  background: none;
+  border: none;
+  color: #666666;
+  cursor: pointer;
+  font-size: 12.5px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-family: inherit;
+  transition: all 0.12s ease;
+}
+.hub-bulk-clear:hover {
+  color: #111111;
+  background: #f5f5f5;
+}
+
+/* ── Table Card ── */
+.hub-table-card {
+  background: var(--hub-table-bg);
+  border-radius: var(--hub-table-border-radius);
+  border: var(--hub-table-border);
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+/* ── Table Header Row ── */
+.hub-table-header {
+  display: grid;
+  align-items: center;
+  min-height: 64px;
+  height: auto;
+  padding: 20px var(--hub-table-padding-x);
+  background: #ffffff;
+  border-bottom: var(--hub-table-border);
+  gap: 12px;
+  box-sizing: border-box;
+}
+
+.hub-table-header-cell {
+  font-size: var(--hub-table-header-font-size);
+  font-weight: 600;
+  color: var(--hub-table-header-color);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ── Table Data Row ── */
+.hub-table-row {
+  display: grid;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: var(--hub-table-row-height);
+  padding: 20px var(--hub-table-padding-x);
+  border-bottom: var(--hub-table-border);
+  gap: 14px;
+  border-radius: 12px;
+  transition: background 0.1s ease;
+}
+.hub-table-row:last-child {
+  border-bottom: none;
+}
+.hub-table-row:hover {
+  background: var(--hub-table-row-hover);
+}
+.hub-table-row.selected {
+  background: #eff6ff;
+}
+
+/* ── Checkbox ── */
+.hub-checkbox-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  flex-shrink: 0;
+}
+
+.hub-checkbox {
+  width: var(--hub-checkbox-size);
+  height: var(--hub-checkbox-size);
+  accent-color: #2563eb;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* ── Cell types ── */
+.hub-cell-text {
+  font-size: var(--hub-table-font-size);
+  color: var(--hub-table-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hub-cell-muted {
+  font-size: var(--hub-table-font-size);
+  color: var(--hub-table-text-muted);
+}
+.hub-cell-bold {
+  font-size: var(--hub-table-font-size);
+  color: var(--hub-table-text);
+  font-weight: 600;
+}
+.hub-cell-link {
+  font-size: var(--hub-table-font-size);
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 500;
+}
+.hub-cell-link:hover {
+  text-decoration: underline;
+}
+
+/* ── Status badges ── */
+.hub-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 100px;
+  white-space: nowrap;
+  cursor: default;
+  border: none;
+  font-family: inherit;
+}
+.hub-status-badge .hub-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Status verde — publicado/ativo/pago */
+.hub-badge-green {
+  background: #dcfce7;
+  color: #166534;
+}
+.hub-badge-green .hub-badge-dot { background: #16a34a; }
+
+/* Status amarelo — rascunho/pendente/processando */
+.hub-badge-yellow {
+  background: #fef9c3;
+  color: #854d0e;
+}
+.hub-badge-yellow .hub-badge-dot { background: #ca8a04; }
+
+/* Status cinza — inativo/arquivado */
+.hub-badge-gray {
+  background: #f3f4f6;
+  color: #374151;
+}
+.hub-badge-gray .hub-badge-dot { background: #9ca3af; }
+
+/* Status vermelho — cancelado/erro */
+.hub-badge-red {
+  background: #fee2e2;
+  color: #991b1b;
+}
+.hub-badge-red .hub-badge-dot { background: #dc2626; }
+
+/* Status azul — enviado/em trânsito */
+.hub-badge-blue {
+  background: #dbeafe;
+  color: #1e40af;
+}
+.hub-badge-blue .hub-badge-dot { background: #2563eb; }
+
+/* Status roxo — especial */
+.hub-badge-purple {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+.hub-badge-purple .hub-badge-dot { background: #7c3aed; }
+
+/* ── Ações da linha (dropdown 3 pontinhos) ── */
+.hub-actions-cell {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.hub-action-wrapper {
+  position: relative;
+}
+
+.hub-action-dots-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: none;
+  cursor: pointer;
+  color: #9ca3af;
+  transition: all 0.12s;
+}
+.hub-action-dots-btn:hover,
+.hub-action-dots-btn.active {
+  background: #f3f4f6;
+  border-color: #e5e7eb;
+  color: #374151;
+}
+
+.hub-action-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+  padding: 6px;
+  min-width: 200px;
+  z-index: 300;
+  animation: hubDropIn 0.12s ease;
+}
+@keyframes hubDropIn {
+  from { opacity: 0; transform: translateY(-4px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.hub-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  transition: background 0.1s;
+  text-decoration: none;
+  font-family: inherit;
+}
+.hub-dropdown-item:hover {
+  background: #f9fafb;
+}
+.hub-dropdown-item.delete {
+  color: #dc2626;
+}
+.hub-dropdown-item.delete:hover {
+  background: #fef2f2;
+}
+.hub-dropdown-divider {
+  height: 1px;
+  background: #f0f0f0;
+  margin: 4px 0;
+}
+
+/* ── Loading Skeleton ── */
+.hub-table-skeleton {
+  padding: 0;
+}
+.hub-skeleton-row {
+  display: grid;
+  align-items: center;
+  box-sizing: border-box;
+  height: var(--hub-table-row-height);
+  padding: 20px var(--hub-table-padding-x);
+  gap: 14px;
+  border-bottom: var(--hub-table-border);
+}
+.hub-skeleton-cell {
+  height: 14px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: hubSkeleton 1.4s infinite;
+}
+@keyframes hubSkeleton {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Empty State ── */
+.hub-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 24px;
+  gap: 12px;
+  text-align: center;
+}
+.hub-empty-icon {
+  width: 48px;
+  height: 48px;
+  background: #f3f4f6;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
+}
+.hub-empty-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+}
+.hub-empty-desc {
+  font-size: 13px;
+  color: #9ca3af;
+  margin: 0;
+}
+
+/* ── Footer / Paginação ── */
+.hub-table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  color: #6b7280;
+  flex-wrap: wrap;
+}
+.hub-pagination {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.hub-page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.1s;
+  font-family: inherit;
+}
+.hub-page-btn:hover {
+  background: #f9fafb;
+}
+.hub-page-btn.active {
+  background: #1a1a1a;
+  color: #ffffff;
+  border-color: #1a1a1a;
+}
+.hub-page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+  .hub-table-card {
+    overflow-x: auto;
+  }
+  .hub-table-header,
+  .hub-table-row,
+  .hub-skeleton-row {
+    min-width: 640px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hub-page-header {
+    flex-direction: column;
+  }
+  .hub-header-actions {
+    margin-left: 0;
+    width: 100%;
+  }
+  .hub-table-toolbar {
+    align-items: center;
+  }
+  .hub-search-wrap {
+    flex-basis: 260px;
+    width: 260px;
+  }
+  .hub-export-wrapper {
+    margin-left: 0;
+  }
+}

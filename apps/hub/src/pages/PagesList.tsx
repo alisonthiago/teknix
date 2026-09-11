@@ -122,11 +122,11 @@ export default function PagesList() {
   const [busy, setBusy] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<Entry | null>(null)
 
-  // Dialog State para Criar ou Duplicar
   const [dialog, setDialog] = useState<{ kind: 'create' | 'duplicate'; entry?: Entry } | null>(null)
   const [title, setTitle] = useState('')
   const [slug, setSlug] = useState('')
   const [template, setTemplate] = useState<'standard' | 'landing' | 'blank'>('standard')
+  const [pageNature, setPageNature] = useState<'custom' | 'landing' | 'template'>('custom')
   const [autoSlug, setAutoSlug] = useState(true)
   const [formError, setFormError] = useState('')
 
@@ -151,6 +151,7 @@ export default function PagesList() {
     setSlug('')
     setAutoSlug(true)
     setTemplate('standard')
+    setPageNature('custom')
     setFormError('')
     setDialog({ kind: 'create' })
   }
@@ -162,6 +163,7 @@ export default function PagesList() {
     setSlug(`/${copySlug}`)
     setAutoSlug(false)
     setTemplate('standard')
+    setPageNature('custom')
     setFormError('')
     setDialog({ kind: 'duplicate', entry })
   }
@@ -210,8 +212,8 @@ export default function PagesList() {
         setDialog(null)
         navigate(`/hub/editor/page/${row.id}`)
       } else {
-        // 1. Cria a página com status draft e slug sanitizado
-        const row = await createEditorPage(title, finalSlug)
+        // 1. Cria a página com status draft, slug sanitizado e tipo explícito
+        const row = await createEditorPage(title, finalSlug, pageNature)
 
         // 2. Insere a estrutura inicial com base no modelo selecionado
         try {
@@ -244,38 +246,32 @@ export default function PagesList() {
               // Widget 1: Título principal
               await supabase.from('page_widgets').insert({
                 container_id: container.id,
-                widget_type: 'heading',
+                type: 'heading',
                 order: 0,
                 content: {
+                  text: title.trim(),
                   title: title.trim(),
                   tag: 'h1',
                   align: 'center'
                 },
-                style: {
-                  fontSize: '38px',
-                  fontWeight: '700',
-                  color: '#000000',
-                  textAlign: 'center',
-                  margin: '0 0 10px 0'
-                }
+                font_size: '38px',
+                font_weight: '700',
+                color: '#000000',
+                text_align: 'center'
               })
 
               // Se for padrão: subtítulo de apresentação
               if (template === 'standard') {
                 await supabase.from('page_widgets').insert({
                   container_id: container.id,
-                  widget_type: 'text',
+                  type: 'text',
                   order: 1,
                   content: {
                     text: 'Edite este texto e adicione novos blocos, produtos e imagens através do editor visual da Teknix.'
                   },
-                  style: {
-                    fontSize: '16px',
-                    color: '#6b7280',
-                    textAlign: 'center',
-                    maxWidth: '680px',
-                    margin: '0 auto'
-                  }
+                  font_size: '16px',
+                  color: '#6b7280',
+                  text_align: 'center'
                 })
               }
 
@@ -283,37 +279,27 @@ export default function PagesList() {
               if (template === 'landing') {
                 await supabase.from('page_widgets').insert({
                   container_id: container.id,
-                  widget_type: 'text',
+                  type: 'text',
                   order: 1,
                   content: {
                     text: 'Aproveite ofertas imperdíveis e condições exclusivas com alta performance e garantia.'
                   },
-                  style: {
-                    fontSize: '18px',
-                    color: '#4b5563',
-                    textAlign: 'center',
-                    maxWidth: '640px',
-                    margin: '0 auto 16px auto'
-                  }
+                  font_size: '18px',
+                  color: '#4b5563',
+                  text_align: 'center'
                 })
 
                 await supabase.from('page_widgets').insert({
                   container_id: container.id,
-                  widget_type: 'button',
+                  type: 'button',
                   order: 2,
                   content: {
                     text: 'Explorar Ofertas',
                     link: '/produtos',
                     variant: 'primary'
                   },
-                  style: {
-                    background: '#1f2328',
-                    color: '#ffffff',
-                    padding: '12px 28px',
-                    borderRadius: '980px',
-                    fontWeight: '600',
-                    fontSize: '15px'
-                  }
+                  color: '#ffffff',
+                  bg_color: '#1f2328'
                 })
               }
             }
@@ -713,6 +699,82 @@ export default function PagesList() {
                   <AlertCircle size={16} style={{ flexShrink: 0, marginTop: 2 }} />
                   <div>
                     {formError || `O endereço "/${currentSlugClean}" é reservado pelo sistema da loja. Escolha outro endereço.`}
+                  </div>
+                </div>
+              )}
+
+              {/* Natureza da Página (Normal x Landing x Template) */}
+              {dialog.kind === 'create' && (
+                <div>
+                  <label style={{ display: 'block', fontSize: 12.5, fontWeight: 600, color: '#1d1d1f', marginBottom: 8 }}>
+                    Tipo / Alcance da Página
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 16 }}>
+                    {[
+                      {
+                        id: 'custom',
+                        title: 'Página Normal',
+                        desc: 'Página individual e independente da loja.',
+                        icon: FileText
+                      },
+                      {
+                        id: 'landing',
+                        title: 'Landing Page',
+                        desc: 'Campanha de alta conversão sem distrações.',
+                        icon: Megaphone
+                      },
+                      {
+                        id: 'template',
+                        title: 'Página Padrão / Template',
+                        desc: 'Modelo base reutilizável para outras páginas.',
+                        icon: Sparkles
+                      }
+                    ].map(item => {
+                      const isSelected = pageNature === item.id
+                      const IconComp = item.icon
+                      return (
+                        <div
+                          key={item.id}
+                          onClick={() => {
+                            setPageNature(item.id as any)
+                            if (item.id === 'landing') setTemplate('landing')
+                          }}
+                          style={{
+                            padding: '12px 10px',
+                            borderRadius: 10,
+                            border: isSelected ? '2px solid #0071e3' : '1px solid #e5e5ea',
+                            background: isSelected ? '#f0f7ff' : '#ffffff',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 6
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <div style={{
+                              width: 26,
+                              height: 26,
+                              borderRadius: 6,
+                              background: isSelected ? '#0071e3' : '#f5f5f7',
+                              color: isSelected ? '#ffffff' : '#6e6e73',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}>
+                              <IconComp size={14} />
+                            </div>
+                            {isSelected && <Check size={14} color="#0071e3" />}
+                          </div>
+                          <div style={{ fontSize: 12, fontWeight: 600, color: isSelected ? '#0071e3' : '#1d1d1f' }}>
+                            {item.title}
+                          </div>
+                          <div style={{ fontSize: 10.5, color: '#86868b', lineHeight: 1.3 }}>
+                            {item.desc}
+                          </div>
+                        </div>
+                      )
+                    })}
                   </div>
                 </div>
               )}

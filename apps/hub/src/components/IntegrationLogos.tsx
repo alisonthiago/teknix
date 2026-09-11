@@ -256,6 +256,35 @@ export function CorreiosLogo({ size = 26, className = '' }: LogoProps) {
   )
 }
 
+const LOGO_PATHS: Record<string, string> = {
+  mercadolivre: '/logos/mercado-livre.svg',
+  mercado_livre: '/logos/mercado-livre.svg',
+  ml: '/logos/mercado-livre.svg',
+  mercado_pago: '/logos/mercado-pago.svg',
+  mercadopago: '/logos/mercado-pago.svg',
+  shopee: '/logos/shopee.svg',
+  amazon: '/logos/amazon.svg',
+  magalu: '/logos/magalu.svg',
+  magazine: '/logos/magalu.svg',
+  casas_bahia: '/logos/casas-bahia.svg',
+  casasbahia: '/logos/casas-bahia.svg',
+  melhor_envio: '/logos/melhor-envio.svg',
+  melhorenvio: '/logos/melhor-envio.svg',
+  focus_nfe: '/logos/focus-nfe.svg',
+  focusnfe: '/logos/focus-nfe.svg',
+  bling: '/logos/bling.svg',
+  asaas: '/logos/asaas.svg',
+  frenet: '/logos/frenet.svg',
+  correios: '/logos/correios.svg',
+  brevo: '/logos/brevo.svg',
+  whatsapp: '/logos/whatsapp.svg',
+  tiktok: '/logos/tiktok.svg',
+  shopify: '/logos/shopify.svg',
+  extra: '/logos/extra.svg',
+  site_teknix: '/teknix-logo.svg',
+  teknix: '/teknix-logo.svg'
+}
+
 export function IntegrationLogoRenderer({
   code,
   size = 24,
@@ -265,9 +294,37 @@ export function IntegrationLogoRenderer({
   size?: number
   className?: string
 }) {
-  const c = code.toLowerCase()
-  if (c.includes('pago') || c.includes('mercado_pago') || c.includes('mercado-pago')) return <MercadoPagoLogo size={size} className={className} />
-  if (c.includes('mercado') || c.includes('meli') || c === 'ml' || c.includes('mercadolivre')) return <MercadoLivreLogo size={size} className={className} />
+  const c = (code || '').toLowerCase().replace(/-/g, '_')
+  
+  // Verifica se há logo oficial SVG disponível
+  const matchedKey = Object.keys(LOGO_PATHS).find(k => c === k || c.includes(k) || k.includes(c))
+  if (matchedKey && LOGO_PATHS[matchedKey]) {
+    return (
+      <img
+        src={LOGO_PATHS[matchedKey]}
+        alt={code}
+        width={size}
+        height={size}
+        style={{
+          width: `${size}px`,
+          height: `${size}px`,
+          maxWidth: `${size}px`,
+          maxHeight: `${size}px`,
+          objectFit: 'contain',
+          display: 'inline-block',
+          verticalAlign: 'middle'
+        }}
+        className={className}
+        onError={(e) => {
+          // Fallback gracioso se não carregar a imagem
+          (e.target as HTMLElement).style.display = 'none'
+        }}
+      />
+    )
+  }
+
+  if (c.includes('pago')) return <MercadoPagoLogo size={size} className={className} />
+  if (c.includes('mercado') || c.includes('meli') || c === 'ml') return <MercadoLivreLogo size={size} className={className} />
   if (c.includes('shopee')) return <ShopeeLogo size={size} className={className} />
   if (c.includes('amazon')) return <AmazonLogo size={size} className={className} />
   if (c.includes('magalu') || c.includes('magazine')) return <MagaluLogo size={size} className={className} />

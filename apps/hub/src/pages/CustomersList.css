@@ -103,6 +103,57 @@
   color: #333333;
 }
 
+.customers-table-container {
+  overflow-x: auto;
+}
+
+.customers-table {
+  min-width: 920px;
+}
+
+.customer-row {
+  cursor: pointer;
+}
+
+.customer-info,
+.contact-info {
+  min-width: 0;
+}
+
+.customer-name-group,
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.customer-name-group strong {
+  max-width: 250px;
+  overflow: hidden;
+  color: #111827;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.customer-name-group span,
+.contact-info span {
+  overflow: hidden;
+  color: #64748b;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.contact-email {
+  max-width: 240px;
+  color: #334155 !important;
+}
+
+.contact-phone {
+  color: #94a3b8 !important;
+}
+
 .interactive-table tbody tr {
   cursor: pointer;
 }

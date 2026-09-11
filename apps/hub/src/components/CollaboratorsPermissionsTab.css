@@ -12,10 +12,38 @@
 
 .colab-header-row {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
+}
+
+.settings-title-with-back {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-back-to-settings {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.btn-back-to-settings:hover {
+  background: #f3f4f6;
+  color: #000000;
+  border-color: #d1d5db;
+  transform: translateX(-1px);
 }
 
 .colab-feedback-banner {

@@ -11,6 +11,12 @@
   letter-spacing: 0;
 }
 
+/* Os cabeçalhos internos das páginas ficam sem título e descrição. */
+.hub-content .hub-page-header .hub-header-info h1,
+.hub-content .hub-page-header .hub-header-info p {
+  display: none;
+}
+
 /* ── Sidebar ── */
 .hub-sidebar {
   position: fixed;
@@ -39,7 +45,7 @@
 
 .sidebar-closed .hub-sidebar .nav-item {
   justify-content: center;
-  padding: 7px 0;
+  padding: 8px 0;
   margin: 0 8px;
   border-radius: 8px;
 }
@@ -136,8 +142,8 @@
   display: flex;
   align-items: center;
   gap: 9px;
-  padding: 7px 16px;
-  min-height: 40px;
+  padding: 8px 16px;
+  min-height: 42px;
   font-size: 13.5px;
   font-weight: 400;
   color: #4b5563;
@@ -436,7 +442,8 @@
   position: absolute;
   right: 0;
   top: 56px;
-  width: min(420px, calc(100vw - 24px));
+  width: min(360px, calc(100vw - 24px));
+  max-height: min(420px, calc(100vh - 86px));
   background: #fff;
   border: 1px solid #e0e0e0;
   border-radius: 14px;
@@ -444,16 +451,22 @@
   z-index: 101;
   overflow: hidden;
 }
-.flow-notification-header { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:16px 18px; border-bottom:1px solid #eef0f3; font-size:13px; color:#111827; }
+.flow-notification-header { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:12px 14px; border-bottom:1px solid #eef0f3; font-size:12px; color:#111827; }
+.flow-notification-header > div { min-width: 0; overflow: hidden; }
+.flow-notification-header strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .flow-notification-header span { color:#6b7280; font-size:11px; font-weight:700; white-space:nowrap; }
-.flow-notification-list { padding:12px; display:grid; gap:8px; max-height:360px; overflow:auto; background:#fafbfc; }
-.flow-notification-item { display:flex; align-items:center; gap:10px; padding:13px 12px; border:1px solid #e8ebef; border-radius:10px; background:#fff; transition:background .15s ease, border-color .15s ease; }
+.flow-notification-header button { flex: 0 0 auto; white-space: nowrap; }
+.flow-notification-list { padding:6px; display:grid; gap:4px; max-height:280px; overflow-y:auto; overflow-x:hidden; background:#fafbfc; }
+.flow-notification-item { display:flex; align-items:center; gap:7px; min-width:0; padding:7px 8px; border:1px solid #e8ebef; border-radius:8px; background:#fff; transition:background .15s ease, border-color .15s ease; }
 .flow-notification-item:hover { background:#f8fafc; border-color:#d9dee6; }
-.flow-notification-icon { width:30px; height:30px; flex:0 0 auto; border-radius:9px; display:grid; place-items:center; background:#eef2f5; color:#374151; font-weight:700; }
-.flow-notification-item strong { display:block; font-size:12px; color:#111827; line-height:1.35; }
-.flow-notification-item small { display:block; margin-top:3px; font-size:10px; color:#8a94a3; }
+.flow-notification-icon { width:27px; height:27px; flex:0 0 auto; border-radius:8px; display:grid; place-items:center; background:#eef2f5; color:#374151; font-weight:700; }
+.flow-notification-icon svg { width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.flow-notification-content { display:flex; align-items:center; gap:7px; min-width:0; flex:1; }
+.flow-notification-text { min-width:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; font-size:11.5px; color:#4b5563; line-height:1.3; }
+.flow-notification-text strong { color:#111827; }
+.flow-notification-item small { flex:0 0 auto; font-size:10px; color:#8a94a3; white-space:nowrap; }
 .flow-notification-item i { margin-left:auto; width:7px; height:7px; flex:0 0 auto; border-radius:50%; background:#8aa000; }
-.flow-notification-footer { display:block; padding:14px 12px; border-top:1px solid #eef0f3; text-align:center; color:#374151; font-size:11px; font-weight:700; text-decoration:none; background:#fff; }
+.flow-notification-footer { display:block; padding:11px 10px; border-top:1px solid #eef0f3; text-align:center; color:#374151; font-size:11px; font-weight:700; text-decoration:none; background:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .flow-notification-footer:hover { background:#f8fafc; color:#111827; }
 
 .flow-user-dropdown-header {
@@ -522,7 +535,7 @@
   box-sizing: border-box;
   max-width: 1600px;
   margin: 0 auto;
-  padding: 8px 48px 48px;
+  padding: 24px 48px 48px;
   background: #ffffff;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -536,25 +549,25 @@
   .hub-content {
     width: 100vw;
     max-width: 100vw;
-    padding: 8px 16px 32px;
+    padding: 16px 16px 32px;
     overflow-x: hidden;
   }
 }
 
 @media (min-width: 640px) {
   .hub-content {
-    padding: 8px 32px 40px;
+    padding: 20px 32px 40px;
   }
 }
 
 @media (min-width: 1024px) {
   .hub-content {
-    padding: 8px 48px 48px;
+    padding: 24px 48px 48px;
   }
 }
 
 @media (min-width: 1280px) {
   .hub-content {
-    padding: 8px 56px 48px;
+    padding: 24px 56px 48px;
   }
 }

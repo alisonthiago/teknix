@@ -95,11 +95,12 @@ export async function processCheckoutOrder(params: CreateOrderParams): Promise<C
     // SELECT para obter customerId (necessário para o pedido).
     // UPDATE em background — nunca bloqueia o checkout.
     let customerId: string | null = null
+    const cleanCpf = (customer.document || '').replace(/\D/g, '')
     try {
       const { data: existing } = await supabase
         .from('customers')
         .select('id, user_id')
-        .or(`document.eq.${customer.document},email.eq.${customer.email}`)
+        .or(`email.eq.${customer.email}${cleanCpf ? `,cpf.eq.${cleanCpf}` : ''}`)
         .maybeSingle()
 
       if (existing?.id) {
@@ -110,11 +111,12 @@ export async function processCheckoutOrder(params: CreateOrderParams): Promise<C
           .update({
             name: customer.name,
             phone: customer.phone,
+            cpf: cleanCpf || undefined,
             address: customer.street,
-            number: customer.number,
-            complement: customer.complement || '',
             neighborhood: customer.neighborhood,
             zip_code: customer.zipCode,
+            city: customer.city || 'São Paulo',
+            state: customer.state || 'SP',
             user_id: userId || existing.user_id || undefined,
             updated_at: new Date().toISOString()
           })
@@ -127,15 +129,12 @@ export async function processCheckoutOrder(params: CreateOrderParams): Promise<C
             user_id: userId || null,
             name: customer.name,
             email: customer.email,
-            document: customer.document,
+            cpf: cleanCpf || null,
             phone: customer.phone,
             address: customer.street,
-            number: customer.number,
-            complement: customer.complement || '',
-            neighborhood: customer.neighborhood,
-            zip_code: customer.zipCode,
             city: customer.city || 'São Paulo',
             state: customer.state || 'SP',
+            zip_code: customer.zipCode,
             created_at: new Date().toISOString()
           })
           .select('id')

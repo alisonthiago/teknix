@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { getOrdersByUserId, type Order } from '../services/customer'
+import { getOrdersByUserId, getOrderByNumber, type Order } from '../services/customer'
 import { useAuth } from '../hooks/useAuth'
 import {
   Truck, Check, Package,
@@ -10,65 +10,6 @@ import {
 } from 'lucide-react'
 import { Editable } from '../components/page-widgets/PageWidgets'
 import './OrderLookup.css'
-
-const DEMO_ORDERS: Record<string, Order> = {
-  'W849204128': {
-    id: 'W849204128',
-    order_number: 'W849204128',
-    customer_name: 'Alison Silva',
-    status: 'paid',
-    payment_status: 'approved',
-    payment_method: 'Pix à vista (10% OFF)',
-    total: 1199.00,
-    subtotal: 1199.00,
-    shipping_cost: 0,
-    shipping_method: 'Loggi Express / Correios Sedex',
-    tracking_code: 'BR948291048TK',
-    created_at: '2026-08-25T14:32:00Z',
-    delivery_estimate: 'Até 28 de Setembro — Horário Comercial',
-    items: [
-      {
-        id: 'item-1',
-        order_id: 'W849204128',
-        product_id: 'prod-dhr202z',
-        product_name: 'Martelete Perfurador Rompedor DHR202Z SDS Plus 1,9J 18V MAKITA',
-        product_sku: 'DHR202Z',
-        product_image: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=800&auto=format&fit=crop&q=80',
-        quantity: 1,
-        price: 1199.00,
-        subtotal: 1199.00
-      }
-    ]
-  },
-  'TK-2026-8841': {
-    id: 'TK-2026-8841',
-    order_number: 'TK-2026-8841',
-    customer_name: 'Cliente TEKNIX',
-    status: 'paid',
-    payment_status: 'approved',
-    payment_method: 'Cartão de Crédito 10x sem juros',
-    total: 849.90,
-    subtotal: 849.90,
-    shipping_cost: 0,
-    shipping_method: 'Jadlog Express',
-    tracking_code: 'TK884102941BR',
-    created_at: '2026-08-28T10:15:00Z',
-    delivery_estimate: 'Até 02 de Outubro',
-    items: [
-      {
-        id: 'item-2',
-        order_id: 'TK-2026-8841',
-        product_id: 'prod-parafusadeira',
-        product_name: 'Parafusadeira Furadeira de Impacto 1/2 Pol Brushless 20V DEWALT',
-        product_sku: 'DCD796D2',
-        product_image: 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=800&auto=format&fit=crop&q=80',
-        quantity: 1,
-        price: 849.90,
-        subtotal: 849.90
-      }
-    ]
-  }
-}
 
 export default function OrderLookup() {
   const { user } = useAuth()
@@ -89,20 +30,21 @@ export default function OrderLookup() {
     setFoundOrder(null)
 
     if (!targetNum) {
-      setErrorMsg('Por favor, informe o número do pedido (ex: W849204128 ou TK-XXXX).')
+      setErrorMsg('Por favor, informe o número do pedido ou código de rastreio.')
       return
     }
 
     setLoading(true)
     try {
-      // 1. Verifica no banco demo rápido
-      if (DEMO_ORDERS[targetNum]) {
-        setFoundOrder(DEMO_ORDERS[targetNum])
+      // 1. Busca pedido real diretamente no Supabase por número ou ID
+      const order = await getOrderByNumber(targetNum)
+      if (order) {
+        setFoundOrder(order)
         setLoading(false)
         return
       }
 
-      // 2. Se o usuário estiver autenticado, busca nos pedidos da conta
+      // 2. Se o usuário estiver autenticado, busca nos pedidos da sua conta
       if (user) {
         const userOrders = await getOrdersByUserId(user.id)
         const match = userOrders.find(o => (o.order_number || o.id).toUpperCase() === targetNum)
@@ -111,15 +53,6 @@ export default function OrderLookup() {
           setLoading(false)
           return
         }
-      }
-
-      // 3. Busca por qualquer pedido cadastrado com esse número
-      const allDemoKeys = Object.keys(DEMO_ORDERS)
-      const partialMatch = allDemoKeys.find(k => k.includes(targetNum) || targetNum.includes(k))
-      if (partialMatch) {
-        setFoundOrder(DEMO_ORDERS[partialMatch])
-        setLoading(false)
-        return
       }
 
       setErrorMsg('Nenhum pedido encontrado com esse número. Verifique se digitou corretamente ou consulte o e-mail de confirmação da compra.')
@@ -140,12 +73,6 @@ export default function OrderLookup() {
     navigator.clipboard.writeText(code)
     setCopiedTracking(true)
     setTimeout(() => setCopiedTracking(false), 2000)
-  }
-
-  const loadDemo = (num: string, mail: string) => {
-    setOrderNumber(num)
-    setEmailAddress(mail)
-    handleLookup(num)
   }
 
   return (
@@ -411,26 +338,6 @@ export default function OrderLookup() {
                   <div className="benefit-item">
                     <span className="benefit-check">✓</span>
                     <span>Disponível mesmo se você comprou sem cadastro prévio</span>
-                  </div>
-                </div>
-
-                <div className="quick-test-box">
-                  <span className="quick-test-label">Demonstração rápida:</span>
-                  <div className="quick-test-buttons">
-                    <button
-                      type="button"
-                      className="quick-test-btn"
-                      onClick={() => loadDemo('W849204128', 'alisonsilvathiago@gmail.com')}
-                    >
-                      Carregar Pedido W849204128
-                    </button>
-                    <button
-                      type="button"
-                      className="quick-test-btn"
-                      onClick={() => loadDemo('TK-2026-8841', 'cliente@teknix.com.br')}
-                    >
-                      Carregar Pedido TK-2026-8841
-                    </button>
                   </div>
                 </div>
               </div>

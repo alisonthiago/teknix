@@ -81,17 +81,17 @@ export default function CategoryPage() {
         return
       }
 
-      // 2. Resolve a categoria pelo slug para obter o category_id real
+      // 2. Resolve a categoria pelo slug para obter o category_id real da tabela store_categories
       const { data: catData } = await supabase
-        .from('categories')
+        .from('store_categories')
         .select('*')
         .eq('slug', categorySlug)
         .maybeSingle()
 
       if (cancelled) return
-      const resolvedCategory = catData || findCoreCategory(categorySlug) || null
+      const resolvedCategory = catData || null
       if (resolvedCategory) setCategory(resolvedCategory)
-      else if(!pageData?.page_styles?.published_snapshot_v2){setNotFound(true);setLoading(false);return}
+      else if (!pageData?.page_styles?.published_snapshot_v2) { setNotFound(true); setLoading(false); return }
 
       // 4. Busca produtos vinculados à categoria (por category_id ou slug)
       const categoryProducts = await getProducts({

@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react'
-import { Link, useLocation, Outlet } from 'react-router-dom'
+import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { usePermissions } from '../hooks/usePermissions'
+import { useHubNotifications } from '../contexts/HubNotificationContext'
+import { resolveNotificationUrl, type HubNotification } from '../services/notificationService'
 import AccessDenied from './AccessDenied'
 import HubToast from './HubToast'
 import {
@@ -12,6 +14,8 @@ import {
   WhatsAppLogo,
   IntegrationLogoRenderer
 } from './IntegrationLogos'
+import { InternalChatProvider, useInternalChat } from '../contexts/InternalChatContext'
+import FloatingMessenger from './internal-chat/FloatingMessenger'
 import './HubLayout.css'
 
 // ─── Ícones originais + logos de integração ────────────────────────────────
@@ -42,15 +46,50 @@ const icons: Record<string, React.ReactElement> = {
   amazonLogo: <AmazonLogo size={22} />,
   magaluLogo: <MagaluLogo size={22} />,
   whatsappLogo: <WhatsAppLogo size={22} />,
+  truck: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="20" height="20"><rect x="1" y="3" width="15" height="13" rx="1"/><polygon points="16 8 20 8 23 11 23 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>,
+  fileText: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="20" height="20"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>,
   plusLogo: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
 }
 
-// ─── Componente principal ──────────────────────────────────────────────────
-export default function HubLayout() {
+// ─── Botão do Chat Interno no Pill do Header (1:1 com o FLOW) ─────────────
+function HubChatPillButton() {
+  const { totalUnreadCount, isFloatingOpen, setIsFloatingOpen, isFloatingMinimized, setIsFloatingMinimized } = useInternalChat()
+  return (
+    <button
+      type="button"
+      className="flow-pill-btn"
+      title="Chat Interno TEKNIX"
+      onClick={() => {
+        if (isFloatingOpen && !isFloatingMinimized) {
+          setIsFloatingOpen(false)
+        } else {
+          setIsFloatingOpen(true)
+          setIsFloatingMinimized(false)
+        }
+      }}
+      style={{ position: 'relative' }}
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" width="18" height="18">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      </svg>
+      {totalUnreadCount > 0 && (
+        <span className="flow-badge-red" style={{ animation: 'pulse 1.5s infinite' }}>
+          {totalUnreadCount > 99 ? '99+' : totalUnreadCount}
+        </span>
+      )}
+    </button>
+  )
+}
+
+// ─── Componente principal interno ──────────────────────────────────────────
+function HubLayoutContent() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [showUserDropdown, setShowUserDropdown] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
   const location = useLocation()
+  const navigate = useNavigate()
+
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useHubNotifications()
 
   const { can, canAccessRoute, role, isMaster } = usePermissions()
 
@@ -136,6 +175,7 @@ export default function HubLayout() {
         { icon: 'bell', label: 'Avisos de Estoque', path: '/hub/avisos-estoque', perm: 'products.view' },
         { icon: 'tag', label: 'Categorias', path: '/hub/categorias', perm: 'categories.view' },
         { icon: 'cart', label: 'Pedidos', path: '/hub/pedidos', perm: 'orders.view' },
+        { icon: 'truck', label: 'Envios', path: '/hub/envios', perm: 'orders.view' },
         { icon: 'users', label: 'Clientes', path: '/hub/clientes', perm: 'customers.view' },
       ]
     },
@@ -144,6 +184,7 @@ export default function HubLayout() {
       items: [
         { icon: 'dollar', label: 'Financeiro', path: '/hub/financeiro', perm: 'finance.view' },
         { icon: 'creditCard', label: 'Pagamentos', path: '/hub/pagamentos', perm: 'mercado_pago.view' },
+        { icon: 'fileText', label: 'Notas Fiscais', path: '/hub/notas-fiscais', perm: 'finance.view' },
       ]
     },
     {
@@ -265,6 +306,9 @@ export default function HubLayout() {
             {/* Lime Capsule Pill (FLOW 1:1) */}
             <div style={{ position: 'relative' }}>
               <div className="mp-header-pill-hub">
+                {/* Chat Interno TEKNIX (1:1 com FLOW) */}
+                <HubChatPillButton />
+
                 {/* Notificações */}
                 <button
                   type="button"
@@ -276,7 +320,9 @@ export default function HubLayout() {
                     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
                     <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                   </svg>
-                  <span className="flow-badge-red">37</span>
+                  {unreadCount > 0 && (
+                    <span className="flow-badge-red">{unreadCount > 99 ? '99+' : unreadCount}</span>
+                  )}
                 </button>
 
                 {/* Usuário logado */}
@@ -302,19 +348,97 @@ export default function HubLayout() {
               {showNotifications && (
                 <div className="flow-notification-dropdown" onClick={e => e.stopPropagation()}>
                   <div className="flow-notification-header">
-                    <strong>Alertas & Mercado Livre</strong>
-                    <span>37 novas</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <strong>Alertas & Notificações</strong>
+                      {unreadCount > 0 && <span>{unreadCount} nova{unreadCount > 1 ? 's' : ''}</span>}
+                    </div>
+                    {unreadCount > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => markAllAsRead()}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: '#2563eb',
+                          fontSize: '11.5px',
+                          cursor: 'pointer',
+                          fontWeight: 600,
+                          padding: '2px 4px'
+                        }}
+                      >
+                        Marcar todas como lidas
+                      </button>
+                    )}
                   </div>
                   <div className="flow-notification-list">
-                    {['Nova venda recebida no Mercado Livre', 'Pedido atualizado no sistema', 'Sincronização concluída com sucesso'].map((message, index) => (
-                      <div className="flow-notification-item" key={message}>
-                        <div className="flow-notification-icon">✓</div>
-                        <div><strong>{message}</strong><small>{index + 1}h atrás</small></div>
-                        <i />
+                    {notifications.length === 0 ? (
+                      <div style={{ padding: '28px 16px', textAlign: 'center', color: '#6b7280', fontSize: '13px' }}>
+                        Nenhuma notificação no momento.
                       </div>
-                    ))}
+                    ) : (
+                      notifications.slice(0, 15).map((item) => {
+                        const mod = String(item.module || '').toLowerCase()
+                        const type = String(item.type || '').toLowerCase()
+                        const isSale = mod === 'sale' || mod === 'order' || type === 'order'
+                        const isPix = mod === 'pix'
+                        const isPayment = mod === 'payment'
+                        const isStock = mod === 'stock'
+                        const isShipment = mod === 'shipment'
+                        const isInvoice = mod === 'invoice'
+                        const isError = type === 'error'
+
+                        let iconSymbol: React.ReactElement = <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5 9.5 17 19 7.5" /></svg>
+                        let iconBg = '#ecfdf5'
+                        let iconColor = '#059669'
+
+                        if (isSale) { iconSymbol = <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="20" r="1" /><circle cx="19" cy="20" r="1" /><path d="M3 4h2l2.4 10.2a2 2 0 0 0 2 1.5h7.8a2 2 0 0 0 1.9-1.5L21 8H6" /></svg>; iconBg = '#ecfdf5'; iconColor = '#059669' }
+                        else if (isPix || isPayment) { iconSymbol = <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2" /><path d="M2.5 9h19M6 14h4" /></svg>; iconBg = '#eff6ff'; iconColor = '#2563eb' }
+                        else if (isStock) { iconSymbol = <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z" /><path d="m4.5 7.5 7.5 4 7.5-4M12 12v9" /></svg>; iconBg = '#fffbeb'; iconColor = '#d97706' }
+                        else if (isShipment) { iconSymbol = <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h11v10H3zM14 10h4l3 3v3h-7z" /><circle cx="7" cy="19" r="1.5" /><circle cx="18" cy="19" r="1.5" /></svg>; iconBg = '#f0f9ff'; iconColor = '#0284c7' }
+                        else if (isInvoice) { iconSymbol = <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z" /><path d="M9 8h6M9 12h6" /></svg>; iconBg = '#f5f3ff'; iconColor = '#7c3aed' }
+                        else if (isError) { iconSymbol = <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.8 20h18.4L12 3Z" /><path d="M12 9v5M12 17h.01" /></svg>; iconBg = '#fef2f2'; iconColor = '#dc2626' }
+
+                        const diffMs = Date.now() - new Date(item.created_at).getTime()
+                        const mins = Math.floor(diffMs / 60000)
+                        let timeStr = 'agora'
+                        if (mins >= 1 && mins < 60) timeStr = `${mins}m atrás`
+                        else if (mins >= 60 && mins < 1440) timeStr = `${Math.floor(mins / 60)}h atrás`
+                        else if (mins >= 1440) timeStr = `${Math.floor(mins / 1440)}d atrás`
+
+                        return (
+                          <div
+                            className="flow-notification-item"
+                            key={item.id}
+                            style={{
+                              cursor: 'pointer',
+                              background: item.is_read ? '#ffffff' : '#f0fdf4',
+                              borderColor: item.is_read ? '#e8ebef' : '#86efac'
+                            }}
+                            onClick={() => {
+                              if (!item.is_read) markAsRead(item.id)
+                              setShowNotifications(false)
+                              navigate(resolveNotificationUrl(item))
+                            }}
+                          >
+                            <div className="flow-notification-icon" style={{ background: iconBg, color: iconColor }}>
+                              {iconSymbol}
+                            </div>
+                            <div className="flow-notification-content">
+                              <div className="flow-notification-text">
+                                <strong style={{ fontWeight: item.is_read ? 500 : 700 }}>{item.title}</strong>
+                                {item.message && <span> — {item.message}</span>}
+                              </div>
+                              <small>{timeStr}</small>
+                            </div>
+                            {!item.is_read && <i />}
+                          </div>
+                        )
+                      })
+                    )}
                   </div>
-                  <Link to="/hub/notificacoes" onClick={() => setShowNotifications(false)} className="flow-notification-footer">Ver histórico completo de notificações →</Link>
+                  <Link to="/hub/notificacoes" onClick={() => setShowNotifications(false)} className="flow-notification-footer">
+                    Ver histórico completo de notificações →
+                  </Link>
                 </div>
               )}
 
@@ -353,7 +477,19 @@ export default function HubLayout() {
           )}
         </div>
       </main>
+
+      {/* Janela Flutuante do Messenger Operacional (Mesmo do FLOW) */}
+      <FloatingMessenger />
     </div>
+  )
+}
+
+// ─── Export Principal Envolvido com o Contexto Global do Chat ──────────────
+export default function HubLayout() {
+  return (
+    <InternalChatProvider>
+      <HubLayoutContent />
+    </InternalChatProvider>
   )
 }
 

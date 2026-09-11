@@ -64,7 +64,43 @@ export async function saveEditorTarget(target: EditorTarget, edits: WidgetEdits,
   const cleanEdits = {...edits};delete cleanEdits.__tree__;delete cleanEdits.__global__
   const styles = { ...(row.page_styles || {}), [WIDGET_EDITOR_KEY]: cleanEdits, ...(target.scope === 'native:/' ? { render_source:'site' } : {}) }
   delete styles[PUBLICATION_KEY]
-  const tree = edits.__tree__?.tree || target.previewData || { page: row, sections: [], containers: [], widgets: [] }
+  const rawTree = edits.__tree__?.tree || target.previewData || { page: row, sections: [], containers: [], widgets: [] }
+  const tree = structuredClone(rawTree)
+  if (Array.isArray(tree.widgets)) {
+    tree.widgets = tree.widgets.map((w: any) => {
+      const edit = cleanEdits[w.id]
+      if (!edit) return w
+      return {
+        ...w,
+        ...edit.schema,
+        content: { ...(w.content || {}), ...(edit.schema?.content || {}), ...(edit.content || {}) },
+        style: { ...(w.style || {}), ...(edit.schema?.style || {}), ...(edit.style || {}) },
+        responsive: { ...(w.responsive || {}), ...(edit.schema?.responsive || {}), ...(edit.responsive || {}) }
+      }
+    })
+  }
+  if (Array.isArray(tree.containers)) {
+    tree.containers = tree.containers.map((c: any) => {
+      const edit = cleanEdits[c.id]
+      if (!edit) return c
+      return {
+        ...c,
+        ...edit.schema,
+        responsive: { ...(c.responsive || {}), ...(edit.schema?.responsive || {}), ...(edit.responsive || {}) }
+      }
+    })
+  }
+  if (Array.isArray(tree.sections)) {
+    tree.sections = tree.sections.map((s: any) => {
+      const edit = cleanEdits[s.id]
+      if (!edit) return s
+      return {
+        ...s,
+        ...edit.schema,
+        responsive: { ...(s.responsive || {}), ...(edit.schema?.responsive || {}), ...(edit.responsive || {}) }
+      }
+    })
+  }
   const pageSettings = edits['page:settings']?.content || {}
   const version = (row.version || 0) + 1
   const snapshot = { ...tree, page: { ...tree.page, id: row.id, status: 'published', version, page_styles: styles, ...pageSettings } }
@@ -88,14 +124,14 @@ export async function setPublicationStatus(id: string, status: 'draft' | 'publis
   if (status === 'published') return saveEditorTarget(target, target.edits, true)
   return replaceRow(target.row, {status:'draft'})
 }
-export async function createEditorPage(title: string, slug: string) {
+export async function createEditorPage(title: string, slug: string, type: 'custom' | 'landing' | 'template' = 'custom') {
   const path = pagePath(slug)
   if (!title.trim() || path === '/' || /[?#\s]/.test(path) || /^\/(__|hub(?:\/|$))/.test(path)) throw new Error('Informe um título e um endereço válido para a nova página.')
   const reserved=['/contato','/produtos','/conta','/pedidos','/buscar-pedido','/itens-salvos','/sacola','/checkout','/login','/cadastro','/password','/comparar','/busca','/blog']
   if(reserved.some(route=>path===route || path.startsWith(route+'/')) || /^\/(produto|categoria|preview)(\/|$)/.test(path))throw new Error('Esse endereço pertence a uma página existente do site. Abra essa página para editar seus widgets.')
   const existing=await checked(supabase.from('pages').select('id').in('slug',[path,path.slice(1)]).limit(1).maybeSingle())
   if(existing)throw new Error('Já existe uma página com este endereço.')
-  return checked(supabase.from('pages').insert({title:title.trim(),slug:path,type:'custom',status:'draft',page_styles:{}}).select('*').single())
+  return checked(supabase.from('pages').insert({title:title.trim(),slug:path,type,is_landing_mode:type==='landing',status:'draft',page_styles:{}}).select('*').single())
 }
 export async function duplicateEditorPage(id: string, title: string, slug: string) {
   const source = await loadEditorTarget('page',id)

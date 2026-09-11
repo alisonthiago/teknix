@@ -17,23 +17,23 @@
 }
 
 .marketing-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--tk-color-text-primary, #1d1d1f);
+  font-size: var(--hub-h1-size, 24px);
+  font-weight: var(--hub-h1-weight, 700);
+  color: var(--hub-h1-color, #111111);
   margin: 0;
   letter-spacing: -0.02em;
 }
 
 .marketing-subtitle {
-  font-size: 0.85rem;
-  color: var(--tk-color-text-secondary, #86868b);
+  font-size: var(--hub-desc-size, 13px);
+  color: var(--hub-desc-color, #666666);
   margin: 2px 0 0 0;
 }
 
 .marketing-tabs {
   display: flex;
   gap: 8px;
-  border-bottom: 1px solid var(--tk-color-border, #e5e5e7);
+  border-bottom: 1px solid #e6e6e6;
   padding-bottom: 10px;
 }
 
@@ -58,8 +58,8 @@
 }
 
 .m-tab-btn.active {
-  background: var(--tk-color-primary, #0071e3);
-  border-color: var(--tk-color-primary, #0071e3);
+  background: var(--hub-btn-primary-bg, #1f2328);
+  border-color: var(--hub-btn-primary-bg, #1f2328);
   color: #ffffff;
   font-weight: 600;
 }
@@ -71,9 +71,9 @@
 }
 
 .m-card {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
+  background: var(--hub-card-bg, #ffffff);
+  border: var(--hub-card-border, 1px solid #e6e6e6);
+  border-radius: var(--hub-card-radius, 14px);
   padding: 20px;
   display: flex;
   flex-direction: column;

@@ -52,17 +52,22 @@ export async function getProductDetail(id: string) {
       real: Number(product.cost_real || product.cost_purchase || 0),
     },
     pricing: {
-      current_price: Number(product.current_price || (orderItems?.[0]?.unit_price) || 0), 
+      current_price: Number((product as any).site_price || product.current_price || (orderItems?.[0]?.unit_price) || 0), 
       suggested_price: Number(product.cost_real || product.cost_purchase || 0) * 1.5,
       minimum_price: Number(product.cost_real || product.cost_purchase || 0) * 1.1,
-      profit: (Number(product.current_price || (orderItems?.[0]?.unit_price) || 0) - Number(product.cost_purchase || 0)),
-      margin: Number(product.current_price || (orderItems?.[0]?.unit_price) || 0) > 0
-        ? ((Number(product.current_price || (orderItems?.[0]?.unit_price) || 0) - Number(product.cost_purchase || 0)) / Number(product.current_price || (orderItems?.[0]?.unit_price) || 0) * 100) : 0,
+      profit: (Number((product as any).site_price || product.current_price || (orderItems?.[0]?.unit_price) || 0) - Number(product.cost_purchase || 0)),
+      margin: Number((product as any).site_price || product.current_price || (orderItems?.[0]?.unit_price) || 0) > 0
+        ? ((Number((product as any).site_price || product.current_price || (orderItems?.[0]?.unit_price) || 0) - Number(product.cost_purchase || 0)) / Number((product as any).site_price || product.current_price || (orderItems?.[0]?.unit_price) || 0) * 100) : 0,
     },
+    site_published: Boolean((product as any).is_site_published ?? true),
+    site_price: Number((product as any).site_price || product.current_price || 0),
     stock: {
-      physical: Number(product.stock || 0), reserved: 0,
-      available: Number(product.stock || 0), minimum: Number(product.min_stock || 0),
-      maximum: Number(product.min_stock || 0) * 3, location: 'Geral',
+      physical: Number(product.stock || 0),
+      reserved: Number((product as any).reserved_stock || 0),
+      available: Math.max(0, Number(product.stock || 0) - Number((product as any).reserved_stock || 0)),
+      minimum: Number(product.min_stock || 0),
+      maximum: Number(product.min_stock || 0) * 3,
+      location: 'Geral',
       value: Number(product.stock || 0) * Number(product.cost_purchase || 0),
     },
     summary: {
@@ -77,9 +82,9 @@ export async function getProductDetail(id: string) {
       const mp = l.marketplaces as Record<string, unknown> | null
       const acc = l.marketplace_accounts as Record<string, unknown> | null
       return {
-        name: (mp?.name as string) || 'Mercado Livre', 
+        name: (mp?.name as string) || (l.channel === 'site' ? 'Loja TEKNIX' : 'Mercado Livre'), 
         account_name: (acc?.account_name as string) || 'TEKNIXBRASIL',
-        listing_id: (l.external_listing_id as string) || product.sku,
+        listing_id: (l.external_listing_id as string) || (l.external_id as string) || product.sku,
         price: Number(l.price || product.current_price || 0), 
         stock: Number(l.stock || product.stock || 0),
         status: (l.status as string) === 'active' || (l.status as string) === 'ACTIVE' ? 'ACTIVE' as const : 'INACTIVE' as const,
@@ -94,6 +99,68 @@ export async function getProductDetail(id: string) {
       status: 'ACTIVE' as const,
       last_sync: new Date().toISOString()
     }],
+    channel_listings: (() => {
+      const rawList = (listings || []).map((l: Record<string, unknown>) => {
+        const mp = l.marketplaces as Record<string, unknown> | null
+        const acc = l.marketplace_accounts as Record<string, unknown> | null
+        const ch = (l.channel as string) || (mp?.code as string) || 'mercadolivre'
+        const chName = ch === 'site' ? 'Loja Própria TEKNIX' : ch === 'shopee' ? 'Shopee' : ch === 'magalu' ? 'Magazine Luiza' : 'Mercado Livre'
+        return {
+          id: (l.id as string) || '',
+          channel: ch,
+          channel_name: chName,
+          account_name: (acc?.account_name as string) || 'TEKNIXBRASIL',
+          listing_id: (l.external_listing_id as string) || (l.external_id as string) || product.sku,
+          external_id: (l.external_id as string) || (l.external_listing_id as string) || product.sku,
+          title: (l.title as string) || product.name,
+          price: Number(l.price || 0),
+          stock: Number(l.stock_synced ?? l.stock ?? product.stock ?? 0),
+          status: (l.status as string) || 'active',
+          sold_quantity: Number((l as any).sold_quantity || 0),
+          total_revenue: Number((l as any).total_revenue || 0),
+          permalink: (l.permalink as string) || null,
+          thumbnail_url: (l.thumbnail_url as string) || null,
+          last_sync: (l.last_synced_at as string) || new Date().toISOString(),
+          is_best_seller: false
+        }
+      })
+
+      // Se tiver anúncio do Mercado Livre ou outros, encontra o com mais vendas para marcar como best seller
+      if (rawList.length > 0) {
+        let best = rawList[0]
+        for (const item of rawList) {
+          if (item.sold_quantity > best.sold_quantity) {
+            best = item
+          }
+        }
+        if (best.sold_quantity > 0) {
+          best.is_best_seller = true
+        }
+      }
+      return rawList
+    })(),
+    channels: (() => {
+      const map: Record<string, any> = {}
+      const list = (listings || [])
+      for (const l of list) {
+        const ch = (l.channel as string) || 'mercadolivre'
+        const chName = ch === 'site' ? 'Loja Própria TEKNIX' : ch === 'shopee' ? 'Shopee' : ch === 'magalu' ? 'Magazine Luiza' : 'Mercado Livre'
+        if (!map[ch]) {
+          map[ch] = {
+            channel: ch,
+            channel_name: chName,
+            total_listings: 0,
+            total_sales: 0,
+            total_revenue: 0,
+            listings: []
+          }
+        }
+        map[ch].total_listings++
+        map[ch].total_sales += Number((l as any).sold_quantity || 0)
+        map[ch].total_revenue += Number((l as any).total_revenue || 0)
+      }
+      return Object.values(map)
+    })(),
     recent_sales: (orderItems || []).map((oi: Record<string, unknown>) => {
       const ord = oi.orders as Record<string, unknown> | null
       const mp = ord?.marketplaces as Record<string, unknown> | null

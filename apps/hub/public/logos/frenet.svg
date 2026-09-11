@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <rect width="100" height="100" rx="22" fill="#1E293B"/>
+  <path d="M72 65c-.5.3-1.1.4-1.7.4s-1.1-.1-1.6-.4l-24-14c-.4-.2-.8-.6-1-.9v-28c0-.5.2-1 .5-1.4l10-6c.5-.3 1.1-.4 1.7-.4s1.1.1 1.6.4l24 14c.7.4 1.2 1.2 1.2 2v28c0 .8-.5 1.6-1.2 2l-9.5 5.3z" fill="url(#frenet_grad)"/>
+  <defs>
+    <linearGradient id="frenet_grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#31C48D"/>
+      <stop offset="50%" stop-color="#3F83F8"/>
+      <stop offset="100%" stop-color="#7B3FF3"/>
+    </linearGradient>
+  </defs>
+</svg>

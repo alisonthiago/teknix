@@ -1,206 +1,291 @@
 import { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { Plus, RefreshCw, Eye, Trash2 } from 'lucide-react'
+import { HubDataTable, type HubColumn, useBulkDelete } from '../components/ui/HubDataTable'
 import type { Customer } from '../types/database'
-import './CustomersList.css'
 
-// Extended interface for the list view metrics
 interface CustomerWithMetrics extends Customer {
   total_spent?: number
   orders_count?: number
   last_order_date?: string
+  cpf?: string
+  document?: string
 }
 
+function formatPrice(price: number) {
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price || 0)
+}
+
+function formatDate(iso?: string) {
+  if (!iso) return '—'
+  return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(iso))
+}
+
+function stringToColor(str: string): string {
+  let hash = 0
+  for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash)
+  const palette = ['#4a6fa5', '#6b8f71', '#c07a4a', '#8b5e83', '#5e8fa5', '#a55e6b']
+  return palette[Math.abs(hash) % palette.length]
+}
+
+const COLUMNS: HubColumn<CustomerWithMetrics>[] = [
+  {
+    key: 'name',
+    label: 'Cliente',
+    render: (c) => (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{
+          width: 34, height: 34, borderRadius: '50%', flexShrink: 0,
+          background: stringToColor(c.name || '?'), color: '#fff',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 14, fontWeight: 700
+        }}>
+          {(c.name || '?').charAt(0).toUpperCase()}
+        </div>
+        <div>
+          <div className="hub-cell-bold">{c.name || 'Cliente sem nome'}</div>
+          <div style={{ fontSize: 11, color: '#9ca3af' }}>CPF: {c.cpf || c.document || 'Não informado'}</div>
+        </div>
+      </div>
+    ),
+    exportValue: (c) => c.name || '',
+  },
+  {
+    key: 'email',
+    label: 'Contato',
+    render: (c) => (
+      <div>
+        <div className="hub-cell-text">{c.email || 'E-mail não informado'}</div>
+        <div style={{ fontSize: 11, color: '#9ca3af' }}>{c.phone || ''}</div>
+      </div>
+    ),
+    exportValue: (c) => c.email || '',
+  },
+  {
+    key: 'city',
+    label: 'Localização',
+    width: '140px',
+    render: (c) => (
+      <span className="hub-cell-muted">
+        {c.city && c.state ? `${c.city} — ${c.state}` : (c.city || c.state || '—')}
+      </span>
+    ),
+    exportValue: (c) => c.city && c.state ? `${c.city} — ${c.state}` : (c.city || c.state || ''),
+  },
+  {
+    key: 'orders_count',
+    label: 'Pedidos',
+    width: '90px',
+    align: 'center',
+    render: (c) => (
+      <span className="hub-status-badge hub-badge-gray">
+        {c.orders_count || 0}
+      </span>
+    ),
+    exportValue: (c) => c.orders_count || 0,
+  },
+  {
+    key: 'total_spent',
+    label: 'Total Comprado',
+    width: '130px',
+    align: 'right',
+    render: (c) => <span className="hub-cell-bold">{formatPrice(c.total_spent || 0)}</span>,
+    exportValue: (c) => formatPrice(c.total_spent || 0),
+  },
+  {
+    key: 'last_order_date',
+    label: 'Última Compra',
+    width: '120px',
+    render: (c) => <span className="hub-cell-muted">{formatDate(c.last_order_date)}</span>,
+    exportValue: (c) => formatDate(c.last_order_date),
+  },
+]
+
 export default function CustomersList() {
+  const navigate = useNavigate()
   const [customers, setCustomers] = useState<CustomerWithMetrics[]>([])
   const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [showAddCustomer, setShowAddCustomer] = useState(false)
-  const [newCustomer, setNewCustomer] = useState({ name: '', email: '', phone: '', document: '' })
-  const navigate = useNavigate()
+  const [search, setSearch] = useState('')
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [newCustomer, setNewCustomer] = useState({ name: '', email: '', phone: '', cpf: '' })
+  const [saving, setSaving] = useState(false)
 
-  useEffect(() => {
-    fetchCustomers()
-  }, [])
+  useEffect(() => { fetchCustomers() }, [])
 
   async function fetchCustomers() {
     setLoading(true)
-    const { data, error } = await supabase
-      .from('customers')
-      .select('*')
-      .order('created_at', { ascending: false })
-
-    if (error || !data || data.length === 0) {
-      // Mock data
-      setCustomers([
-        {
-          id: '1',
-          name: 'João Silva',
-          email: 'joao.silva@email.com',
-          phone: '(11) 98765-4321',
-          document: '111.222.333-44',
-          city: 'São Paulo',
-          state: 'SP',
-          created_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30).toISOString(),
-          total_spent: 2450.00,
-          orders_count: 3,
-          last_order_date: new Date().toISOString()
-        },
-        {
-          id: '2',
-          name: 'Maria Oliveira',
-          email: 'maria.oliveira@email.com',
-          phone: '(21) 99999-8888',
-          document: '555.666.777-88',
-          city: 'Rio de Janeiro',
-          state: 'RJ',
-          created_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 15).toISOString(),
-          total_spent: 750.00,
-          orders_count: 1,
-          last_order_date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 10).toISOString()
-        },
-        {
-          id: '3',
-          name: 'Carlos Santos',
-          email: 'carlos.santos@email.com',
-          phone: '(31) 97777-6666',
-          document: '999.888.777-66',
-          city: 'Belo Horizonte',
-          state: 'MG',
-          created_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString(),
-          total_spent: 0,
-          orders_count: 0,
-          last_order_date: undefined
-        }
+    try {
+      const [custRes, ordersRes] = await Promise.all([
+        supabase.from('customers').select('*').order('created_at', { ascending: false }),
+        supabase.from('store_orders').select('id, customer_id, customer_email, total, status, created_at')
       ])
-    } else {
-      setCustomers(data as CustomerWithMetrics[])
+      if (custRes.error) throw custRes.error
+
+      const rawCusts = (custRes.data || []) as any[]
+      const allOrders = (ordersRes.data || []) as any[]
+
+      const enriched: CustomerWithMetrics[] = rawCusts.map(c => {
+        const clientOrders = allOrders.filter(
+          o => (o.customer_id && o.customer_id === c.id) ||
+            (o.customer_email && o.customer_email.toLowerCase() === (c.email || '').toLowerCase())
+        )
+        const paidOrders = clientOrders.filter(o =>
+          ['paid', 'approved', 'preparing', 'shipped', 'delivered'].includes((o.status || '').toLowerCase())
+        )
+        const totalSpent = paidOrders.reduce((acc: number, o: any) => acc + Number(o.total || 0), 0)
+        const lastOrder = clientOrders.sort((a: any, b: any) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        )[0]
+        return {
+          ...c,
+          document: c.cpf || c.document || '',
+          orders_count: clientOrders.length,
+          total_spent: totalSpent > 0 ? totalSpent : Number(c.total_spent || 0),
+          last_order_date: lastOrder ? lastOrder.created_at : undefined
+        }
+      })
+      setCustomers(enriched)
+    } catch (err) {
+      console.error('[CustomersList]', err)
+      setCustomers([])
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
-  function formatPrice(price: number) {
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price)
+  async function handleDeleteCustomers(ids: string[]) {
+    try {
+      await supabase.from('customers').delete().in('id', ids)
+      setCustomers(prev => prev.filter(c => !ids.includes(c.id)))
+    } catch (e) {
+      console.error('Erro ao excluir clientes:', e)
+      alert('Erro ao excluir clientes.')
+    }
   }
 
-  function formatDate(iso?: string) {
-    if (!iso) return '-'
-    const d = new Date(iso)
-    return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(d)
+  const confirmDelete = useBulkDelete(handleDeleteCustomers, 'cliente')
+
+  async function handleCreateCustomer(e: React.FormEvent) {
+    e.preventDefault()
+    if (!newCustomer.name.trim()) return
+    setSaving(true)
+    try {
+      await supabase.from('customers').insert({
+        name: newCustomer.name.trim(),
+        email: newCustomer.email.trim() || null,
+        phone: newCustomer.phone.trim() || null,
+        cpf: newCustomer.cpf.replace(/\D/g, '') || null,
+        created_at: new Date().toISOString()
+      })
+      setShowAddModal(false)
+      setNewCustomer({ name: '', email: '', phone: '', cpf: '' })
+      await fetchCustomers()
+    } catch (err: any) {
+      alert(`Erro ao cadastrar cliente: ${err.message}`)
+    } finally {
+      setSaving(false)
+    }
   }
 
-  const filteredCustomers = customers.filter(c => 
-    c.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    (c.email && c.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (c.document && c.document.includes(searchTerm))
+  const filteredCustomers = customers.filter(c =>
+    (c.name && c.name.toLowerCase().includes(search.toLowerCase())) ||
+    (c.email && c.email.toLowerCase().includes(search.toLowerCase())) ||
+    (c.document && c.document.includes(search)) ||
+    (c.cpf && c.cpf.includes(search))
   )
 
   return (
-    <div className="customers-list-page">
-      <div className="page-header">
-        <div className="header-info">
-          <h1>Clientes</h1>
-          <p>Gerencie sua carteira de clientes e histórico de compras</p>
-        </div>
-        <div className="header-actions">
-          <button className="btn btn-secondary">Exportar (CSV)</button>
-          <button className="btn btn-primary" onClick={() => setShowAddCustomer(true)}>Adicionar Cliente</button>
-        </div>
-      </div>
-
-      <div className="list-filters">
-        <div className="search-bar">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
-          <input 
-            type="text" 
-            placeholder="Buscar por nome, e-mail ou CPF..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-      </div>
-
-      <div className="data-table-container">
-        {loading ? (
-          <div className="loading-state">
-            <div className="spinner"></div>
-            <p>Carregando clientes...</p>
-          </div>
-        ) : filteredCustomers.length === 0 ? (
-          <div className="empty-state">
-            Nenhum cliente encontrado.
-          </div>
-        ) : (
-          <table className="data-table interactive-table">
-            <thead>
-              <tr>
-                <th>Cliente</th>
-                <th>Contato</th>
-                <th>Localidade</th>
-                <th>Pedidos</th>
-                <th>Total Gasto (LTV)</th>
-                <th>Última Compra</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredCustomers.map(customer => (
-                <tr key={customer.id} onClick={() => navigate(`/hub/clientes/${customer.id}`)}>
-                  <td>
-                    <div className="customer-info">
-                      <div className="customer-avatar">{customer.name.charAt(0).toUpperCase()}</div>
-                      <div className="customer-name-group">
-                        <strong>{customer.name}</strong>
-                        <span>CPF/CNPJ: {customer.document || 'Não informado'}</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <div className="contact-info">
-                      <span>{customer.email}</span>
-                      <span>{customer.phone}</span>
-                    </div>
-                  </td>
-                  <td>
-                    {customer.city && customer.state ? `${customer.city} - ${customer.state}` : '-'}
-                  </td>
-                  <td>
-                    <span className="badge badge-neutral">{customer.orders_count || 0}</span>
-                  </td>
-                  <td>
-                    <strong>{formatPrice(customer.total_spent || 0)}</strong>
-                  </td>
-                  <td>
-                    {formatDate(customer.last_order_date)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+    <>
+      <HubDataTable
+        title="Clientes"
+        description="Base unificada de clientes e histórico de compras da loja."
+        headerActions={
+          <>
+            <button className="hub-btn hub-btn-secondary" onClick={fetchCustomers} disabled={loading}>
+              <RefreshCw size={14} /> Atualizar
+            </button>
+            <button className="hub-btn hub-btn-primary" onClick={() => setShowAddModal(true)}>
+              <Plus size={14} /> Novo Cliente
+            </button>
+          </>
+        }
+        columns={COLUMNS}
+        rows={filteredCustomers}
+        loading={loading}
+        searchValue={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Buscar por nome, e-mail ou CPF"
+        exportTitle="Clientes"
+        exportFilename="clientes"
+        entityLabel="cliente"
+        emptyMessage="Nenhum cliente encontrado."
+        emptyDescription={search ? `Nenhum resultado para "${search}"` : 'Os clientes que realizarem compras no SITE aparecerão aqui.'}
+        bulkActions={[
+          { label: 'Excluir', icon: <Trash2 size={13} />, action: confirmDelete, variant: 'danger' },
+        ]}
+        renderRowActions={(customer, onClose) => (
+          <>
+            <Link
+              to={`/hub/clientes/${customer.id}`}
+              className="hub-dropdown-item"
+              onClick={onClose}
+            >
+              <Eye size={14} color="#2563eb" /> Ver cliente
+            </Link>
+            <div className="hub-dropdown-divider" />
+            <button
+              className="hub-dropdown-item delete"
+              onClick={() => { onClose(); confirmDelete([customer.id]) }}
+            >
+              <Trash2 size={14} color="#dc2626" /> Excluir cliente
+            </button>
+          </>
         )}
-      </div>
+      />
 
-      {showAddCustomer && (
-        <div className="customer-modal-backdrop" onClick={() => setShowAddCustomer(false)}>
-          <form className="customer-modal" onClick={e => e.stopPropagation()} onSubmit={e => {
-            e.preventDefault()
-            if (!newCustomer.name.trim()) return
-            const customer = { ...newCustomer, id: `local-${Date.now()}`, created_at: new Date().toISOString(), city: '', state: '', total_spent: 0, orders_count: 0 }
-            setCustomers(current => [customer as CustomerWithMetrics, ...current])
-            setNewCustomer({ name: '', email: '', phone: '', document: '' })
-            setShowAddCustomer(false)
-          }}>
-            <div className="customer-modal-header"><div><h2>Novo cliente</h2><p>Cadastre os dados básicos para acompanhar o cliente.</p></div><button type="button" onClick={() => setShowAddCustomer(false)}>×</button></div>
-            <label>Nome<input required value={newCustomer.name} onChange={e => setNewCustomer({ ...newCustomer, name: e.target.value })} /></label>
-            <label>E-mail<input type="email" value={newCustomer.email} onChange={e => setNewCustomer({ ...newCustomer, email: e.target.value })} /></label>
-            <label>Telefone<input value={newCustomer.phone} onChange={e => setNewCustomer({ ...newCustomer, phone: e.target.value })} /></label>
-            <label>CPF/CNPJ<input value={newCustomer.document} onChange={e => setNewCustomer({ ...newCustomer, document: e.target.value })} /></label>
-            <div className="customer-modal-actions"><button type="button" className="btn btn-secondary" onClick={() => setShowAddCustomer(false)}>Cancelar</button><button className="btn btn-primary">Salvar cliente</button></div>
+      {/* Modal novo cliente */}
+      {showAddModal && (
+        <div
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          onClick={() => setShowAddModal(false)}
+        >
+          <form
+            style={{ background: '#fff', borderRadius: 16, padding: 28, width: 420, maxWidth: '90vw', display: 'flex', flexDirection: 'column', gap: 14 }}
+            onClick={e => e.stopPropagation()}
+            onSubmit={handleCreateCustomer}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div>
+                <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>Novo Cliente</h2>
+                <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>Cadastre os dados básicos.</p>
+              </div>
+              <button type="button" onClick={() => setShowAddModal(false)} style={{ background: 'none', border: 'none', fontSize: 22, cursor: 'pointer', color: '#6b7280', lineHeight: 1 }}>×</button>
+            </div>
+            {[
+              { label: 'Nome Completo *', key: 'name', type: 'text', required: true },
+              { label: 'E-mail', key: 'email', type: 'email', required: false },
+              { label: 'Telefone', key: 'phone', type: 'text', required: false },
+              { label: 'CPF / CNPJ', key: 'cpf', type: 'text', required: false },
+            ].map(f => (
+              <label key={f.key} style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: 13, fontWeight: 600, color: '#374151' }}>
+                {f.label}
+                <input
+                  type={f.type}
+                  required={f.required}
+                  value={(newCustomer as any)[f.key]}
+                  onChange={e => setNewCustomer({ ...newCustomer, [f.key]: e.target.value })}
+                  style={{ border: '1px solid #e5e7eb', borderRadius: 8, padding: '8px 12px', fontSize: 14, outline: 'none', fontFamily: 'inherit' }}
+                />
+              </label>
+            ))}
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 4 }}>
+              <button type="button" className="hub-btn hub-btn-secondary" onClick={() => setShowAddModal(false)}>Cancelar</button>
+              <button className="hub-btn hub-btn-primary" disabled={saving}>{saving ? 'Salvando...' : 'Salvar'}</button>
+            </div>
           </form>
         </div>
       )}
-    </div>
+    </>
   )
 }

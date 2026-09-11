@@ -2,7 +2,9 @@ import AdsPageLocations from '../components/editor/AdsPageLocations'
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { Megaphone, CheckCircle2, LayoutTemplate, Images, Ban } from 'lucide-react'
 import './AdsList.css'
+import '../components/ui/HubDataTable/HubKpi.css'
 
 export interface AdCarouselItem {
   id: string
@@ -382,26 +384,26 @@ export default function AdsList() {
       </div>
 
       {/* Stats */}
-      <div className="ads-stats-row">
-        <div className="ads-stat-card">
-          <span className="ads-stat-num">{ads.length}</span>
-          <span className="ads-stat-label">Total de Anúncios</span>
+      <div className="hub-kpi-grid">
+        <div className="hub-kpi-card">
+          <div className="hub-kpi-header"><span className="hub-kpi-label">Total de Anúncios</span><div className="hub-kpi-icon"><Megaphone size={16} /></div></div>
+          <span className="hub-kpi-value">{ads.length}</span><p className="hub-kpi-subtitle">Todos os anúncios cadastrados</p>
         </div>
-        <div className="ads-stat-card active">
-          <span className="ads-stat-num">{activeCount}</span>
-          <span className="ads-stat-label">Anúncios Ativos</span>
+        <div className="hub-kpi-card">
+          <div className="hub-kpi-header"><span className="hub-kpi-label">Anúncios Ativos</span><div className="hub-kpi-icon"><CheckCircle2 size={16} /></div></div>
+          <span className="hub-kpi-value">{activeCount}</span><p className="hub-kpi-subtitle">Anúncios publicados e ativos</p>
         </div>
-        <div className="ads-stat-card middle">
-          <span className="ads-stat-num">{middleCount}</span>
-          <span className="ads-stat-label">Meio da Tela</span>
+        <div className="hub-kpi-card">
+          <div className="hub-kpi-header"><span className="hub-kpi-label">Meio da Tela</span><div className="hub-kpi-icon"><LayoutTemplate size={16} /></div></div>
+          <span className="hub-kpi-value">{middleCount}</span><p className="hub-kpi-subtitle">Anúncios nesta posição</p>
         </div>
-        <div className="ads-stat-card carousel">
-          <span className="ads-stat-num">{carouselCount}</span>
-          <span className="ads-stat-label">Carrosséis</span>
+        <div className="hub-kpi-card">
+          <div className="hub-kpi-header"><span className="hub-kpi-label">Carrosséis</span><div className="hub-kpi-icon"><Images size={16} /></div></div>
+          <span className="hub-kpi-value">{carouselCount}</span><p className="hub-kpi-subtitle">Anúncios em formato carrossel</p>
         </div>
-        <div className="ads-stat-card inactive">
-          <span className="ads-stat-num">{inactiveCount}</span>
-          <span className="ads-stat-label">Inativos / Bloqueados</span>
+        <div className="hub-kpi-card">
+          <div className="hub-kpi-header"><span className="hub-kpi-label">Inativos / Bloqueados</span><div className="hub-kpi-icon"><Ban size={16} /></div></div>
+          <span className="hub-kpi-value">{inactiveCount}</span><p className="hub-kpi-subtitle">Anúncios fora de exibição</p>
         </div>
       </div>
 

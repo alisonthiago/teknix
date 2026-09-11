@@ -234,6 +234,19 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
     }
   }, [])
 
+  const sessionIdRef = useRef<string>(typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : 'flow-sess-' + Math.random().toString(36).substring(2, 9))
+  const userPresenceAppsRef = useRef<Map<string, Set<string>>>(new Map())
+
+  // Filtro rigoroso: apenas colaboradores internos autorizados (remove clientes e contas de teste)
+  const isInternalCollaborator = useCallback((p: any) => {
+    if (!p) return false
+    const role = (p.role || '').toUpperCase()
+    const name = (p.name || '').toLowerCase()
+    if (role === 'CLIENTE' || role === 'CUSTOMER' || role === 'CLIENT') return false
+    if (name.includes('cliente a') || name.includes('cliente b') || name.includes('admin demo teknix')) return false
+    return true
+  }, [])
+
   // 2. Carregar conversas e colaboradores via API Route (100% garantido sem RLS)
   const refreshConversations = useCallback(async () => {
     try {
@@ -242,14 +255,27 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
       const data = await res.json()
 
       const dbConversations = data.conversations || []
-      const profiles = data.profiles || []
+      const allProfiles = data.profiles || []
       const recentMsgs = data.recentMessages || []
 
-      // Atualiza colaboradores reais respeitando o status online real via Presence
+      // Filtra apenas colaboradores internos reais
+      const profiles = allProfiles.filter(isInternalCollaborator)
+
+      // Atualiza colaboradores reais respeitando o status online real via Presence multi-sessão
       if (profiles && profiles.length > 0) {
         const currentUid = currentUserRef.current?.id
         const realMembers: ChatMember[] = profiles.map((p: any) => {
-          const isOnline = onlineUserIdsRef.current.has(p.id) || (currentUid ? p.id === currentUid : false)
+          const apps = userPresenceAppsRef.current.get(p.id) || (currentUid && p.id === currentUid ? new Set(['FLOW']) : new Set())
+          const hasHub = apps.has('HUB')
+          const hasFlow = apps.has('FLOW')
+          const isOnline = apps.size > 0
+
+          let lastActivity = 'Offline'
+          if (hasHub && hasFlow) lastActivity = 'Online no HUB e FLOW'
+          else if (hasHub) lastActivity = 'Online no HUB'
+          else if (hasFlow) lastActivity = 'Online no FLOW'
+          else if (isOnline) lastActivity = 'Online agora'
+
           return {
             id: p.id,
             name: removeEmojis(p.name || p.email?.split('@')[0] || 'Colaborador'),
@@ -257,7 +283,7 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
             role: p.role || 'Operador',
             photo_url: p.avatar_url || p.photo_url,
             online: isOnline,
-            last_activity: isOnline ? 'Online agora' : 'Offline'
+            last_activity: lastActivity
           }
         })
         setCollaborators(realMembers)
@@ -463,19 +489,38 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
       .on('presence', { event: 'sync' }, () => {
         const state = channel.presenceState()
         const onlineIds = new Set<string>()
+        const presenceMap = new Map<string, Set<string>>()
+
         Object.values(state).forEach((presences: any) => {
           presences.forEach((p: any) => {
-            if (p.user_id) onlineIds.add(p.user_id)
+            if (p.user_id) {
+              onlineIds.add(p.user_id)
+              const apps = presenceMap.get(p.user_id) || new Set<string>()
+              apps.add(p.app || 'FLOW')
+              presenceMap.set(p.user_id, apps)
+            }
           })
         })
+
         onlineUserIdsRef.current = onlineIds
+        userPresenceAppsRef.current = presenceMap
 
         setCollaborators(prev => prev.map(c => {
-          const isOnline = onlineIds.has(c.id) || (currentUserRef.current?.id ? c.id === currentUserRef.current.id : false)
+          const apps = presenceMap.get(c.id) || (currentUserRef.current?.id && c.id === currentUserRef.current.id ? new Set(['FLOW']) : new Set())
+          const hasHub = apps.has('HUB')
+          const hasFlow = apps.has('FLOW')
+          const isOnline = apps.size > 0
+
+          let lastActivity = 'Offline'
+          if (hasHub && hasFlow) lastActivity = 'Online no HUB e FLOW'
+          else if (hasHub) lastActivity = 'Online no HUB'
+          else if (hasFlow) lastActivity = 'Online no FLOW'
+          else if (isOnline) lastActivity = 'Online agora'
+
           return {
             ...c,
-            online: !!isOnline,
-            last_activity: isOnline ? 'Online agora' : 'Offline'
+            online: isOnline,
+            last_activity: lastActivity
           }
         }))
       })
@@ -576,6 +621,8 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
         await channel.track({
           user_id: currentUser.id,
           user_name: currentUser.name,
+          app: 'FLOW',
+          session_id: sessionIdRef.current,
           online_at: new Date().toISOString()
         })
       }
@@ -613,6 +660,7 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
       message_type: messageType,
       metadata: {
         ...(metadata || {}),
+        sent_from_app: 'FLOW',
         ...(senderPhoto ? { sender_photo: senderPhoto } : {})
       },
       reply_to: replyTo,

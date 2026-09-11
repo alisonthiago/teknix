@@ -231,10 +231,32 @@ function PageRendererContent({ pageId, product, className, previewData }: PageRe
   const [loadError,setLoadError]=useState('')
   const presentation=usePageWidgetState()
   const viewport=presentation && presentation.width<=767?'mobile':presentation && presentation.width<=1024?'tablet':'desktop'
-  const merge=(row:any)=>{const edit=presentation?.edits[row.id];return {...row,...edit?.schema,content:row.content,...(edit?.hidden && !presentation?.preview ? {hide_on_desktop:true,hide_on_tablet:true,hide_on_mobile:true}: {})}}
-  const sections=sourceSections.map(merge)
-  const containers=Object.fromEntries(Object.entries(sourceContainers).map(([id,rows])=>[id,rows.map(merge)]))
-  const widgets=Object.fromEntries(Object.entries(sourceWidgets).map(([id,rows])=>[id,rows.map(merge)]))
+  const merge = (row: any) => {
+    const edit = presentation?.edits[row.id]
+    return {
+      ...row,
+      ...edit?.schema,
+      content: {
+        ...(row.content || {}),
+        ...(edit?.schema?.content || {}),
+        ...(edit?.content || {})
+      },
+      style: {
+        ...(row.style || {}),
+        ...(edit?.schema?.style || {}),
+        ...(edit?.style || {})
+      },
+      responsive: {
+        ...(row.responsive || {}),
+        ...(edit?.schema?.responsive || {}),
+        ...(edit?.responsive || {})
+      },
+      ...(edit?.hidden && !presentation?.preview ? { hide_on_desktop: true, hide_on_tablet: true, hide_on_mobile: true } : {})
+    }
+  }
+  const sections = sourceSections.map(merge)
+  const containers = Object.fromEntries(Object.entries(sourceContainers).map(([id, rows]) => [id, rows.map(merge)]))
+  const widgets = Object.fromEntries(Object.entries(sourceWidgets).map(([id, rows]) => [id, rows.map(merge)]))
 
   useEffect(() => {
     if (!pageId) return
@@ -266,6 +288,28 @@ function PageRendererContent({ pageId, product, className, previewData }: PageRe
     loadPage()
     return () => { cancelled = true }
   }, [pageId, product, previewData])
+
+  // Registra elementos no contexto de inspeção e navigator do editor
+  useEffect(() => {
+    if (!presentation?.register || !presentation?.preview) return
+    sections.forEach(s => {
+      presentation.register?.({ id: s.id, label: `Seção (${s.layout || 'padrão'})`, kind: 'section', content: {} })
+      const conList = containers[s.id] || []
+      conList.forEach((c: any) => {
+        presentation.register?.({ id: c.id, label: `Contêiner (${c.direction || 'coluna'})`, kind: 'container', content: {} })
+        const widList = widgets[c.id] || []
+        widList.forEach((w: any) => {
+          presentation.register?.({
+            id: w.id,
+            label: w.content?.title || w.content?.text || w.label || w.type,
+            kind: 'widget',
+            widgetType: w.widget_type || w.type,
+            content: w.content || {}
+          })
+        })
+      })
+    })
+  }, [sections, containers, widgets, presentation?.preview])
 
   // Initialize runtime motion effects after rendering
   useEffect(() => {
@@ -452,13 +496,26 @@ function PageRendererContent({ pageId, product, className, previewData }: PageRe
                         const isPositioned = computedWidgetStyle.position === 'absolute' || computedWidgetStyle.position === 'fixed' || computedWidgetStyle.position === 'sticky'
                         const cAlign = container.align_items || 'stretch'
 
+                        const isSelectedInEditor = presentation?.preview && presentation.selected === widget.id
+
                         return (
                           <div
                             key={widget.id}
                             data-widget-id={widget.id}
+                            data-widget-key={widget.id}
+                            onClickCapture={(e: any) => {
+                              if (presentation?.preview) {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                presentation.select(widget.id)
+                              }
+                            }}
                             className={`${widget.custom_class || ''} ${wVisibilityClasses}`.trim()}
                             style={{
                               ...computedWidgetStyle,
+                              cursor: presentation?.preview ? 'pointer' : undefined,
+                              outline: isSelectedInEditor ? '2px solid #0071e3 !important' : undefined,
+                              outlineOffset: isSelectedInEditor ? '2px' : undefined,
                               position: (computedWidgetStyle.position as any) || 'relative',
                               top: computedWidgetStyle.top,
                               right: computedWidgetStyle.right,
@@ -501,6 +558,7 @@ function PageRendererContent({ pageId, product, className, previewData }: PageRe
                             <ExistingWidget
                               widget={{
                                 ...widget,
+                                type: widget.widget_type || widget.type,
                                 content: widget.content,
                                 style: computeWidgetStyles(widget, viewport),
                               }}

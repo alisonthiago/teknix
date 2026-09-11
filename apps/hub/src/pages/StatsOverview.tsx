@@ -270,33 +270,37 @@ export default function StatsOverview() {
                   <span className="stat-card-label">Comportamento dos visitantes <Info size={14} className="stat-card-info-icon" /></span>
                   <MoreVertical size={16} className="stat-card-dots" />
                 </div>
-                <div className="visitor-funnel visitor-timeline">
-                  <div className="visitor-funnel-step">
-                    <div className="visitor-funnel-label">
-                      <span>Visitantes no site</span><span>Não disponível</span>
-                    </div>
-                    <div className="visitor-funnel-track"><div className="visitor-funnel-fill blue" style={{ width: '100%' }}></div>
-                    </div>
-                  </div>
-                  <div className="visitor-funnel-step">
-                    <div className="visitor-funnel-label">
-                      <span>Pedidos criados</span><span>{metrics.orders}</span>
-                    </div>
-                    <div className="visitor-funnel-track"><div className="visitor-funnel-fill purple" style={{ width: `${Math.min(100, metrics.orders * 4)}%` }}></div>
+                <div className="visitor-timeline">
+                  <div className="visitor-timeline-step visitor-timeline-muted">
+                    <div className="visitor-timeline-marker">1</div>
+                    <div className="visitor-timeline-content">
+                      <span>Visitantes no site</span>
+                      <strong>Não disponível</strong>
+                      <small>Fonte de visitas ainda não conectada</small>
                     </div>
                   </div>
-                  <div className="visitor-funnel-step">
-                    <div className="visitor-funnel-label">
-                      <span>Clientes identificados</span><span>{metrics.buyers}</span>
-                    </div>
-                    <div className="visitor-funnel-track"><div className="visitor-funnel-fill orange" style={{ width: `${Math.min(100, metrics.buyers * 4)}%` }}></div>
+                  <div className="visitor-timeline-step">
+                    <div className="visitor-timeline-marker">2</div>
+                    <div className="visitor-timeline-content">
+                      <span>Pedidos criados</span>
+                      <strong>{metrics.orders}</strong>
+                      <small>Pedidos da Loja Própria no período</small>
                     </div>
                   </div>
-                  <div className="visitor-funnel-step">
-                    <div className="visitor-funnel-label">
-                      <span>Receita gerada</span><span>{money(metrics.revenue)}</span>
+                  <div className="visitor-timeline-step">
+                    <div className="visitor-timeline-marker">3</div>
+                    <div className="visitor-timeline-content">
+                      <span>Clientes identificados</span>
+                      <strong>{metrics.buyers}</strong>
+                      <small>Clientes com pedido identificado</small>
                     </div>
-                    <div className="visitor-funnel-track"><div className="visitor-funnel-fill green" style={{ width: metrics.revenue ? '100%' : '0%' }}></div>
+                  </div>
+                  <div className="visitor-timeline-step visitor-timeline-success">
+                    <div className="visitor-timeline-marker">4</div>
+                    <div className="visitor-timeline-content">
+                      <span>Receita gerada</span>
+                      <strong>{money(metrics.revenue)}</strong>
+                      <small>Receita consolidada da Loja Própria</small>
                     </div>
                   </div>
                 </div>

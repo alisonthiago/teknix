@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { ChevronLeft } from 'lucide-react'
 import { notifyHub } from '../lib/hubNotifications'
 import './ShippingSettings.css'
 
@@ -77,9 +78,20 @@ export default function ShippingSettings() {
   return (
     <div className="shipping-settings-page">
       <div className="page-header">
-        <div className="header-info">
-          <h2>Entregas e Frete</h2>
-          <p>Gerencie como você envia os produtos aos seus clientes</p>
+        <div className="header-info" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <button
+            type="button"
+            className="btn-back-to-settings"
+            onClick={() => navigate('/hub/configuracoes')}
+            title="Voltar para Configurações"
+            aria-label="Voltar para Configurações"
+          >
+            <ChevronLeft size={20} />
+          </button>
+          <div>
+            <h2>Meios de Envio & Entregas</h2>
+            <p>Gerencie como você envia os produtos aos seus clientes</p>
+          </div>
         </div>
         <div className="header-actions">
           <button 

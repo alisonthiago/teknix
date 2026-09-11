@@ -15,12 +15,12 @@
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: #1a1a2e;
+  background: var(--hub-btn-primary-bg, #1f2328);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 24px;
 }
 
@@ -31,12 +31,14 @@
 
 .customer-title-text h2 {
   margin: 0;
-  font-size: 24px;
+  font-size: var(--hub-h1-size, 24px);
+  font-weight: var(--hub-h1-weight, 700);
+  color: var(--hub-h1-color, #111111);
 }
 
 .customer-since {
-  color: #666;
-  font-size: 13px;
+  color: var(--hub-desc-color, #666666);
+  font-size: var(--hub-desc-size, 13px);
   margin-top: 4px;
 }
 
@@ -61,25 +63,25 @@
 }
 
 .metric-card {
-  background: white;
-  border-radius: 12px;
-  border: 1px solid #e5e5e5;
-  padding: 24px;
+  background: var(--hub-card-bg, #ffffff);
+  border-radius: var(--hub-card-radius, 14px);
+  border: var(--hub-card-border, 1px solid #e6e6e6);
+  padding: var(--hub-card-padding, 24px);
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
 .metric-title {
-  color: #666;
-  font-size: 13px;
-  font-weight: 500;
+  color: var(--hub-desc-color, #666666);
+  font-size: 12px;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .metric-value {
-  color: #1a1a2e;
+  color: #111111;
   font-size: 28px;
   font-weight: 700;
   letter-spacing: -0.5px;

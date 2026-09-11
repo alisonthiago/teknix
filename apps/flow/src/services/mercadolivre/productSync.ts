@@ -20,6 +20,7 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { getValidTokenBySellerId } from './client'
+import { matchAndLinkExternalListing } from '../catalog/matcher'
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -385,28 +386,37 @@ export async function syncSingleItem(itemId: string, sellerId: string): Promise<
     console.log(`[SyncItem] Fotos: ${pictures.length} total (${newPicsCount} novas adicionadas)`)
   }
 
-  // ── PASSO 9: Upsert do produto interno (se tiver SKU cadastrado) ──────────
-  if (sku && listingDbId) {
-    const { data: existingProduct } = await supabase
-      .from('products')
-      .select('id, stock')
-      .eq('sku', sku)
-      .maybeSingle()
-
-    if (existingProduct) {
-      const productUpdate: Record<string, any> = {
-        name: title,
+  // ── PASSO 9: Vinculação Anti-Duplicação ao Produto Central ──────────
+  if (listingDbId) {
+    try {
+      const matchResult = await matchAndLinkExternalListing({
+        channel: 'mercadolivre',
+        externalId: itemId,
+        title,
+        price: finalPrice || 0,
+        stock: stock || 0,
+        sellerSku: sku,
+        gtin,
         brand,
         model,
-        ean: gtin,
-        image_url: primaryPicUrl,
-        updated_at: new Date().toISOString()
-      }
-      if (stock !== null) productUpdate.stock = stock
-      await supabase.from('products').update(productUpdate).eq('id', existingProduct.id)
+        catalogProductId,
+        thumbnailUrl: primaryPicUrl,
+        permalink,
+        marketplaceAccountId: sellerId
+      })
 
-      // Vincular listing ao produto
-      await supabase.from('ml_listings').update({ product_id: existingProduct.id }).eq('id', listingDbId)
+      if (matchResult.productId) {
+        // Vincula o anúncio ml_listings ao produto central
+        await supabase
+          .from('ml_listings')
+          .update({ product_id: matchResult.productId })
+          .eq('id', listingDbId)
+        console.log(`[SyncItem] Anúncio ${itemId} vinculado ao produto ${matchResult.productId} (Ação: ${matchResult.action}, Confiança: ${matchResult.confidence}%)`)
+      } else {
+        console.log(`[SyncItem] Anúncio ${itemId} enviado para conferência humana (Confiança: ${matchResult.confidence}%)`)
+      }
+    } catch (matchErr: any) {
+      console.warn('[SyncItem] Aviso na vinculação do catálogo:', matchErr.message)
     }
   }
 

@@ -4,10 +4,10 @@ import { supabase } from '../lib/supabase'
 import { createPage } from '../services/pageBuilder'
 import type { Product } from '../types/database'
 import {
-  Search,
   SlidersHorizontal,
   ArrowUpDown,
-  Download,
+  FileSpreadsheet,
+  FileText,
   Plus,
   Share2,
   Copy,
@@ -22,9 +22,17 @@ import {
   Package
 } from 'lucide-react'
 import './ProductsList.css'
+import { exportToPDF, exportToXLSX } from '../lib/exportTable'
 
 function formatMoney(value: number) {
   return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+}
+
+function summarizeProductName(name: string, maxLength = 76) {
+  const normalized = name.trim().replace(/\s+/g, ' ')
+  if (normalized.length <= maxLength) return normalized
+  const shortened = normalized.slice(0, maxLength).replace(/\s+\S*$/, '')
+  return `${shortened}…`
 }
 
 export default function ProductsList() {
@@ -66,49 +74,13 @@ export default function ProductsList() {
         })
         setInlinePrices(initialPrices)
       } else {
-        // Fallback sample product matching user's screenshot
-        const fallback: Product[] = [
-          {
-            id: 'demo-1',
-            name: 'Parafusadeira e Furadeira de Impacto 12V Bivolt TEKNIX',
-            slug: 'parafusadeira-impacto-12v',
-            sku: 'TKN-FUR-12V',
-            price: 45.00,
-            promo_price: 39.90,
-            manage_stock: false,
-            stock: 100,
-            images: ['https://images.unsplash.com/photo-1504148455328-c376907d081c?w=100&auto=format&fit=crop&q=60'],
-            status: 'active',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          },
-          {
-            id: 'demo-2',
-            name: 'Disco de Corte Diamantado Extra Fino 110mm',
-            slug: 'disco-corte-diamantado',
-            sku: 'TKN-DISC-110',
-            price: 18.50,
-            promo_price: 15.00,
-            manage_stock: true,
-            stock: 24,
-            images: ['https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=100&auto=format&fit=crop&q=60'],
-            status: 'active',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          }
-        ]
-        setProducts(fallback)
-        const initialPrices: Record<string, { price: string; promo: string }> = {}
-        fallback.forEach(p => {
-          initialPrices[p.id] = {
-            price: p.price ? p.price.toString() : '0',
-            promo: p.promo_price ? p.promo_price.toString() : ''
-          }
-        })
-        setInlinePrices(initialPrices)
+        setProducts([])
+        setInlinePrices({})
       }
     } catch (e) {
-      console.error(e)
+      console.error('[ProductsList] Erro ao carregar produtos:', e)
+      setProducts([])
+      setInlinePrices({})
     } finally {
       setLoading(false)
     }
@@ -284,6 +256,23 @@ export default function ProductsList() {
     (p.sku && p.sku.toLowerCase().includes(search.toLowerCase()))
   )
 
+  async function exportProducts(type: 'xlsx' | 'pdf') {
+    const rows = filteredProducts.map(product => ({
+      produto: product.name,
+      sku: product.sku || '',
+      estoque: product.stock ?? 0,
+      preco: product.price ?? 0
+    }))
+    const columns = [
+      { key: 'produto', label: 'Produto' },
+      { key: 'sku', label: 'SKU' },
+      { key: 'estoque', label: 'Estoque' },
+      { key: 'preco', label: 'Preço' }
+    ]
+    if (type === 'xlsx') await exportToXLSX(rows, columns, 'produtos')
+    else await exportToPDF(rows, columns, 'Produtos', undefined, 'produtos')
+  }
+
   const toggleSelectAll = () => {
     if (selectedIds.length === filteredProducts.length) {
       setSelectedIds([])
@@ -311,9 +300,6 @@ export default function ProductsList() {
             <p>Gerencie seu catálogo de produtos, estoque e preços.</p>
           </div>
           <div className="header-actions">
-            <button className="btn btn-secondary" onClick={() => alert('Exportar catálogo em CSV')}>
-              <Download size={14} /> Exportar
-            </button>
             <button className="btn btn-secondary" onClick={() => alert('Organizar vitrine')}>
               <ListFilter size={14} /> Organizar
             </button>
@@ -326,7 +312,6 @@ export default function ProductsList() {
         {/* Search & Filters */}
         <div className="products-search-bar">
           <div className="products-search-input-wrap">
-            <Search size={16} className="products-search-icon" />
             <input
               type="text"
               className="products-search-input"
@@ -337,12 +322,21 @@ export default function ProductsList() {
           </div>
 
           <button className="btn-filter-action" onClick={() => {}}>
-            <SlidersHorizontal size={14} /> Filtrar
+            <SlidersHorizontal size={12} /> Filtrar
           </button>
 
           <button className="btn-filter-action" onClick={() => {}}>
-            <ArrowUpDown size={14} /> Mais novo
+            <ArrowUpDown size={12} /> Mais novo
           </button>
+
+          <div className="products-export-actions" aria-label="Exportar produtos">
+            <button className="btn-filter-action" onClick={() => exportProducts('xlsx')} title="Exportar para Excel">
+              <FileSpreadsheet size={12} /> Excel
+            </button>
+            <button className="btn-filter-action" onClick={() => exportProducts('pdf')} title="Exportar para PDF">
+              <FileText size={12} /> PDF
+            </button>
+          </div>
         </div>
 
         <div style={{ fontSize: '0.82rem', color: '#6b7280', fontWeight: 600 }}>
@@ -416,8 +410,13 @@ export default function ProductsList() {
                     >
                       <Package size={18} color="#9ca3af" />
                     </div>
-                    <Link to={`/hub/produtos/${product.id}`} className="product-name-link" title="Ver visão geral do produto no HUB">
-                      {product.name}
+                    <Link
+                      to={`/hub/produtos/${product.id}`}
+                      className="product-name-link"
+                      title={product.name}
+                      aria-label={`Ver produto ${product.name}`}
+                    >
+                      {summarizeProductName(product.name)}
                     </Link>
                   </div>
 

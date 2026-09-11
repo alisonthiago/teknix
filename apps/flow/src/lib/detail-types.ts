@@ -1,4 +1,30 @@
-// Detail page interfaces (shared between components and server queries)
+export interface ProductListingDetail {
+  id: string
+  channel: 'site' | 'mercadolivre' | 'shopee' | 'magalu' | string
+  channel_name: string
+  account_name?: string
+  listing_id: string
+  external_id: string
+  title: string
+  price: number
+  stock: number
+  status: string
+  sold_quantity: number
+  total_revenue: number
+  permalink?: string | null
+  thumbnail_url?: string | null
+  last_sync: string
+  is_best_seller?: boolean
+}
+
+export interface ChannelGroup {
+  channel: string
+  channel_name: string
+  total_listings: number
+  total_sales: number
+  total_revenue: number
+  listings: ProductListingDetail[]
+}
 
 export interface ProductDetail {
   id: string
@@ -14,6 +40,8 @@ export interface ProductDetail {
   status: 'ACTIVE' | 'INACTIVE' | 'OUT_OF_STOCK' | 'LOW_STOCK' | 'PAUSED'
   created_at: string
   updated_at: string
+  site_published?: boolean
+  site_price?: number
   supplier: {
     id: string; name: string; cnpj: string; contact: string; phone: string; whatsapp: string; email: string; delivery_time: number; min_order: number; last_purchase: string; cost: number
   }
@@ -22,6 +50,8 @@ export interface ProductDetail {
   stock: { physical: number; reserved: number; available: number; minimum: number; maximum: number; location: string; value: number }
   summary: { total_sales: number; total_orders: number; total_revenue: number; total_profit: number; avg_margin: number; avg_ticket: number }
   marketplaces: Array<{ name: string; account_name?: string; listing_id: string; price: number; stock: number; status: 'ACTIVE' | 'INACTIVE'; last_sync: string }>
+  channels?: ChannelGroup[]
+  channel_listings?: ProductListingDetail[]
   recent_sales: Array<{ id: string; order_id: string; order_uuid?: string; customer_name?: string; marketplace: string; account_name?: string; quantity: number; price: number; revenue: number; profit: number; margin: number; status: string; date: string }>
   stock_movements: Array<{ id: string; date: string; type: 'COMPRA' | 'VENDA' | 'CANCELAMENTO' | 'DEVOLUCAO' | 'AJUSTE' | 'PERDA' | 'TRANSFERENCIA'; quantity: number; balance: number; order_ref: string; user: string }>
   purchases_history: Array<{ id: string; purchase_id?: string; order_ref: string; supplier: string; quantity: number; unit_cost: number; total: number; date: string; status: string }>

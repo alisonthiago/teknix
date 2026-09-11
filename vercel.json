@@ -18,16 +18,145 @@
     {
       "source": "/integracoes/melhor-envio/teste",
       "headers": [
-        { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization, x-me-signature"
+        }
       ]
     }
   ],
   "rewrites": [
-    { "source": "/webhooks/melhor-envio", "destination": "/api/webhooks/melhor-envio" },
-    { "source": "/oauth/melhor-envio/authorize", "destination": "/api/oauth/melhor-envio/authorize" },
-    { "source": "/oauth/melhor-envio/callback", "destination": "/api/oauth/melhor-envio/callback" },
     {
-      "source": "/((?!api(?:/|$)|webhooks(?:/|$)|oauth(?:/|$)).*)",
+      "source": "/webhooks/melhor-envio/teste",
+      "destination": "/api/webhooks/melhor-envio.ts"
+    },
+    {
+      "source": "/webhooks/melhor-envio",
+      "destination": "/api/webhooks/melhor-envio.ts"
+    },
+    {
+      "source": "/webhooks/melhor-envio/(.*)",
+      "destination": "/api/webhooks/melhor-envio.ts"
+    },
+    {
+      "source": "/api/webhooks/melhor-envio",
+      "destination": "/api/webhooks/melhor-envio.ts"
+    },
+    {
+      "source": "/api/webhooks/melhor-envio/(.*)",
+      "destination": "/api/webhooks/melhor-envio.ts"
+    },
+    {
+      "source": "/webhooks/focus-nfe",
+      "destination": "/api/webhooks/focus-nfe.ts"
+    },
+    {
+      "source": "/webhooks/focus-nfe/(.*)",
+      "destination": "/api/webhooks/focus-nfe.ts"
+    },
+    {
+      "source": "/api/webhooks/focus-nfe",
+      "destination": "/api/webhooks/focus-nfe.ts"
+    },
+    {
+      "source": "/api/webhooks/focus-nfe/(.*)",
+      "destination": "/api/webhooks/focus-nfe.ts"
+    },
+    {
+      "source": "/oauth/melhor-envio/authorize",
+      "destination": "/api/oauth/melhor-envio/authorize.ts"
+    },
+    {
+      "source": "/api/oauth/melhor-envio/authorize",
+      "destination": "/api/oauth/melhor-envio/authorize.ts"
+    },
+    {
+      "source": "/oauth/melhor-envio/callback",
+      "destination": "/api/oauth/melhor-envio/callback.ts"
+    },
+    {
+      "source": "/api/oauth/melhor-envio/callback",
+      "destination": "/api/oauth/melhor-envio/callback.ts"
+    },
+    {
+      "source": "/webhooks/mercadolivre",
+      "destination": "https://flow.teknixbrasil.com.br/api/webhooks/mercadolivre"
+    },
+    {
+      "source": "/webhooks/mercadolivre/(.*)",
+      "destination": "https://flow.teknixbrasil.com.br/api/webhooks/mercadolivre"
+    },
+    {
+      "source": "/api/webhooks/mercadolivre",
+      "destination": "https://flow.teknixbrasil.com.br/api/webhooks/mercadolivre"
+    },
+    {
+      "source": "/api/webhooks/mercadolivre/(.*)",
+      "destination": "https://flow.teknixbrasil.com.br/api/webhooks/mercadolivre"
+    },
+    {
+      "source": "/auth/mercadolivre/callback",
+      "destination": "https://flow.teknixbrasil.com.br/api/auth/mercadolivre/callback"
+    },
+    {
+      "source": "/api/auth/mercadolivre/callback",
+      "destination": "https://flow.teknixbrasil.com.br/api/auth/mercadolivre/callback"
+    },
+    {
+      "source": "/api/auth/mercadolivre",
+      "destination": "https://flow.teknixbrasil.com.br/api/auth/mercadolivre"
+    },
+    {
+      "source": "/fiscal/emit",
+      "destination": "/api/fiscal/emit.ts"
+    },
+    {
+      "source": "/api/fiscal/emit",
+      "destination": "/api/fiscal/emit.ts"
+    },
+    {
+      "source": "/fiscal/cancel",
+      "destination": "/api/fiscal/cancel.ts"
+    },
+    {
+      "source": "/api/fiscal/cancel",
+      "destination": "/api/fiscal/cancel.ts"
+    },
+    {
+      "source": "/fiscal/receipt",
+      "destination": "/api/fiscal/receipt.ts"
+    },
+    {
+      "source": "/api/fiscal/receipt",
+      "destination": "/api/fiscal/receipt.ts"
+    },
+    {
+      "source": "/internal/migrate-fiscal",
+      "destination": "/api/internal/migrate-fiscal.ts"
+    },
+    {
+      "source": "/api/internal/migrate-fiscal",
+      "destination": "/api/internal/migrate-fiscal.ts"
+    },
+    {
+      "source": "/((?!api(?:/|$)|webhooks(?:/|$)|oauth(?:/|$)|auth(?:/|$)|fiscal(?:/|$)|internal(?:/|$)).*)",
       "destination": "/"
     }
   ]

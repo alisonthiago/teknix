@@ -17,14 +17,14 @@
 .settings-nav-sidebar {
   width: 260px;
   background: #ffffff;
-  border: 1px solid var(--tk-color-border, #e5e7eb);
-  border-radius: var(--tk-radius-card, 12px);
+  border: 1px solid #e6e6e6;
+  border-radius: var(--hub-card-radius, 14px);
   padding: 18px 12px;
   display: flex;
   flex-direction: column;
   gap: 14px;
   flex-shrink: 0;
-  box-shadow: var(--tk-shadow-card);
+  box-shadow: none;
   align-self: flex-start;
   position: sticky;
   top: 70px;
@@ -125,39 +125,67 @@
   margin-bottom: 8px;
 }
 
-.settings-main-title {
-  font-size: 20px;
-  font-weight: 600;
+.settings-title-with-back {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-back-to-settings {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--tk-color-border, #e5e7eb);
+  background: #ffffff;
+  color: var(--tk-color-text-secondary, #4b5563);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.btn-back-to-settings:hover {
+  background: var(--tk-color-surface-hover, #f3f4f6);
   color: var(--tk-color-text-primary, #000000);
+  border-color: #d1d5db;
+  transform: translateX(-1px);
+}
+
+.settings-main-title {
+  font-size: var(--hub-h1-size, 24px);
+  font-weight: var(--hub-h1-weight, 700);
+  color: var(--hub-h1-color, #111111);
   letter-spacing: -0.015em;
   margin: 0;
   line-height: 1.25;
 }
 
 .settings-subtitle {
-  font-size: 13px;
-  font-weight: 400;
-  color: var(--tk-color-text-secondary, #6b7280);
+  font-size: var(--hub-desc-size, 13px);
+  font-weight: var(--hub-desc-weight, 400);
+  color: var(--hub-desc-color, #666666);
   margin: 4px 0 0;
   line-height: 1.4;
 }
 
 /* Card in Settings */
 .settings-card {
-  background: #ffffff;
-  border: 1px solid var(--tk-color-border, #e5e7eb);
-  border-radius: var(--tk-radius-card, 12px);
-  padding: 24px 28px;
-  box-shadow: var(--tk-shadow-card);
+  background: var(--hub-card-bg, #ffffff);
+  border: var(--hub-card-border, 1px solid #e6e6e6);
+  border-radius: var(--hub-card-radius, 14px);
+  padding: var(--hub-card-padding, 24px);
+  box-shadow: none;
   display: flex;
   flex-direction: column;
   gap: 18px;
 }
 
 .settings-card-title {
-  font-size: 15px;
-  font-weight: 550;
-  color: var(--tk-color-text-primary, #000000);
+  font-size: var(--hub-card-title-size, 16px);
+  font-weight: var(--hub-card-title-weight, 700);
+  color: var(--hub-card-title-color, #111111);
   margin: 0 0 4px 0;
   letter-spacing: -0.01em;
 }
@@ -169,9 +197,9 @@
 }
 
 .settings-label {
-  font-size: 12.5px;
-  font-weight: 500;
-  color: #374151;
+  font-size: var(--hub-label-size, 12.5px);
+  font-weight: var(--hub-label-weight, 700);
+  color: var(--hub-label-color, #333333);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -189,35 +217,37 @@
 .settings-input,
 .settings-textarea,
 .settings-select {
-  font-family: var(--tk-font-family);
-  font-size: 13.5px;
+  font-family: var(--hub-font-family);
+  font-size: var(--hub-input-size, 13.5px);
   font-weight: 400;
-  color: #000000 !important;
-  background: #ffffff !important;
-  border: 1px solid var(--tk-color-border-dark, #d1d5db) !important;
-  border-radius: var(--tk-radius-btn, 8px);
-  padding: 9px 13px;
+  color: var(--hub-input-color, #111111) !important;
+  background: var(--hub-input-bg, #ffffff) !important;
+  border: var(--hub-input-border, 1px solid #e6e6e6) !important;
+  border-radius: var(--hub-input-radius, 10px) !important;
+  padding: 0 14px;
   width: 100%;
   max-width: 560px;
   box-sizing: border-box;
   outline: none;
-  transition: border-color var(--tk-transition-fast, 0.12s), box-shadow var(--tk-transition-fast, 0.12s);
+  transition: border-color 0.12s ease, box-shadow 0.12s ease;
 }
 
 .settings-input,
 .settings-select {
-  min-height: 44px;
+  height: var(--hub-input-height, 42px);
+  min-height: var(--hub-input-height, 42px);
 }
 
 .settings-input:focus,
 .settings-textarea:focus,
 .settings-select:focus {
-  border-color: var(--tk-color-primary, #0071e3) !important;
-  box-shadow: 0 0 0 2px rgba(0, 113, 227, 0.12) !important;
+  border-color: var(--hub-input-focus-border, #1f2328) !important;
+  box-shadow: 0 0 0 1px var(--hub-input-focus-border, #1f2328) !important;
 }
 
 .settings-textarea {
   min-height: 100px;
+  padding: 12px 14px;
   resize: vertical;
   line-height: 1.5;
 }

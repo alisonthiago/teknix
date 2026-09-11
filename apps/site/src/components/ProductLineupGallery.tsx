@@ -194,19 +194,23 @@ export default function ProductLineupGallery({
             })
             setDbProducts(mapped)
           } else {
-            setDbProducts(DEFAULT_LINEUP_ITEMS)
+            setDbProducts([])
           }
         })
         .catch(() => {
-          if (isMounted) setDbProducts(DEFAULT_LINEUP_ITEMS)
+          if (isMounted) setDbProducts([])
         })
       return () => { isMounted = false }
     }
   }, [dataSource, content.category, content.segment, content.limit, content.sort])
 
-  const items = dataSource === 'dynamic' && dbProducts.length > 0
+  const items = dataSource === 'dynamic'
     ? dbProducts
-    : (Array.isArray(content.items) && content.items.length > 0 ? content.items : DEFAULT_LINEUP_ITEMS)
+    : (Array.isArray(content.items) && content.items.length > 0 ? content.items : [])
+
+  if (items.length === 0) {
+    return null
+  }
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {

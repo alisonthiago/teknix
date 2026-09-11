@@ -1,0 +1,440 @@
+/* ==========================================================================
+   TEKNIX HUB — DESIGN SYSTEM GLOBAL UNIFICADO (BASE: /hub/usuarios)
+   Este arquivo é a FONTE ÚNICA DE VERDADE para a estética administrativa do HUB.
+   Qualquer ajuste em tokens aqui reflete automaticamente em todas as páginas.
+   ========================================================================== */
+
+:root {
+  /* ── Tipografia Global ── */
+  --hub-font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  
+  /* Título da Página (H1) */
+  --hub-h1-size: 24px;
+  --hub-h1-weight: 700;
+  --hub-h1-color: #111111;
+  --hub-h1-line-height: 1.2;
+
+  /* Subtítulo / Descrição da Página */
+  --hub-desc-size: 13px;
+  --hub-desc-weight: 400;
+  --hub-desc-color: #666666;
+  --hub-desc-line-height: 1.4;
+
+  /* Título dos Cards (H2) */
+  --hub-card-title-size: 16px;
+  --hub-card-title-weight: 700;
+  --hub-card-title-color: #111111;
+  --hub-card-title-line-height: 1.25;
+
+  /* Subtítulo dos Cards (P) */
+  --hub-card-desc-size: 12px;
+  --hub-card-desc-weight: 400;
+  --hub-card-desc-color: #888888;
+  --hub-card-desc-line-height: 1.35;
+
+  /* Labels dos Formulários */
+  --hub-label-size: 12.5px;
+  --hub-label-weight: 700;
+  --hub-label-color: #333333;
+  --hub-label-gap: 6px;
+
+  /* Inputs, Selects & Textareas */
+  --hub-input-size: 13.5px;
+  --hub-input-color: #111111;
+  --hub-input-placeholder: #999999;
+  --hub-input-height: 42px;
+  --hub-input-padding: 0 14px;
+  --hub-input-radius: 10px;
+  --hub-input-border: 1px solid #e6e6e6;
+  --hub-input-focus-border: #1f2328;
+  --hub-input-bg: #ffffff;
+
+  /* ── Cards & Superfícies ── */
+  --hub-card-bg: #ffffff;
+  --hub-card-border: 1px solid #e6e6e6;
+  --hub-card-radius: 14px;
+  --hub-card-padding: 24px;
+  --hub-card-gap: 20px;
+  --hub-card-header-pb: 16px;
+  --hub-card-header-border: 1px solid #f0f0f0;
+  
+  /* Ícone do Card */
+  --hub-card-icon-size: 36px;
+  --hub-card-icon-bg: #f5f5f5;
+  --hub-card-icon-color: #111111;
+  --hub-card-icon-radius: 10px;
+
+  /* ── Botões Globais ── */
+  --hub-btn-height: 38px;
+  --hub-btn-radius: 8px;
+  --hub-btn-gap: 8px;
+  
+  /* Botão Primário (Preto Antracite) */
+  --hub-btn-primary-bg: #1f2328;
+  --hub-btn-primary-hover: #000000;
+  --hub-btn-primary-color: #ffffff;
+  --hub-btn-primary-size: 13.5px;
+  --hub-btn-primary-weight: 600;
+
+  /* Botão Secundário (Branco com borda sutil) */
+  --hub-btn-secondary-bg: #ffffff;
+  --hub-btn-secondary-hover: #f8fafc;
+  --hub-btn-secondary-border: 1px solid #e6e6e6;
+  --hub-btn-secondary-color: #333333;
+  --hub-btn-secondary-size: 13px;
+  --hub-btn-secondary-weight: 500;
+
+  /* Botão Voltar (Chevron) */
+  --hub-btn-back-size: 32px;
+  --hub-btn-back-radius: 8px;
+
+  /* ── Switches (Apple / Flow) ── */
+  --hub-switch-w: 44px;
+  --hub-switch-h: 24px;
+  --hub-switch-off-bg: #e5e7eb;
+  --hub-switch-on-bg: #1f2328;
+  --hub-switch-knob-size: 18px;
+
+  /* ── Banners & Alertas Semânticos ── */
+  --hub-banner-radius: 10px;
+  --hub-banner-padding: 12px 16px;
+  --hub-banner-font-size: 13.5px;
+  --hub-banner-font-weight: 600;
+
+  --hub-banner-success-bg: #ecfdf5;
+  --hub-banner-success-color: #16a34a;
+  --hub-banner-success-border: 1px solid #bbf7d0;
+
+  --hub-banner-error-bg: #fef2f2;
+  --hub-banner-error-color: #dc2626;
+  --hub-banner-error-border: 1px solid #fecaca;
+
+  /* ── Espaçamentos Gerais ── */
+  --hub-section-gap: 20px;
+  --hub-form-grid-gap: 16px;
+}
+
+/* ==========================================================================
+   CLASSES CANÔNICAS COMPARTILHADAS (1:1 com /hub/usuarios)
+   ========================================================================== */
+
+/* ── Cabeçalho Padrão de Página ── */
+.hub-layout .page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--hub-section-gap);
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.hub-layout .page-header .header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hub-layout .page-header .header-info h1,
+.hub-layout h1.page-title {
+  font-size: var(--hub-h1-size) !important;
+  font-weight: var(--hub-h1-weight) !important;
+  color: var(--hub-h1-color) !important;
+  line-height: var(--hub-h1-line-height) !important;
+  margin: 0 !important;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hub-layout .page-header .header-info p,
+.hub-layout p.page-subtitle {
+  font-size: var(--hub-desc-size) !important;
+  font-weight: var(--hub-desc-weight) !important;
+  color: var(--hub-desc-color) !important;
+  line-height: var(--hub-desc-line-height) !important;
+  margin: 0 !important;
+}
+
+.hub-layout .page-header .header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ── Botão Voltar ── */
+.hub-layout .btn-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--hub-btn-back-size);
+  height: var(--hub-btn-back-size);
+  border-radius: var(--hub-btn-back-radius);
+  background: transparent;
+  border: none;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  padding: 0;
+}
+
+.hub-layout .btn-back:hover {
+  background: #f3f4f6;
+  color: #111111;
+}
+
+/* ── Cards Administrativos ── */
+.hub-layout .hub-card,
+.hub-layout .user-card {
+  background: var(--hub-card-bg);
+  border: var(--hub-card-border);
+  border-radius: var(--hub-card-radius);
+  padding: var(--hub-card-padding);
+  display: flex;
+  flex-direction: column;
+  gap: var(--hub-card-gap);
+  box-shadow: none;
+}
+
+.hub-layout .hub-card-header,
+.hub-layout .user-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: var(--hub-card-header-pb);
+  border-bottom: var(--hub-card-header-border);
+}
+
+.hub-layout .hub-card-icon,
+.hub-layout .user-card-icon {
+  width: var(--hub-card-icon-size);
+  height: var(--hub-card-icon-size);
+  border-radius: var(--hub-card-icon-radius);
+  background: var(--hub-card-icon-bg);
+  color: var(--hub-card-icon-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.hub-layout .hub-card-header h2,
+.hub-layout .user-card-header h2 {
+  font-size: var(--hub-card-title-size) !important;
+  font-weight: var(--hub-card-title-weight) !important;
+  color: var(--hub-card-title-color) !important;
+  line-height: var(--hub-card-title-line-height) !important;
+  margin: 0 !important;
+}
+
+.hub-layout .hub-card-header p,
+.hub-layout .user-card-header p {
+  font-size: var(--hub-card-desc-size) !important;
+  font-weight: var(--hub-card-desc-weight) !important;
+  color: var(--hub-card-desc-color) !important;
+  line-height: var(--hub-card-desc-line-height) !important;
+  margin: 2px 0 0 !important;
+}
+
+/* ── Formulários e Inputs ── */
+.hub-layout .hub-form-grid,
+.hub-layout .user-form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--hub-form-grid-gap);
+}
+
+@media (min-width: 640px) {
+  .hub-layout .hub-form-grid,
+  .hub-layout .user-form-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.hub-layout .hub-col-full,
+.hub-layout .user-col-full {
+  grid-column: 1 / -1;
+}
+
+.hub-layout .hub-form-field,
+.hub-layout .user-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hub-label-gap);
+}
+
+.hub-layout .hub-label,
+.hub-layout .user-label,
+.hub-layout label.form-label {
+  font-size: var(--hub-label-size) !important;
+  font-weight: var(--hub-label-weight) !important;
+  color: var(--hub-label-color) !important;
+  display: block;
+}
+
+.hub-layout .hub-input,
+.hub-layout .user-input,
+.hub-layout input[type="text"]:not(.raw-input),
+.hub-layout input[type="email"]:not(.raw-input),
+.hub-layout input[type="password"]:not(.raw-input),
+.hub-layout input[type="number"]:not(.raw-input),
+.hub-layout input[type="tel"]:not(.raw-input),
+.hub-layout input[type="url"]:not(.raw-input),
+.hub-layout select:not(.raw-select) {
+  width: 100%;
+  height: var(--hub-input-height);
+  padding: var(--hub-input-padding);
+  background: var(--hub-input-bg);
+  border: var(--hub-input-border);
+  border-radius: var(--hub-input-radius);
+  font-size: var(--hub-input-size);
+  color: var(--hub-input-color);
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.hub-layout textarea:not(.raw-textarea) {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--hub-input-bg);
+  border: var(--hub-input-border);
+  border-radius: var(--hub-input-radius);
+  font-size: var(--hub-input-size);
+  color: var(--hub-input-color);
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s ease;
+  min-height: 80px;
+}
+
+.hub-layout .hub-input:focus,
+.hub-layout .user-input:focus,
+.hub-layout input:focus:not(.raw-input),
+.hub-layout select:focus:not(.raw-select),
+.hub-layout textarea:focus:not(.raw-textarea) {
+  border-color: var(--hub-input-focus-border) !important;
+}
+
+/* ── Botões Padronizados ── */
+.hub-layout .btn,
+.hub-layout .hub-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--hub-btn-gap);
+  height: var(--hub-btn-height);
+  padding: 0 16px;
+  border-radius: var(--hub-btn-radius);
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  text-decoration: none;
+  border: none;
+}
+
+.hub-layout .btn-primary,
+.hub-layout .hub-btn-primary {
+  background: var(--hub-btn-primary-bg) !important;
+  color: var(--hub-btn-primary-color) !important;
+  font-size: var(--hub-btn-primary-size) !important;
+  font-weight: var(--hub-btn-primary-weight) !important;
+}
+
+.hub-layout .btn-primary:hover,
+.hub-layout .hub-btn-primary:hover {
+  background: var(--hub-btn-primary-hover) !important;
+}
+
+.hub-layout .btn-secondary,
+.hub-layout .hub-btn-secondary {
+  background: var(--hub-btn-secondary-bg) !important;
+  border: var(--hub-btn-secondary-border) !important;
+  color: var(--hub-btn-secondary-color) !important;
+  font-size: var(--hub-btn-secondary-size) !important;
+  font-weight: var(--hub-btn-secondary-weight) !important;
+}
+
+.hub-layout .btn-secondary:hover,
+.hub-layout .hub-btn-secondary:hover {
+  background: var(--hub-btn-secondary-hover) !important;
+  border-color: #d1d5db !important;
+}
+
+/* ── Banners de Alerta ── */
+.hub-layout .hub-banner,
+.hub-layout .user-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: var(--hub-banner-padding);
+  border-radius: var(--hub-banner-radius);
+  font-size: var(--hub-banner-font-size);
+  font-weight: var(--hub-banner-font-weight);
+}
+
+.hub-layout .hub-banner.success,
+.hub-layout .user-banner.success {
+  background: var(--hub-banner-success-bg);
+  color: var(--hub-banner-success-color);
+  border: var(--hub-banner-success-border);
+}
+
+.hub-layout .hub-banner.error,
+.hub-layout .user-banner.error {
+  background: var(--hub-banner-error-bg);
+  color: var(--hub-banner-error-color);
+  border: var(--hub-banner-error-border);
+}
+
+/* ── Switches Padronizados ── */
+.hub-layout .hub-switch,
+.hub-layout .user-switch {
+  position: relative;
+  display: inline-block;
+  width: var(--hub-switch-w);
+  height: var(--hub-switch-h);
+  flex-shrink: 0;
+}
+
+.hub-layout .hub-switch input,
+.hub-layout .user-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.hub-layout .hub-slider,
+.hub-layout .user-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: var(--hub-switch-off-bg);
+  transition: 0.2s;
+  border-radius: 980px;
+}
+
+.hub-layout .hub-slider:before,
+.hub-layout .user-slider:before {
+  position: absolute;
+  content: "";
+  height: var(--hub-switch-knob-size);
+  width: var(--hub-switch-knob-size);
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.2s;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.hub-layout input:checked + .hub-slider,
+.hub-layout input:checked + .user-slider {
+  background-color: var(--hub-switch-on-bg);
+}
+
+.hub-layout input:checked + .hub-slider:before,
+.hub-layout input:checked + .user-slider:before {
+  transform: translateX(20px);
+}

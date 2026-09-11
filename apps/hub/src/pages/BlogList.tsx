@@ -1,9 +1,13 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { LayoutGrid, List, FileText, CircleCheck, FilePenLine, Plus, Eye, Edit, Trash2, ExternalLink } from 'lucide-react'
+import { HubDataTable, type HubColumn, useBulkDelete } from '../components/ui/HubDataTable'
+import { HubTableToolbar } from '../components/ui/HubDataTable/HubTableToolbar'
+import '../components/ui/HubDataTable/HubDataTable.css'
 import './BlogList.css'
 import './BlogViews.css'
-import { LayoutGrid, List, FileText, CircleCheck, FilePenLine } from 'lucide-react'
+import '../components/ui/HubDataTable/HubKpi.css'
 
 interface BlogPost {
   id: string
@@ -17,18 +21,68 @@ interface BlogPost {
   author_name: string | null
 }
 
+const TABLE_COLUMNS: HubColumn<BlogPost>[] = [
+  {
+    key: 'title',
+    label: 'Título',
+    render: (p) => (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        {p.cover_image ? (
+          <img src={p.cover_image} alt={p.title} style={{ width: 40, height: 30, objectFit: 'cover', borderRadius: 6, flexShrink: 0 }} />
+        ) : (
+          <div style={{ width: 40, height: 30, background: '#f3f4f6', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <FileText size={14} color="#9ca3af" />
+          </div>
+        )}
+        <div>
+          <div className="hub-cell-bold" style={{ maxWidth: 280, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.title}</div>
+          {p.slug && <div style={{ fontSize: 11, color: '#9ca3af' }}>/blog/{p.slug}</div>}
+        </div>
+      </div>
+    ),
+    exportValue: (p) => p.title,
+  },
+  {
+    key: 'author_name',
+    label: 'Autor',
+    width: '140px',
+    render: (p) => <span className="hub-cell-muted">{p.author_name || '—'}</span>,
+    exportValue: (p) => p.author_name || '',
+  },
+  {
+    key: 'status',
+    label: 'Status',
+    width: '120px',
+    render: (p) => (
+      <span className={`hub-status-badge ${p.status === 'published' ? 'hub-badge-green' : 'hub-badge-yellow'}`}>
+        <span className="hub-badge-dot" />
+        {p.status === 'published' ? 'Publicado' : 'Rascunho'}
+      </span>
+    ),
+    exportValue: (p) => p.status === 'published' ? 'Publicado' : 'Rascunho',
+  },
+  {
+    key: 'created_at',
+    label: 'Criado em',
+    width: '120px',
+    render: (p) => (
+      <span className="hub-cell-muted">
+        {new Date(p.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+      </span>
+    ),
+    exportValue: (p) => new Date(p.created_at).toLocaleDateString('pt-BR'),
+  },
+]
+
 export default function BlogList() {
   const navigate = useNavigate()
   const [posts, setPosts] = useState<BlogPost[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [filterStatus, setFilterStatus] = useState<'all' | 'published' | 'draft'>('all')
-  const [deleting, setDeleting] = useState<string | null>(null)
-  const [viewMode,setViewMode] = useState<'grid'|'list'>('grid')
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
-  useEffect(() => {
-    loadPosts()
-  }, [])
+  useEffect(() => { loadPosts() }, [])
 
   async function loadPosts() {
     setLoading(true)
@@ -38,39 +92,29 @@ export default function BlogList() {
         .select('id, title, slug, summary, cover_image, status, published_at, created_at, author_name')
         .order('created_at', { ascending: false })
       if (data) setPosts(data)
-    } catch {
-      setPosts([])
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  async function handleDelete(id: string) {
-    if (!confirm('Excluir este post permanentemente?')) return
-    setDeleting(id)
-    try {
-      await supabase.from('blog_posts').delete().eq('id', id)
-      setPosts(prev => prev.filter(p => p.id !== id))
-    } catch {
-      alert('Erro ao excluir post.')
-    } finally {
-      setDeleting(null)
-    }
+    } catch { setPosts([]) }
+    finally { setLoading(false) }
   }
 
   async function handleToggleStatus(post: BlogPost) {
     const newStatus = post.status === 'published' ? 'draft' : 'published'
-    const update: any = {
-      status: newStatus,
-      published_at: newStatus === 'published' ? new Date().toISOString() : null
-    }
     try {
-      await supabase.from('blog_posts').update(update).eq('id', post.id)
-      setPosts(prev => prev.map(p => p.id === post.id ? { ...p, ...update } : p))
-    } catch {
-      alert('Erro ao alterar status.')
-    }
+      await supabase.from('blog_posts').update({
+        status: newStatus,
+        published_at: newStatus === 'published' ? new Date().toISOString() : null
+      }).eq('id', post.id)
+      setPosts(prev => prev.map(p => p.id === post.id ? { ...p, status: newStatus as any } : p))
+    } catch { alert('Erro ao alterar status.') }
   }
+
+  async function handleDeletePosts(ids: string[]) {
+    try {
+      await supabase.from('blog_posts').delete().in('id', ids)
+      setPosts(prev => prev.filter(p => !ids.includes(p.id)))
+    } catch { alert('Erro ao excluir post(s).') }
+  }
+
+  const confirmDelete = useBulkDelete(handleDeletePosts, 'post')
 
   const filtered = posts.filter(p => {
     const matchSearch = p.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -79,175 +123,185 @@ export default function BlogList() {
     return matchSearch && matchStatus
   })
 
-  const publishedCount = posts.filter(p => p.status === 'published').length
-  const draftCount = posts.filter(p => p.status === 'draft').length
-
   return (
-    <div className="blog-list-page">
-      <div className="blog-list-header">
-        <div className="blog-list-header-left">
-          <h2 className="blog-list-title">Blog</h2>
-          <p className="blog-list-subtitle">Crie e gerencie artigos publicados no site público</p>
-        </div>
-        <div className="blog-header-actions">
-        <button className="blog-tool-btn" onClick={() => navigate('/hub/blog/analytics')}>Analytics</button>
-        <button className="blog-tool-btn" onClick={() => navigate('/hub/blog/seo')}>SEO</button>
-        <button className="blog-new-btn" onClick={() => navigate('/hub/blog/add')}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-          Novo Post
-        </button>
-        </div>
-      </div>
+    <div className="hub-page-container">
+      <div className="hub-page-wrapper">
 
-      <div className="blog-stats-row">
-        <div className="blog-stat-card">
-          <FileText size={20} className="blog-stat-icon" aria-hidden="true" />
-          <span className="blog-stat-num">{posts.length}</span>
-          <span className="blog-stat-label">Total de posts</span>
+        {/* Header */}
+        <div className="hub-page-header">
+          <div className="hub-header-info">
+            <h1>Blog</h1>
+            <p>Crie e gerencie artigos publicados no site público.</p>
+          </div>
+          <div className="hub-header-actions">
+            <button className="hub-btn hub-btn-secondary" onClick={() => navigate('/hub/blog/analytics')}>Analytics</button>
+            <button className="hub-btn hub-btn-secondary" onClick={() => navigate('/hub/blog/seo')}>SEO</button>
+            <button className="hub-btn hub-btn-primary" onClick={() => navigate('/hub/blog/add')}>
+              <Plus size={14} /> Novo Post
+            </button>
+          </div>
         </div>
-        <div className="blog-stat-card published">
-          <CircleCheck size={20} className="blog-stat-icon" aria-hidden="true" />
-          <span className="blog-stat-num">{publishedCount}</span>
-          <span className="blog-stat-label">Publicados</span>
-        </div>
-        <div className="blog-stat-card draft">
-          <FilePenLine size={20} className="blog-stat-icon" aria-hidden="true" />
-          <span className="blog-stat-num">{draftCount}</span>
-          <span className="blog-stat-label">Rascunhos</span>
-        </div>
-      </div>
 
-      <div className="blog-filters-row">
-        <div className="blog-search-wrap">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width="16" height="16">
-            <circle cx="11" cy="11" r="8" />
-            <line x1="21" y1="21" x2="16.65" y2="16.65" />
-          </svg>
-          <input
-            type="text"
-            placeholder="Buscar posts..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="blog-search-input"
+        {/* Stats */}
+        <div className="hub-kpi-grid">
+          {[
+            { label: 'Total de Posts', value: posts.length, icon: <FileText size={18} />, color: '#6b7280' },
+            { label: 'Publicados', value: posts.filter(p => p.status === 'published').length, icon: <CircleCheck size={18} />, color: '#16a34a' },
+            { label: 'Rascunhos', value: posts.filter(p => p.status === 'draft').length, icon: <FilePenLine size={18} />, color: '#ca8a04' },
+          ].map((s, i) => (
+            <div key={i} className="hub-kpi-card hub-kpi-card--compact">
+              <div className="hub-kpi-header"><span className="hub-kpi-label">{s.label}</span><div className="hub-kpi-icon">{s.icon}</div></div>
+              <div className="hub-kpi-value">{s.value}</div>
+              <p className="hub-kpi-subtitle">{s.label === 'Publicados' ? 'Posts publicados no blog' : s.label === 'Rascunhos' ? 'Posts em edição' : 'Total de posts cadastrados'}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Toolbar + View Toggle */}
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+          <HubTableToolbar
+            searchValue={search}
+            onSearchChange={setSearch}
+            searchPlaceholder="Buscar posts por título ou resumo"
+            exportColumns={TABLE_COLUMNS.filter(c => c.exportValue).map(c => ({ key: c.key, label: c.label }))}
+            exportRows={filtered.map(p => {
+              const r: Record<string, any> = {}
+              TABLE_COLUMNS.forEach(c => { if (c.exportValue) r[c.key] = c.exportValue(p) })
+              return r
+            })}
+            exportTitle="Blog"
+            exportFilename="blog-posts"
           />
-        </div>
-        <div className="blog-view-toggle" role="group" aria-label="Visualização dos posts">
-          <button type="button" aria-label="Visualizar em grade" aria-pressed={viewMode==='grid'} onClick={()=>setViewMode('grid')}><LayoutGrid size={18}/></button>
-          <button type="button" aria-label="Visualizar em lista" aria-pressed={viewMode==='list'} onClick={()=>setViewMode('list')}><List size={18}/></button>
-        </div>
-        <div className="blog-status-tabs">
+          {/* Status filter */}
           {(['all', 'published', 'draft'] as const).map(s => (
             <button
               key={s}
-              className={`blog-status-tab ${filterStatus === s ? 'active' : ''}`}
               onClick={() => setFilterStatus(s)}
+              style={{
+                padding: '6px 14px', borderRadius: 8, border: '1px solid',
+                cursor: 'pointer', fontSize: 13, fontWeight: filterStatus === s ? 700 : 500,
+                background: filterStatus === s ? '#1a1a1a' : '#fff',
+                color: filterStatus === s ? '#fff' : '#374151',
+                borderColor: filterStatus === s ? '#1a1a1a' : '#e5e7eb',
+                fontFamily: 'inherit'
+              }}
             >
               {s === 'all' ? 'Todos' : s === 'published' ? 'Publicados' : 'Rascunhos'}
             </button>
           ))}
+          {/* View mode */}
+          <div style={{ display: 'flex', background: '#f3f4f6', borderRadius: 8, padding: 2, gap: 2, marginLeft: 'auto' }}>
+            <button
+              onClick={() => setViewMode('grid')}
+              style={{ padding: '6px 8px', borderRadius: 6, border: 'none', cursor: 'pointer', background: viewMode === 'grid' ? '#fff' : 'transparent', color: viewMode === 'grid' ? '#111' : '#9ca3af', boxShadow: viewMode === 'grid' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none' }}
+              aria-label="Visualizar em grade"
+            ><LayoutGrid size={16} /></button>
+            <button
+              onClick={() => setViewMode('list')}
+              style={{ padding: '6px 8px', borderRadius: 6, border: 'none', cursor: 'pointer', background: viewMode === 'list' ? '#fff' : 'transparent', color: viewMode === 'list' ? '#111' : '#9ca3af', boxShadow: viewMode === 'list' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none' }}
+              aria-label="Visualizar em lista"
+            ><List size={16} /></button>
+          </div>
         </div>
-      </div>
 
-      {loading ? (
-        <div className="blog-loading">
-          <div className="blog-loading-spinner" />
-          <span>Carregando posts...</span>
-        </div>
-      ) : filtered.length === 0 ? (
-        <div className="blog-empty-state">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" width="56" height="56">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-            <polyline points="14 2 14 8 20 8" />
-            <line x1="16" y1="13" x2="8" y2="13" />
-            <line x1="16" y1="17" x2="8" y2="17" />
-          </svg>
-          <h3>{search ? 'Nenhum post encontrado' : 'Nenhum post criado ainda'}</h3>
-          <p>{search ? 'Tente outro termo de busca.' : 'Clique em "Novo Post" para começar.'}</p>
-          {!search && (
-            <button className="blog-new-btn" onClick={() => navigate('/hub/blog/add')}>
-              Criar primeiro post
-            </button>
-          )}
-        </div>
-      ) : (
-        <div className={`blog-posts-grid ${viewMode==='list' ? 'is-list' : ''}`}>
-          {filtered.map(post => (
-            <div key={post.id} className="blog-post-card">
-              {post.cover_image && (
-                <div className="blog-post-cover">
-                  <img src={post.cover_image} alt={post.title} />
-                </div>
-              )}
-              <div className="blog-post-body">
-                <div className="blog-post-meta-top">
-                  <span className={`blog-status-badge ${post.status}`}>
-                    {post.status === 'published' ? '● Publicado' : '○ Rascunho'}
-                  </span>
-                  <span className="blog-post-date">
-                    {new Date(post.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })}
-                  </span>
-                </div>
-                <h3 className="blog-post-title">{post.title}</h3>
-                {post.summary && <p className="blog-post-summary">{post.summary}</p>}
-                {post.slug && (
-                  <div className="blog-post-url">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width="12" height="12">
-                      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-                    </svg>
-                    <span>/blog/{post.slug}</span>
+        {/* Contagem */}
+        <div className="hub-table-count">{filtered.length} post{filtered.length !== 1 ? 's' : ''}</div>
+
+        {/* Grid Mode */}
+        {viewMode === 'grid' && (
+          loading ? (
+            <div style={{ textAlign: 'center', padding: 40, color: '#9ca3af', fontSize: 14 }}>Carregando posts...</div>
+          ) : filtered.length === 0 ? (
+            <div className="hub-empty-state">
+              <div className="hub-empty-icon"><FileText size={22} /></div>
+              <p className="hub-empty-title">{search ? 'Nenhum post encontrado' : 'Nenhum post criado ainda'}</p>
+              <p className="hub-empty-desc">{search ? 'Tente outro termo.' : 'Clique em "Novo Post" para começar.'}</p>
+            </div>
+          ) : (
+            <div className="blog-posts-grid">
+              {filtered.map(post => (
+                <div key={post.id} className="blog-post-card">
+                  {post.cover_image && (
+                    <div className="blog-post-cover">
+                      <img src={post.cover_image} alt={post.title} />
+                    </div>
+                  )}
+                  <div className="blog-post-body">
+                    <div className="blog-post-meta-top">
+                      <span className={`blog-status-badge ${post.status}`}>
+                        {post.status === 'published' ? '● Publicado' : '○ Rascunho'}
+                      </span>
+                      <span className="blog-post-date">
+                        {new Date(post.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                      </span>
+                    </div>
+                    <h3 className="blog-post-title">{post.title}</h3>
+                    {post.summary && <p className="blog-post-summary">{post.summary}</p>}
+                    {post.slug && (
+                      <div className="blog-post-url">
+                        <ExternalLink size={12} />
+                        <span>/blog/{post.slug}</span>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-              <div className="blog-post-actions">
-                <Link to={`/hub/blog/editar/${post.id}`} className="blog-action-btn edit">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width="15" height="15">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                  </svg>
-                  Editar
+                  <div className="blog-post-actions">
+                    <Link to={`/hub/blog/editar/${post.id}`} className="blog-action-btn edit">
+                      <Edit size={14} /> Editar
+                    </Link>
+                    <button className={`blog-action-btn ${post.status === 'published' ? 'unpublish' : 'publish'}`}
+                      onClick={() => handleToggleStatus(post)}>
+                      {post.status === 'published' ? 'Despublicar' : 'Publicar'}
+                    </button>
+                    {post.status === 'published' && (
+                      <a href={`http://localhost:5173/blog/${post.slug}`} target="_blank" rel="noreferrer" className="blog-action-btn view">
+                        <Eye size={14} /> Ver
+                      </a>
+                    )}
+                    <button className="blog-action-btn delete" onClick={() => confirmDelete([post.id])}>
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
+        )}
+
+        {/* List/Table Mode */}
+        {viewMode === 'list' && (
+          <HubDataTable
+            title=""
+            columns={TABLE_COLUMNS}
+            rows={filtered}
+            loading={loading}
+            entityLabel="post"
+            emptyMessage="Nenhum post encontrado."
+            bulkActions={[
+              { label: 'Excluir', icon: <Trash2 size={13} />, action: confirmDelete, variant: 'danger' },
+            ]}
+            renderRowActions={(post, onClose) => (
+              <>
+                <Link to={`/hub/blog/editar/${post.id}`} className="hub-dropdown-item" onClick={onClose}>
+                  <Edit size={14} color="#2563eb" /> Editar post
                 </Link>
-                <button
-                  className={`blog-action-btn ${post.status === 'published' ? 'unpublish' : 'publish'}`}
-                  onClick={() => handleToggleStatus(post)}
-                >
-                  {post.status === 'published' ? 'Despublicar' : 'Publicar'}
+                <button className="hub-dropdown-item" onClick={() => { onClose(); handleToggleStatus(post) }}>
+                  {post.status === 'published' ? '○ Despublicar' : '● Publicar'}
                 </button>
                 {post.status === 'published' && (
-                  <a
-                    href={`http://localhost:5173/blog/${post.slug}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="blog-action-btn view"
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width="15" height="15">
-                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                      <polyline points="15 3 21 3 21 9" />
-                      <line x1="10" y1="14" x2="21" y2="3" />
-                    </svg>
-                    Ver
+                  <a href={`http://localhost:5173/blog/${post.slug}`} target="_blank" rel="noreferrer"
+                    className="hub-dropdown-item" onClick={onClose}>
+                    <Eye size={14} color="#16a34a" /> Ver no site
                   </a>
                 )}
-                <button
-                  className="blog-action-btn delete"
-                  onClick={() => handleDelete(post.id)}
-                  disabled={deleting === post.id}
-                >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width="15" height="15">
-                    <polyline points="3 6 5 6 21 6" />
-                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-                    <path d="M10 11v6M14 11v6" />
-                    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
-                  </svg>
+                <div className="hub-dropdown-divider" />
+                <button className="hub-dropdown-item delete" onClick={() => { onClose(); confirmDelete([post.id]) }}>
+                  <Trash2 size={14} color="#dc2626" /> Excluir post
                 </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+              </>
+            )}
+          />
+        )}
+      </div>
     </div>
   )
 }

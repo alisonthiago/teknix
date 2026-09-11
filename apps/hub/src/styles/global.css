@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @import './tokens.css';
+@import './hub-theme.css';
 
 /* ==========================================================================
    TEKNIX HUB — GLOBAL CSS (FLOW 1:1 — mesma base tipográfica, cores, espaçamentos)
@@ -49,14 +50,12 @@ select {
   color-scheme: light;
 }
 
-/* Tipografia leve e mais espaço de leitura no HUB. */
-.hub-layout :where(h1, h2, h3, h4, h5, h6, strong, b, th) { font-weight: 500; }
-.hub-layout :where(.btn, button, label, th) { font-weight: 400; }
+/* Tipografia oficial TEKNIX HUB (base: /hub/usuarios) */
+.hub-layout :where(h1, h2) { font-weight: 700; color: #111111; }
+.hub-layout :where(h3, h4) { font-weight: 600; color: #111111; }
+.hub-layout :where(label) { font-weight: 700; color: #333333; }
 .hub-layout :where(input, select, textarea, table, button) { font-family: inherit; letter-spacing: 0; }
-.hub-layout :where(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="submit"]):not([type="button"]), select) {
-  min-height: 44px;
-}
-.hub-layout :where(.page-header, .data-table-container, .table-wrapper, .pages-table-wrapper, .stat-card, .stat-card-large, .finance-kpi-card, .finance-table-card, .category-tree-card) { margin-bottom: 8px; }
+.hub-layout :where(.page-header) { margin-bottom: 20px; }
 
 /* ── FLOW Universal Table & List Standards ── */
 table {
@@ -247,6 +246,82 @@ p {
 .hub-layout .btn-action-primary:hover {
   background: var(--tk-color-primary-hover) !important;
   border-color: var(--tk-color-primary-hover) !important;
+}
+
+/* ── Padrão global dos botões de ação do Hub ──
+   Ações principais usam a mesma cor, largura e altura em todas as páginas. */
+.hub-layout :where(
+  .btn-primary,
+  .btn-secondary.btn-action-primary,
+  .hub-btn-primary,
+  .pages-primary-btn,
+  .ads-new-btn,
+  .btn-fisc-save,
+  .btn-primary-action
+) {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 180px !important;
+  height: 44px !important;
+  min-width: 180px !important;
+  min-height: 44px !important;
+  padding: 0 16px;
+  background: var(--tk-color-primary, #347ff2) !important;
+  border: 1px solid var(--tk-color-primary, #347ff2) !important;
+  border-radius: 8px;
+  color: #ffffff !important;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.hub-layout :where(
+  .btn-primary,
+  .btn-secondary.btn-action-primary,
+  .hub-btn-primary,
+  .pages-primary-btn,
+  .ads-new-btn,
+  .btn-fisc-save,
+  .btn-primary-action
+):hover:not(:disabled) {
+  background: var(--tk-color-primary-hover, #2469d8) !important;
+  border-color: var(--tk-color-primary-hover, #2469d8) !important;
+  color: #ffffff !important;
+}
+
+.hub-layout :where(
+  .btn-primary,
+  .btn-secondary.btn-action-primary,
+  .hub-btn-primary,
+  .pages-primary-btn,
+  .ads-new-btn,
+  .btn-fisc-save,
+  .btn-primary-action
+):disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+  .hub-layout :where(
+    .btn-primary,
+    .btn-secondary.btn-action-primary,
+    .hub-btn-primary,
+    .pages-primary-btn,
+    .ads-new-btn,
+    .btn-fisc-save,
+    .btn-primary-action
+  ) {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
 }
 
 .btn-secondary {
@@ -456,14 +531,14 @@ p {
 }
 
 .mp-list-item-title {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
   color: #111111;
   line-height: 1.3;
 }
 
 @media (min-width: 640px) {
-  .mp-list-item-title { font-size: 16px; }
+  .mp-list-item-title { font-size: 14px; }
 }
 
 .mp-list-item-sub {

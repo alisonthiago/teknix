@@ -60,21 +60,16 @@
 
 /* ── Header Principal do Produto ── */
 .product-details-header {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
+  background: var(--hub-card-bg, #ffffff);
+  border: var(--hub-card-border, 1px solid #e6e6e6);
+  border-radius: var(--hub-card-radius, 14px);
   padding: 22px 24px;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 28px;
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
+  box-shadow: none;
   margin-bottom: 24px;
-  transition: box-shadow 0.2s ease;
-}
-
-.product-details-header:hover {
-  box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.08);
 }
 
 .product-header-main {
@@ -363,15 +358,15 @@
 }
 
 .btn-product-action.primary {
-  background: #0f172a;
+  background: var(--hub-btn-primary-bg, #1f2328);
   color: #ffffff;
-  border-color: #0f172a;
-  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
+  border-color: var(--hub-btn-primary-bg, #1f2328);
+  box-shadow: none;
 }
 
 .btn-product-action.primary:hover:not(:disabled) {
-  background: #1e293b;
-  border-color: #1e293b;
+  background: var(--hub-btn-primary-hover, #000000);
+  border-color: #000000;
   color: #ffffff;
 }
 

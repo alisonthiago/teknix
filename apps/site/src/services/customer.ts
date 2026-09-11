@@ -318,6 +318,49 @@ export async function getOrdersByUserId(userId: string): Promise<Order[]> {
   }
 }
 
+export async function getOrderByNumber(orderNumber: string): Promise<Order | null> {
+  try {
+    const cleanNum = orderNumber.trim().toUpperCase()
+    const { data: order, error } = await supabase
+      .from('orders')
+      .select('*')
+      .or(`order_number.ilike.${cleanNum},id.eq.${cleanNum}`)
+      .maybeSingle()
+
+    if (error || !order) return null
+
+    const { data: items } = await supabase
+      .from('order_items')
+      .select('*, products(name, image_url, images, sku)')
+      .eq('order_id', order.id)
+
+    const orderItems: OrderItem[] = (items || []).map((item: any) => {
+      const prod = item.products
+      return {
+        id: item.id,
+        order_id: item.order_id,
+        product_id: item.product_id,
+        product_name: item.product_name || prod?.name || 'Produto TEKNIX',
+        product_sku: item.product_sku || prod?.sku,
+        product_image: item.product_image || prod?.image_url || (Array.isArray(prod?.images) ? prod?.images[0] : ''),
+        quantity: item.quantity || 1,
+        price: Number(item.price || 0),
+        subtotal: Number(item.total || item.price * item.quantity || 0),
+        is_digital: item.is_digital || false,
+        download_url: item.download_url
+      }
+    })
+
+    return {
+      ...order,
+      items: orderItems
+    } as Order
+  } catch (err) {
+    console.error('Erro ao buscar pedido por número:', err)
+    return null
+  }
+}
+
 export async function getAddressesByUserId(userId: string): Promise<Address[]> {
   const { data, error } = await supabase
     .from('addresses')
