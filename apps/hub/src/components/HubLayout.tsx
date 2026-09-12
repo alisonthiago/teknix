@@ -18,6 +18,7 @@ import {
 import { InternalChatProvider, useInternalChat } from '../contexts/InternalChatContext'
 import FloatingMessenger from './internal-chat/FloatingMessenger'
 import { TeknixLogo } from './TeknixLogo'
+import { User, Users, Settings, Layers, LogOut } from 'lucide-react'
 import './HubLayout.css'
 
 // ─── Ícones originais + logos de integração ────────────────────────────────
@@ -771,14 +772,34 @@ function HubLayoutContent() {
               </div>
               <div className="flow-dropdown-divider" />
               <Link to="/hub/usuarios" className="flow-dropdown-item">
-                Dados da conta
+                <User size={15} />
+                <span>Perfil</span>
+              </Link>
+              <Link to="/hub/configuracoes?tab=users" className="flow-dropdown-item">
+                <Users size={15} />
+                <span>Usuários</span>
               </Link>
               <Link to="/hub/configuracoes" className="flow-dropdown-item">
-                Configurações da loja
+                <Settings size={15} />
+                <span>Configuração</span>
+              </Link>
+              <Link to="/hub/integracoes" className="flow-dropdown-item">
+                <Layers size={15} />
+                <span>Integrações</span>
               </Link>
               <div className="flow-dropdown-divider" />
-              <Link to="/login" className="flow-dropdown-item logout">
-                Sair
+              <Link
+                to="/login"
+                className="flow-dropdown-item logout"
+                onClick={async () => {
+                  try {
+                    localStorage.removeItem('demo_user_active')
+                    await supabase.auth.signOut()
+                  } catch {}
+                }}
+              >
+                <LogOut size={15} />
+                <span>Sair</span>
               </Link>
             </div>
           )}

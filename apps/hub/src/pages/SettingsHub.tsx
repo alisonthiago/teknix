@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   CreditCard, Truck, MapPin, FileText, Phone, MessageSquare, Mail,
   ShoppingCart, Users, Globe, Code, Shuffle, Edit3, ChevronLeft, Save, ShieldCheck
@@ -11,8 +11,17 @@ import './SettingsHub.css'
 
 export default function SettingsHub() {
   const navigate = useNavigate()
-  const [activeSection, setActiveSection] = useState('contact')
+  const [searchParams] = useSearchParams()
+  const tabParam = searchParams.get('tab')
+  const [activeSection, setActiveSection] = useState(tabParam || 'contact')
   const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    const tab = searchParams.get('tab')
+    if (tab) {
+      setActiveSection(tab)
+    }
+  }, [searchParams])
 
   // Mock form states
   const [contactData, setContactData] = useState({

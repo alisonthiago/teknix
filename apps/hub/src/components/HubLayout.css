@@ -1038,14 +1038,23 @@
 }
 
 .flow-dropdown-item {
-  display: block;
-  padding: 10px 11px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
   border-radius: 8px;
   color: #374151;
   font-size: 13px;
-  font-weight: 450;
+  font-weight: 500;
   text-decoration: none;
-  transition: all 0.1s ease;
+  transition: all 0.12s ease;
+  cursor: pointer;
+}
+
+.flow-dropdown-item svg {
+  color: #64748b;
+  flex-shrink: 0;
+  transition: color 0.12s ease;
 }
 
 @media (max-width: 639px) {
