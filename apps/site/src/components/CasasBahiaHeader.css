@@ -1767,17 +1767,96 @@
     position: absolute;
     right: 12px;
     top: 8px;
-    gap: var(--tkn-space-12);
+    height: 36px;
+    display: flex !important;
+    align-items: center !important;
+    gap: 16px !important;
+    z-index: 20;
   }
 
-  .dsvia-account-user-text {
-    display: flex;
+  .dsvia-actions-right > div {
+    display: contents !important;
   }
 
-  .dsvia-account-capsule {
-    background: transparent;
-    border-color: transparent;
-    padding: 4px 5px;
+  /* Ordem 1:1 idêntica ao Magalu no celular (Favoritos -> Carrinho -> Minha Conta) */
+  .dsvia-actions-right [data-canvas-node*="favorites"],
+  .dsvia-actions-right a[href*="salvos"],
+  .dsvia-actions-right a[title*="Favorito"] {
+    order: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .dsvia-actions-right [data-canvas-node*="cart"],
+  .dsvia-actions-right a[href*="sacola"],
+  .dsvia-actions-right a[title*="Carrinho"] {
+    order: 2 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: relative !important;
+  }
+
+  .dsvia-actions-right [data-canvas-node*="account-group"],
+  .dsvia-actions-right .dsvia-account-menu {
+    order: 3 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* Meus Pedidos oculto no topo do celular (fica acessível pelo menu hambúrguer e página de conta) */
+  .dsvia-actions-right [data-canvas-node*="orders"],
+  .dsvia-actions-right a[href*="pedidos"],
+  .dsvia-actions-right a[title*="Pedidos"] {
+    display: none !important;
+  }
+
+  /* Oculta textos na conta no celular, exibindo somente o ícone circular ou avatar */
+  .dsvia-actions-right .dsvia-account-user-text {
+    display: none !important;
+  }
+
+  .dsvia-actions-right :is(.dsvia-account-capsule, .dsvia-icon-action) {
+    background: transparent !important;
+    border: none !important;
+    padding: 2px !important;
+    box-shadow: none !important;
+    color: inherit !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 24px !important;
+    min-height: 24px !important;
+  }
+
+  .dsvia-actions-right svg {
+    width: 22px !important;
+    height: 22px !important;
+    display: block !important;
+  }
+
+  /* Badge verde do carrinho idêntico à referência */
+  .dsvia-actions-right .dsvia-cart-count-badge {
+    position: absolute !important;
+    top: -4px !important;
+    right: -6px !important;
+    background: #22c55e !important;
+    color: #ffffff !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    width: 17px !important;
+    height: 17px !important;
+    min-width: 17px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 1.5px solid #ffffff !important;
+    line-height: 1 !important;
+    padding: 0 !important;
+    z-index: 2 !important;
   }
 
   .dsvia-guest-popover { display: none !important; }
