@@ -449,13 +449,13 @@ export default function TeknixHeader() {
                       aria-expanded={isCepOpen ? 'true' : 'false'}
                       aria-haspopup="dialog"
                       aria-label={`Região de ${displayCity}. Alterar o CEP`}
-                      className={`[grid-area:location] flex font-2xsm-regular gap-2xsm items-center w-full text-interaction-default-inverted bg-transparent cursor-pointer xlg:justify-self-start xlg:w-max xlg:[grid-area:unset] min-w-0 [&>*:last-child]:ml-auto xlg:w-auto xlg:max-w-[250px] dsvia-location-pill ${isSearching ? 'is-searching' : ''}`}
+                      className={`[grid-area:location] flex font-2xsm-regular gap-2xsm items-center w-full bg-transparent cursor-pointer xlg:justify-self-start xlg:w-max xlg:[grid-area:unset] min-w-0 [&>*:last-child]:ml-auto xlg:w-auto xlg:max-w-[250px] dsvia-location-pill ${isSearching ? 'is-searching' : ''}`}
                       data-testid="header-location"
                       type="button"
                       onClick={() => setIsCepOpen(true)}
                       title={`Região de ${displayCity}. Alterar o CEP`}
                     >
-                      <i className="icon icon-place text-interaction-default-inverted font-xlg-regular shrink-0 dsvia-icon-place" aria-hidden="true">
+                      <i className="icon icon-place font-xlg-regular shrink-0 dsvia-icon-place" aria-hidden="true">
                         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" />
                           <circle cx="12" cy="10" r="3" />
@@ -465,7 +465,7 @@ export default function TeknixHeader() {
                         <span className="xlg:block dsvia-location-prefix">Região de </span>
                         <span className="xlg:block xlg:font-2xsm-bold dsvia-location-city">{displayCity}</span>
                       </span>
-                      <i className="icon icon-chevron-down text-interaction-default-inverted font-xlg-regular shrink-0 xlg:font-md-regular xlg:self-auto dsvia-icon-chevron" aria-hidden="true">
+                      <i className="icon icon-chevron-down font-xlg-regular shrink-0 xlg:font-md-regular xlg:self-auto dsvia-icon-chevron" aria-hidden="true">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                           <path d="m6 9 6 6 6-6" />
                         </svg>

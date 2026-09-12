@@ -108,6 +108,16 @@
   justify-content: space-between;
   gap: var(--tkn-space-16);
   width: 100%;
+  color: #000000;
+}
+
+.dsvia-row-top a,
+.dsvia-row-top button {
+  color: #000000;
+}
+
+.dsvia-row-top a:visited {
+  color: #000000;
 }
 
 /* Bloco Marca */
@@ -168,7 +178,7 @@
   text-align: left;
 }
 .dsvia-account-avatar { width:24px; height:24px; flex:0 0 auto; border-radius:50%; object-fit:cover; box-shadow:0 0 0 2px var(--hagor-green, var(--site-accent, #B5F500)); }
-.dsvia-account-initials-badge { width:24px; height:24px; flex:0 0 auto; border-radius:50%; background:var(--site-accent, #0071e3); color:#ffffff; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; text-transform:uppercase; box-shadow:0 0 0 2px rgba(0,0,0,0.06); }
+.dsvia-account-initials-badge { width:24px; height:24px; flex:0 0 auto; border-radius:50%; background: #000000; color:#ffffff; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; text-transform:uppercase; box-shadow:0 0 0 2px rgba(0,0,0,0.06); }
 
 .dsvia-account-greeting {
   font-size: var(--tkn-text-12);
@@ -182,18 +192,27 @@
   color: var(--tkn-mid-gray);
 }
 
-/* Atalhos principais da conta seguem o azul de navegação da referência. */
+/* Todos os atalhos e ícones em preto oficial — sem nenhum tom de azul */
 .dsvia-actions-right .dsvia-cep-trigger,
 .dsvia-actions-right .dsvia-account-capsule,
-.dsvia-actions-right .dsvia-icon-action { color: #123bd1; }
+.dsvia-actions-right .dsvia-icon-action {
+  color: #000000 !important;
+}
 
-.dsvia-actions-right .dsvia-account-greeting { color: inherit; font-weight: var(--tkn-weight-semibold); }
+.dsvia-actions-right .dsvia-icon-action svg,
+.dsvia-actions-right .dsvia-account-capsule svg {
+  color: #000000 !important;
+  stroke: currentColor !important;
+}
 
-/* Conta, favoritos e sacola usam ícones pretos; somente o CEP permanece azul. */
-.dsvia-actions-right .dsvia-account-capsule,
-.dsvia-actions-right .dsvia-icon-action { color: #000000; }
+.dsvia-actions-right .dsvia-account-greeting {
+  color: #000000 !important;
+  font-weight: var(--tkn-weight-semibold);
+}
 
-.dsvia-actions-right .dsvia-cep-trigger { color: #000000; }
+.dsvia-actions-right .dsvia-account-subtext {
+  color: #555555 !important;
+}
 
 /* Location Pill (Desktop) */
 .dsvia-location-wrapper {
@@ -213,7 +232,7 @@
   cursor: pointer;
   font-size: 13px;
   font-weight: 500;
-  color: inherit;
+  color: #000000 !important;
   margin-right: 12px;
   transition: background 0.15s ease, opacity 0.15s ease;
   text-align: left;
@@ -232,7 +251,7 @@
   justify-content: center;
   font-style: normal;
   flex-shrink: 0;
-  color: #0066cc;
+  color: #000000 !important;
 }
 
 .dsvia-location-pill .dsvia-icon-chevron,
@@ -242,7 +261,7 @@
   justify-content: center;
   font-style: normal;
   flex-shrink: 0;
-  color: #64748b;
+  color: #000000 !important;
   margin-left: 2px;
 }
 
@@ -253,18 +272,19 @@
   align-items: flex-start;
   line-height: 1.2;
   min-width: 0;
+  color: #000000 !important;
 }
 
 .dsvia-location-prefix {
   font-size: 11px;
-  color: #64748b;
+  color: #333333 !important;
   font-weight: 400;
 }
 
 .dsvia-location-city {
   font-size: 13px;
   font-weight: 700;
-  color: #0f172a;
+  color: #000000 !important;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1522,7 +1542,7 @@
 }
 
 .brand-teknix {
-  background: #0071e3;
+  background: #000000;
   color: #ffffff;
 }
 
@@ -1599,7 +1619,7 @@
 }
 
 .tkn-drawer-btn-primary:hover {
-  background: #0068d1;
+  background: #000000;
   color: #ffffff;
 }
 
@@ -1674,11 +1694,15 @@
   display: none;
   background: transparent;
   border: none;
-  color: var(--tkn-dark-gray);
+  color: #000000 !important;
   cursor: pointer;
   padding: var(--tkn-space-4);
   align-items: center;
   justify-content: center;
+}
+.dsvia-mobile-hamburger-btn svg {
+  fill: #000000 !important;
+  color: #000000 !important;
 }
 
 .dsvia-mobile-subbar {
@@ -1824,7 +1848,7 @@
     border: none !important;
     padding: 2px !important;
     box-shadow: none !important;
-    color: inherit !important;
+    color: #000000 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -1911,13 +1935,13 @@
     border: none !important;
     cursor: pointer;
     gap: 8px !important;
-    color: #1e293b;
+    color: #000000 !important;
     box-sizing: border-box;
   }
 
   .dsvia-location-pill .dsvia-icon-place,
   [data-testid="header-location"] .dsvia-icon-place {
-    color: #0066cc !important;
+    color: #000000 !important;
     flex-shrink: 0 !important;
     display: inline-flex !important;
     align-items: center;
@@ -1928,7 +1952,7 @@
   [data-testid="header-location"] .dsvia-icon-chevron,
   [data-testid="header-location"] > *:last-child {
     margin-left: auto !important;
-    color: #64748b !important;
+    color: #000000 !important;
     flex-shrink: 0 !important;
     display: inline-flex !important;
     align-items: center;
