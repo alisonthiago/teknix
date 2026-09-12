@@ -268,6 +268,18 @@ export default function ProductForm() {
   const [uploadStatus, setUploadStatus] = useState('')
   const [isDragging, setIsDragging] = useState(false)
   const [previewVideoModal, setPreviewVideoModal] = useState<string | null>(null)
+    const [categorySearch, setCategorySearch] = useState('')
+  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false)
+  const categoryDropdownRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target as Node)) {
+        setIsCategoryDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
   const [showQuickFill, setShowQuickFill] = useState(false)
   const [quickFillText, setQuickFillText] = useState('')
 
@@ -1165,17 +1177,50 @@ export default function ProductForm() {
             <h2 className="card-title" style={{ margin: 0 }}>Categorias</h2>
           </div>
 
-          <div className="form-group">
-            <select
-              className="form-select"
-              value={form.category_id}
-              onChange={(e) => setForm({ ...form, category_id: e.target.value })}
+          <div className="form-group" ref={categoryDropdownRef} style={{ position: 'relative' }}>
+            <div 
+              className="form-select" 
+              style={{ cursor: 'text', display: 'flex', alignItems: 'center', padding: 0 }}
+              onClick={() => setIsCategoryDropdownOpen(true)}
             >
-              <option value="">Selecione uma categoria...</option>
-              {categories.map(c => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
+              <input 
+                type="text" 
+                placeholder="Pesquise ou selecione a categoria..."
+                value={isCategoryDropdownOpen ? categorySearch : (categories.find(c => c.id === form.category_id)?.name || '')}
+                onChange={e => {
+                  setCategorySearch(e.target.value)
+                  setIsCategoryDropdownOpen(true)
+                }}
+                onFocus={() => {
+                  setCategorySearch('')
+                  setIsCategoryDropdownOpen(true)
+                }}
+                style={{ width: '100%', border: 'none', background: 'transparent', outline: 'none', padding: '0 12px', height: '100%', fontSize: '13px', color: '#1e293b' }}
+              />
+              <ChevronDown size={16} style={{ marginRight: 12, color: '#9ca3af' }} />
+            </div>
+            {isCategoryDropdownOpen && (
+              <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#fff', border: '1px solid #e2e8f0', borderRadius: 8, marginTop: 4, zIndex: 10, maxHeight: 200, overflowY: 'auto', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}>
+                {categories.filter(c => c.name.toLowerCase().includes(categorySearch.toLowerCase())).map(c => (
+                  <div 
+                    key={c.id} 
+                    style={{ padding: '8px 12px', cursor: 'pointer', background: c.id === form.category_id ? '#f1f5f9' : 'transparent', fontSize: '13px', color: '#334155' }}
+                    onClick={() => {
+                      setForm({ ...form, category_id: c.id })
+                      setIsCategoryDropdownOpen(false)
+                      setCategorySearch('')
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.background = '#f8fafc')}
+                    onMouseLeave={e => (e.currentTarget.style.background = c.id === form.category_id ? '#f1f5f9' : 'transparent')}
+                  >
+                    {c.name}
+                  </div>
+                ))}
+                {categories.filter(c => c.name.toLowerCase().includes(categorySearch.toLowerCase())).length === 0 && (
+                  <div style={{ padding: '8px 12px', color: '#9ca3af', fontSize: '13px' }}>Nenhuma categoria encontrada.</div>
+                )}
+              </div>
+            )}
             
             {!showAddCategory ? (
               <button
