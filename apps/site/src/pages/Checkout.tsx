@@ -22,6 +22,20 @@ import QRCode from 'qrcode'
 const money = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 const emptyAddress = { name: '', street: '', number: '', complement: '', neighborhood: '', city: '', state: '', zipCode: '' }
 
+function getCarrierLogo(company?: string, serviceName?: string): string | null {
+  const comp = (company || '').toLowerCase()
+  const srv = (serviceName || '').toLowerCase()
+  const combined = `${comp} ${srv}`
+
+  if (combined.includes('jadlog')) return '/images/carriers/jadlog.png'
+  if (combined.includes('loggi')) return '/images/carriers/loggi.png'
+  if (combined.includes('sedex') || combined.includes('correios') || combined.includes('pac')) return '/images/carriers/sedex.png'
+  if (combined.includes('total express') || combined.includes('total')) return '/images/carriers/total-express.png'
+  if (combined.includes('azul cargo') || combined.includes('azul')) return '/images/carriers/azul-cargo.png'
+  if (combined.includes('j&t') || combined.includes('jet') || combined.includes('jt express')) return '/images/carriers/jet.webp'
+  return null
+}
+
 const normalizeBrPhone = (value: string) => {
   const digits = value.replace(/\D/g, '')
   if (!digits) return ''
@@ -1398,37 +1412,66 @@ export default function Checkout() {
                   </div>
                 ) : shippingOptions.length > 0 ? (
                   <div className="tkn-shipping-options-list" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
-                    {shippingOptions.map(opt => (
-                      <label 
-                        key={opt.id} 
-                        style={{ 
-                          display: 'flex', 
-                          alignItems: 'center', 
-                          padding: 12, 
-                          border: `1px solid ${selectedShipping?.id === opt.id ? '#0066cc' : '#e2e8f0'}`,
-                          borderRadius: 8,
-                          cursor: 'pointer',
-                          background: selectedShipping?.id === opt.id ? '#f0f7ff' : '#fff',
-                          transition: 'all 0.2s'
-                        }}
-                      >
-                        <input 
-                          type="radio" 
-                          name="checkout-shipping" 
-                          value={opt.id}
-                          checked={selectedShipping?.id === opt.id}
-                          onChange={() => setSelectedShipping(opt)}
-                          style={{ marginRight: 12, accentColor: '#0066cc' }}
-                        />
-                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                          <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#0f172a' }}>{typeof opt.company === 'object' ? opt.company?.name : opt.company} {opt.name}</div>
-                          <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Entrega em até {opt.delivery_time} dias úteis</div>
-                        </div>
-                        <strong style={{ fontSize: '1rem', color: '#0f172a' }}>
-                          {Number(opt.price) === 0 ? 'Grátis' : money(Number(opt.price))}
-                        </strong>
-                      </label>
-                    ))}
+                    {shippingOptions.map(opt => {
+                      const companyName = typeof opt.company === 'object' ? opt.company?.name : opt.company
+                      const isFree = Number(opt.price) === 0
+                      const logoUrl = getCarrierLogo(companyName, opt.name)
+                      const displayName = opt.name?.toLowerCase().includes((companyName || '').toLowerCase())
+                        ? opt.name
+                        : `${companyName || ''} ${opt.name || ''}`.trim()
+
+                      return (
+                        <label 
+                          key={opt.id} 
+                          style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            padding: '12px 14px', 
+                            border: `1px solid ${selectedShipping?.id === opt.id ? '#0066cc' : '#e2e8f0'}`,
+                            borderRadius: 8, 
+                            cursor: 'pointer',
+                            background: selectedShipping?.id === opt.id ? '#f8fafc' : '#ffffff',
+                            gap: 12,
+                            transition: 'all 0.2s'
+                          }}
+                        >
+                          <input 
+                            type="radio" 
+                            name="checkout-shipping" 
+                            value={opt.id}
+                            checked={selectedShipping?.id === opt.id}
+                            onChange={() => setSelectedShipping(opt)}
+                            style={{ accentColor: '#0066cc', flexShrink: 0 }}
+                          />
+                          <div style={{
+                            width: 38,
+                            height: 38,
+                            borderRadius: 8,
+                            background: '#ffffff',
+                            border: '1px solid #e2e8f0',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0,
+                            padding: 4,
+                            overflow: 'hidden'
+                          }}>
+                            {logoUrl ? (
+                              <img src={logoUrl} alt={displayName} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+                            ) : (
+                              <Truck size={18} color="#64748b" />
+                            )}
+                          </div>
+                          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                            <div style={{ fontWeight: 600, fontSize: '0.92rem', color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{displayName}</div>
+                            <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Entrega em até {opt.delivery_time} dias úteis</div>
+                          </div>
+                          <strong style={{ fontSize: '1rem', color: isFree ? '#16a34a' : '#0f172a', flexShrink: 0 }}>
+                            {isFree ? 'Grátis' : money(Number(opt.price))}
+                          </strong>
+                        </label>
+                      )
+                    })}
                     {!selectedShipping && shippingOptions.length > 0 && (
                       <div style={{ marginTop: 8, padding: '9px 14px', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 8, color: '#1d4ed8', fontSize: '0.85rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 6 }}>
                         <span>👉 Por favor, selecione uma das opções de frete acima para continuar com a compra.</span>
