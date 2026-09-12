@@ -8,6 +8,7 @@ import { useCart, getCartSessionCode } from '../context/CartContext'
 import { useAuth } from '../hooks/useAuth'
 import { getAddressesByUserId, getCustomerByUserId } from '../services/customer'
 import { processCheckoutOrder, type CreatedOrderResult } from '../services/checkout'
+import { calculateMelhorEnvioQuote, type MelhorEnvioQuote } from '../services/melhorEnvioTest'
 import { validateCoupon, registerCouponUse, type AppliedCoupon } from '../services/coupons'
 import { getProductById, getProductBySku } from '../services/products'
 import { supabase } from '../lib/supabase'
@@ -859,6 +860,11 @@ export default function Checkout() {
   const [busy, setBusy] = useState(false)
   const [checkoutLoadingMessage, setCheckoutLoadingMessage] = useState('Preparando tudo para sua compra')
 
+  // Shipping logic
+  const [shippingOptions, setShippingOptions] = useState<MelhorEnvioQuote[]>([])
+  const [selectedShipping, setSelectedShipping] = useState<MelhorEnvioQuote | null>(null)
+  const [loadingShipping, setLoadingShipping] = useState(false)
+
   useEffect(() => {
     let mounted = true
     void supabase.from('store_payment_settings').select('enable_pix, enable_credit_card, enable_boleto').eq('id', 'default').maybeSingle().then(({ data, error }) => {
@@ -968,8 +974,34 @@ export default function Checkout() {
     ? (directItem.promo_price && directItem.promo_price > 0 ? directItem.promo_price : directItem.price) * directItem.quantity
     : totalPrice
 
-  const shippingCost = 0
+  const shippingCost = selectedShipping ? Number(selectedShipping.price) : 0
   const total = Math.max(0, activeTotalPrice + shippingCost - (coupon?.discount || 0))
+
+  useEffect(() => {
+    const currentCep = editingAddress ? draft.zipCode : address.zipCode
+    const cleanCep = currentCep?.replace(/\D/g, '')
+    if (cleanCep?.length === 8) {
+      setLoadingShipping(true)
+      calculateMelhorEnvioQuote(cleanCep, activeItems, 0)
+        .then(quotes => {
+          setShippingOptions(quotes)
+          if (quotes.length > 0) {
+            setSelectedShipping(quotes[0])
+          } else {
+            setSelectedShipping(null)
+          }
+        })
+        .catch(err => {
+          console.error('[checkout] Falha ao calcular frete:', err)
+          setShippingOptions([])
+          setSelectedShipping(null)
+        })
+        .finally(() => setLoadingShipping(false))
+    } else {
+      setShippingOptions([])
+      setSelectedShipping(null)
+    }
+  }, [editingAddress ? draft.zipCode : address.zipCode, activeItems])
 
   // 2. Garante que a URL SEMPRE exiba o código correto (sem /checkout no play.teknixbrasil.com.br)
   useEffect(() => {
@@ -1058,7 +1090,7 @@ export default function Checkout() {
         items: activeItems,
         customer: { ...selected, name: taxType === 'CNPJ' ? company.trim() : selected.name, email, phone: normalizeBrPhone(phone), document: taxDoc },
         shippingCost,
-        shippingMethod: 'sedex',
+        shippingMethod: selectedShipping ? `${selectedShipping.name} - ${selectedShipping.company}` : 'Padrão',
         discount: coupon?.discount || 0,
         paymentMethod: payment,
         userId: user?.id,
@@ -1113,6 +1145,18 @@ export default function Checkout() {
     if (!validAddress(selected)) { setError('Confira os campos do endereço antes de continuar.'); return }
     if (taxDoc.length !== (taxType === 'CPF' ? 11 : 14) || (taxType === 'CNPJ' && !company.trim())) { setError('Confira o documento e os dados de faturamento.'); return }
     if (phone.replace(/\D/g, '').length < 10) { setError('Informe o telefone com DDD.'); return }
+    
+    // Validar CEP e Frete
+    const currentCep = editingAddress ? draft.zipCode : address.zipCode
+    if (!currentCep || currentCep.replace(/\D/g, '').length < 8) {
+      setError('Por favor, informe seu CEP de entrega.')
+      return
+    }
+    if (shippingOptions.length > 0 && !selectedShipping) {
+      setError('Por favor, escolha uma opção de frete.')
+      return
+    }
+
     setError('')
     if (payment === 'pix') {
       setPixFlowStage('preparing')
@@ -1332,7 +1376,55 @@ export default function Checkout() {
                 {cepNotice && <Editable content={{}} as="p" widgetId="checkout-17" className="tkn-checkout-wide tkn-checkout-cep-note" role="status">{cepNotice}</Editable>}
                 <div className="tkn-checkout-wide tkn-checkout-edit-actions"><button type="button" className="tkn-checkout-secondary" onClick={confirmAddress}>Usar este endereço</button>{validAddress(address) && <button type="button" className="tkn-checkout-link" onClick={() => setEditingAddress(false)}>Cancelar</button>}</div>
               </div>}
-              <div className="tkn-checkout-shipping"><Editable as="h3" widgetId="checkout-18">Envio</Editable><div><span>Entrega padrão</span><strong>{money(shippingCost)}</strong></div><Editable as="p" widgetId="checkout-19">O prazo de entrega será informado no acompanhamento do pedido.</Editable></div>
+              <div className="tkn-checkout-shipping">
+                <Editable as="h3" widgetId="checkout-18">Envio</Editable>
+                
+                {loadingShipping ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 0', color: '#64748b' }}>
+                    <Loader2 size={16} className="tkn-spin" /> Calculando opções de frete...
+                  </div>
+                ) : shippingOptions.length > 0 ? (
+                  <div className="tkn-shipping-options-list" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
+                    {shippingOptions.map(opt => (
+                      <label 
+                        key={opt.id} 
+                        style={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          padding: 12, 
+                          border: `1px solid ${selectedShipping?.id === opt.id ? '#0066cc' : '#e2e8f0'}`,
+                          borderRadius: 8,
+                          cursor: 'pointer',
+                          background: selectedShipping?.id === opt.id ? '#f0f7ff' : '#fff',
+                          transition: 'all 0.2s'
+                        }}
+                      >
+                        <input 
+                          type="radio" 
+                          name="checkout-shipping" 
+                          value={opt.id}
+                          checked={selectedShipping?.id === opt.id}
+                          onChange={() => setSelectedShipping(opt)}
+                          style={{ marginRight: 12, accentColor: '#0066cc' }}
+                        />
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                          <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#0f172a' }}>{opt.company} {opt.name}</div>
+                          <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Entrega em até {opt.delivery_time} dias úteis</div>
+                        </div>
+                        <strong style={{ fontSize: '1rem', color: '#0f172a' }}>
+                          {Number(opt.price) === 0 ? 'Grátis' : money(Number(opt.price))}
+                        </strong>
+                      </label>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ padding: '12px 0', color: '#64748b', fontSize: '0.95rem' }}>
+                    {editingAddress && (!draft.zipCode || draft.zipCode.replace(/\D/g, '').length < 8) 
+                      ? 'Informe seu CEP completo para calcular as opções de frete.' 
+                      : 'Nenhuma opção de frete disponível para este endereço.'}
+                  </div>
+                )}
+              </div>
             </Editable>
             <section className="tkn-checkout-card" aria-labelledby="payment-title" data-widget-id="checkout-20">
               <Editable as="h2" widgetId="checkout-21" id="payment-title">Meios de pagamento</Editable>
