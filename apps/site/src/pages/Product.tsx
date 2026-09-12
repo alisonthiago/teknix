@@ -282,6 +282,12 @@ export default function Product() {
   }
 
   const handleOneClickBuy = () => {
+    if (!freightCalculated || !(deliveryCep || cep)) {
+      setShowCepModal(true)
+      showToast('Por favor, informe seu CEP para calcular o frete antes de comprar.')
+      return
+    }
+
     const productCode = currentProduct.sku || (currentProduct as any).slug || currentProduct.id
     // Isola esta compra para o produto específico (não acumula itens anteriores)
     clearCart()
