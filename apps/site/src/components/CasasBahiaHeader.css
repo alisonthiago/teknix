@@ -201,43 +201,73 @@
   align-items: center;
 }
 
-.dsvia-location-pill {
+.dsvia-location-pill,
+[data-testid="header-location"] {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: rgba(0, 0, 0, 0.04);
-  padding: 6px 12px;
-  border-radius: 20px;
+  background: transparent;
+  padding: 4px 8px;
+  border-radius: 6px;
   border: none;
   cursor: pointer;
   font-size: 13px;
   font-weight: 500;
-  color: #333;
+  color: inherit;
   margin-right: 12px;
-  transition: background 0.15s ease;
+  transition: background 0.15s ease, opacity 0.15s ease;
+  text-align: left;
+  line-height: 1.2;
 }
 
-.dsvia-location-pill:hover {
-  background: rgba(0, 0, 0, 0.08);
+.dsvia-location-pill:hover,
+[data-testid="header-location"]:hover {
+  background: rgba(0, 0, 0, 0.05);
 }
 
-.dsvia-location-text-col {
+.dsvia-location-pill .dsvia-icon-place,
+[data-testid="header-location"] .dsvia-icon-place {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-style: normal;
+  flex-shrink: 0;
+  color: #0066cc;
+}
+
+.dsvia-location-pill .dsvia-icon-chevron,
+[data-testid="header-location"] .dsvia-icon-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-style: normal;
+  flex-shrink: 0;
+  color: #64748b;
+  margin-left: 2px;
+}
+
+.dsvia-location-text-col,
+[data-testid="header-location"] .dsvia-location-text-col {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   line-height: 1.2;
+  min-width: 0;
 }
 
 .dsvia-location-prefix {
   font-size: 11px;
-  color: #666;
+  color: #64748b;
   font-weight: 400;
 }
 
 .dsvia-location-city {
   font-size: 13px;
-  font-weight: 600;
-  color: #333;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Barra de Busca Central */
@@ -1782,40 +1812,76 @@
     align-items: center;
   }
 
-  .dsvia-location-pill {
-    width: 100%;
-    justify-content: flex-start;
+  .dsvia-location-pill,
+  [data-testid="header-location"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
     background: transparent !important;
-    padding: 3px 4px !important;
+    padding: 6px 2px !important;
     margin-right: 0 !important;
     border-radius: 4px;
-    gap: 8px;
-    color: #4b5563;
+    border: none !important;
+    cursor: pointer;
+    gap: 8px !important;
+    color: #1e293b;
+    box-sizing: border-box;
   }
 
-  .dsvia-location-pill svg {
-    color: #0066cc;
-    flex-shrink: 0;
-  }
-
-  .dsvia-location-text-col {
-    display: flex;
-    flex-direction: row;
+  .dsvia-location-pill .dsvia-icon-place,
+  [data-testid="header-location"] .dsvia-icon-place {
+    color: #0066cc !important;
+    flex-shrink: 0 !important;
+    display: inline-flex !important;
     align-items: center;
-    gap: 5px;
-    line-height: 1.2;
   }
 
-  .dsvia-location-prefix {
-    font-size: 12px;
-    color: #6b7280;
-    font-weight: 400;
+  .dsvia-location-pill .dsvia-icon-chevron,
+  .dsvia-location-pill > *:last-child,
+  [data-testid="header-location"] .dsvia-icon-chevron,
+  [data-testid="header-location"] > *:last-child {
+    margin-left: auto !important;
+    color: #64748b !important;
+    flex-shrink: 0 !important;
+    display: inline-flex !important;
+    align-items: center;
   }
 
-  .dsvia-location-city {
-    font-size: 12px;
-    font-weight: 600;
-    color: #1f2937;
+  .dsvia-location-pill .dsvia-location-text-col,
+  [data-testid="header-location"] .dsvia-location-text-col {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 4px !important;
+    line-height: 1.2 !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    text-align: left !important;
+  }
+
+  .dsvia-location-pill .dsvia-location-prefix,
+  [data-testid="header-location"] .dsvia-location-prefix {
+    font-size: 13px !important;
+    color: #64748b !important;
+    font-weight: 400 !important;
+    white-space: nowrap !important;
+    display: inline-block !important;
+  }
+
+  .dsvia-location-pill .dsvia-location-city,
+  [data-testid="header-location"] .dsvia-location-city {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: inline-block !important;
   }
 
   /* Quando pesquisar (campo focado ou com texto), ocultar a localização no celular */
