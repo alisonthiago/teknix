@@ -38,8 +38,36 @@ export default function Dashboard() {
   const [chartPeriod, setChartPeriod] = useState<'7d' | '30d' | '12m'>('7d')
 
   // UI States
-  const [hidden, setHidden] = useState(false)
+  const [hidden, setHidden] = useState(() => {
+    try {
+      return localStorage.getItem('hub_hide_values') === 'true'
+    } catch {
+      return false
+    }
+  })
   const [showLiveMonitor, setShowLiveMonitor] = useState(false)
+
+  const toggleHidden = () => {
+    setHidden(prev => {
+      const next = !prev
+      try {
+        localStorage.setItem('hub_hide_values', String(next))
+        window.dispatchEvent(new CustomEvent('hub_hide_values_changed', { detail: { hide: next } }))
+      } catch {}
+      return next
+    })
+  }
+
+  useEffect(() => {
+    const handleHideChanged = (ev: Event) => {
+      const customEv = ev as CustomEvent
+      if (typeof customEv.detail?.hide === 'boolean') {
+        setHidden(customEv.detail.hide)
+      }
+    }
+    window.addEventListener('hub_hide_values_changed', handleHideChanged)
+    return () => window.removeEventListener('hub_hide_values_changed', handleHideChanged)
+  }, [])
 
   // Perfil do Usuário
   const [userNickname, setUserNickname] = useState(() => localStorage.getItem('user_nickname') || 'Alison')
@@ -711,7 +739,7 @@ export default function Dashboard() {
                 </p>
               </div>
               <button
-                onClick={() => setHidden(!hidden)}
+                onClick={toggleHidden}
                 title={hidden ? 'Exibir valores' : 'Ocultar valores'}
                 type="button"
                 style={{ width: 40, height: 40, borderRadius: '50%', border: 'none', background: 'none', cursor: 'pointer', color: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center' }}

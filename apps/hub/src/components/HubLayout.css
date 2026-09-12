@@ -565,6 +565,104 @@
   box-shadow: 0 0 6px rgba(239, 68, 68, 0.8);
 }
 
+/* ── Live Revenue Capsule no Header Pill ── */
+.hub-live-revenue-capsule {
+  display: inline-flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 980px;
+  padding: 0 6px 0 10px;
+  height: 32px;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.hub-live-revenue-capsule:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.hub-live-revenue-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: none;
+  background: transparent;
+  padding: 0 4px 0 0;
+  cursor: pointer;
+  color: #0f172a;
+  text-decoration: none;
+  line-height: 1;
+}
+
+.hub-live-pulse-wrapper {
+  position: relative;
+  display: flex;
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+}
+
+.hub-live-pulse-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background-color: #ef4444;
+  opacity: 0.75;
+  animation: hubLivePulse 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.hub-live-pulse-dot {
+  position: relative;
+  display: inline-flex;
+  border-radius: 9999px;
+  width: 8px;
+  height: 8px;
+  background-color: #ef4444;
+}
+
+@keyframes hubLivePulse {
+  75%, 100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+.hub-live-revenue-label {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #0f172a;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+}
+
+.hub-live-eye-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-left: 2px;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.hub-live-eye-btn:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
 .flow-user-btn {
   display: flex;
   align-items: center;

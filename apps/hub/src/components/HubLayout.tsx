@@ -18,7 +18,7 @@ import {
 import { InternalChatProvider, useInternalChat } from '../contexts/InternalChatContext'
 import FloatingMessenger from './internal-chat/FloatingMessenger'
 import { TeknixLogo } from './TeknixLogo'
-import { User, Users, Settings, Layers, LogOut } from 'lucide-react'
+import { User, Users, Settings, Layers, LogOut, Eye, EyeOff } from 'lucide-react'
 import './HubLayout.css'
 
 // ─── Ícones originais + logos de integração ────────────────────────────────
@@ -189,6 +189,38 @@ function HubLayoutContent() {
 
   // Faturamento de hoje para o botão Ao Vivo (FLOW 1:1)
   const [todayRevenue, setTodayRevenue] = useState<number>(0)
+
+  // Ocultar / Exibir valores (persistido no localStorage e sincronizado)
+  const [hideValues, setHideValues] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('hub_hide_values') === 'true'
+    } catch {
+      return false
+    }
+  })
+
+  const toggleHideValues = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation()
+    setHideValues(prev => {
+      const next = !prev
+      try {
+        localStorage.setItem('hub_hide_values', String(next))
+        window.dispatchEvent(new CustomEvent('hub_hide_values_changed', { detail: { hide: next } }))
+      } catch {}
+      return next
+    })
+  }
+
+  useEffect(() => {
+    const handleHideChanged = (ev: Event) => {
+      const customEv = ev as CustomEvent
+      if (typeof customEv.detail?.hide === 'boolean') {
+        setHideValues(customEv.detail.hide)
+      }
+    }
+    window.addEventListener('hub_hide_values_changed', handleHideChanged)
+    return () => window.removeEventListener('hub_hide_values_changed', handleHideChanged)
+  }, [])
 
   useEffect(() => {
     async function loadTodayRevenue() {
@@ -498,23 +530,41 @@ function HubLayoutContent() {
                   </svg>
                 </button>
 
-                {/* Ao Vivo */}
-                <button
-                  type="button"
-                  onClick={() => navigate('/hub/financeiro')}
-                  className="header-live-button flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white hover:bg-[#f5f5f5] text-[#111111] text-[11px] font-black shadow-sm transition-all tracking-wider uppercase cursor-pointer"
-                  title="Monitor ao Vivo em Tempo Real"
-                >
-                  <span className="relative flex h-2 w-2 shrink-0">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#e74c3c] opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[#e74c3c]"></span>
-                  </span>
-                  <span className="font-mono font-bold whitespace-nowrap">
-                    {todayRevenue > 0
-                      ? `R$ ${todayRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                      : 'R$ 0,00'}
-                  </span>
-                </button>
+                {/* Ao Vivo com Ocultação de Valores */}
+                <div className="hub-live-revenue-capsule header-live-button">
+                  <button
+                    type="button"
+                    onClick={() => navigate('/hub/financeiro')}
+                    className="hub-live-revenue-btn"
+                    title="Monitor ao Vivo em Tempo Real — Ver Financeiro"
+                  >
+                    <span className="hub-live-pulse-wrapper">
+                      <span className="hub-live-pulse-ring" />
+                      <span className="hub-live-pulse-dot" />
+                    </span>
+                    <span className="hub-live-revenue-label">
+                      {hideValues ? '••••••' : (
+                        todayRevenue > 0
+                          ? `R$ ${todayRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                          : 'R$ 0,00'
+                      )}
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={toggleHideValues}
+                    className="hub-live-eye-btn"
+                    title={hideValues ? 'Mostrar valores' : 'Ocultar valores'}
+                    aria-label={hideValues ? 'Mostrar valores' : 'Ocultar valores'}
+                  >
+                    {hideValues ? (
+                      <EyeOff size={14} strokeWidth={1.8} />
+                    ) : (
+                      <Eye size={14} strokeWidth={1.8} />
+                    )}
+                  </button>
+                </div>
 
 
                 {/* Usuário logado */}
