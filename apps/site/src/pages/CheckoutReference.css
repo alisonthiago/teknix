@@ -72,8 +72,133 @@
 .tkn-checkout-edit-actions { display:flex; gap:16px; align-items:center; }
 .tkn-checkout-secondary { background:#f0f5ff; color:#2474e8; padding:12px 16px; border:0; border-radius:8px; cursor:pointer; font:inherit; font-size:13px; }
 .tkn-checkout-shipping { margin-top:32px; }
-.tkn-checkout-shipping > div { display:flex; justify-content:space-between; gap:16px; font-size:14px; }
+.tkn-checkout-shipping > div:not(.tkn-shipping-options-list) { display:flex; justify-content:space-between; gap:16px; font-size:14px; }
 .tkn-checkout-shipping p { font-size:12px; color:#888; margin:12px 0 0; }
+
+.tkn-shipping-options-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  margin-top: 12px !important;
+}
+
+.tkn-shipping-option {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  padding: 10px 14px !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 10px !important;
+  cursor: pointer !important;
+  background: #ffffff !important;
+  gap: 12px !important;
+  min-height: 52px !important;
+  height: auto !important;
+  overflow: hidden !important;
+  transition: all 0.15s ease !important;
+}
+
+.tkn-shipping-option:hover {
+  border-color: #cbd5e1 !important;
+}
+
+.tkn-shipping-option.is-selected {
+  border-color: #0066cc !important;
+  background: #f0f7ff !important;
+}
+
+.tkn-shipping-option input[type="radio"],
+.tkn-shipping-option input {
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  max-width: 18px !important;
+  min-height: 18px !important;
+  max-height: 18px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  flex: 0 0 18px !important;
+  flex-shrink: 0 !important;
+  accent-color: #0066cc !important;
+  cursor: pointer !important;
+  align-self: center !important;
+}
+
+.tkn-shipping-logo-wrap {
+  width: 56px !important;
+  height: 28px !important;
+  min-width: 56px !important;
+  max-width: 56px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 56px !important;
+  flex-shrink: 0 !important;
+  overflow: hidden !important;
+}
+
+.tkn-shipping-logo-wrap img {
+  max-width: 56px !important;
+  max-height: 26px !important;
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain !important;
+  display: block !important;
+}
+
+.tkn-shipping-meta {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+}
+
+.tkn-shipping-title {
+  font-weight: 500 !important;
+  font-size: 13px !important;
+  color: #1e293b !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  line-height: 1.35 !important;
+}
+
+.tkn-shipping-subtitle {
+  font-size: 11px !important;
+  color: #64748b !important;
+  font-weight: 400 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  line-height: 1.35 !important;
+}
+
+.tkn-shipping-price {
+  flex: 0 0 auto !important;
+  flex-shrink: 0 !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #0f172a !important;
+  text-align: right !important;
+  white-space: nowrap !important;
+  margin-left: auto !important;
+}
+
+.tkn-shipping-price.is-free {
+  color: #16a34a !important;
+}
+
 .tkn-checkout-payment { display:flex; gap:16px; align-items:center; padding:16px 12px; border:1px solid transparent; border-radius:12px; cursor:pointer; font-size:14px; }
 .tkn-checkout-payment + .tkn-checkout-payment { margin-top:0; }
 .tkn-checkout-payment.is-selected { border-color:#3483fa; background:#fafcff; }
@@ -164,6 +289,48 @@
   .tkn-checkout-card { padding:16px; border-radius:16px; }
   .tkn-checkout-fields { grid-template-columns:minmax(0,1fr); }
   .tkn-checkout-payment { gap:12px; padding:12px 8px; }
+  .tkn-shipping-options-list { width: 100% !important; gap: 6px !important; }
+  .tkn-shipping-option {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    padding: 8px 10px !important;
+    gap: 10px !important;
+    min-height: 48px !important;
+    box-sizing: border-box !important;
+  }
+  .tkn-shipping-option input[type="radio"],
+  .tkn-shipping-option input {
+    flex: 0 0 16px !important;
+    width: 16px !important;
+    height: 16px !important;
+    min-width: 16px !important;
+    max-width: 16px !important;
+  }
+  .tkn-shipping-logo-wrap {
+    flex: 0 0 48px !important;
+    width: 48px !important;
+    height: 24px !important;
+    min-width: 48px !important;
+    max-width: 48px !important;
+  }
+  .tkn-shipping-logo-wrap img {
+    max-width: 48px !important;
+    max-height: 22px !important;
+  }
+  .tkn-shipping-title {
+    font-size: 12px !important;
+  }
+  .tkn-shipping-subtitle {
+    font-size: 10px !important;
+  }
+  .tkn-shipping-price {
+    font-size: 13px !important;
+  }
   .tkn-checkout-product { gap:12px; align-items:flex-start; }
   .tkn-checkout-product > div:last-child { padding-right:0; padding-top:4px; }
   .tkn-checkout-thumb { width:64px; height:64px; padding:2px; }

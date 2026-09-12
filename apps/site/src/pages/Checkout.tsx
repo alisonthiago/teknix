@@ -1412,7 +1412,7 @@ export default function Checkout() {
                     <Loader2 size={16} className="tkn-spin" /> Calculando opções de frete...
                   </div>
                 ) : shippingOptions.length > 0 ? (
-                  <div className="tkn-shipping-options-list" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
+                  <div className="tkn-shipping-options-list">
                     {(showAllShipping || shippingOptions.length <= 3
                       ? shippingOptions
                       : (selectedShipping && !shippingOptions.slice(0, 3).some(o => o.id === selectedShipping.id))
@@ -1429,16 +1429,12 @@ export default function Checkout() {
                       return (
                         <label 
                           key={opt.id} 
-                          style={{ 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            padding: '12px 14px', 
-                            border: `1px solid ${selectedShipping?.id === opt.id ? '#0066cc' : '#e2e8f0'}`,
-                            borderRadius: 8, 
-                            cursor: 'pointer', 
-                            background: selectedShipping?.id === opt.id ? '#f0f7ff' : '#ffffff',
-                            gap: 14,
-                            transition: 'all 0.15s ease'
+                          className={`tkn-shipping-option ${selectedShipping?.id === opt.id ? 'is-selected' : ''}`}
+                          style={{
+                            boxSizing: 'border-box',
+                            width: '100%',
+                            maxWidth: '100%',
+                            minWidth: 0
                           }}
                         >
                           <input 
@@ -1447,27 +1443,39 @@ export default function Checkout() {
                             value={opt.id}
                             checked={selectedShipping?.id === opt.id}
                             onChange={() => setSelectedShipping(opt)}
-                            style={{ accentColor: '#0066cc', flexShrink: 0 }}
+                            style={{
+                              width: 18,
+                              height: 18,
+                              minWidth: 18,
+                              maxWidth: 18,
+                              margin: 0,
+                              flex: '0 0 18px',
+                              flexShrink: 0,
+                              accentColor: '#0066cc',
+                              alignSelf: 'center'
+                            }}
                           />
-                          <div style={{
-                            width: 68,
-                            height: 32,
+                          <div className="tkn-shipping-logo-wrap" style={{
+                            width: 56,
+                            height: 28,
+                            flex: '0 0 56px',
+                            flexShrink: 0,
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            flexShrink: 0
+                            overflow: 'hidden'
                           }}>
                             {logoUrl ? (
-                              <img src={logoUrl} alt={displayName} style={{ maxWidth: 68, maxHeight: 30, objectFit: 'contain', display: 'block' }} />
+                              <img src={logoUrl} alt={displayName} style={{ maxWidth: 56, maxHeight: 26, width: 'auto', height: 'auto', objectFit: 'contain', display: 'block' }} />
                             ) : (
-                              <Truck size={20} color="#64748b" />
+                              <Truck size={18} color="#64748b" />
                             )}
                           </div>
-                          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                            <div style={{ fontWeight: 500, fontSize: '0.88rem', color: '#1e293b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{displayName}</div>
-                            <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 400 }}>Entrega em até {opt.delivery_time} dias úteis</div>
+                          <div className="tkn-shipping-meta" style={{ flex: '1 1 auto', minWidth: 0, overflow: 'hidden' }}>
+                            <div className="tkn-shipping-title" style={{ fontWeight: 500, fontSize: '0.85rem', color: '#1e293b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{displayName}</div>
+                            <div className="tkn-shipping-subtitle" style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 400, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Entrega em até {opt.delivery_time} dias úteis</div>
                           </div>
-                          <strong style={{ fontSize: '0.96rem', fontWeight: 600, color: isFree ? '#16a34a' : '#0f172a', flexShrink: 0 }}>
+                          <strong className={`tkn-shipping-price ${isFree ? 'is-free' : ''}`} style={{ fontSize: '0.92rem', fontWeight: 600, color: isFree ? '#16a34a' : '#0f172a', flex: '0 0 auto', flexShrink: 0, marginLeft: 'auto', whiteSpace: 'nowrap' }}>
                             {isFree ? 'Grátis' : money(Number(opt.price))}
                           </strong>
                         </label>
