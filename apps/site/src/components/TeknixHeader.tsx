@@ -485,8 +485,19 @@ export default function TeknixHeader() {
                 <Editable as={Link} widgetId="chrome:header:account" globalKey="chrome:header:account" widgetType="button" label="Acesso à conta" renderContent={false}
                   to={user ? '/conta' : '/login'}
                   className="dsvia-account-capsule"
-                  title={user ? `Minha Conta (${account.fullName})` : 'Acesse sua conta'}
-                  onClick={(event: any) => { if (user) { event.preventDefault(); setIsAccountOpen(open => !open) } }}
+                  onClick={(event: any) => {
+                    const isMobile = typeof window !== 'undefined' && (window.innerWidth <= 1024 || window.matchMedia('(max-width: 1024px)').matches)
+                    if (isMobile) {
+                      setIsAccountOpen(false)
+                      event.preventDefault()
+                      navigate(user ? '/conta' : '/login')
+                      return
+                    }
+                    if (user) {
+                      event.preventDefault()
+                      setIsAccountOpen(open => !open)
+                    }
+                  }}
                   aria-expanded={user ? isAccountOpen : undefined}
                 >
                   {account.avatarUrl ? (

@@ -1843,6 +1843,10 @@
     display: none !important;
   }
 
+  .dsvia-account-popover {
+    display: none !important;
+  }
+
   .dsvia-actions-right :is(.dsvia-account-capsule, .dsvia-icon-action) {
     background: transparent !important;
     border: none !important;
