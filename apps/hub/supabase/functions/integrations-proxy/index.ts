@@ -802,7 +802,9 @@ serve(async (req) => {
             body: JSON.stringify(payload)
           })
           const data = await res.json()
-          const quotes = Array.isArray(data) ? data.filter((q: any) => !q.error) : []
+          // Melhor Envio API returns an object with numeric keys, not an array
+          const rawQuotes = Array.isArray(data) ? data : Object.values(data).filter((v: any) => v && typeof v === 'object' && v.id !== undefined)
+          const quotes = (rawQuotes as any[]).filter((q: any) => !q.error)
           result = res.ok
             ? { status: isSandbox ? 'sandbox' : 'connected', quotes }
             : { status: 'error', quotes: [], message: 'A API do Melhor Envio recusou a cotação.' }

@@ -9,11 +9,14 @@ export interface ProductCommerce {
   freeShipping: boolean
   condition?: string
   soldCount?: number | string
+  ratingScore?: number
+  ratingCount?: number
 }
 export const DEFAULT_COMMERCE: ProductCommerce = {
   offerEnabled: false, offerEndsAt: null, badge: 'none', showLastUnit: false,
   installments: 1, pixDiscountPercent: 0, freeShipping: false,
-  condition: 'Novo', soldCount: '+10 mil vendidos'
+  condition: 'Novo', soldCount: '+10 mil vendidos',
+  ratingScore: 4.8, ratingCount: 125
 }
 export function normalizeCommerce(value: unknown): ProductCommerce {
   const p = value && typeof value === 'object' ? value as Partial<ProductCommerce> : {}
@@ -26,7 +29,9 @@ export function normalizeCommerce(value: unknown): ProductCommerce {
     pixDiscountPercent: typeof p.pixDiscountPercent === 'number' && Number.isFinite(p.pixDiscountPercent) && p.pixDiscountPercent >= 0 && p.pixDiscountPercent < 100 ? p.pixDiscountPercent : 0,
     freeShipping: p.freeShipping === true,
     condition: typeof p.condition === 'string' && p.condition.trim() ? p.condition.trim() : 'Novo',
-    soldCount: p.soldCount != null ? p.soldCount : '+10 mil vendidos'
+    soldCount: p.soldCount != null ? p.soldCount : '+10 mil vendidos',
+    ratingScore: typeof p.ratingScore === 'number' ? p.ratingScore : 4.8,
+    ratingCount: typeof p.ratingCount === 'number' ? p.ratingCount : 125
   }
 }
 export function validateCommerce(p: ProductCommerce, price: number, promo: number | null, now = Date.now()): string | null {

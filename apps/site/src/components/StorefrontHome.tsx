@@ -146,7 +146,7 @@ export default function StorefrontHome() {
 
       // Produtos Recomendados
       const lastCategory = typeof window !== 'undefined' ? localStorage.getItem('teknix_last_category') : null
-      let recommended = []
+      let recommended: any[] = []
       if (lastCategory) {
         recommended = published.filter(p => {
           const cat = String(p.category || p.category_id || '').toLowerCase()

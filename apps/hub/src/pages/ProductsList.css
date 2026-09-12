@@ -490,6 +490,23 @@
   box-sizing: border-box;
 }
 
+.product-dropdown-item svg {
+  color: #64748b;
+  transition: color 0.12s ease;
+}
+
+.product-dropdown-item:hover svg {
+  color: #1d1d1f;
+}
+
+.product-dropdown-item.delete svg {
+  color: #f87171;
+}
+
+.product-dropdown-item.delete:hover svg {
+  color: #dc2626;
+}
+
 .product-dropdown-item:hover {
   background: #f3f4f6;
   color: #000000;

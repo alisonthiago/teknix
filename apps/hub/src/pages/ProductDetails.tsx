@@ -409,11 +409,18 @@ export default function ProductDetails() {
     ? productSpecs.flatMap(imageValue)
     : imageValue((productSpecs as any).gallery_images)
   const metadataImages = imageValue((storeMeta as any)?.gallery_images)
+  
+  const storeMetaSpecs = (storeMeta as any)?.specifications || {}
+  const storeMetaGalleryImages = Array.isArray(storeMetaSpecs.gallery_images)
+    ? storeMetaSpecs.gallery_images.flatMap(imageValue)
+    : imageValue(storeMetaSpecs.gallery_images)
+
   const galleryImages = [
     ...relatedImages,
     ...productImages,
     ...specificationImages,
     ...metadataImages,
+    ...storeMetaGalleryImages,
     ...editorialImages,
   ].filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
   const imgUrl = galleryImages[0] || product.main_image || product.image_url || ''
@@ -654,7 +661,7 @@ export default function ProductDetails() {
           {/* Dados Gerais / Ficha Técnica Moderna */}
           <div className="product-section-card">
             <h2 className="product-section-title">
-              <Tag size={18} color="#4b5563" />
+              <Tag size={15} color="#6b7280" />
               Ficha Técnica e Dados do Cadastro
             </h2>
             <div className="specs-modern-grid">
@@ -699,7 +706,7 @@ export default function ProductDetails() {
           <div className="product-section-card">
             <div className="product-section-header-row">
               <h2 className="product-section-title">
-                <ShieldCheck size={18} color="#4b5563" />
+                <ShieldCheck size={15} color="#6b7280" />
                 Descrição e Apresentação Comercial
               </h2>
               <button
@@ -731,7 +738,7 @@ export default function ProductDetails() {
               <div className="product-section-card storytelling-overview-card">
                 <div className="product-section-header-row">
                   <h2 className="product-section-title">
-                    <Sparkles size={18} color="#e91e63" />
+                    <Sparkles size={15} color="#e91e63" />
                     Storytelling & Apresentação
                   </h2>
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -825,7 +832,7 @@ export default function ProductDetails() {
           {/* Galeria de Fotos */}
           <div className="product-section-card">
             <h2 className="product-section-title">
-              <Eye size={18} color="#4b5563" />
+              <Eye size={15} color="#6b7280" />
               Fotos Cadastradas ({allImages.length})
             </h2>
             {allImages.length > 0 ? (
@@ -846,7 +853,7 @@ export default function ProductDetails() {
           {/* Canais de Venda e Sincronização */}
           <div className="product-section-card">
             <h2 className="product-section-title">
-              <Layers size={18} color="#4b5563" />
+              <Layers size={15} color="#6b7280" />
               Canais de Venda & Integração
             </h2>
             <div className="product-channels-list">
@@ -856,8 +863,8 @@ export default function ProductDetails() {
                     TX
                   </div>
                   <div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#000000' }}>Loja Própria TEKNIX</div>
-                    <div style={{ fontSize: 12, color: '#6b7280' }}>
+                    <div style={{ fontSize: 12.5, fontWeight: 600, color: '#111111' }}>Loja Própria TEKNIX</div>
+                    <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>
                       {isPublished ? 'Ativo na vitrine pública' : 'Oculto da vitrine'}
                     </div>
                   </div>
@@ -873,8 +880,8 @@ export default function ProductDetails() {
                     ML
                   </div>
                   <div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#000000' }}>Mercado Livre (FLOW)</div>
-                    <div style={{ fontSize: 12, color: '#6b7280' }}>
+                    <div style={{ fontSize: 12.5, fontWeight: 600, color: '#111111' }}>Mercado Livre (FLOW)</div>
+                    <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>
                       {product.sku?.startsWith('MLB') ? `Anúncio: ${product.sku}` : 'Catálogo central'} • {salesInfo.totalSold} vendas registradas
                     </div>
                   </div>

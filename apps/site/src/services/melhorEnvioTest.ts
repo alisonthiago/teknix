@@ -35,7 +35,7 @@ export async function checkMelhorEnvio(): Promise<ProxyResponse> {
   return invoke('health_check')
 }
 
-export async function calculateMelhorEnvioQuote(toPostalCode: string): Promise<MelhorEnvioQuote[]> {
+export async function calculateMelhorEnvioQuote(toPostalCode: string, _products?: any[], _orderValue?: number): Promise<MelhorEnvioQuote[]> {
   const response = await invoke('calculate_quote', {
     from: { postal_code: originPostalCode },
     to: { postal_code: toPostalCode.replace(/\D/g, '') },

@@ -74,6 +74,12 @@ export default function StorefrontProductCard({ product: p, to, instance="catalo
         count: p.reviewData.length
       }
     }
+    if (p.commerceProduct?.commerce?.ratingScore) {
+      return {
+        score: p.commerceProduct.commerce.ratingScore.toFixed(1),
+        count: p.commerceProduct.commerce.ratingCount ? String(p.commerceProduct.commerce.ratingCount) : '125'
+      }
+    }
     if (p.rating) {
       return {
         score: Number(p.rating).toFixed(1),

@@ -260,6 +260,7 @@ export async function getProducts(options?: {
           product.slug,
           product.store_meta?.category_id,
           product.store_meta?.segment_id,
+          ...(Array.isArray(product.store_meta?.specifications?.additional_categories) ? product.store_meta.specifications.additional_categories : []),
         ].some((value) => matchesNormalizedToken(value, segmentTerm))
       }
 
@@ -312,18 +313,23 @@ export async function getProductById(id: string) {
 
   // Garante autenticação de catálogo para permissão de leitura no Supabase RLS
   await ensureCatalogAuth()
-  const keys = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
-    ? ['id', 'sku', 'slug', 'mercadolivre_item_id']
-    : ['sku', 'slug', 'mercadolivre_item_id']
-  for (const key of keys) {
-    try {
-      const { data } = await storeClient.from('products')
-        .select('*, store_meta:product_store_metadata(*)').ilike(key, id).maybeSingle()
-      if (data) return mapProduct(data)
-    } catch {
-      // A página continua pública mesmo quando o catálogo remoto está indisponível.
-    }
+  
+  try {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
+    const orCondition = isUuid 
+      ? `id.eq.${id},sku.ilike.${id},slug.ilike.${id},mercadolivre_item_id.ilike.${id}`
+      : `sku.ilike.${id},slug.ilike.${id},mercadolivre_item_id.ilike.${id}`
+      
+    const { data } = await storeClient.from('products')
+      .select('*, store_meta:product_store_metadata(*)')
+      .or(orCondition)
+      .maybeSingle()
+      
+    if (data) return mapProduct(data)
+  } catch {
+    // Fallback silencioso
   }
+  
   try {
     const { data: metadata } = await storeClient.from('product_store_metadata')
       .select('product_id').ilike('slug', id).maybeSingle()

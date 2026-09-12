@@ -195,10 +195,58 @@
 
 .dsvia-actions-right .dsvia-cep-trigger { color: #000000; }
 
+/* Location Pill (Desktop) */
+.dsvia-location-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.dsvia-location-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.04);
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+  margin-right: 12px;
+  transition: background 0.15s ease;
+}
+
+.dsvia-location-pill:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.dsvia-location-text-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.2;
+}
+
+.dsvia-location-prefix {
+  font-size: 11px;
+  color: #666;
+  font-weight: 400;
+}
+
+.dsvia-location-city {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+}
+
 /* Barra de Busca Central */
 .dsvia-search-box {
   flex: 1;
   max-width: 580px;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 .dsvia-search-form {
@@ -217,21 +265,29 @@
   box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.06);
 }
 
-.dsvia-search-input {
+.dsvia-search-input,
+#search-input,
+.dsvia-search-form input {
   flex: 1;
-  border: none;
-  outline: none;
+  border: none !important;
+  outline: none !important;
   font-size: var(--tkn-text-14);
   font-weight: var(--tkn-weight-regular);
   line-height: 150%;
   letter-spacing: 0.02em;
   color: var(--tkn-black);
-  background: transparent;
+  background: transparent !important;
   font-family: var(--cb-font);
-  padding: 0;
+  padding: 0 !important;
+  box-shadow: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
 }
 
-.dsvia-search-input::placeholder {
+.dsvia-search-input::placeholder,
+#search-input::placeholder,
+.dsvia-search-form input::placeholder {
   color: var(--tkn-light-gray);
 }
 
@@ -1702,17 +1758,71 @@
   .dsvia-search-box {
     width: 100%;
     order: 2;
-    margin-top: 12px;
+    margin-top: 10px;
+    margin-bottom: 2px;
   }
 
   .dsvia-search-form {
-    margin-top: 4px;
+    margin-top: 0;
   }
 
   .dsvia-search-input {
     height: 38px;
     font-size: var(--tkn-text-13);
     border-radius: 4px;
+  }
+
+  /* Location Pill (Mobile - abaixo da barra de busca) */
+  .dsvia-location-wrapper {
+    order: 3;
+    width: 100%;
+    margin-top: 6px;
+    margin-bottom: 2px;
+    display: flex;
+    align-items: center;
+  }
+
+  .dsvia-location-pill {
+    width: 100%;
+    justify-content: flex-start;
+    background: transparent !important;
+    padding: 3px 4px !important;
+    margin-right: 0 !important;
+    border-radius: 4px;
+    gap: 8px;
+    color: #4b5563;
+  }
+
+  .dsvia-location-pill svg {
+    color: #0066cc;
+    flex-shrink: 0;
+  }
+
+  .dsvia-location-text-col {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
+    line-height: 1.2;
+  }
+
+  .dsvia-location-prefix {
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 400;
+  }
+
+  .dsvia-location-city {
+    font-size: 12px;
+    font-weight: 600;
+    color: #1f2937;
+  }
+
+  /* Quando pesquisar (campo focado ou com texto), ocultar a localização no celular */
+  .dsvia-location-wrapper.is-searching,
+  .dsvia-location-pill.is-searching,
+  .dsvia-header-root:has(.dsvia-search-form:focus-within) .dsvia-location-wrapper {
+    display: none !important;
   }
 
   .dsvia-mobile-subbar {

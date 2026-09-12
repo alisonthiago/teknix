@@ -12,7 +12,7 @@ import { useFavorites } from '../context/FavoritesContext'
 import type { Product as ProductType } from '../types/database'
 import './Product.css'
 import { Ads } from '../components/Ads'
-import { FileText, ShieldCheck, Truck, RotateCcw, Headphones, Zap, BatteryCharging, Wrench, ChevronDown, CheckCircle2, Search, ChevronRight, Loader2 } from 'lucide-react'
+import { FileText, ShieldCheck, Truck, RotateCcw, Headphones, Zap, BatteryCharging, Wrench, ChevronDown, ChevronUp, CheckCircle2, Search, ChevronRight, Loader2 } from 'lucide-react'
 import StockNotifyModal from '../components/StockNotifyModal'
 import './ProductResponsive.css'
 import { productPricing, cleanProductTitle, normalizeShowcase, type ProductEditorialShowcase } from '../../../../packages/core/src/productCommerce'
@@ -134,6 +134,11 @@ export default function Product() {
   const [freightCalculated, setFreightCalculated] = useState(false)
   const [freightLoading, setFreightLoading] = useState(false)
   const [freightOptions, setFreightOptions] = useState<MelhorEnvioQuote[]>([])
+  const [showAllFreight, setShowAllFreight] = useState(false)
+  const sortedFreight = useMemo(() => {
+    return [...freightOptions].sort((a, b) => Number(a.price) - Number(b.price))
+  }, [freightOptions])
+  const displayedFreight = showAllFreight ? sortedFreight : sortedFreight.slice(0, 3)
   const [freightError, setFreightError] = useState('')
   const [cepPreview, setCepPreview] = useState<{ city: string; state: string; neighborhood?: string; street?: string } | null>(null)
   const [showFreightCalc, setShowFreightCalc] = useState(false)
@@ -194,10 +199,7 @@ export default function Product() {
     let cancelled = false
 
     async function load() {
-      let data = await getProductBySku(productId)
-      if (!data) {
-        data = await getProductById(productId)
-      }
+      let data = await getProductById(productId)
       if (cancelled) return
       setProduct(data)
       setLoading(false)
@@ -282,10 +284,11 @@ export default function Product() {
   }
 
   const handleOneClickBuy = () => {
-    if (!freightCalculated || !(deliveryCep || cep)) {
-      setShowCepModal(true)
-      showToast('Por favor, informe seu CEP para calcular o frete antes de comprar.')
-      return
+    const candidateCep = (deliveryCep || cep || '').replace(/\D/g, '')
+    if (candidateCep.length === 8) {
+      try {
+        localStorage.setItem('teknix_user_cep', candidateCep)
+      } catch {}
     }
 
     const productCode = currentProduct.sku || (currentProduct as any).slug || currentProduct.id
@@ -349,12 +352,30 @@ export default function Product() {
     }
   }
 
-  const handleCalculateFreight = async (e: React.FormEvent) => {
-    e.preventDefault()
-    const cleanCep = cep.replace(/\D/g, '')
+  const handleCalculateFreight = async (e?: React.FormEvent, overrideCep?: string) => {
+    if (e) e.preventDefault()
+    const cleanCep = (overrideCep || cep).replace(/\D/g, '')
     if (cleanCep.length < 8) return
     setFreightLoading(true)
     setFreightError('')
+
+    // Auto lookup address preview if not yet populated
+    if (cleanCep.length === 8) {
+      fetch(`https://viacep.com.br/ws/${cleanCep}/json/`)
+        .then(r => r.json())
+        .then(data => {
+          if (!data.erro) {
+            setCepPreview({
+              city: data.localidade || '',
+              state: data.uf || '',
+              neighborhood: data.bairro || '',
+              street: data.logradouro || ''
+            })
+          }
+        })
+        .catch(() => {})
+    }
+
     try {
       const options = await calculateMelhorEnvioQuote(cleanCep)
       setFreightOptions(options)
@@ -381,7 +402,6 @@ export default function Product() {
   const displayProductImages = productImages.filter((image) => !presentationImages.includes(image))
   const customFaqs = ((rawShowcase as any)?.custom_faqs || []).filter((item: any) => item?.question?.trim() && item?.answer?.trim())
   const displayFaqs = customFaqs
-
 
   return (
     <PageWidgets key={currentProduct.id} scope={`product:${currentProduct.id}`} product={currentProduct}><div className="product-detail-page-root">
@@ -938,13 +958,17 @@ export default function Product() {
               <Editable as="h1" widgetId="product-5" className="ml-pdp-title notranslate">{cleanProductTitle(currentProduct.name)}</Editable>
 
               {/* 3. Avaliação Estrelas */}
-              <Editable as="div" widgetId="product-rating" widgetType="productRating" editorKind="widget" renderContent={false} className="ml-pdp-rating-row">
-                <span className="ml-pdp-rating-num">4.9</span>
-                <div className="ml-pdp-stars">
-                  <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
-                </div>
-                <span className="ml-pdp-rating-count">(4455)</span>
-              </Editable>
+              {(pricing.commerce.ratingScore ?? 0) > 0 && (
+                <Editable as="div" widgetId="product-rating" widgetType="productRating" editorKind="widget" renderContent={false} className="ml-pdp-rating-row">
+                  <span className="ml-pdp-rating-num">{(pricing.commerce.ratingScore ?? 0).toFixed(1)}</span>
+                  <div className="ml-pdp-stars">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <span key={i} style={{ opacity: i < Math.round(pricing.commerce.ratingScore ?? 0) ? 1 : 0.3 }}>★</span>
+                    ))}
+                  </div>
+                  <span className="ml-pdp-rating-count">({pricing.commerce.ratingCount})</span>
+                </Editable>
+              )}
 
               {/* 4. Bloco de Preço e Oferta Compacto */}
               <Editable as="div" widgetId="product-control-23" className="ml-pdp-price-section">
@@ -1074,12 +1098,12 @@ export default function Product() {
 
                     <div className="jet-product-add-cart" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12 }}>
                       <div className="btn-one-click" style={{ flex: 1 }}>
-                        <Editable as="button" widgetId="product-control-34" type="button" className="one-click" onClick={handleOneClickBuy} style={{ width: '100%', height: 48, background: '#46a032', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: '1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Editable as="button" widgetId="product-control-34" type="button" className="one-click" onClick={handleOneClickBuy} style={{ width: '100%', height: 48, background: '#0066cc', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: '1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }} onMouseOver={(e: any) => e.currentTarget.style.background = '#005bb5'} onMouseOut={(e: any) => e.currentTarget.style.background = '#0066cc'}>
                           Comprar <ChevronRight size={18} style={{ marginLeft: 6 }} />
                         </Editable>
                       </div>
                       <div className="btn-buy" style={{ width: '100%' }}>
-                        <Editable as="button" widgetId="product-control-35" type="button" className="add-cart" onClick={handleAddToCart} style={{ width: '100%', height: 48, background: '#fff', color: '#46a032', border: '1px solid #46a032', borderRadius: 8, fontWeight: 700, fontSize: '1rem', cursor: 'pointer' }}>
+                        <Editable as="button" widgetId="product-control-35" type="button" className="add-cart" onClick={handleAddToCart} style={{ width: '100%', height: 48, background: '#fff', color: '#0066cc', border: '1px solid #0066cc', borderRadius: 8, fontWeight: 700, fontSize: '1rem', cursor: 'pointer', transition: 'background 0.2s' }} onMouseOver={(e: any) => e.currentTarget.style.background = '#f8fafc'} onMouseOut={(e: any) => e.currentTarget.style.background = '#fff'}>
                           Adicionar ao Carrinho
                         </Editable>
                       </div>
@@ -1092,53 +1116,230 @@ export default function Product() {
                   </div>
                 )}
 
-                {/* 2. Novo Calculador de Frete (Jet Format) */}
-                <div className="jet-product-freight-calculation" style={{ marginBottom: 24 }}>
-                  <div className="shipping-title" style={{ fontSize: '0.95rem', color: '#4b5563', marginBottom: 12, fontWeight: 500 }}>Consulte prazos de entrega</div>
+                {/* 2. Novo Calculador de Frete (Jet Format Modernizado) */}
+                <div className="jet-product-freight-calculation" style={{ 
+                  marginBottom: 24, 
+                  background: '#ffffff', 
+                  border: '1px solid #e2e8f0', 
+                  borderRadius: 12, 
+                  padding: '16px 18px',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.95rem', fontWeight: 600, color: '#1e293b' }}>
+                      <Truck size={18} style={{ color: '#0066cc' }} />
+                      <span>Calcular frete e prazo</span>
+                    </div>
+                    <a 
+                      href="https://buscacepinter.correios.com.br/app/endereco/index.php" 
+                      target="_blank" 
+                      rel="noreferrer" 
+                      style={{ fontSize: '0.8rem', color: '#0066cc', textDecoration: 'none', fontWeight: 500 }}
+                    >
+                      Não sei meu CEP
+                    </a>
+                  </div>
+
                   <div className="freight-container">
-                    <form className="freight-input" onSubmit={handleCalculateFreight} style={{ display: 'flex', position: 'relative', background: '#eef2ff', border: '1px solid #e2e8f0', borderRadius: 6, overflow: 'hidden', height: 48, marginBottom: 8 }}>
+                    <form 
+                      className="freight-input" 
+                      onSubmit={handleCalculateFreight} 
+                      style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        position: 'relative', 
+                        background: '#f8fafc', 
+                        border: '1.5px solid #cbd5e1', 
+                        borderRadius: 8, 
+                        overflow: 'hidden', 
+                        height: 44, 
+                        padding: '2px 4px 2px 14px',
+                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
+                        transition: 'border-color 0.2s'
+                      }}
+                    >
                       <input 
                         type="tel" 
                         placeholder="00000-000" 
                         maxLength={9} 
                         id="zipcode"
                         value={cep} 
-                        onChange={e => setCep(e.target.value)} 
-                        style={{ flex: 1, background: 'transparent', border: 'none', padding: '0 16px', fontWeight: 600, fontSize: '1rem', color: '#0f172a', outline: 'none' }}
+                        onChange={e => {
+                          const val = e.target.value.replace(/\D/g, '')
+                          let formatted = val
+                          if (val.length > 5) {
+                            formatted = `${val.slice(0, 5)}-${val.slice(5, 8)}`
+                          }
+                          setCep(formatted)
+                          if (val.length === 8) {
+                            handleCalculateFreight(undefined, val)
+                          }
+                        }} 
+                        style={{ 
+                          flex: 1, 
+                          background: 'transparent', 
+                          border: 'none', 
+                          padding: '0', 
+                          fontWeight: 600, 
+                          fontSize: '0.95rem', 
+                          color: '#0f172a', 
+                          outline: 'none',
+                          letterSpacing: '0.5px'
+                        }}
                       />
-                      <button type="submit" disabled={freightLoading} style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', padding: '0 16px', display: 'flex', alignItems: 'center' }}>
-                        {freightLoading ? <Loader2 size={18} className="tkn-spin" /> : <Search size={18} />}
+                      <button 
+                        type="submit" 
+                        disabled={freightLoading || cep.replace(/\D/g, '').length < 8} 
+                        style={{ 
+                          background: '#0066cc', 
+                          color: '#ffffff', 
+                          border: 'none', 
+                          borderRadius: 6,
+                          height: 36,
+                          padding: '0 16px',
+                          fontSize: '0.85rem',
+                          fontWeight: 600,
+                          cursor: (freightLoading || cep.replace(/\D/g, '').length < 8) ? 'not-allowed' : 'pointer',
+                          opacity: (freightLoading || cep.replace(/\D/g, '').length < 8) ? 0.6 : 1,
+                          display: 'flex', 
+                          alignItems: 'center',
+                          gap: 6,
+                          transition: 'background 0.2s'
+                        }}
+                      >
+                        {freightLoading ? (
+                          <>
+                            <Loader2 size={16} className="tkn-spin" />
+                            <span>Calculando...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Search size={15} />
+                            <span>Calcular</span>
+                          </>
+                        )}
                       </button>
                     </form>
-                    
-                    {freightCalculated && freightOptions.length > 0 && (
-                      <div className="result" style={{ marginTop: 16 }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem', border: '1px solid #64748b', borderRadius: 8, overflow: 'hidden' }}>
-                          <thead>
-                            <tr>
-                              <th style={{ background: '#fff', padding: '12px 16px', color: '#334155', fontWeight: 700, borderBottom: '1px solid #64748b' }}>Entrega</th>
-                              <th style={{ background: '#fff', padding: '12px 16px', color: '#334155', fontWeight: 700, borderBottom: '1px solid #64748b' }}>Frete</th>
-                              <th style={{ background: '#fff', padding: '12px 16px', color: '#334155', fontWeight: 700, borderBottom: '1px solid #64748b' }}>Prazo</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {freightOptions.map((opt, i) => {
-                              const today = new Date();
-                              today.setDate(today.getDate() + (parseInt(opt.delivery_time) || 0));
-                              const estimate = today.toLocaleDateString('pt-BR');
-                              return (
-                                <tr key={i}>
-                                  <td className="freight-name" style={{ padding: '12px 16px', color: '#475569', borderBottom: '1px solid #cbd5e1', background: '#fff' }}>{opt.name}</td>
-                                  <td className="freight-value" style={{ padding: '12px 16px', color: '#475569', borderBottom: '1px solid #cbd5e1', background: '#fff' }}>{Number(opt.price) === 0 ? 'Grátis' : formatMoney(Number(opt.price))}</td>
-                                  <td className="freight-time" style={{ padding: '12px 16px', color: '#475569', borderBottom: '1px solid #cbd5e1', background: '#fff' }}>Previsão: <span className="delivery-time">{opt.delivery_time} dias úteis</span></td>
-                                </tr>
-                              )
-                            })}
-                          </tbody>
-                        </table>
+
+                    {cepPreview && (
+                      <div style={{ marginTop: 6, fontSize: '0.8rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <CheckCircle2 size={14} style={{ color: '#16a34a', flexShrink: 0 }} />
+                        <span>Entrega para: <strong>{cepPreview.neighborhood ? `${cepPreview.neighborhood}, ` : ''}{cepPreview.city} - {cepPreview.state}</strong></span>
                       </div>
                     )}
-                    {freightCalculated && freightOptions.length === 0 && (
+
+                    {freightError && (
+                      <div style={{ color: '#ef4444', fontSize: '0.82rem', marginTop: 8 }}>
+                        {freightError}
+                      </div>
+                    )}
+                    
+                    {freightCalculated && sortedFreight.length > 0 && (
+                      <div className="result" style={{ marginTop: 14 }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                          {displayedFreight.map((opt, i) => {
+                            const companyName = typeof opt.company === 'object' ? opt.company?.name : opt.company
+                            const isFree = Number(opt.price) === 0
+                            const days = parseInt(String(opt.delivery_time || '0')) || 0
+
+                            return (
+                              <div 
+                                key={i} 
+                                style={{ 
+                                  display: 'flex', 
+                                  alignItems: 'center', 
+                                  justifyContent: 'space-between', 
+                                  padding: '12px 14px', 
+                                  background: '#f8fafc', 
+                                  border: '1px solid #e2e8f0', 
+                                  borderRadius: 8, 
+                                  gap: 12,
+                                  transition: 'all 0.15s ease'
+                                }}
+                              >
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+                                  <div style={{ 
+                                    width: 36, 
+                                    height: 36, 
+                                    borderRadius: 8, 
+                                    background: isFree ? '#ecfdf5' : '#e0f2fe', 
+                                    color: isFree ? '#16a34a' : '#0284c7', 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    justifyContent: 'center', 
+                                    flexShrink: 0 
+                                  }}>
+                                    <Truck size={18} />
+                                  </div>
+                                  <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                                    <span style={{ 
+                                      fontWeight: 600, 
+                                      fontSize: '0.88rem', 
+                                      color: '#1e293b', 
+                                      whiteSpace: 'nowrap', 
+                                      overflow: 'hidden', 
+                                      textOverflow: 'ellipsis' 
+                                    }}>
+                                      {companyName} {opt.name}
+                                    </span>
+                                    <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                                      {days === 0 ? 'Entrega expressa' : `Chega em até ${days} ${days === 1 ? 'dia útil' : 'dias úteis'}`}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                                  <span style={{ 
+                                    fontWeight: 700, 
+                                    fontSize: '0.95rem', 
+                                    color: isFree ? '#16a34a' : '#0f172a' 
+                                  }}>
+                                    {isFree ? 'Grátis' : formatMoney(Number(opt.price))}
+                                  </span>
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+
+                        {sortedFreight.length > 3 && (
+                          <button
+                            type="button"
+                            onClick={() => setShowAllFreight(!showAllFreight)}
+                            style={{
+                              width: '100%',
+                              marginTop: 10,
+                              padding: '10px 14px',
+                              background: '#ffffff',
+                              border: '1px solid #cbd5e1',
+                              borderRadius: 8,
+                              fontSize: '0.82rem',
+                              fontWeight: 600,
+                              color: '#0066cc',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: 6,
+                              transition: 'all 0.15s ease'
+                            }}
+                          >
+                            {showAllFreight ? (
+                              <>
+                                <span>Mostrar menos opções</span>
+                                <ChevronUp size={15} />
+                              </>
+                            ) : (
+                              <>
+                                <span>Ver mais {sortedFreight.length - 3} opções de entrega</span>
+                                <ChevronDown size={15} />
+                              </>
+                            )}
+                          </button>
+                        )}
+                      </div>
+                    )}
+                    {freightCalculated && sortedFreight.length === 0 && (
                       <p style={{ marginTop: 12, fontSize: 13, color: '#64748b' }}>
                         {commerce.freeShipping ? `✓ Frete grátis confirmado para ${deliveryCep || cep}!` : `Nenhuma opção de frete encontrada para ${deliveryCep || cep}.`}
                       </p>

@@ -103,9 +103,23 @@ export async function getActiveAdsByPosition(position: string): Promise<Ad[]> {
       })
       .map((ad: any) => {
         const saved = decodeLegacyAdConfig(ad.link)
+        
+        let parsedItems = []
+        if (Array.isArray(ad.items)) {
+          parsedItems = ad.items
+        } else if (typeof ad.items === 'string') {
+          try {
+            parsedItems = JSON.parse(ad.items)
+            if (!Array.isArray(parsedItems)) parsedItems = []
+          } catch {
+            parsedItems = []
+          }
+        }
+
         const items = Array.isArray(saved?.items) && saved.items.length
           ? saved.items
-          : Array.isArray(ad.items) ? ad.items : []
+          : parsedItems
+          
         return {
           ...ad,
           link: saved?.destination_link || ad.link,

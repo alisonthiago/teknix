@@ -161,11 +161,36 @@ export default function TeknixHeader() {
   const account = extractAccountData(user, dbCustomer)
 
   const [searchTerm, setSearchTerm] = useState('')
+  const [isSearchFocused, setIsSearchFocused] = useState(false)
+  const isSearching = isSearchFocused || searchTerm.trim().length > 0
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isCepOpen, setIsCepOpen] = useState(false)
   const [isAccountOpen, setIsAccountOpen] = useState(false)
   const [isDepartmentsOpen, setIsDepartmentsOpen] = useState(false)
   const [cep, setCep] = useState(() => localStorage.getItem('teknix_user_cep') || '')
+  const [locationDetails, setLocationDetails] = useState<{city?: string; state?: string; neighborhood?: string; street?: string}>(() => {
+    if (typeof window === 'undefined') return {}
+    try {
+      const loc = localStorage.getItem('teknix_user_location')
+      return loc ? JSON.parse(loc) : {}
+    } catch { return {} }
+  })
+  const [geoCity, setGeoCity] = useState<string>('')
+
+  useEffect(() => {
+    if (!cep && typeof window !== 'undefined') {
+      let active = true
+      fetch('https://get.geojs.io/v1/ip/geo.json')
+        .then(res => res.json())
+        .then(data => {
+          if (active && data.city) {
+            setGeoCity(data.city)
+          }
+        })
+        .catch(() => {})
+      return () => { active = false }
+    }
+  }, [cep])
 
   const accountPopoverRef = useRef<HTMLDivElement>(null)
   const departmentsPopoverRef = useRef<HTMLDivElement>(null)
@@ -277,6 +302,7 @@ export default function TeknixHeader() {
     setCep(newCep)
     localStorage.setItem('teknix_user_cep', newCep)
     if (details) {
+      setLocationDetails(details)
       localStorage.setItem('teknix_user_location', JSON.stringify(details))
     }
     window.dispatchEvent(new CustomEvent('teknix:cep-changed', { detail: { cep: newCep, ...details } }))
@@ -370,6 +396,20 @@ export default function TeknixHeader() {
                   autoComplete="off"
                   value={searchTerm}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
+                  onFocus={() => setIsSearchFocused(true)}
+                  onBlur={() => setIsSearchFocused(false)}
+                  style={{
+                    border: 'none',
+                    outline: 'none',
+                    background: 'transparent',
+                    boxShadow: 'none',
+                    WebkitAppearance: 'none',
+                    appearance: 'none',
+                    padding: 0,
+                    margin: 0,
+                    width: '100%',
+                    height: '100%'
+                  }}
                 />
                 <Editable as="button" widgetId="chrome:header:search" globalKey="chrome:header:search" widgetType="button" label="Botão de busca" renderContent={false} type="submit" className="dsvia-search-btn" aria-label="Buscar">
                   {searchEdit?.content?.icon ? (
@@ -380,17 +420,7 @@ export default function TeknixHeader() {
                     </svg>
                   )}
                 </Editable>
-                <button
-                  type="button"
-                  className="dsvia-search-cep-btn"
-                  onClick={() => setIsCepOpen(true)}
-                  aria-label="Informe seu CEP"
-                  title="Informe seu CEP"
-                >
-                  <svg viewBox="0 0 22 16" width="18" height="14" fill="currentColor">
-                    <path d="M4.84389 15.5577C4.06336 15.5577 3.40066 15.2847 2.85579 14.7388C2.31092 14.1928 2.03849 13.5299 2.03849 12.75H1.25004C0.993941 12.75 0.779275 12.6634 0.606041 12.4901C0.432808 12.3169 0.346191 12.1022 0.346191 11.8462V2.30773C0.346191 1.8026 0.521191 1.37503 0.871191 1.02503C1.22119 0.675031 1.64875 0.500031 2.15387 0.500031H13.9615C14.4587 0.500031 14.8842 0.67704 15.2382 1.03106C15.5922 1.38506 15.7692 1.81061 15.7692 2.30773V4.30773H17.5192C17.8054 4.30773 18.0766 4.37175 18.3327 4.49978C18.5888 4.62783 18.7997 4.80483 18.9654 5.03078L21.4731 8.38851C21.5333 8.46384 21.5785 8.5467 21.6086 8.63708C21.6388 8.72746 21.6538 8.82538 21.6538 8.93083V11.8462C21.6538 12.1022 21.5672 12.3169 21.394 12.4901C21.2208 12.6634 21.0061 12.75 20.75 12.75H19.8462C19.8462 13.5299 19.573 14.1928 19.0266 14.7388C18.4802 15.2847 17.8167 15.5577 17.0362 15.5577C16.2557 15.5577 15.593 15.2847 15.0481 14.7388C14.5032 14.1928 14.2308 13.5299 14.2308 12.75H7.65384C7.65384 13.532 7.38065 14.1955 6.83427 14.7404C6.2879 15.2852 5.62444 15.5577 4.84389 15.5577ZM4.84617 14.0577C5.21283 14.0577 5.52245 13.9314 5.77502 13.6789C6.02758 13.4263 6.15387 13.1167 6.15387 12.75C6.15387 12.3833 6.02758 12.0737 5.77502 11.8211C5.52245 11.5686 5.21283 11.4423 4.84617 11.4423C4.47948 11.4423 4.16986 11.5686 3.91729 11.8211C3.66472 12.0737 3.53844 12.3833 3.53844 12.75C3.53844 13.1167 3.66472 13.4263 3.91729 13.6789C4.16986 13.9314 4.47948 14.0577 4.84617 14.0577ZM1.84617 11.25H2.56924C2.78204 10.8795 3.08941 10.5689 3.49134 10.3183C3.89327 10.0676 4.34488 9.94231 4.84617 9.94231C5.33463 9.94231 5.78303 10.066 6.19137 10.3135C6.5997 10.5609 6.91027 10.8731 7.12309 11.25H14.2693V2.30773C14.2693 2.21798 14.2404 2.14426 14.1827 2.08656C14.125 2.02886 14.0513 2.00001 13.9615 2.00001H2.15387C2.07695 2.00001 2.00643 2.03206 1.94232 2.09616C1.87822 2.16027 1.84617 2.2308 1.84617 2.30773V11.25ZM17.0385 14.0577C17.4052 14.0577 17.7148 13.9314 17.9673 13.6789C18.2199 13.4263 18.3462 13.1167 18.3462 12.75C18.3462 12.3833 18.2199 12.0737 17.9673 11.8211C17.7148 11.5686 17.4052 11.4423 17.0385 11.4423C16.6718 11.4423 16.3622 11.5686 16.1096 11.8211C15.857 12.0737 15.7308 12.3833 15.7308 12.75C15.7308 13.1167 15.857 13.4263 16.1096 13.6789C16.6718 14.0577 17.0385 14.0577Z" />
-                  </svg>
-                </button>
+
               </form>
             </Editable>
 
@@ -401,6 +431,29 @@ export default function TeknixHeader() {
               currentCep={cep}
               onSelectCep={handleSelectCep}
             />
+
+            {/* ── LOCATION PILL (IP/CEP) ── */}
+            <div className={`dsvia-location-wrapper ${isSearching ? 'is-searching' : ''}`}>
+              <div className="published-flow-node" data-canvas-node="header-top-row:chrome:header:location" draggable="false" style={{ display: 'contents' }}>
+                <button
+                  type="button"
+                  className={`dsvia-location-pill ${isSearching ? 'is-searching' : ''}`}
+                  onClick={() => setIsCepOpen(true)}
+                  aria-label="Informe seu CEP"
+                  title="Informe seu CEP"
+                >
+                  <svg viewBox="0 0 22 16" width="16" height="14" fill="currentColor">
+                    <path d="M4.84389 15.5577C4.06336 15.5577 3.40066 15.2847 2.85579 14.7388C2.31092 14.1928 2.03849 13.5299 2.03849 12.75H1.25004C0.993941 12.75 0.779275 12.6634 0.606041 12.4901C0.432808 12.3169 0.346191 12.1022 0.346191 11.8462V2.30773C0.346191 1.8026 0.521191 1.37503 0.871191 1.02503C1.22119 0.675031 1.64875 0.500031 2.15387 0.500031H13.9615C14.4587 0.500031 14.8842 0.67704 15.2382 1.03106C15.5922 1.38506 15.7692 1.81061 15.7692 2.30773V4.30773H17.5192C17.8054 4.30773 18.0766 4.37175 18.3327 4.49978C18.5888 4.62783 18.7997 4.80483 18.9654 5.03078L21.4731 8.38851C21.5333 8.46384 21.5785 8.5467 21.6086 8.63708C21.6388 8.72746 21.6538 8.82538 21.6538 8.93083V11.8462C21.6538 12.1022 21.5672 12.3169 21.394 12.4901C21.2208 12.6634 21.0061 12.75 20.75 12.75H19.8462C19.8462 13.5299 19.573 14.1928 19.0266 14.7388C18.4802 15.2847 17.8167 15.5577 17.0362 15.5577C16.2557 15.5577 15.593 15.2847 15.0481 14.7388C14.5032 14.1928 14.2308 13.5299 14.2308 12.75H7.65384C7.65384 13.532 7.38065 14.1955 6.83427 14.7404C6.2879 15.2852 5.62444 15.5577 4.84389 15.5577ZM4.84617 14.0577C5.21283 14.0577 5.52245 13.9314 5.77502 13.6789C6.02758 13.4263 6.15387 13.1167 6.15387 12.75C6.15387 12.3833 6.02758 12.0737 5.77502 11.8211C5.52245 11.5686 5.21283 11.4423 4.84617 11.4423C4.47948 11.4423 4.16986 11.5686 3.91729 11.8211C3.66472 12.0737 3.53844 12.3833 3.53844 12.75C3.53844 13.1167 3.66472 13.4263 3.91729 13.6789C4.16986 13.9314 4.47948 14.0577 4.84617 14.0577ZM1.84617 11.25H2.56924C2.78204 10.8795 3.08941 10.5689 3.49134 10.3183C3.89327 10.0676 4.34488 9.94231 4.84617 9.94231C5.33463 9.94231 5.78303 10.066 6.19137 10.3135C6.5997 10.5609 6.91027 10.8731 7.12309 11.25H14.2693V2.30773C14.2693 2.21798 14.2404 2.14426 14.1827 2.08656C14.125 2.02886 14.0513 2.00001 13.9615 2.00001H2.15387C2.07695 2.00001 2.00643 2.03206 1.94232 2.09616C1.87822 2.16027 1.84617 2.2308 1.84617 2.30773V11.25ZM17.0385 14.0577C17.4052 14.0577 17.7148 13.9314 17.9673 13.6789C18.2199 13.4263 18.3462 13.1167 18.3462 12.75C18.3462 12.3833 18.2199 12.0737 17.9673 11.8211C17.7148 11.5686 17.4052 11.4423 17.0385 11.4423C16.6718 11.4423 16.3622 11.5686 16.1096 11.8211C15.857 12.0737 15.7308 12.3833 15.7308 12.75C15.7308 13.1167 15.857 13.4263 16.1096 13.6789C16.6718 14.0577 17.0385 14.0577Z" />
+                  </svg>
+                  <div className="dsvia-location-text-col">
+                    <span className="dsvia-location-prefix">{finalPrefix}</span>
+                    <span className="dsvia-location-city">
+                      {locationDetails?.city ? `${locationDetails.city}${locationDetails.state ? ` - ${locationDetails.state}` : ''}` : geoCity ? geoCity : cep ? `CEP ${cep}` : 'Informar localização'}
+                    </span>
+                  </div>
+                </button>
+              </div>
+            </div>
 
             {/* Ações da Direita: Acesse sua Conta, Pedidos, Favoritos, Carrinho */}
             <Editable as="div" widgetId="chrome:header:actions" globalKey="chrome:header:actions" label="Ícones e ações do cabeçalho" widgetType="container" editorKind="container" className="dsvia-actions-right" renderContent={false}>

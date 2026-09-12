@@ -43,13 +43,13 @@ interface DeviceSizeConfig {
 const SIZES: Record<string, Record<Device, DeviceSizeConfig>> = {
   'home-promo-strip': {
     desktop: { label: '2080 × 185 px', width: 2080, height: 185 },
-    tablet: { label: '2080 × 185 px (exibição proporcional)', width: 2080, height: 185 },
-    mobile: { label: '2080 × 185 px (exibição proporcional)', width: 2080, height: 185 }
+    tablet: { label: '2080 × 185 px', width: 2080, height: 185 },
+    mobile: { label: '2080 × 185 px', width: 2080, height: 185 }
   },
   'home-hero': {
     desktop: { label: '1620 × 219 px', width: 1620, height: 219 },
-    tablet: { label: '1620 × 219 px (exibição proporcional)', width: 1620, height: 219 },
-    mobile: { label: '1620 × 219 px (exibição proporcional)', width: 1620, height: 219 }
+    tablet: { label: '1620 × 219 px', width: 1620, height: 219 },
+    mobile: { label: '1620 × 219 px', width: 1620, height: 219 }
   },
   'home-middle': {
     desktop: { label: '470 × 360 px (cada bloco)', width: 470, height: 360 },
@@ -229,10 +229,17 @@ export default function AdsForm() {
         setEndDate(data.end_date?.slice(0, 16) || '')
         setActive(data.is_active !== false)
 
+        let parsedItems = []
+        if (Array.isArray(data.items)) {
+          parsedItems = data.items
+        } else if (typeof data.items === 'string') {
+          try { parsedItems = JSON.parse(data.items) } catch {}
+        }
+
         const raw = Array.isArray(saved?.items) && saved.items.length
           ? saved.items
-          : Array.isArray(data.items) && data.items.length
-          ? data.items
+          : Array.isArray(parsedItems) && parsedItems.length
+          ? parsedItems
           : [{ image_url: data.image_url, link: saved?.destination_link || data.link, target: saved?.target || data.target }]
 
         setSlides(
@@ -574,7 +581,6 @@ export default function AdsForm() {
         <div>
           <span className="ads-editor-kicker">PUBLICIDADE</span>
           <h1>{editing ? 'Editar anúncio' : 'Novo anúncio'}</h1>
-          <p>Configure formatos, dispositivos, período e destino.</p>
         </div>
         <div className="ads-editor-actions">
           <a
@@ -607,7 +613,6 @@ export default function AdsForm() {
       {placement === 'promo-bar' && (
         <section className="ads-editor-card ads-promo-settings">
           <h2>Conteúdo do Desconto OFF</h2>
-          <p>Use texto e cores, uma imagem por dispositivo, ou combine os dois.</p>
           <div className="ads-fields two">
             <label>
               Selo
@@ -679,7 +684,7 @@ export default function AdsForm() {
               <span className="ads-preview-content">Conteúdo</span>
               <span className="ads-preview-footer">Rodapé</span>
             </div>
-            <div><strong>{PLACEMENTS.find(p => p.value === placement)?.label}</strong><p>{PLACEMENTS.find(p => p.value === placement)?.desc}</p></div>
+            <div><strong>{PLACEMENTS.find(p => p.value === placement)?.label}</strong></div>
           </div>
 
           {placement === 'promo-bar' && (
@@ -687,12 +692,11 @@ export default function AdsForm() {
               <strong>Largura da faixa</strong>
               <label><input type="radio" name="width-mode" checked={widthMode === 'full'} onChange={() => setWidthMode('full')} /> Tela inteira</label>
               <label><input type="radio" name="width-mode" checked={widthMode === 'container'} onChange={() => setWidthMode('container')} /> Container do site</label>
-              <span>A altura permanece em 44 px nos dois modos.</span>
             </div>
           )}
 
           <div className="ads-size-guide">
-            <strong>Tamanhos obrigatórios do sistema</strong>
+            <strong>Dimensões</strong>
             {(['desktop', 'tablet', 'mobile'] as Device[]).map(d => (
               <div key={d}>
                 <span>{d === 'desktop' ? 'Desktop / notebook' : d === 'tablet' ? 'Tablet' : 'Celular'}</span>
@@ -709,10 +713,8 @@ export default function AdsForm() {
           <section className="ads-editor-card">
             <div className="ads-middle-blocks-intro">
               <div style={{ flex: 1 }}>
-                <h3>3 Seções do Meio da Tela (Colunas lado a lado no Container)</h3>
-                <p>
-                  Esta vitrine é composta por 3 blocos lado a lado no container de 1440px. Cada bloco mede <strong>470 × 360 px</strong> no desktop e pode ter imagem fixa ou carrossel individual.
-                </p>
+                <h3>3 Seções Lado a Lado</h3>
+                <p>Cada bloco mede <strong>470 × 360 px</strong>.</p>
               </div>
             </div>
 
@@ -748,8 +750,8 @@ export default function AdsForm() {
                   </div>
 
                   {sec.type === 'carousel' && (
-                    <div className="ads-carousel-options" style={{ margin: '4px 0 10px', padding: '10px' }}>
-                      <label className="ads-interval" style={{ fontSize: '12px' }}>
+                    <div className="ads-carousel-options">
+                      <label className="ads-interval">
                         Tempo{' '}
                         <input
                           type="number"
@@ -765,10 +767,10 @@ export default function AdsForm() {
                   )}
 
                   {sec.slides.map((slide, slideIdx) => (
-                    <div className="ads-slide" key={slide.id} style={{ marginTop: 0, padding: '14px' }}>
+                    <div className="ads-slide" key={slide.id}>
                       {sec.type === 'carousel' && (
-                        <div className="ads-slide-title" style={{ marginBottom: '8px' }}>
-                          <span style={{ fontSize: '12px', fontWeight: 700 }}>Slide {slideIdx + 1}</span>
+                        <div className="ads-slide-title">
+                          <span>Slide {slideIdx + 1}</span>
                           {sec.slides.length > 1 && (
                             <button type="button" onClick={() => removeMiddleSlide(secIdx, slideIdx)}>
                               Remover
@@ -864,8 +866,8 @@ export default function AdsForm() {
                         })}
                       </div>
 
-                      <div className="ads-fields" style={{ marginTop: '10px' }}>
-                        <label style={{ fontSize: '12px' }}>
+                      <div className="ads-fields">
+                        <label>
                           Link de destino
                           <input
                             value={slide.link}
@@ -873,7 +875,7 @@ export default function AdsForm() {
                             placeholder="/produtos/... ou https://..."
                           />
                         </label>
-                        <label style={{ fontSize: '12px' }}>
+                        <label>
                           Abertura
                           <select
                             value={slide.target}
@@ -892,7 +894,6 @@ export default function AdsForm() {
                       type="button"
                       className="ads-add-slide"
                       onClick={() => addMiddleSlide(secIdx)}
-                      style={{ padding: '8px', fontSize: '12px' }}
                     >
                       + Adicionar slide ao Bloco {secIdx + 1}
                     </button>
@@ -908,8 +909,7 @@ export default function AdsForm() {
           <section className="ads-editor-card">
             <div className="ads-card-heading">
               <div>
-                <h2>Formato e imagens</h2>
-                <p>Todos os espaços aceitam imagem única ou carrossel.</p>
+                <h2>Configuração dos slides</h2>
               </div>
               <div className="ads-type-tabs">
                 <button
@@ -1189,31 +1189,19 @@ export default function AdsForm() {
       />
 
       {toast && (
-        <div className="ads-bottom-toast">
-          <div className="ads-toast-content">
-            <CheckCircle2 size={20} className="ads-toast-icon" />
-            <div>
-              <strong>{toast}</strong>
-              <p>O anúncio já está salvo e publicado na loja.</p>
-            </div>
-          </div>
-          <div className="ads-toast-actions">
-            <button
-              type="button"
-              className="ads-toast-btn"
-              onClick={() => navigate('/hub/ads')}
-            >
-              Ver todos os anúncios
-            </button>
-            <button
-              type="button"
-              className="ads-toast-close"
-              onClick={() => setToast(null)}
-              aria-label="Fechar"
-            >
-              <X size={16} />
-            </button>
-          </div>
+        <div
+          className="teknix-toast-notification"
+          style={{
+            background: '#ecfdf5',
+            color: '#166534',
+            border: '1px solid #bbf7d0',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}
+        >
+          <CheckCircle2 size={16} />
+          {toast}
         </div>
       )}
     </div>

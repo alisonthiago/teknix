@@ -482,7 +482,7 @@ export default function ProductsList() {
                               setOpenMenuId(null)
                             }}
                           >
-                            <Package size={15} color="#4b5563" />
+                            <Package size={15} />
                             <span>Ver Visão Geral no HUB</span>
                           </Link>
 
@@ -494,7 +494,7 @@ export default function ProductsList() {
                               setOpenMenuId(null)
                             }}
                           >
-                            <Edit size={15} color="#2563eb" />
+                            <Edit size={15} />
                             <span>Editar Cadastro</span>
                           </Link>
 
@@ -507,7 +507,7 @@ export default function ProductsList() {
                               handleEditProductPage(product)
                             }}
                           >
-                            <LayoutTemplate size={15} color="#6366f1" />
+                            <LayoutTemplate size={15} />
                             <span>{editingPageId === product.id ? 'Abrindo...' : 'Editar Página (Page Builder)'}</span>
                           </button>
 
@@ -518,7 +518,7 @@ export default function ProductsList() {
                             rel="noreferrer"
                             onClick={() => setOpenMenuId(null)}
                           >
-                            <Eye size={15} color="#16a34a" />
+                            <Eye size={15} />
                             <span>Ver na Loja Pública</span>
                           </a>
 
@@ -531,7 +531,7 @@ export default function ProductsList() {
                               alert('Link público do produto copiado!')
                             }}
                           >
-                            <Share2 size={15} color="#8b5cf6" />
+                            <Share2 size={15} />
                             <span>Copiar Link / Compartilhar</span>
                           </button>
 
@@ -543,7 +543,7 @@ export default function ProductsList() {
                               handleDuplicate(product)
                             }}
                           >
-                            <Copy size={15} color="#6b7280" />
+                            <Copy size={15} />
                             <span>Duplicar Produto</span>
                           </button>
 
@@ -557,7 +557,7 @@ export default function ProductsList() {
                               handleDelete(product.id)
                             }}
                           >
-                            <Trash2 size={15} color="#dc2626" />
+                            <Trash2 size={15} />
                             <span>Excluir Produto</span>
                           </button>
                         </div>

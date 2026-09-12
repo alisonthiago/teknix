@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import {
   ChevronLeft, ChevronDown, ChevronUp, Upload, Trash2, Video, Globe,
-  CheckCircle, Plus, Eye,
+  CheckCircle, CheckCircle2, Plus, Eye,
   Percent, Tag, DollarSign, Package, Layers, Sparkles,
   X, ExternalLink, Check, Play, Loader2, Film,
   HelpCircle, Wand2, Sliders, Zap, Battery, Shield, Wrench, Truck, Star,
@@ -59,6 +59,7 @@ interface FormData {
   age_group: string
   condition: string
   category_id: string
+  additional_categories: string[]
   brand: string
   tags: string
   variations: { id: string; name: string; sku: string; price: number; stock: number }[]
@@ -108,6 +109,7 @@ const initialForm: FormData = {
   age_group: 'adult',
   condition: 'new',
   category_id: '',
+  additional_categories: [],
   brand: 'TEKNIX',
   tags: '',
   variations: [],
@@ -443,6 +445,7 @@ export default function ProductForm() {
           age_group: data.age_group || 'adult',
           condition: data.condition || 'new',
           category_id: store?.category_id || data.category_id || '',
+          additional_categories: Array.isArray(specs?.additional_categories) ? specs.additional_categories : [],
           brand: data.brand || 'TEKNIX',
           tags: Array.isArray(data.tags) ? data.tags.join(', ') : (data.tags || specs.tags || ''),
           variations: Array.isArray(data.variations) ? data.variations : [],
@@ -830,7 +833,8 @@ export default function ProductForm() {
           gallery_images: form.images.filter(Boolean),
           video_url: form.video_url || null,
           variations: form.variations || [],
-            product_specifications: form.specifications.filter(item => item.label.trim() && item.value.trim()),
+          product_specifications: form.specifications.filter(item => item.label.trim() && item.value.trim()),
+          additional_categories: form.additional_categories || [],
           tags: form.tags || '',
           editorial_showcase: form.editorial_showcase
         },
@@ -1173,8 +1177,34 @@ export default function ProductForm() {
 
         {/* 2. CATEGORIAS */}
         <div className="form-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
             <h2 className="card-title" style={{ margin: 0 }}>Categorias</h2>
+          </div>
+
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
+            {[form.category_id, ...form.additional_categories].filter(Boolean).map(id => {
+              const cat = categories.find(c => c.id === id)
+              if (!cat) return null
+              return (
+                <div key={id} style={{ display: 'flex', alignItems: 'center', background: '#f1f5f9', color: '#0f172a', padding: '4px 10px', borderRadius: 16, fontSize: '13px', fontWeight: 500 }}>
+                  {cat.name}
+                  <button 
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      if (id === form.category_id) {
+                        setForm({ ...form, category_id: form.additional_categories[0] || '', additional_categories: form.additional_categories.slice(1) })
+                      } else {
+                        setForm({ ...form, additional_categories: form.additional_categories.filter(x => x !== id) })
+                      }
+                    }}
+                    style={{ background: 'none', border: 'none', marginLeft: 6, cursor: 'pointer', color: '#64748b', display: 'flex', alignItems: 'center' }}
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              )
+            })}
           </div>
 
           <div className="form-group" ref={categoryDropdownRef} style={{ position: 'relative' }}>
@@ -1185,37 +1215,49 @@ export default function ProductForm() {
             >
               <input 
                 type="text" 
-                placeholder="Pesquise ou selecione a categoria..."
-                value={isCategoryDropdownOpen ? categorySearch : (categories.find(c => c.id === form.category_id)?.name || '')}
+                placeholder="Pesquise ou selecione para adicionar..."
+                value={categorySearch}
                 onChange={e => {
                   setCategorySearch(e.target.value)
                   setIsCategoryDropdownOpen(true)
                 }}
-                onFocus={() => {
-                  setCategorySearch('')
-                  setIsCategoryDropdownOpen(true)
-                }}
-                style={{ width: '100%', border: 'none', background: 'transparent', outline: 'none', padding: '0 12px', height: '100%', fontSize: '13px', color: '#1e293b' }}
+                onFocus={() => setIsCategoryDropdownOpen(true)}
+                style={{ flex: '1 1 150px', minWidth: 150, border: 'none', background: 'transparent', outline: 'none', padding: '0 4px', height: 30, fontSize: '13px', color: '#1e293b' }}
               />
               <ChevronDown size={16} style={{ marginRight: 12, color: '#9ca3af' }} />
             </div>
             {isCategoryDropdownOpen && (
               <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#fff', border: '1px solid #e2e8f0', borderRadius: 8, marginTop: 4, zIndex: 10, maxHeight: 200, overflowY: 'auto', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}>
-                {categories.filter(c => c.name.toLowerCase().includes(categorySearch.toLowerCase())).map(c => (
-                  <div 
-                    key={c.id} 
-                    style={{ padding: '8px 12px', cursor: 'pointer', background: c.id === form.category_id ? '#f1f5f9' : 'transparent', fontSize: '13px', color: '#334155' }}
-                    onClick={() => {
-                      setForm({ ...form, category_id: c.id })
-                      setIsCategoryDropdownOpen(false)
-                      setCategorySearch('')
-                    }}
-                    onMouseEnter={e => (e.currentTarget.style.background = '#f8fafc')}
-                    onMouseLeave={e => (e.currentTarget.style.background = c.id === form.category_id ? '#f1f5f9' : 'transparent')}
-                  >
-                    {c.name}
-                  </div>
-                ))}
+                {categories.filter(c => c.name.toLowerCase().includes(categorySearch.toLowerCase())).map(c => {
+                  const isSelected = c.id === form.category_id || form.additional_categories.includes(c.id)
+                  return (
+                    <div 
+                      key={c.id} 
+                      style={{ padding: '8px 12px', cursor: 'pointer', background: isSelected ? '#f1f5f9' : 'transparent', fontSize: '13px', color: '#334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                      onClick={() => {
+                        if (isSelected) {
+                          if (c.id === form.category_id) {
+                            setForm({ ...form, category_id: form.additional_categories[0] || '', additional_categories: form.additional_categories.slice(1) })
+                          } else {
+                            setForm({ ...form, additional_categories: form.additional_categories.filter(x => x !== c.id) })
+                          }
+                        } else {
+                          if (!form.category_id) {
+                            setForm({ ...form, category_id: c.id })
+                          } else {
+                            setForm({ ...form, additional_categories: [...form.additional_categories, c.id] })
+                          }
+                        }
+                        setCategorySearch('')
+                      }}
+                      onMouseEnter={e => (e.currentTarget.style.background = '#f8fafc')}
+                      onMouseLeave={e => (e.currentTarget.style.background = isSelected ? '#f1f5f9' : 'transparent')}
+                    >
+                      {c.name}
+                      {isSelected && <CheckCircle2 size={14} color="#059669" />}
+                    </div>
+                  )
+                })}
                 {categories.filter(c => c.name.toLowerCase().includes(categorySearch.toLowerCase())).length === 0 && (
                   <div style={{ padding: '8px 12px', color: '#9ca3af', fontSize: '13px' }}>Nenhuma categoria encontrada.</div>
                 )}
@@ -1228,7 +1270,7 @@ export default function ProductForm() {
                 onClick={() => setShowAddCategory(true)}
                 style={{ background: 'none', border: 'none', color: '#000000', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', textAlign: 'left', marginTop: 4 }}
               >
-                + Adicionar categorias
+                + Adicionar nova categoria
               </button>
             ) : (
               <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
@@ -1989,11 +2031,11 @@ export default function ProductForm() {
           </div>
         </div>
 
-        {/* 11. DESTAQUE E SEÇÕES */}
+        {/* 11. DESTAQUE E AVALIAÇÕES */}
         <div className="form-card">
-          <h2 className="card-title">Destacar produto</h2>
+          <h2 className="card-title">Destaque e Avaliações</h2>
 
-          <label className="toggle-switch-label">
+          <label className="toggle-switch-label" style={{ marginBottom: 20 }}>
             <input
               type="checkbox"
               className="toggle-switch-input"
@@ -2002,6 +2044,45 @@ export default function ProductForm() {
             />
             Exibir na seção de Produtos em Destaque na Home
           </label>
+          
+          <div className="form-row">
+            <div className="form-group" style={{ flex: 1 }}>
+              <label>Nota de Avaliação (Estrelas)</label>
+              <input
+                type="number"
+                step="0.1"
+                min="0"
+                max="5"
+                className="form-input"
+                placeholder="Ex: 4.8"
+                value={form.commerce.ratingScore || ''}
+                onChange={(e) => setForm({ 
+                  ...form, 
+                  commerce: { ...form.commerce, ratingScore: parseFloat(e.target.value) }
+                })}
+                style={{ maxWidth: 180 }}
+              />
+              <span className="field-hint">Exibido na página do produto (0 a 5).</span>
+            </div>
+
+            <div className="form-group" style={{ flex: 1 }}>
+              <label>Total de Avaliações</label>
+              <input
+                type="number"
+                step="1"
+                min="0"
+                className="form-input"
+                placeholder="Ex: 125"
+                value={form.commerce.ratingCount || ''}
+                onChange={(e) => setForm({ 
+                  ...form, 
+                  commerce: { ...form.commerce, ratingCount: parseInt(e.target.value, 10) }
+                })}
+                style={{ maxWidth: 180 }}
+              />
+              <span className="field-hint">Número de pessoas que avaliaram.</span>
+            </div>
+          </div>
         </div>
 
         {/* 12. DADOS PARA NOTA FISCAL */}

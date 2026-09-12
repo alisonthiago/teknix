@@ -1,6 +1,6 @@
 import { Editable } from '../components/page-widgets/PageWidgets'
 import EditableFlow from '../components/page-widgets/EditableFlow'
-import { useEffect, useState, useRef, type FormEvent } from 'react'
+import { useEffect, useState, useRef, useMemo, type FormEvent } from 'react'
 import { Link, useParams, useSearchParams, useNavigate } from 'react-router-dom'
 import { createPortal } from 'react-dom'
 import { MapPin, Truck, ShieldCheck, Package, ArrowLeft, CheckCircle2, ChevronDown, ChevronUp, Ticket, X, Copy, Check, ExternalLink, CreditCard, RefreshCw, Loader2, Clock, FileText, Printer, Mail, Info, Banknote } from 'lucide-react'
@@ -837,7 +837,15 @@ export default function Checkout() {
   const [loadingProduct, setLoadingProduct] = useState(false)
   const { user, loading: authLoading, signOut } = useAuth()
   const [address, setAddress] = useState(emptyAddress)
-  const [draft, setDraft] = useState(emptyAddress)
+  const [draft, setDraft] = useState(() => {
+    try {
+      const savedCep = typeof window !== 'undefined' ? localStorage.getItem('teknix_user_cep') : null
+      if (savedCep && savedCep.replace(/\D/g, '').length === 8) {
+        return { ...emptyAddress, zipCode: savedCep }
+      }
+    } catch {}
+    return emptyAddress
+  })
   const [editingAddress, setEditingAddress] = useState(true)
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
@@ -969,7 +977,7 @@ export default function Checkout() {
     return () => { cancelled = true }
   }, [urlCode, items])
 
-  const activeItems = directItem ? [directItem] : items
+  const activeItems = useMemo(() => directItem ? [directItem] : items, [directItem, items])
   const activeTotalPrice = directItem
     ? (directItem.promo_price && directItem.promo_price > 0 ? directItem.promo_price : directItem.price) * directItem.quantity
     : totalPrice
@@ -981,27 +989,32 @@ export default function Checkout() {
     const currentCep = editingAddress ? draft.zipCode : address.zipCode
     const cleanCep = currentCep?.replace(/\D/g, '')
     if (cleanCep?.length === 8) {
-      setLoadingShipping(true)
-      calculateMelhorEnvioQuote(cleanCep, activeItems, 0)
-        .then(quotes => {
-          setShippingOptions(quotes)
-          if (quotes.length > 0) {
-            setSelectedShipping(quotes[0])
-          } else {
+      const timer = setTimeout(() => {
+        setLoadingShipping(true)
+        calculateMelhorEnvioQuote(cleanCep, activeItems, 0)
+          .then(quotes => {
+            setShippingOptions(quotes)
+            // Preserve user selection if it still exists in the new quotes, otherwise keep null so user must choose
+            setSelectedShipping(prev => {
+              if (!prev) return null
+              const match = quotes.find(q => q.id === prev.id)
+              return match || null
+            })
+          })
+          .catch(err => {
+            console.error('[checkout] Falha ao calcular frete:', err)
+            setShippingOptions([])
             setSelectedShipping(null)
-          }
-        })
-        .catch(err => {
-          console.error('[checkout] Falha ao calcular frete:', err)
-          setShippingOptions([])
-          setSelectedShipping(null)
-        })
-        .finally(() => setLoadingShipping(false))
+          })
+          .finally(() => setLoadingShipping(false))
+      }, 400)
+      return () => clearTimeout(timer)
     } else {
       setShippingOptions([])
       setSelectedShipping(null)
+      setLoadingShipping(false)
     }
-  }, [editingAddress ? draft.zipCode : address.zipCode, activeItems])
+  }, [editingAddress ? draft.zipCode : address.zipCode, activeItems.length, directItem?.id, items.length])
 
   // 2. Garante que a URL SEMPRE exiba o código correto (sem /checkout no play.teknixbrasil.com.br)
   useEffect(() => {
@@ -1090,7 +1103,7 @@ export default function Checkout() {
         items: activeItems,
         customer: { ...selected, name: taxType === 'CNPJ' ? company.trim() : selected.name, email, phone: normalizeBrPhone(phone), document: taxDoc },
         shippingCost,
-        shippingMethod: selectedShipping ? `${selectedShipping.name} - ${selectedShipping.company}` : 'Padrão',
+        shippingMethod: selectedShipping ? `${selectedShipping.name} - ${typeof selectedShipping.company === 'object' ? selectedShipping.company?.name : selectedShipping.company}` : 'Padrão',
         discount: coupon?.discount || 0,
         paymentMethod: payment,
         userId: user?.id,
@@ -1152,8 +1165,8 @@ export default function Checkout() {
       setError('Por favor, informe seu CEP de entrega.')
       return
     }
-    if (shippingOptions.length > 0 && !selectedShipping) {
-      setError('Por favor, escolha uma opção de frete.')
+    if (!selectedShipping) {
+      setError('Por favor, escolha uma opção de frete antes de finalizar a compra.')
       return
     }
 
@@ -1408,7 +1421,7 @@ export default function Checkout() {
                           style={{ marginRight: 12, accentColor: '#0066cc' }}
                         />
                         <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                          <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#0f172a' }}>{opt.company} {opt.name}</div>
+                          <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#0f172a' }}>{typeof opt.company === 'object' ? opt.company?.name : opt.company} {opt.name}</div>
                           <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Entrega em até {opt.delivery_time} dias úteis</div>
                         </div>
                         <strong style={{ fontSize: '1rem', color: '#0f172a' }}>
@@ -1416,6 +1429,11 @@ export default function Checkout() {
                         </strong>
                       </label>
                     ))}
+                    {!selectedShipping && shippingOptions.length > 0 && (
+                      <div style={{ marginTop: 8, padding: '9px 14px', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 8, color: '#1d4ed8', fontSize: '0.85rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span>👉 Por favor, selecione uma das opções de frete acima para continuar com a compra.</span>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div style={{ padding: '12px 0', color: '#64748b', fontSize: '0.95rem' }}>
