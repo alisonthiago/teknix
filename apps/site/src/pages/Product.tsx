@@ -40,6 +40,33 @@ function formatMoney(value: number) {
   return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 
+function getCarrierLogo(company?: string, serviceName?: string): string | null {
+  const comp = (company || '').toLowerCase()
+  const srv = (serviceName || '').toLowerCase()
+  const combined = `${comp} ${srv}`
+
+  if (combined.includes('jadlog')) {
+    return '/images/carriers/jadlog.png'
+  }
+  if (combined.includes('loggi')) {
+    return '/images/carriers/loggi.png'
+  }
+  if (combined.includes('sedex') || combined.includes('correios') || combined.includes('pac')) {
+    return '/images/carriers/sedex.png'
+  }
+  if (combined.includes('total express') || combined.includes('total')) {
+    return '/images/carriers/total-express.png'
+  }
+  if (combined.includes('azul cargo') || combined.includes('azul')) {
+    return '/images/carriers/azul-cargo.png'
+  }
+  if (combined.includes('j&t') || combined.includes('jet') || combined.includes('jt express')) {
+    return '/images/carriers/jet.webp'
+  }
+
+  return null
+}
+
 function conciseDescription(value?: string) {
   const clean = value?.replace(/[-–—_]{3,}/g, ' ').replace(/\s+/g, ' ').trim() || ''
   if (!clean) return 'Produto desenvolvido para profissionais que precisam de desempenho, segurança e durabilidade no dia a dia.'
@@ -1241,6 +1268,10 @@ export default function Product() {
                             const companyName = typeof opt.company === 'object' ? opt.company?.name : opt.company
                             const isFree = Number(opt.price) === 0
                             const days = parseInt(String(opt.delivery_time || '0')) || 0
+                            const logoUrl = getCarrierLogo(companyName, opt.name)
+                            const displayName = opt.name?.toLowerCase().includes((companyName || '').toLowerCase())
+                              ? opt.name
+                              : `${companyName || ''} ${opt.name || ''}`.trim()
 
                             return (
                               <div 
@@ -1250,7 +1281,7 @@ export default function Product() {
                                   alignItems: 'center', 
                                   justifyContent: 'space-between', 
                                   padding: '12px 14px', 
-                                  background: '#f8fafc', 
+                                  background: '#ffffff', 
                                   border: '1px solid #e2e8f0', 
                                   borderRadius: 8, 
                                   gap: 12,
@@ -1259,17 +1290,27 @@ export default function Product() {
                               >
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
                                   <div style={{ 
-                                    width: 36, 
-                                    height: 36, 
+                                    width: 40, 
+                                    height: 40, 
                                     borderRadius: 8, 
-                                    background: isFree ? '#ecfdf5' : '#e0f2fe', 
-                                    color: isFree ? '#16a34a' : '#0284c7', 
+                                    background: '#ffffff', 
+                                    border: '1px solid #e2e8f0',
                                     display: 'flex', 
                                     alignItems: 'center', 
                                     justifyContent: 'center', 
-                                    flexShrink: 0 
+                                    flexShrink: 0,
+                                    padding: 4,
+                                    overflow: 'hidden'
                                   }}>
-                                    <Truck size={18} />
+                                    {logoUrl ? (
+                                      <img 
+                                        src={logoUrl} 
+                                        alt={displayName} 
+                                        style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} 
+                                      />
+                                    ) : (
+                                      <Truck size={18} color="#64748b" />
+                                    )}
                                   </div>
                                   <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
                                     <span style={{ 
@@ -1280,7 +1321,7 @@ export default function Product() {
                                       overflow: 'hidden', 
                                       textOverflow: 'ellipsis' 
                                     }}>
-                                      {companyName} {opt.name}
+                                      {displayName}
                                     </span>
                                     <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
                                       {days === 0 ? 'Entrega expressa' : `Chega em até ${days} ${days === 1 ? 'dia útil' : 'dias úteis'}`}
