@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { supabase } from '../lib/supabase'
+import { supabase, supabaseAdmin } from '../lib/supabase'
 import { Plus, RefreshCw, Eye, Trash2 } from 'lucide-react'
 import { HubDataTable, type HubColumn, useBulkDelete } from '../components/ui/HubDataTable'
 import type { Customer } from '../types/database'
@@ -156,14 +156,23 @@ export default function CustomersList() {
 
   async function handleDeleteCustomers(ids: string[]) {
     try {
-      // Desvincular pedidos para evitar violação de integridade referencial
-      await supabase.from('store_orders').update({ customer_id: null }).in('customer_id', ids)
-      const { error } = await supabase.from('customers').delete().in('id', ids)
+      // 1. Desvincular pedidos para integridade referencial
+      await Promise.allSettled([
+        supabaseAdmin.from('store_orders').update({ customer_id: null }).in('customer_id', ids),
+        supabaseAdmin.from('orders').update({ customer_id: null }).in('customer_id', ids),
+        supabase.from('store_orders').update({ customer_id: null }).in('customer_id', ids),
+        supabase.from('orders').update({ customer_id: null }).in('customer_id', ids),
+      ])
+
+      // 2. Exclusão no banco de dados via service_role para garantir que realmente suma
+      const { error } = await supabaseAdmin.from('customers').delete().in('id', ids)
       if (error) {
         console.error('Erro ao excluir clientes no banco:', error)
         alert(`Não foi possível excluir: ${error.message}`)
         return
       }
+
+      // 3. Atualizar estado local imediatamente
       setCustomers(prev => prev.filter(c => !ids.includes(c.id)))
       await fetchCustomers()
     } catch (e: any) {

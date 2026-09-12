@@ -15,44 +15,13 @@ interface HubBulkActionsProps {
   entityLabel?: string
 }
 
-export function HubBulkActions({
-  selectedIds,
-  onClear,
-  actions = [],
-  entityLabel = 'registro'
-}: HubBulkActionsProps) {
-  if (selectedIds.length === 0) return null
-
-  const count = selectedIds.length
-  const label = count === 1 ? `${count} ${entityLabel} selecionado` : `${count} ${entityLabel}s selecionados`
-
-  return (
-    <div className="hub-bulk-bar" role="toolbar" aria-label="Ações em massa">
-      <span className="hub-bulk-count">{label}</span>
-
-      {actions.map((action, i) => (
-        <button
-          key={i}
-          className={`hub-bulk-action-btn${action.variant === 'danger' ? ' danger' : ''}`}
-          onClick={() => action.action(selectedIds)}
-          aria-label={action.label}
-        >
-          {action.icon}
-          {action.label}
-        </button>
-      ))}
-
-      <button
-        className="hub-bulk-clear"
-        onClick={onClear}
-        aria-label="Desmarcar seleção"
-        title="Desmarcar tudo"
-      >
-        <X size={13} style={{ marginRight: 3 }} />
-        Desmarcar
-      </button>
-    </div>
-  )
+/**
+ * HubBulkActions — As ações em massa agora são integradas diretamente
+ * na HubTableToolbar (substituindo a toolbar durante a seleção),
+ * garantindo que nenhuma barra flutuante (.hub-bulk-bar) apareça.
+ */
+export function HubBulkActions(_props: HubBulkActionsProps) {
+  return null
 }
 
 /** Hook utilitário para exclusão em massa com confirmação */

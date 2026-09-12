@@ -8,7 +8,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { MoreVertical, Package } from 'lucide-react'
 import { HubTableToolbar, type SortOption } from './HubTableToolbar'
-import { HubBulkActions, type BulkAction } from './HubBulkActions'
+import type { BulkAction } from './HubBulkActions'
 import type { ExportColumn, ExportRow } from '../../../lib/exportTable'
 import './HubDataTable.css'
 
@@ -180,18 +180,26 @@ export function HubDataTable<T extends { id: string }>({
   ].filter(Boolean).join(' ')
 
   // ── Export rows ──
+  const resolvedExportCols: ExportColumn[] = (exportColumns && exportColumns.length > 0)
+    ? exportColumns
+    : (columns.some(c => c.exportValue)
+        ? columns.filter(c => c.exportValue).map(c => ({ key: c.key, label: c.label }))
+        : columns.map(c => ({ key: c.key, label: c.label }))
+      )
+
   const exportRows: ExportRow[] = rows.map(row => {
     const r: ExportRow = {}
-    const cols = exportColumns || columns.filter(c => c.exportValue).map(c => ({ key: c.key, label: c.label }))
-    cols.forEach(col => {
+    resolvedExportCols.forEach(col => {
       const hubCol = columns.find(c => c.key === col.key)
       r[col.key] = hubCol?.exportValue ? hubCol.exportValue(row) : String((row as any)[col.key] ?? '')
     })
     return r
   })
 
-  const getRowById = (id: string): ExportRow | undefined =>
-    exportRows.find((_, i) => rows[i]?.id === id)
+  const getRowById = (id: string): ExportRow | undefined => {
+    const idx = rows.findIndex(r => r.id === id)
+    return idx >= 0 ? exportRows[idx] : undefined
+  }
 
   return (
     <div className="hub-page-container">
@@ -204,7 +212,7 @@ export function HubDataTable<T extends { id: string }>({
         )}
 
         {/* ── Toolbar Unificada (Busca + Tabs + Ações + Export + Bulk Actions tudo integrado) ── */}
-        {(onSearchChange || headerActions || toolbarExtra || (selectedIds.length > 0 && bulkActions.length > 0)) && (
+        {(onSearchChange || headerActions || toolbarExtra || selectedIds.length > 0) && (
           <HubTableToolbar
             searchValue={searchValue}
             onSearchChange={onSearchChange || (() => {})}
@@ -214,7 +222,7 @@ export function HubDataTable<T extends { id: string }>({
             sortOptions={sortOptions}
             currentSort={currentSort}
             onSortChange={onSortChange}
-            exportColumns={exportColumns || columns.filter(c => c.exportValue).map(c => ({ key: c.key, label: c.label }))}
+            exportColumns={resolvedExportCols}
             exportRows={exportRows}
             selectedIds={selectedIds}
             getRowById={getRowById}

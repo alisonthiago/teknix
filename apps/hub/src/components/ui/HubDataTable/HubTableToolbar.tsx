@@ -70,14 +70,30 @@ export function HubTableToolbar({
   }, [])
 
   // Quando houver itens selecionados, a toolbar se transforma na barra de ações em massa
-  if (selectedIds.length > 0 && bulkActions && bulkActions.length > 0) {
+  if (selectedIds.length > 0) {
     const count = selectedIds.length
     const countText = `${count} ${count === 1 ? entityLabel : `${entityLabel}s`} ${count === 1 ? 'selecionado' : 'selecionados'}`
 
     return (
       <div className="hub-table-toolbar hub-table-toolbar-selection" role="toolbar" aria-label="Ações de seleção">
-        <div className="hub-toolbar-selection-left" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', flex: '1 1 auto' }}>
+        <div className="hub-toolbar-selection-left">
           <span className="hub-bulk-count">{countText}</span>
+
+          {bulkActions && bulkActions.map((action, i) => (
+            <button
+              key={i}
+              className={`hub-toolbar-btn hub-bulk-action-btn${action.variant === 'danger' ? ' danger' : ''}`}
+              onClick={async () => {
+                await action.action(selectedIds)
+                onClearSelection?.()
+              }}
+              aria-label={action.label}
+            >
+              {action.icon}
+              {action.label}
+            </button>
+          ))}
+
           {onClearSelection && (
             <button
               className="hub-toolbar-btn hub-bulk-clear-btn"
@@ -89,21 +105,10 @@ export function HubTableToolbar({
               Desmarcar
             </button>
           )}
-          {bulkActions.map((action, i) => (
-            <button
-              key={i}
-              className={`hub-toolbar-btn hub-bulk-action-btn${action.variant === 'danger' ? ' danger' : ''}`}
-              onClick={() => action.action(selectedIds)}
-              aria-label={action.label}
-            >
-              {action.icon}
-              {action.label}
-            </button>
-          ))}
         </div>
 
-        <div className="hub-toolbar-selection-right" style={{ display: 'flex', alignItems: 'center', gap: 8, marginLeft: 'auto' }}>
-          {exportColumns && (
+        <div className="hub-toolbar-selection-right">
+          {exportColumns && exportColumns.length > 0 && (
             <div className="hub-toolbar-export-container">
               <HubExportMenu
                 columns={exportColumns}

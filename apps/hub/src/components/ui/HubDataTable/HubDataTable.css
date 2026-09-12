@@ -442,82 +442,81 @@
 }
 
 .hub-bulk-bar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: #ffffff;
-  color: #111111;
-  padding: 8px 16px;
-  min-height: 46px;
-  border: 1px solid #e6e6e6;
-  border-radius: 10px;
-  font-size: 13px;
-  font-weight: 500;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
-  animation: hubBulkSlideIn 0.18s ease;
+  display: none !important;
 }
-@keyframes hubBulkSlideIn {
-  from { opacity: 0; transform: translateY(-6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+
 .hub-bulk-count {
   font-weight: 700;
   font-size: 13px;
-  color: #1f2328;
-  padding: 4px 10px;
-  background: #f5f5f5;
-  border: 1px solid #e6e6e6;
-  border-radius: 6px;
-  margin-right: 4px;
+  color: #111111;
+  padding: 0 12px;
+  height: 36px;
+  background: #f5f5f7;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
 }
+
 .hub-bulk-action-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 14px;
+  padding: 0 14px;
+  height: 36px;
   border-radius: 8px;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 600;
-  border: 1px solid #e6e6e6;
+  border: 1px solid #e5e7eb;
   cursor: pointer;
   background: #ffffff;
   color: #1f2328;
-  transition: all 0.12s ease;
+  transition: all 0.15s ease;
   font-family: inherit;
+  box-sizing: border-box;
 }
+
 .hub-bulk-action-btn:hover {
   background: #f8fafc;
   border-color: #d1d5db;
   color: #000000;
 }
+
 .hub-bulk-action-btn.danger {
   background: #fef2f2;
   border-color: #fecaca;
   color: #dc2626;
 }
+
 .hub-bulk-action-btn.danger:hover {
   background: #fee2e2;
   border-color: #fca5a5;
   color: #b91c1c;
 }
-.hub-bulk-clear {
-  margin-left: auto;
+
+.hub-bulk-clear-btn {
   display: inline-flex;
   align-items: center;
-  background: none;
-  border: none;
-  color: #666666;
-  cursor: pointer;
-  font-size: 12.5px;
+  gap: 4px;
+  padding: 0 12px;
+  height: 36px;
+  border-radius: 8px;
+  font-size: 13px;
   font-weight: 500;
-  padding: 4px 10px;
-  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #4b5563 !important;
+  cursor: pointer;
+  transition: all 0.15s ease;
   font-family: inherit;
-  transition: all 0.12s ease;
+  box-sizing: border-box;
 }
-.hub-bulk-clear:hover {
-  color: #111111;
-  background: #f5f5f5;
+
+.hub-bulk-clear-btn:hover {
+  color: #111827 !important;
+  background: #f3f4f6 !important;
+  border-color: #d1d5db;
 }
 
 /* ── Table Card ── */
