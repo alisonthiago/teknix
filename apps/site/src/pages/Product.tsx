@@ -1063,22 +1063,27 @@ export default function Product() {
 
               {/* 5. CARD DE COMPRA RESUMIDO & MODERNO */}
               <div className="ml-pdp-buy-box">
-                {/* 1. Botões de Compra (Lado a Lado + Carrinho Embaixo) */}
+                {/* 1. Botões de Compra (Layout da Plataforma Jet) */}
                 {(currentProduct.stock ?? 1) > 0 ? (
-                  <div className="tkx-actions-group">
-                    <div className="tkx-buy-primary-row">
-                      <div className="tkx-qty-stepper">
-                        <Editable as="button" widgetId="product-control-32" type="button" onClick={() => setQuantity(q => Math.max(1, q - 1))} aria-label="Diminuir">-</Editable>
-                        <input type="tel" value={quantity} onChange={e => setQuantity(Math.max(1, parseInt(e.target.value) || 1))} />
-                        <Editable as="button" widgetId="product-control-33" type="button" onClick={() => setQuantity(q => q + 1)} aria-label="Aumentar">+</Editable>
-                      </div>
-                      <Editable as="button" widgetId="product-control-34" type="button" className="tkx-btn-buy" onClick={handleOneClickBuy}>
-                        Comprar <ChevronRight size={18} style={{ marginLeft: 6 }} />
-                      </Editable>
+                  <div className="flex buy-wish" style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 24 }}>
+                    <div className="jet-product-quantity" style={{ display: 'flex', border: '1px solid #e5e7eb', borderRadius: 8, height: 48, background: '#fff' }}>
+                      <Editable as="button" widgetId="product-control-32" type="button" className="minus" aria-label="Menos" onClick={() => setQuantity(q => Math.max(1, q - 1))} style={{ width: 40, border: 'none', background: 'transparent', fontSize: '1.2rem', cursor: 'pointer' }}>-</Editable>
+                      <input aria-label="Quantidade" id="quantityItemDetail" className="quantity" type="tel" value={quantity} onChange={e => setQuantity(Math.max(1, parseInt(e.target.value) || 1))} style={{ width: 40, border: 'none', textAlign: 'center', fontWeight: 600, fontSize: '1rem', color: '#111827', pointerEvents: 'none' }} />
+                      <Editable as="button" widgetId="product-control-33" type="button" className="plus" aria-label="Mais" onClick={() => setQuantity(q => q + 1)} style={{ width: 40, border: 'none', background: 'transparent', fontSize: '1.2rem', cursor: 'pointer' }}>+</Editable>
                     </div>
-                    <Editable as="button" widgetId="product-control-35" type="button" className="tkx-btn-cart" onClick={handleAddToCart}>
-                      Adicionar ao Carrinho
-                    </Editable>
+
+                    <div className="jet-product-add-cart" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                      <div className="btn-one-click" style={{ flex: 1 }}>
+                        <Editable as="button" widgetId="product-control-34" type="button" className="one-click" onClick={handleOneClickBuy} style={{ width: '100%', height: 48, background: '#46a032', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: '1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          Comprar <ChevronRight size={18} style={{ marginLeft: 6 }} />
+                        </Editable>
+                      </div>
+                      <div className="btn-buy" style={{ width: '100%' }}>
+                        <Editable as="button" widgetId="product-control-35" type="button" className="add-cart" onClick={handleAddToCart} style={{ width: '100%', height: 48, background: '#fff', color: '#46a032', border: '1px solid #46a032', borderRadius: 8, fontWeight: 700, fontSize: '1rem', cursor: 'pointer' }}>
+                          Adicionar ao Carrinho
+                        </Editable>
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   <div className="tkx-out-of-stock-banner">
@@ -1087,49 +1092,58 @@ export default function Product() {
                   </div>
                 )}
 
-                {/* 2. Novo Calculador de Frete (Tabela Inline) */}
-                <div className="tkx-shipping-calc">
-                  <p className="tkx-shipping-label">Consulte prazos de entrega</p>
-                  <form className="tkx-shipping-form" onSubmit={handleCalculateFreight}>
-                    <input 
-                      type="tel" 
-                      placeholder="00000-000" 
-                      maxLength={9} 
-                      value={cep} 
-                      onChange={e => setCep(e.target.value)} 
-                    />
-                    <button type="submit" aria-label="Buscar Frete" disabled={freightLoading}>
-                      {freightLoading ? <Loader2 size={18} className="tkn-spin" /> : <Search size={18} />}
-                    </button>
-                  </form>
-
-                  {freightCalculated && freightOptions.length > 0 && (
-                    <div className="tkx-shipping-table-wrapper">
-                      <table className="tkx-shipping-table">
-                        <thead>
-                          <tr>
-                            <th>Entrega</th>
-                            <th>Frete</th>
-                            <th>Prazo</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {freightOptions.map((opt, i) => (
-                            <tr key={i}>
-                              <td>{opt.name}</td>
-                              <td>{Number(opt.price) === 0 ? 'Grátis' : formatMoney(Number(opt.price))}</td>
-                              <td>Previsão: {opt.delivery_time} dias úteis</td>
+                {/* 2. Novo Calculador de Frete (Jet Format) */}
+                <div className="jet-product-freight-calculation" style={{ marginBottom: 24 }}>
+                  <div className="shipping-title" style={{ fontSize: '0.95rem', color: '#4b5563', marginBottom: 12, fontWeight: 500 }}>Consulte prazos de entrega</div>
+                  <div className="freight-container">
+                    <form className="freight-input" onSubmit={handleCalculateFreight} style={{ display: 'flex', position: 'relative', background: '#eef2ff', border: '1px solid #e2e8f0', borderRadius: 6, overflow: 'hidden', height: 48, marginBottom: 8 }}>
+                      <input 
+                        type="tel" 
+                        placeholder="00000-000" 
+                        maxLength={9} 
+                        id="zipcode"
+                        value={cep} 
+                        onChange={e => setCep(e.target.value)} 
+                        style={{ flex: 1, background: 'transparent', border: 'none', padding: '0 16px', fontWeight: 600, fontSize: '1rem', color: '#0f172a', outline: 'none' }}
+                      />
+                      <button type="submit" disabled={freightLoading} style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', padding: '0 16px', display: 'flex', alignItems: 'center' }}>
+                        {freightLoading ? <Loader2 size={18} className="tkn-spin" /> : <Search size={18} />}
+                      </button>
+                    </form>
+                    
+                    {freightCalculated && freightOptions.length > 0 && (
+                      <div className="result" style={{ marginTop: 16 }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem', border: '1px solid #64748b', borderRadius: 8, overflow: 'hidden' }}>
+                          <thead>
+                            <tr>
+                              <th style={{ background: '#fff', padding: '12px 16px', color: '#334155', fontWeight: 700, borderBottom: '1px solid #64748b' }}>Entrega</th>
+                              <th style={{ background: '#fff', padding: '12px 16px', color: '#334155', fontWeight: 700, borderBottom: '1px solid #64748b' }}>Frete</th>
+                              <th style={{ background: '#fff', padding: '12px 16px', color: '#334155', fontWeight: 700, borderBottom: '1px solid #64748b' }}>Prazo</th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                  {freightCalculated && freightOptions.length === 0 && (
-                    <p style={{ marginTop: 12, fontSize: 13, color: '#64748b' }}>
-                      {commerce.freeShipping ? `✓ Frete grátis confirmado para ${deliveryCep || cep}!` : `Nenhuma opção de frete encontrada para ${deliveryCep || cep}.`}
-                    </p>
-                  )}
+                          </thead>
+                          <tbody>
+                            {freightOptions.map((opt, i) => {
+                              const today = new Date();
+                              today.setDate(today.getDate() + (parseInt(opt.delivery_time) || 0));
+                              const estimate = today.toLocaleDateString('pt-BR');
+                              return (
+                                <tr key={i}>
+                                  <td className="freight-name" style={{ padding: '12px 16px', color: '#475569', borderBottom: '1px solid #cbd5e1', background: '#fff' }}>{opt.name}</td>
+                                  <td className="freight-value" style={{ padding: '12px 16px', color: '#475569', borderBottom: '1px solid #cbd5e1', background: '#fff' }}>{Number(opt.price) === 0 ? 'Grátis' : formatMoney(Number(opt.price))}</td>
+                                  <td className="freight-time" style={{ padding: '12px 16px', color: '#475569', borderBottom: '1px solid #cbd5e1', background: '#fff' }}>Previsão: <span className="delivery-time">{opt.delivery_time} dias úteis</span></td>
+                                </tr>
+                              )
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                    {freightCalculated && freightOptions.length === 0 && (
+                      <p style={{ marginTop: 12, fontSize: 13, color: '#64748b' }}>
+                        {commerce.freeShipping ? `✓ Frete grátis confirmado para ${deliveryCep || cep}!` : `Nenhuma opção de frete encontrada para ${deliveryCep || cep}.`}
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 {/* 3. Ações Extras de Contato / Disponibilidade */}
