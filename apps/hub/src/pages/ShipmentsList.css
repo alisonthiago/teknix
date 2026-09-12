@@ -71,8 +71,9 @@
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  background: #f0f4ff;
-  color: #347ff2;
+  background: #fafafa;
+  color: #111111;
+  border: 1px solid #e6e6e6;
 }
 
 .shipments-header-title h2 {
@@ -80,7 +81,7 @@
   font-weight: 700;
   letter-spacing: -0.02em;
   margin: 0;
-  color: #1d1d1f;
+  color: #111111;
 }
 
 .shipments-header-title p {
@@ -242,14 +243,14 @@
 }
 
 .search-box input:focus {
-  border-color: #347ff2;
+  border-color: #111111;
 }
 
 /* Tabela */
 .table-wrapper {
   background: #ffffff;
-  border-radius: 12px;
-  border: 1px solid #e5e5e7;
+  border-radius: 14px;
+  border: 1px solid #e6e6e6;
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
@@ -418,7 +419,7 @@
 
 .btn-action-primary {
   padding: 6px 12px;
-  background: #347ff2;
+  background: #111111;
   color: #ffffff;
   border: none;
   border-radius: 6px;
@@ -429,7 +430,7 @@
 }
 
 .btn-action-primary:hover {
-  background: #2563eb;
+  background: #000000;
 }
 
 .btn-action-secondary {
@@ -438,8 +439,8 @@
   gap: 6px;
   padding: 6px 12px;
   background: #ffffff;
-  color: #1d1d1f;
-  border: 1px solid #e5e5e7;
+  color: #111111;
+  border: 1px solid #e6e6e6;
   border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
@@ -448,13 +449,13 @@
 }
 
 .btn-action-secondary:hover {
-  background: #f5f5f7;
+  background: #fafafa;
 }
 
 .btn-action-ghost {
   padding: 6px 12px;
   background: transparent;
-  color: #347ff2;
+  color: #111111;
   border: none;
   border-radius: 6px;
   font-size: 12px;
@@ -487,7 +488,7 @@
   width: 22px;
   height: 22px;
   border: 2px solid #e5e5e7;
-  border-top-color: #347ff2;
+  border-top-color: #111111;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
   margin: 0 auto 10px;
@@ -602,7 +603,7 @@
 }
 
 .drawer-card-title svg {
-  color: #347ff2;
+  color: #111111;
 }
 
 .drawer-card-title h4 {
@@ -659,7 +660,7 @@
 .address-icon {
   margin-top: 2px;
   flex-shrink: 0;
-  color: #347ff2;
+  color: #111111;
 }
 
 /* Lista de Produtos */
@@ -789,7 +790,7 @@
   gap: 8px;
   width: 100%;
   padding: 12px 18px;
-  background: #347ff2;
+  background: #111111;
   color: #ffffff;
   border: none;
   border-radius: 8px;
@@ -800,7 +801,7 @@
 }
 
 .btn-generate-label:hover {
-  background: #2563eb;
+  background: #000000;
 }
 
 .btn-generate-label:disabled {
@@ -908,8 +909,8 @@
   gap: 6px;
   padding: 10px 14px;
   background: #ffffff;
-  color: #347ff2;
-  border: 1px solid #c7d9ff;
+  color: #111111;
+  border: 1px solid #e6e6e6;
   border-radius: 8px;
   font-size: 12px;
   font-weight: 600;
@@ -918,7 +919,7 @@
 }
 
 .btn-track-external:hover {
-  background: #edf3ff;
+  background: #fafafa;
 }
 
 /* Ações manuais de status */
@@ -928,7 +929,7 @@
   gap: 6px;
   margin-top: 4px;
   padding-top: 10px;
-  border-top: 1px solid #e0ebff;
+  border-top: 1px solid #e6e6e6;
 }
 
 .sub-label {
@@ -982,7 +983,7 @@
   gap: 6px;
   font-size: 13px;
   font-weight: 600;
-  color: #347ff2;
+  color: #111111;
   text-decoration: none;
 }
 

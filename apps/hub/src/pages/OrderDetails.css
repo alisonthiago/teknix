@@ -429,20 +429,20 @@
 }
 
 .btn-fiscal-action.primary {
-  background: #0f172a;
+  background: #111111;
   color: #ffffff;
 }
 .btn-fiscal-action.primary:hover {
-  background: #334155;
+  background: #000000;
 }
 
 .btn-fiscal-action.secondary {
   background: #ffffff;
-  color: #1e293b;
-  border: 1px solid #cbd5e1;
+  color: #111111;
+  border: 1px solid #e6e6e6;
 }
 .btn-fiscal-action.secondary:hover {
-  background: #f1f5f9;
+  background: #fafafa;
 }
 
 .btn-fiscal-action.danger {
@@ -462,7 +462,7 @@
 .cancel-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(0, 0, 0, 0.45);
   z-index: 9999;
   display: flex;
   align-items: center;
@@ -472,11 +472,12 @@
 
 .cancel-modal-content {
   background: #ffffff;
-  border-radius: 12px;
+  border-radius: 14px;
+  border: 1px solid #e6e6e6;
   padding: 24px;
   width: 100%;
   max-width: 480px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
 }
 
 .cancel-modal-content h3 {

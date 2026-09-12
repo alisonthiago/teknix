@@ -32,14 +32,14 @@ function FilterBar({ mp, setMp, acc, setAcc, accounts }: {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 mb-5">
       <select value={mp} onChange={e => { setMp(e.target.value); setAcc('all') }}
-        className="w-full sm:w-auto min-h-[40px] px-3.5 border border-[#e6e6e6] rounded-xl text-[12px] font-medium text-[#333] focus:outline-none focus:border-[#16a34a] bg-white shadow-2xs">
+        className="w-full sm:w-auto h-[38px] px-3 border border-[#e6e6e6] rounded-lg text-sm font-normal text-[#111] focus:outline-none focus:border-[#1f2328] bg-white transition-colors cursor-pointer">
         <option value="all">Todos marketplaces</option>
         {(marketplaces || []).map((m: Record<string, unknown>) => (
           <option key={m.id as string} value={m.id as string}>{m.name as string}</option>
         ))}
       </select>
       <select value={acc} onChange={e => setAcc(e.target.value)}
-        className="w-full sm:w-auto min-h-[40px] px-3.5 border border-[#e6e6e6] rounded-xl text-[12px] font-medium text-[#333] focus:outline-none focus:border-[#16a34a] bg-white shadow-2xs">
+        className="w-full sm:w-auto h-[38px] px-3 border border-[#e6e6e6] rounded-lg text-sm font-normal text-[#111] focus:outline-none focus:border-[#1f2328] bg-white transition-colors cursor-pointer">
         <option value="all">Todas contas</option>
         {filteredAccounts.map((a: Record<string, unknown>) => (
           <option key={a.id as string} value={a.id as string}>{a.account_name as string}</option>
@@ -410,8 +410,8 @@ export default function FinanceiroPage() {
   ]
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-14 animate-in fade-in duration-200">
-      <PageHeader title="Financeiro & DRE" description="Receitas, lucros, margens e custos em tempo real" />
+    <div className="mp-stack">
+      <PageHeader title="Financeiro & DRE" />
       <FilterBar mp={filterMp} setMp={setFilterMp} acc={filterAcc} setAcc={setFilterAcc} accounts={accounts || []} />
       
       <Tabs defaultValue="visao-geral">

@@ -131,7 +131,7 @@ export default function PermissoesPage() {
   }, {})
 
   return (
-    <ConfigSubLayout title="Permissões" description="Controle o que cada colaborador pode ver e fazer">
+    <ConfigSubLayout title="Permissões">
       <ConfigSection title="Colaboradores">
         <div className="flex justify-between items-center mb-3">
           <p className="text-[11px] text-[#999]">Selecione um colaborador para editar suas permissões</p>

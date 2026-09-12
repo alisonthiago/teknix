@@ -34,6 +34,8 @@ export interface HubDataTableProps<T extends { id: string }> {
   description?: string
   /** Botões do header (Novo, Importar, etc.) */
   headerActions?: React.ReactNode
+  /** Ações exibidas acima da toolbar da tabela */
+  headerTopActions?: React.ReactNode
   /** Colunas */
   columns: HubColumn<T>[]
   /** Dados já filtrados e carregados */
@@ -98,6 +100,7 @@ export function HubDataTable<T extends { id: string }>({
   title,
   description,
   headerActions,
+  headerTopActions,
   columns,
   rows,
   loading = false,
@@ -190,31 +193,21 @@ export function HubDataTable<T extends { id: string }>({
   const getRowById = (id: string): ExportRow | undefined =>
     exportRows.find((_, i) => rows[i]?.id === id)
 
-  const displayCount = totalCount ?? rows.length
-  const displayLabel = displayCount === 1 ? `1 ${entityLabel}` : `${displayCount} ${entityLabel}s`
-
   return (
     <div className="hub-page-container">
       <div className="hub-page-wrapper">
 
-        {/* ── Page Header ── */}
-        <div className="hub-page-header">
-          <div className="hub-header-info">
-            <h1>{title}</h1>
-            {description && <p>{description}</p>}
+        {headerTopActions && (
+          <div className="hub-table-top-actions">
+            {headerTopActions}
           </div>
-          {headerActions && (
-            <div className="hub-header-actions">
-              {headerActions}
-            </div>
-          )}
-        </div>
+        )}
 
-        {/* ── Toolbar ── */}
-        {onSearchChange && (
+        {/* ── Toolbar Unificada (Busca + Tabs + Ações + Export — Tudo na mesma seção reta) ── */}
+        {(onSearchChange || headerActions || toolbarExtra) && (
           <HubTableToolbar
             searchValue={searchValue}
-            onSearchChange={onSearchChange}
+            onSearchChange={onSearchChange || (() => {})}
             searchPlaceholder={searchPlaceholder}
             onFilter={onFilter}
             filterActive={filterActive}
@@ -228,6 +221,7 @@ export function HubDataTable<T extends { id: string }>({
             exportTitle={exportTitle || title}
             exportFilename={exportFilename}
             activeFilters={activeFilters}
+            headerActions={headerActions}
             extra={toolbarExtra}
           />
         )}
@@ -240,16 +234,6 @@ export function HubDataTable<T extends { id: string }>({
             actions={bulkActions}
             entityLabel={entityLabel}
           />
-        )}
-
-        {/* ── Contador ── */}
-        {!loading && (
-          <div className="hub-table-count">
-            {selectedIds.length > 0
-              ? `${selectedIds.length} selecionado${selectedIds.length !== 1 ? 's' : ''} de ${displayCount}`
-              : displayLabel
-            }
-          </div>
         )}
 
         {/* ── Table Card ── */}

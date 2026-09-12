@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { User, ShoppingCart, DollarSign, Search, MapPin, Phone, ArrowUpRight, Store } from 'lucide-react'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
+import { PageHeader } from '@/components/ui/module'
 
 function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
@@ -100,34 +101,48 @@ export default function ClientesPage() {
   const avgTicket = customers.length > 0 ? totalSpentAll / customers.length : 0
 
   return (
-    <div className="space-y-4 -mx-5 sm:-mx-8 lg:-mx-12 xl:-mx-16">
+    <div className="mp-stack">
+      <PageHeader title="Clientes" />
+
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <StatCard label="Total de Clientes" value={String(customers.length)} />
-        <StatCard label="Faturamento Total" value={formatBRL(totalSpentAll)} />
-        <StatCard label="Ticket Médio" value={formatBRL(avgTicket)} />
-        <StatCard label="Canais Conectados" value="Mercado Livre" sub="Shopee • Amazon" />
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+        <div className="bg-white px-5 py-5 rounded-2xl border border-[#e6e6e6] shadow-2xs">
+          <p className="text-xs font-normal text-[#999] uppercase tracking-wide">Total de Clientes</p>
+          <p className="text-2xl font-semibold text-[#111] mt-1 tracking-tight">{customers.length}</p>
+        </div>
+        <div className="bg-white px-5 py-5 rounded-2xl border border-[#e6e6e6] shadow-2xs">
+          <p className="text-xs font-normal text-[#999] uppercase tracking-wide">Faturamento Total</p>
+          <p className="text-2xl font-semibold text-[#111] mt-1 tracking-tight">{formatBRL(totalSpentAll)}</p>
+        </div>
+        <div className="bg-white px-5 py-5 rounded-2xl border border-[#e6e6e6] shadow-2xs">
+          <p className="text-xs font-normal text-[#999] uppercase tracking-wide">Ticket Médio</p>
+          <p className="text-2xl font-semibold text-[#111] mt-1 tracking-tight">{formatBRL(avgTicket)}</p>
+        </div>
+        <div className="bg-white px-5 py-5 rounded-2xl border border-[#e6e6e6] shadow-2xs">
+          <p className="text-xs font-normal text-[#999] uppercase tracking-wide">Canais Conectados</p>
+          <p className="text-sm font-semibold text-[#111] mt-1">Mercado Livre</p>
+          <p className="text-xs text-[#999] mt-0.5">Shopee • Amazon</p>
+        </div>
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded-md border border-[#e6e6e6]">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-2.5 w-4 h-4 text-[#999]" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#999]" />
           <input
             type="text"
             placeholder="Buscar por nome, telefone ou endereço..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 bg-[#fafafa] border border-[#e6e6e6] rounded-md text-sm text-[#333] focus:outline-none focus:border-[#ccc]"
+            className="w-full pl-9 pr-3 h-[38px] bg-white border border-[#e6e6e6] rounded-lg text-sm text-[#111] focus:outline-none focus:border-[#1f2328] transition-colors"
           />
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-[#999]">Canal:</span>
           <select
             value={selectedChannel}
             onChange={(e) => setSelectedChannel(e.target.value)}
-            className="bg-[#fafafa] border border-[#e6e6e6] rounded-md px-3 py-1.5 text-sm text-[#333] focus:outline-none"
+            className="bg-white border border-[#e6e6e6] rounded-lg px-3 h-[38px] text-sm text-[#111] focus:outline-none focus:border-[#1f2328] cursor-pointer"
           >
             <option value="ALL">Todos os Canais</option>
             <option value="Mercado Livre">Mercado Livre</option>
@@ -138,7 +153,7 @@ export default function ClientesPage() {
       </div>
 
       {/* Customers Table */}
-      <div className="bg-white rounded-md border border-[#e6e6e6] overflow-hidden">
+      <div className="bg-white rounded-2xl border border-[#e6e6e6] overflow-hidden shadow-2xs">
         {loading ? (
           <div className="p-12 text-center text-sm text-[#999]">Carregando clientes...</div>
         ) : filtered.length === 0 ? (
@@ -217,9 +232,9 @@ export default function ClientesPage() {
                       <td className="py-4 px-4 text-right">
                         <Link
                           href={`/clientes/${customerSlug}`}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-white hover:bg-[#f5f5f5] text-[#666] hover:text-[#333] border border-[#e6e6e6] rounded-md text-sm font-medium transition-colors"
+                          className="inline-flex items-center gap-1.5 h-[32px] px-3 bg-white hover:bg-[#f8fafc] text-[#333] border border-[#e6e6e6] rounded-lg text-xs font-normal transition-colors shadow-2xs"
                         >
-                          Ver Perfil <ArrowUpRight className="w-3 h-3" />
+                          Ver Perfil <ArrowUpRight className="w-3.5 h-3.5" />
                         </Link>
                       </td>
                     </tr>

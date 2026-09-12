@@ -81,7 +81,7 @@ export default function RelatorioContasPage() {
           <ArrowLeft className="w-3.5 h-3.5" /> Análises
         </Link>
       </div>
-      <PageHeader title="Relatório por Conta" description="Desempenho individual de cada conta de marketplace" />
+      <PageHeader title="Relatório por Conta" />
 
       <div className="flex flex-wrap items-center gap-2 mb-4">
         {(['7d', '30d', '90d'] as const).map(p => (

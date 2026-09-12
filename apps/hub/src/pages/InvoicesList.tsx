@@ -211,14 +211,12 @@ export default function InvoicesList() {
           <div key={i} className="hub-kpi-card">
             <div className="hub-kpi-header"><span className="hub-kpi-label">{s.label}</span><div className="hub-kpi-icon">{s.icon}</div></div>
             <div className="hub-kpi-value">{s.value}</div>
-            <p className="hub-kpi-subtitle">{s.sub}</p>
           </div>
         ))}
       </div>
 
       <HubDataTable
         title="Notas Fiscais (NF-e)"
-        description="Administração fiscal centralizada via Focus NFe."
         headerActions={
           <>
             <div className="hub-status-tabs">

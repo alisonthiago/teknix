@@ -8,7 +8,8 @@ import StorefrontProductCard from '../components/StorefrontProductCard'
 import { storefrontCard } from '../services/storefrontCommerce'
 import { getProducts, getProductById } from '../services/products'
 import type { Product } from '../types/database'
-import { findCoreCategory } from '../services/categories'
+import { findCoreCategory, fetchSubcategories } from '../services/categories'
+import { parseCategoryRow, type CentralCategory } from '../../../../packages/core/src/categoryRules'
 import ProductPage from './Product'
 import './CategoryPage.css'
 
@@ -28,7 +29,8 @@ export default function CategoryPage() {
   const { segmento, categoria, slug } = useParams<{ segmento: string; categoria: string; slug: string }>()
   const [searchParams, setSearchParams] = useSearchParams()
   const [page, setPage] = useState<PageData | null>(null)
-  const [category, setCategory] = useState<{ id: string; name: string; slug: string; category_type?: string; rules?: Record<string, unknown> } | null>(null)
+  const [category, setCategory] = useState<CentralCategory | null>(null)
+  const [subcategories, setSubcategories] = useState<CentralCategory[]>([])
   const [products, setProducts] = useState<Product[]>([])
   const [isProductPage, setIsProductPage] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -51,6 +53,7 @@ export default function CategoryPage() {
     setLoading(true)
     setPage(null)
     setCategory(null)
+    setSubcategories([])
     setNotFound(false)
     setIsProductPage(false)
 
@@ -71,7 +74,6 @@ export default function CategoryPage() {
         if (!['category', 'segment'].includes(pageData.type)) { setLoading(false); return }
       }
 
-
       // 1. Verifica primeiro se é um produto (por ID, SKU ou slug)
       const foundProduct = await getProductById(categorySlug)
       if (cancelled) return
@@ -81,7 +83,7 @@ export default function CategoryPage() {
         return
       }
 
-      // 2. Resolve a categoria pelo slug para obter o category_id real da tabela store_categories
+      // 2. Resolve a categoria pelo slug para obter o registro real da tabela store_categories
       const { data: catData } = await supabase
         .from('store_categories')
         .select('*')
@@ -89,23 +91,60 @@ export default function CategoryPage() {
         .maybeSingle()
 
       if (cancelled) return
-      const resolvedCategory = catData || null
-      if (resolvedCategory) setCategory(resolvedCategory)
-      else if (!pageData?.page_styles?.published_snapshot_v2) { setNotFound(true); setLoading(false); return }
 
-      // 4. Busca produtos vinculados à categoria (por category_id ou slug)
+      let parsedCat: CentralCategory | null = null
+      if (catData) {
+        parsedCat = parseCategoryRow(catData)
+        setCategory(parsedCat)
+
+        // SEO Title
+        if (parsedCat.seo_title) {
+          document.title = `${parsedCat.seo_title} | TEKNIX`
+        } else {
+          document.title = `${parsedCat.name} | TEKNIX`
+        }
+
+        // Meta description
+        if (parsedCat.seo_description) {
+          let meta = document.querySelector('meta[name="description"]')
+          if (!meta) {
+            meta = document.createElement('meta')
+            meta.setAttribute('name', 'description')
+            document.head.appendChild(meta)
+          }
+          meta.setAttribute('content', parsedCat.seo_description)
+        }
+
+        // Busca subcategorias
+        try {
+          const subs = await fetchSubcategories(parsedCat.id)
+          if (!cancelled) setSubcategories(subs)
+        } catch {
+          // ignore error
+        }
+      } else if (!pageData?.page_styles?.published_snapshot_v2) {
+        setNotFound(true)
+        setLoading(false)
+        return
+      }
+
+      // 4. Busca produtos vinculados à categoria (por regras inteligentes, manuais ou slug)
       const categoryProducts = await getProducts({
-        segment: catData?.id || categorySlug,
-        category: categorySlug,
+        segment: parsedCat?.id || categorySlug,
+        category: parsedCat?.slug || categorySlug,
         brand: selectedBrand || undefined,
         search: searchTerm || undefined,
         limit: 40,
         sort: sortBy,
-        categoryRules: catData?.category_type === 'smart' ? catData.rules : undefined
+        categoryRules: parsedCat?.rules,
+        categoryOperator: parsedCat?.rule_operator,
+        categoryLinkingMode: parsedCat?.linking_mode,
+        manualProductIds: parsedCat?.manual_product_ids,
+        excludedProductIds: parsedCat?.excluded_product_ids,
       })
 
       if (cancelled) return
-      if (!pageData && !resolvedCategory && (!categoryProducts || categoryProducts.length === 0)) {
+      if (!pageData && !parsedCat && (!categoryProducts || categoryProducts.length === 0)) {
         setNotFound(true)
       } else {
         setProducts(categoryProducts)
@@ -200,6 +239,18 @@ export default function CategoryPage() {
               <span className="current">{category?.name || page?.title}</span>
             </nav>
             <Editable as="h1" widgetId="categorypage-3" className="category-title">{category?.name || page?.title}</Editable>
+            {category?.description && (
+              <p className="category-description-text">{category.description}</p>
+            )}
+            {subcategories.length > 0 && (
+              <div className="category-subcategories-bar">
+                {subcategories.map((sub) => (
+                  <Link key={sub.id} to={`/categoria/${sub.slug}`} className="subcategory-pill">
+                    {sub.name}
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
         </Editable>
       )}

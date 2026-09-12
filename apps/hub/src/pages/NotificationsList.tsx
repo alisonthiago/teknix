@@ -13,6 +13,7 @@ import {
   resolveNotificationUrl,
   type HubNotification
 } from '../services/notificationService'
+import { resolveNotificationIcon } from '@teknix/notifications'
 
 export default function NotificationsList() {
   const navigate = useNavigate()
@@ -175,21 +176,47 @@ export default function NotificationsList() {
     {
       key: 'title',
       label: 'Notificação',
-      render: (row: HubNotification) => (
-        <div style={{ padding: '2px 0' }}>
-          <div style={{
-            fontSize: '13px',
-            fontWeight: row.is_read ? 500 : 700,
-            color: '#111827',
-            marginBottom: '2px'
-          }}>
-            {row.title}
+      render: (row: HubNotification) => {
+        const approvedAsset = resolveNotificationIcon({
+          module: row.module,
+          type: row.type,
+          title: row.title,
+          message: row.message,
+          metadata: row.metadata
+        })
+
+        return (
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '2px 0' }}>
+            {approvedAsset ? (
+              <img
+                src={approvedAsset}
+                alt=""
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  objectFit: 'contain',
+                  flexShrink: 0,
+                  marginTop: '2px',
+                  filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.08))'
+                }}
+              />
+            ) : null}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{
+                fontSize: '13px',
+                fontWeight: row.is_read ? 500 : 700,
+                color: '#111827',
+                marginBottom: '2px'
+              }}>
+                {row.title}
+              </div>
+              <div style={{ fontSize: '12px', color: '#4b5563', lineHeight: 1.4 }}>
+                {row.message}
+              </div>
+            </div>
           </div>
-          <div style={{ fontSize: '12px', color: '#4b5563', lineHeight: 1.4 }}>
-            {row.message}
-          </div>
-        </div>
-      ),
+        )
+      },
       exportValue: (row: HubNotification) => `${row.title} — ${row.message}`
     },
     {
@@ -411,7 +438,6 @@ export default function NotificationsList() {
     <div>
       <HubDataTable<HubNotification>
         title="Central de Notificações & Alertas"
-        description="Monitoramento em tempo real de vendas, pagamentos, estoque, envios e integrações do ecossistema TEKNIX."
         headerActions={headerActions}
         columns={columns}
         rows={filteredNotifications}
@@ -523,9 +549,6 @@ export default function NotificationsList() {
                 ✕
               </button>
             </div>
-            <p style={{ margin: '0 0 18px 0', fontSize: '13px', color: '#6b7280', lineHeight: 1.4 }}>
-              Dispare notificações em tempo real para verificar a replicação no sino, no badge, o som do chime e o redirecionamento com um clique:
-            </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <button

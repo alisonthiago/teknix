@@ -65,7 +65,7 @@ export default function ColaboradoresPage() {
   }
 
   return (
-    <ConfigSubLayout title="Colaboradores" description="Pessoas que operam o TEKNIX">
+    <ConfigSubLayout title="Colaboradores">
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:justify-between mb-4">
         <div className="flex gap-4 text-sm text-[#999]">
           {loading ? (

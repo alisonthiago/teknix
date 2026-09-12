@@ -251,7 +251,9 @@ p {
 /* ── Padrão global dos botões de ação do Hub ──
    Ações principais usam a mesma cor, largura e altura em todas as páginas. */
 .hub-layout :where(
+  .btn,
   .btn-primary,
+  .hub-btn,
   .btn-secondary.btn-action-primary,
   .hub-btn-primary,
   .pages-primary-btn,
@@ -283,7 +285,9 @@ p {
 }
 
 .hub-layout :where(
+  .btn,
   .btn-primary,
+  .hub-btn,
   .btn-secondary.btn-action-primary,
   .hub-btn-primary,
   .pages-primary-btn,
@@ -297,7 +301,9 @@ p {
 }
 
 .hub-layout :where(
+  .btn,
   .btn-primary,
+  .hub-btn,
   .btn-secondary.btn-action-primary,
   .hub-btn-primary,
   .pages-primary-btn,
@@ -311,7 +317,9 @@ p {
 
 @media (max-width: 480px) {
   .hub-layout :where(
+    .btn,
     .btn-primary,
+    .hub-btn,
     .btn-secondary.btn-action-primary,
     .hub-btn-primary,
     .pages-primary-btn,
@@ -350,6 +358,8 @@ p {
    Keep each button's existing color while standardizing its geometry and type. */
 .hub-layout .btn-primary,
 .hub-layout .btn-secondary,
+.hub-layout .btn,
+.hub-layout .hub-btn,
 .hub-layout .pages-primary-btn,
 .hub-layout .blog-new-btn,
 .hub-layout .blog-tool-btn,

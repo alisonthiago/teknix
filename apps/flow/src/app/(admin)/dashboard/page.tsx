@@ -160,7 +160,7 @@ export default function DashboardPage() {
               setSelectedMarketplace(e.target.value)
               setSelectedAccount('ALL')
             }}
-            className="w-full sm:w-auto px-3 py-2.5 sm:py-1.5 border border-[#e6e6e6] rounded-md text-xs text-[#333] bg-white focus:outline-none focus:border-[#1f2328] min-h-[44px]"
+            className="w-full sm:w-auto px-3 h-[38px] border border-[#e6e6e6] rounded-lg text-xs text-[#111] bg-white focus:outline-none focus:border-[#1f2328] cursor-pointer"
           >
             <option value="ALL">Todos os marketplaces</option>
             {filterData?.marketplaces.map(mp => (
@@ -171,7 +171,7 @@ export default function DashboardPage() {
           <select
             value={selectedAccount}
             onChange={e => setSelectedAccount(e.target.value)}
-            className="w-full sm:w-auto px-3 py-2.5 sm:py-1.5 border border-[#e6e6e6] rounded-md text-xs text-[#333] bg-white focus:outline-none focus:border-[#1f2328] min-h-[44px]"
+            className="w-full sm:w-auto px-3 h-[38px] border border-[#e6e6e6] rounded-lg text-xs text-[#111] bg-white focus:outline-none focus:border-[#1f2328] cursor-pointer"
           >
             <option value="ALL">Todas as contas</option>
             {filteredAccounts.map(acc => (
@@ -182,7 +182,7 @@ export default function DashboardPage() {
           <select
             value={period}
             onChange={e => setPeriod(e.target.value)}
-            className="col-span-2 w-full sm:col-span-1 sm:w-auto px-3 py-2.5 sm:py-1.5 border border-[#e6e6e6] rounded-md text-xs text-[#333] bg-white focus:outline-none focus:border-[#1f2328] min-h-[44px]"
+            className="col-span-2 w-full sm:col-span-1 sm:w-auto px-3 h-[38px] border border-[#e6e6e6] rounded-lg text-xs text-[#111] bg-white focus:outline-none focus:border-[#1f2328] cursor-pointer"
           >
             <option value="7">Últimos 7 dias</option>
             <option value="30">Últimos 30 dias</option>
@@ -228,7 +228,7 @@ export default function DashboardPage() {
           </div>
           <Link
             href="/ao-vivo"
-            className="px-5 py-2.5 rounded-xl bg-black hover:bg-[#222] text-white text-[13px] font-medium transition-all flex items-center justify-center gap-2 shadow-sm shrink-0"
+            className="px-5 py-2.5 rounded-lg bg-[#1f2328] hover:bg-black text-white text-[13px] font-medium transition-colors flex items-center justify-center gap-2 shadow-2xs shrink-0"
           >
             <span>Ir para o Monitor ao Vivo</span>
             <span className="text-[14px]">→</span>
@@ -291,16 +291,16 @@ export default function DashboardPage() {
           <Link href="/pedidos" className="mp-btn-secondary w-full mt-6 text-center">Ver pedidos</Link>
         </div>
 
-        {/* Card escuro — produtos ativos */}
-        <div className="xl:col-span-4 rounded-2xl bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] p-6 text-white flex flex-col justify-between min-h-[260px]">
+        {/* Card produtos ativos */}
+        <div className="xl:col-span-4 mp-card flex flex-col justify-between min-h-[260px]">
           <div>
-            <h3 className="text-base font-semibold">Produtos ativos</h3>
-            <p className="text-sm text-white/70 mt-2 leading-relaxed">
-              Você tem <strong className="text-white">{stats?.activeProducts || 0}</strong> produtos cadastrados.
+            <h3 className="text-base font-semibold text-[#333]">Produtos ativos</h3>
+            <p className="text-sm text-[#666] mt-4 leading-relaxed">
+              Você tem <strong className="text-[#333]">{stats?.activeProducts || 0}</strong> produtos cadastrados.
             </p>
-            <p className="text-4xl font-semibold mt-6">{stats?.activeProducts || 0}</p>
+            <p className="text-3xl font-bold text-[#111] mt-4">{stats?.activeProducts || 0}</p>
           </div>
-          <Link href="/operacao" className="inline-flex items-center justify-center bg-white text-[#333] font-semibold rounded-xl px-5 py-3 text-sm hover:bg-white/90 transition-colors mt-6 w-fit">
+          <Link href="/operacao" className="mp-btn-secondary w-full mt-6 text-center">
             Ver produtos
           </Link>
         </div>

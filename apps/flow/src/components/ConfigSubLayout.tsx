@@ -5,21 +5,21 @@ import { ArrowLeft } from 'lucide-react'
 
 export default function ConfigSubLayout({ title, description, backHref = '/sistema', children }: {
   title: string
-  description: string
+  description?: string
   backHref?: string
   children: React.ReactNode
 }) {
   return (
     <div className="max-w-[900px] mx-auto w-full">
-      <div className="mb-5">
-        <Link href={backHref} className="inline-flex items-center gap-1.5 text-[12px] text-[#999] hover:text-[#333] transition-colors">
+      <div className="mb-4">
+        <Link href={backHref} className="inline-flex items-center gap-1.5 text-xs text-[#71717a] hover:text-[#111111] transition-colors">
           <ArrowLeft className="w-3.5 h-3.5" />
           Configurações
         </Link>
       </div>
       <div className="mb-5">
-        <h1 className="text-[18px] font-semibold text-[#333]">{title}</h1>
-        <p className="text-[13px] text-[#999] mt-1">{description}</p>
+        <h1 className="text-[22px] font-bold text-[#111111] tracking-tight">{title}</h1>
+        {description && <p className="text-xs text-[#71717a] mt-1">{description}</p>}
       </div>
       <div className="space-y-4">{children}</div>
     </div>
@@ -28,8 +28,8 @@ export default function ConfigSubLayout({ title, description, backHref = '/siste
 
 export function ConfigSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-white border border-[#e6e6e6] rounded-md p-3 sm:p-5">
-      <h3 className="text-[14px] font-semibold text-[#333] mb-4">{title}</h3>
+    <div className="bg-white border border-[#e6e6e6] rounded-xl p-4 sm:p-5 shadow-2xs">
+      <h3 className="text-sm font-semibold text-[#111111] mb-3">{title}</h3>
       {children}
     </div>
   )

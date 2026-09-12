@@ -83,7 +83,7 @@
 .btn-back-to-settings:hover {
   background: #f3f4f6;
   border-color: #d1d5db;
-  color: #0071e3;
+  color: #111111;
   transform: translateX(-1px);
 }
 
@@ -106,7 +106,7 @@
   align-self: flex-start;
   gap: 4px;
   padding: 4px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #e6e6e6;
   border-radius: 10px;
   background: #ffffff;
   order: 0;
@@ -133,13 +133,13 @@
 
 .payment-tab-btn.active {
   color: #ffffff;
-  background: var(--tk-color-primary, #347ff2);
+  background: #111111;
   box-shadow: none;
 }
 
 .tab-badge {
   background: #ffffff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #e6e6e6;
   color: #374151;
   font-size: 0.7rem;
   font-weight: 700;
@@ -161,10 +161,10 @@
 
 .gateway-card {
   background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
+  border: 1px solid #e6e6e6;
+  border-radius: 14px;
   padding: 22px 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -248,11 +248,12 @@
 
 .badge-featured {
   background: #f8fafc;
-  color: #2563eb;
+  color: #111111;
   font-size: 0.7rem;
   font-weight: 700;
   padding: 2px 8px;
   border-radius: 6px;
+  border: 1px solid #e6e6e6;
 }
 
 .badge-status {
@@ -321,7 +322,7 @@
 .gateway-link {
   font-size: 0.82rem;
   font-weight: 600;
-  color: #2563eb;
+  color: #111111;
   text-decoration: none;
   display: flex;
   align-items: center;
@@ -336,7 +337,7 @@
 .btn-activate {
   padding: 8px 20px;
   border-radius: 8px;
-  background: var(--tk-color-primary);
+  background: #111111;
   color: #ffffff;
   border: none;
   font-size: 0.85rem;
@@ -346,15 +347,15 @@
 }
 
 .btn-activate:hover {
-  background: #1f2937;
+  background: #000000;
 }
 
 .btn-configure {
   padding: 8px 18px;
   border-radius: 8px;
   background: #ffffff;
-  color: #374151;
-  border: 1px solid #d1d5db;
+  color: #111111;
+  border: 1px solid #e6e6e6;
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
@@ -362,6 +363,6 @@
 }
 
 .btn-configure:hover {
-  background: #f9fafb;
-  border-color: #9ca3af;
+  background: #fafafa;
+  border-color: #d1d5db;
 }

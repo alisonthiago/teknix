@@ -82,24 +82,23 @@ export default function SincronizacaoPage() {
   const failed = list.filter((j: Record<string, unknown>) => j.status === 'failed').length
 
   return (
-    <div className="space-y-5 max-w-7xl mx-auto pb-14 animate-in fade-in duration-200">
+    <div className="mp-stack">
       <div className="mb-2">
-        <Link href="/sistema" className="inline-flex items-center gap-1.5 text-sm font-bold text-[#777] hover:text-[#111] transition-colors">
+        <Link href="/sistema" className="inline-flex items-center gap-1.5 text-sm text-[#777] hover:text-[#111] transition-colors">
           <ArrowLeft className="w-3.5 h-3.5" /> Voltar para Sistema
         </Link>
       </div>
 
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <PageHeader title="Sincronização" description="Status de sincronização de catálogo, pedidos e estoque com marketplaces" />
+      <PageHeader title="Sincronização">
         <button
           onClick={handleSyncNow}
           disabled={syncing}
-          className="px-5 py-2.5 bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold rounded-xl flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50 shadow-2xs shrink-0"
+          className="h-[38px] px-4 bg-[#1f2328] hover:bg-black text-white text-sm font-medium rounded-lg flex items-center gap-2 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs shrink-0"
         >
           {syncing ? <Loader2 className="w-4 h-4 animate-spin text-white" /> : <RefreshCw className="w-4 h-4 text-white" />}
           <span>{syncing ? 'Sincronizando...' : 'Sincronizar Agora'}</span>
         </button>
-      </div>
+      </PageHeader>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
         <StatCard label="Total de Jobs" value={String(total)} />

@@ -74,7 +74,7 @@ export default function ImportExportPage() {
   }
 
   return (
-    <ConfigSubLayout title="Importar / Exportar" description="Importe e exporte dados cadastrais e operacionais em Excel e CSV">
+    <ConfigSubLayout title="Importar / Exportar">
       <ConfigSection title="Importar Planilhas">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
           {['Produtos', 'Fornecedores', 'Estoque', 'Compras', 'Pedidos', 'Vendas'].map(item => (

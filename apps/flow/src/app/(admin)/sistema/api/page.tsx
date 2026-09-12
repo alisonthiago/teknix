@@ -85,7 +85,7 @@ export default function ApiPage() {
   }
 
   return (
-    <ConfigSubLayout title="API e desenvolvedores" description="Gerencie chaves de API e acesso programático">
+    <ConfigSubLayout title="API e desenvolvedores">
       <ConfigSection title="Chaves de API">
         <div className="flex justify-between items-center mb-3">
           <p className="text-[11px] text-[#999]">{keys.length} chave(s) ativa(s)</p>

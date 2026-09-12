@@ -9,7 +9,7 @@ export default function SegurancaPage() {
   const [twoFactor, setTwoFactor] = useState(false)
 
   return (
-    <ConfigSubLayout title="Segurança" description="Gerencie a segurança da sua conta">
+    <ConfigSubLayout title="Segurança">
       <ConfigSection title="Alterar senha">
         <div className="space-y-3">
           <div>

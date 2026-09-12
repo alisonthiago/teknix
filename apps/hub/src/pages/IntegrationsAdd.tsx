@@ -315,9 +315,6 @@ export default function IntegrationsAdd() {
           </button>
           <div>
             <h1 className="page-title" style={{ margin: 0 }}>Adicionar Nova Integração</h1>
-            <p className="page-subtitle" style={{ margin: '4px 0 0' }}>
-              Selecione o serviço ou parceiro que deseja ativar na sua loja TEKNIX.
-            </p>
           </div>
         </div>
 

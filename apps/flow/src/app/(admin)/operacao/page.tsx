@@ -1188,7 +1188,7 @@ function StockCountTab() {
 export default function OperacaoPage() {
   return (
     <div className="mp-stack">
-      <PageHeader title="Operação" description="Gerencie produtos, fornecedores, compras e estoque" />
+      <PageHeader title="Operação" />
       <Tabs defaultValue="produtos">
         <TabsList>
           <TabsTrigger value="produtos"><Package className="w-3.5 h-3.5 mr-1 inline" /> Produtos</TabsTrigger>

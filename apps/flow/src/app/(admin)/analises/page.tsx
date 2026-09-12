@@ -65,11 +65,8 @@ export default function AnalisesPage() {
   const purchaseSuggestions = useMemo(() => generatePurchaseSuggestions(products, orderItems, 30), [products, orderItems])
 
   return (
-    <div className="mp-stack max-w-7xl mx-auto pb-12">
-      <PageHeader 
-        title="Análises" 
-        description="Lucro líquido, ranking de produtos e reposição" 
-      />
+    <div className="mp-stack">
+      <PageHeader title="Análises" />
 
       <Tabs defaultValue="lucro-real">
         <TabsList className="mb-4">

@@ -30,7 +30,7 @@ export default function AdminChrome({
 
   return (
     <InternalChatProvider>
-      <div className="min-h-screen bg-[#f5f5f5] flex print:bg-white">
+      <div className="flow-layout min-h-screen bg-[#f5f5f5] flex print:bg-white font-sans">
         <div className="print:hidden">
           <Sidebar
             permissions={permissions}
@@ -40,7 +40,7 @@ export default function AdminChrome({
             setCollapsed={setCollapsed}
           />
         </div>
-        <div className={`flex-1 flex flex-col transition-all duration-300 ${collapsed ? 'lg:ml-[72px]' : 'lg:ml-[260px]'} min-w-0 max-w-full print:ml-0`}>
+        <div className={`flex-1 flex flex-col transition-all duration-300 ${collapsed ? 'lg:ml-[72px]' : 'lg:ml-[240px]'} min-w-0 max-w-full print:ml-0`}>
           <div className="print:hidden">
             <Header
               userName={userName}

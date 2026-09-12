@@ -148,7 +148,6 @@ export default function CouponsList() {
     <>
       <HubDataTable
         title="Cupons"
-        description="Crie códigos promocionais e descontos especiais para seus clientes."
         headerActions={
           <button className="hub-btn hub-btn-primary" onClick={() => setShowModal(true)}>
             <Plus size={14} /> Novo Cupom

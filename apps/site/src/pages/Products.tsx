@@ -552,7 +552,6 @@ export default function Products() {
         <div className="Essentials_banner">
           <div className="Essentials_info">
             <h3>Acessórios indispensáveis.</h3>
-            <p>Descubra capas, canetas, teclados e pulseiras com materiais de alta precisão.</p>
             <Link to="/produtos" className="Button_primary">
               Ver todos os acessórios
             </Link>

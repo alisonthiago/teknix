@@ -508,7 +508,7 @@ export default function Header({ userName, userRole, userEmail, userId, userAvat
 
       {/* Desktop — título + pill verde */}
       <header className="hidden lg:flex sticky top-0 z-30 bg-[#f5f5f5] items-center justify-between py-5 px-10">
-        <h1 className="text-[28px] font-semibold text-[#333] leading-tight">{pageTitle}</h1>
+        <h1 className="text-[24px] sm:text-[26px] font-bold text-[#111111] tracking-tight leading-tight">{pageTitle}</h1>
         
         <div className="flex items-center gap-3">
           <div className="relative flex items-center gap-1">

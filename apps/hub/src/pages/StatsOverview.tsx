@@ -121,7 +121,6 @@ export default function StatsOverview() {
         <div className="page-header">
           <div className="header-info">
             <h1>Estatísticas</h1>
-            <p>Métricas de vendas, visitas, conversão e desempenho da loja TEKNIX.</p>
           </div>
         </div>
 
@@ -213,10 +212,6 @@ export default function StatsOverview() {
                 <Clock size={14} /> Atualizado às {updatedLabel}
               </div>
             </div>
-
-            <p className="stats-subtitle">
-              Exibindo dados de acordo com a <strong>data de criação</strong> do pedido
-            </p>
 
             <div className="stats-metrics-grid">
               <div className="stat-card">

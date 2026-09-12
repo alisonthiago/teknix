@@ -75,7 +75,7 @@
 }
 
 .receipt-btn-print:hover {
-  background: #334155;
+  background: #000000;
 }
 
 .receipt-btn-close {
@@ -91,15 +91,15 @@
 }
 
 .receipt-btn-close:hover {
-  background: #e2e8f0;
-  color: #0f172a;
+  background: #f1f5f9;
+  color: #111111;
 }
 
 /* Folha A4 do Recibo */
 .receipt-paper {
   padding: 36px 40px;
   background: #ffffff;
-  color: #1e293b;
+  color: #111111;
   font-family: inherit;
   overflow-y: auto;
 }

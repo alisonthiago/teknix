@@ -17,7 +17,7 @@ const integrations = [
 
 export default function IntegracoesPage() {
   return (
-    <ConfigSubLayout title="Integrações" description="Conecte ferramentas utilizadas pela empresa">
+    <ConfigSubLayout title="Integrações">
       <ConfigSection title="Marketplaces">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {integrations.filter(i => i.type === 'marketplace').map(int => (

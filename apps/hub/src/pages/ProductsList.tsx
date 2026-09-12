@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { createPage } from '../services/pageBuilder'
 import type { Product } from '../types/database'
@@ -37,6 +37,7 @@ function summarizeProductName(name: string, maxLength = 76) {
 
 export default function ProductsList() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -251,10 +252,16 @@ export default function ProductsList() {
     }
   }
 
-  const filteredProducts = products.filter(p =>
-    p.name.toLowerCase().includes(search.toLowerCase()) ||
-    (p.sku && p.sku.toLowerCase().includes(search.toLowerCase()))
-  )
+  const filterParam = searchParams.get('filter')
+  const filteredProducts = products.filter(p => {
+    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
+      (p.sku && p.sku.toLowerCase().includes(search.toLowerCase()))
+    if (!matchSearch) return false
+    if (filterParam === 'low_stock') {
+      return (p.stock ?? 0) <= 3
+    }
+    return true
+  })
 
   async function exportProducts(type: 'xlsx' | 'pdf') {
     const rows = filteredProducts.map(product => ({
@@ -297,7 +304,6 @@ export default function ProductsList() {
         <div className="page-header">
           <div className="header-info">
             <h1>Produtos</h1>
-            <p>Gerencie seu catálogo de produtos, estoque e preços.</p>
           </div>
           <div className="header-actions">
             <button className="btn btn-secondary" onClick={() => alert('Organizar vitrine')}>

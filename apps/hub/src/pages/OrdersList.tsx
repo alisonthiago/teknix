@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { RefreshCw, Eye, Trash2, ShoppingBag, DollarSign, CheckCircle2, Clock } from 'lucide-react'
 import { HubDataTable, type HubColumn, useBulkDelete } from '../components/ui/HubDataTable'
@@ -192,12 +192,19 @@ const COLUMNS: HubColumn<StoreOrder>[] = [
 
 export default function OrdersList() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const initialStatus = searchParams.get('status') || 'all'
   const [orders, setOrders] = useState<StoreOrder[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
-  const [activeTab, setActiveTab] = useState('all')
+  const [activeTab, setActiveTab] = useState(initialStatus)
   const [paymentFilter, setPaymentFilter] = useState('all')
   const [sort, setSort] = useState('newest')
+
+  useEffect(() => {
+    const statusParam = searchParams.get('status')
+    if (statusParam) setActiveTab(statusParam)
+  }, [searchParams])
 
   useEffect(() => { fetchOrders() }, [])
 
@@ -267,14 +274,12 @@ export default function OrdersList() {
           <div key={i} className="hub-kpi-card">
             <div className="hub-kpi-header"><span className="hub-kpi-label">{s.label}</span><div className="hub-kpi-icon">{s.icon}</div></div>
             <div className="hub-kpi-value">{s.currency && <span className="hub-kpi-currency">R$</span>} {s.currency ? String(s.value).replace(/^R\$\s*/, '') : s.value}</div>
-            <p className="hub-kpi-subtitle">{s.sub}</p>
           </div>
         ))}
       </div>
 
       <HubDataTable
         title="Pedidos da Loja"
-        description="Gerencie todos os pedidos da Loja Própria TEKNIX."
         headerActions={
           <>
             <div className="hub-status-tabs">
@@ -348,7 +353,7 @@ export default function OrdersList() {
               className="hub-dropdown-item"
               onClick={onClose}
             >
-              <Eye size={14} color="#2563eb" /> Ver detalhes
+              <Eye size={14} color="#111111" /> Ver detalhes
             </Link>
             <div className="hub-dropdown-divider" />
             <button

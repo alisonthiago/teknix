@@ -356,7 +356,6 @@ export default function AdsList() {
         <div>
           <div className="ads-header-badge">Centro de Publicidade & ADS</div>
           <h2 className="ads-list-title">Gerenciador de ADS (/hub/ads)</h2>
-          <p className="ads-list-subtitle">Cadastre, edite e posicione anúncios, vitrines do meio da tela e carrosséis no sistema</p>
         </div>
         <div className="ads-header-actions">
           <a
@@ -387,23 +386,23 @@ export default function AdsList() {
       <div className="hub-kpi-grid">
         <div className="hub-kpi-card">
           <div className="hub-kpi-header"><span className="hub-kpi-label">Total de Anúncios</span><div className="hub-kpi-icon"><Megaphone size={16} /></div></div>
-          <span className="hub-kpi-value">{ads.length}</span><p className="hub-kpi-subtitle">Todos os anúncios cadastrados</p>
+          <span className="hub-kpi-value">{ads.length}</span>
         </div>
         <div className="hub-kpi-card">
           <div className="hub-kpi-header"><span className="hub-kpi-label">Anúncios Ativos</span><div className="hub-kpi-icon"><CheckCircle2 size={16} /></div></div>
-          <span className="hub-kpi-value">{activeCount}</span><p className="hub-kpi-subtitle">Anúncios publicados e ativos</p>
+          <span className="hub-kpi-value">{activeCount}</span>
         </div>
         <div className="hub-kpi-card">
           <div className="hub-kpi-header"><span className="hub-kpi-label">Meio da Tela</span><div className="hub-kpi-icon"><LayoutTemplate size={16} /></div></div>
-          <span className="hub-kpi-value">{middleCount}</span><p className="hub-kpi-subtitle">Anúncios nesta posição</p>
+          <span className="hub-kpi-value">{middleCount}</span>
         </div>
         <div className="hub-kpi-card">
           <div className="hub-kpi-header"><span className="hub-kpi-label">Carrosséis</span><div className="hub-kpi-icon"><Images size={16} /></div></div>
-          <span className="hub-kpi-value">{carouselCount}</span><p className="hub-kpi-subtitle">Anúncios em formato carrossel</p>
+          <span className="hub-kpi-value">{carouselCount}</span>
         </div>
         <div className="hub-kpi-card">
           <div className="hub-kpi-header"><span className="hub-kpi-label">Inativos / Bloqueados</span><div className="hub-kpi-icon"><Ban size={16} /></div></div>
-          <span className="hub-kpi-value">{inactiveCount}</span><p className="hub-kpi-subtitle">Anúncios fora de exibição</p>
+          <span className="hub-kpi-value">{inactiveCount}</span>
         </div>
       </div>
 
@@ -585,7 +584,6 @@ export default function AdsList() {
             <div className="ads-modal-header">
               <div>
                 <h3>{editingAd ? 'Editar Anúncio' : 'Novo Anúncio (ADS)'}</h3>
-                <p className="ads-modal-header-desc">Defina a posição, modo (imagem única ou carrossel), produtos e regras de exibição.</p>
               </div>
               <button className="ads-modal-close" onClick={() => setShowModal(false)}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
@@ -735,7 +733,6 @@ export default function AdsList() {
                   <div className="ads-carousel-header">
                     <div>
                       <h4 className="ads-section-title">Imagens & Produtos do Carrossel ({formItems.length})</h4>
-                      <p className="ads-section-subtitle">Cada item pode ter sua própria imagem, título e link individual.</p>
                     </div>
                     <div className="ads-carousel-timing">
                       <label>Tempo por imagem:</label>

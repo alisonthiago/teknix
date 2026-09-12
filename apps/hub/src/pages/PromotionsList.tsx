@@ -90,7 +90,6 @@ export default function PromotionsList() {
     <>
       <HubDataTable
         title="Promoções"
-        description="Configure ofertas automáticas e descontos progressivos por volume ou categoria."
         headerActions={
           <button className="hub-btn hub-btn-primary" onClick={() => setShowModal(true)}>
             <Plus size={14} /> Nova Promoção

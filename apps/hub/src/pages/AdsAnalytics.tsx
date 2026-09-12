@@ -73,7 +73,6 @@ export default function AdsAnalytics() {
         <div>
           <span>PUBLICIDADE</span>
           <h1>Analytics de anúncios</h1>
-          <p>Cliques, impressões, CTR e origem geográfica dos acessos.</p>
         </div>
         <button onClick={() => navigate('/hub/ads')}>← Voltar aos anúncios</button>
       </header>

@@ -7,6 +7,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(import.meta.dirname, './src'),
+      '@teknix/notifications': path.resolve(import.meta.dirname, '../../packages/notifications/src'),
     },
   },
   server: {

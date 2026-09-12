@@ -12,7 +12,7 @@ export default function NotificacoesPage() {
   function toggle(key: keyof typeof prefs) { setPrefs(p => ({ ...p, [key]: !p[key] })) }
 
   return (
-    <ConfigSubLayout title="Notificações" description="Configure quais notificações deseja receber">
+    <ConfigSubLayout title="Notificações">
       <ConfigSection title="Vendas e pedidos">
         <Toggle label="Nova venda" description="Receber notificação quando uma venda for concluída." enabled={prefs.nova_venda} onChange={() => toggle('nova_venda')} />
         <Toggle label="Novo pedido" description="Receber notificação quando um novo pedido chegar." enabled={prefs.novo_pedido} onChange={() => toggle('novo_pedido')} />

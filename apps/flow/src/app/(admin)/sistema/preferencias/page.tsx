@@ -10,7 +10,7 @@ export default function PreferenciasPage() {
   })
 
   return (
-    <ConfigSubLayout title="Preferências" description="Configurações pessoais do sistema">
+    <ConfigSubLayout title="Preferências">
       <ConfigSection title="Região e idioma">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[

@@ -51,7 +51,7 @@ export default function MarketplacesConfigPage() {
   })
 
   return (
-    <ConfigSubLayout title="Marketplaces" description="Conecte suas plataformas de venda ao TEKNIX">
+    <ConfigSubLayout title="Marketplaces">
       {loading ? (
         <div className="bg-white border border-[#e6e6e6] rounded-md p-6 text-center text-[13px] text-[#999]">Carregando marketplaces...</div>
       ) : error ? (

@@ -64,15 +64,15 @@ export function TabsTrigger({
     <button
       type="button"
       onClick={() => setActiveTab(value)}
-      className={`px-2 pb-3 text-sm font-semibold transition-colors relative whitespace-nowrap cursor-pointer ${
+      className={`px-2.5 pb-3 text-[13px] sm:text-[13.5px] transition-colors relative whitespace-nowrap cursor-pointer ${
         isActive
-          ? 'text-[#1f2328]'
-          : 'text-[#333] hover:text-[#666]'
+          ? 'text-[#111111] font-semibold'
+          : 'text-[#666666] font-medium hover:text-[#111111]'
       } ${className}`}
     >
       {children}
       {isActive && (
-        <span className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#1f2328] rounded-full" />
+        <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-[#1f2328] rounded-full" />
       )}
     </button>
   )

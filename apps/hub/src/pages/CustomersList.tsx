@@ -199,16 +199,17 @@ export default function CustomersList() {
     <>
       <HubDataTable
         title="Clientes"
-        description="Base unificada de clientes e histórico de compras da loja."
         headerActions={
           <>
             <button className="hub-btn hub-btn-secondary" onClick={fetchCustomers} disabled={loading}>
               <RefreshCw size={14} /> Atualizar
             </button>
-            <button className="hub-btn hub-btn-primary" onClick={() => setShowAddModal(true)}>
-              <Plus size={14} /> Novo Cliente
-            </button>
           </>
+        }
+        headerTopActions={
+          <button className="hub-btn hub-btn-primary" onClick={() => setShowAddModal(true)}>
+            <Plus size={14} /> Novo Cliente
+          </button>
         }
         columns={COLUMNS}
         rows={filteredCustomers}

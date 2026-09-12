@@ -61,7 +61,6 @@ export default function MercadoPagoSettings() {
       <div className="page-header">
         <div className="header-info">
           <h1>Mercado Pago</h1>
-          <p>Configure credenciais e métodos de pagamento da sua loja própria.</p>
         </div>
         <div className="header-actions">
           <button className="btn btn-primary" onClick={handleSave} disabled={loading || saving}>
@@ -78,7 +77,6 @@ export default function MercadoPagoSettings() {
           </div>
           <div>
             <div className="mp-status-title">Gateway Ativo • Ambiente de Produção</div>
-            <p className="mp-status-desc">Os pagamentos via Pix e Cartão de Crédito estão funcionando normalmente no checkout.</p>
           </div>
         </div>
         <span className="mp-status-badge">
@@ -95,7 +93,6 @@ export default function MercadoPagoSettings() {
             </div>
             <div>
               <h3>Credenciais da API</h3>
-              <p>Chaves de produção para processamento de pagamentos</p>
             </div>
           </div>
 
@@ -132,7 +129,6 @@ export default function MercadoPagoSettings() {
             </div>
             <div>
               <h3>Métodos de Pagamento</h3>
-              <p>Habilite as formas aceitas no checkout da sua loja</p>
             </div>
           </div>
 

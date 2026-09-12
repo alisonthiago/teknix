@@ -22,6 +22,9 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
   // Fetch suppliers to populate the dropdown
   const { data: suppliers } = await supabase.from('suppliers').select('id, name').order('name')
 
+  // Fetch central store categories
+  const { data: categories } = await supabase.from('store_categories').select('id, name, slug').order('name')
+
   return (
     <div className="mp-stack max-w-4xl mx-auto px-4 sm:px-0">
       <div className="flex items-center justify-between">
@@ -63,8 +66,23 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
                 <Input id="ean" name="ean" defaultValue={product.ean || ''} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="category">Categoria</Label>
-                <Input id="category" name="category" defaultValue={product.category || ''} />
+                <Label htmlFor="category">Categoria (Central)</Label>
+                <select
+                  id="category"
+                  name="category"
+                  defaultValue={product.category || ''}
+                  className="flex h-9 w-full items-center justify-between rounded-md border border-[#e6e6e6] bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-white placeholder:text-[#999] focus:outline-none focus:ring-1 focus:ring-[#1f2328] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="">Selecione uma categoria (Central)</option>
+                  {categories?.map((cat) => (
+                    <option key={cat.id} value={cat.name}>
+                      {cat.name}
+                    </option>
+                  ))}
+                  {product.category && !categories?.some((c) => c.name === product.category) && (
+                    <option value={product.category}>{product.category} (Personalizado)</option>
+                  )}
+                </select>
               </div>
             </div>
           </CardContent>

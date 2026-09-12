@@ -36,7 +36,7 @@ export default function VendasConfigPage() {
   }
 
   return (
-    <ConfigSubLayout title="Configurações de vendas" description="Parâmetros de vendas e pedidos">
+    <ConfigSubLayout title="Configurações de vendas">
       <ConfigSection title="Automação">
         <Toggle label="Baixa automática de estoque" description="Dar baixa no estoque ao confirmar pagamento." enabled={prefs.auto_stock} onChange={() => toggle('auto_stock')} />
         <Toggle label="Cancelamento automático" description="Cancelar pedido após prazo sem pagamento." enabled={prefs.auto_cancel} onChange={() => toggle('auto_cancel')} />

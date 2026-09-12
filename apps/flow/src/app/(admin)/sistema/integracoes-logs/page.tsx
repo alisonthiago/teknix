@@ -67,7 +67,7 @@ export default function IntegracoesLogsPage() {
           <ArrowLeft className="w-3.5 h-3.5" /> Sistema
         </Link>
       </div>
-      <PageHeader title="Logs de Integração" description="Chamadas API realizadas com marketplaces" />
+      <PageHeader title="Logs de Integração" />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
         <StatCard label="Total" value={String(total)} />

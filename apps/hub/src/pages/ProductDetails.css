@@ -178,9 +178,9 @@
 
 .product-pill.brand {
   background: #f5f5f5;
-  color: #334155;
+  color: #111111;
   border: 1px solid #e2e8f0;
-  font-weight: 400;
+  font-weight: 500;
 }
 
 .product-pill.sku-pill {
@@ -265,7 +265,7 @@
 .product-header-summary strong { color: #0f172a; }
 
 .product-meta-item strong {
-  color: #1e293b;
+  color: #111111;
 }
 
 .meta-separator {
@@ -293,7 +293,7 @@
 
 .product-id-chip code {
   font-family: monospace;
-  color: #334155;
+  color: #111111;
   font-weight: 600;
 }
 
@@ -330,7 +330,7 @@
   text-decoration: none;
   border: 1px solid #e2e8f0;
   background: #ffffff;
-  color: #334155;
+  color: #111111;
   transition: all 0.15s ease;
   white-space: nowrap;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
@@ -343,7 +343,7 @@
 .btn-product-action:hover:not(:disabled) {
   background: #f8fafc;
   border-color: #cbd5e1;
-  color: #0f172a;
+  color: #111111;
   transform: translateY(-1px);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);
 }
@@ -373,7 +373,7 @@
 .btn-product-action.pagebuilder {
   background: #f8fafc;
   border-color: #e2e8f0;
-  color: #334155;
+  color: #111111;
 }
 
 .btn-product-action.pagebuilder:hover:not(:disabled) {
@@ -385,13 +385,13 @@
 .btn-product-action.store {
   background: #ffffff;
   border-color: #e2e8f0;
-  color: #334155;
+  color: #111111;
 }
 
 .btn-product-action.store:hover:not(:disabled) {
   background: #f8fafc;
   border-color: #94a3b8;
-  color: #0f172a;
+  color: #111111;
 }
 
 .btn-product-action.unpublish {
@@ -898,6 +898,6 @@
   padding: 2px 7px;
   border-radius: 4px;
   background: #ffffff;
-  color: #334155;
-  border: 1px solid #cbd5e1;
+  color: #111111;
+  border: 1px solid #e6e6e6;
 }

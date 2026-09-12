@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { usePermissions } from '../hooks/usePermissions'
 import { useHubNotifications } from '../contexts/HubNotificationContext'
 import { resolveNotificationUrl, type HubNotification } from '../services/notificationService'
+import { resolveNotificationIcon } from '@teknix/notifications'
 import AccessDenied from './AccessDenied'
 import HubToast from './HubToast'
 import {
@@ -16,6 +17,7 @@ import {
 } from './IntegrationLogos'
 import { InternalChatProvider, useInternalChat } from '../contexts/InternalChatContext'
 import FloatingMessenger from './internal-chat/FloatingMessenger'
+import { TeknixLogo } from './TeknixLogo'
 import './HubLayout.css'
 
 // ─── Ícones originais + logos de integração ────────────────────────────────
@@ -184,9 +186,44 @@ function HubLayoutContent() {
     return () => window.removeEventListener('user_profile_updated', handleProfileUpdate)
   }, [])
 
+  // Faturamento de hoje para o botão Ao Vivo (FLOW 1:1)
+  const [todayRevenue, setTodayRevenue] = useState<number>(0)
+
+  useEffect(() => {
+    async function loadTodayRevenue() {
+      try {
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+        const { data } = await supabase
+          .from('orders')
+          .select('total_amount, created_at')
+          .gte('created_at', today.toISOString())
+        if (data && data.length > 0) {
+          const sum = data.reduce((acc, o) => acc + (Number(o.total_amount) || 0), 0)
+          setTodayRevenue(sum)
+        }
+      } catch {}
+    }
+    loadTodayRevenue()
+    const interval = setInterval(loadTodayRevenue, 15000)
+    return () => clearInterval(interval)
+  }, [])
+
   const isActive = (path: string) => {
     if (path === '/hub') return location.pathname === '/hub'
     return location.pathname.startsWith(path)
+  }
+
+  const handleSidebarMouseEnter = () => {
+    if (window.matchMedia('(min-width: 1025px)').matches) {
+      setSidebarOpen(true)
+    }
+  }
+
+  const handleSidebarMouseLeave = () => {
+    if (window.matchMedia('(min-width: 1025px)').matches) {
+      setSidebarOpen(false)
+    }
   }
 
   // ─── Itens dinâmicos de Integrações ──────────────────────────────────────
@@ -279,7 +316,11 @@ function HubLayoutContent() {
       <HubToast />
 
       {/* ── Sidebar (estilo visual FLOW, funcionalidade original) ── */}
-      <aside className="hub-sidebar">
+      <aside
+        className="hub-sidebar"
+        onMouseEnter={handleSidebarMouseEnter}
+        onMouseLeave={handleSidebarMouseLeave}
+      >
         {/* Sidebar Header — logo TEKNIX vetorial + botão colapso */}
         <div className="sidebar-header">
           <Link to="/hub" className="sidebar-logo-link">
@@ -320,6 +361,7 @@ function HubLayoutContent() {
                   to={item.path}
                   className={`nav-item ${isActive(item.path) ? 'active' : ''}`}
                   title={!sidebarOpen ? item.label : undefined}
+                  onClick={() => setSidebarOpen(false)}
                 >
                   <span className="nav-icon">{icons[item.icon]}</span>
                   <span className="nav-label">{item.label}</span>
@@ -338,32 +380,106 @@ function HubLayoutContent() {
         </div>
       </aside>
 
+      {/* Backdrop Mobile para fechar Sidebar ao tocar fora */}
+      {sidebarOpen && (
+        <div
+          className="hub-sidebar-backdrop"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* ── Main Content Area ── */}
       <main className="hub-main">
-        {/* Header — visual FLOW com Lime Capsule */}
-        <header className="hub-header">
+        {/* ── Mobile Header Oficial — Barra Verde #B5F500 (1:1 com FLOW) ── */}
+        <div className="hub-mobile-header-bar">
+          <div className="bg-[#B5F500] rounded-full flex items-center justify-between px-3.5 py-2.5 shadow-sm hub-mobile-pill">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 text-[#111] hover:bg-black/10 transition-colors cursor-pointer"
+                aria-label="Abrir menu"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-menu w-7 h-7 text-[#111]" aria-hidden="true">
+                  <path d="M4 5h16" />
+                  <path d="M4 12h16" />
+                  <path d="M4 19h16" />
+                </svg>
+              </button>
+              <Link to="/hub" className="flex items-center text-[#111]">
+                <TeknixLogo height={28} style={{ fill: '#111', color: '#111' }} />
+              </Link>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              {/* Notificações */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowNotifications(!showNotifications)
+                    setShowUserDropdown(false)
+                  }}
+                  className="w-9 h-9 rounded-full flex items-center justify-center text-[#111] hover:bg-black/10 transition-colors relative cursor-pointer"
+                  title="Notificações"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-bell text-[#111]" aria-hidden="true">
+                    <path d="M10.268 21a2 2 0 0 0 3.464 0" />
+                    <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" />
+                  </svg>
+                  {unreadCount > 0 && (
+                    <span className="flow-badge-red" style={{ top: 2, right: 2 }}>
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  )}
+                </button>
+              </div>
+
+              {/* Usuário / Avatar */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowUserDropdown(!showUserDropdown)
+                    setShowNotifications(false)
+                  }}
+                  className="flex items-center gap-1.5 pl-1 pr-1.5 py-1 rounded-full hover:bg-black/10 transition-colors cursor-pointer"
+                >
+                  <div className="relative">
+                    <div className="h-10 w-10 rounded-full overflow-hidden border border-black/20">
+                      <img
+                        alt={userNickname}
+                        src={userPhoto}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  </div>
+                  <span className="hidden sm:block text-sm font-semibold text-[#111] max-w-[90px] truncate">{userNickname}</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-down w-4 h-4 text-[#111] hidden sm:block" aria-hidden="true">
+                    <path d="m6 9 6 6 6-6" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Título da Página no Mobile (1:1 com FLOW) */}
+          <div className="hub-mobile-header-title-row">
+            <h1 className="hub-mobile-page-title">{getPageTitle(location.pathname)}</h1>
+          </div>
+        </div>
+
+        {/* ── Desktop Header — título + pill (FLOW 1:1) ── */}
+        <header className="hub-header hub-desktop-header">
           <div className="hub-header-left">
-            <button
-              className="mobile-menu-btn"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              aria-label="Menu"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
-                <line x1="3" y1="6" x2="21" y2="6"/>
-                <line x1="3" y1="12" x2="21" y2="12"/>
-                <line x1="3" y1="18" x2="21" y2="18"/>
-              </svg>
-            </button>
-            {location.pathname.includes('/avisos-estoque') ? null : (
-              <h1 className="hub-page-title">
-                {getPageTitle(location.pathname)}
-              </h1>
-            )}
+            <h1 className="hub-page-title">
+              {getPageTitle(location.pathname)}
+            </h1>
           </div>
 
           <div className="hub-header-right">
             {/* Lime Capsule Pill (FLOW 1:1) */}
-            <div style={{ position: 'relative' }} ref={notifDropdownRef}>
+            <div style={{ position: 'relative' }}>
               <div className="mp-header-pill-hub">
                 {/* Chat Interno TEKNIX (1:1 com FLOW) */}
                 <HubChatPillButton />
@@ -379,16 +495,45 @@ function HubLayoutContent() {
                     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
                     <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                   </svg>
-                  {unreadCount > 0 && (
-                    <span className="flow-badge-red">{unreadCount > 99 ? '99+' : unreadCount}</span>
-                  )}
+                </button>
+
+                {/* Ao Vivo */}
+                <button
+                  type="button"
+                  onClick={() => navigate('/hub/financeiro')}
+                  className="header-live-button flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white hover:bg-[#f5f5f5] text-[#111111] text-[11px] font-black shadow-sm transition-all tracking-wider uppercase cursor-pointer"
+                  title="Monitor ao Vivo em Tempo Real"
+                >
+                  <span className="relative flex h-2 w-2 shrink-0">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#e74c3c] opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[#e74c3c]"></span>
+                  </span>
+                  <span className="font-mono font-bold whitespace-nowrap">
+                    {todayRevenue > 0
+                      ? `R$ ${todayRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                      : 'R$ 0,00'}
+                  </span>
+                </button>
+
+                {/* Precificação */}
+                <button
+                  type="button"
+                  onClick={() => navigate('/hub/produtos')}
+                  className="flow-pill-btn"
+                  title="Precificação"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/>
+                    <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/>
+                    <path d="M12 18V6"/>
+                  </svg>
                 </button>
 
                 {/* Usuário logado */}
                 <button
                   type="button"
                   className="flow-user-btn"
-                  onClick={() => setShowUserDropdown(!showUserDropdown)}
+                  onClick={() => { setShowUserDropdown(!showUserDropdown); setShowNotifications(false) }}
                 >
                   <div className="flow-user-avatar-wrap">
                     <img
@@ -403,226 +548,241 @@ function HubLayoutContent() {
                   </svg>
                 </button>
               </div>
-
-              {showNotifications && (
-                <div className="flow-notification-dropdown" onClick={e => e.stopPropagation()}>
-                  {/* Mercado Livre Notification Center Header */}
-                  <div className="flow-notification-header">
-                    <div className="flow-notification-top-row">
-                      <h3 className="flow-notification-title">Notificações</h3>
-                      {unreadCount > 0 && (
-                        <button
-                          type="button"
-                          className="flow-notification-mark-read-btn"
-                          onClick={() => markAllAsRead()}
-                        >
-                          Marcar todas como lidas
-                        </button>
-                      )}
-                    </div>
-                    <div className="flow-notification-tabs">
-                      <button
-                        type="button"
-                        className={`flow-notification-tab ${notificationTab === 'all' ? 'active' : ''}`}
-                        onClick={() => setNotificationTab('all')}
-                      >
-                        Todas
-                      </button>
-                      <button
-                        type="button"
-                        className={`flow-notification-tab ${notificationTab === 'unread' ? 'active' : ''}`}
-                        onClick={() => setNotificationTab('unread')}
-                      >
-                        Não lidas
-                        {unreadCount > 0 && (
-                          <span className="flow-notification-tab-badge">{unreadCount}</span>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Notification Items List */}
-                  <div className="flow-notification-list">
-                    {(() => {
-                      const list = notificationTab === 'unread'
-                        ? notifications.filter(n => !n.is_read)
-                        : notifications
-
-                      if (list.length === 0) {
-                        return (
-                          <div className="flow-notification-empty">
-                            <div className="flow-notification-empty-icon">
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width="22" height="22">
-                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-                              </svg>
-                            </div>
-                            <p className="flow-notification-empty-title">
-                              {notificationTab === 'unread'
-                                ? 'Nenhuma notificação não lida'
-                                : 'Você não tem notificações'}
-                            </p>
-                            <p className="flow-notification-empty-desc">
-                              {notificationTab === 'unread'
-                                ? 'Você leu todas as notificações recentes.'
-                                : 'Atualizações sobre vendas, pedidos e novidades aparecerão aqui.'}
-                            </p>
-                          </div>
-                        )
-                      }
-
-                      return list.slice(0, 18).map((item) => {
-                        const mod = String(item.module || '').toLowerCase()
-                        const type = String(item.type || '').toLowerCase()
-                        const isSale = mod === 'sale' || mod === 'order' || type === 'order'
-                        const isPix = mod === 'pix'
-                        const isPayment = mod === 'payment'
-                        const isStock = mod === 'stock'
-                        const isShipment = mod === 'shipment'
-                        const isInvoice = mod === 'invoice'
-                        const isError = type === 'error'
-
-                        let iconSymbol: React.ReactElement = (
-                          <svg viewBox="0 0 24 24">
-                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-                          </svg>
-                        )
-                        let iconBg = '#f0f4f8'
-                        let iconColor = '#475569'
-
-                        if (isSale) {
-                          // Mercado Livre green cart
-                          iconSymbol = (
-                            <svg viewBox="0 0 24 24">
-                              <circle cx="9" cy="20" r="1.5"/>
-                              <circle cx="19" cy="20" r="1.5"/>
-                              <path d="M2.5 3h3l2.4 10.5a2 2 0 0 0 2 1.5h7.6a2 2 0 0 0 1.9-1.4l2.1-8.6H6.5"/>
-                            </svg>
-                          )
-                          iconBg = '#e8f8ee'
-                          iconColor = '#00a650'
-                        } else if (isPix || isPayment) {
-                          // Mercado Pago blue payment
-                          iconSymbol = (
-                            <svg viewBox="0 0 24 24">
-                              <rect x="2.5" y="5" width="19" height="14" rx="2.5"/>
-                              <line x1="2.5" y1="10" x2="21.5" y2="10"/>
-                              <line x1="6" y1="15" x2="10" y2="15"/>
-                            </svg>
-                          )
-                          iconBg = '#ebf3fe'
-                          iconColor = '#2563eb'
-                        } else if (isStock) {
-                          // Amber stock box
-                          iconSymbol = (
-                            <svg viewBox="0 0 24 24">
-                              <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
-                              <path d="m3.3 7 8.7 5 8.7-5"/>
-                              <path d="M12 22V12"/>
-                            </svg>
-                          )
-                          iconBg = '#fff5e5'
-                          iconColor = '#ea580c'
-                        } else if (isShipment) {
-                          // Mercado Envios delivery truck
-                          iconSymbol = (
-                            <svg viewBox="0 0 24 24">
-                              <rect x="2" y="4" width="13" height="11" rx="1.5"/>
-                              <polygon points="15 8 19 8 22 12 22 15 15 15 15 8"/>
-                              <circle cx="6" cy="18.5" r="2"/>
-                              <circle cx="18" cy="18.5" r="2"/>
-                            </svg>
-                          )
-                          iconBg = '#e5f5fc'
-                          iconColor = '#0284c7'
-                        } else if (isInvoice) {
-                          // Fiscal purple invoice
-                          iconSymbol = (
-                            <svg viewBox="0 0 24 24">
-                              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                              <polyline points="14 2 14 8 20 8"/>
-                              <line x1="16" y1="13" x2="8" y2="13"/>
-                              <line x1="16" y1="17" x2="8" y2="17"/>
-                            </svg>
-                          )
-                          iconBg = '#f3ebff'
-                          iconColor = '#7c3aed'
-                        } else if (isError) {
-                          // Red alert
-                          iconSymbol = (
-                            <svg viewBox="0 0 24 24">
-                              <circle cx="12" cy="12" r="10"/>
-                              <line x1="12" y1="8" x2="12" y2="12"/>
-                              <line x1="12" y1="16" x2="12.01" y2="16"/>
-                            </svg>
-                          )
-                          iconBg = '#feeaea'
-                          iconColor = '#dc2626'
-                        }
-
-                        const timeStr = formatRelativeTime(item.created_at)
-
-                        return (
-                          <div
-                            key={item.id}
-                            className={`flow-notification-item ${item.is_read ? 'read' : 'unread'}`}
-                            onClick={() => {
-                              if (!item.is_read) markAsRead(item.id)
-                              setShowNotifications(false)
-                              navigate(resolveNotificationUrl(item))
-                            }}
-                          >
-                            <div className="flow-notification-icon" style={{ background: iconBg, color: iconColor }}>
-                              {iconSymbol}
-                            </div>
-                            <div className="flow-notification-content">
-                              <h4 className="flow-notification-item-title">{cleanNotificationText(item.title)}</h4>
-                              {item.message && (
-                                <p className="flow-notification-item-desc">{cleanNotificationText(item.message)}</p>
-                              )}
-                              <span className="flow-notification-item-time">{timeStr}</span>
-                            </div>
-                            {!item.is_read && <span className="flow-notification-dot" title="Não lida" />}
-                          </div>
-                        )
-                      })
-                    })()}
-                  </div>
-
-                  {/* Modeless Footer */}
-                  <Link
-                    to="/hub/notificacoes"
-                    onClick={() => setShowNotifications(false)}
-                    className="flow-notification-footer"
-                  >
-                    Ver todas as notificações →
-                  </Link>
-                </div>
-              )}
-
-              {showUserDropdown && (
-                <div className="flow-user-dropdown" onClick={() => setShowUserDropdown(false)}>
-                  <div className="flow-user-dropdown-header">
-                    <div className="flow-dropdown-name">{userName}</div>
-                    <div className="flow-dropdown-email">{userEmail}</div>
-                  </div>
-                  <div className="flow-dropdown-divider" />
-                  <Link to="/hub/usuarios" className="flow-dropdown-item">
-                    Dados da conta
-                  </Link>
-                  <Link to="/hub/configuracoes" className="flow-dropdown-item">
-                    Configurações da loja
-                  </Link>
-                  <div className="flow-dropdown-divider" />
-                  <Link to="/login" className="flow-dropdown-item logout">
-                    Sair
-                  </Link>
-                </div>
-              )}
             </div>
           </div>
         </header>
+
+        {/* Modais Globais de Notificações e Usuário */}
+        <div ref={notifDropdownRef}>
+          {showNotifications && (
+            <div className="flow-notification-dropdown" onClick={e => e.stopPropagation()}>
+              {/* Cabeçalho compacto no mesmo padrão do painel de notificações */}
+              <div className="flow-notification-header">
+                <div className="flow-notification-top-row">
+                  <h3 className="flow-notification-title">Notificações</h3>
+                  <button
+                    type="button"
+                    className="flow-notification-settings"
+                    aria-label="Configurações de notificações"
+                    title="Configurações de notificações"
+                    onClick={() => markAllAsRead()}
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
+                      <path d="m19.4 15 .1.1a1.8 1.8 0 0 1-2.5 2.5l-.1-.1a1.8 1.8 0 0 0-3.1 1.3v.2a1.8 1.8 0 0 1-3.6 0v-.2a1.8 1.8 0 0 0-3.1-1.3l-.1.1a1.8 1.8 0 0 1-2.5-2.5l.1-.1a1.8 1.8 0 0 0-1.3-3.1h-.2a1.8 1.8 0 0 1 0-3.6h.2a1.8 1.8 0 0 0 1.3-3.1l-.1-.1a1.8 1.8 0 0 1 2.5-2.5l.1.1a1.8 1.8 0 0 0 3.1-1.3V3a1.8 1.8 0 0 1 3.6 0v.2a1.8 1.8 0 0 0 3.1 1.3l.1-.1a1.8 1.8 0 0 1 2.5 2.5l-.1.1a1.8 1.8 0 0 0 1.3 3.1h.2a1.8 1.8 0 0 1 0 3.6h-.2a1.8 1.8 0 0 0-1.3 1.3Z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              {/* Notification Items List */}
+              <div className="flow-notification-list">
+                {(() => {
+                  const list = notificationTab === 'unread'
+                    ? notifications.filter(n => !n.is_read)
+                    : notifications
+
+                  if (list.length === 0) {
+                    return (
+                      <div className="flow-notification-empty">
+                        <div className="flow-notification-empty-icon">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width="22" height="22">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                          </svg>
+                        </div>
+                        <p className="flow-notification-empty-title">
+                          {notificationTab === 'unread'
+                            ? 'Nenhuma notificação não lida'
+                            : 'Você não tem notificações'}
+                        </p>
+                        <p className="flow-notification-empty-desc">
+                          {notificationTab === 'unread'
+                            ? 'Você leu todas as notificações recentes.'
+                            : 'Atualizações sobre vendas, pedidos e novidades aparecerão aqui.'}
+                        </p>
+                      </div>
+                    )
+                  }
+
+                  return list.slice(0, 18).map((item) => {
+                    const mod = String(item.module || '').toLowerCase()
+                    const type = String(item.type || '').toLowerCase()
+                    const isSale = mod === 'sale' || mod === 'order' || type === 'order'
+                    const isPix = mod === 'pix'
+                    const isPayment = mod === 'payment'
+                    const isStock = mod === 'stock'
+                    const isShipment = mod === 'shipment'
+                    const isInvoice = mod === 'invoice'
+                    const isError = type === 'error'
+
+                    let iconSymbol: React.ReactElement = (
+                      <svg viewBox="0 0 24 24">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                      </svg>
+                    )
+                    let iconBg = '#f0f4f8'
+                    let iconColor = '#475569'
+
+                    if (isSale) {
+                      iconSymbol = (
+                        <svg viewBox="0 0 24 24">
+                          <circle cx="9" cy="20" r="1.5"/>
+                          <circle cx="19" cy="20" r="1.5"/>
+                          <path d="M2.5 3h3l2.4 10.5a2 2 0 0 0 2 1.5h7.6a2 2 0 0 0 1.9-1.4l2.1-8.6H6.5"/>
+                        </svg>
+                      )
+                      iconBg = '#e8f8ee'
+                      iconColor = '#00a650'
+                    } else if (isPix || isPayment) {
+                      iconSymbol = (
+                        <svg viewBox="0 0 24 24">
+                          <rect x="2.5" y="5" width="19" height="14" rx="2.5"/>
+                          <line x1="2.5" y1="10" x2="21.5" y2="10"/>
+                          <line x1="6" y1="15" x2="10" y2="15"/>
+                        </svg>
+                      )
+                      iconBg = '#ebf3fe'
+                      iconColor = '#2563eb'
+                    } else if (isStock) {
+                      iconSymbol = (
+                        <svg viewBox="0 0 24 24">
+                          <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
+                          <path d="m3.3 7 8.7 5 8.7-5"/>
+                          <path d="M12 22V12"/>
+                        </svg>
+                      )
+                      iconBg = '#fff5e5'
+                      iconColor = '#ea580c'
+                    } else if (isShipment) {
+                      iconSymbol = (
+                        <svg viewBox="0 0 24 24">
+                          <rect x="2" y="4" width="13" height="11" rx="1.5"/>
+                          <polygon points="15 8 19 8 22 12 22 15 15 15 15 8"/>
+                          <circle cx="6" cy="18.5" r="2"/>
+                          <circle cx="18" cy="18.5" r="2"/>
+                        </svg>
+                      )
+                      iconBg = '#e5f5fc'
+                      iconColor = '#0284c7'
+                    } else if (isInvoice) {
+                      iconSymbol = (
+                        <svg viewBox="0 0 24 24">
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                          <polyline points="14 2 14 8 20 8"/>
+                          <line x1="16" y1="13" x2="8" y2="13"/>
+                          <line x1="16" y1="17" x2="8" y2="17"/>
+                        </svg>
+                      )
+                      iconBg = '#f3ebff'
+                      iconColor = '#7c3aed'
+                    } else if (isError) {
+                      iconSymbol = (
+                        <svg viewBox="0 0 24 24">
+                          <circle cx="12" cy="12" r="10"/>
+                          <line x1="12" y1="8" x2="12" y2="12"/>
+                          <line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                      )
+                      iconBg = '#feeaea'
+                      iconColor = '#dc2626'
+                    }
+
+                    const timeStr = formatRelativeTime(item.created_at)
+                    const approvedAsset = resolveNotificationIcon({
+                      module: item.module,
+                      type: item.type,
+                      title: item.title,
+                      message: item.message,
+                      metadata: item.metadata
+                    })
+
+                    return (
+                      <div
+                        key={item.id}
+                        className={`flow-notification-item ${item.is_read ? 'read' : 'unread'}`}
+                        onClick={() => {
+                          if (!item.is_read) markAsRead(item.id)
+                          setShowNotifications(false)
+                          navigate(resolveNotificationUrl(item))
+                        }}
+                      >
+                        <div className="flow-notification-icon" style={{ background: approvedAsset ? 'transparent' : iconBg, color: iconColor }}>
+                          {approvedAsset ? (
+                            <img
+                              src={approvedAsset}
+                              alt={cleanNotificationText(item.title)}
+                              className="flow-notification-img-icon"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none'
+                                const next = e.currentTarget.nextElementSibling as HTMLElement
+                                if (next) next.style.display = 'flex'
+                              }}
+                            />
+                          ) : null}
+                          <span
+                            style={{
+                              display: approvedAsset ? 'none' : 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              width: '100%',
+                              height: '100%'
+                            }}
+                          >
+                            {iconSymbol}
+                          </span>
+                        </div>
+                        <div className="flow-notification-content">
+                          <h4 className="flow-notification-item-title">{cleanNotificationText(item.title)}</h4>
+                          <p className="flow-notification-item-description">
+                            {cleanNotificationText(item.message)}
+                          </p>
+                          <span className="flow-notification-item-time">{timeStr}</span>
+                        </div>
+                        {!item.is_read && <span className="flow-notification-dot" title="Não lida" />}
+                        <svg className="flow-notification-chevron" viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="m9 18 6-6-6-6" />
+                        </svg>
+                      </div>
+                    )
+                  })
+                })()}
+              </div>
+
+              {/* Modeless Footer */}
+              <Link
+                to="/hub/notificacoes"
+                onClick={() => setShowNotifications(false)}
+                className="flow-notification-footer"
+              >
+                Ver todas as notificações →
+              </Link>
+            </div>
+          )}
+        </div>
+
+        <div ref={userDropdownRef}>
+          {showUserDropdown && (
+            <div className="flow-user-dropdown" onClick={() => setShowUserDropdown(false)}>
+              <div className="flow-user-dropdown-header">
+                <div className="flow-dropdown-name">{userName}</div>
+                <div className="flow-dropdown-email">{userEmail}</div>
+              </div>
+              <div className="flow-dropdown-divider" />
+              <Link to="/hub/usuarios" className="flow-dropdown-item">
+                Dados da conta
+              </Link>
+              <Link to="/hub/configuracoes" className="flow-dropdown-item">
+                Configurações da loja
+              </Link>
+              <div className="flow-dropdown-divider" />
+              <Link to="/login" className="flow-dropdown-item logout">
+                Sair
+              </Link>
+            </div>
+          )}
+        </div>
 
         {/* Page Content protegido por Permissões Reais */}
         <div className="hub-content">

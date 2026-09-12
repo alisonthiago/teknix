@@ -394,7 +394,6 @@ export default function PagesList() {
       <div className="pages-page-header">
         <div className="pages-header-titles">
           <h1 className="pages-main-title">Páginas</h1>
-          <p className="pages-main-subtitle">Gerencie e edite os widgets e a apresentação visual da loja.</p>
         </div>
         <button
           type="button"

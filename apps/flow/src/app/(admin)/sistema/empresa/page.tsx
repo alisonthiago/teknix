@@ -46,7 +46,7 @@ export default function EmpresaPage() {
   }
 
   return (
-    <ConfigSubLayout title="Dados da empresa" description="Informações da empresa no TEKNIX">
+    <ConfigSubLayout title="Dados da empresa">
       <ConfigSection title="Dados gerais">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[

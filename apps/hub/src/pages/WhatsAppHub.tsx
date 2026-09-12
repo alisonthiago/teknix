@@ -21,7 +21,6 @@ export default function WhatsAppHub() {
       <div className="page-header">
         <div className="header-info">
           <h1>WhatsApp</h1>
-          <p>Atendimento, botão flutuante e notificações automáticas da sua loja.</p>
         </div>
         <div className="header-actions">
           <span className="badge-success" style={{ padding: '6px 12px', fontSize: '12px' }}>
@@ -66,13 +65,11 @@ export default function WhatsAppHub() {
         <div className="w-grid">
           <div className="w-card">
             <h3 className="w-card-title">Configurações do Botão no Site</h3>
-            <p className="w-card-desc">Exiba o ícone flutuante do WhatsApp em todas as páginas públicas do site.</p>
 
             <div className="w-form-content">
               <div className="w-toggle-row">
                 <div>
                   <div className="w-toggle-title">Ativar botão de WhatsApp no site</div>
-                  <div className="w-toggle-sub">Exibe o ícone de chat no canto inferior direito para os visitantes.</div>
                 </div>
                 <label className="w-switch">
                   <input type="checkbox" defaultChecked />
@@ -104,7 +101,6 @@ export default function WhatsAppHub() {
           {/* Live Preview Box */}
           <div className="w-card preview-box">
             <h3 className="w-card-title">Pré-visualização no Site</h3>
-            <p className="w-card-desc">Como o visitante verá o botão na sua loja.</p>
 
             <div className="phone-mockup">
               <div className="phone-screen">
@@ -130,7 +126,6 @@ export default function WhatsAppHub() {
       {activeTab === 'notifications' && (
         <div className="w-card">
           <h3 className="w-card-title">Disparos Automáticos de Pedido</h3>
-          <p className="w-card-desc">Envie atualizações de status automaticamente via WhatsApp para o cliente.</p>
 
           <div className="w-notifs-list">
             <div className="w-notif-item">
@@ -173,7 +168,6 @@ export default function WhatsAppHub() {
       {activeTab === 'recovery' && (
         <div className="w-card">
           <h3 className="w-card-title">Recuperação de Carrinho Abandonado</h3>
-          <p className="w-card-desc">Envie lembretes e cupons especiais para clientes que não concluíram o checkout.</p>
 
           <div className="w-form-content">
             <div className="w-toggle-row">
@@ -199,7 +193,6 @@ export default function WhatsAppHub() {
       {activeTab === 'templates' && (
         <div className="w-card">
           <h3 className="w-card-title">Modelos de Mensagem Aprovados</h3>
-          <p className="w-card-desc">Textos pré-formatados com variáveis dinâmicas.</p>
 
           <div className="w-template-box">
             <div className="w-template-label">Modelo: Confirmação de Pedido</div>

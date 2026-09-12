@@ -199,7 +199,7 @@ export default function AdsGeoMap({ events, totalAdClicks, totalAdViews, onFilte
 
   // Função para interpolar cor em tons do TEKNIX (#83b700)
   function getStateColor(uf: string, isHovered: boolean, isSelected: boolean) {
-    if (isSelected) return '#1e293b'
+    if (isSelected) return '#111111'
     const val = metricType === 'clicks' ? stateStats[uf]?.clicks || 0 : stateStats[uf]?.impressions || 0
     if (val === 0) return isHovered ? '#cbd5e1' : '#f1f5f9'
 

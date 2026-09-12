@@ -10,7 +10,7 @@ const devices = [
 
 export default function SessoesPage() {
   return (
-    <ConfigSubLayout title="Sessões e dispositivos" description="Dispositivos conectados e sessões ativas">
+    <ConfigSubLayout title="Sessões e dispositivos">
       <ConfigSection title="Dispositivos conectados">
         <div className="space-y-3">
           {devices.map((d, i) => (

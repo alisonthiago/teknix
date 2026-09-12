@@ -166,9 +166,6 @@ export default function FiscalSettings() {
             </button>
             <div>
               <h1 className="fisc-title">Configurações Fiscais (NF-e & Focus NFe)</h1>
-              <p className="fisc-subtitle">
-                Administre dados da empresa emitente, ambiente da SEFAZ, webhook e regras de emissão.
-              </p>
             </div>
           </div>
           <button

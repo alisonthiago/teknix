@@ -7,6 +7,7 @@ import { Plus, Store, ArrowRight, Wifi, WifiOff, AlertTriangle, RefreshCw, Unlin
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
 import ConnectMarketplaceModal from '@/components/ConnectMarketplaceModal'
+import { PageHeader, PrimaryButton } from '@/components/ui/module'
 import { createClient } from '@/utils/supabase/client'
 import { useNotification } from '@/contexts/NotificationContext'
 
@@ -150,18 +151,11 @@ export default function MarketplacesPage() {
   return (
     <div className="mp-stack">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <h1 className="text-lg font-semibold text-[#333]">Marketplaces</h1>
-          <p className="text-sm text-[#999]">Gerencie seus canais de venda, login e múltiplas contas</p>
-        </div>
-        <button
-          onClick={() => setShowConnectModal(true)}
-          className="inline-flex items-center gap-2 bg-[#1f2328] text-white text-sm font-semibold px-4 py-2.5 rounded-lg hover:bg-[#111827] transition-colors shadow-sm cursor-pointer"
-        >
+      <PageHeader title="Marketplaces">
+        <PrimaryButton onClick={() => setShowConnectModal(true)}>
           <Plus className="w-4 h-4" /> Novo Marketplace
-        </button>
-      </div>
+        </PrimaryButton>
+      </PageHeader>
 
       {/* Connect Modal */}
       <ConnectMarketplaceModal

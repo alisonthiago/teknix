@@ -31,14 +31,14 @@
 }
 
 .product-form-container .btn-primary-action {
-  background: var(--tk-color-primary, #347ff2) !important;
-  border-color: var(--tk-color-primary, #347ff2) !important;
+  background: var(--hub-btn-primary-bg, #1f2328) !important;
+  border-color: var(--hub-btn-primary-bg, #1f2328) !important;
   color: #ffffff !important;
 }
 
 .product-form-container .btn-primary-action:hover:not(:disabled) {
-  background: var(--tk-color-primary-hover, #2469d8) !important;
-  border-color: var(--tk-color-primary-hover, #2469d8) !important;
+  background: var(--hub-btn-primary-hover, #000000) !important;
+  border-color: var(--hub-btn-primary-hover, #000000) !important;
 }
 
 .product-form-wrapper {
@@ -482,7 +482,7 @@
 }
 
 .btn-upload-file:hover {
-  background: #1e293b;
+  background: #000000;
 }
 
 .btn-upload-link {
@@ -766,7 +766,7 @@
 
 .publish-modal-close-btn:hover {
   background: #f1f5f9;
-  color: #1e293b;
+  color: #111111;
 }
 
 .publish-modal-header {
@@ -912,12 +912,12 @@
   font-weight: 600;
   text-decoration: none;
   transition: background 0.15s ease;
-  border: 1px solid #0f172a;
+  border: 1px solid #1f2328;
 }
 
 .btn-modal-view-store:hover {
-  background: #1e293b;
-  border-color: #1e293b;
+  background: #000000;
+  border-color: #000000;
 }
 
 .btn-modal-continue {
@@ -1039,8 +1039,8 @@
   padding: 7px 12px;
   border-radius: 8px;
   background: #ffffff;
-  border: 1px solid #cbd5e1;
-  color: #334155;
+  border: 1px solid #e6e6e6;
+  color: #111111;
   font-size: 0.82rem;
   font-weight: 600;
   text-decoration: none;
@@ -1049,8 +1049,8 @@
 }
 
 .btn-tab-link:hover {
-  background: #f8fafc;
-  color: #0f172a;
-  border-color: #94a3b8;
+  background: #fafafa;
+  color: #111111;
+  border-color: #d1d5db;
 }
 

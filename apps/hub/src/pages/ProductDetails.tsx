@@ -758,10 +758,6 @@ export default function ProductDetails() {
                   </div>
                 </div>
 
-                <p style={{ fontSize: 13, color: '#64748b', margin: '0 0 16px', lineHeight: 1.4 }}>
-                  As 5 seções da vitrine pública deste produto:
-                </p>
-
                 <div className="storytelling-blocks-overview">
                   <div className="storytelling-block-item">
                     <span className="storytelling-block-num">1</span>

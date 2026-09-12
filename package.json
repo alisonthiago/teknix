@@ -6,11 +6,12 @@
   "type": "module",
   "scripts": {
     "dev": "turbo run dev",
-    "dev:flow": "pnpm --filter @teknix/flow dev",
+    "dev:flow": "pnpm --filter ./apps/flow dev",
     "dev:hub": "pnpm --filter @teknix/hub dev",
+    "dev:site": "pnpm --filter @teknix/site dev",
     "build": "pnpm --filter @teknix/site build",
     "build:all": "turbo run build",
-    "build:flow": "pnpm --filter @teknix/flow build",
+    "build:flow": "pnpm --filter ./apps/flow build",
     "build:hub": "pnpm --filter @teknix/hub build",
     "build:site": "pnpm --filter @teknix/site build",
     "build:multidomain": "pnpm build:site && pnpm build:hub && node scripts/prepare-multidomain-dist.js"

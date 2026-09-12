@@ -164,9 +164,11 @@ export default function TeknixHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isCepOpen, setIsCepOpen] = useState(false)
   const [isAccountOpen, setIsAccountOpen] = useState(false)
+  const [isDepartmentsOpen, setIsDepartmentsOpen] = useState(false)
   const [cep, setCep] = useState(() => localStorage.getItem('teknix_user_cep') || '')
 
   const accountPopoverRef = useRef<HTMLDivElement>(null)
+  const departmentsPopoverRef = useRef<HTMLDivElement>(null)
 
   // Personalização da Logo e do Cabeçalho
   const headerEdit = useWidgetEdit('chrome:header', 'chrome:header')
@@ -241,12 +243,16 @@ export default function TeknixHeader() {
       if (accountPopoverRef.current && !accountPopoverRef.current.contains(e.target as Node)) {
         setIsAccountOpen(false)
       }
+      if (departmentsPopoverRef.current && !departmentsPopoverRef.current.contains(e.target as Node)) {
+        setIsDepartmentsOpen(false)
+      }
     }
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setIsMenuOpen(false)
         setIsCepOpen(false)
         setIsAccountOpen(false)
+        setIsDepartmentsOpen(false)
       }
     }
     const handleOpenCepModal = () => setIsCepOpen(true)
@@ -424,10 +430,7 @@ export default function TeknixHeader() {
                   )}
                   <div className="dsvia-account-user-text">
                     {user ? (
-                      <>
-                        <span className="dsvia-account-greeting">Olá, {account.firstName}</span>
-                        <span className="dsvia-account-subtext">Minha conta</span>
-                      </>
+                      <span className="dsvia-account-logged-in-label" aria-hidden="true" />
                     ) : (
                       <>
                         <span className="dsvia-account-greeting">Boas-vindas :)</span>
@@ -514,16 +517,28 @@ export default function TeknixHeader() {
               renderContent={false}
             >
               {showDeptBtn && (
-                <Link
-                  to="/hub/categorias"
+                <div className="dsvia-departments-menu" ref={departmentsPopoverRef}>
+                <button
+                  type="button"
                   className="dsvia-dept-trigger"
                   aria-label="Abrir todos os departamentos"
+                  aria-expanded={isDepartmentsOpen}
+                  aria-haspopup="menu"
+                  onClick={() => setIsDepartmentsOpen(open => !open)}
                 >
                   <svg viewBox="0 0 18 12" width="16" height="12" fill="currentColor">
                     <path d="M1.25 11.635c-.212 0-.391-.072-.534-.216S.5 11.097.5 10.884s.072-.391.216-.534.322-.215.534-.215h15.5c.212 0 .391.072.534.216s.216.322.216.535-.072.391-.216.534-.322.215-.534.215H1.25zm0-4.885c-.212 0-.391-.072-.534-.216S.5 6.212.5 6s.072-.391.216-.534.322-.215.534-.215h15.5c.212 0 .391.072.534.216s.216.322.216.535-.072.391-.216.534-.322.215-.534.215H1.25zm0-4.885c-.212 0-.391-.072-.534-.216S.5 1.328.5 1.115.572.724.716.581s.322-.215.534-.215h15.5c.212 0 .391.072.534.216s.216.322.216.535-.072.391-.216.534-.322.215-.534.215H1.25z" />
                   </svg>
                   <span>{deptBtnText}</span>
-                </Link>
+                </button>
+                {isDepartmentsOpen && (
+                  <div className="dsvia-departments-popover" role="menu" aria-label="Todos os departamentos">
+                    {CORE_CATEGORIES.map(item => (
+                      <Link key={item.slug} to={`/categoria/${item.slug}`} role="menuitem" onClick={() => setIsDepartmentsOpen(false)}>{item.name}</Link>
+                    ))}
+                  </div>
+                )}
+                </div>
               )}
 
               {visibleDeptItems.map((item, idx) => (

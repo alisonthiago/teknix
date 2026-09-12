@@ -337,7 +337,6 @@ export default function Product() {
           <div className="pdp-cep-modal-card" onMouseDown={event => event.stopPropagation()}>
             <button type="button" className="pdp-cep-modal-close" onClick={() => setShowCepModal(false)} aria-label="Fechar">×</button>
             <h2 id="pdp-cep-title">Onde vamos entregar?</h2>
-            <p>Assim, mostramos as melhores ofertas e prazos para a sua região.</p>
             <form onSubmit={handleCalculateFreight}>
               <label htmlFor="pdp-cep-modal-input">Enviar para</label>
               <div className="pdp-cep-modal-input-row">
@@ -1195,8 +1194,8 @@ Principais Destaques:
         </section>
       )}
 
-      {/* Showcase editorial removido da vitrine pública por solicitação. */}
-      {false && <Editable as="div" widgetId="product-control-36" className="ui container fluid description-section product-specifications-section" id="specifications">
+      {/* Showcase editorial — ativo para visualização */}
+      {true && <Editable as="div" widgetId="product-control-36" className="ui container fluid description-section product-specifications-section" id="specifications">
         <div className="teknix-ref-showcase-root">
           
           {/* SEÇÃO 1: HERO SPOTLIGHT (FUNDO PRETO PURO #000 — FOCO NO VALOR & POR QUE COMPRAR) */}

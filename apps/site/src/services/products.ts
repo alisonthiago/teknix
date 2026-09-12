@@ -2,6 +2,12 @@ import { createClient } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import type { Product } from '../types/database'
 import { normalizeCommerce, cleanProductTitle, normalizeShowcase } from '../../../../packages/core/src/productCommerce'
+import {
+  matchesCategoryRules,
+  type CategoryRule,
+  type RuleOperator,
+  type LinkingMode
+} from '../../../../packages/core/src/categoryRules'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://ykgprfzfnffooqmfbeox.supabase.co'
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlrZ3ByZnpmbmZmb29xbWZiZW94Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5NDM3OTEsImV4cCI6MjEwMjUxOTc5MX0.DQ-4lHwbyMW2umWSGmxfB2JUthUTKujGmZ-IACtFCIY'
@@ -164,7 +170,11 @@ export async function getProducts(options?: {
   offset?: number
   featured?: boolean
   onlyPublished?: boolean
-  categoryRules?: { brand?: string; name?: string; min_price?: number; max_price?: number; in_stock?: boolean }
+  categoryRules?: CategoryRule[] | { brand?: string; name?: string; min_price?: number; max_price?: number; in_stock?: boolean }
+  categoryOperator?: RuleOperator
+  categoryLinkingMode?: LinkingMode
+  manualProductIds?: string[]
+  excludedProductIds?: string[]
 }) {
   await ensureCatalogAuth()
 
@@ -209,27 +219,45 @@ export async function getProducts(options?: {
   const segmentTerm = options?.segment || options?.category
   const searchTerm = options?.search || options?.brand
 
-  if (segmentTerm || searchTerm) {
+  if (segmentTerm || searchTerm || options?.categoryRules || options?.manualProductIds) {
     mapped = mapped.filter((product) => {
-      const rules = options?.categoryRules
-      const productPrice = Number(product.promo_price ?? product.price ?? 0)
-      const smartMatches = !rules || (
-        (!rules.brand || normalizeSearchValue(product.brand).includes(normalizeSearchValue(rules.brand))) &&
-        (!rules.name || normalizeSearchValue(product.name).includes(normalizeSearchValue(rules.name))) &&
-        (rules.min_price == null || productPrice >= rules.min_price) &&
-        (rules.max_price == null || productPrice <= rules.max_price) &&
-        (!rules.in_stock || Number(product.stock || 0) > 0)
-      )
-      const categoryMatches = rules ? smartMatches : !segmentTerm || [
-        product.category,
-        product.category_id,
-        product.name,
-        product.brand,
-        product.model,
-        product.slug,
-        product.store_meta?.category_id,
-        product.store_meta?.segment_id,
-      ].some((value) => matchesNormalizedToken(value, segmentTerm))
+      const pId = String(product.id)
+      if (options?.excludedProductIds?.includes(pId)) {
+        return false
+      }
+
+      // Se for vínculo manual explícito
+      if (options?.manualProductIds?.includes(pId)) {
+        return true
+      }
+
+      let categoryMatches = true
+
+      if (options?.categoryRules && Array.isArray(options.categoryRules) && options.categoryRules.length > 0) {
+        const op = options.categoryOperator || 'OR'
+        categoryMatches = matchesCategoryRules(product, options.categoryRules as CategoryRule[], op).matched
+      } else if (options?.categoryRules && !Array.isArray(options.categoryRules)) {
+        const rules = options.categoryRules as any
+        const productPrice = Number(product.promo_price ?? product.price ?? 0)
+        categoryMatches = (
+          (!rules.brand || normalizeSearchValue(product.brand).includes(normalizeSearchValue(rules.brand))) &&
+          (!rules.name || normalizeSearchValue(product.name).includes(normalizeSearchValue(rules.name))) &&
+          (rules.min_price == null || productPrice >= rules.min_price) &&
+          (rules.max_price == null || productPrice <= rules.max_price) &&
+          (!rules.in_stock || Number(product.stock || 0) > 0)
+        )
+      } else if (segmentTerm) {
+        categoryMatches = [
+          product.category,
+          product.category_id,
+          product.name,
+          product.brand,
+          product.model,
+          product.slug,
+          product.store_meta?.category_id,
+          product.store_meta?.segment_id,
+        ].some((value) => matchesNormalizedToken(value, segmentTerm))
+      }
 
       const brandMatches = !options?.brand || [
         product.brand,

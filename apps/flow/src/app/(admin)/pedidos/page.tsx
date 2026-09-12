@@ -220,29 +220,26 @@ export default function PedidosPage() {
         />
       )}
 
-      {/* ── CABEÇALHO CLEAN & ESPAÇOSO ─────────────────────────────────── */}
-      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 pb-2">
-        <div className="space-y-1.5">
-          <h1 className="text-3xl font-extrabold text-[#0f172a] tracking-tight">
+      {/* ── CABEÇALHO CLEAN & ESPAÇOSO (HUB 1:1) ───────────────────────── */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-2">
+        <div>
+          <h1 className="text-2xl sm:text-[26px] font-bold text-[#111111] tracking-tight">
             Pedidos
           </h1>
-          <p className="text-sm text-[#64748b]">
-            Pedidos, separação e expedição da equipe
-          </p>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
           <button
             onClick={handleExportAll}
-            className="px-4 py-2.5 bg-white border border-[#e2e8f0] hover:border-[#cbd5e1] text-[#475569] hover:text-[#0f172a] rounded-xl text-sm font-medium flex items-center gap-2 transition-all cursor-pointer shadow-xs"
+            className="px-4 py-2 bg-white border border-[#e6e6e6] hover:bg-[#f8fafc] hover:border-[#d1d5db] text-[#333333] rounded-lg text-[13px] font-medium flex items-center gap-2 transition-all cursor-pointer shadow-none"
           >
-            <Download className="w-4 h-4 text-[#64748b]" />
+            <Download className="w-4 h-4 text-[#666666]" />
             <span>Exportar Excel</span>
           </button>
 
           <button
             onClick={() => router.push('/etiquetas')}
-            className="px-5 py-2.5 bg-[#347ff2] hover:bg-[#2469d8] text-white rounded-xl text-sm font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-xs"
+            className="px-4 py-2 bg-[#1f2328] hover:bg-black text-white rounded-lg text-[13.5px] font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-none"
           >
             <Printer className="w-4 h-4" />
             <span>Central de Etiquetas</span>
@@ -252,31 +249,31 @@ export default function PedidosPage() {
 
       {/* ── CARDS RESUMO COM RESPIRO ────────────────────────────────────── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white p-6 rounded-2xl border border-[#eef2f6] shadow-xs space-y-1">
-          <p className="text-xs font-semibold text-[#64748b] tracking-wide">Total de Pedidos</p>
-          <p className="text-3xl font-bold text-[#0f172a]">{stats.total}</p>
+        <div className="bg-white p-5 rounded-2xl border border-[#e6e6e6] shadow-none space-y-1">
+          <p className="text-[11px] font-semibold text-[#8a8a8a] tracking-wider uppercase">Total de Pedidos</p>
+          <p className="text-2xl sm:text-3xl font-bold text-[#111111] tracking-tight">{stats.total}</p>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-[#eef2f6] shadow-xs space-y-1">
+        <div className="bg-white p-5 rounded-2xl border border-[#e6e6e6] shadow-none space-y-1">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-semibold text-[#64748b] tracking-wide">Aguardando Separação</p>
+            <p className="text-[11px] font-semibold text-[#8a8a8a] tracking-wider uppercase">Aguardando Separação</p>
             {stats.pendingPicking > 0 && <span className="w-2 h-2 rounded-full bg-[#16a34a]" />}
           </div>
-          <p className="text-3xl font-bold text-[#0f172a]">{stats.pendingPicking}</p>
+          <p className="text-2xl sm:text-3xl font-bold text-[#111111] tracking-tight">{stats.pendingPicking}</p>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-[#eef2f6] shadow-xs space-y-1">
-          <p className="text-xs font-semibold text-[#16a34a] tracking-wide">Prontos / Enviados</p>
-          <p className="text-3xl font-bold text-[#0f172a]">{stats.readyShipping + stats.sent}</p>
+        <div className="bg-white p-5 rounded-2xl border border-[#e6e6e6] shadow-none space-y-1">
+          <p className="text-[11px] font-semibold text-[#16a34a] tracking-wider uppercase">Prontos / Enviados</p>
+          <p className="text-2xl sm:text-3xl font-bold text-[#111111] tracking-tight">{stats.readyShipping + stats.sent}</p>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-[#eef2f6] shadow-xs space-y-1">
-          <p className="text-xs font-semibold text-[#64748b] tracking-wide">Cancelados</p>
-          <p className="text-3xl font-bold text-[#64748b]">{stats.canceled}</p>
+        <div className="bg-white p-5 rounded-2xl border border-[#e6e6e6] shadow-none space-y-1">
+          <p className="text-[11px] font-semibold text-[#8a8a8a] tracking-wider uppercase">Cancelados</p>
+          <p className="text-2xl sm:text-3xl font-bold text-[#8a8a8a] tracking-tight">{stats.canceled}</p>
         </div>
       </div>
 
-      {/* ── ABAS MODERNAS & ESPAÇOSAS (SEM BORDAS AZUIS ANTIGAS) ─────────── */}
+      {/* ── ABAS MODERNAS & ESPAÇOSAS ─────────────────────────────────────── */}
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           
@@ -284,10 +281,10 @@ export default function PedidosPage() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setActiveTab('pedidos')}
-              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 ${
+              className={`px-3.5 py-1.5 rounded-lg text-[13px] font-medium transition-all cursor-pointer flex items-center gap-2 ${
                 activeTab === 'pedidos'
-                  ? 'bg-[#0f172a] text-white shadow-xs'
-                  : 'text-[#64748b] hover:text-[#0f172a] hover:bg-[#f1f5f9]'
+                  ? 'bg-[#1f2328] text-white shadow-none'
+                  : 'text-[#666666] hover:text-[#111111] hover:bg-[#f5f5f5]'
               }`}
             >
               <ClipboardList className="w-4 h-4" />
@@ -296,10 +293,10 @@ export default function PedidosPage() {
 
             <button
               onClick={() => setActiveTab('separacao')}
-              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 ${
+              className={`px-3.5 py-1.5 rounded-lg text-[13px] font-medium transition-all cursor-pointer flex items-center gap-2 ${
                 activeTab === 'separacao'
-                  ? 'bg-[#0f172a] text-white shadow-xs'
-                  : 'text-[#64748b] hover:text-[#0f172a] hover:bg-[#f1f5f9]'
+                  ? 'bg-[#1f2328] text-white shadow-none'
+                  : 'text-[#666666] hover:text-[#111111] hover:bg-[#f5f5f5]'
               }`}
             >
               <Pickaxe className="w-4 h-4" />
@@ -308,10 +305,10 @@ export default function PedidosPage() {
 
             <button
               onClick={() => setActiveTab('expedicao')}
-              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 ${
+              className={`px-3.5 py-1.5 rounded-lg text-[13px] font-medium transition-all cursor-pointer flex items-center gap-2 ${
                 activeTab === 'expedicao'
-                  ? 'bg-[#0f172a] text-white shadow-xs'
-                  : 'text-[#64748b] hover:text-[#0f172a] hover:bg-[#f1f5f9]'
+                  ? 'bg-[#1f2328] text-white shadow-none'
+                  : 'text-[#666666] hover:text-[#111111] hover:bg-[#f5f5f5]'
               }`}
             >
               <Send className="w-4 h-4" />
@@ -348,16 +345,16 @@ export default function PedidosPage() {
         {/* Campo de Busca (para a aba de pedidos) */}
         {activeTab === 'pedidos' && (
           <div className="relative w-full">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94a3b8]" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#999999]" />
             <input
               type="text"
               placeholder="Buscar por número do pedido, SKU, produto ou comprador..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full pl-11 pr-4 py-3 bg-white border border-[#e2e8f0] focus:border-[#0f172a] rounded-2xl text-sm text-[#0f172a] placeholder:text-[#94a3b8] focus:outline-none transition-all shadow-xs"
+              className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#e6e6e6] focus:border-[#1f2328] focus:ring-1 focus:ring-[#1f2328]/10 rounded-lg text-[13.5px] text-[#111111] placeholder:text-[#999999] focus:outline-none transition-colors shadow-none"
             />
             {search && (
-              <button onClick={() => setSearch('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#94a3b8] hover:text-[#0f172a]">
+              <button onClick={() => setSearch('')} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#999999] hover:text-[#111111]">
                 <X className="w-4 h-4" />
               </button>
             )}
@@ -367,33 +364,33 @@ export default function PedidosPage() {
 
       {/* ── BARRA FLUTUANTE DE SELEÇÃO EM LOTE (BRANCO CLEAN) ─────────────── */}
       {selectedItems.length > 0 && (
-        <div className="bg-white text-[#0f172a] px-6 py-4 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.08)] border border-[#e2e8f0] flex items-center justify-between gap-4 animate-in slide-in-from-bottom-4 duration-200">
+        <div className="bg-white text-[#111111] px-5 py-3.5 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.06)] border border-[#e6e6e6] flex items-center justify-between gap-4 animate-in slide-in-from-bottom-4 duration-200">
           <div className="flex items-center gap-3">
-            <span className="w-7 h-7 rounded-full bg-[#16a34a] text-white flex items-center justify-center font-bold text-xs shadow-xs">
+            <span className="w-7 h-7 rounded-full bg-[#16a34a] text-white flex items-center justify-center font-bold text-xs shadow-none">
               {selectedItems.length}
             </span>
-            <p className="font-bold text-sm text-[#0f172a]">
+            <p className="font-semibold text-[13.5px] text-[#111111]">
               {selectedItems.length} pedido(s) selecionado(s)
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             <button
               onClick={() => setSelectedItems([])}
-              className="text-xs font-semibold text-[#64748b] hover:text-[#0f172a] transition-colors cursor-pointer px-2 py-1"
+              className="text-xs font-semibold text-[#666666] hover:text-[#111111] transition-colors cursor-pointer px-2 py-1"
             >
               Desmarcar
             </button>
             <button 
               onClick={() => window.open(`/api/shipments/mercadolivre/label?orderIds=${selectedItems.join(',')}&cropPackagingOnly=true`, '_blank')}
-              className="px-4 py-2.5 bg-[#16a34a] hover:bg-[#15803d] text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
+              className="px-3.5 py-2 bg-[#16a34a] hover:bg-[#15803d] text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-none"
             >
               <Printer className="w-4 h-4" /> Imprimir Etiquetas
             </button>
-            <button onClick={handleExportSelected} className="px-3.5 py-2.5 bg-[#f8fafc] hover:bg-[#f1f5f9] text-[#475569] hover:text-[#0f172a] rounded-xl text-xs font-medium border border-[#e2e8f0] cursor-pointer">
-              <Download className="w-3.5 h-3.5 inline mr-1 text-[#64748b]" /> Exportar
+            <button onClick={handleExportSelected} className="px-3.5 py-2 bg-white hover:bg-[#f8fafc] text-[#333333] hover:text-[#111111] rounded-lg text-xs font-medium border border-[#e6e6e6] cursor-pointer">
+              <Download className="w-3.5 h-3.5 inline mr-1 text-[#666666]" /> Exportar
             </button>
-            <button onClick={() => setShowDeleteModal(true)} className="px-3.5 py-2.5 bg-[#fef2f2] hover:bg-[#fee2e2] text-[#dc2626] rounded-xl text-xs font-medium border border-[#fecaca] cursor-pointer">
+            <button onClick={() => setShowDeleteModal(true)} className="px-3.5 py-2 bg-[#fef2f2] hover:bg-[#fee2e2] text-[#dc2626] rounded-lg text-xs font-medium border border-[#fecaca] cursor-pointer">
               <Trash2 className="w-3.5 h-3.5 inline mr-1" /> Excluir
             </button>
           </div>
@@ -404,7 +401,7 @@ export default function PedidosPage() {
       {/* ABA 1: PEDIDOS                                                       */}
       {/* ════════════════════════════════════════════════════════════════════ */}
       {activeTab === 'pedidos' && (
-        <div className="bg-white rounded-3xl border border-[#eef2f6] shadow-xs overflow-hidden">
+        <div className="bg-white rounded-2xl border border-[#e6e6e6] shadow-none overflow-hidden">
           {loading ? (
             <div className="py-20 text-center text-xs text-[#94a3b8]">Carregando pedidos...</div>
           ) : filteredOrders.length === 0 ? (
@@ -412,7 +409,7 @@ export default function PedidosPage() {
               <div className="w-12 h-12 rounded-2xl bg-[#f8fafc] flex items-center justify-center mx-auto text-[#94a3b8] mb-3">
                 <Package className="w-6 h-6" />
               </div>
-              <h3 className="text-base font-bold text-[#0f172a]">Nenhum pedido encontrado</h3>
+              <h3 className="text-base font-bold text-[#111111]">Nenhum pedido encontrado</h3>
               <p className="text-xs text-[#64748b] max-w-sm mx-auto">
                 {dateFilter === 'TODAY'
                   ? 'Nenhum pedido novo recebido hoje até o momento.'
@@ -566,32 +563,32 @@ export default function PedidosPage() {
                   <div
                     key={order.id}
                     onClick={() => router.push(`/pedidos/${order.id}`)}
-                    className="bg-white rounded-2xl border border-[#e2e8f0] p-5 cursor-pointer hover:border-[#0f172a] hover:shadow-md transition-all shadow-xs space-y-3.5"
+                    className="bg-white rounded-2xl border border-[#e6e6e6] p-5 cursor-pointer hover:border-[#1f2328] transition-colors shadow-none space-y-3.5"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-mono text-xs font-bold text-[#0f172a]">#{order.order_number}</span>
-                      <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${getStatus(order.status).c}`}>
+                      <span className="font-mono text-xs font-bold text-[#111111]">#{order.order_number}</span>
+                      <span className={`px-2.5 py-0.5 rounded text-[11px] font-semibold ${getStatus(order.status).c}`}>
                         {getStatus(order.status).l}
                       </span>
                     </div>
 
                     <div className="flex items-center gap-3.5">
                       {product?.image_url ? (
-                        <img src={product.image_url} alt="" className="w-12 h-12 rounded-xl object-contain border border-[#e2e8f0] bg-[#f5f5f5] p-0.5 shrink-0" />
+                        <img src={product.image_url} alt="" className="w-12 h-12 rounded-xl object-contain border border-[#e6e6e6] bg-[#f5f5f5] p-0.5 shrink-0" />
                       ) : (
-                        <div className="w-12 h-12 rounded-xl bg-[#f5f5f5] flex items-center justify-center text-[#94a3b8] shrink-0">
+                        <div className="w-12 h-12 rounded-xl bg-[#f5f5f5] border border-[#e6e6e6] flex items-center justify-center text-[#999999] shrink-0">
                           <Package className="w-6 h-6" />
                         </div>
                       )}
                       <div className="min-w-0 flex-1 space-y-0.5">
-                        <p className="text-[13px] font-bold text-[#0f172a] truncate">{product?.name || firstItem?.product_name || 'Produto'}</p>
-                        <p className="text-[11px] text-[#64748b] font-mono">SKU: {product?.sku || firstItem?.sku || 'SKU'}</p>
+                        <p className="text-[13px] font-semibold text-[#111111] truncate">{product?.name || firstItem?.product_name || 'Produto'}</p>
+                        <p className="text-[11px] text-[#888888] font-mono">SKU: {product?.sku || firstItem?.sku || 'SKU'}</p>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between text-xs pt-3 border-t border-[#f1f5f9]">
+                    <div className="flex items-center justify-between text-xs pt-3 border-t border-[#eeeeee]">
                       <span className="font-bold text-[#16a34a]">R$ {Number(order.total_amount || 0).toFixed(2).replace('.', ',')}</span>
-                      <div className="flex items-center gap-1.5 text-[#64748b]">
+                      <div className="flex items-center gap-1.5 text-[#666666]">
                         <MarketplaceLogo name={mp?.name || 'Mercado Livre'} className="w-3.5 h-3.5" />
                         <span>{mp?.name || 'Mercado Livre'}</span>
                       </div>
@@ -600,7 +597,7 @@ export default function PedidosPage() {
                     {['AGUARDANDO_SEPARACAO', 'PAGO', 'PAID', 'NOVO', 'approved', 'ETIQUETA_IMPRESSA'].includes(order.status) && (
                       <button 
                         onClick={e => { e.stopPropagation(); updateOrderStatus(order.id, 'EM_SEPARACAO') }} 
-                        className="w-full bg-[#0f172a] hover:bg-[#1e293b] text-white py-2.5 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-2"
+                        className="w-full bg-[#1f2328] hover:bg-black text-white py-2 rounded-lg text-xs font-semibold transition-colors shadow-none cursor-pointer flex items-center justify-center gap-2"
                       >
                         <PlayCircle className="w-3.5 h-3.5" /> Iniciar Separação
                       </button>
@@ -608,7 +605,7 @@ export default function PedidosPage() {
                     {order.status === 'EM_SEPARACAO' && (
                       <button 
                         onClick={e => { e.stopPropagation(); updateOrderStatus(order.id, 'SEPARADO') }} 
-                        className="w-full bg-[#16a34a] hover:bg-[#15803d] text-white py-2.5 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-2"
+                        className="w-full bg-[#16a34a] hover:bg-[#15803d] text-white py-2 rounded-lg text-xs font-semibold transition-colors shadow-none cursor-pointer flex items-center justify-center gap-2"
                       >
                         <CheckCircle2 className="w-3.5 h-3.5" /> Marcar como Separado ✓
                       </button>
@@ -627,10 +624,10 @@ export default function PedidosPage() {
       {activeTab === 'expedicao' && (
         <div className="space-y-4">
           {shippingOrders.length === 0 ? (
-            <div className="bg-white rounded-3xl border border-[#eef2f6] p-16 text-center shadow-xs space-y-2">
+            <div className="bg-white rounded-2xl border border-[#e6e6e6] p-16 text-center shadow-none space-y-2">
               <Send className="w-10 h-10 text-[#cbd5e1] mx-auto mb-2" />
-              <p className="text-base font-bold text-[#0f172a]">Nenhum pedido na expedição</p>
-              <p className="text-xs text-[#64748b]">Os pedidos separados aparecerão aqui para conferência e despacho</p>
+              <p className="text-base font-bold text-[#111111]">Nenhum pedido na expedição</p>
+              <p className="text-xs text-[#888888]">Os pedidos separados aparecerão aqui para conferência e despacho</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -640,26 +637,26 @@ export default function PedidosPage() {
                   <div
                     key={order.id}
                     onClick={() => router.push(`/pedidos/${order.id}`)}
-                    className="bg-white rounded-3xl border border-[#eef2f6] p-6 cursor-pointer hover:border-[#0f172a] transition-all shadow-xs space-y-4"
+                    className="bg-white rounded-2xl border border-[#e6e6e6] p-5 cursor-pointer hover:border-[#1f2328] transition-colors shadow-none space-y-3.5"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-mono text-sm font-bold text-[#0f172a]">#{order.order_number}</span>
-                      <span className="text-xs font-semibold text-[#64748b] flex items-center gap-1.5">
+                      <span className="font-mono text-sm font-bold text-[#111111]">#{order.order_number}</span>
+                      <span className="text-xs font-semibold text-[#666666] flex items-center gap-1.5">
                         <MarketplaceLogo name={mp?.name || 'Mercado Livre'} className="w-3.5 h-3.5" />
                         {mp?.name || 'Mercado Livre'}
                       </span>
                     </div>
 
                     <div>
-                      <p className="text-xs font-bold text-[#0f172a]">{order.customer_name || 'Comprador'}</p>
+                      <p className="text-xs font-bold text-[#111111]">{order.customer_name || 'Comprador'}</p>
                       <p className="font-mono text-[11px] text-[#16a34a] font-bold mt-0.5">{order.tracking_code || 'Envio Padrão'}</p>
                     </div>
 
-                    <div className="pt-2 border-t border-[#f1f5f9]">
+                    <div className="pt-2 border-t border-[#eeeeee]">
                       {['SEPARADO', 'AGUARDANDO_EXPEDICAO'].includes(order.status) && (
                         <button 
                           onClick={e => { e.stopPropagation(); updateOrderStatus(order.id, 'EMBALADO') }} 
-                          className="w-full bg-[#0284c7] hover:bg-[#0369a1] text-white py-2.5 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
+                          className="w-full bg-[#1f2328] hover:bg-black text-white py-2 rounded-lg text-xs font-semibold transition-colors shadow-none cursor-pointer"
                         >
                           Embalar & Colar Etiqueta
                         </button>
@@ -667,7 +664,7 @@ export default function PedidosPage() {
                       {order.status === 'EMBALADO' && (
                         <button 
                           onClick={e => { e.stopPropagation(); updateOrderStatus(order.id, 'ENVIADO') }} 
-                          className="w-full bg-[#16a34a] hover:bg-[#15803d] text-white py-2.5 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
+                          className="w-full bg-[#16a34a] hover:bg-[#15803d] text-white py-2 rounded-lg text-xs font-semibold transition-colors shadow-none cursor-pointer"
                         >
                           Despachar Pedido ✓
                         </button>

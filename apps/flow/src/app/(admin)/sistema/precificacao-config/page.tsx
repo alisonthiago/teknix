@@ -42,7 +42,7 @@ export default function PrecificacaoConfigPage() {
   }
 
   return (
-    <ConfigSubLayout title="Precificação" description="Configure margem, markup, custos e simulador">
+    <ConfigSubLayout title="Precificação">
       <ConfigSection title="Margem">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>

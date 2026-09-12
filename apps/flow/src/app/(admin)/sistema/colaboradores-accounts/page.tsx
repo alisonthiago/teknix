@@ -46,7 +46,7 @@ export default function ColaboradoresAccountsPage() {
           <ArrowLeft className="w-3.5 h-3.5" /> Sistema
         </Link>
       </div>
-      <PageHeader title="Permissões por Conta" description="Atribua contas de marketplace a colaboradores" />
+      <PageHeader title="Permissões por Conta" />
 
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
         <StatCard label="Colaboradores" value={String((users || []).length)} />

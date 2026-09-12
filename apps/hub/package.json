@@ -12,6 +12,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.112.4",
     "@teknix/design-system": "workspace:*",
+    "@teknix/notifications": "workspace:*",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.8",
     "lottie-web": "^5.13.0",

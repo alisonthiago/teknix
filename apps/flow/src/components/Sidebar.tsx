@@ -107,25 +107,25 @@ export default function Sidebar({ permissions, mobileOpen, setMobileOpen, collap
                   href={item.href}
                   onClick={() => setMobileOpen(false)}
                   title={isNavCollapsed ? item.label : undefined}
-                  className={`flex items-center transition-colors min-h-[44px] relative ${
-                    isNavCollapsed ? 'justify-center px-0 py-3 mx-2 rounded-lg' : 'gap-3 px-4 py-3 justify-between'
+                  className={`flex items-center transition-colors min-h-[42px] relative text-[13.5px] rounded-lg mx-2 ${
+                    isNavCollapsed ? 'justify-center px-0 py-2.5 my-0.5' : 'gap-3 px-3.5 py-2.5 my-0.5 justify-between'
                   } ${
                     active
-                      ? item.isLive ? 'text-[#e74c3c] font-bold' : 'text-[#1f2328] font-bold'
-                      : item.isLive ? 'text-[#e74c3c] font-bold hover:bg-[#fafafa]' : 'text-[#333] font-normal hover:bg-[#fafafa]'
+                      ? item.isLive ? 'text-[#e74c3c] font-semibold bg-[#fff5f5]' : 'text-[#000000] font-medium bg-[#f5f5f5]'
+                      : item.isLive ? 'text-[#e74c3c] font-medium hover:bg-[#fafafa]' : 'text-[#4b5563] font-normal hover:bg-[#fafafa] hover:text-[#000000]'
                   }`}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
                     <Icon
-                      className={`w-[22px] h-[22px] shrink-0 ${
-                        active ? (item.isLive ? 'text-[#e74c3c]' : 'text-[#1f2328]') : (item.isLive ? 'text-[#e74c3c] animate-pulse' : 'text-[#666]')
+                      className={`w-[20px] h-[20px] shrink-0 ${
+                        active ? (item.isLive ? 'text-[#e74c3c]' : 'text-[#000000]') : (item.isLive ? 'text-[#e74c3c] animate-pulse' : 'text-[#000000]')
                       }`}
                       strokeWidth={1.5}
                     />
-                    {!isNavCollapsed && <span>{item.label}</span>}
+                    {!isNavCollapsed && <span className="truncate">{item.label}</span>}
                   </div>
                   {!isNavCollapsed && item.isLive && (
-                    <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-[#e74c3c] text-white tracking-wider animate-pulse uppercase">
+                    <span className="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-[#e74c3c] text-white tracking-wider uppercase">
                       AO VIVO
                     </span>
                   )}
@@ -148,7 +148,7 @@ export default function Sidebar({ permissions, mobileOpen, setMobileOpen, collap
       )}
 
       {/* Desktop Sidebar */}
-      <aside className={`hidden lg:flex fixed top-0 left-0 h-full bg-white z-50 flex-col transition-all duration-300 ${collapsed ? 'w-[72px]' : 'w-[260px]'}`}>
+      <aside className={`hidden lg:flex fixed top-0 left-0 h-full bg-white border-r border-[#e6e6e6] z-50 flex-col transition-all duration-300 ${collapsed ? 'w-[72px]' : 'w-[240px]'}`}>
         <div className={`h-[72px] flex items-center shrink-0 ${collapsed ? 'justify-center px-0' : 'justify-between px-5'}`}>
           {!collapsed && (
             <Link href="/dashboard" className="flex items-center">

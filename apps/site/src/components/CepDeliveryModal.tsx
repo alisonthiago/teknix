@@ -239,7 +239,6 @@ export default function CepDeliveryModal({
       <div className="dsvia-cep-simple-card" ref={modalRef} onMouseDown={event => event.stopPropagation()}>
         <button type="button" className="dsvia-cep-simple-close" onClick={onClose} aria-label="Fechar">×</button>
         <h3 id="cep-simple-title">Onde vamos entregar?</h3>
-        <p>Assim, mostramos as melhores ofertas e prazos para a sua região.</p>
         <form onSubmit={handleSaveQuickCep}>
           <label htmlFor="cep-simple-input">Enviar para</label>
           <div className="dsvia-cep-simple-row">

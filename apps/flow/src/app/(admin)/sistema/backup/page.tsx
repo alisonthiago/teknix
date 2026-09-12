@@ -65,7 +65,7 @@ export default function BackupPage() {
   }
 
   return (
-    <ConfigSubLayout title="Backup e Dados" description="Gestão de cópias de segurança e integridade do banco de dados">
+    <ConfigSubLayout title="Backup e Dados">
       <ConfigSection title="Backup Automático em Nuvem">
         <div className="flex items-start gap-3.5 p-4 bg-[#f0fff4] border border-[#bbf7d0] rounded-2xl mb-4 shadow-2xs">
           <ShieldCheck className="w-6 h-6 text-[#16a34a] shrink-0 mt-0.5" />

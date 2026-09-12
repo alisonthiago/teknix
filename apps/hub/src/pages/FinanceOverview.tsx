@@ -64,7 +64,6 @@ export default function FinanceOverview() {
       <div className="page-header">
         <div className="header-info">
           <h1>Financeiro</h1>
-          <p>Acompanhe o faturamento, ticket médio e transações reais da loja.</p>
         </div>
         <div className="header-actions">
           <Link to="/hub/pagamentos" className="btn btn-secondary btn-action-primary">
@@ -85,7 +84,6 @@ export default function FinanceOverview() {
           <div className="finance-kpi-val">
             <span className="finance-kpi-curr">R$</span> {fmtBRL(totalRevenue)}
           </div>
-          <p className="finance-kpi-sub">Receita acumulada de vendas pagas</p>
         </div>
 
         <div className="finance-kpi-card">
@@ -98,7 +96,6 @@ export default function FinanceOverview() {
           <div className="finance-kpi-val">
             <span className="finance-kpi-curr">R$</span> {fmtBRL(averageTicket)}
           </div>
-          <p className="finance-kpi-sub">Média por pedido aprovado</p>
         </div>
 
         <div className="finance-kpi-card">
@@ -111,7 +108,6 @@ export default function FinanceOverview() {
           <div className="finance-kpi-val">
             {approvedCount}
           </div>
-          <p className="finance-kpi-sub">{pendingOrders.length} aguardando pagamento</p>
         </div>
       </div>
 
@@ -120,7 +116,6 @@ export default function FinanceOverview() {
         <div className="finance-table-card-header">
           <div>
             <h2>Transações Recentes</h2>
-            <p>Histórico das últimas movimentações de pedidos</p>
           </div>
           <Link to="/hub/pedidos" className="finance-see-all">
             Ver todos os pedidos →

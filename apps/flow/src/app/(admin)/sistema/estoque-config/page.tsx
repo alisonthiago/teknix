@@ -39,7 +39,7 @@ export default function EstoqueConfigPage() {
   }
 
   return (
-    <ConfigSubLayout title="Configurações de estoque" description="Parâmetros de controle de estoque">
+    <ConfigSubLayout title="Configurações de estoque">
       <ConfigSection title="Alertas">
         <Toggle label="Alerta de estoque baixo" description="Notificar quando atingir o estoque mínimo." enabled={prefs.min_alert} onChange={() => toggle('min_alert')} />
         <Toggle label="Alerta de estoque zerado" description="Notificar quando ficar sem estoque." enabled={prefs.zero_alert} onChange={() => toggle('zero_alert')} />

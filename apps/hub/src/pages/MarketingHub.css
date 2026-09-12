@@ -87,7 +87,7 @@
   display: flex;
   gap: 12px;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .m-icon-box {
@@ -180,13 +180,14 @@
 }
 
 .m-card-btn.primary {
-  background: #2563eb;
-  border-color: #2563eb;
+  background: #111111;
+  border-color: #111111;
   color: white;
 }
 
 .m-card-btn.primary:hover {
-  background: #1d4ed8;
+  background: #000000;
+  border-color: #000000;
 }
 
 .recovery-rules-list {

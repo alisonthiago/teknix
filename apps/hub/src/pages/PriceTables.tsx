@@ -72,9 +72,6 @@ export default function PriceTables() {
         <div className="price-tables-hero">
           <span className="hero-tag">Centralização e Controle</span>
           <h1 className="hero-title">Venda atacado e varejo no mesmo site</h1>
-          <p className="hero-subtitle">
-            Crie tabelas de preços exclusivas, regras de compra mínima e gerencie um estoque unificado para todos os seus clientes, sem precisar de uma segunda loja.
-          </p>
           <button className="btn-primary-action" style={{ borderRadius: 20, padding: '10px 24px' }} onClick={() => setShowModal(true)}>
             <Plus size={16} /> Criar tabela de preços
           </button>

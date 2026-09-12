@@ -33,7 +33,7 @@ export default function FinanceiroConfigPage() {
   }
 
   return (
-    <ConfigSubLayout title="Configurações financeiras" description="Moeda, impostos, categorias e contas">
+    <ConfigSubLayout title="Configurações financeiras">
       <ConfigSection title="Geral">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>

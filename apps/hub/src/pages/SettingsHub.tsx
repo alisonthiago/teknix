@@ -245,7 +245,6 @@ export default function SettingsHub() {
                   </button>
                   <div>
                     <h1 className="settings-main-title">Informação de contato</h1>
-                    <p className="settings-subtitle">Dados cadastrais, canais de atendimento e endereço exibidos na loja.</p>
                   </div>
                 </div>
               </div>
@@ -355,7 +354,6 @@ export default function SettingsHub() {
                   </button>
                   <div>
                     <h1 className="settings-main-title">Botão de WhatsApp</h1>
-                    <p className="settings-main-subtitle">Exibe o ícone flutuante do WhatsApp no canto inferior do site público.</p>
                   </div>
                 </div>
               </div>
@@ -426,7 +424,6 @@ export default function SettingsHub() {
                   </button>
                   <div>
                     <h1 className="settings-main-title">Nota Fiscal Eletrônica (NF-e)</h1>
-                    <p className="settings-main-subtitle">Emissão automática e configurações fiscais integradas.</p>
                   </div>
                 </div>
               </div>
@@ -487,7 +484,6 @@ export default function SettingsHub() {
                   </button>
                   <div>
                     <h1 className="settings-main-title">Opções do checkout</h1>
-                    <p className="settings-main-subtitle">Configure as opções disponíveis para pedir dados adicionais ao seu cliente durante o processo de compra.</p>
                   </div>
                 </div>
                 <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
@@ -528,7 +524,6 @@ export default function SettingsHub() {
                   <h3 className="settings-card-title" style={{ margin: 0 }}>Mensagem do cliente</h3>
                   <input type="checkbox" className="toggle-switch-input" defaultChecked />
                 </div>
-                <p className="settings-card-desc">Seu cliente pode usar este campo para deixar observações sobre o pedido.</p>
                 
                 <div>
                   <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>Nome do campo</label>
@@ -544,7 +539,6 @@ export default function SettingsHub() {
               {/* ClearSale */}
               <div className="settings-card">
                 <h3 className="settings-card-title">ClearSale</h3>
-                <p className="settings-card-desc">A ClearSale ajudará a analisar o risco dos pedidos efetuados em sua loja.</p>
                 <div>
                   <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>Código de integração</label>
                   <input className="settings-input" placeholder="Insira o código de integração" />
@@ -554,7 +548,6 @@ export default function SettingsHub() {
               {/* Restringir compras */}
               <div className="settings-card">
                 <h3 className="settings-card-title">Restringir compras</h3>
-                <p className="settings-card-desc">Defina quem pode comprar na sua loja.</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.85rem' }}>
                     <input type="radio" name="restrict" defaultChecked /> Todos os clientes
@@ -583,7 +576,6 @@ export default function SettingsHub() {
                   <h3 className="settings-card-title" style={{ margin: 0 }}>Checkout acelerado TEKNIX Pay</h3>
                   <input type="checkbox" className="toggle-switch-input" defaultChecked />
                 </div>
-                <p className="settings-card-desc">Preencha dados pessoais e endereços automaticamente em 1 clique.</p>
                 <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 8, padding: 14 }}>
                   <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1e40af' }}>Benefício exclusivo TEKNIX Pay</div>
                   <div style={{ fontSize: '0.8rem', color: '#3b82f6', marginTop: 4 }}>Preenchimento automático de dados e cartões salvos. Aumente em até 7% a conversão.</div>
@@ -612,7 +604,6 @@ export default function SettingsHub() {
                   </button>
                   <div>
                     <h1 className="settings-main-title">Mensagem para clientes</h1>
-                    <p className="settings-main-subtitle">Defina a mensagem exibida ao cliente após a finalização do pedido.</p>
                   </div>
                 </div>
                 <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
@@ -653,9 +644,6 @@ export default function SettingsHub() {
                   </button>
                   <div>
                     <h1 className="settings-main-title">Idiomas e moedas</h1>
-                    <p className="settings-main-subtitle">
-                      Chegue mais longe! Configure diferentes moedas para administrar seus produtos e habilite sua loja para vendas em outros países.
-                    </p>
                   </div>
                 </div>
               </div>
@@ -663,7 +651,6 @@ export default function SettingsHub() {
               {/* Países habilitados */}
               <div className="settings-card">
                 <h3 className="settings-card-title">Países habilitados</h3>
-                <p className="settings-card-desc">Defina onde quer que sua loja esteja disponível. Seus clientes poderão escolher em qual navegar.</p>
                 <button
                   type="button"
                   style={{ background: 'none', border: 'none', color: '#2563eb', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer', textAlign: 'left', display: 'inline-flex', alignItems: 'center', gap: 4 }}
@@ -684,7 +671,6 @@ export default function SettingsHub() {
               {/* País padrão da loja */}
               <div className="settings-card">
                 <h3 className="settings-card-title">País padrão da loja</h3>
-                <p className="settings-card-desc">Defina o idioma e em que moeda os preços devem aparecer para seus clientes ao visitar a loja.</p>
                 <div>
                   <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>País padrão</label>
                   <select className="settings-input">
@@ -698,7 +684,6 @@ export default function SettingsHub() {
               {/* Moeda do administrador */}
               <div className="settings-card">
                 <h3 className="settings-card-title">Moeda do administrador</h3>
-                <p className="settings-card-desc">Defina uma moeda para gerenciar os preços dos seus produtos. Só você verá essa informação.</p>
                 <div>
                   <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>Moeda padrão</label>
                   <select className="settings-input">
@@ -728,7 +713,6 @@ export default function SettingsHub() {
                   </button>
                   <div>
                     <h1 className="settings-main-title">Códigos externos</h1>
-                    <p className="settings-main-subtitle">Scripts de rastreamento, Google Tag Manager e pixels de conversão.</p>
                   </div>
                 </div>
                 <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
@@ -819,7 +803,6 @@ export default function SettingsHub() {
                   </button>
                   <div>
                     <h1 className="settings-main-title">Domínios e SSL</h1>
-                    <p className="settings-main-subtitle">Configure o endereço oficial da sua loja na internet.</p>
                   </div>
                 </div>
               </div>
@@ -860,7 +843,6 @@ export default function SettingsHub() {
                   </button>
                   <div>
                     <h1 className="settings-main-title">E-mails automáticos</h1>
-                    <p className="settings-main-subtitle">Notificações enviadas aos seus clientes em cada etapa da compra.</p>
                   </div>
                 </div>
                 <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
@@ -919,7 +901,6 @@ export default function SettingsHub() {
                   </button>
                   <div>
                     <h1 className="settings-main-title">DC-e (Declaração de Conteúdo Eletrônica)</h1>
-                    <p className="settings-main-subtitle">Documento para envios de pessoas físicas ou MEI sem exigência de NF-e.</p>
                   </div>
                 </div>
                 <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
@@ -951,7 +932,6 @@ export default function SettingsHub() {
                   </button>
                   <div>
                     <h1 className="settings-main-title">Redirecionamentos 301 (SEO)</h1>
-                    <p className="settings-main-subtitle">Evite erros 404 ao migrar páginas antigas da sua loja para novos endereços.</p>
                   </div>
                 </div>
                 <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
@@ -984,7 +964,6 @@ export default function SettingsHub() {
                   </button>
                   <div>
                     <h1 className="settings-main-title">Campos personalizados</h1>
-                    <p className="settings-main-subtitle">Crie campos extras no cadastro de clientes ou no checkout.</p>
                   </div>
                 </div>
                 <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
@@ -993,7 +972,6 @@ export default function SettingsHub() {
               </div>
 
               <div className="settings-card">
-                <p className="settings-card-desc">Adicione perguntas ou informações adicionais necessárias para a entrega ou personalização do pedido.</p>
                 <button className="btn-secondary-action" style={{ alignSelf: 'flex-start' }}>+ Novo Campo Personalizado</button>
               </div>
             </>
@@ -1014,7 +992,6 @@ export default function SettingsHub() {
                   </button>
                   <div>
                     <h1 className="settings-main-title">Centros de Distribuição</h1>
-                    <p className="settings-main-subtitle">Locais de saída para cálculo de frete e estoque.</p>
                   </div>
                 </div>
               </div>

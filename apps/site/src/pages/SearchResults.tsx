@@ -244,7 +244,7 @@ export default function SearchResults() {
                   {searchTerm ? 'Nenhum produto encontrado' : 'Nenhum produto publicado'}
                 </Editable>
                 <Editable as="p" widgetId="searchresults-9">
-                  {searchTerm ? 'Verifique a ortografia das palavras ou tente buscar por termos mais genéricos.' : 'Ainda não há produtos publicados na vitrine da loja.'}
+                  {searchTerm ? 'Tente buscar por termos mais genéricos.' : 'Nenhum produto disponível.'}
                 </Editable>
                 <Link to="/produtos" className="no-results-action-btn">
                   Ver todo o catálogo

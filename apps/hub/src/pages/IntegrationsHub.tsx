@@ -236,10 +236,7 @@ export default function IntegrationsHub() {
       <div className="page-header">
         <div className="header-info">
           <h1 className="page-title">Integrações & Conexões Oficiais</h1>
-          <p className="page-subtitle">
-            Monitore marketplaces, gateways de pagamento, emissão fiscal, cálculo de fretes e comunicação do ecossistema TEKNIX.
-          </p>
-          <div style={{ display: 'flex', gap: 10, marginTop: 6, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 10, marginTop: 8, flexWrap: 'wrap' }}>
             <span className="security-badge-pill">
               <ShieldCheck size={13} color="#16a34a" /> Credenciais protegidas via Supabase RLS
             </span>

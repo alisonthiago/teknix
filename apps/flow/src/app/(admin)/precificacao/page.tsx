@@ -207,7 +207,7 @@ function SimulatorTab() {
 export default function PrecificacaoPage() {
   return (
     <div className="mp-stack">
-      <PageHeader title="Precificação" description="Gerencie custos, preços e margens" />
+      <PageHeader title="Precificação" />
       <Tabs defaultValue="custo-real">
         <TabsList>
           <TabsTrigger value="custo-real"><BadgeDollarSign className="w-3.5 h-3.5 mr-1 inline" /> Custo</TabsTrigger>

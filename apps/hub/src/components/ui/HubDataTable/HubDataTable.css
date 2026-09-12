@@ -41,7 +41,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   margin-bottom: 4px;
   min-width: 0;
 }
@@ -98,9 +98,9 @@
   font-size: 13px;
   font-weight: 500;
   border-radius: var(--hub-btn-radius, 8px);
-  padding: 0 14px;
-  height: var(--hub-btn-height, 38px);
-  min-height: var(--hub-btn-height, 38px);
+  padding: 0 13px;
+  height: 36px;
+  min-height: 36px;
   border: none;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -140,89 +140,133 @@
   background: #fee2e2;
 }
 
-/* ── Toolbar (busca + filtros + exportar) ── */
+/* ── Toolbar Unificada (tudo na mesma seção reta) ── */
 .hub-table-toolbar {
   display: flex;
   align-items: center;
-  gap: 6px;
-  flex-wrap: nowrap;
+  column-gap: 8px;
+  row-gap: 16px;
+  flex-wrap: wrap;
   width: 100%;
-  height: 32px;
-  flex: 0 0 32px;
-  padding: 0;
+  min-height: 38px;
+  height: auto;
+  flex: 0 0 auto;
+  padding: 14px 0;
+  margin: 20px 0;
   min-width: 0;
   overflow-x: auto;
-  overflow-y: hidden;
+  overflow-y: visible;
   scrollbar-width: none;
   box-sizing: border-box;
+  background: #ffffff;
+  box-shadow: none;
 }
 
 .hub-table-toolbar::-webkit-scrollbar {
   display: none;
 }
 
-@media (max-width: 900px) {
-  .hub-page-header {
-    align-items: center;
-  }
-
-  .hub-header-actions {
-    margin-left: 0;
-    max-width: 70%;
-  }
-
-  .hub-header-actions .hub-status-tabs {
-    flex: 1 1 auto;
-  }
+.hub-table-top-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+  min-height: 44px;
+  margin-bottom: 8px;
 }
 
-@media (max-width: 480px) {
-  .hub-header-actions {
-    align-items: center;
-  }
+.hub-toolbar-header-actions {
+  display: contents;
+}
 
-  .hub-header-actions .hub-status-tabs {
-    flex: 0 0 auto;
-  }
+/* Mantém todos os controles na mesma linha, agrupados à direita. */
+.hub-table-toolbar > .hub-btn,
+.hub-table-toolbar > .hub-toolbar-btn,
+.hub-table-toolbar > .hub-toolbar-export-container {
+  order: 2;
+  flex-shrink: 0;
+}
 
-  .hub-header-actions > .hub-btn {
-    flex: 0 0 auto;
-  }
+.hub-toolbar-header-actions > .hub-btn,
+.hub-toolbar-header-actions > .hub-toolbar-btn {
+  order: 2;
+  flex-shrink: 0;
+}
+
+.hub-status-tabs {
+  display: inline-flex;
+  align-items: center;
+  background: #ffffff;
+  padding: 3px;
+  border-radius: 9px;
+  gap: 2px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  box-shadow: none;
+  order: 10;
+  flex-basis: 100%;
+  width: 100%;
+  flex-shrink: 0;
+  justify-content: flex-start;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+}
+
+.hub-status-tabs button {
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
 }
 
 .hub-search-wrap {
   display: flex;
   align-items: center;
-  gap: 0;
+  gap: 4px;
   background: #ffffff;
   border: 1px solid #e5e7eb;
-  border-radius: 7px;
-  padding: 0 9px;
-  height: 32px;
-  min-height: 32px;
-  line-height: 30px;
+  border-radius: 8px;
+  padding: 0 10px;
+  height: 36px;
+  min-height: 36px;
+  line-height: 34px;
   box-sizing: border-box;
-  flex: 0 0 min(420px, 32vw);
-  min-width: 160px;
-  width: min(420px, 100%);
-  max-width: 420px;
-  flex-shrink: 1;
-  box-sizing: border-box;
+  width: auto;
+  max-width: none;
+  min-width: 0;
+  flex: 1 1 auto;
+  order: 1;
   transition: border-color 0.15s;
 }
 .hub-search-wrap:focus-within {
-  border-color: #9ca3af;
+  border-color: #111111;
+}
+
+.hub-search-icon {
+  color: #9ca3af;
+  flex-shrink: 0;
+  margin-right: 4px;
 }
 
 .hub-search-input {
-  border: none;
-  outline: none;
-  font-size: 10px;
+  display: block;
+  appearance: none;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  font-size: 13px;
   color: #111111;
-  height: 30px;
-  min-height: 0;
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px;
   min-width: 0;
-  padding: 0;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 34px;
+  vertical-align: middle;
   width: 100%;
   background: transparent;
   font-family: inherit;
@@ -230,30 +274,36 @@
 }
 .hub-search-input::placeholder {
   color: #9ca3af;
+  font-size: 12.5px;
 }
 
 .hub-toolbar-btn {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  font-size: 11px;
-  font-weight: 400;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
   color: #374151;
   background: #ffffff;
   border: 1px solid #e5e7eb;
-  border-radius: 7px;
-  padding: 0 9px;
-  height: 32px;
+  border-radius: 8px;
+  padding: 0 11px;
+  height: 36px;
+  min-height: 36px;
   flex: 0 0 auto;
   cursor: pointer;
   transition: all 0.12s;
   white-space: nowrap;
   font-family: inherit;
+  box-sizing: border-box;
 }
 .hub-table-toolbar select.hub-toolbar-btn {
   appearance: auto;
-  height: 32px;
-  min-height: 32px;
+  width: auto;
+  max-width: max-content;
+  flex: 0 0 auto;
+  height: 36px;
+  min-height: 36px;
   line-height: normal;
   padding-top: 0;
   padding-bottom: 0;
@@ -267,7 +317,26 @@
   border-color: #9ca3af;
 }
 
-/* ── Export Menu ── */
+/* ── Export Menu no fim da reta ── */
+.hub-toolbar-export-container {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0;
+  flex-shrink: 0;
+  order: 2;
+}
+
+/* Atualizar usa exatamente o mesmo padrão visual dos demais controles. */
+.hub-table-toolbar .hub-btn-secondary {
+  height: 36px;
+  min-height: 36px;
+  padding: 0 11px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  box-sizing: border-box;
+}
+
 .hub-export-wrapper {
   display: inline-flex;
   align-items: center;
@@ -279,6 +348,11 @@
 .hub-export-btn {
   min-width: 0;
   justify-content: center;
+  height: 36px;
+  border-radius: 8px;
+  padding: 0 11px;
+  font-size: 12px;
+  font-weight: 500;
 }
 .hub-export-xlsx svg { color: #16a34a; }
 .hub-export-pdf svg { color: #dc2626; }
@@ -330,13 +404,6 @@
 .hub-export-badge.pdf {
   background: #fee2e2;
   color: #991b1b;
-}
-
-/* ── Contador de registros ── */
-.hub-table-count {
-  font-size: 0.82rem;
-  color: #6b7280;
-  font-weight: 600;
 }
 
 /* ── Bulk Actions Bar (Padrão Oficial HUB: Branco, Clean) ── */

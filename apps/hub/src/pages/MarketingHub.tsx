@@ -13,7 +13,6 @@ export default function MarketingHub() {
         <div className="page-header">
           <div className="header-info">
             <h1>Marketing</h1>
-            <p>Gerencie canais de aquisição, recuperação de carrinhos e campanhas da loja.</p>
           </div>
           <div className="header-actions">
             <button className="btn btn-primary">
@@ -51,7 +50,6 @@ export default function MarketingHub() {
                   <span className="m-card-badge active">● Conectado</span>
                 </div>
               </div>
-              <p className="m-card-desc">Exiba seus produtos no topo das pesquisas do Google com feed XML sincronizado automaticamente.</p>
               <div className="m-card-stats">
                 <div>
                   <div className="stat-num">482</div>
@@ -74,7 +72,6 @@ export default function MarketingHub() {
                   <span className="m-card-badge active">● Catálogo Ativo</span>
                 </div>
               </div>
-              <p className="m-card-desc">Marque seus produtos nas publicações do Instagram (Sacolinha) e anuncie com o Pixel do Meta.</p>
               <div className="m-card-stats">
                 <div>
                   <div className="stat-num">482</div>
@@ -97,7 +94,6 @@ export default function MarketingHub() {
                   <span className="m-card-badge ready">Pronto para ativar</span>
                 </div>
               </div>
-              <p className="m-card-desc">Crie anúncios em vídeo no TikTok e alcance milhões de compradores com campanhas dinâmicas.</p>
               <div className="m-card-stats">
                 <div>
                   <div className="stat-num">—</div>
@@ -118,10 +114,7 @@ export default function MarketingHub() {
         {activeTab === 'recovery' && (
           <div className="recovery-section">
             <div className="m-card large">
-              <h3 style={{ margin: '0 0 8px 0', fontSize: '1.1rem', fontWeight: 800 }}>Fluxos Automáticos de Recuperação</h3>
-              <p style={{ color: '#6b7280', fontSize: '0.84rem', margin: '0 0 20px 0' }}>
-                Dispare e-mails e mensagens de WhatsApp para clientes que não concluíram a compra.
-              </p>
+              <h3 style={{ margin: '0 0 16px 0', fontSize: '1.1rem', fontWeight: 800 }}>Fluxos Automáticos de Recuperação</h3>
 
               <div className="recovery-rules-list">
                 <div className="rule-item">
@@ -158,9 +151,8 @@ export default function MarketingHub() {
         {activeTab === 'popups' && (
           <div className="popups-grid">
             <div className="m-card">
-              <h3 style={{ margin: '0 0 6px 0', fontSize: '1rem', fontWeight: 700 }}>Pop-up de Primeira Compra</h3>
-              <p style={{ fontSize: '0.82rem', color: '#6b7280' }}>Ofereça 10% OFF no primeiro pedido em troca do e-mail/WhatsApp do cliente.</p>
-              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, padding: 14, margin: '14px 0', textAlign: 'center' }}>
+              <h3 style={{ margin: '0 0 14px 0', fontSize: '1rem', fontWeight: 700 }}>Pop-up de Primeira Compra</h3>
+              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, padding: 14, margin: '0 0 14px 0', textAlign: 'center' }}>
                 <div style={{ fontWeight: 800, color: '#000000' }}>🎁 Ganhe 10% de Desconto</div>
                 <div style={{ fontSize: '0.78rem', color: '#6b7280', marginTop: 4 }}>Cadastre seu e-mail e receba o cupom BEMVINDO</div>
               </div>

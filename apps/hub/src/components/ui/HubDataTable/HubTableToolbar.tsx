@@ -1,5 +1,5 @@
 import { useRef, useEffect } from 'react'
-import { SlidersHorizontal, ArrowUpDown } from 'lucide-react'
+import { SlidersHorizontal, ArrowUpDown, Search } from 'lucide-react'
 import { HubExportMenu } from './HubExportMenu'
 import type { ExportColumn, ExportRow } from '../../../lib/exportTable'
 import './HubDataTable.css'
@@ -25,6 +25,7 @@ interface HubTableToolbarProps {
   exportTitle?: string
   exportFilename?: string
   activeFilters?: string
+  headerActions?: React.ReactNode
   extra?: React.ReactNode
 }
 
@@ -44,6 +45,7 @@ export function HubTableToolbar({
   exportTitle,
   exportFilename,
   activeFilters,
+  headerActions,
   extra
 }: HubTableToolbarProps) {
   const inputRef = useRef<HTMLInputElement>(null)
@@ -65,26 +67,36 @@ export function HubTableToolbar({
   return (
     <div className="hub-table-toolbar">
       {/* Campo de busca */}
-      <div className="hub-search-wrap">
-        <input
-          ref={inputRef}
-          type="text"
-          className="hub-search-input"
-          placeholder={searchPlaceholder}
-          value={searchValue}
-          onChange={e => onSearchChange(e.target.value)}
-          aria-label={searchPlaceholder}
-        />
-        {searchValue && (
-          <button
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', padding: '0 4px', fontSize: 16, lineHeight: 1 }}
-            onClick={() => onSearchChange('')}
-            aria-label="Limpar busca"
-          >
-            ×
-          </button>
-        )}
-      </div>
+      {onSearchChange && (
+        <div className="hub-search-wrap">
+          <Search size={14} className="hub-search-icon" />
+          <input
+            ref={inputRef}
+            type="text"
+            className="hub-search-input"
+            placeholder={searchPlaceholder}
+            value={searchValue}
+            onChange={e => onSearchChange(e.target.value)}
+            aria-label={searchPlaceholder}
+          />
+          {searchValue && (
+            <button
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', padding: '0 4px', fontSize: 16, lineHeight: 1 }}
+              onClick={() => onSearchChange('')}
+              aria-label="Limpar busca"
+            >
+              ×
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Tabs / Ações (ex: Todos, Pendentes, Notificados, Atualizar, etc.) */}
+      {headerActions && (
+        <div className="hub-toolbar-header-actions">
+          {headerActions}
+        </div>
+      )}
 
       {/* Filtrar */}
       {onFilter && (
@@ -120,15 +132,17 @@ export function HubTableToolbar({
 
       {/* Exportar */}
       {exportColumns && (
-        <HubExportMenu
-          columns={exportColumns}
-          allRows={exportRows}
-          selectedIds={selectedIds}
-          getRowById={getRowById}
-          exportTitle={exportTitle}
-          filename={exportFilename}
-          activeFilters={activeFilters}
-        />
+        <div className="hub-toolbar-export-container">
+          <HubExportMenu
+            columns={exportColumns}
+            allRows={exportRows}
+            selectedIds={selectedIds}
+            getRowById={getRowById}
+            exportTitle={exportTitle}
+            filename={exportFilename}
+            activeFilters={activeFilters}
+          />
+        </div>
       )}
     </div>
   )

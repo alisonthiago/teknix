@@ -151,19 +151,19 @@ function SalesTab() {
       {/* Filtros */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-2.5">
         <div className="flex-1 relative">
-          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#999]" />
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#999]" />
           <input
             type="text"
             placeholder="Buscar por pedido, comprador ou canal..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3.5 py-2.5 border border-[#e6e6e6] rounded-xl text-sm font-medium text-[#333] focus:outline-none focus:border-[#16a34a] bg-white shadow-2xs"
+            className="w-full pl-9 pr-3.5 h-[38px] border border-[#e6e6e6] rounded-lg text-sm font-normal text-[#111] focus:outline-none focus:border-[#1f2328] bg-white transition-colors"
           />
         </div>
         <select 
           value={filterMp} 
           onChange={e => { setFilterMp(e.target.value); setFilterAcc('all') }} 
-          className="min-h-[40px] px-3.5 border border-[#e6e6e6] rounded-xl text-sm font-medium text-[#333] focus:outline-none focus:border-[#16a34a] bg-white shadow-2xs"
+          className="h-[38px] px-3 border border-[#e6e6e6] rounded-lg text-sm font-normal text-[#111] focus:outline-none focus:border-[#1f2328] bg-white transition-colors cursor-pointer"
         >
           <option value="all">Todos marketplaces</option>
           <option value="Mercado Livre">Mercado Livre</option>
@@ -174,7 +174,7 @@ function SalesTab() {
         <select 
           value={filterAcc} 
           onChange={e => setFilterAcc(e.target.value)} 
-          className="min-h-[40px] px-3.5 border border-[#e6e6e6] rounded-xl text-sm font-medium text-[#333] focus:outline-none focus:border-[#16a34a] bg-white shadow-2xs"
+          className="h-[38px] px-3 border border-[#e6e6e6] rounded-lg text-sm font-normal text-[#111] focus:outline-none focus:border-[#1f2328] bg-white transition-colors cursor-pointer"
         >
           <option value="all">Todas contas</option>
           {(accounts || []).map((a: Record<string, unknown>) => (
@@ -330,8 +330,8 @@ function MarketplacesTab() {
 
 export default function VendasPage() {
   return (
-    <div className="space-y-6 max-w-none -mx-5 sm:-mx-8 lg:-mx-12 xl:-mx-16 pb-14 animate-in fade-in duration-200">
-      <PageHeader title="Vendas" description="Vendas, canais e desempenho em tempo real" />
+    <div className="mp-stack">
+      <PageHeader title="Vendas" />
       <Tabs defaultValue="vendas">
         <TabsList>
           <TabsTrigger value="vendas"><DollarSign className="w-3.5 h-3.5 mr-1 inline" /> Vendas</TabsTrigger>

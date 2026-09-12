@@ -12,7 +12,7 @@ const auditLogs = [
 
 export default function AuditoriaPage() {
   return (
-    <ConfigSubLayout title="Auditoria" description="Log de todas as alterações realizadas no sistema">
+    <ConfigSubLayout title="Auditoria">
       <ConfigSection title="Registros recentes">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">

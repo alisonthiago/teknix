@@ -57,9 +57,9 @@
 }
 
 .blog-save-draft-btn {
-  background: #f3f4f6;
-  color: #374151;
-  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #111111;
+  border: 1px solid #e6e6e6;
   border-radius: 8px;
   padding: 8px 16px;
   font-size: 14px;
@@ -69,7 +69,7 @@
 }
 
 .blog-save-draft-btn:hover {
-  background: #e5e7eb;
+  background: #fafafa;
 }
 
 .blog-save-draft-btn:disabled {
@@ -81,19 +81,19 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  background: #000000;
+  background: #111111;
   color: #fff;
   border: none;
   border-radius: 8px;
   padding: 8px 18px;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
   transition: background 0.15s;
 }
 
 .blog-publish-btn:hover {
-  background: #374151;
+  background: #000000;
 }
 
 .blog-publish-btn:disabled {

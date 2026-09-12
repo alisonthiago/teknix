@@ -46,7 +46,7 @@
 }
 
 .settings-back-header:hover {
-  color: var(--tk-color-primary, #0071e3);
+  color: #111111;
 }
 
 .settings-group {
@@ -89,9 +89,9 @@
 }
 
 .settings-nav-item.active {
-  background: var(--tk-color-primary-light, #f0f7ff);
-  color: var(--tk-color-primary, #0071e3);
-  font-weight: 500;
+  background: #f5f5f5;
+  color: #111111;
+  font-weight: 600;
 }
 
 /* Settings Content Area */
@@ -148,7 +148,7 @@
 
 .btn-back-to-settings:hover {
   background: var(--tk-color-surface-hover, #f3f4f6);
-  color: var(--tk-color-text-primary, #000000);
+  color: #111111;
   border-color: #d1d5db;
   transform: translateX(-1px);
 }

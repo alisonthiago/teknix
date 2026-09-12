@@ -41,19 +41,19 @@
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
-  background: #f1f5f9;
-  color: #334155;
+  background: #ffffff;
+  color: #111111;
   border-radius: 8px;
   font-size: 0.85rem;
   font-weight: 600;
   text-decoration: none;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #e6e6e6;
   transition: all 0.15s ease;
 }
 
 .btn-fiscal-settings:hover {
-  background: #e2e8f0;
-  color: #0f172a;
+  background: #fafafa;
+  color: #111111;
 }
 
 .btn-fiscal-refresh {
@@ -61,7 +61,7 @@
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
-  background: #0f172a;
+  background: #111111;
   color: #ffffff;
   border-radius: 8px;
   font-size: 0.85rem;
@@ -72,7 +72,7 @@
 }
 
 .btn-fiscal-refresh:hover {
-  background: #334155;
+  background: #000000;
 }
 
 /* Stats Grid */
@@ -201,14 +201,14 @@
 }
 
 .inv-search-input:focus {
-  border-color: #0f172a;
+  border-color: #111111;
 }
 
 .inv-search-btn {
   padding: 8px 16px;
-  background: #f1f5f9;
-  color: #334155;
-  border: 1px solid #cbd5e1;
+  background: #111111;
+  color: #ffffff;
+  border: none;
   border-radius: 6px;
   font-size: 0.82rem;
   font-weight: 600;
@@ -216,16 +216,16 @@
 }
 
 .inv-search-btn:hover {
-  background: #e2e8f0;
+  background: #000000;
 }
 
 /* Table Card */
 .invoices-table-card {
   background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  border: 1px solid #e6e6e6;
+  border-radius: 14px;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
 .invoices-table-wrapper {
@@ -297,7 +297,7 @@
 
 .inv-customer-name {
   font-weight: 600;
-  color: #1e293b;
+  color: #111111;
   display: block;
 }
 
@@ -313,21 +313,22 @@
 
 .inv-amount {
   font-weight: 700;
-  color: #0f172a;
+  color: #111111;
 }
 
 .inv-key-code {
   font-family: monospace;
   font-size: 0.75rem;
-  background: #f1f5f9;
+  background: #f8fafc;
   padding: 4px 6px;
   border-radius: 4px;
   cursor: pointer;
-  color: #334155;
+  color: #111111;
+  border: 1px solid #e6e6e6;
 }
 
 .inv-key-code:hover {
-  background: #e2e8f0;
+  background: #f1f5f9;
 }
 
 .inv-error-hint {
@@ -346,9 +347,9 @@
   align-items: center;
   gap: 4px;
   padding: 4px 8px;
-  background: #f1f5f9;
-  color: #0f172a;
-  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #111111;
+  border: 1px solid #e6e6e6;
   border-radius: 4px;
   font-size: 0.75rem;
   font-weight: 600;
@@ -357,7 +358,7 @@
 }
 
 .inv-doc-btn:hover {
-  background: #e2e8f0;
+  background: #fafafa;
 }
 
 .inv-btn-view {
@@ -365,7 +366,7 @@
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  background: #0f172a;
+  background: #111111;
   color: #ffffff;
   border-radius: 6px;
   font-size: 0.8rem;
@@ -375,7 +376,7 @@
 }
 
 .inv-btn-view:hover {
-  background: #334155;
+  background: #000000;
 }
 
 /* Badges */

@@ -315,23 +315,20 @@ export default function CentralEtiquetasPage() {
       )}
 
       {/* ── 1. CABEÇALHO CLEAN & ESPAÇOSO ─────────────────────────────────── */}
-      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 pb-2">
-        <div className="space-y-1.5">
-          <h1 className="text-3xl font-extrabold text-[#0f172a] tracking-tight">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#e6e6e6]/60">
+        <div>
+          <h1 className="text-[26px] font-bold text-[#111111] tracking-tight leading-tight">
             Central de Etiquetas
           </h1>
-          <p className="text-sm text-[#64748b]">
-            Emissão em lote de etiquetas térmicas 100x150mm
-          </p>
         </div>
 
         {/* Botões de Ação */}
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
           <button
             onClick={() => setShowConfigModal(true)}
-            className="px-4 py-2.5 bg-white border border-[#e6e6e6] hover:border-[#cbd5e1] text-[#666] hover:text-[#333] rounded-xl text-[13px] font-medium flex items-center gap-2 transition-all cursor-pointer shadow-xs"
+            className="h-[38px] px-3.5 bg-white border border-[#e6e6e6] hover:bg-[#f8fafc] text-[#333] rounded-lg text-sm font-normal flex items-center gap-2 transition-colors cursor-pointer shadow-2xs"
           >
-            <Sliders className="w-4 h-4 text-[#64748b]" />
+            <Sliders className="w-4 h-4 text-[#666]" />
             <span>Configurar Impressora</span>
           </button>
 
@@ -341,10 +338,10 @@ export default function CentralEtiquetasPage() {
               handleBatchPrint(allAvailableIds)
             }}
             disabled={stats.available === 0}
-            className={`px-5 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2.5 transition-all shadow-xs cursor-pointer ${
+            className={`h-[38px] px-4 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors shadow-2xs cursor-pointer ${
               stats.available > 0
-                ? 'bg-[#16a34a] hover:bg-[#15803d] text-white hover:shadow-md'
-                : 'bg-[#f5f5f5] text-[#94a3b8] cursor-not-allowed border border-[#d9d9d9]'
+                ? 'bg-[#1f2328] hover:bg-black text-white'
+                : 'bg-[#f5f5f5] text-[#999] cursor-not-allowed border border-[#e6e6e6]'
             }`}
           >
             <Printer className="w-4 h-4" />
@@ -390,13 +387,13 @@ export default function CentralEtiquetasPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           
           {/* Abas de Modo de Visualização */}
-          <div className="flex items-center gap-2">
+          <div className="inline-flex items-center gap-1 p-1 bg-[#f0f0f0] rounded-lg">
             <button
               onClick={() => setViewMode('ORDERS')}
-              className={`label-view-tab px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-md text-[13px] font-medium transition-all cursor-pointer ${
                 viewMode === 'ORDERS'
-                  ? 'bg-[#347ff2] text-white'
-                  : 'text-[#334155] hover:text-white hover:bg-[#347ff2]'
+                  ? 'bg-white text-[#111111] shadow-2xs'
+                  : 'text-[#666666] hover:text-[#111111]'
               }`}
             >
               Por Pedido ({filteredOrders.length})
@@ -404,10 +401,10 @@ export default function CentralEtiquetasPage() {
 
             <button
               onClick={() => setViewMode('PRODUCTS')}
-              className={`label-view-tab px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-md text-[13px] font-medium transition-all cursor-pointer ${
                 viewMode === 'PRODUCTS'
-                  ? 'bg-[#347ff2] text-white'
-                  : 'text-[#334155] hover:text-white hover:bg-[#347ff2]'
+                  ? 'bg-white text-[#111111] shadow-2xs'
+                  : 'text-[#666666] hover:text-[#111111]'
               }`}
             >
               Agrupado por Produto ({groupedByProduct.length})
@@ -415,10 +412,10 @@ export default function CentralEtiquetasPage() {
 
             <button
               onClick={() => setViewMode('HISTORY')}
-              className={`label-view-tab px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-md text-[13px] font-medium transition-all cursor-pointer ${
                 viewMode === 'HISTORY'
-                  ? 'bg-[#347ff2] text-white'
-                  : 'text-[#334155] hover:text-white hover:bg-[#347ff2]'
+                  ? 'bg-white text-[#111111] shadow-2xs'
+                  : 'text-[#666666] hover:text-[#111111]'
               }`}
             >
               Histórico ({printLogs.length})

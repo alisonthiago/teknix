@@ -60,7 +60,6 @@ export default function Login() {
         <div className="flow-login-form-box">
           <div className="flow-login-titles">
             <h1 className="flow-login-title">Acesse sua conta</h1>
-            <p className="flow-login-subtitle">Entre com suas credenciais para acessar o painel.</p>
           </div>
 
           {import.meta.env.VITE_DEMO_MODE === 'true' && (

@@ -111,7 +111,7 @@
 .pages-search-input:focus{border-color:#83b700;box-shadow:0 0 0 3px rgba(181,245,0,.18)}
 .pages-segmented-tabs{display:inline-flex;align-items:center;gap:4px;padding:4px;background:#ffffff;border:1px solid #e5e7eb;border-radius:9px}
 .pages-tab{min-height:31px;padding:0 12px;border:0;border-radius:7px;background:transparent;color:#6b7280;font-size:12px;font-weight:450;cursor:pointer;white-space:nowrap}
-.pages-tab.active{background:var(--tk-color-primary, #347ff2);color:#fff;font-weight:500;box-shadow:none}
+.pages-tab.active{background: #111111;color:#fff;font-weight:500;box-shadow:none}
 .pages-table{width:100%;border-collapse:collapse;text-align:left}
 .pages-table{width:100%;border-collapse:collapse;text-align:left}.pages-table thead{background:#ffffff}.pages-table th{padding:20px 16px;color:#6b7280;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.04em}.pages-table td{padding:16px;border-top:1px solid #eef0f2;font-size:13px}.pages-table tbody tr:hover{background:#fbfcfd}
 

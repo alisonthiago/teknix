@@ -258,7 +258,6 @@ export default function PaymentMethods() {
             </button>
             <div>
               <h1 className="payments-title">Meios de pagamento</h1>
-              <p className="payments-subtitle">Configure as credenciais das APIs de pagamento para receber via PIX, Cartão e Boleto na sua loja.</p>
             </div>
           </div>
         </div>
@@ -287,7 +286,6 @@ export default function PaymentMethods() {
               <div className="payments-admin-title">
               <span className="payments-section-kicker">Administração do gateway</span>
               <h2><GatewayLogoVisual gatewayId="mercado_pago" label="Mercado Pago" /></h2>
-              <p>Credenciais e métodos do checkout ficam nesta área exclusiva para administradores.</p>
               </div>
               <ChevronDown className={mercadoPagoOpen ? 'is-open' : ''} size={22} aria-hidden="true" />
             </button>

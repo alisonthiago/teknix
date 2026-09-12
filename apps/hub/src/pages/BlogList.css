@@ -29,7 +29,7 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  background: var(--tk-color-primary);
+  background: #111111;
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -42,9 +42,9 @@
 }
 
 .blog-new-btn:hover {
-  background: #374151;
+  background: #000000;
 }
-.blog-header-actions{display:flex;align-items:center;gap:8px}.blog-tool-btn{height:37px;padding:0 14px;border:1px solid #d1d5db;border-radius:8px;background:#fff;color:#000000;font-size:13px;font-weight:700;cursor:pointer}.blog-tool-btn:hover{border-color:#83b700;background:#faffed}
+.blog-header-actions{display:flex;align-items:center;gap:8px}.blog-tool-btn{height:37px;padding:0 14px;border:1px solid #e6e6e6;border-radius:8px;background:#fff;color:#000000;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s ease}.blog-tool-btn:hover{border-color:#111111;background:#fafafa}
 
 /* Stats */
 .blog-stats-row {
@@ -56,8 +56,8 @@
 .blog-stat-card {
   flex: 1;
   background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
+  border: 1px solid #e6e6e6;
+  border-radius: 14px;
   padding: 18px 22px;
   display: flex;
   flex-direction: column;
@@ -98,7 +98,7 @@
   align-items: center;
   gap: 8px;
   background: #fff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #e6e6e6;
   border-radius: 8px;
   padding: 0 12px;
   flex: 1;
@@ -121,7 +121,7 @@
   display: flex;
   gap: 4px;
   background: #ffffff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #e6e6e6;
   border-radius: 8px;
   padding: 4px;
 }
@@ -203,7 +203,7 @@
 
 .blog-post-card {
   background: #fff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #e6e6e6;
   border-radius: 14px;
   overflow: hidden;
   display: flex;

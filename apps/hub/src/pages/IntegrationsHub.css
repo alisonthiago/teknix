@@ -406,8 +406,8 @@
 }
 
 .card-account-line.highlight {
-  color: #0071e3;
-  font-weight: 500;
+  color: #111111;
+  font-weight: 600;
 }
 
 .card-help {
@@ -432,14 +432,14 @@
   align-items: center;
   gap: 4px;
   font-size: 11.5px;
-  color: #0071e3;
+  color: #111111;
   text-decoration: none;
   font-weight: 500;
   transition: color 0.15s;
 }
 
 .card-help-link:hover {
-  color: #005bb5;
+  color: #000000;
   text-decoration: underline;
 }
 
@@ -455,10 +455,10 @@
 /* Logs Table */
 .logs-table-card {
   background: #ffffff;
-  border: 1px solid var(--tk-color-border, #e5e7eb);
-  border-radius: var(--tk-radius-card, 12px);
+  border: 1px solid #e6e6e6;
+  border-radius: 14px;
   padding: 24px;
-  box-shadow: var(--tk-shadow-card);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
   display: flex;
   flex-direction: column;
   gap: 16px;

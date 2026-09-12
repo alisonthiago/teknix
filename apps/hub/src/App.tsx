@@ -22,6 +22,7 @@ import PromotionsList from './pages/PromotionsList'
 import ShippingDiscounts from './pages/ShippingDiscounts'
 import UserEdit from './pages/UserEdit'
 import CategoriesList from './pages/CategoriesList'
+import CategoryEdit from './pages/CategoryEdit'
 import PriceTables from './pages/PriceTables'
 import StatsOverview from './pages/StatsOverview'
 import MarketingHub from './pages/MarketingHub'
@@ -76,8 +77,10 @@ function App() {
             <Route path="/hub/produtos/novo" element={<ProductForm />} />
             <Route path="/hub/produtos/editar/:id" element={<ProductForm />} />
             <Route path="/hub/produtos/:id" element={<ProductDetails />} />
-            <Route path="/hub/inventario" element={<ProductsList />} />
             <Route path="/hub/categorias" element={<CategoriesList />} />
+            <Route path="/hub/categorias/nova" element={<CategoryEdit />} />
+            <Route path="/hub/categorias/:id" element={<CategoryEdit />} />
+            <Route path="/hub/categorias/editar/:id" element={<CategoryEdit />} />
             <Route path="/hub/tabelas-de-precos" element={<PriceTables />} />
             <Route path="/hub/assinaturas" element={<PlaceholderPage title="Assinaturas e Recorrência" />} />
             <Route path="/hub/pedidos" element={<OrdersList />} />

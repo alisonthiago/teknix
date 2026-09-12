@@ -26,11 +26,11 @@
   --color-brand-light: #f4fed2;
   --color-brand-text: #111111;
 
-  /* ── Ação Principal (Azul Funcional Oficial) ── */
-  --color-action-primary: #347ff2;
-  --color-action-primary-hover: #2469d8;
-  --color-action-primary-active: #1858bd;
-  --color-action-primary-light: #f0f7ff;
+  /* ── Ação Principal (Preto Antracite Oficial TEKNIX HUB/FLOW) ── */
+  --color-action-primary: #1f2328;
+  --color-action-primary-hover: #000000;
+  --color-action-primary-active: #111111;
+  --color-action-primary-light: #f5f5f5;
   --color-action-surface: #ffffff;
 
   /* ── Cores Semânticas Oficiais (Uso exclusivamente funcional) ── */

@@ -246,10 +246,7 @@ export default function SistemaPage() {
 
   return (
     <div className="mp-stack max-w-[900px] mx-auto w-full">
-      <PageHeader
-        title="Configurações"
-        description="Gerencie sua conta, empresa, integrações e operação"
-      />
+      <PageHeader title="Configurações" />
       <Tabs defaultValue="conta">
         <TabsList>
           <TabsTrigger value="conta"><User className="w-3.5 h-3.5 mr-1 inline" /> Conta</TabsTrigger>

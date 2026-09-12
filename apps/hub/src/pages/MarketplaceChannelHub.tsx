@@ -187,7 +187,6 @@ export default function MarketplaceChannelHub({ defaultChannel }: { defaultChann
       <div className="page-header">
         <div className="header-info">
           <h1>{config.name}</h1>
-          <p>Sincronização de catálogo, anúncios e estoque integrado ao FLOW.</p>
         </div>
         <div className="header-actions">
           <button
@@ -254,7 +253,6 @@ export default function MarketplaceChannelHub({ defaultChannel }: { defaultChann
         <div className="meli-card-header">
           <div>
             <h2>Produtos Integrados em {config.name}</h2>
-            <p>Catálogo e estoque compartilhado em tempo real com o FLOW</p>
           </div>
           <a href="/ao-vivo" className="meli-flow-link">
             <span>Ver no Monitor ao Vivo</span>

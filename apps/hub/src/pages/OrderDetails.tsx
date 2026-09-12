@@ -539,7 +539,7 @@ export default function OrderDetails() {
                     fontSize: 13,
                     fontWeight: 600,
                     background: fiscalMsg.type === 'success' ? '#dcfce7' : fiscalMsg.type === 'error' ? '#fee2e2' : '#f1f5f9',
-                    color: fiscalMsg.type === 'success' ? '#15803d' : fiscalMsg.type === 'error' ? '#b91c1c' : '#334155',
+                    color: fiscalMsg.type === 'success' ? '#15803d' : fiscalMsg.type === 'error' ? '#b91c1c' : '#111111',
                     display: 'flex',
                     alignItems: 'center',
                     gap: 8,
@@ -725,7 +725,7 @@ export default function OrderDetails() {
                           Emissão direta via SEFAZ com integração Focus NFe.
                         </p>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.8rem' }}>
-                          <label style={{ fontWeight: 600, color: '#334155' }}>Ambiente:</label>
+                          <label style={{ fontWeight: 600, color: '#111111' }}>Ambiente:</label>
                           <select
                             className="form-select"
                             style={{ padding: '4px 8px', fontSize: '0.8rem', borderRadius: 6 }}

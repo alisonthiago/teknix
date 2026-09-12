@@ -279,14 +279,12 @@ export default function ShipmentsList() {
           <div key={i} onClick={() => setActiveTab(s.tab)} className="hub-kpi-card is-clickable">
             <div className="hub-kpi-header"><span className="hub-kpi-label">{s.label}</span><div className="hub-kpi-icon">{s.icon}</div></div>
             <div className="hub-kpi-value">{s.value}</div>
-            <p className="hub-kpi-subtitle">{s.sub}</p>
           </div>
         ))}
       </div>
 
       <HubDataTable
         title="Envios & Expedição"
-        description="Gerencie o despacho dos pedidos, etiquetas e rastreamento via Melhor Envio."
         headerActions={
           <>
             <div className="hub-status-tabs">

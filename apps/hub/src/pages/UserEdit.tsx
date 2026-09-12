@@ -285,7 +285,6 @@ export default function UserEdit() {
             </button>
             <h1>Dados da Conta &amp; Perfil</h1>
           </div>
-          <p style={{ marginLeft: 36 }}>Gerencie sua foto de perfil, dados de acesso e alteração de senha.</p>
         </div>
         <div className="header-actions">
           <button
@@ -330,7 +329,6 @@ export default function UserEdit() {
             </div>
             <div>
               <h2>Foto de Perfil</h2>
-              <p>Esta foto será exibida no cabeçalho, no painel principal e em toda a sua navegação.</p>
             </div>
           </div>
 
@@ -388,7 +386,6 @@ export default function UserEdit() {
             </div>
             <div>
               <h2>Informações do Usuário</h2>
-              <p>Seus dados de identificação na plataforma</p>
             </div>
           </div>
 
@@ -438,7 +435,6 @@ export default function UserEdit() {
             </div>
             <div>
               <h2>Segurança e Senha</h2>
-              <p>Altere sua senha de acesso ao painel administrativo</p>
             </div>
           </div>
 
@@ -487,7 +483,6 @@ export default function UserEdit() {
             </div>
             <div>
               <h2>Notificações por E-mail</h2>
-              <p>Escolha quais alertas você deseja receber no seu e-mail</p>
             </div>
           </div>
 

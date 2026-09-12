@@ -218,14 +218,12 @@ export default function StockNotificationsList() {
           <div key={i} className="hub-kpi-card hub-kpi-card--compact">
             <div className="hub-kpi-header"><span className="hub-kpi-label">{s.label}</span><div className="hub-kpi-icon">{s.icon}</div></div>
             <div className="hub-kpi-value">{s.value}</div>
-            <p className="hub-kpi-subtitle">{s.sub}</p>
           </div>
         ))}
       </div>
 
       <HubDataTable
         title="Avisos de Estoque"
-        description="Leads e clientes aguardando reposição de produtos esgotados no SITE."
         headerActions={
           <>
             <div className="hub-status-tabs">

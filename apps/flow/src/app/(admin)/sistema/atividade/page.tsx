@@ -20,7 +20,7 @@ export default function AtividadePage() {
   })
 
   return (
-    <ConfigSubLayout title="Atividade da conta" description="Histórico de acessos e alterações realizadas">
+    <ConfigSubLayout title="Atividade da conta">
       <ConfigSection title="Atividade recente">
         {loading ? (
           <div className="text-[13px] text-[#999] py-4 text-center">Carregando atividade...</div>

@@ -131,7 +131,6 @@ export default function BlogList() {
         <div className="hub-page-header">
           <div className="hub-header-info">
             <h1>Blog</h1>
-            <p>Crie e gerencie artigos publicados no site público.</p>
           </div>
           <div className="hub-header-actions">
             <button className="hub-btn hub-btn-secondary" onClick={() => navigate('/hub/blog/analytics')}>Analytics</button>
@@ -152,7 +151,6 @@ export default function BlogList() {
             <div key={i} className="hub-kpi-card hub-kpi-card--compact">
               <div className="hub-kpi-header"><span className="hub-kpi-label">{s.label}</span><div className="hub-kpi-icon">{s.icon}</div></div>
               <div className="hub-kpi-value">{s.value}</div>
-              <p className="hub-kpi-subtitle">{s.label === 'Publicados' ? 'Posts publicados no blog' : s.label === 'Rascunhos' ? 'Posts em edição' : 'Total de posts cadastrados'}</p>
             </div>
           ))}
         </div>
@@ -203,9 +201,6 @@ export default function BlogList() {
             ><List size={16} /></button>
           </div>
         </div>
-
-        {/* Contagem */}
-        <div className="hub-table-count">{filtered.length} post{filtered.length !== 1 ? 's' : ''}</div>
 
         {/* Grid Mode */}
         {viewMode === 'grid' && (

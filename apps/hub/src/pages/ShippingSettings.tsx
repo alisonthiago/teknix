@@ -90,7 +90,6 @@ export default function ShippingSettings() {
           </button>
           <div>
             <h2>Meios de Envio & Entregas</h2>
-            <p>Gerencie como você envia os produtos aos seus clientes</p>
           </div>
         </div>
         <div className="header-actions">
@@ -117,7 +116,6 @@ export default function ShippingSettings() {
           <div className="detail-card">
             <div className="card-header">
               <h3>Integração Correios</h3>
-              <p className="card-subtitle">Serviços postais oficiais (Cálculo automático)</p>
             </div>
             <div className="card-body">
               <div className="switches-list">
@@ -170,7 +168,6 @@ export default function ShippingSettings() {
               <div className="divider"></div>
 
               <h4>Contrato (Opcional)</h4>
-              <p className="section-desc">Insira seus dados caso tenha tarifas exclusivas com os Correios</p>
               <div className="form-grid">
                 <div className="form-group">
                   <label>Código Administrativo</label>
@@ -195,42 +192,40 @@ export default function ShippingSettings() {
               <div className="divider"></div>
 
               <h4>Acréscimos (Gordura)</h4>
-              <p className="section-desc">Adicionar dias ou valores extras no cálculo do frete para o cliente</p>
               <div className="form-grid">
                 <div className="form-group">
                   <label>Dias extras (Manuseio)</label>
                   <div className="input-suffix">
                     <input 
-                      type="number" 
-                      value={config.correios_additional_days}
-                      onChange={e => updateConfig('correios_additional_days', parseInt(e.target.value) || 0)}
-                    />
-                    <span>dias</span>
-                  </div>
+                    type="number" 
+                    value={config.correios_additional_days}
+                    onChange={e => updateConfig('correios_additional_days', parseInt(e.target.value) || 0)}
+                  />
+                  <span>dias</span>
                 </div>
-                <div className="form-group">
-                  <label>Valor extra (Embalagem)</label>
-                  <div className="input-prefix">
-                    <span>R$</span>
-                    <input 
-                      type="number" 
-                      step="0.01"
-                      value={config.correios_additional_price}
-                      onChange={e => updateConfig('correios_additional_price', parseFloat(e.target.value) || 0)}
-                    />
-                  </div>
+              </div>
+              <div className="form-group">
+                <label>Valor extra (Embalagem)</label>
+                <div className="input-prefix">
+                  <span>R$</span>
+                  <input 
+                    type="number" 
+                    step="0.01"
+                    value={config.correios_additional_price}
+                    onChange={e => updateConfig('correios_additional_price', parseFloat(e.target.value) || 0)}
+                  />
                 </div>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* MOTOBOY / FRETE FIXO */}
-          <div className="detail-card">
-            <div className="card-header flex-header">
-              <div>
-                <h3>Logística Local (Motoboy)</h3>
-                <p className="card-subtitle">Frete fixo para faixas de CEP específicas</p>
-              </div>
+        {/* MOTOBOY / FRETE FIXO */}
+        <div className="detail-card">
+          <div className="card-header flex-header">
+            <div>
+              <h3>Logística Local (Motoboy)</h3>
+            </div>
               <label className="toggle-switch">
                 <input 
                   type="checkbox" 
@@ -304,7 +299,6 @@ export default function ShippingSettings() {
           <div className="detail-card">
             <div className="card-header">
               <h3>Transportadoras</h3>
-              <p className="card-subtitle">Jadlog, Azul Cargo, Total Express</p>
             </div>
             <div className="card-body empty-integration">
               <div className="integration-icon">
@@ -328,7 +322,6 @@ export default function ShippingSettings() {
             <div className="card-header flex-header">
               <div>
                 <h3>Frete Grátis</h3>
-                <p className="card-subtitle">Promoção para o cliente</p>
               </div>
               <label className="toggle-switch">
                 <input 
