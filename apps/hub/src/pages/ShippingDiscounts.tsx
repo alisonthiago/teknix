@@ -62,17 +62,14 @@ export default function ShippingDiscounts() {
     <div className="discounts-page-container">
       <div className="discounts-wrapper">
         
-        {/* Header */}
-        <div className="discounts-header">
-          <h1 className="discounts-title">Descontos em frete</h1>
-          <div className="discounts-actions">
-            <button className="btn-secondary-pill" onClick={() => alert('Frete grátis para compras acima de um valor mínimo aumenta o ticket médio.')}>
-              Conhecer mais descontos
-            </button>
-            <button className="btn-primary-pill" onClick={() => setShowModal(true)}>
-              <Plus size={16} /> Criar frete grátis
-            </button>
-          </div>
+        {/* Top Actions */}
+        <div className="hub-table-top-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginBottom: 16 }}>
+          <button className="btn-secondary-pill" onClick={() => alert('Frete grátis para compras acima de um valor mínimo aumenta o ticket médio.')}>
+            Conhecer mais descontos
+          </button>
+          <button className="btn-primary-pill" onClick={() => setShowModal(true)}>
+            <Plus size={16} /> Criar frete grátis
+          </button>
         </div>
 
         {/* Hero Onboarding Card (Print 4) */}

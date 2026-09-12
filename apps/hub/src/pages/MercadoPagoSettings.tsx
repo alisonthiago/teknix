@@ -57,16 +57,11 @@ export default function MercadoPagoSettings() {
 
   return (
     <div className="mp-settings-page">
-      {/* ── Page Header ── */}
-      <div className="page-header">
-        <div className="header-info">
-          <h1>Mercado Pago</h1>
-        </div>
-        <div className="header-actions">
-          <button className="btn btn-primary" onClick={handleSave} disabled={loading || saving}>
-            <Save size={14} /> {saving ? 'Salvando...' : 'Salvar Alterações'}
-          </button>
-        </div>
+      {/* ── Top Actions ── */}
+      <div className="hub-table-top-actions" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+        <button className="btn btn-primary" onClick={handleSave} disabled={loading || saving} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <Save size={14} /> {saving ? 'Salvando...' : 'Salvar Alterações'}
+        </button>
       </div>
 
       {/* ── Status Banner ── */}

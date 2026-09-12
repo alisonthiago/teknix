@@ -71,7 +71,7 @@ export default function PriceTables() {
         {/* Hero Centralization Banner */}
         <div className="price-tables-hero">
           <span className="hero-tag">Centralização e Controle</span>
-          <h1 className="hero-title">Venda atacado e varejo no mesmo site</h1>
+          <h2 className="hero-title">Venda atacado e varejo no mesmo site</h2>
           <button className="btn-primary-action" style={{ borderRadius: 20, padding: '10px 24px' }} onClick={() => setShowModal(true)}>
             <Plus size={16} /> Criar tabela de preços
           </button>

@@ -127,18 +127,13 @@ export default function BlogList() {
     <div className="hub-page-container">
       <div className="hub-page-wrapper">
 
-        {/* Header */}
-        <div className="hub-page-header">
-          <div className="hub-header-info">
-            <h1>Blog</h1>
-          </div>
-          <div className="hub-header-actions">
-            <button className="hub-btn hub-btn-secondary" onClick={() => navigate('/hub/blog/analytics')}>Analytics</button>
-            <button className="hub-btn hub-btn-secondary" onClick={() => navigate('/hub/blog/seo')}>SEO</button>
-            <button className="hub-btn hub-btn-primary" onClick={() => navigate('/hub/blog/add')}>
-              <Plus size={14} /> Novo Post
-            </button>
-          </div>
+        {/* Top Actions */}
+        <div className="hub-table-top-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginBottom: 16 }}>
+          <button className="hub-btn hub-btn-secondary" onClick={() => navigate('/hub/blog/analytics')}>Analytics</button>
+          <button className="hub-btn hub-btn-secondary" onClick={() => navigate('/hub/blog/seo')}>SEO</button>
+          <button className="hub-btn hub-btn-primary" onClick={() => navigate('/hub/blog/add')}>
+            <Plus size={14} /> Novo Post
+          </button>
         </div>
 
         {/* Stats */}

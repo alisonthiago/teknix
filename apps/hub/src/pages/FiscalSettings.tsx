@@ -164,9 +164,6 @@ export default function FiscalSettings() {
             >
               <ChevronLeft size={20} />
             </button>
-            <div>
-              <h1 className="fisc-title">Configurações Fiscais (NF-e & Focus NFe)</h1>
-            </div>
           </div>
           <button
             className="btn-fisc-save"

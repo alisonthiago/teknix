@@ -117,12 +117,6 @@ export default function StatsOverview() {
     <div className="stats-page-container">
       <div className="stats-wrapper">
         
-        {/* Header */}
-        <div className="page-header">
-          <div className="header-info">
-            <h1>Estatísticas</h1>
-          </div>
-        </div>
 
         {/* Navigation Tabs */}
         <div className="stats-tab-nav" style={{ display: 'flex', gap: 6, borderBottom: '1px solid var(--tk-color-border, #e5e5e7)', paddingBottom: 8, overflowX: 'auto' }}>
@@ -207,7 +201,7 @@ export default function StatsOverview() {
         {activeTab === 'general' && (
           <>
             <div className="stats-header-row">
-              <h1 className="stats-title">Visão geral</h1>
+              <h2 className="stats-title">Visão geral</h2>
               <div className="stats-timestamp">
                 <Clock size={14} /> Atualizado às {updatedLabel}
               </div>
@@ -331,7 +325,7 @@ export default function StatsOverview() {
         {activeTab === 'visits' && (
           <>
             <div className="stats-header-row">
-              <h1 className="stats-title">Visitas</h1>
+              <h2 className="stats-title">Visitas</h2>
             </div>
 
             <div className="stats-dual-grid">
@@ -396,7 +390,7 @@ export default function StatsOverview() {
         {activeTab === 'live' && (
           <>
             <div className="stats-header-row">
-              <h1 className="stats-title">Tempo real</h1>
+              <h2 className="stats-title">Tempo real</h2>
             </div>
             <p className="stats-subtitle">Pedidos recebidos nos últimos 5 minutos · atualização automática a cada 15 segundos</p>
 

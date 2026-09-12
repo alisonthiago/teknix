@@ -391,10 +391,7 @@ export default function PagesList() {
 
   return (
     <div className="pages-page-container">
-      <div className="pages-page-header">
-        <div className="pages-header-titles">
-          <h1 className="pages-main-title">Páginas</h1>
-        </div>
+      <div className="hub-table-top-actions" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
         <button
           type="button"
           disabled={busy}

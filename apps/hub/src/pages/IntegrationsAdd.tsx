@@ -313,9 +313,6 @@ export default function IntegrationsAdd() {
           >
             <ChevronLeft size={20} />
           </button>
-          <div>
-            <h1 className="page-title" style={{ margin: 0 }}>Adicionar Nova Integração</h1>
-          </div>
         </div>
 
         <div style={{ display: 'flex', gap: 10 }}>

@@ -202,8 +202,7 @@ export default function Showcases() {
             <Link to="/hub/produtos" className="btn btn-icon" style={{ marginBottom: 12, display: 'inline-flex', alignItems: 'center', gap: 6, color: '#6b7280', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 500 }}>
               <ArrowLeft size={16} /> Voltar aos produtos
             </Link>
-            <h1 style={{ fontSize: '1.6rem', fontWeight: 700, color: '#0f172a', margin: '0 0 6px 0' }}>Organização de Vitrines</h1>
-            <p style={{ color: '#64748b', margin: 0, fontSize: '0.95rem' }}>Defina quais produtos aparecem nas áreas nobres e de maior conversão da página inicial.</p>
+            <p style={{ color: '#64748b', margin: '4px 0 0 0', fontSize: '0.95rem' }}>Defina quais produtos aparecem nas áreas nobres e de maior conversão da página inicial.</p>
           </div>
           <div className="header-actions">
             <button 

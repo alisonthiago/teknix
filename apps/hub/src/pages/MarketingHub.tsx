@@ -9,16 +9,11 @@ export default function MarketingHub() {
     <div className="marketing-page-container">
       <div className="marketing-wrapper">
         
-        {/* Header */}
-        <div className="page-header">
-          <div className="header-info">
-            <h1>Marketing</h1>
-          </div>
-          <div className="header-actions">
-            <button className="btn btn-primary">
-              <Sparkles size={16} /> Nova campanha
-            </button>
-          </div>
+        {/* Top Actions */}
+        <div className="hub-table-top-actions" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+          <button className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <Sparkles size={16} /> Nova campanha
+          </button>
         </div>
 
         {/* Tabs */}

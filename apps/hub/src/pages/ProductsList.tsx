@@ -303,19 +303,14 @@ export default function ProductsList() {
     <div className="products-page-container">
       <div className="products-wrapper">
         
-        {/* Top Header */}
-        <div className="page-header">
-          <div className="header-info">
-            <h1>Produtos</h1>
-          </div>
-          <div className="header-actions">
-            <Link to="/hub/destaques" className="btn btn-secondary">
-              <LayoutTemplate size={14} /> Destaques
-            </Link>
-            <Link to="/hub/produtos/novo" className="btn btn-primary">
-              <Plus size={15} /> Adicionar produto
-            </Link>
-          </div>
+        {/* Top Actions */}
+        <div className="hub-table-top-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginBottom: 16 }}>
+          <Link to="/hub/destaques" className="btn btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <LayoutTemplate size={14} /> Destaques
+          </Link>
+          <Link to="/hub/produtos/novo" className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <Plus size={15} /> Adicionar produto
+          </Link>
         </div>
 
         {/* Search & Filters */}

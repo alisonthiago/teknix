@@ -69,11 +69,7 @@ export default function AdsAnalytics() {
 
   return (
     <div className="ads-analytics-page">
-      <header className="analytics-header">
-        <div>
-          <span>PUBLICIDADE</span>
-          <h1>Analytics de anúncios</h1>
-        </div>
+      <header className="analytics-header" style={{ justifyContent: 'flex-end' }}>
         <button onClick={() => navigate('/hub/ads')}>← Voltar aos anúncios</button>
       </header>
 

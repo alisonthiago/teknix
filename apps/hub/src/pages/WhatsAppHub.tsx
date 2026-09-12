@@ -17,19 +17,14 @@ export default function WhatsAppHub() {
 
   return (
     <div className="whatsapp-page-container">
-      {/* ── Page Header ── */}
-      <div className="page-header">
-        <div className="header-info">
-          <h1>WhatsApp</h1>
-        </div>
-        <div className="header-actions">
-          <span className="badge-success" style={{ padding: '6px 12px', fontSize: '12px' }}>
-            <CheckCircle2 size={13} /> Conectado
-          </span>
-          <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
-            <Save size={14} /> {saving ? 'Salvando...' : 'Salvar Alterações'}
-          </button>
-        </div>
+      {/* ── Top Actions ── */}
+      <div className="hub-table-top-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginBottom: 16 }}>
+        <span className="badge-success" style={{ padding: '6px 12px', fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <CheckCircle2 size={13} /> Conectado
+        </span>
+        <button className="btn btn-primary" onClick={handleSave} disabled={saving} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <Save size={14} /> {saving ? 'Salvando...' : 'Salvar Alterações'}
+        </button>
       </div>
 
       {/* ── FLOW Tabs ── */}

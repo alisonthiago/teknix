@@ -235,8 +235,7 @@ export default function IntegrationsHub() {
       {/* Header */}
       <div className="page-header">
         <div className="header-info">
-          <h1 className="page-title">Integrações & Conexões Oficiais</h1>
-          <div style={{ display: 'flex', gap: 10, marginTop: 8, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
             <span className="security-badge-pill">
               <ShieldCheck size={13} color="#16a34a" /> Credenciais protegidas via Supabase RLS
             </span>

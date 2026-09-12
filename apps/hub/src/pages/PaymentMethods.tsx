@@ -244,8 +244,8 @@ export default function PaymentMethods() {
     <div className="payments-page-container">
       <div className="payments-wrapper">
         
-        {/* Header */}
-        <div className="payments-header">
+        {/* Back navigation */}
+        <div className="payments-header" style={{ marginBottom: 12 }}>
           <div className="title-with-back" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
             <button
               type="button"
@@ -256,9 +256,6 @@ export default function PaymentMethods() {
             >
               <ChevronLeft size={20} />
             </button>
-            <div>
-              <h1 className="payments-title">Meios de pagamento</h1>
-            </div>
           </div>
         </div>
 

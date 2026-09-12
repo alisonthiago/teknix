@@ -183,11 +183,8 @@ export default function MarketplaceChannelHub({ defaultChannel }: { defaultChann
 
   return (
     <div className="meli-page-container">
-      {/* ── Page Header ── */}
-      <div className="page-header">
-        <div className="header-info">
-          <h1>{config.name}</h1>
-        </div>
+      {/* ── Top Actions ── */}
+      <div className="hub-table-top-actions" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
         <div className="header-actions">
           <button
             className="btn btn-primary"

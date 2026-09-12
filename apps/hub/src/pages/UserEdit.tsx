@@ -283,7 +283,6 @@ export default function UserEdit() {
             >
               <ChevronLeft size={20} />
             </button>
-            <h1>Dados da Conta &amp; Perfil</h1>
           </div>
         </div>
         <div className="header-actions">
