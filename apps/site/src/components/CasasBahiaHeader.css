@@ -58,8 +58,8 @@
 }
 .dsvia-header-home .dsvia-brand-logo { color: #000000; }
 .dsvia-header-home .dsvia-brand-logo svg { filter: contrast(1.05); }
-.dsvia-header-home .dsvia-search-form { border-color: transparent; border-radius: 8px; box-shadow: 0 1px 2px rgb(0 0 0 / .12); }
-.dsvia-header-home .dsvia-search-form:focus-within { border-color: #b5f500; box-shadow: 0 0 0 3px rgb(181 245 0 / .28); }
+.dsvia-header-home .dsvia-search-form { border-color: transparent; border-radius: 9999px; box-shadow: 0 1px 2px rgb(0 0 0 / .12); }
+.dsvia-header-home .dsvia-search-form:focus-within { border-color: #b5f500; box-shadow: 0 0 0 3px rgb(181 245 0 / .28); border-radius: 9999px; }
 .dsvia-header-home .dsvia-actions-right :is(.dsvia-cep-trigger, .dsvia-account-capsule, .dsvia-icon-action),
 .dsvia-header-home .dsvia-actions-right .dsvia-account-greeting,
 .dsvia-header-home .dsvia-actions-right .dsvia-account-subtext,
@@ -284,15 +284,16 @@
   align-items: center;
   background: #ffffff;
   border: 1.5px solid var(--tkn-border-color);
-  border-radius: 4px;
+  border-radius: 9999px;
   height: 48px;
-  padding: 0 var(--tkn-space-12) 0 var(--tkn-space-16);
+  padding: 0 var(--tkn-space-16) 0 var(--tkn-space-20);
   transition: all 0.2s ease;
 }
 
 .dsvia-search-form:focus-within {
   border-color: var(--tkn-black);
   box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.06);
+  border-radius: 9999px;
 }
 
 .dsvia-search-input,
@@ -1794,12 +1795,15 @@
 
   .dsvia-search-form {
     margin-top: 0;
+    border-radius: 9999px !important;
+    height: 42px;
+    padding: 0 14px 0 18px;
   }
 
   .dsvia-search-input {
     height: 38px;
     font-size: var(--tkn-text-13);
-    border-radius: 4px;
+    border-radius: 9999px;
   }
 
   /* Location Pill (Mobile - abaixo da barra de busca) */
