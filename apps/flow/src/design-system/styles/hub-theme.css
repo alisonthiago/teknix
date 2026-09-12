@@ -1,0 +1,642 @@
+/* ==========================================================================
+   TEKNIX HUB — DESIGN SYSTEM GLOBAL UNIFICADO (BASE: /hub/usuarios)
+   Este arquivo é a FONTE ÚNICA DE VERDADE para a estética administrativa do HUB.
+   Qualquer ajuste em tokens aqui reflete automaticamente em todas as páginas.
+   ========================================================================== */
+
+:root {
+  /* ── Tipografia Global ── */
+  --hub-font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  
+  /* Título da Página (H1) */
+  --hub-h1-size: 24px;
+  --hub-h1-weight: 700;
+  --hub-h1-color: #111111;
+  --hub-h1-line-height: 1.2;
+
+  /* Subtítulo / Descrição da Página */
+  --hub-desc-size: 13px;
+  --hub-desc-weight: 400;
+  --hub-desc-color: #666666;
+  --hub-desc-line-height: 1.4;
+
+  /* Título dos Cards (H2) */
+  --hub-card-title-size: 16px;
+  --hub-card-title-weight: 700;
+  --hub-card-title-color: #111111;
+  --hub-card-title-line-height: 1.25;
+
+  /* Subtítulo dos Cards (P) */
+  --hub-card-desc-size: 12px;
+  --hub-card-desc-weight: 400;
+  --hub-card-desc-color: #888888;
+  --hub-card-desc-line-height: 1.35;
+
+  /* Labels dos Formulários */
+  --hub-label-size: 12.5px;
+  --hub-label-weight: 700;
+  --hub-label-color: #333333;
+  --hub-label-gap: 6px;
+
+  /* Inputs, Selects & Textareas */
+  --hub-input-size: 13.5px;
+  --hub-input-color: #111111;
+  --hub-input-placeholder: #999999;
+  --hub-input-height: 42px;
+  --hub-input-padding: 0 14px;
+  --hub-input-radius: 10px;
+  --hub-input-border: 1px solid #e6e6e6;
+  --hub-input-focus-border: #1f2328;
+  --hub-input-bg: #ffffff;
+
+  /* ── Cards & Superfícies ── */
+  --hub-card-bg: #ffffff;
+  --hub-card-border: 1px solid #e6e6e6;
+  --hub-card-radius: 14px;
+  --hub-card-padding: 24px;
+  --hub-card-gap: 20px;
+  --hub-card-header-pb: 16px;
+  --hub-card-header-border: 1px solid #f0f0f0;
+  
+  /* Ícone do Card */
+  --hub-card-icon-size: 36px;
+  --hub-card-icon-bg: #f5f5f5;
+  --hub-card-icon-color: #111111;
+  --hub-card-icon-radius: 10px;
+
+  /* ── Botões Globais ── */
+  --hub-btn-height: 38px;
+  --hub-btn-radius: 8px;
+  --hub-btn-gap: 8px;
+  
+  /* Botão Primário (Preto Antracite) */
+  --hub-btn-primary-bg: #1f2328;
+  --hub-btn-primary-hover: #000000;
+  --hub-btn-primary-color: #ffffff;
+  --hub-btn-primary-size: 13.5px;
+  --hub-btn-primary-weight: 600;
+
+  /* Botão Secundário (Branco com borda sutil) */
+  --hub-btn-secondary-bg: #ffffff;
+  --hub-btn-secondary-hover: #f8fafc;
+  --hub-btn-secondary-border: 1px solid #e6e6e6;
+  --hub-btn-secondary-color: #333333;
+  --hub-btn-secondary-size: 13px;
+  --hub-btn-secondary-weight: 500;
+
+  /* Botão Voltar (Chevron) */
+  --hub-btn-back-size: 32px;
+  --hub-btn-back-radius: 8px;
+
+  /* ── Switches (Apple / Flow) ── */
+  --hub-switch-w: 44px;
+  --hub-switch-h: 24px;
+  --hub-switch-off-bg: #e5e7eb;
+  --hub-switch-on-bg: #1f2328;
+  --hub-switch-knob-size: 18px;
+
+  /* ── Banners & Alertas Semânticos ── */
+  --hub-banner-radius: 10px;
+  --hub-banner-padding: 12px 16px;
+  --hub-banner-font-size: 13.5px;
+  --hub-banner-font-weight: 600;
+
+  --hub-banner-success-bg: #ecfdf5;
+  --hub-banner-success-color: #16a34a;
+  --hub-banner-success-border: 1px solid #bbf7d0;
+
+  --hub-banner-error-bg: #fef2f2;
+  --hub-banner-error-color: #dc2626;
+  --hub-banner-error-border: 1px solid #fecaca;
+
+  /* ── Espaçamentos Gerais ── */
+  --hub-section-gap: 20px;
+  --hub-form-grid-gap: 16px;
+}
+
+/* ==========================================================================
+   CLASSES CANÔNICAS COMPARTILHADAS (1:1 com /hub/usuarios)
+   ========================================================================== */
+
+/* ── Cabeçalho Padrão de Página ── */
+:is(.hub-layout, .flow-layout) .page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--hub-section-gap);
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+:is(.hub-layout, .flow-layout) .page-header .header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+:is(.hub-layout, .flow-layout) .page-header .header-info h1,
+:is(.hub-layout, .flow-layout) h1.page-title {
+  font-size: var(--hub-h1-size) !important;
+  font-weight: var(--hub-h1-weight) !important;
+  color: var(--hub-h1-color) !important;
+  line-height: var(--hub-h1-line-height) !important;
+  margin: 0 !important;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+:is(.hub-layout, .flow-layout) .page-header .header-info p,
+:is(.hub-layout, .flow-layout) p.page-subtitle {
+  font-size: var(--hub-desc-size) !important;
+  font-weight: var(--hub-desc-weight) !important;
+  color: var(--hub-desc-color) !important;
+  line-height: var(--hub-desc-line-height) !important;
+  margin: 0 !important;
+}
+
+:is(.hub-layout, .flow-layout) .page-header .header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ── Botão Voltar ── */
+:is(.hub-layout, .flow-layout) .btn-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--hub-btn-back-size);
+  height: var(--hub-btn-back-size);
+  border-radius: var(--hub-btn-back-radius);
+  background: transparent;
+  border: none;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  padding: 0;
+}
+
+:is(.hub-layout, .flow-layout) .btn-back:hover {
+  background: #f3f4f6;
+  color: #111111;
+}
+
+/* ── Cards Administrativos ── */
+:is(.hub-layout, .flow-layout) .hub-card,
+:is(.hub-layout, .flow-layout) .user-card {
+  background: var(--hub-card-bg);
+  border: var(--hub-card-border);
+  border-radius: var(--hub-card-radius);
+  padding: var(--hub-card-padding);
+  display: flex;
+  flex-direction: column;
+  gap: var(--hub-card-gap);
+  box-shadow: none;
+}
+
+:is(.hub-layout, .flow-layout) .hub-card-header,
+:is(.hub-layout, .flow-layout) .user-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: var(--hub-card-header-pb);
+  border-bottom: var(--hub-card-header-border);
+}
+
+:is(.hub-layout, .flow-layout) .hub-card-icon,
+:is(.hub-layout, .flow-layout) .user-card-icon {
+  width: var(--hub-card-icon-size);
+  height: var(--hub-card-icon-size);
+  border-radius: var(--hub-card-icon-radius);
+  background: var(--hub-card-icon-bg);
+  color: var(--hub-card-icon-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+:is(.hub-layout, .flow-layout) .hub-card-header h2,
+:is(.hub-layout, .flow-layout) .user-card-header h2 {
+  font-size: var(--hub-card-title-size) !important;
+  font-weight: var(--hub-card-title-weight) !important;
+  color: var(--hub-card-title-color) !important;
+  line-height: var(--hub-card-title-line-height) !important;
+  margin: 0 !important;
+}
+
+:is(.hub-layout, .flow-layout) .hub-card-header p,
+:is(.hub-layout, .flow-layout) .user-card-header p {
+  font-size: var(--hub-card-desc-size) !important;
+  font-weight: var(--hub-card-desc-weight) !important;
+  color: var(--hub-card-desc-color) !important;
+  line-height: var(--hub-card-desc-line-height) !important;
+  margin: 2px 0 0 !important;
+}
+
+/* ── Formulários e Inputs ── */
+:is(.hub-layout, .flow-layout) .hub-form-grid,
+:is(.hub-layout, .flow-layout) .user-form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--hub-form-grid-gap);
+}
+
+@media (min-width: 640px) {
+  :is(.hub-layout, .flow-layout) .hub-form-grid,
+  :is(.hub-layout, .flow-layout) .user-form-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+:is(.hub-layout, .flow-layout) .hub-col-full,
+:is(.hub-layout, .flow-layout) .user-col-full {
+  grid-column: 1 / -1;
+}
+
+:is(.hub-layout, .flow-layout) .hub-form-field,
+:is(.hub-layout, .flow-layout) .user-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hub-label-gap);
+}
+
+:is(.hub-layout, .flow-layout) .hub-label,
+:is(.hub-layout, .flow-layout) .user-label,
+:is(.hub-layout, .flow-layout) label.form-label {
+  font-size: var(--hub-label-size) !important;
+  font-weight: var(--hub-label-weight) !important;
+  color: var(--hub-label-color) !important;
+  display: block;
+}
+
+:is(.hub-layout, .flow-layout) .hub-input,
+:is(.hub-layout, .flow-layout) .user-input,
+:is(.hub-layout, .flow-layout) input[type="text"]:not(.raw-input),
+:is(.hub-layout, .flow-layout) input[type="email"]:not(.raw-input),
+:is(.hub-layout, .flow-layout) input[type="password"]:not(.raw-input),
+:is(.hub-layout, .flow-layout) input[type="number"]:not(.raw-input),
+:is(.hub-layout, .flow-layout) input[type="tel"]:not(.raw-input),
+:is(.hub-layout, .flow-layout) input[type="url"]:not(.raw-input),
+:is(.hub-layout, .flow-layout) select:not(.raw-select) {
+  width: 100%;
+  height: var(--hub-input-height);
+  padding: var(--hub-input-padding);
+  background: var(--hub-input-bg);
+  border: var(--hub-input-border);
+  border-radius: var(--hub-input-radius);
+  font-size: var(--hub-input-size);
+  color: var(--hub-input-color);
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+:is(.hub-layout, .flow-layout) textarea:not(.raw-textarea) {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--hub-input-bg);
+  border: var(--hub-input-border);
+  border-radius: var(--hub-input-radius);
+  font-size: var(--hub-input-size);
+  color: var(--hub-input-color);
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s ease;
+  min-height: 80px;
+}
+
+:is(.hub-layout, .flow-layout) .hub-input:focus,
+:is(.hub-layout, .flow-layout) .user-input:focus,
+:is(.hub-layout, .flow-layout) input:focus:not(.raw-input),
+:is(.hub-layout, .flow-layout) select:focus:not(.raw-select),
+:is(.hub-layout, .flow-layout) textarea:focus:not(.raw-textarea) {
+  border-color: var(--hub-input-focus-border) !important;
+}
+
+/* ── Botões Padronizados ── */
+:is(.hub-layout, .flow-layout) .btn,
+:is(.hub-layout, .flow-layout) .hub-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--hub-btn-gap);
+  height: var(--hub-btn-height);
+  padding: 0 16px;
+  border-radius: var(--hub-btn-radius);
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  text-decoration: none;
+  border: none;
+}
+
+:is(.hub-layout, .flow-layout) .btn-primary,
+:is(.hub-layout, .flow-layout) .hub-btn-primary {
+  background: var(--hub-btn-primary-bg) !important;
+  color: var(--hub-btn-primary-color) !important;
+  font-size: var(--hub-btn-primary-size) !important;
+  font-weight: var(--hub-btn-primary-weight) !important;
+}
+
+:is(.hub-layout, .flow-layout) .btn-primary:hover,
+:is(.hub-layout, .flow-layout) .hub-btn-primary:hover {
+  background: var(--hub-btn-primary-hover) !important;
+}
+
+:is(.hub-layout, .flow-layout) .btn-secondary,
+:is(.hub-layout, .flow-layout) .hub-btn-secondary {
+  background: var(--hub-btn-secondary-bg) !important;
+  border: var(--hub-btn-secondary-border) !important;
+  color: var(--hub-btn-secondary-color) !important;
+  font-size: var(--hub-btn-secondary-size) !important;
+  font-weight: var(--hub-btn-secondary-weight) !important;
+}
+
+:is(.hub-layout, .flow-layout) .btn-secondary:hover,
+:is(.hub-layout, .flow-layout) .hub-btn-secondary:hover {
+  background: var(--hub-btn-secondary-hover) !important;
+  border-color: #d1d5db !important;
+}
+
+/* ── Banners de Alerta ── */
+:is(.hub-layout, .flow-layout) .hub-banner,
+:is(.hub-layout, .flow-layout) .user-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: var(--hub-banner-padding);
+  border-radius: var(--hub-banner-radius);
+  font-size: var(--hub-banner-font-size);
+  font-weight: var(--hub-banner-font-weight);
+}
+
+:is(.hub-layout, .flow-layout) .hub-banner.success,
+:is(.hub-layout, .flow-layout) .user-banner.success {
+  background: var(--hub-banner-success-bg);
+  color: var(--hub-banner-success-color);
+  border: var(--hub-banner-success-border);
+}
+
+:is(.hub-layout, .flow-layout) .hub-banner.error,
+:is(.hub-layout, .flow-layout) .user-banner.error {
+  background: var(--hub-banner-error-bg);
+  color: var(--hub-banner-error-color);
+  border: var(--hub-banner-error-border);
+}
+
+/* ── Switches Padronizados ── */
+:is(.hub-layout, .flow-layout) .hub-switch,
+:is(.hub-layout, .flow-layout) .user-switch {
+  position: relative;
+  display: inline-block;
+  width: var(--hub-switch-w);
+  height: var(--hub-switch-h);
+  flex-shrink: 0;
+}
+
+:is(.hub-layout, .flow-layout) .hub-switch input,
+:is(.hub-layout, .flow-layout) .user-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+:is(.hub-layout, .flow-layout) .hub-slider,
+:is(.hub-layout, .flow-layout) .user-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: var(--hub-switch-off-bg);
+  transition: 0.2s;
+  border-radius: 980px;
+}
+
+:is(.hub-layout, .flow-layout) .hub-slider:before,
+:is(.hub-layout, .flow-layout) .user-slider:before {
+  position: absolute;
+  content: "";
+  height: var(--hub-switch-knob-size);
+  width: var(--hub-switch-knob-size);
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.2s;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+:is(.hub-layout, .flow-layout) input:checked + .hub-slider,
+:is(.hub-layout, .flow-layout) input:checked + .user-slider {
+  background-color: var(--hub-switch-on-bg);
+}
+
+:is(.hub-layout, .flow-layout) input:checked + .hub-slider:before,
+:is(.hub-layout, .flow-layout) input:checked + .user-slider:before {
+  transform: translateX(20px);
+}
+
+/* ── Badges e Pílulas de Status Unificadas ── */
+:is(.hub-layout, .flow-layout) .hub-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+:is(.hub-layout, .flow-layout) .hub-badge.success,
+:is(.hub-layout, .flow-layout) .hub-badge.pago,
+:is(.hub-layout, .flow-layout) .hub-badge.ativo {
+  background: #ecfdf5;
+  color: #00a650;
+  border: 1px solid #bbf7d0;
+}
+
+:is(.hub-layout, .flow-layout) .hub-badge.warning,
+:is(.hub-layout, .flow-layout) .hub-badge.pendente,
+:is(.hub-layout, .flow-layout) .hub-badge.alerta {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fef3c7;
+}
+
+:is(.hub-layout, .flow-layout) .hub-badge.danger,
+:is(.hub-layout, .flow-layout) .hub-badge.cancelado,
+:is(.hub-layout, .flow-layout) .hub-badge.erro {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fee2e2;
+}
+
+:is(.hub-layout, .flow-layout) .hub-badge.neutral,
+:is(.hub-layout, .flow-layout) .hub-badge.enviado,
+:is(.hub-layout, .flow-layout) .hub-badge.processando {
+  background: #f8fafc;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+:is(.hub-layout, .flow-layout) .hub-badge.lime,
+:is(.hub-layout, .flow-layout) .hub-badge.live {
+  background: rgba(180, 244, 0, 0.2);
+  color: #111111;
+  border: 1px solid rgba(180, 244, 0, 0.4);
+  font-weight: 600;
+}
+
+/* ── Barra de Filtros Canônica (Padrão Home) ── */
+:is(.hub-layout, .flow-layout) .hub-filter-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #ffffff;
+  border: 1px solid #e6e6e6;
+  border-radius: var(--hub-card-radius, 14px);
+  padding: 12px 16px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  :is(.hub-layout, .flow-layout) .hub-filter-bar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+}
+
+:is(.hub-layout, .flow-layout) .hub-filter-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #666666;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+:is(.hub-layout, .flow-layout) .hub-filter-selects {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+}
+
+@media (min-width: 480px) {
+  :is(.hub-layout, .flow-layout) .hub-filter-selects {
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  }
+}
+
+@media (min-width: 768px) {
+  :is(.hub-layout, .flow-layout) .hub-filter-selects {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: auto;
+  }
+}
+
+:is(.hub-layout, .flow-layout) .hub-select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 30px 8px 12px;
+  border: 1px solid #e6e6e6;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #1f2328;
+  background-color: #ffffff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
+  outline: none;
+  min-height: 38px;
+  height: 38px;
+  font-family: inherit;
+  transition: all 0.15s ease;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  :is(.hub-layout, .flow-layout) .hub-select {
+    flex: 1 1 130px;
+    min-width: 110px;
+    max-width: 220px;
+    height: 34px;
+    min-height: 34px;
+    padding: 6px 28px 6px 10px;
+  }
+}
+
+:is(.hub-layout, .flow-layout) .hub-select:hover {
+  border-color: #c4c4c4;
+  background-color: #fafafa;
+}
+
+:is(.hub-layout, .flow-layout) .hub-select:focus {
+  border-color: #1f2328;
+  box-shadow: 0 0 0 2px rgba(31, 35, 40, 0.08);
+}
+
+/* ── Estado Vazio Padrão (Empty State) ── */
+:is(.hub-layout, .flow-layout) .hub-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  background: #ffffff;
+  border: 1px solid #e6e6e6;
+  border-radius: var(--hub-card-radius, 14px);
+  gap: 12px;
+}
+
+:is(.hub-layout, .flow-layout) .hub-empty-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  margin-bottom: 4px;
+}
+
+:is(.hub-layout, .flow-layout) .hub-empty-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111111;
+  margin: 0;
+}
+
+:is(.hub-layout, .flow-layout) .hub-empty-desc {
+  font-size: 13px;
+  color: #666666;
+  margin: 0;
+  max-width: 380px;
+  line-height: 1.45;
+}

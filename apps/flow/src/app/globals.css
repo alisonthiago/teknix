@@ -1,4 +1,4 @@
-@import '@teknix/design-system/index.css';
+@import '../design-system/index.css';
 @import "tailwindcss";
 
 /* Dropdowns neutros em todo o Flow: sem destaque azul nativo. */

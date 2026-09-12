@@ -1,0 +1,24 @@
+:root {
+  /* ── Escala Universal de Espaçamento ── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* ── Padrões Semânticos de Respiro e Layout ── */
+  --gap-title-desc: var(--space-2);       /* 4–8px */
+  --gap-title-content: var(--space-5);    /* 16–24px */
+  --gap-section-section: var(--space-8);  /* 32–48px */
+  --gap-card-card: var(--space-5);        /* 16–24px */
+
+  /* ── Container & Padding Padrão ── */
+  --content-max-width: 1280px;
+  --content-padding-x: var(--space-6);
+  --content-padding-y: var(--space-6);
+}
