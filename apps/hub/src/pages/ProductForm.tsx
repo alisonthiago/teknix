@@ -1181,13 +1181,36 @@ export default function ProductForm() {
             <h2 className="card-title" style={{ margin: 0 }}>Categorias</h2>
           </div>
 
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
             {[form.category_id, ...form.additional_categories].filter(Boolean).map(id => {
               const cat = categories.find(c => c.id === id)
               if (!cat) return null
+              const isPrimary = id === form.category_id
               return (
-                <div key={id} style={{ display: 'flex', alignItems: 'center', background: '#f1f5f9', color: '#0f172a', padding: '4px 10px', borderRadius: 16, fontSize: '13px', fontWeight: 500 }}>
-                  {cat.name}
+                <div
+                  key={id}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    background: '#f0fdf4',
+                    border: '1px solid #bbf7d0',
+                    color: '#15803d',
+                    padding: '5px 12px',
+                    borderRadius: 20,
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    gap: 6,
+                    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#16a34a', flexShrink: 0 }} />
+                  <span>{cat.name}</span>
+                  {isPrimary && (
+                    <span style={{ fontSize: '10px', background: '#dcfce7', color: '#166534', padding: '1px 6px', borderRadius: 10, fontWeight: 700, marginLeft: 2 }}>
+                      Principal
+                    </span>
+                  )}
                   <button 
                     type="button"
                     onClick={(e) => {
@@ -1198,9 +1221,32 @@ export default function ProductForm() {
                         setForm({ ...form, additional_categories: form.additional_categories.filter(x => x !== id) })
                       }
                     }}
-                    style={{ background: 'none', border: 'none', marginLeft: 6, cursor: 'pointer', color: '#64748b', display: 'flex', alignItems: 'center' }}
+                    title="Remover categoria"
+                    style={{
+                      background: 'rgba(22, 163, 74, 0.12)',
+                      border: 'none',
+                      marginLeft: 4,
+                      cursor: 'pointer',
+                      color: '#15803d',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: 18,
+                      height: 18,
+                      borderRadius: '50%',
+                      padding: 0,
+                      transition: 'all 0.15s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = '#fee2e2'
+                      e.currentTarget.style.color = '#dc2626'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'rgba(22, 163, 74, 0.12)'
+                      e.currentTarget.style.color = '#15803d'
+                    }}
                   >
-                    <X size={14} />
+                    <X size={11} strokeWidth={2.5} />
                   </button>
                 </div>
               )
@@ -1210,7 +1256,18 @@ export default function ProductForm() {
           <div className="form-group" ref={categoryDropdownRef} style={{ position: 'relative' }}>
             <div 
               className="form-select" 
-              style={{ cursor: 'text', display: 'flex', alignItems: 'center', padding: 0 }}
+              style={{
+                cursor: 'text',
+                display: 'flex',
+                alignItems: 'center',
+                padding: '4px 8px 4px 12px',
+                minHeight: 38,
+                borderRadius: 8,
+                border: isCategoryDropdownOpen ? '1px solid #16a34a' : '1px solid #e2e8f0',
+                boxShadow: isCategoryDropdownOpen ? '0 0 0 2px rgba(22, 163, 74, 0.15)' : 'none',
+                background: '#ffffff',
+                transition: 'all 0.15s ease'
+              }}
               onClick={() => setIsCategoryDropdownOpen(true)}
             >
               <input 
@@ -1222,18 +1279,18 @@ export default function ProductForm() {
                   setIsCategoryDropdownOpen(true)
                 }}
                 onFocus={() => setIsCategoryDropdownOpen(true)}
-                style={{ flex: '1 1 150px', minWidth: 150, border: 'none', background: 'transparent', outline: 'none', padding: '0 4px', height: 30, fontSize: '13px', color: '#1e293b' }}
+                style={{ flex: '1 1 150px', minWidth: 150, border: 'none', background: 'transparent', outline: 'none', padding: '0 4px', height: 28, fontSize: '13px', color: '#1e293b' }}
               />
-              <ChevronDown size={16} style={{ marginRight: 12, color: '#9ca3af' }} />
+              <ChevronDown size={16} style={{ marginRight: 6, color: isCategoryDropdownOpen ? '#16a34a' : '#9ca3af', transition: 'transform 0.15s ease', transform: isCategoryDropdownOpen ? 'rotate(180deg)' : 'none' }} />
             </div>
             {isCategoryDropdownOpen && (
-              <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#fff', border: '1px solid #e2e8f0', borderRadius: 8, marginTop: 4, zIndex: 10, maxHeight: 200, overflowY: 'auto', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}>
+              <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#fff', border: '1px solid #e2e8f0', borderRadius: 8, marginTop: 4, zIndex: 10, maxHeight: 200, overflowY: 'auto', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04)' }}>
                 {categories.filter(c => c.name.toLowerCase().includes(categorySearch.toLowerCase())).map(c => {
                   const isSelected = c.id === form.category_id || form.additional_categories.includes(c.id)
                   return (
                     <div 
                       key={c.id} 
-                      style={{ padding: '8px 12px', cursor: 'pointer', background: isSelected ? '#f1f5f9' : 'transparent', fontSize: '13px', color: '#334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                      style={{ padding: '8px 12px', cursor: 'pointer', background: isSelected ? '#f0fdf4' : 'transparent', fontSize: '13px', color: isSelected ? '#15803d' : '#334155', fontWeight: isSelected ? 600 : 400, display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'background 0.1s ease' }}
                       onClick={() => {
                         if (isSelected) {
                           if (c.id === form.category_id) {
@@ -1250,16 +1307,16 @@ export default function ProductForm() {
                         }
                         setCategorySearch('')
                       }}
-                      onMouseEnter={e => (e.currentTarget.style.background = '#f8fafc')}
-                      onMouseLeave={e => (e.currentTarget.style.background = isSelected ? '#f1f5f9' : 'transparent')}
+                      onMouseEnter={e => (e.currentTarget.style.background = isSelected ? '#dcfce7' : '#f8fafc')}
+                      onMouseLeave={e => (e.currentTarget.style.background = isSelected ? '#f0fdf4' : 'transparent')}
                     >
-                      {c.name}
-                      {isSelected && <CheckCircle2 size={14} color="#059669" />}
+                      <span>{c.name}</span>
+                      {isSelected && <CheckCircle2 size={15} color="#16a34a" />}
                     </div>
                   )
                 })}
                 {categories.filter(c => c.name.toLowerCase().includes(categorySearch.toLowerCase())).length === 0 && (
-                  <div style={{ padding: '8px 12px', color: '#9ca3af', fontSize: '13px' }}>Nenhuma categoria encontrada.</div>
+                  <div style={{ padding: '10px 12px', color: '#9ca3af', fontSize: '13px' }}>Nenhuma categoria encontrada.</div>
                 )}
               </div>
             )}
@@ -1268,21 +1325,77 @@ export default function ProductForm() {
               <button
                 type="button"
                 onClick={() => setShowAddCategory(true)}
-                style={{ background: 'none', border: 'none', color: '#000000', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', textAlign: 'left', marginTop: 4 }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#16a34a',
+                  fontWeight: 600,
+                  fontSize: '0.82rem',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  marginTop: 8,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 5,
+                  padding: '4px 0',
+                  transition: 'color 0.15s ease'
+                }}
+                onMouseEnter={e => e.currentTarget.style.color = '#15803d'}
+                onMouseLeave={e => e.currentTarget.style.color = '#16a34a'}
               >
-                + Adicionar nova categoria
+                <Plus size={15} strokeWidth={2.5} />
+                Adicionar nova categoria
               </button>
             ) : (
-              <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
+              <div style={{ display: 'flex', gap: 8, marginTop: 8, alignItems: 'center' }}>
                 <input
                   type="text"
                   className="form-input"
                   placeholder="Nome da categoria"
                   value={newCategoryName}
                   onChange={(e) => setNewCategoryName(e.target.value)}
+                  style={{ maxWidth: 280, height: 34, fontSize: '13px' }}
                 />
-                <button type="button" className="btn-primary-action" onClick={handleCreateCategory}>Criar</button>
-                <button type="button" className="btn-secondary-action" onClick={() => setShowAddCategory(false)}>X</button>
+                <button
+                  type="button"
+                  onClick={handleCreateCategory}
+                  style={{
+                    background: '#16a34a',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: 6,
+                    padding: '0 14px',
+                    height: 34,
+                    fontWeight: 600,
+                    fontSize: '13px',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 4,
+                    transition: 'background 0.15s ease'
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#15803d'}
+                  onMouseLeave={e => e.currentTarget.style.background = '#16a34a'}
+                >
+                  Criar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowAddCategory(false)}
+                  style={{
+                    background: '#f1f5f9',
+                    color: '#64748b',
+                    border: 'none',
+                    borderRadius: 6,
+                    padding: '0 10px',
+                    height: 34,
+                    fontWeight: 600,
+                    fontSize: '13px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Cancelar
+                </button>
               </div>
             )}
           </div>
