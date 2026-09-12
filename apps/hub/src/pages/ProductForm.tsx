@@ -35,6 +35,7 @@ interface FormData {
   name: string
   slug: string
   description: string
+  specifications: ProductSpecification[]
   short_description: string
   images: string[]
   main_image: string
@@ -73,11 +74,17 @@ interface FormData {
   editorial_showcase: ProductEditorialShowcase
 }
 
+interface ProductSpecification {
+  label: string
+  value: string
+}
+
 const initialForm: FormData = {
   commerce: DEFAULT_COMMERCE,
   name: '',
   slug: '',
   description: '',
+  specifications: [],
   short_description: '',
   images: [],
   main_image: '',
@@ -116,6 +123,104 @@ const initialForm: FormData = {
   editorial_showcase: createDefaultShowcase()
 }
 
+function parseTags(value: string) {
+  return value
+    .split(',')
+    .map(tag => tag.trim())
+    .filter(Boolean)
+}
+
+const specificationAliases: Record<string, string> = {
+  marca: 'Marca',
+  fabricante: 'Marca',
+  modelo: 'Modelo',
+  sku: 'SKU / Código',
+  código: 'SKU / Código',
+  codigo: 'SKU / Código',
+  tensão: 'Tensão',
+  tensao: 'Tensão',
+  voltagem: 'Tensão',
+  'tensão da bateria': 'Tensão da Bateria',
+  'tensao da bateria': 'Tensão da Bateria',
+  'alimentação': 'Alimentação',
+  alimentacao: 'Alimentação',
+  'alimentação do carregador': 'Alimentação do Carregador',
+  'alimentacao do carregador': 'Alimentação do Carregador',
+  tamanho: 'Tamanho',
+  dimensões: 'Dimensões',
+  dimensoes: 'Dimensões',
+  peso: 'Peso',
+  altura: 'Altura',
+  largura: 'Largura',
+  comprimento: 'Comprimento',
+  acessórios: 'Acessórios Inclusos',
+  acessorios: 'Acessórios Inclusos',
+  garantia: 'Garantia de Fábrica',
+  'garantia de fábrica': 'Garantia de Fábrica',
+  'garantia de fabrica': 'Garantia de Fábrica'
+}
+
+function normalizeSpecificationLabel(label: string) {
+  return label.trim().toLocaleLowerCase('pt-BR').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+}
+
+function canonicalSpecificationLabel(label: string) {
+  const normalized = normalizeSpecificationLabel(label)
+  const alias = Object.entries(specificationAliases).find(([key]) => normalizeSpecificationLabel(key) === normalized)
+  return alias?.[1] || label.trim()
+}
+
+function extractSpecifications(description: string): ProductSpecification[] {
+  const extracted: ProductSpecification[] = []
+  const knownLabels = Object.keys(specificationAliases).sort((a, b) => b.length - a.length)
+
+  for (const rawLine of description.split(/\r?\n/)) {
+    const line = rawLine.replace(/^[-•*]\s*/, '').trim()
+    if (!line) continue
+
+    const tabParts = line.split(/\t+/).map(part => part.trim()).filter(Boolean)
+    let label = ''
+    let value = ''
+
+    if (tabParts.length >= 2) {
+      label = tabParts[0]
+      value = tabParts.slice(1).join(' ')
+    } else {
+      const separator = line.search(/\s*:\s*/)
+      if (separator > 0) {
+        label = line.slice(0, separator).trim()
+        value = line.slice(line.indexOf(':', separator) + 1).trim()
+      } else {
+        const normalizedLine = normalizeSpecificationLabel(line)
+        const knownLabel = knownLabels.find(item => normalizedLine.startsWith(normalizeSpecificationLabel(item) + ' '))
+        if (knownLabel) {
+          label = knownLabel
+          value = line.slice(knownLabel.length).trim()
+        }
+      }
+    }
+
+    if (!label || !value || label.length > 60 || value.length > 500) continue
+    const canonicalLabel = canonicalSpecificationLabel(label)
+    const existingIndex = extracted.findIndex(item => normalizeSpecificationLabel(item.label) === normalizeSpecificationLabel(canonicalLabel))
+    const item = { label: canonicalLabel, value }
+    if (existingIndex >= 0) extracted[existingIndex] = item
+    else extracted.push(item)
+  }
+
+  return extracted
+}
+
+function mergeSpecifications(current: ProductSpecification[], extracted: ProductSpecification[]) {
+  const merged = [...current]
+  for (const item of extracted) {
+    const index = merged.findIndex(existing => normalizeSpecificationLabel(existing.label) === normalizeSpecificationLabel(item.label))
+    if (index >= 0) merged[index] = item
+    else merged.push(item)
+  }
+  return merged
+}
+
 export default function ProductForm() {
   const { user } = useAuth()
   const { id } = useParams()
@@ -149,6 +254,7 @@ export default function ProductForm() {
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [tagsInput, setTagsInput] = useState('')
   const [newCategoryName, setNewCategoryName] = useState('')
   const [showAddCategory, setShowAddCategory] = useState(false)
   const [showPublishModal, setShowPublishModal] = useState(false)
@@ -167,6 +273,38 @@ export default function ProductForm() {
       loadProduct(id)
     }
   }, [id])
+
+  // Preencher especificações baseadas na categoria
+  useEffect(() => {
+    const selectedCategory = categories.find(c => c.id === form.category_id)
+    if (!selectedCategory) return
+
+    const categoryName = selectedCategory.name.toLowerCase()
+    let suggestedSpecs: string[] = []
+    
+    if (categoryName.includes('informática') || categoryName.includes('computador') || categoryName.includes('notebook') || categoryName.includes('mouse') || categoryName.includes('teclado') || categoryName.includes('monitor')) {
+      suggestedSpecs = ['Marca', 'Modelo', 'Voltagem', 'Conexão', 'Dimensões', 'Peso']
+    } else if (categoryName.includes('casa') || categoryName.includes('móveis')) {
+      suggestedSpecs = ['Marca', 'Material', 'Cor', 'Dimensões (L x A x P)', 'Peso']
+    } else if (categoryName.includes('ferramenta') || categoryName.includes('furadeira') || categoryName.includes('serra')) {
+      suggestedSpecs = ['Marca', 'Modelo', 'Voltagem', 'Potência', 'Rotação', 'Alimentação', 'Peso']
+    } else if (categoryName.includes('celular') || categoryName.includes('smartphone')) {
+      suggestedSpecs = ['Marca', 'Modelo', 'Cor', 'Armazenamento', 'Bateria', 'Sistema Operacional']
+    } else {
+      suggestedSpecs = ['Marca', 'Modelo', 'Cor', 'Material', 'Dimensões', 'Peso']
+    }
+
+    setForm(prev => {
+      const allEmpty = prev.specifications.every(s => !s.value.trim())
+      if (allEmpty) {
+        return {
+          ...prev,
+          specifications: suggestedSpecs.map(label => ({ label, value: '' }))
+        }
+      }
+      return prev
+    })
+  }, [form.category_id, categories])
 
   async function fetchCategories() {
     try {
@@ -238,7 +376,10 @@ export default function ProductForm() {
           category_id: store?.category_id || data.category_id || '',
           brand: data.brand || 'TEKNIX',
           tags: Array.isArray(data.tags) ? data.tags.join(', ') : (data.tags || specs.tags || ''),
-          variations: data.variations || specs.variations || [],
+          variations: Array.isArray(data.variations) ? data.variations : [],
+          specifications: Array.isArray(specs.product_specifications)
+            ? specs.product_specifications.filter((item: any) => item && typeof item.label === 'string' && typeof item.value === 'string')
+            : extractSpecifications(data.notes || data.description || store?.store_description || ''),
           seo_title: store?.seo?.title || data.seo_title || data.name || '',
           seo_description: store?.seo?.description || data.seo_description || '',
           seo_slug: store?.slug || data.seo_slug || data.slug || '',
@@ -307,6 +448,57 @@ export default function ProductForm() {
     return match ? match[1] : null
   }
 
+  async function optimizeImageFile(file: File): Promise<File> {
+    // GIF, SVG e formatos que não podem ser desenhados com segurança no canvas
+    // devem permanecer exatamente como foram selecionados pelo usuário.
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size < 300 * 1024) {
+      return file
+    }
+
+    try {
+      const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+        const objectUrl = URL.createObjectURL(file)
+        const element = new Image()
+        element.onload = () => {
+          URL.revokeObjectURL(objectUrl)
+          resolve(element)
+        }
+        element.onerror = () => {
+          URL.revokeObjectURL(objectUrl)
+          reject(new Error('Não foi possível ler a imagem'))
+        }
+        element.src = objectUrl
+      })
+
+      const maxDimension = 2560
+      const scale = Math.min(1, maxDimension / Math.max(image.naturalWidth, image.naturalHeight))
+      const canvas = document.createElement('canvas')
+      canvas.width = Math.max(1, Math.round(image.naturalWidth * scale))
+      canvas.height = Math.max(1, Math.round(image.naturalHeight * scale))
+      const context = canvas.getContext('2d')
+      if (!context) return file
+      context.imageSmoothingEnabled = true
+      context.imageSmoothingQuality = 'high'
+      context.drawImage(image, 0, 0, canvas.width, canvas.height)
+
+      const quality = file.type === 'image/png' ? undefined : file.type === 'image/webp' ? 0.92 : 0.94
+      const optimizedBlob = await new Promise<Blob | null>(resolve => {
+        canvas.toBlob(resolve, file.type, quality)
+      })
+
+      // Nunca substitui o original por uma versão maior ou sem redução real.
+      if (!optimizedBlob || optimizedBlob.size >= file.size) return file
+
+      return new File([optimizedBlob], file.name, {
+        type: file.type,
+        lastModified: file.lastModified
+      })
+    } catch (error) {
+      console.warn('Não foi possível otimizar a imagem; usando o arquivo original.', error)
+      return file
+    }
+  }
+
   async function handleUploadFiles(files: FileList | File[], presentationIndex?: number) {
     if (!files || files.length === 0) return
     setIsUploadingMedia(true)
@@ -353,24 +545,29 @@ export default function ProductForm() {
           setForm(prev => ({ ...prev, video_url: blobUrl }))
         }
       } else if (file.type.startsWith('image/')) {
-        setUploadStatus(`Enviando foto: ${file.name}...`)
+        setUploadStatus(`Otimizando foto: ${file.name}...`)
         try {
+          const optimizedFile = await optimizeImageFile(file)
+          const reduction = file.size > optimizedFile.size
+            ? ` (${Math.round((1 - optimizedFile.size / file.size) * 100)}% menor)`
+            : ''
+          setUploadStatus(`Enviando foto: ${file.name}${reduction}...`)
           const ext = file.name.split('.').pop() || 'jpg'
           const path = `products/images/${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${ext}`
 
           let imgUrl = ''
-          const { error: uploadError } = await supabase.storage.from('media').upload(path, file, {
+          const { error: uploadError } = await supabase.storage.from('media').upload(path, optimizedFile, {
             upsert: true,
-            contentType: file.type
+            contentType: optimizedFile.type
           })
 
           if (!uploadError) {
             const { data: urlData } = supabase.storage.from('media').getPublicUrl(path)
             imgUrl = urlData.publicUrl
           } else {
-            const { error: uploadError2 } = await supabase.storage.from('uploads').upload(path, file, {
+            const { error: uploadError2 } = await supabase.storage.from('uploads').upload(path, optimizedFile, {
               upsert: true,
-              contentType: file.type
+              contentType: optimizedFile.type
             })
             if (!uploadError2) {
               const { data: urlData2 } = supabase.storage.from('uploads').getPublicUrl(path)
@@ -379,7 +576,7 @@ export default function ProductForm() {
               imgUrl = await new Promise<string>((resolve) => {
                 const reader = new FileReader()
                 reader.onload = () => resolve(reader.result as string)
-                reader.readAsDataURL(file)
+                reader.readAsDataURL(optimizedFile)
               })
             }
           }
@@ -389,10 +586,11 @@ export default function ProductForm() {
           }
         } catch (err) {
           console.warn('Erro no upload da foto, usando FileReader:', err)
+          const fallbackFile = await optimizeImageFile(file)
           const dataUrl = await new Promise<string>((resolve) => {
             const reader = new FileReader()
             reader.onload = () => resolve(reader.result as string)
-            reader.readAsDataURL(file)
+            reader.readAsDataURL(fallbackFile)
           })
           if (dataUrl) newImages.push(dataUrl)
         }
@@ -470,6 +668,49 @@ export default function ProductForm() {
     setForm(prev => ({ ...prev, variations: prev.variations.filter((_, i) => i !== index) }))
   }
 
+  function handleAddTag() {
+    const newTags = parseTags(tagsInput)
+    if (!newTags.length) return
+
+    setForm(prev => {
+      const tags = parseTags(prev.tags)
+      const tagsToAdd = newTags.filter(newTag => !tags.some(tag => tag.toLocaleLowerCase() === newTag.toLocaleLowerCase()))
+      return tagsToAdd.length ? { ...prev, tags: [...tags, ...tagsToAdd].join(', ') } : prev
+    })
+    setTagsInput('')
+  }
+
+  function handleRemoveTag(tagToRemove: string) {
+    setForm(prev => ({
+      ...prev,
+      tags: parseTags(prev.tags).filter(tag => tag !== tagToRemove).join(', ')
+    }))
+  }
+
+  function handleDescriptionChange(description: string) {
+    const extracted = extractSpecifications(description)
+    setForm(prev => ({
+      ...prev,
+      description,
+      specifications: extracted.length ? mergeSpecifications(prev.specifications, extracted) : prev.specifications
+    }))
+  }
+
+  function updateSpecification(index: number, field: keyof ProductSpecification, value: string) {
+    setForm(prev => ({
+      ...prev,
+      specifications: prev.specifications.map((item, itemIndex) => itemIndex === index ? { ...item, [field]: value } : item)
+    }))
+  }
+
+  function removeSpecification(index: number) {
+    setForm(prev => ({ ...prev, specifications: prev.specifications.filter((_, itemIndex) => itemIndex !== index) }))
+  }
+
+  function addSpecification() {
+    setForm(prev => ({ ...prev, specifications: [...prev.specifications, { label: 'Nova especificação', value: '' }] }))
+  }
+
   /**
    * Sincroniza o vínculo automático do produto com a publicação da loja.
    * Cria/atualiza a linha em product_store_metadata, que é a fonte usada
@@ -520,6 +761,7 @@ export default function ProductForm() {
           gallery_images: form.images.filter(Boolean),
           video_url: form.video_url || null,
           variations: form.variations || [],
+            product_specifications: form.specifications.filter(item => item.label.trim() && item.value.trim()),
           tags: form.tags || '',
           editorial_showcase: form.editorial_showcase
         },
@@ -840,16 +1082,6 @@ export default function ProductForm() {
           <div className="form-group">
             <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span>Descrição</span>
-              <button
-                type="button"
-                className="btn-ai-generate"
-                onClick={() => setForm({
-                  ...form,
-                  description: `${form.name || 'Produto'}: Desenvolvido com alta tecnologia e componentes de primeira linha para oferecer a melhor performance, durabilidade e confiabilidade. Ideal para profissionais e entusiastas que buscam excelência.`
-                })}
-              >
-                <Sparkles size={12} /> Gerar com IA
-              </button>
             </label>
             <div className="rich-editor-wrapper">
               <div className="rich-editor-toolbar">
@@ -864,13 +1096,55 @@ export default function ProductForm() {
                 className="rich-editor-textarea"
                 placeholder="Descreva as principais características, vantagens e detalhes técnicos do produto..."
                 value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                onChange={(e) => handleDescriptionChange(e.target.value)}
               />
             </div>
           </div>
         </div>
 
-        {/* 2. FOTOS E VÍDEOS */}
+        {/* 2. CATEGORIAS */}
+        <div className="form-card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h2 className="card-title" style={{ margin: 0 }}>Categorias</h2>
+          </div>
+
+          <div className="form-group">
+            <select
+              className="form-select"
+              value={form.category_id}
+              onChange={(e) => setForm({ ...form, category_id: e.target.value })}
+            >
+              <option value="">Selecione uma categoria...</option>
+              {categories.map(c => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+            
+            {!showAddCategory ? (
+              <button
+                type="button"
+                onClick={() => setShowAddCategory(true)}
+                style={{ background: 'none', border: 'none', color: '#000000', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', textAlign: 'left', marginTop: 4 }}
+              >
+                + Adicionar categorias
+              </button>
+            ) : (
+              <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="Nome da categoria"
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
+                />
+                <button type="button" className="btn-primary-action" onClick={handleCreateCategory}>Criar</button>
+                <button type="button" className="btn-secondary-action" onClick={() => setShowAddCategory(false)}>X</button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* 3. FOTOS E VÍDEOS */}
         <div className="form-card">
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <h2 className="card-title" style={{ margin: 0 }}>Fotos e vídeos do produto</h2>
@@ -1265,14 +1539,7 @@ export default function ProductForm() {
         {form.product_type === 'physical' && (
           <div className="form-card">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h2 className="card-title" style={{ margin: 0 }}>Peso e dimensões</h2>
-              <button
-                type="button"
-                className="btn-ai-generate"
-                onClick={() => setForm({ ...form, weight: 1.5, length: 25, width: 15, height: 10 })}
-              >
-                <Sparkles size={12} /> Gerar com IA
-              </button>
+              <h2 className="card-title" style={{ margin: 0 }}>Dimensões e Especificações Técnicas</h2>
             </div>
 
             <div className="form-row four-cols">
@@ -1313,6 +1580,42 @@ export default function ProductForm() {
                   onChange={(e) => setForm({ ...form, height: parseFloat(e.target.value) || 0 })}
                 />
               </div>
+            </div>
+
+            <div className="specifications-editor" style={{ marginTop: 24 }}>
+              <div className="specifications-editor-header">
+                <div>
+                  <h3>Especificações técnicas</h3>
+                  <p className="field-hint">Os campos mudam inteligentemente de acordo com a categoria selecionada.</p>
+                </div>
+                <button type="button" className="btn-secondary-action" onClick={addSpecification}>
+                  <Plus size={14} /> Adicionar linha
+                </button>
+              </div>
+              {form.specifications.length > 0 ? (
+                <div className="specifications-table-wrapper">
+                  <table className="specifications-table">
+                    <thead>
+                      <tr><th>Característica</th><th>Valor</th><th aria-label="Ações" /></tr>
+                    </thead>
+                    <tbody>
+                      {form.specifications.map((specification, index) => (
+                        <tr key={`${specification.label}-${index}`}>
+                          <td><input className="form-input" value={specification.label} onChange={e => updateSpecification(index, 'label', e.target.value)} /></td>
+                          <td><input className="form-input" value={specification.value} onChange={e => updateSpecification(index, 'value', e.target.value)} /></td>
+                          <td>
+                            <button type="button" className="specification-remove-button" title="Remover especificação" aria-label="Remover especificação" onClick={() => removeSpecification(index)}>
+                              <Trash2 size={15} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="specifications-empty">Selecione uma categoria para gerar as especificações automaticamente ou adicione manualmente.</div>
+              )}
             </div>
           </div>
         )}
@@ -1360,55 +1663,6 @@ export default function ProductForm() {
                 <option value="female">Produto feminino</option>
               </select>
             </div>
-          </div>
-        </div>
-
-        {/* 8. CATEGORIAS */}
-        <div className="form-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2 className="card-title" style={{ margin: 0 }}>Categorias</h2>
-            <button
-              type="button"
-              className="btn-ai-generate"
-              onClick={() => alert('IA sugeriu a categoria principal com base no nome do produto.')}
-            >
-              <Sparkles size={12} /> Gerar com IA
-            </button>
-          </div>
-
-          <div className="form-group">
-            <select
-              className="form-select"
-              value={form.category_id}
-              onChange={(e) => setForm({ ...form, category_id: e.target.value })}
-            >
-              <option value="">Selecione uma categoria...</option>
-              {categories.map(c => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
-            
-            {!showAddCategory ? (
-              <button
-                type="button"
-                onClick={() => setShowAddCategory(true)}
-                style={{ background: 'none', border: 'none', color: '#000000', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', textAlign: 'left', marginTop: 4 }}
-              >
-                + Adicionar categorias
-              </button>
-            ) : (
-              <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="Nome da categoria"
-                  value={newCategoryName}
-                  onChange={(e) => setNewCategoryName(e.target.value)}
-                />
-                <button type="button" className="btn-primary-action" onClick={handleCreateCategory}>Criar</button>
-                <button type="button" className="btn-secondary-action" onClick={() => setShowAddCategory(false)}>X</button>
-              </div>
-            )}
           </div>
         </div>
 
@@ -1494,20 +1748,6 @@ export default function ProductForm() {
         <div className="form-card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h2 className="card-title" style={{ margin: 0 }}><Globe size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} /> SEO e busca na loja</h2>
-            <button
-              type="button"
-              className="btn-ai-generate"
-              onClick={() => {
-                setForm({
-                  ...form,
-                  seo_title: `${form.name || 'Produto'} — Melhor Preço | TEKNIX`,
-                  seo_description: `Compre ${form.name || 'este produto'} com o melhor preço, garantia oficial e entrega rápida para todo o Brasil. Confira!`,
-                  tags: 'ferramentas, profissional, eletrica, teknix, garantia'
-                })
-              }}
-            >
-              <Sparkles size={12} /> Gerar com IA
-            </button>
           </div>
 
           <div className="form-group">
@@ -1515,13 +1755,38 @@ export default function ProductForm() {
               Tags
               <span className="field-hint">Adicione palavras-chave para ajudar seus clientes a encontrar este produto na loja.</span>
             </label>
-            <input
-              type="text"
-              className="form-input"
-              placeholder="ferramentas, furadeira, sem fio, 12v"
-              value={form.tags}
-              onChange={(e) => setForm({ ...form, tags: e.target.value })}
-            />
+            <div className="tags-input-wrapper">
+              <div className="tags-list" aria-live="polite">
+                {parseTags(form.tags).map(tag => (
+                  <span className="tag-pill" key={tag}>
+                    <span>{tag}</span>
+                    <button
+                      type="button"
+                      className="tag-remove-button"
+                      aria-label={`Remover tag ${tag}`}
+                      title={`Remover ${tag}`}
+                      onClick={() => handleRemoveTag(tag)}
+                    >
+                      <X size={13} />
+                    </button>
+                  </span>
+                ))}
+                <input
+                  type="text"
+                  className="tags-text-input"
+                  placeholder={parseTags(form.tags).length ? 'Adicionar outra palavra ou frase' : 'ferramentas, furadeira, sem fio, 12v'}
+                  value={tagsInput}
+                  onChange={(e) => setTagsInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      handleAddTag()
+                    }
+                  }}
+                />
+              </div>
+            </div>
+            <span className="field-hint">Digite uma palavra ou frase e pressione Enter para criar um botão. Passe o mouse na tag para removê-la.</span>
           </div>
 
           <div className="form-group">

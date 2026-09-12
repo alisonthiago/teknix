@@ -46,8 +46,11 @@ export default function ProductsList() {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
 
   useEffect(() => {
-    function handleClickOutside() {
-      setOpenMenuId(null)
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as HTMLElement
+      if (!target.closest('.product-dropdown-wrapper')) {
+        setOpenMenuId(null)
+      }
     }
     window.addEventListener('click', handleClickOutside)
     return () => window.removeEventListener('click', handleClickOutside)
@@ -421,6 +424,7 @@ export default function ProductsList() {
                       className="product-name-link"
                       title={product.name}
                       aria-label={`Ver produto ${product.name}`}
+                      onClick={(event) => event.stopPropagation()}
                     >
                       {summarizeProductName(product.name)}
                     </Link>
@@ -473,7 +477,10 @@ export default function ProductsList() {
                           <Link
                             to={`/hub/produtos/${product.id}`}
                             className="product-dropdown-item"
-                            onClick={() => setOpenMenuId(null)}
+                            onClick={(event) => {
+                              event.stopPropagation()
+                              setOpenMenuId(null)
+                            }}
                           >
                             <Package size={15} color="#4b5563" />
                             <span>Ver Visão Geral no HUB</span>
@@ -482,7 +489,10 @@ export default function ProductsList() {
                           <Link
                             to={`/hub/produtos/editar/${product.id}`}
                             className="product-dropdown-item"
-                            onClick={() => setOpenMenuId(null)}
+                            onClick={(event) => {
+                              event.stopPropagation()
+                              setOpenMenuId(null)
+                            }}
                           >
                             <Edit size={15} color="#2563eb" />
                             <span>Editar Cadastro</span>

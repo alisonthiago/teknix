@@ -68,7 +68,7 @@ export default function CartTray() {
                     </g>
                   </svg>
                 </button>
-                <Link to={`/${item.sku || item.id}`}>
+                <Link to={`/${item.slug || item.sku || item.id}`}>
                   {item.image ? (
                     <img src={item.image} alt={item.name} className="teknix-cart-tray-img" />
                   ) : (

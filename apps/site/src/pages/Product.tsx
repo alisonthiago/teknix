@@ -267,6 +267,7 @@ export default function Product() {
       id: currentProduct.id,
       name: currentProduct.name,
       sku: currentProduct.sku || currentProduct.id,
+      slug: currentProduct.slug || currentProduct.id,
       price: basePrice,
       promo_price: finalPrice,
       image: displayProductImages[0] || productImages[0],
@@ -284,6 +285,7 @@ export default function Product() {
       id: currentProduct.id,
       name: currentProduct.name,
       sku: currentProduct.sku || currentProduct.id,
+      slug: currentProduct.slug || currentProduct.id,
       price: basePrice,
       promo_price: finalPrice,
       image: displayProductImages[0] || productImages[0],
@@ -727,19 +729,9 @@ export default function Product() {
                   {activeOverviewTab === 'desc' && (
                     <div className="pdp-gallery-description-content">
                       <div className={`pdp-tab-collapsible-wrapper ${!isDescriptionExpanded ? 'collapsed' : ''}`}>
-                        <div className="pdp-gallery-description-text">
-                          {currentProduct.description || (
-                            `Experimente a máxima potência e versatilidade com o Kit Chave de Impacto 21V e Jogo de Soquetes 46 Peças!
-
-Tenha uma ferramenta profissional, ergonômica e robusta, com torque elevado de 350 N.m capaz de atender desde manutenções automotivas e trocas de rodas até montagens estruturais pesadas em canteiros de obras.
-
-O kit acompanha bateria de íons de lítio 21V com indicador de nível de carga, carregador inteligente rápido bivolt (127V/220V) e estojo completo com 46 peças e soquetes forjados em cromo-vanádio de alta resistência ao impacto.
-
-Principais Destaques:
-• Motor Brushless de alta performance sem escovas de carvão, garantindo menor aquecimento e maior durabilidade.
-• Iluminação LED frontal embutida para trabalho em áreas de pouca luminosidade ou caixas de rodas.
-• Seletor eletrônico de velocidade variável e reversão de sentido de rotação instantâneo.
-• Empunhadura emborrachada antiderrapante com distribuição de peso balanceada para longas jornadas de trabalho.`
+                        <div className="pdp-gallery-description-text" style={{ whiteSpace: 'pre-wrap' }}>
+                          {currentProduct.description ? currentProduct.description : (
+                            `Experimente a máxima potência e versatilidade! Produto com alto desempenho e qualidade.`
                           )}
                         </div>
                         {!isDescriptionExpanded && <div className="pdp-tab-fade-overlay" />}
@@ -775,48 +767,44 @@ Principais Destaques:
                             <tbody>
                               <tr>
                                 <th>Marca</th>
-                                <td>{currentProduct.brand || 'Bomvink'}</td>
+                                <td>{currentProduct.brand || 'Não informada'}</td>
                               </tr>
                               <tr>
                                 <th>Modelo</th>
-                                <td>{currentProduct.name || 'Kit Chave De Impacto 21V'}</td>
+                                <td>{currentProduct.model || currentProduct.name}</td>
                               </tr>
                               <tr>
                                 <th>SKU / Código</th>
-                                <td><code>{currentProduct.sku || 'BOM-9146-21V'}</code></td>
+                                <td><code>{currentProduct.sku}</code></td>
                               </tr>
-                              <tr>
-                                <th>Tensão da Bateria</th>
-                                <td>21V Íon-Lítio Recarregável</td>
-                              </tr>
-                              <tr>
-                                <th>Torque Máximo</th>
-                                <td>350 N.m</td>
-                              </tr>
-                              <tr>
-                                <th>Velocidade sem Carga</th>
-                                <td>0 a 2.800 RPM</td>
-                              </tr>
-                              <tr>
-                                <th>Frequência de Impactos</th>
-                                <td>0 a 3.200 IPM</td>
-                              </tr>
-                              <tr>
-                                <th>Encaixe do Mandril</th>
-                                <td>Quadrado de 1/2" (12.7 mm) com pino trava</td>
-                              </tr>
-                              <tr>
-                                <th>Alimentação do Carregador</th>
-                                <td>Bivolt Automático (110V / 220V — 50Hz/60Hz)</td>
-                              </tr>
-                              <tr>
-                                <th>Acessórios Inclusos</th>
-                                <td>Jogo de Soquetes 46 Peças, Maleta Rígida Reforçada, Bateria 21V, Carregador</td>
-                              </tr>
-                              <tr>
-                                <th>Garantia de Fábrica</th>
-                                <td>90 dias oficiais contra defeitos de fabricação</td>
-                              </tr>
+                              {Array.isArray(currentProduct.specifications) && currentProduct.specifications.length > 0 ? (
+                                currentProduct.specifications.map((spec: any, idx: number) => {
+                                  let label = '';
+                                  let value = '';
+                                  if (typeof spec === 'string') {
+                                    const parts = spec.split(':');
+                                    label = parts[0];
+                                    value = parts.slice(1).join(':').trim();
+                                  } else if (spec && typeof spec === 'object') {
+                                    label = spec.label || spec.name || '';
+                                    value = spec.value || '';
+                                  }
+                                  
+                                  if (!label) return null;
+                                  return (
+                                    <tr key={idx}>
+                                      <th>{label}</th>
+                                      <td>{value}</td>
+                                    </tr>
+                                  );
+                                })
+                              ) : (
+                                <tr>
+                                  <td colSpan={2} style={{ textAlign: 'center', color: '#666', padding: '20px' }}>
+                                    Nenhuma especificação adicional cadastrada para este produto.
+                                  </td>
+                                </tr>
+                              )}
                             </tbody>
                           </table>
                         </div>

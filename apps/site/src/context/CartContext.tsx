@@ -10,6 +10,7 @@ export interface CartItem {
   id: string
   name: string
   sku: string
+  slug?: string
   price: number
   promo_price?: number | null
   image: string

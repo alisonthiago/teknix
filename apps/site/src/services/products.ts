@@ -116,7 +116,11 @@ function mapProduct(p: any): Product {
     images: [...new Set([meta?.seo?.store_image || p.main_image || p.image_url || galleryImages[0] || images[0], ...galleryImages, ...images].filter(Boolean))],
     short_description: meta?.short_description || p.short_description || '',
     description: meta?.store_description || p.notes || p.description || '',
-    specifications: Array.isArray(specs) ? specs : (Array.isArray(p.specifications) ? p.specifications : []),
+    specifications: Array.isArray(specs)
+      ? specs
+      : (Array.isArray(specs?.product_specifications)
+        ? specs.product_specifications.map((item: any) => `${item.label}: ${item.value}`)
+        : (Array.isArray(p.specifications) ? p.specifications : [])),
     editorial_showcase: (() => {
       const rawShowcase = {
         ...((meta?.seo?.editorial_showcase && typeof meta.seo.editorial_showcase === 'object') ? meta.seo.editorial_showcase : {}),

@@ -19,6 +19,7 @@ export default function SavedItems() {
       price: item.price,
       image: item.image_url || '',
       sku: item.sku || item.id,
+      slug: item.slug || item.id,
       stock: 99
     })
     setAddedIds(prev => ({ ...prev, [item.id]: true }))
@@ -36,6 +37,7 @@ export default function SavedItems() {
         price: item.price,
         image: item.image_url || '',
         sku: item.sku || item.id,
+        slug: item.slug || item.id,
         stock: 99
       })
     })
