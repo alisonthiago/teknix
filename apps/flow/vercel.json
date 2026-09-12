@@ -1,6 +1,5 @@
 {
   "framework": "nextjs",
-  "buildCommand": "pnpm build",
   "rewrites": [
     {
       "source": "/webhooks/melhor-envio",
@@ -18,4 +17,3 @@
     }
   ]
 }
-
