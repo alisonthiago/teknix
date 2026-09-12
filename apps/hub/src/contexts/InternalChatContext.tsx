@@ -323,6 +323,16 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
 
       // 2. Conversas Salvas no Banco
       dbConversations.forEach((c: any) => {
+        const isDirect = c.type === 'DIRECT' || c.id.startsWith('direct-')
+        if (isDirect && currentUid) {
+          // Garante que o usuário atual é participante desta conversa direta
+          const isParticipant = c.id.includes(currentUid) ||
+            (Array.isArray(c.members) && c.members.some((m: any) => m.id === currentUid))
+          if (!isParticipant) {
+            return // Ignora DMs privadas de outros colaboradores
+          }
+        }
+
         const existing = convMap.get(c.id)
         const last = lastMsgMap.get(c.id)
 
@@ -348,13 +358,16 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
         })
       })
 
-      // 3. Conversas Diretas Determinísticas com todos os colaboradores conhecidos
+      // 3. Conversas Diretas Determinísticas com mensagens ou ativa no momento
       if (currentUid && profiles && profiles.length > 0) {
         profiles.forEach((p: any) => {
           if (p.id !== currentUid) {
             const directId = getDirectConvId(currentUid, p.id)
-            if (!convMap.has(directId)) {
-              const last = lastMsgMap.get(directId)
+            const last = lastMsgMap.get(directId)
+            const isViewingDirect = activeChatRoomIdRef.current === directId
+
+            // Só insere no mapa se houver mensagem real ou se for a conversa aberta atualmente
+            if (!convMap.has(directId) && (last || isViewingDirect)) {
               const unreadCount = recentMsgs.filter((m: any) => {
                 if (m.conversation_id !== directId) return false
                 if (m.sender_id === currentUid) return false
@@ -362,8 +375,6 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
                 if (!lastRead) return true
                 return new Date(m.created_at).getTime() > new Date(lastRead).getTime()
               }).length
-
-              const isViewingDirect = activeChatRoomIdRef.current === directId
 
               convMap.set(directId, {
                 id: directId,

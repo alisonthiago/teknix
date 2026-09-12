@@ -133,16 +133,54 @@ export default function FloatingMessenger() {
   const directChats = useMemo(() => {
     const map = new Map<string, typeof conversations[0]>()
     conversations
-      .filter(c => c.type === 'DIRECT' || c.id.startsWith('direct-'))
+      .filter(c => {
+        const isDirect = c.type === 'DIRECT' || c.id.startsWith('direct-')
+        if (!isDirect) return false
+        if (currentUser?.id) {
+          const isParticipant = c.id.includes(currentUser.id) ||
+            (Array.isArray(c.members) && c.members.some((m: any) => m.id === currentUser.id))
+          if (!isParticipant) return false
+        }
+        // Apenas conversas com mensagens OU que sejam a conversa aberta no momento
+        return !!c.last_message || c.id === activeConversation?.id
+      })
       .forEach(c => {
-        if (!map.has(c.id)) map.set(c.id, c)
+        const colab = getConversationColab(c, currentUser?.id, collaborators)
+        const partnerKey = colab?.id || c.id
+        if (!map.has(partnerKey)) {
+          map.set(partnerKey, c)
+        } else {
+          // Mantém a que tiver a mensagem mais recente
+          const existing = map.get(partnerKey)!
+          const existingTime = existing.last_message?.created_at ? new Date(existing.last_message.created_at).getTime() : 0
+          const curTime = c.last_message?.created_at ? new Date(c.last_message.created_at).getTime() : 0
+          if (curTime > existingTime) {
+            map.set(partnerKey, c)
+          }
+        }
       })
     return Array.from(map.values())
-  }, [conversations])
+  }, [conversations, currentUser?.id, collaborators, activeConversation?.id])
+
+  const activeColabIds = useMemo(() => {
+    const ids = new Set<string>()
+    directChats.forEach(c => {
+      const colab = getConversationColab(c, currentUser?.id, collaborators)
+      if (colab?.id) ids.add(colab.id)
+    })
+    return ids
+  }, [directChats, currentUser?.id, collaborators])
 
   const otherCollaborators = useMemo(() => {
-    return collaborators.filter(c => c.id !== currentUser?.id)
-  }, [collaborators, currentUser?.id])
+    return collaborators.filter(c => {
+      if (c.id === currentUser?.id) return false
+      if (currentUser?.email && c.email?.toLowerCase() === currentUser.email.toLowerCase()) return false
+      if (currentUser?.name && c.name.toLowerCase() === currentUser.name.toLowerCase()) return false
+      // Se já possui conversa ativa acima, não duplica na seção de iniciar
+      if (activeColabIds.has(c.id)) return false
+      return true
+    })
+  }, [collaborators, currentUser?.id, currentUser?.email, currentUser?.name, activeColabIds])
 
   // Filtragem pela busca
   const filteredDirectChats = useMemo(() => {
@@ -347,58 +385,60 @@ export default function FloatingMessenger() {
             </div>
 
             {/* Seção 3: Iniciar com Colaboradores */}
-            <div className="hub-chat-list-section">
-              <p className="hub-chat-section-label">
-                <Users size={14} color="#64748b" /> Iniciar com Colaborador
-              </p>
-              {filteredCollaborators.map(c => (
-                <button
-                  key={c.id}
-                  onClick={() => handleSelectCollaborator(c.id, c.name)}
-                  className="hub-chat-item-btn"
-                  style={{ padding: '10px 18px' }}
-                >
-                  <div className="hub-chat-item-left">
-                    <div className="hub-chat-avatar-wrap">
-                      {c.photo_url ? (
-                        <img
-                          src={c.photo_url}
-                          alt={c.name}
-                          className="hub-chat-avatar-img"
-                          style={{ width: 36, height: 36 }}
-                        />
-                      ) : (
-                        <div className="hub-chat-avatar-placeholder" style={{ width: 36, height: 36, fontSize: 13 }}>
-                          {c.name.slice(0, 1).toUpperCase()}
-                        </div>
-                      )}
-                      <span
-                        className={`hub-chat-presence-indicator ${c.online ? 'online' : 'offline'}`}
-                        title={c.presenceStatus || (c.online ? 'Online' : 'Offline')}
-                      />
-                    </div>
-                    <div className="hub-chat-item-text">
-                      <p className="hub-chat-item-name" style={{ fontSize: 13 }}>{c.name}</p>
-                      <p className="hub-chat-item-msg" style={{ fontSize: 11 }}>{c.role || 'Colaborador'}</p>
-                    </div>
-                  </div>
-                  <span
-                    style={{
-                      fontSize: 11,
-                      fontWeight: 600,
-                      padding: '2px 8px',
-                      borderRadius: 9999,
-                      marginLeft: 8,
-                      flexShrink: 0,
-                      backgroundColor: c.online ? '#ecfdf5' : '#f1f5f9',
-                      color: c.online ? '#16a34a' : '#94a3b8'
-                    }}
+            {filteredCollaborators.length > 0 && (
+              <div className="hub-chat-list-section">
+                <p className="hub-chat-section-label">
+                  <Users size={14} color="#64748b" /> Iniciar com Colaborador
+                </p>
+                {filteredCollaborators.map(c => (
+                  <button
+                    key={c.id}
+                    onClick={() => handleSelectCollaborator(c.id, c.name)}
+                    className="hub-chat-item-btn"
+                    style={{ padding: '10px 18px' }}
                   >
-                    {c.presenceStatus || (c.online ? 'Online' : 'Offline')}
-                  </span>
-                </button>
-              ))}
-            </div>
+                    <div className="hub-chat-item-left">
+                      <div className="hub-chat-avatar-wrap">
+                        {c.photo_url ? (
+                          <img
+                            src={c.photo_url}
+                            alt={c.name}
+                            className="hub-chat-avatar-img"
+                            style={{ width: 36, height: 36 }}
+                          />
+                        ) : (
+                          <div className="hub-chat-avatar-placeholder" style={{ width: 36, height: 36, fontSize: 13 }}>
+                            {c.name.slice(0, 1).toUpperCase()}
+                          </div>
+                        )}
+                        <span
+                          className={`hub-chat-presence-indicator ${c.online ? 'online' : 'offline'}`}
+                          title={c.presenceStatus || (c.online ? 'Online' : 'Offline')}
+                        />
+                      </div>
+                      <div className="hub-chat-item-text">
+                        <p className="hub-chat-item-name" style={{ fontSize: 13 }}>{c.name}</p>
+                        <p className="hub-chat-item-msg" style={{ fontSize: 11 }}>{c.role || 'Colaborador'}</p>
+                      </div>
+                    </div>
+                    <span
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 600,
+                        padding: '2px 8px',
+                        borderRadius: 9999,
+                        marginLeft: 8,
+                        flexShrink: 0,
+                        backgroundColor: c.online ? '#ecfdf5' : '#f1f5f9',
+                        color: c.online ? '#16a34a' : '#94a3b8'
+                      }}
+                    >
+                      {c.presenceStatus || (c.online ? 'Online' : 'Offline')}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       ) : (
