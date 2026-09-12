@@ -58,8 +58,8 @@
 }
 .dsvia-header-home .dsvia-brand-logo { color: #000000; }
 .dsvia-header-home .dsvia-brand-logo svg { filter: contrast(1.05); }
-.dsvia-header-home .dsvia-search-form { border-color: transparent; border-radius: 9999px; box-shadow: 0 1px 2px rgb(0 0 0 / .12); }
-.dsvia-header-home .dsvia-search-form:focus-within { border-color: #b5f500; box-shadow: 0 0 0 3px rgb(181 245 0 / .28); border-radius: 9999px; }
+.dsvia-header-home .dsvia-search-form { border-color: transparent; border-radius: 8px; box-shadow: 0 1px 2px rgb(0 0 0 / .12); }
+.dsvia-header-home .dsvia-search-form:focus-within { border-color: #b5f500; box-shadow: 0 0 0 3px rgb(181 245 0 / .28); border-radius: 8px; }
 .dsvia-header-home .dsvia-actions-right :is(.dsvia-cep-trigger, .dsvia-account-capsule, .dsvia-icon-action),
 .dsvia-header-home .dsvia-actions-right .dsvia-account-greeting,
 .dsvia-header-home .dsvia-actions-right .dsvia-account-subtext,
@@ -284,16 +284,17 @@
   align-items: center;
   background: #ffffff;
   border: 1.5px solid var(--tkn-border-color);
-  border-radius: 9999px;
+  border-radius: 8px;
   height: 48px;
-  padding: 0 var(--tkn-space-16) 0 var(--tkn-space-20);
+  padding: 0 16px;
+  gap: 10px;
   transition: all 0.2s ease;
 }
 
 .dsvia-search-form:focus-within {
   border-color: var(--tkn-black);
   box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.06);
-  border-radius: 9999px;
+  border-radius: 8px;
 }
 
 .dsvia-search-input,
@@ -309,7 +310,7 @@
   color: var(--tkn-black);
   background: transparent !important;
   font-family: var(--cb-font);
-  padding: 0 !important;
+  padding: 0 4px !important;
   box-shadow: none !important;
   -webkit-appearance: none !important;
   -moz-appearance: none !important;
@@ -1874,15 +1875,16 @@
 
   .dsvia-search-form {
     margin-top: 0;
-    border-radius: 9999px !important;
+    border-radius: 8px !important;
     height: 42px;
-    padding: 0 14px 0 18px;
+    padding: 0 14px;
+    gap: 8px;
   }
 
   .dsvia-search-input {
     height: 38px;
     font-size: var(--tkn-text-13);
-    border-radius: 9999px;
+    border-radius: 8px;
   }
 
   /* Location Pill (Mobile - abaixo da barra de busca) */

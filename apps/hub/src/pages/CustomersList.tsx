@@ -156,11 +156,19 @@ export default function CustomersList() {
 
   async function handleDeleteCustomers(ids: string[]) {
     try {
-      await supabase.from('customers').delete().in('id', ids)
+      // Desvincular pedidos para evitar violação de integridade referencial
+      await supabase.from('store_orders').update({ customer_id: null }).in('customer_id', ids)
+      const { error } = await supabase.from('customers').delete().in('id', ids)
+      if (error) {
+        console.error('Erro ao excluir clientes no banco:', error)
+        alert(`Não foi possível excluir: ${error.message}`)
+        return
+      }
       setCustomers(prev => prev.filter(c => !ids.includes(c.id)))
-    } catch (e) {
+      await fetchCustomers()
+    } catch (e: any) {
       console.error('Erro ao excluir clientes:', e)
-      alert('Erro ao excluir clientes.')
+      alert('Erro ao excluir clientes: ' + (e?.message || ''))
     }
   }
 

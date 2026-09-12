@@ -60,16 +60,11 @@ export default function FinanceOverview() {
 
   return (
     <div className="finance-page">
-      {/* ── Page Header ── */}
-      <div className="page-header">
-        <div className="header-info">
-          <h1>Financeiro</h1>
-        </div>
-        <div className="header-actions">
-          <Link to="/hub/pagamentos" className="btn btn-secondary btn-action-primary">
-            <CreditCard size={14} /> Configurar Gateway
-          </Link>
-        </div>
+      {/* ── Top Actions ── */}
+      <div className="hub-table-top-actions" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+        <Link to="/hub/pagamentos" className="btn btn-secondary btn-action-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <CreditCard size={14} /> Configurar Gateway
+        </Link>
       </div>
 
       {/* ── KPI Grid ── */}

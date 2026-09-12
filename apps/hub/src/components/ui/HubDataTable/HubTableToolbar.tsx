@@ -1,6 +1,7 @@
 import { useRef, useEffect } from 'react'
-import { SlidersHorizontal, ArrowUpDown, Search } from 'lucide-react'
+import { SlidersHorizontal, ArrowUpDown, Search, X } from 'lucide-react'
 import { HubExportMenu } from './HubExportMenu'
+import type { BulkAction } from './HubBulkActions'
 import type { ExportColumn, ExportRow } from '../../../lib/exportTable'
 import './HubDataTable.css'
 
@@ -27,6 +28,9 @@ interface HubTableToolbarProps {
   activeFilters?: string
   headerActions?: React.ReactNode
   extra?: React.ReactNode
+  bulkActions?: BulkAction[]
+  onClearSelection?: () => void
+  entityLabel?: string
 }
 
 export function HubTableToolbar({
@@ -46,7 +50,10 @@ export function HubTableToolbar({
   exportFilename,
   activeFilters,
   headerActions,
-  extra
+  extra,
+  bulkActions,
+  onClearSelection,
+  entityLabel = 'registro'
 }: HubTableToolbarProps) {
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -61,6 +68,58 @@ export function HubTableToolbar({
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
   }, [])
+
+  // Quando houver itens selecionados, a toolbar se transforma na barra de ações em massa
+  if (selectedIds.length > 0 && bulkActions && bulkActions.length > 0) {
+    const count = selectedIds.length
+    const countText = `${count} ${count === 1 ? entityLabel : `${entityLabel}s`} ${count === 1 ? 'selecionado' : 'selecionados'}`
+
+    return (
+      <div className="hub-table-toolbar hub-table-toolbar-selection" role="toolbar" aria-label="Ações de seleção">
+        <div className="hub-toolbar-selection-left" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', flex: '1 1 auto' }}>
+          <span className="hub-bulk-count">{countText}</span>
+          {onClearSelection && (
+            <button
+              className="hub-toolbar-btn hub-bulk-clear-btn"
+              onClick={onClearSelection}
+              aria-label="Desmarcar seleção"
+              title="Desmarcar tudo"
+            >
+              <X size={13} style={{ marginRight: 4 }} />
+              Desmarcar
+            </button>
+          )}
+          {bulkActions.map((action, i) => (
+            <button
+              key={i}
+              className={`hub-toolbar-btn hub-bulk-action-btn${action.variant === 'danger' ? ' danger' : ''}`}
+              onClick={() => action.action(selectedIds)}
+              aria-label={action.label}
+            >
+              {action.icon}
+              {action.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="hub-toolbar-selection-right" style={{ display: 'flex', alignItems: 'center', gap: 8, marginLeft: 'auto' }}>
+          {exportColumns && (
+            <div className="hub-toolbar-export-container">
+              <HubExportMenu
+                columns={exportColumns}
+                allRows={exportRows}
+                selectedIds={selectedIds}
+                getRowById={getRowById}
+                exportTitle={exportTitle}
+                filename={exportFilename}
+                activeFilters={activeFilters}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
 
   const currentSortLabel = sortOptions?.find(o => o.value === currentSort)?.label || sortOptions?.[0]?.label || 'Mais novo'
 

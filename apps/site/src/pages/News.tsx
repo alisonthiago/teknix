@@ -1,14 +1,49 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { supabase } from '../lib/supabase'
 import NewsHeader from '../components/NewsHeader'
 import NewsFooter from '../components/NewsFooter'
 import './News.css'
 import './NewsMobileFix.css'
 
+type PublishedPost = {
+  id: string
+  title: string
+  slug: string
+  summary: string | null
+  cover_image: string | null
+  tags: string[] | null
+  published_at: string | null
+}
+
+function postTag(post: PublishedPost) {
+  return post.tags?.[0] || 'TEKNIX NEWS'
+}
+
+function postDate(post: PublishedPost) {
+  return post.published_at
+    ? new Date(post.published_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
+    : ''
+}
+
 export default function News() {
+  const [posts, setPosts] = useState<PublishedPost[]>([])
 
   useEffect(() => {
     document.title = 'Home | Teknix News'
+    void supabase
+      .from('blog_posts')
+      .select('id,title,slug,summary,cover_image,tags,published_at')
+      .eq('status', 'published')
+      .order('published_at', { ascending: false })
+      .limit(5)
+      .then(({ data, error }) => {
+        if (error) {
+          console.error('Não foi possível carregar as notícias publicadas:', error)
+          return
+        }
+        setPosts((data || []) as PublishedPost[])
+      })
   }, [])
 
   return (
@@ -55,185 +90,52 @@ export default function News() {
           </div>
         </div>
 
-        {/* 3. NOTÍCIAS RECENTES (ESTRUTURA EXATA DO HTML DA REFERÊNCIA) */}
+        {/* 3. NOTÍCIAS RECENTES — conteúdo publicado no blog */}
         <div id="block-noticiasdestacadas">
           <div className="news-section">
             <div>
-              <div className="news-title">
-                <h2>Notícias Recentes</h2>
-                <div className="all-news-url">
-                  <Link to="/noticias">VER TODAS AS NOTÍCIAS</Link>
-                </div>
-              </div>
-
-              <div className="news-container">
-                {/* Coluna 1: Notícia Principal (Big News) */}
+              {posts.length > 0 && <div className="news-container">
                 <div className="views-element-container">
-                <div className="news-item big-news" role="link" tabIndex={0} onClick={() => { window.location.href = '/blog/resultados-segundo-trimestre-2026' }} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') window.location.href = '/blog/resultados-segundo-trimestre-2026' }}>
-                    <div className="news-tags">Resultados</div>
-                    <div className="news-images">
-                      <a href="#noticia-1">
-                        <img
-                          loading="lazy"
-                          src="/news-reference/imagen-destacada---1440x580px_192.jpg.webp"
-                          width={476}
-                          height={242}
-                          alt="Resultados Financeiros do Segundo Trimestre de 2026"
-                        />
-                      </a>
-                    </div>
-                    <div className="news-date">05 Ago 2026</div>
-                    <div className="news-body">
-                      <div>
-                        <h2>
-                          <a href="#noticia-1">
-                            Receita do Mercado Livre no 2º trimestre de 2026 alcança US$ 10 bilhões, à medida que o maior engajamento fortalece sua vantagem competitiva
-                          </a>
-                        </h2>
-                        <div className="short-description">
-                          <ul>
-                            <li>
-                              <strong>Financeiro</strong>: A receita líquida cresceu 50% na comparação anual, alcançando US$ 10,2 bilhões.
-                            </li>
-                          </ul>
+                  {(() => {
+                    const post = posts[0]
+                    return <div className="news-item big-news">
+                      <div className="news-tags">{postTag(post)}</div>
+                      <div className="news-images">
+                        <Link to={`/blog/${post.slug}`}>
+                          {post.cover_image && <img loading="lazy" src={post.cover_image} width={476} height={242} alt={post.title} />}
+                        </Link>
+                      </div>
+                      <div className="news-date">{postDate(post)}</div>
+                      <div className="news-body">
+                        <div>
+                          <h2><Link to={`/blog/${post.slug}`}>{post.title}</Link></h2>
+                          {post.summary && <div className="short-description"><ul><li>{post.summary}</li></ul></div>}
                         </div>
-                      </div>
-                      <div className="news-url">
-                        <a href="#noticia-1">
-                          Ver mais
-                          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ marginLeft: 4 }}>
-                            <path d="M3 7H11M11 7L7 3M11 7L7 11" stroke="#000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        </a>
+                        <div className="news-url"><Link to={`/blog/${post.slug}`}>Ver mais<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ marginLeft: 4 }}><path d="M3 7H11M11 7L7 3M11 7L7 11" stroke="#000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg></Link></div>
                       </div>
                     </div>
-                  </div>
+                  })()}
                 </div>
-
-                {/* Coluna 2: Lista de Notícias Secundárias */}
                 <div className="views-element-container">
                   <div className="news-list mobile-offset">
-
-                    {/* Notícia 1 */}
-                    <div className="news-item">
-                      <div className="news-tags">Resultados</div>
+                    {posts.slice(1).map(post => <div className="news-item" key={post.id}>
+                      <div className="news-tags">{postTag(post)}</div>
                       <div className="news-images">
-                        <Link to="/blog/noticia-1">
-                          <img
-                            loading="lazy"
-                            src="/news-reference/imagen-destacada---1440x580px_192.jpg"
-                            width={240}
-                            height={155}
-                            alt="Resultados Financeiros do Segundo Trimestre de 2026"
-                          />
+                        <Link to={`/blog/${post.slug}`}>
+                          {post.cover_image && <img loading="lazy" src={post.cover_image} width={240} height={155} alt={post.title} />}
                         </Link>
                       </div>
                       <div className="news-body">
-                        <div className="news-tags">Resultados</div>
-                        <div>
-                          <h2>
-                            <Link to="/blog/noticia-1">
-                              Receita do Mercado Livre no 2º trimestre de 2026 alcança US$ 10 bilhões, à medida que o maior engajamento fortalece sua vantagem competitiva
-                            </Link>
-                          </h2>
-                        </div>
-                        <div className="news-url">
-                          <Link to="/blog/noticia-1">See more</Link>
-                        </div>
+                        <div className="news-tags">{postTag(post)}</div>
+                        <div><h2><Link to={`/blog/${post.slug}`}>{post.title}</Link></h2></div>
+                        <div className="news-url"><Link to={`/blog/${post.slug}`}>Ver mais</Link></div>
                       </div>
-                    </div>
-
-                    {/* Notícia 2 */}
-                    <div className="news-item">
-                      <div className="news-tags">Mercado Pago</div>
-                      <div className="news-images">
-                        <Link to="/blog/noticia-2">
-                          <img
-                            loading="lazy"
-                            src="/news-reference/imagen-destacada---1440x580px_189.jpg"
-                            width={240}
-                            height={155}
-                            alt="Mercado Pago é reconhecida como uma das principais empresas fintech do mundo em 2026"
-                          />
-                        </Link>
-                      </div>
-                      <div className="news-body">
-                        <div className="news-tags">Mercado Pago</div>
-                        <div>
-                          <h2>
-                            <Link to="/blog/noticia-2">
-                              Mercado Pago é reconhecido pela CNBC como uma das principais fintechs do mundo em 2026
-                            </Link>
-                          </h2>
-                        </div>
-                        <div className="news-url">
-                          <Link to="/blog/noticia-2">See more</Link>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Notícia 3 */}
-                    <div className="news-item">
-                      <div className="news-tags">Cultura</div>
-                      <div className="news-images">
-                        <Link to="/blog/noticia-3">
-                          <img
-                            loading="lazy"
-                            src="/news-reference/imagen-destacada---1440x580px_187.jpg"
-                            width={240}
-                            height={155}
-                            alt="Como combater a falsificação e a pirataria durante a Copa do Mundo de 2026"
-                          />
-                        </Link>
-                      </div>
-                      <div className="news-body">
-                        <div className="news-tags">Cultura</div>
-                        <div>
-                          <h2>
-                            <Link to="/blog/noticia-3">
-                              Version en Português Mercado Livre e FIFA unem forças para combater a falsificação e a pirataria durante a Copa do Mundo 2026
-                            </Link>
-                          </h2>
-                        </div>
-                        <div className="news-url">
-                          <Link to="/blog/noticia-3">See more</Link>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Notícia 4 */}
-                    <div className="news-item">
-                      <div className="news-tags">Relatório de Transparência</div>
-                      <div className="news-images">
-                        <Link to="/blog/noticia-4">
-                          <img
-                            loading="lazy"
-                            src="/news-reference/imagen-destacada---1440x580px_200.jpg"
-                            width={240}
-                            height={155}
-                            alt="Nosso Código de Ética: o compromisso de fazer o que é certo"
-                          />
-                        </Link>
-                      </div>
-                      <div className="news-body">
-                        <div className="news-tags">Relatório de Transparência</div>
-                        <div>
-                          <h2>
-                            <Link to="/blog/noticia-4">
-                              Nosso Código de Ética: o compromisso de fazer o que é certo
-                            </Link>
-                          </h2>
-                        </div>
-                        <div className="news-url">
-                          <Link to="/blog/noticia-4">See more</Link>
-                        </div>
-                      </div>
-                    </div>
-
+                    </div>)}
                   </div>
                 </div>
+              </div>}
 
-              </div>
+              {posts.length === 0 && <div className="news-empty">Nenhuma notícia publicada no momento.</div>}
 
               <div className="news-title">
                 <div className="all-news-url-mobile">

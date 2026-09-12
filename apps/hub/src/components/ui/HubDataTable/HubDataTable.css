@@ -406,7 +406,41 @@
   color: #991b1b;
 }
 
-/* ── Bulk Actions Bar (Padrão Oficial HUB: Branco, Clean) ── */
+.hub-table-toolbar-selection {
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  animation: hubBulkSlideIn 0.15s ease;
+}
+
+.hub-toolbar-selection-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex: 1 1 auto;
+}
+
+.hub-toolbar-selection-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.hub-bulk-clear-btn {
+  color: #4b5563 !important;
+  font-weight: 500 !important;
+}
+
+.hub-bulk-clear-btn:hover {
+  color: #111827 !important;
+  background: #f3f4f6 !important;
+}
+
 .hub-bulk-bar {
   display: flex;
   align-items: center;

@@ -203,8 +203,8 @@ export function HubDataTable<T extends { id: string }>({
           </div>
         )}
 
-        {/* ── Toolbar Unificada (Busca + Tabs + Ações + Export — Tudo na mesma seção reta) ── */}
-        {(onSearchChange || headerActions || toolbarExtra) && (
+        {/* ── Toolbar Unificada (Busca + Tabs + Ações + Export + Bulk Actions tudo integrado) ── */}
+        {(onSearchChange || headerActions || toolbarExtra || (selectedIds.length > 0 && bulkActions.length > 0)) && (
           <HubTableToolbar
             searchValue={searchValue}
             onSearchChange={onSearchChange || (() => {})}
@@ -223,15 +223,8 @@ export function HubDataTable<T extends { id: string }>({
             activeFilters={activeFilters}
             headerActions={headerActions}
             extra={toolbarExtra}
-          />
-        )}
-
-        {/* ── Bulk actions ── */}
-        {selectedIds.length > 0 && bulkActions.length > 0 && (
-          <HubBulkActions
-            selectedIds={selectedIds}
-            onClear={() => setSelectedIds([])}
-            actions={bulkActions}
+            bulkActions={bulkActions}
+            onClearSelection={() => setSelectedIds([])}
             entityLabel={entityLabel}
           />
         )}
