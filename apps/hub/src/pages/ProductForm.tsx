@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import './ProductForm.css'
 import './ProductCommerce.css'
+import MediaLibraryModal from '../components/MediaLibraryModal'
 import {
   DEFAULT_COMMERCE,
   normalizeCommerce,
@@ -229,6 +230,7 @@ export default function ProductForm() {
   // A aba Storytelling foi removida; mantemos o estado apenas para não
   // desmontar o conteúdo editorial já salvo nos produtos existentes.
   const [activeTab] = useState<'details' | 'storytelling'>('details')
+  const [mainTab, setMainTab] = useState<'basics' | 'pricing' | 'shipping' | 'seo'>('basics')
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     hero: true,
     performance: false,
@@ -266,6 +268,61 @@ export default function ProductForm() {
   const [uploadStatus, setUploadStatus] = useState('')
   const [isDragging, setIsDragging] = useState(false)
   const [previewVideoModal, setPreviewVideoModal] = useState<string | null>(null)
+  const [showQuickFill, setShowQuickFill] = useState(false)
+  const [quickFillText, setQuickFillText] = useState('')
+
+  const handleApplyQuickFill = () => {
+    if (!quickFillText.trim()) return
+    const lines = quickFillText.split('\n')
+    const newSpecs: { label: string; value: string }[] = []
+    
+    lines.forEach(line => {
+      // Parse by colon, dash, or tab
+      const parts = line.split(/[:\t]| - /)
+      if (parts.length >= 2) {
+        const label = parts.shift()?.trim() || ''
+        const value = parts.join(':').trim()
+        if (label && value && label.length < 50) {
+          newSpecs.push({ label, value })
+        }
+      }
+    })
+
+    if (newSpecs.length > 0) {
+      setForm(prev => ({
+        ...prev,
+        specifications: [...prev.specifications, ...newSpecs]
+      }))
+      setQuickFillText('')
+      setShowQuickFill(false)
+    } else {
+      alert("Não foi possível identificar especificações no formato 'Chave: Valor'.")
+    }
+  }
+
+  const [mediaModalState, setMediaModalState] = useState<{ isOpen: boolean; target: string | null }>({ isOpen: false, target: null })
+
+  function handleMediaSelected(url: string) {
+    if (!mediaModalState.target) return
+    
+    if (mediaModalState.target === 'gallery') {
+      handleAddImageUrl(url)
+    } else if (mediaModalState.target === 'hero') {
+      updateShowcase(s => ({ ...s, hero: { ...s.hero, image_url: url } }))
+    } else if (mediaModalState.target === 'performance') {
+      updateShowcase(s => ({ ...s, performance: { ...s.performance, image_url: url } }))
+    } else if (mediaModalState.target.startsWith('model-')) {
+      const idx = parseInt(mediaModalState.target.split('-')[1])
+      updateShowcase(s => {
+        const nextM = [...s.explore_models.models]
+        nextM[idx] = { ...nextM[idx], image_url: url }
+        return { ...s, explore_models: { ...s.explore_models, models: nextM } }
+      })
+    }
+    
+    setMediaModalState({ isOpen: false, target: null })
+  }
+
 
   useEffect(() => {
     fetchCategories()
@@ -1173,7 +1230,7 @@ export default function ProductForm() {
 
           <div
             className={`upload-dropzone ${isDragging ? 'is-dragging' : ''} ${isUploadingMedia ? 'is-uploading' : ''}`}
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => setMediaModalState({ isOpen: true, target: 'gallery' })}
             onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
             onDragLeave={() => setIsDragging(false)}
             onDrop={(e) => {
@@ -1199,7 +1256,7 @@ export default function ProductForm() {
                   <button
                     type="button"
                     className="btn-upload-file"
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={() => setMediaModalState({ isOpen: true, target: 'gallery' })}
                   >
                     <Upload size={13} style={{ verticalAlign: 'middle', marginRight: 4 }} />
                     Subir Fotos / Vídeo
@@ -1534,6 +1591,11 @@ export default function ProductForm() {
             </div>
           </div>
         </div>
+                </>
+              )}
+              {mainTab === 'shipping' && (
+                <>
+
 
         {/* 6. PESO E DIMENSÕES */}
         {form.product_type === 'physical' && (
@@ -1586,12 +1648,35 @@ export default function ProductForm() {
               <div className="specifications-editor-header">
                 <div>
                   <h3>Especificações técnicas</h3>
-                  <p className="field-hint">Os campos mudam inteligentemente de acordo com a categoria selecionada.</p>
+                  <p className="field-hint">Preencha manualmente ou cole um texto para extração automática.</p>
                 </div>
-                <button type="button" className="btn-secondary-action" onClick={addSpecification}>
-                  <Plus size={14} /> Adicionar linha
-                </button>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button type="button" className="btn-secondary-action" onClick={() => setShowQuickFill(!showQuickFill)} style={{ background: '#f8fafc', color: '#3b82f6', borderColor: '#bfdbfe' }}>
+                    <Wand2 size={14} /> Colar Texto
+                  </button>
+                  <button type="button" className="btn-secondary-action" onClick={addSpecification}>
+                    <Plus size={14} /> Adicionar linha
+                  </button>
+                </div>
               </div>
+
+              {showQuickFill && (
+                <div style={{ padding: 16, background: '#f1f5f9', borderRadius: 8, marginBottom: 16 }}>
+                  <p style={{ fontSize: 13, margin: '0 0 8px 0', color: '#475569' }}>Cole o texto com as especificações (use o formato <b>Característica: Valor</b>):</p>
+                  <textarea 
+                    className="form-textarea" 
+                    rows={6} 
+                    value={quickFillText} 
+                    onChange={e => setQuickFillText(e.target.value)}
+                    placeholder="Marca: Newion\nModelo: Lapela Sem Fio\nTorque Máximo: 350 N.m"
+                    style={{ marginBottom: 12 }}
+                  />
+                  <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                    <button type="button" className="btn-secondary-action" onClick={() => setShowQuickFill(false)}>Cancelar</button>
+                    <button type="button" className="btn-primary" onClick={handleApplyQuickFill} style={{ padding: '6px 12px', fontSize: 13, height: 'auto' }}>Extrair e Preencher</button>
+                  </div>
+                </div>
+              )}
               {form.specifications.length > 0 ? (
                 <div className="specifications-table-wrapper">
                   <table className="specifications-table">
@@ -1619,6 +1704,11 @@ export default function ProductForm() {
             </div>
           </div>
         )}
+                </>
+              )}
+              {mainTab === 'seo' && (
+                <>
+
 
         {/* 7. INSTAGRAM E GOOGLE SHOPPING */}
         <div className="form-card">
@@ -2165,13 +2255,16 @@ export default function ProductForm() {
 
               <div className="form-group">
                 <label>Imagem do Hero</label>
-                <input
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <input
                   type="text"
                   className="form-input"
                   placeholder="URL da imagem"
                   value={form.editorial_showcase.hero.image_url}
                   onChange={e => updateShowcase(s => ({ ...s, hero: { ...s.hero, image_url: e.target.value } }))}
                 />
+                  <button type="button" className="btn-secondary-action" onClick={() => setMediaModalState({ isOpen: true, target: 'hero' })}>Biblioteca</button>
+                </div>
                 {form.images.length > 0 && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
                     <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Fotos:</span>
@@ -2340,13 +2433,16 @@ export default function ProductForm() {
 
               <div className="form-group">
                 <label>Imagem em Operação</label>
-                <input
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <input
                   type="text"
                   className="form-input"
                   placeholder="URL da imagem em ação"
                   value={form.editorial_showcase.performance.image_url}
                   onChange={e => updateShowcase(s => ({ ...s, performance: { ...s.performance, image_url: e.target.value } }))}
                 />
+                  <button type="button" className="btn-secondary-action" onClick={() => setMediaModalState({ isOpen: true, target: 'performance' })}>Biblioteca</button>
+                </div>
                 {form.images.length > 0 && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
                     <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Fotos:</span>
@@ -3012,56 +3108,36 @@ export default function ProductForm() {
               <X size={16} />
             </button>
 
-            <div className="publish-modal-header">
-              <div className="publish-modal-icon">
-                <Check size={18} strokeWidth={2.5} />
+            <div className="publish-modal-header" style={{ alignItems: 'center', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 12, paddingBottom: 0, borderBottom: 'none' }}>
+              <div className="publish-modal-icon" style={{ width: 52, height: 52, borderRadius: '50%', background: '#e6f9f0', color: '#00a854', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
+                <Check size={26} strokeWidth={2.5} />
               </div>
               <div className="publish-modal-title-wrap">
-                <h3>Publicação Atualizada</h3>
-                <p>O produto está ativo e sincronizado na vitrine oficial da TEKNIX.</p>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, color: '#0f172a' }}>Produto Publicado!</h3>
+                <p style={{ margin: '8px 0 0 0', color: '#64748b', fontSize: '0.9rem', lineHeight: 1.4 }}>Seu produto já está ativo e visível na vitrine oficial.</p>
               </div>
             </div>
 
-            <div className="publish-modal-product-box">
-              {form.main_image || (form.images && form.images[0]) ? (
-                <img src={form.main_image || form.images[0]} alt={form.name} className="publish-modal-thumb" />
-              ) : (
-                <div className="publish-modal-thumb-placeholder">
-                  <Package size={18} color="#94a3b8" />
-                </div>
-              )}
-              <div className="publish-modal-product-info">
-                <div className="publish-modal-sku-row">
-                  <span className="publish-modal-sku">SKU: {form.sku || 'TKN-PROD'}</span>
-                  <span className="publish-modal-status-badge">● No Ar</span>
-                </div>
-                <span className="publish-modal-name" title={form.name}>{form.name}</span>
-                <span className="publish-modal-price">
-                  {form.has_promo && form.promo_price
-                    ? `R$ ${Number(form.promo_price).toFixed(2).replace('.', ',')} (de R$ ${Number(form.sell_price).toFixed(2).replace('.', ',')})`
-                    : `R$ ${Number(form.sell_price || 0).toFixed(2).replace('.', ',')}`}
-                </span>
-              </div>
-            </div>
-
-            <div className="publish-modal-actions">
-              <a
-                href={`http://localhost:5173/produtos/${publishedSlug || form.seo_slug || form.slug || id}`}
-                target="_blank"
-                rel="noreferrer"
-                className="btn-modal-view-store"
-                onClick={() => setShowPublishModal(false)}
-              >
-                <ExternalLink size={14} />
-                Ver na Loja Oficial
-              </a>
+            <div className="publish-modal-actions" style={{ marginTop: 28, display: 'flex', gap: 12, flexDirection: 'row', paddingTop: 0, borderTop: 'none' }}>
               <button
                 type="button"
                 className="btn-modal-continue"
                 onClick={() => setShowPublishModal(false)}
+                style={{ flex: 1, padding: '10px 0', textAlign: 'center', background: '#f1f5f9', border: 'none', color: '#334155', borderRadius: 8, fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem' }}
               >
-                Continuar Editando
+                Fechar
               </button>
+              <a
+                href={`https://teknixbrasil.com.br/produto/${publishedSlug || form.seo_slug || form.slug || id}`}
+                target="_blank"
+                rel="noreferrer"
+                className="btn-modal-view-store"
+                onClick={() => setShowPublishModal(false)}
+                style={{ flex: 1, padding: '10px 0', textAlign: 'center', background: '#000', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, textDecoration: 'none', fontSize: '0.9rem' }}
+              >
+                <ExternalLink size={14} />
+                Ver na Loja
+              </a>
             </div>
           </div>
         </div>
@@ -3088,6 +3164,13 @@ export default function ProductForm() {
           </div>
         </div>
       )}
+
+      <MediaLibraryModal
+        isOpen={mediaModalState.isOpen}
+        onClose={() => setMediaModalState({ isOpen: false, target: null })}
+        onSelectMedia={handleMediaSelected}
+        title="Biblioteca de Mídia do Produto"
+      />
     </div>
   )
 }

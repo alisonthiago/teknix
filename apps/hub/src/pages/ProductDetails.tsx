@@ -167,7 +167,7 @@ export default function ProductDetails() {
     try {
       const { data, error } = await supabase
         .from('products')
-        .select('*, store_meta:product_store_metadata(*), product_images(url, sort_order, display_order, is_primary)')
+        .select('*, store_meta:product_store_metadata(*)')
         .eq('id', productId)
         .maybeSingle()
 
@@ -177,7 +177,7 @@ export default function ProductDetails() {
       } else {
         const { data: bySku } = await supabase
           .from('products')
-          .select('*, store_meta:product_store_metadata(*), product_images(url, sort_order, display_order, is_primary)')
+          .select('*, store_meta:product_store_metadata(*)')
           .eq('sku', productId)
           .maybeSingle()
 

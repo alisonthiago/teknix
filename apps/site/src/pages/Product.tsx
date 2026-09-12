@@ -17,6 +17,7 @@ import StockNotifyModal from '../components/StockNotifyModal'
 import './ProductResponsive.css'
 import { productPricing, cleanProductTitle, normalizeShowcase, type ProductEditorialShowcase } from '../../../../packages/core/src/productCommerce'
 import { commerceSignals } from '../services/storefrontCommerce'
+import { calculateMelhorEnvioQuote, type MelhorEnvioQuote } from '../services/melhorEnvioTest'
 import { remainingOfferTime } from '../services/productPresentation'
 
 function renderBenefitIcon(iconName?: string) {
@@ -132,6 +133,9 @@ export default function Product() {
   const [cep, setCep] = useState('')
   const [freightCalculated, setFreightCalculated] = useState(false)
   const [freightLoading, setFreightLoading] = useState(false)
+  const [freightOptions, setFreightOptions] = useState<MelhorEnvioQuote[]>([])
+  const [freightError, setFreightError] = useState('')
+  const [cepPreview, setCepPreview] = useState<{ city: string; state: string; neighborhood?: string; street?: string } | null>(null)
   const [showFreightCalc, setShowFreightCalc] = useState(false)
   const [showCepModal, setShowCepModal] = useState(false)
   const [showPaymentModal, setShowPaymentModal] = useState(false)
@@ -306,15 +310,56 @@ export default function Product() {
     }
   }
 
-  const handleCalculateFreight = (e: React.FormEvent) => {
+  const handleCepInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.replace(/\D/g, '')
+    if (val.length > 5) val = `${val.slice(0, 5)}-${val.slice(5)}`
+    setCep(val)
+    setFreightError('')
+
+    const clean = val.replace(/\D/g, '')
+    if (clean.length === 8) {
+      setFreightLoading(true)
+      try {
+        const res = await fetch(`https://viacep.com.br/ws/${clean}/json/`)
+        const data = await res.json()
+        if (data.erro) {
+          setFreightError('CEP não encontrado.')
+          setCepPreview(null)
+        } else {
+          setCepPreview({
+            city: data.localidade || '',
+            state: data.uf || '',
+            neighborhood: data.bairro || '',
+            street: data.logradouro || ''
+          })
+        }
+      } catch {
+        setFreightError('Não foi possível validar o CEP.')
+      } finally {
+        setFreightLoading(false)
+      }
+    } else {
+      setCepPreview(null)
+    }
+  }
+
+  const handleCalculateFreight = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!cep.replace(/\D/g, '')) return
+    const cleanCep = cep.replace(/\D/g, '')
+    if (cleanCep.length < 8) return
     setFreightLoading(true)
-    setTimeout(() => {
-      setFreightLoading(false)
+    setFreightError('')
+    try {
+      const options = await calculateMelhorEnvioQuote(cleanCep)
+      setFreightOptions(options)
       setFreightCalculated(true)
       setShowCepModal(false)
-    }, 600)
+      window.dispatchEvent(new CustomEvent('teknix:cep-changed', { detail: { cep: cleanCep } }))
+    } catch (err) {
+      setFreightError('Não foi possível calcular o frete.')
+    } finally {
+      setFreightLoading(false)
+    }
   }
 
   const editorialHeroTitle = (() => {
@@ -343,10 +388,19 @@ export default function Product() {
               <label htmlFor="pdp-cep-modal-input">Enviar para</label>
               <div className="pdp-cep-modal-input-row">
                 <span aria-hidden="true">⌖</span>
-                <input id="pdp-cep-modal-input" type="tel" inputMode="numeric" placeholder="CEP" maxLength={9} value={cep} onChange={e => setCep(e.target.value)} autoFocus />
+                <input id="pdp-cep-modal-input" type="tel" inputMode="numeric" placeholder="CEP" maxLength={9} value={cep} onChange={handleCepInputChange} autoFocus />
                 <a href="https://buscacepinter.correios.com.br/app/endereco/index.php" target="_blank" rel="noreferrer">Não sei o meu CEP</a>
               </div>
-              <button type="submit" disabled={freightLoading || !cep.replace(/\D/g, '')}>{freightLoading ? 'Calculando…' : 'Confirmar'}</button>
+              {freightError && <div style={{ color: '#ef4444', fontSize: '12px', marginTop: 8 }}>{freightError}</div>}
+              {cepPreview && (
+                <div style={{ marginTop: 16, padding: '12px 16px', background: '#f8fafc', borderRadius: 8, fontSize: '13px', color: '#334155', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <span style={{ fontWeight: 600, color: '#0f172a' }}>{cepPreview.street || 'Endereço encontrado'}</span>
+                  <span>{cepPreview.neighborhood ? `${cepPreview.neighborhood} - ` : ''}{cepPreview.city}, {cepPreview.state}</span>
+                </div>
+              )}
+              <button type="submit" disabled={freightLoading || cep.replace(/\D/g, '').length < 8} style={{ marginTop: cepPreview ? 16 : 22 }}>
+                {freightLoading ? 'Calculando…' : 'Confirmar'}
+              </button>
             </form>
           </div>
         </div>
@@ -1017,7 +1071,9 @@ export default function Product() {
                     type="button"
                     className="ml-pdp-shipping-details-link"
                     onClick={() => setShowCepModal(true)}
+                    style={{ display: 'flex', alignItems: 'center', gap: 6 }}
                   >
+                    <Truck size={18} />
                     {deliveryCep || cep ? `Enviar para ${deliveryCep || cep}` : 'Calcular prazo de entrega'}
                   </Editable>
 
@@ -1038,9 +1094,28 @@ export default function Product() {
                         </Editable>
                       </form>
                       {freightCalculated && (
-                        <Editable as="p" widgetId="product-6" className="ml-pdp-freight-result">
-                          {commerce.freeShipping ? `✓ Frete grátis confirmado para ${deliveryCep || cep}!` : `Consulte prazos para ${deliveryCep || cep}.`}
-                        </Editable>
+                        <div className="ml-pdp-freight-result" style={{ marginTop: 16 }}>
+                          {freightOptions.length > 0 ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                              <p style={{ margin: '0 0 4px', fontSize: '13px', color: '#00a650', fontWeight: 600 }}>Opções de entrega para {deliveryCep || cep}:</p>
+                              {freightOptions.map((opt, i) => (
+                                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 6, fontSize: '13px' }}>
+                                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                    <span style={{ fontWeight: 600, color: '#334155' }}>{opt.name}</span>
+                                    <span style={{ color: '#64748b' }}>Chega em aprox. {opt.delivery_time} dias úteis</span>
+                                  </div>
+                                  <div style={{ fontWeight: 700, color: '#0f172a' }}>
+                                    {Number(opt.price) === 0 ? 'Grátis' : formatMoney(Number(opt.price))}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <Editable as="p" widgetId="product-6">
+                              {commerce.freeShipping ? `✓ Frete grátis confirmado para ${deliveryCep || cep}!` : `Consulte prazos para ${deliveryCep || cep}.`}
+                            </Editable>
+                          )}
+                        </div>
                       )}
                     </div>
                   )}
@@ -1224,40 +1299,7 @@ export default function Product() {
             </div>
           </section>
 
-          {/* SEÇÃO 7: PERGUNTAS FREQUENTES (FUNDO BRANCO #FFF) */}
-          <section className="teknix-ref-faq-section">
-            <div className="teknix-ref-container">
-              <div className="teknix-ref-faq-content">
-                <h2 className="teknix-ref-faq-title">
-                  Perguntas Frequentes
-                </h2>
 
-                <div className="teknix-ref-faq-list">
-                  {showcase.faqs.map((item, idx) => {
-                    const isOpen = openFaq === idx
-                    return (
-                      <div key={idx} className={`teknix-ref-faq-row ${isOpen ? 'open' : ''}`}>
-                        <button
-                          type="button"
-                          className="teknix-ref-faq-trigger"
-                          onClick={() => setOpenFaq(isOpen ? null : idx)}
-                          aria-expanded={isOpen}
-                        >
-                          <span>{item.q}</span>
-                          <span className="teknix-ref-faq-icon">{isOpen ? '−' : '+'}</span>
-                        </button>
-                        {isOpen && (
-                          <div className="teknix-ref-faq-body">
-                            <p>{item.a}</p>
-                          </div>
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            </div>
-          </section>
 
           {/* SEÇÃO 8: NOTAS LEGAIS E ISENÇÕES TÉCNICAS (FUNDO CINZA CLARO #F5F5F7) */}
           <section className="teknix-ref-notes-section">
