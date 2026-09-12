@@ -1066,10 +1066,10 @@ export default function ProductForm() {
                 type="button"
                 onClick={handleOpenVisualEditor}
                 className="btn-secondary-action"
-                style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}
                 title="Abrir Apresentação do Produto no Page Builder em Nova Aba"
               >
-                <Sparkles size={14} color="#e91e63" /> Editor Visual
+                <Sparkles size={14} color="#7c3aed" />
+                <span>Editor Visual</span>
               </button>
             )}
             <button
@@ -1078,7 +1078,6 @@ export default function ProductForm() {
               onClick={() => handleSubmit(undefined, false)}
               disabled={saving}
               title="Salva no catálogo interno TEKNIX sem exibir na vitrine pública"
-              style={{ fontWeight: 600 }}
             >
               Salvar Catálogo
             </button>
@@ -1087,13 +1086,21 @@ export default function ProductForm() {
               className="btn-primary-action"
               onClick={() => handleSubmit(undefined, true)}
               disabled={saving}
-              style={{
-                fontWeight: 600,
-                transition: 'all 0.2s ease'
-              }}
               title={form.published ? 'Atualizar publicação na vitrine oficial da loja' : 'Publicar produto imediatamente na vitrine oficial da loja'}
             >
-              {saving ? 'Salvando...' : form.published ? '✓ Atualizar Publicação' : 'Publicar'}
+              {saving ? (
+                <>
+                  <Loader2 size={14} className="spinner-icon" />
+                  <span>Salvando...</span>
+                </>
+              ) : form.published ? (
+                <>
+                  <Check size={14} strokeWidth={2.5} />
+                  <span>Atualizar Publicação</span>
+                </>
+              ) : (
+                <span>Publicar</span>
+              )}
             </button>
           </div>
         </div>
@@ -1851,7 +1858,7 @@ export default function ProductForm() {
                   <p className="field-hint">Preencha manualmente ou cole um texto para extração automática.</p>
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <button type="button" className="btn-secondary-action" onClick={() => setShowQuickFill(!showQuickFill)} style={{ background: '#f8fafc', color: '#3b82f6', borderColor: '#bfdbfe' }}>
+                  <button type="button" className="btn-secondary-action" onClick={() => setShowQuickFill(!showQuickFill)} style={{ background: '#ffffff', color: '#111827', borderColor: '#e5e7eb' }}>
                     <Wand2 size={14} /> Colar Texto
                   </button>
                   <button type="button" className="btn-secondary-action" onClick={addSpecification}>
@@ -1861,7 +1868,7 @@ export default function ProductForm() {
               </div>
 
               {showQuickFill && (
-                <div style={{ padding: 16, background: '#f1f5f9', borderRadius: 8, marginBottom: 16 }}>
+                <div style={{ padding: 16, background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 8, marginBottom: 16 }}>
                   <p style={{ fontSize: 13, margin: '0 0 8px 0', color: '#475569' }}>Cole o texto com as especificações (use o formato <b>Característica: Valor</b>):</p>
                   <textarea 
                     className="form-textarea" 
@@ -2382,7 +2389,7 @@ export default function ProductForm() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              background: expandedSections.hero ? '#f8fafc' : '#ffffff',
+              background: expandedSections.hero ? '#fafafa' : '#ffffff',
               border: 'none',
               borderBottom: expandedSections.hero ? '1px solid #e2e8f0' : 'none',
               cursor: 'pointer',
@@ -2540,7 +2547,7 @@ export default function ProductForm() {
                         gridTemplateColumns: '130px 1fr 1.5fr',
                         gap: 6,
                         padding: 6,
-                        background: '#f8fafc',
+                        background: '#fafafa',
                         borderRadius: 6,
                         border: '1px solid #e2e8f0',
                         alignItems: 'center'
@@ -2615,7 +2622,7 @@ export default function ProductForm() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              background: expandedSections.performance ? '#f8fafc' : '#ffffff',
+              background: expandedSections.performance ? '#fafafa' : '#ffffff',
               border: 'none',
               borderBottom: expandedSections.performance ? '1px solid #e2e8f0' : 'none',
               cursor: 'pointer',
@@ -2715,7 +2722,7 @@ export default function ProductForm() {
                       key={fIdx}
                       style={{
                         padding: 8,
-                        background: '#f8fafc',
+                        background: '#fafafa',
                         borderRadius: 6,
                         border: '1px solid #e2e8f0',
                         display: 'flex',
@@ -2772,7 +2779,7 @@ export default function ProductForm() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              background: expandedSections.models ? '#f8fafc' : '#ffffff',
+              background: expandedSections.models ? '#fafafa' : '#ffffff',
               border: 'none',
               borderBottom: expandedSections.models ? '1px solid #e2e8f0' : 'none',
               cursor: 'pointer',
@@ -2846,7 +2853,7 @@ export default function ProductForm() {
                     key={mIdx}
                     style={{
                       padding: 10,
-                      background: '#f8fafc',
+                      background: '#fafafa',
                       borderRadius: 6,
                       border: '1px solid #e2e8f0',
                       display: 'flex',
@@ -2950,7 +2957,7 @@ export default function ProductForm() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              background: expandedSections.comparison ? '#f8fafc' : '#ffffff',
+              background: expandedSections.comparison ? '#fafafa' : '#ffffff',
               border: 'none',
               borderBottom: expandedSections.comparison ? '1px solid #e2e8f0' : 'none',
               cursor: 'pointer',
@@ -3126,7 +3133,7 @@ export default function ProductForm() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              background: expandedSections.faq ? '#f8fafc' : '#ffffff',
+              background: expandedSections.faq ? '#fafafa' : '#ffffff',
               border: 'none',
               borderBottom: expandedSections.faq ? '1px solid #e2e8f0' : 'none',
               cursor: 'pointer',
@@ -3186,7 +3193,7 @@ export default function ProductForm() {
                     key={fIdx}
                     style={{
                       padding: 8,
-                      background: '#f8fafc',
+                      background: '#fafafa',
                       borderRadius: 6,
                       border: '1px solid #e2e8f0',
                       display: 'flex',
@@ -3264,7 +3271,7 @@ export default function ProductForm() {
                     <img
                       src={images[index]}
                       alt={`Pré-visualização da imagem ${index + 1}`}
-                      style={{ width: '100%', maxHeight: 180, objectFit: 'contain', border: '1px solid #e2e8f0', borderRadius: 8, marginBottom: 8, background: '#f8fafc' }}
+                      style={{ width: '100%', maxHeight: 180, objectFit: 'contain', border: '1px solid #e2e8f0', borderRadius: 8, marginBottom: 8, background: '#ffffff' }}
                     />
                   )}
                   <input

@@ -52,15 +52,16 @@
 /* Header */
 .product-form-header {
   display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  justify-content: flex-start;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
   width: 100%;
-  gap: 12px;
-  padding: 16px 18px;
-  border: 1px solid var(--apple-border, #e5e5e7);
-  border-radius: 14px;
-  background: #f8fafc;
+  gap: 16px;
+  padding: 14px 20px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   box-sizing: border-box;
 }
 
@@ -69,7 +70,7 @@
   align-items: center;
   gap: 12px;
   min-width: 0;
-  width: 100%;
+  flex: 1 1 auto;
 }
 
 .btn-back {
@@ -78,92 +79,104 @@
   justify-content: center;
   width: 36px;
   height: 36px;
-  border-radius: 980px;
+  border-radius: 8px;
   background: #ffffff;
-  border: 1px solid var(--apple-border-dark, #d2d2d7);
-  color: var(--apple-text, #1d1d1f);
+  border: 1px solid #e5e7eb;
+  color: #374151;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.15s ease;
   flex-shrink: 0;
 }
 
 .btn-back:hover {
-  background: #f5f5f7;
-  color: var(--apple-text, #1d1d1f);
+  background: #f9fafb;
+  border-color: #d1d5db;
+  color: #111827;
 }
 
 .product-form-title {
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   font-weight: 700;
-  color: var(--apple-text, #1d1d1f);
+  color: #111827;
   margin: 0;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   letter-spacing: -0.02em;
   min-width: 0;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .product-title-text {
-  white-space: normal;
-  word-break: break-word;
-  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 480px;
   line-height: 1.3;
 }
 
 .product-status-pill {
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  padding: 3px 8px;
-  border-radius: 980px;
+  padding: 3px 10px;
+  border-radius: 9999px;
   flex-shrink: 0;
 }
 
 .product-status-pill.published {
-  background: #dcfce7;
+  background: #ecfdf5;
   color: #15803d;
-  border: 1px solid #86efac;
+  border: 1px solid #bbf7d0;
 }
 
 .product-status-pill.active {
-  background: rgba(52, 199, 89, 0.12);
-  color: #248a3d;
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
 }
 
 .product-status-pill.draft {
-  background: rgba(255, 159, 10, 0.12);
-  color: #b26a00;
+  background: #fefce8;
+  color: #a16207;
+  border: 1px solid #fef08a;
 }
 
 .header-right {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: flex-end;
   gap: 10px;
-  width: 100%;
-  padding-top: 12px;
-  border-top: 1px solid #e5e7eb;
-  flex-wrap: wrap;
+  flex-shrink: 0;
+  border-top: none;
+  padding-top: 0;
+  width: auto;
+  flex-wrap: nowrap;
 }
 
 .btn-secondary-action {
-  padding: 7px 16px;
-  border-radius: 980px;
+  padding: 0 16px;
+  height: 36px;
+  border-radius: 8px;
   background: #ffffff;
-  border: 1px solid var(--apple-border-dark, #d2d2d7);
-  color: var(--apple-text, #1d1d1f);
+  border: 1px solid #e5e7eb;
+  color: #374151;
   font-size: 0.84rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
 }
 
 .btn-secondary-action:hover {
-  background: #f5f5f7;
-  border-color: var(--apple-text, #1d1d1f);
+  background: #f9fafb;
+  border-color: #d1d5db;
+  color: #111827;
 }
 
 .header-right .btn-secondary-action,
@@ -172,50 +185,61 @@
 }
 
 .btn-primary-action {
-  padding: 7px 20px;
-  border-radius: 980px;
-  background: var(--apple-blue, #0071e3);
+  padding: 0 18px;
+  height: 36px;
+  border-radius: 8px;
+  background: #111827;
   color: #ffffff;
-  border: 1px solid var(--apple-blue, #0071e3);
+  border: 1px solid #111827;
   font-size: 0.84rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s;
-  display: flex;
+  transition: all 0.15s ease;
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
+  white-space: nowrap;
 }
 
-.btn-primary-action:hover {
-  background: var(--apple-blue-hover, #0077ed);
-  border-color: var(--apple-blue-hover, #0077ed);
+.btn-primary-action:hover:not(:disabled) {
+  background: #000000;
+  border-color: #000000;
 }
 
-.btn-primary-action:disabled {
+.btn-primary-action:disabled,
+.btn-secondary-action:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 900px) {
   .product-form-header {
-    padding: 14px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 14px 16px;
   }
 
-  .product-form-title {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 6px;
-    font-size: 1.08rem;
+  .header-left {
+    width: 100%;
   }
 
   .product-title-text {
-    max-width: calc(100vw - 100px);
+    max-width: 100%;
     white-space: normal;
+  }
+
+  .header-right {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 8px;
   }
 
   .header-right .btn-secondary-action,
   .header-right .btn-primary-action {
-    flex: 1 1 100%;
+    flex: 1 1 auto;
     justify-content: center;
   }
 }
@@ -651,7 +675,7 @@
 /* ── Dropzone e Vídeos ── */
 .upload-dropzone.is-dragging {
   border-color: #2563eb;
-  background: #f8fafc;
+  background: #fafafa;
 }
 
 .upload-dropzone.is-uploading {
@@ -709,7 +733,7 @@
 }
 
 .btn-upload-link:hover {
-  background: #f8fafc;
+  background: #f9fafb;
   color: #0f172a;
 }
 
@@ -1025,7 +1049,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background: #f8fafc;
+  background: #fafafa;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
   padding: 10px 12px;
@@ -1148,7 +1172,7 @@
 }
 
 .btn-modal-continue:hover {
-  background: #f8fafc;
+  background: #f9fafb;
   color: #0f172a;
   border-color: #cbd5e1;
 }
