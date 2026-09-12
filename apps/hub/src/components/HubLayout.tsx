@@ -15,7 +15,7 @@ import {
   WhatsAppLogo,
   IntegrationLogoRenderer
 } from './IntegrationLogos'
-import { InternalChatProvider, useInternalChat } from '../contexts/InternalChatContext'
+import { InternalChatProvider } from '../contexts/InternalChatContext'
 import FloatingMessenger from './internal-chat/FloatingMessenger'
 import { TeknixLogo } from './TeknixLogo'
 import { User, Users, Settings, Layers, LogOut, Eye, EyeOff } from 'lucide-react'
@@ -52,36 +52,6 @@ const icons: Record<string, React.ReactElement> = {
   truck: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="20" height="20"><rect x="1" y="3" width="15" height="13" rx="1"/><polygon points="16 8 20 8 23 11 23 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>,
   fileText: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="20" height="20"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>,
   plusLogo: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-}
-
-// ─── Botão do Chat Interno no Pill do Header (1:1 com o FLOW) ─────────────
-function HubChatPillButton() {
-  const { totalUnreadCount, isFloatingOpen, setIsFloatingOpen, isFloatingMinimized, setIsFloatingMinimized } = useInternalChat()
-  return (
-    <button
-      type="button"
-      className="flow-pill-btn"
-      title="Chat Interno TEKNIX"
-      onClick={() => {
-        if (isFloatingOpen && !isFloatingMinimized) {
-          setIsFloatingOpen(false)
-        } else {
-          setIsFloatingOpen(true)
-          setIsFloatingMinimized(false)
-        }
-      }}
-      style={{ position: 'relative' }}
-    >
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" width="18" height="18">
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-      </svg>
-      {totalUnreadCount > 0 && (
-        <span className="flow-badge-red" style={{ animation: 'pulse 1.5s infinite' }}>
-          {totalUnreadCount > 99 ? '99+' : totalUnreadCount}
-        </span>
-      )}
-    </button>
-  )
 }
 
 // ─── Componente principal interno ──────────────────────────────────────────
@@ -514,9 +484,6 @@ function HubLayoutContent() {
             {/* Lime Capsule Pill (FLOW 1:1) */}
             <div style={{ position: 'relative' }}>
               <div className="mp-header-pill-hub">
-                {/* Chat Interno TEKNIX (1:1 com FLOW) */}
-                <HubChatPillButton />
-
                 {/* Notificações */}
                 <button
                   type="button"
