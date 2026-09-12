@@ -46,7 +46,9 @@ export interface Product {
   segment?: string
   image_url?: string
   images?: string[]
+  published?: boolean
   featured?: boolean
+  flash_sale?: boolean
   active?: boolean
   is_new?: boolean
   specifications?: any

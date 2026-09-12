@@ -123,13 +123,45 @@ export default function StorefrontHome() {
   const [rawProducts, setRawProducts] = useState<Product[]>([])
   const [catalogProducts, setCatalogProducts] = useState<CbProductItem[]>([])
 
+  const [featuredProductsList, setFeaturedProductsList] = useState<CbProductItem[]>([])
+  const [recommendedProductsList, setRecommendedProductsList] = useState<CbProductItem[]>([])
+
   useEffect(() => {
     let cancelled = false
-    getProducts({ limit: 40 }).then(products => {
+    getProducts({ limit: 60 }).then(products => {
       if (cancelled) return
       const published = products.filter(p => p.store_meta?.published !== false)
       setRawProducts(published)
-      setCatalogProducts(published.map(storefrontCard))
+      
+      const allMapped = published.map(storefrontCard)
+      setCatalogProducts(allMapped)
+
+      // Produtos em Destaque (is_featured)
+      const featured = published.filter(p => p.featured)
+      if (featured.length > 0) {
+        setFeaturedProductsList(featured.map(storefrontCard))
+      } else {
+        setFeaturedProductsList(allMapped.slice(0, 6)) // Fallback
+      }
+
+      // Produtos Recomendados
+      const lastCategory = typeof window !== 'undefined' ? localStorage.getItem('teknix_last_category') : null
+      let recommended = []
+      if (lastCategory) {
+        recommended = published.filter(p => {
+          const cat = String(p.category || p.category_id || '').toLowerCase()
+          return cat.includes(lastCategory.toLowerCase())
+        })
+      }
+      
+      // Fallback para recomendados se não houver da categoria ou não tiver histórico
+      if (recommended.length === 0) {
+        // Pega produtos que não estão em destaque nem flash sale
+        const others = published.filter(p => !p.featured && !p.flash_sale)
+        recommended = others.length > 0 ? others : published
+      }
+      
+      setRecommendedProductsList(recommended.slice(0, 6).map(storefrontCard))
     })
     return () => { cancelled = true }
   }, [])
@@ -243,14 +275,19 @@ export default function StorefrontHome() {
     } else if (source === 'catalog') {
       targetList = rawProducts
     } else {
-      // 'auto' (produtos reais com oferta ativa ou desconto promocional)
-      const offerProducts = rawProducts.filter(p => {
-        const hasOfferFlag = Boolean(p.commerce?.offerEnabled)
-        const hasPromo = Boolean(p.promo_price && Number(p.promo_price) < Number(p.price))
-        const hasBadgeOffer = p.commerce?.badge === 'daily' || p.commerce?.badge === 'special'
-        return hasOfferFlag || hasPromo || hasBadgeOffer
-      })
-      targetList = offerProducts.length > 0 ? offerProducts : rawProducts
+      // 'auto' (produtos reais marcados no Hub, ou fallback)
+      const flashSaleMarked = rawProducts.filter(p => p.flash_sale)
+      if (flashSaleMarked.length > 0) {
+        targetList = flashSaleMarked
+      } else {
+        const offerProducts = rawProducts.filter(p => {
+          const hasOfferFlag = Boolean(p.commerce?.offerEnabled)
+          const hasPromo = Boolean(p.promo_price && Number(p.promo_price) < Number(p.price))
+          const hasBadgeOffer = p.commerce?.badge === 'daily' || p.commerce?.badge === 'special'
+          return hasOfferFlag || hasPromo || hasBadgeOffer
+        })
+        targetList = offerProducts.length > 0 ? offerProducts : rawProducts
+      }
     }
 
     if (targetList.length === 0) {
@@ -612,10 +649,10 @@ export default function StorefrontHome() {
       )}
 
       {/* ── 6. VITRINE 1: PRODUTOS EM DESTAQUE ── */}
-      {catalogProducts.length > 0 && renderCbVerticalShelf('featured', 'Produtos em destaque', catalogProducts.slice(0, 6))}
+      {featuredProductsList.length > 0 && renderCbVerticalShelf('featured', 'Produtos em Destaque', featuredProductsList)}
 
-      {/* ── 7. VITRINE 2: EXPLORE NOSSOS PRODUTOS ── */}
-      {catalogProducts.length > 6 && renderCbVerticalShelf('recommended', 'Explore nossos produtos', catalogProducts.slice(6, 12))}
+      {/* ── 7. VITRINE 2: PRODUTOS RECOMENDADOS ── */}
+      {recommendedProductsList.length > 0 && renderCbVerticalShelf('recommended', 'Recomendados para Você', recommendedProductsList)}
 
       {/* ── 14. RODAPÉ OFICIAL CASAS BAHIA COMPLETO ── */}
       <Ads position="global-footer" />

@@ -11,6 +11,7 @@ export async function getProducts(options?: {
   limit?: number
   offset?: number
   featured?: boolean
+  flash_sale?: boolean
 }) {
   try {
     let query = supabase
@@ -30,6 +31,10 @@ export async function getProducts(options?: {
 
     if (options?.featured) {
       query = query.eq('featured', true)
+    }
+
+    if (options?.flash_sale) {
+      query = query.eq('flash_sale', true)
     }
 
     switch (options?.sort) {

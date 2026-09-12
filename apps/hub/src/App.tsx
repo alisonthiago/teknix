@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard'
 import ProductsList from './pages/ProductsList'
 import ProductForm from './pages/ProductForm'
 import ProductDetails from './pages/ProductDetails'
+import Showcases from './pages/Showcases'
 import OrdersList from './pages/OrdersList'
 import ShipmentsList from './pages/ShipmentsList'
 import StockNotificationsList from './pages/StockNotificationsList'
@@ -77,6 +78,7 @@ function App() {
             <Route path="/hub/produtos/novo" element={<ProductForm />} />
             <Route path="/hub/produtos/editar/:id" element={<ProductForm />} />
             <Route path="/hub/produtos/:id" element={<ProductDetails />} />
+            <Route path="/hub/destaques" element={<Showcases />} />
             <Route path="/hub/categorias" element={<CategoriesList />} />
             <Route path="/hub/categorias/nova" element={<CategoryEdit />} />
             <Route path="/hub/categorias/:id" element={<CategoryEdit />} />

@@ -309,9 +309,9 @@ export default function ProductsList() {
             <h1>Produtos</h1>
           </div>
           <div className="header-actions">
-            <button className="btn btn-secondary" onClick={() => alert('Organizar vitrine')}>
-              <ListFilter size={14} /> Organizar
-            </button>
+            <Link to="/hub/destaques" className="btn btn-secondary">
+              <LayoutTemplate size={14} /> Destaques
+            </Link>
             <Link to="/hub/produtos/novo" className="btn btn-primary">
               <Plus size={15} /> Adicionar produto
             </Link>

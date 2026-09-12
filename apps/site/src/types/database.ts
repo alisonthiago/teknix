@@ -30,6 +30,8 @@ export interface Product {
   user_id?: string
   created_at?: string
   updated_at?: string
+  featured?: boolean
+  flash_sale?: boolean
 
   // Campos vindos de product_store_metadata (loja própria)
   description?: string
@@ -41,6 +43,7 @@ export interface Product {
     slug?: string
     published?: boolean
     featured?: boolean
+    flash_sale?: boolean
     short_description?: string
     store_description?: string
     specifications?: any
