@@ -12,7 +12,7 @@ import { useFavorites } from '../context/FavoritesContext'
 import type { Product as ProductType } from '../types/database'
 import './Product.css'
 import { Ads } from '../components/Ads'
-import { FileText, ShieldCheck, Truck, RotateCcw, Headphones, Zap, BatteryCharging, Wrench, ChevronDown, CheckCircle2 } from 'lucide-react'
+import { FileText, ShieldCheck, Truck, RotateCcw, Headphones, Zap, BatteryCharging, Wrench, ChevronDown, CheckCircle2 } , Search, ChevronRight, Loader2 } from 'lucide-react'
 import StockNotifyModal from '../components/StockNotifyModal'
 import './ProductResponsive.css'
 import { productPricing, cleanProductTitle, normalizeShowcase, type ProductEditorialShowcase } from '../../../../packages/core/src/productCommerce'
@@ -1063,142 +1063,81 @@ export default function Product() {
 
               {/* 5. CARD DE COMPRA RESUMIDO & MODERNO */}
               <div className="ml-pdp-buy-box">
-                {/* Frete Rápido */}
-                <div className="ml-pdp-box-shipping">
-                  <div className="ml-pdp-shipping-title-row">
-                    <span className="ml-pdp-shipping-badge">
-                      <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
-                        <path d="m13 2-9 12h7l-1 8 10-13h-7z" />
-                      </svg>
-                      Chegará grátis amanhã
-                    </span>
-                  </div>
-                  <Editable as="button" widgetId="product-control-27"
-                    type="button"
-                    className="ml-pdp-shipping-details-link"
-                    onClick={() => setShowCepModal(true)}
-                    style={{ display: 'flex', alignItems: 'center', gap: 6 }}
-                  >
-                    <Truck size={18} />
-                    {deliveryCep || cep ? `Enviar para ${deliveryCep || cep}` : 'Calcular prazo de entrega'}
-                  </Editable>
-
-                  {showFreightCalc && (
-                    <div className="ml-pdp-freight-mini">
-                      <form onSubmit={handleCalculateFreight} className="ml-pdp-freight-form">
-                        <input
-                          type="tel"
-                          placeholder="00000-000"
-                          maxLength={9}
-                          id="zipcode"
-                          value={cep}
-                          onChange={e => setCep(e.target.value)}
-                          className="ml-pdp-freight-input"
-                        />
-                        <Editable as="button" widgetId="product-control-28" type="submit" className="ml-pdp-freight-btn" disabled={freightLoading}>
-                          {freightLoading ? '...' : 'OK'}
-                        </Editable>
-                      </form>
-                      {freightCalculated && (
-                        <div className="ml-pdp-freight-result" style={{ marginTop: 16 }}>
-                          {freightOptions.length > 0 ? (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                              <p style={{ margin: '0 0 4px', fontSize: '13px', color: '#00a650', fontWeight: 600 }}>Opções de entrega para {deliveryCep || cep}:</p>
-                              {freightOptions.map((opt, i) => (
-                                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 6, fontSize: '13px' }}>
-                                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                    <span style={{ fontWeight: 600, color: '#334155' }}>{opt.name}</span>
-                                    <span style={{ color: '#64748b' }}>Chega em aprox. {opt.delivery_time} dias úteis</span>
-                                  </div>
-                                  <div style={{ fontWeight: 700, color: '#0f172a' }}>
-                                    {Number(opt.price) === 0 ? 'Grátis' : formatMoney(Number(opt.price))}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          ) : (
-                            <Editable as="p" widgetId="product-6">
-                              {commerce.freeShipping ? `✓ Frete grátis confirmado para ${deliveryCep || cep}!` : `Consulte prazos para ${deliveryCep || cep}.`}
-                            </Editable>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {/* Estoque e Quantidade em Linha Única Resumida */}
+                {/* 1. Botões de Compra (Lado a Lado + Carrinho Embaixo) */}
                 {(currentProduct.stock ?? 1) > 0 ? (
-                  <div className="ml-pdp-box-stock-compact">
-                    <div className="ml-pdp-stock-inline">
-                      <span className="ml-pdp-stock-status-text">Estoque disponível</span>
-                      <span className="ml-pdp-qty-avail">({currentProduct.stock || 15} disponíveis)</span>
-                    </div>
-                    <div className="ml-pdp-qty-row-compact">
-                      <span className="ml-pdp-qty-label">Quantidade:</span>
-                      <div className="ml-pdp-qty-controls">
-                        <Editable as="button" widgetId="product-control-32" type="button" className="ml-pdp-qty-btn" onClick={() => setQuantity(q => Math.max(1, q - 1))} aria-label="Diminuir">-</Editable>
-                        <input type="tel" aria-label="Quantidade" className="ml-pdp-qty-val" value={quantity} onChange={e => setQuantity(Math.max(1, parseInt(e.target.value) || 1))} />
-                        <Editable as="button" widgetId="product-control-33" type="button" className="ml-pdp-qty-btn" onClick={() => setQuantity(q => q + 1)} aria-label="Aumentar">+</Editable>
+                  <div className="tkx-actions-group">
+                    <div className="tkx-buy-primary-row">
+                      <div className="tkx-qty-stepper">
+                        <Editable as="button" widgetId="product-control-32" type="button" onClick={() => setQuantity(q => Math.max(1, q - 1))} aria-label="Diminuir">-</Editable>
+                        <input type="tel" value={quantity} onChange={e => setQuantity(Math.max(1, parseInt(e.target.value) || 1))} />
+                        <Editable as="button" widgetId="product-control-33" type="button" onClick={() => setQuantity(q => q + 1)} aria-label="Aumentar">+</Editable>
                       </div>
+                      <Editable as="button" widgetId="product-control-34" type="button" className="tkx-btn-buy" onClick={handleOneClickBuy}>
+                        Comprar <ChevronRight size={18} style={{ marginLeft: 6 }} />
+                      </Editable>
                     </div>
+                    <Editable as="button" widgetId="product-control-35" type="button" className="tkx-btn-cart" onClick={handleAddToCart}>
+                      Adicionar ao Carrinho
+                    </Editable>
                   </div>
                 ) : (
-                  <div className="ml-pdp-out-of-stock-banner">
-                    <p className="ml-pdp-out-of-stock-text">Produto esgotado, clique no botão abaixo para ser avisado quando chegar</p>
+                  <div className="tkx-out-of-stock-banner">
+                    <p>Produto esgotado, clique no botão abaixo para ser avisado quando chegar</p>
+                    <button type="button" className="tkx-btn-notify-stock" onClick={() => setShowStockNotifyModal(true)}>Quero ser avisado</button>
                   </div>
                 )}
 
-                {/* Botões de Ação */}
-                <div className="ml-pdp-box-actions">
-                  {(currentProduct.stock ?? 1) > 0 ? (
-                    <>
-                      <Editable as="button" widgetId="product-control-34" type="button" className="ml-pdp-btn-buy" onClick={handleOneClickBuy}>
-                        Comprar agora
-                      </Editable>
-                      <Editable as="button" widgetId="product-control-35" type="button" className="ml-pdp-btn-cart" onClick={handleAddToCart}>
-                        Adicionar ao carrinho
-                      </Editable>
-                    </>
-                  ) : (
-                    <button
-                      type="button"
-                      className="ml-pdp-btn-notify-stock"
-                      onClick={() => setShowStockNotifyModal(true)}
-                    >
-                      Quero ser avisado
+                {/* 2. Novo Calculador de Frete (Tabela Inline) */}
+                <div className="tkx-shipping-calc">
+                  <p className="tkx-shipping-label">Consulte prazos de entrega</p>
+                  <form className="tkx-shipping-form" onSubmit={handleCalculateFreight}>
+                    <input 
+                      type="tel" 
+                      placeholder="00000-000" 
+                      maxLength={9} 
+                      value={cep} 
+                      onChange={e => setCep(e.target.value)} 
+                    />
+                    <button type="submit" aria-label="Buscar Frete" disabled={freightLoading}>
+                      {freightLoading ? <Loader2 size={18} className="tkn-spin" /> : <Search size={18} />}
                     </button>
+                  </form>
+
+                  {freightCalculated && freightOptions.length > 0 && (
+                    <div className="tkx-shipping-table-wrapper">
+                      <table className="tkx-shipping-table">
+                        <thead>
+                          <tr>
+                            <th>Entrega</th>
+                            <th>Frete</th>
+                            <th>Prazo</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {freightOptions.map((opt, i) => (
+                            <tr key={i}>
+                              <td>{opt.name}</td>
+                              <td>{Number(opt.price) === 0 ? 'Grátis' : formatMoney(Number(opt.price))}</td>
+                              <td>Previsão: {opt.delivery_time} dias úteis</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                  {freightCalculated && freightOptions.length === 0 && (
+                    <p style={{ marginTop: 12, fontSize: 13, color: '#64748b' }}>
+                      {commerce.freeShipping ? `✓ Frete grátis confirmado para ${deliveryCep || cep}!` : `Nenhuma opção de frete encontrada para ${deliveryCep || cep}.`}
+                    </p>
                   )}
                 </div>
 
-                {/* Garantias Resumidas (1 Linha cada) */}
-                <div className="ml-pdp-box-guarantee-compact">
-                  <div className="ml-pdp-guar-compact-item">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#00a650" strokeWidth="2.2">
-                      <path d="M20 7h-9a4 4 0 1 0 4 4" /><path d="m20 7-3-3" /><path d="m20 7-3 3" />
-                    </svg>
-                    <span><strong>Devolução grátis</strong> em até 30 dias</span>
-                  </div>
-                  <div className="ml-pdp-guar-compact-item">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#00a650" strokeWidth="2.2">
-                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" /><path d="m9 12 2 2 4-4" />
-                    </svg>
-                    <span><strong>Compra Garantida</strong> receba o produto ou seu dinheiro</span>
-                  </div>
-                </div>
-
-                {/* Suporte WhatsApp Compacto */}
-                <div className="ml-pdp-box-support">
-                  <a
-                    href={`https://api.whatsapp.com/send?phone=5546999155875&text=${encodeURIComponent(`Olá, tenho dúvidas sobre o produto: ${currentProduct.name} - Código: ${currentProduct.sku || '58'}`)}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="ml-pdp-support-link"
-                  >
-                    <svg viewBox="0 0 24 24" width="15" height="15" fill="#25d366">
-                      <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2z"/>
-                    </svg>
-                    <span>Dúvidas? <strong>Fale conosco</strong></span>
+                {/* 3. Ações Extras de Contato / Disponibilidade */}
+                <div className="tkx-extra-actions">
+                  <button type="button" className="tkx-btn-immediate">Disponibilidade Imediata</button>
+                  <a href={`https://api.whatsapp.com/send?phone=5546999155875&text=${encodeURIComponent(`Olá, tenho dúvidas sobre o produto: ${currentProduct.name} - Código: ${currentProduct.sku || '58'}`)}`} target="_blank" rel="noreferrer" className="tkx-btn-whatsapp">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2z"/></svg>
+                    Tire suas dúvidas
                   </a>
                 </div>
               </div>
