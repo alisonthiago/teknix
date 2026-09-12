@@ -886,6 +886,7 @@ export default function Checkout() {
   const [shippingOptions, setShippingOptions] = useState<MelhorEnvioQuote[]>([])
   const [selectedShipping, setSelectedShipping] = useState<MelhorEnvioQuote | null>(null)
   const [loadingShipping, setLoadingShipping] = useState(false)
+  const [showAllShipping, setShowAllShipping] = useState(false)
 
   useEffect(() => {
     let mounted = true
@@ -1412,7 +1413,12 @@ export default function Checkout() {
                   </div>
                 ) : shippingOptions.length > 0 ? (
                   <div className="tkn-shipping-options-list" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
-                    {shippingOptions.map(opt => {
+                    {(showAllShipping || shippingOptions.length <= 3
+                      ? shippingOptions
+                      : (selectedShipping && !shippingOptions.slice(0, 3).some(o => o.id === selectedShipping.id))
+                        ? [...shippingOptions.slice(0, 3), selectedShipping]
+                        : shippingOptions.slice(0, 3)
+                    ).map(opt => {
                       const companyName = typeof opt.company === 'object' ? opt.company?.name : opt.company
                       const isFree = Number(opt.price) === 0
                       const logoUrl = getCarrierLogo(companyName, opt.name)
@@ -1429,10 +1435,10 @@ export default function Checkout() {
                             padding: '12px 14px', 
                             border: `1px solid ${selectedShipping?.id === opt.id ? '#0066cc' : '#e2e8f0'}`,
                             borderRadius: 8, 
-                            cursor: 'pointer',
-                            background: selectedShipping?.id === opt.id ? '#f8fafc' : '#ffffff',
-                            gap: 12,
-                            transition: 'all 0.2s'
+                            cursor: 'pointer', 
+                            background: selectedShipping?.id === opt.id ? '#f0f7ff' : '#ffffff',
+                            gap: 14,
+                            transition: 'all 0.15s ease'
                           }}
                         >
                           <input 
@@ -1444,34 +1450,66 @@ export default function Checkout() {
                             style={{ accentColor: '#0066cc', flexShrink: 0 }}
                           />
                           <div style={{
-                            width: 38,
-                            height: 38,
-                            borderRadius: 8,
-                            background: '#ffffff',
-                            border: '1px solid #e2e8f0',
+                            width: 68,
+                            height: 32,
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            flexShrink: 0,
-                            padding: 4,
-                            overflow: 'hidden'
+                            flexShrink: 0
                           }}>
                             {logoUrl ? (
-                              <img src={logoUrl} alt={displayName} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+                              <img src={logoUrl} alt={displayName} style={{ maxWidth: 68, maxHeight: 30, objectFit: 'contain', display: 'block' }} />
                             ) : (
-                              <Truck size={18} color="#64748b" />
+                              <Truck size={20} color="#64748b" />
                             )}
                           </div>
                           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                            <div style={{ fontWeight: 600, fontSize: '0.92rem', color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{displayName}</div>
-                            <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Entrega em até {opt.delivery_time} dias úteis</div>
+                            <div style={{ fontWeight: 500, fontSize: '0.88rem', color: '#1e293b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{displayName}</div>
+                            <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 400 }}>Entrega em até {opt.delivery_time} dias úteis</div>
                           </div>
-                          <strong style={{ fontSize: '1rem', color: isFree ? '#16a34a' : '#0f172a', flexShrink: 0 }}>
+                          <strong style={{ fontSize: '0.96rem', fontWeight: 600, color: isFree ? '#16a34a' : '#0f172a', flexShrink: 0 }}>
                             {isFree ? 'Grátis' : money(Number(opt.price))}
                           </strong>
                         </label>
                       )
                     })}
+
+                    {shippingOptions.length > 3 && (
+                      <button
+                        type="button"
+                        onClick={() => setShowAllShipping(prev => !prev)}
+                        style={{
+                          width: '100%',
+                          marginTop: 4,
+                          padding: '10px 14px',
+                          background: '#ffffff',
+                          border: '1px solid #cbd5e1',
+                          borderRadius: 8,
+                          fontSize: '0.82rem',
+                          fontWeight: 600,
+                          color: '#0066cc',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: 6,
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        {showAllShipping ? (
+                          <>
+                            <span>Mostrar menos opções</span>
+                            <ChevronUp size={15} />
+                          </>
+                        ) : (
+                          <>
+                            <span>Ver mais {shippingOptions.length - 3} opções de frete</span>
+                            <ChevronDown size={15} />
+                          </>
+                        )}
+                      </button>
+                    )}
+
                     {!selectedShipping && shippingOptions.length > 0 && (
                       <div style={{ marginTop: 8, padding: '9px 14px', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 8, color: '#1d4ed8', fontSize: '0.85rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 6 }}>
                         <span>👉 Por favor, selecione uma das opções de frete acima para continuar com a compra.</span>

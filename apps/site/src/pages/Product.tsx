@@ -1288,33 +1288,28 @@ export default function Product() {
                                   transition: 'all 0.15s ease'
                                 }}
                               >
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
                                   <div style={{ 
-                                    width: 40, 
-                                    height: 40, 
-                                    borderRadius: 8, 
-                                    background: '#ffffff', 
-                                    border: '1px solid #e2e8f0',
+                                    width: 68, 
+                                    height: 32, 
                                     display: 'flex', 
                                     alignItems: 'center', 
                                     justifyContent: 'center', 
-                                    flexShrink: 0,
-                                    padding: 4,
-                                    overflow: 'hidden'
+                                    flexShrink: 0
                                   }}>
                                     {logoUrl ? (
                                       <img 
                                         src={logoUrl} 
                                         alt={displayName} 
-                                        style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} 
+                                        style={{ maxWidth: 68, maxHeight: 30, objectFit: 'contain', display: 'block' }} 
                                       />
                                     ) : (
-                                      <Truck size={18} color="#64748b" />
+                                      <Truck size={20} color="#64748b" />
                                     )}
                                   </div>
                                   <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
                                     <span style={{ 
-                                      fontWeight: 600, 
+                                      fontWeight: 500, 
                                       fontSize: '0.88rem', 
                                       color: '#1e293b', 
                                       whiteSpace: 'nowrap', 
@@ -1323,7 +1318,7 @@ export default function Product() {
                                     }}>
                                       {displayName}
                                     </span>
-                                    <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                                    <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 400 }}>
                                       {days === 0 ? 'Entrega expressa' : `Chega em até ${days} ${days === 1 ? 'dia útil' : 'dias úteis'}`}
                                     </span>
                                   </div>
@@ -1331,7 +1326,7 @@ export default function Product() {
 
                                 <div style={{ textAlign: 'right', flexShrink: 0 }}>
                                   <span style={{ 
-                                    fontWeight: 700, 
+                                    fontWeight: 600, 
                                     fontSize: '0.95rem', 
                                     color: isFree ? '#16a34a' : '#0f172a' 
                                   }}>
