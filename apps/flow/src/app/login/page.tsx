@@ -1,7 +1,4 @@
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { login } from './actions'
-import Image from 'next/image'
 import Link from 'next/link'
 
 const TeknixLogo = () => (
@@ -48,58 +45,68 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
             </p>
           </div>
 
-
-
           {params?.error && (
-            <div className="p-4 text-sm font-medium text-[#f23d4f] bg-[#fff0f1] border border-[#ffcdd2] rounded-xl animate-in fade-in zoom-in duration-300">
-              Erro: {params.error}
+            <div className="p-4 text-sm font-medium text-[#f23d4f] bg-[#fff0f1] border border-[#ffcdd2] rounded-xl">
+              {params.error}
             </div>
           )}
 
           <form action={login} className="space-y-5">
             <div className="space-y-4">
               <div className="space-y-1.5">
-                <Label htmlFor="email" className="text-[#333] font-medium text-[13px]">Email</Label>
-                <Input
+                <label htmlFor="email" className="block text-[#333] font-medium text-[13px]">Email</label>
+                <input
                   id="email"
                   name="email"
                   type="email"
                   placeholder="exemplo@dominio.com"
                   required
-                  className="h-[46px] w-full rounded-xl border-[#e6e6e6] bg-[#fcfcfc] px-4 text-[15px] focus:bg-white transition-colors placeholder:text-[#999]"
+                  className="h-[46px] w-full rounded-xl border border-[#e6e6e6] bg-[#fcfcfc] px-4 text-[15px] outline-none focus:border-[#333] focus:bg-white transition-colors placeholder:text-[#999]"
                 />
               </div>
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password" className="text-[#333] font-medium text-[13px]">Senha</Label>
+                  <label htmlFor="password" className="text-[#333] font-medium text-[13px]">Senha</label>
                   <Link href="#" className="text-[13px] text-[#999] hover:text-[#333] transition-colors">
                     Esqueceu a senha?
                   </Link>
                 </div>
-                <Input
+                <input
                   id="password"
                   name="password"
                   type="password"
                   placeholder="••••••••"
                   required
-                  className="h-[46px] w-full rounded-xl border-[#e6e6e6] bg-[#fcfcfc] px-4 text-[15px] tracking-widest placeholder:tracking-normal focus:bg-white transition-colors placeholder:text-[#999]"
+                  className="h-[46px] w-full rounded-xl border border-[#e6e6e6] bg-[#fcfcfc] px-4 text-[15px] tracking-widest outline-none focus:border-[#333] focus:bg-white transition-colors placeholder:tracking-normal placeholder:text-[#999]"
                 />
               </div>
             </div>
 
             <div className="flex items-start gap-2.5 pt-1 pb-3">
-              <input type="checkbox" id="terms" className="mt-1 h-4 w-4 rounded border-gray-300 text-[#333] focus:ring-[#333]" />
+              <input
+                type="checkbox"
+                id="terms"
+                defaultChecked
+                className="mt-1 h-4 w-4 rounded border-gray-300 accent-[#333]"
+              />
               <label htmlFor="terms" className="text-[13px] text-[#666] leading-snug">
-                Eu concordo com os <Link href="#" className="text-[#333] underline hover:no-underline">Termos e Condições</Link> e a <Link href="#" className="text-[#333] underline hover:no-underline">Política de Privacidade</Link>.
+                Eu concordo com os{' '}
+                <Link href="#" className="text-[#333] underline hover:no-underline">Termos e Condições</Link>
+                {' '}e a{' '}
+                <Link href="#" className="text-[#333] underline hover:no-underline">Política de Privacidade</Link>.
               </label>
             </div>
 
-            <button type="submit" className="w-full h-[48px] bg-[#333] hover:bg-black text-white font-medium rounded-full text-[15px] transition-colors shadow-sm">
+            <button
+              type="submit"
+              className="w-full h-[48px] bg-[#333] hover:bg-black text-white font-medium rounded-full text-[15px] transition-colors shadow-sm cursor-pointer"
+            >
               Entrar
             </button>
 
             <p className="text-center text-[13px] text-[#666] pt-2">
-              Não tem uma conta? <Link href="#" className="text-[#1f2328] hover:underline font-medium">Cadastre-se</Link>
+              Não tem uma conta?{' '}
+              <Link href="#" className="text-[#1f2328] hover:underline font-medium">Cadastre-se</Link>
             </p>
           </form>
         </div>
@@ -110,10 +117,36 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         </div>
       </div>
 
-      {/* Right Column - Graphic */}
+      {/* Right Column - Dark with grid + lime glow */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-[#1a1a1a] via-[#2a2a2a] to-[#000000]">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-        <div className="absolute left-0 right-0 top-0 -z-10 m-auto h-[310px] w-[310px] rounded-full bg-[#B5F500] opacity-20 blur-[100px]"></div>
+        {/* Grid pattern */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
+        {/* Lime glow */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[380px] w-[380px] rounded-full bg-[#B5F500] opacity-20 blur-[120px]" />
+        {/* Promo content */}
+        <div className="relative z-10 flex flex-col justify-center px-14 xl:px-20 text-white">
+          <span className="text-[11px] font-bold tracking-[0.2em] text-[#B5F500] uppercase mb-6">
+            TEKNIX • PAINEL DE OPERAÇÕES
+          </span>
+          <h2 className="text-[36px] xl:text-[42px] font-semibold leading-tight mb-4">
+            Controle sua loja<br />em um só lugar.
+          </h2>
+          <p className="text-[16px] text-white/60 leading-relaxed mb-8 max-w-sm">
+            Produtos, pedidos, vendas e integrações organizados para você trabalhar melhor.
+          </p>
+          <div className="flex flex-col gap-3">
+            {['Gestão simples e centralizada', 'Acompanhe seus resultados', 'Venda com mais eficiência'].map((item) => (
+              <div key={item} className="flex items-center gap-3">
+                <div className="w-5 h-5 rounded-full bg-[#B5F500]/20 border border-[#B5F500]/40 flex items-center justify-center shrink-0">
+                  <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                    <path d="M1 4L3.5 6.5L9 1" stroke="#B5F500" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <span className="text-[14px] text-white/80">{item}</span>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   )
