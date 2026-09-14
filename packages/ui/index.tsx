@@ -1,3 +1,2 @@
 // @teknix/ui — Componentes compartilhados
-// Adicionar componentes aqui conforme necessário
-export {}
+export * from './viewport'

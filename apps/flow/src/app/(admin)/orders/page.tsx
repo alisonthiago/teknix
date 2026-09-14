@@ -85,13 +85,13 @@ export default async function OrdersPage() {
             <p className="text-xs text-orange-600">Em Separação</p>
           </CardContent>
         </Card>
-        <Card className="rounded-xl border-[#dbeafe] bg-[#f5f5f5]/50">
+        <Card className="rounded-xl border-[#e5e7eb] bg-[#f5f5f5]/50">
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold text-[#1f2328]">{stats.aguardandoExpedicao}</p>
             <p className="text-xs text-[#1f2328]">Para Expedição</p>
           </CardContent>
         </Card>
-        <Card className="rounded-xl border-[#dbeafe] bg-[#f5f5f5]/50">
+        <Card className="rounded-xl border-[#e5e7eb] bg-[#f5f5f5]/50">
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold text-[#111827]">{stats.enviados}</p>
             <p className="text-xs text-[#1f2328]">Enviados</p>

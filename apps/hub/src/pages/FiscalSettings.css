@@ -5,6 +5,12 @@
   font-family: inherit;
 }
 
+.fiscal-settings-page.embedded {
+  padding: 0;
+  max-width: 100%;
+  margin: 0;
+}
+
 .fisc-header {
   margin-bottom: 24px;
 }
@@ -15,14 +21,14 @@
   gap: 6px;
   font-size: 0.82rem;
   font-weight: 500;
-  color: #64748b;
+  color: #666666;
   text-decoration: none;
   margin-bottom: 12px;
   transition: color 0.15s ease;
 }
 
 .fisc-back-link:hover {
-  color: #0f172a;
+  color: #111111;
 }
 
 .btn-back-to-settings {
@@ -34,7 +40,7 @@
   border-radius: 9px;
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  color: #0f172a;
+  color: #111111;
   cursor: pointer;
   transition: all 0.15s ease;
   flex-shrink: 0;
@@ -124,7 +130,7 @@
   justify-content: center;
   padding: 80px 20px;
   gap: 16px;
-  color: #64748b;
+  color: #666666;
   background: #ffffff;
   border-radius: var(--hub-card-radius, 14px);
   border: 1px solid #e6e6e6;
@@ -245,8 +251,8 @@
 .fisc-input-copy-group input {
   font-family: monospace;
   font-size: 0.8rem;
-  background: #f8fafc;
-  color: #475569;
+  background: #F7F7F7;
+  color: #666666;
 }
 
 .btn-fisc-copy {
@@ -255,7 +261,7 @@
   justify-content: center;
   padding: 0 14px;
   border: 1px solid #cbd5e1;
-  background: #f8fafc;
+  background: #F7F7F7;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -263,12 +269,12 @@
 
 .btn-fisc-copy:hover {
   background: #f1f5f9;
-  border-color: #94a3b8;
+  border-color: #999999;
 }
 
 .fisc-hint {
   font-size: 0.78rem;
-  color: #64748b;
+  color: #666666;
   margin: 6px 0 0 0;
   line-height: 1.35;
 }
@@ -349,7 +355,7 @@
 
 .fisc-radio-card.selected {
   border-color: #2563eb;
-  background: #eff6ff;
+  background: #F7F7F7;
 }
 
 .fisc-radio-card input[type="radio"] {
@@ -359,13 +365,13 @@
 .fisc-radio-card strong {
   display: block;
   font-size: 0.92rem;
-  color: #0f172a;
+  color: #111111;
   margin-bottom: 4px;
 }
 
 .fisc-radio-card p {
   font-size: 0.82rem;
-  color: #64748b;
+  color: #666666;
   margin: 0;
   line-height: 1.4;
 }
@@ -373,7 +379,7 @@
 .fisc-subheading {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #0f172a;
+  color: #111111;
   margin: 24px 0 14px 0;
   padding-bottom: 8px;
   border-bottom: 1px solid #f1f5f9;

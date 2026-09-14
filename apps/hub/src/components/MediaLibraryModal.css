@@ -68,7 +68,7 @@
 }
 
 .teknix-media-close {
-  background: #f8fafc;
+  background: #F7F7F7;
   border: 1px solid #e2e8f0;
   color: #64748b;
   cursor: pointer;
@@ -92,7 +92,7 @@
   display: flex;
   gap: 8px;
   padding: 8px 24px;
-  background: #f8fafc;
+  background: #F7F7F7;
   border-bottom: 1px solid #e2e8f0;
   flex-shrink: 0;
 }
@@ -256,7 +256,7 @@
 }
 
 .media-refresh-btn {
-  background: #f8fafc;
+  background: #F7F7F7;
   border: 1px solid #e2e8f0;
   width: 34px;
   height: 34px;
@@ -329,7 +329,7 @@
   position: relative;
   width: 100%;
   aspect-ratio: 1 / 1;
-  background-color: #f8fafc;
+  background-color: #F7F7F7;
   background-image: 
     linear-gradient(45deg, #f1f5f9 25%, transparent 25%), 
     linear-gradient(-45deg, #f1f5f9 25%, transparent 25%), 
@@ -400,7 +400,7 @@
 /* Sidebar Details */
 .teknix-media-sidebar {
   width: 330px;
-  background: #f8fafc;
+  background: #F7F7F7;
   border-left: 1px solid #e2e8f0;
   padding: 20px;
   display: flex;
@@ -577,7 +577,7 @@
   align-items: center;
   justify-content: center;
   padding: 32px;
-  background: #f8fafc;
+  background: #F7F7F7;
 }
 
 .upload-drop-zone {
@@ -873,9 +873,9 @@
 }
 
 .expected-size-status.proportional {
-  background: #f8fafc;
+  background: #F7F7F7;
   color: #1d4ed8;
-  border: 1px solid #bfdbfe;
+  border: 1px solid #e5e7eb;
 }
 
 .expected-size-status.different {
@@ -923,7 +923,7 @@
 
 .teknix-media-lightbox-header strong {
   font-weight: 600;
-  color: #f8fafc;
+  color: #F7F7F7;
 }
 
 .teknix-media-lightbox-header span {
@@ -934,7 +934,7 @@
 .teknix-media-lightbox-header button {
   background: rgba(255, 255, 255, 0.1);
   border: none;
-  color: #f8fafc;
+  color: #F7F7F7;
   width: 28px;
   height: 28px;
   border-radius: 6px;

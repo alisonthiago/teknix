@@ -256,7 +256,7 @@ export default function FloatingMessenger() {
           </div>
 
           {/* Lista de Conversas com Scroll */}
-          <div className="flex-1 overflow-y-auto divide-y divide-[#f8fafc]">
+          <div className="flex-1 overflow-y-auto divide-y divide-[#F7F7F7]">
             {/* Seção 1: Conversas Recentes / Diretas */}
             {filteredDirectChats.length > 0 && (
               <div className="py-2">

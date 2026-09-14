@@ -153,7 +153,7 @@
 }
 
 .metric-card.waiting .metric-icon { background: #fff8eb; color: #f59e0b; }
-.metric-card.ready .metric-icon { background: #eff6ff; color: #3b82f6; }
+.metric-card.ready .metric-icon { background: #F7F7F7; color: #1f2328; }
 .metric-card.shipped .metric-icon { background: #f5f3ff; color: #8b5cf6; }
 .metric-card.delivered .metric-icon { background: #f0fdf4; color: #10b981; }
 
@@ -366,7 +366,7 @@
 }
 
 .badge-warning { background: #fffbeb; color: #b45309; }
-.badge-info { background: #eff6ff; color: #1d4ed8; }
+.badge-info { background: #F7F7F7; color: #1f2328; border: 1px solid #e5e7eb; }
 .badge-primary { background: #f5f3ff; color: #6d28d9; }
 .badge-success { background: #f0fdf4; color: #15803d; }
 .badge-danger { background: #fef2f2; color: #b91c1c; }
@@ -790,18 +790,20 @@
   gap: 8px;
   width: 100%;
   padding: 12px 18px;
-  background: #111111;
+  background: var(--button-primary, #0071e3);
   color: #ffffff;
-  border: none;
+  border: 1px solid var(--button-primary, #0071e3);
   border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 113, 227, 0.2);
 }
 
 .btn-generate-label:hover {
-  background: #000000;
+  background: var(--button-hover, #0077ed);
+  border-color: var(--button-hover, #0077ed);
 }
 
 .btn-generate-label:disabled {

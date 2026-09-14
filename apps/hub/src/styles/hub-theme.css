@@ -10,7 +10,7 @@
   
   /* Título da Página (H1) */
   --hub-h1-size: 24px;
-  --hub-h1-weight: 700;
+  --hub-h1-weight: 600;
   --hub-h1-color: #111111;
   --hub-h1-line-height: 1.2;
 
@@ -22,25 +22,25 @@
 
   /* Título dos Cards (H2) */
   --hub-card-title-size: 16px;
-  --hub-card-title-weight: 700;
+  --hub-card-title-weight: 600;
   --hub-card-title-color: #111111;
   --hub-card-title-line-height: 1.25;
 
   /* Subtítulo dos Cards (P) */
   --hub-card-desc-size: 12px;
   --hub-card-desc-weight: 400;
-  --hub-card-desc-color: #888888;
+  --hub-card-desc-color: #666666;
   --hub-card-desc-line-height: 1.35;
 
   /* Labels dos Formulários */
   --hub-label-size: 12.5px;
-  --hub-label-weight: 700;
-  --hub-label-color: #333333;
+  --hub-label-weight: 500;
+  --hub-label-color: #666666;
   --hub-label-gap: 6px;
 
   /* Inputs, Selects & Textareas */
   --hub-input-size: 13.5px;
-  --hub-input-color: #111111;
+  --hub-input-color: #333333;
   --hub-input-placeholder: #999999;
   --hub-input-height: 42px;
   --hub-input-padding: 0 14px;
@@ -69,16 +69,17 @@
   --hub-btn-radius: 8px;
   --hub-btn-gap: 8px;
   
-  /* Botão Primário (Preto Antracite) */
-  --hub-btn-primary-bg: #1f2328;
-  --hub-btn-primary-hover: #000000;
-  --hub-btn-primary-color: #ffffff;
+  /* Botão Primário (AZUL OFICIAL TEKNIX) */
+  --hub-btn-primary-bg: var(--button-primary, #0071e3);
+  --hub-btn-primary-hover: var(--button-primary-hover, #0062c4);
+  --hub-btn-primary-active: var(--button-primary-active, #004f9e);
+  --hub-btn-primary-color: var(--button-primary-text, #ffffff);
   --hub-btn-primary-size: 13.5px;
   --hub-btn-primary-weight: 600;
 
   /* Botão Secundário (Branco com borda sutil) */
   --hub-btn-secondary-bg: #ffffff;
-  --hub-btn-secondary-hover: #f8fafc;
+  --hub-btn-secondary-hover: #F7F7F7;
   --hub-btn-secondary-border: 1px solid #e6e6e6;
   --hub-btn-secondary-color: #333333;
   --hub-btn-secondary-size: 13px;
@@ -335,16 +336,43 @@
 }
 
 .hub-layout .btn-primary,
-.hub-layout .hub-btn-primary {
-  background: var(--hub-btn-primary-bg) !important;
-  color: var(--hub-btn-primary-color) !important;
+.hub-layout .hub-btn-primary,
+.hub-layout .btn-primary-action,
+.hub-layout .btn-action-primary {
+  background: var(--button-primary, #0071e3) !important;
+  border: 1px solid var(--button-primary, #0071e3) !important;
+  color: var(--button-primary-text, #ffffff) !important;
   font-size: var(--hub-btn-primary-size) !important;
   font-weight: var(--hub-btn-primary-weight) !important;
 }
 
 .hub-layout .btn-primary:hover,
-.hub-layout .hub-btn-primary:hover {
-  background: var(--hub-btn-primary-hover) !important;
+.hub-layout .hub-btn-primary:hover,
+.hub-layout .btn-primary-action:hover,
+.hub-layout .btn-action-primary:hover {
+  background: var(--button-primary-hover, #0062c4) !important;
+  border-color: var(--button-primary-hover, #0062c4) !important;
+  color: #ffffff !important;
+}
+
+.hub-layout .btn-primary:active,
+.hub-layout .hub-btn-primary:active,
+.hub-layout .btn-primary-action:active,
+.hub-layout .btn-action-primary:active {
+  background: var(--button-primary-active, #004f9e) !important;
+  border-color: var(--button-primary-active, #004f9e) !important;
+  color: #ffffff !important;
+}
+
+.hub-layout .btn-primary:disabled,
+.hub-layout .hub-btn-primary:disabled,
+.hub-layout .btn-primary-action:disabled,
+.hub-layout .btn-action-primary:disabled {
+  background: var(--button-primary-disabled, #F7F7F7) !important;
+  border-color: var(--button-primary-disabled, #F7F7F7) !important;
+  color: #999999 !important;
+  opacity: 0.65 !important;
+  cursor: not-allowed !important;
 }
 
 .hub-layout .btn-secondary,
@@ -479,7 +507,7 @@
 .hub-layout .hub-badge.neutral,
 .hub-layout .hub-badge.enviado,
 .hub-layout .hub-badge.processando {
-  background: #f8fafc;
+  background: #F7F7F7;
   color: #475569;
   border: 1px solid #e2e8f0;
 }
@@ -617,7 +645,7 @@
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: #f8fafc;
+  background: #F7F7F7;
   border: 1px solid #e2e8f0;
   display: flex;
   align-items: center;

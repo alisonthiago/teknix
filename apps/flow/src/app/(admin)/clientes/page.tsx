@@ -232,7 +232,7 @@ export default function ClientesPage() {
                       <td className="py-4 px-4 text-right">
                         <Link
                           href={`/clientes/${customerSlug}`}
-                          className="inline-flex items-center gap-1.5 h-[32px] px-3 bg-white hover:bg-[#f8fafc] text-[#333] border border-[#e6e6e6] rounded-lg text-xs font-normal transition-colors shadow-2xs"
+                          className="inline-flex items-center gap-1.5 h-[32px] px-3 bg-white hover:bg-[#F7F7F7] text-[#333] border border-[#e6e6e6] rounded-lg text-xs font-normal transition-colors shadow-2xs"
                         >
                           Ver Perfil <ArrowUpRight className="w-3.5 h-3.5" />
                         </Link>

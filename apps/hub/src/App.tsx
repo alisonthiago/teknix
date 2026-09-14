@@ -12,11 +12,9 @@ import OrdersList from './pages/OrdersList'
 import ShipmentsList from './pages/ShipmentsList'
 import StockNotificationsList from './pages/StockNotificationsList'
 import OrderDetails from './pages/OrderDetails'
-import ShippingSettings from './pages/ShippingSettings'
 import CustomersList from './pages/CustomersList'
 import CustomerDetails from './pages/CustomerDetails'
 import FinanceOverview from './pages/FinanceOverview'
-import PaymentMethods from './pages/PaymentMethods'
 import SettingsHub from './pages/SettingsHub'
 import CouponsList from './pages/CouponsList'
 import PromotionsList from './pages/PromotionsList'
@@ -42,7 +40,6 @@ import AdsList from './pages/AdsList'
 import AdsForm from './pages/AdsForm'
 import AdsAnalytics from './pages/AdsAnalytics'
 import InvoicesList from './pages/InvoicesList'
-import FiscalSettings from './pages/FiscalSettings'
 import NotificationsList from './pages/NotificationsList'
 import { HubNotificationProvider } from './contexts/HubNotificationContext'
 
@@ -81,6 +78,7 @@ function App() {
             <Route path="/hub/destaques" element={<Showcases />} />
             <Route path="/hub/categorias" element={<CategoriesList />} />
             <Route path="/hub/categorias/nova" element={<CategoryEdit />} />
+            <Route path="/hub/categorias/add" element={<CategoryEdit />} />
             <Route path="/hub/categorias/:id" element={<CategoryEdit />} />
             <Route path="/hub/categorias/editar/:id" element={<CategoryEdit />} />
             <Route path="/hub/tabelas-de-precos" element={<PriceTables />} />
@@ -89,13 +87,13 @@ function App() {
             <Route path="/hub/envios" element={<ShipmentsList />} />
             <Route path="/hub/avisos-estoque" element={<StockNotificationsList />} />
             <Route path="/hub/pedidos/:id" element={<OrderDetails />} />
-            <Route path="/hub/entregas" element={<ShippingSettings />} />
+            <Route path="/hub/entregas" element={<Navigate to="/hub/configuracoes?tab=shipping" replace />} />
             <Route path="/hub/clientes" element={<CustomersList />} />
             <Route path="/hub/clientes/:id" element={<CustomerDetails />} />
             <Route path="/hub/financeiro" element={<FinanceOverview />} />
-            <Route path="/hub/pagamentos" element={<PaymentMethods />} />
+            <Route path="/hub/pagamentos" element={<Navigate to="/hub/configuracoes?tab=payments" replace />} />
             <Route path="/hub/notas-fiscais" element={<InvoicesList />} />
-            <Route path="/hub/configuracoes/fiscal" element={<FiscalSettings />} />
+            <Route path="/hub/configuracoes/fiscal" element={<Navigate to="/hub/configuracoes?tab=nfe" replace />} />
             <Route path="/hub/descontos" element={<CouponsList />} />
             <Route path="/hub/cupons" element={<CouponsList />} />
             <Route path="/hub/promocoes" element={<PromotionsList />} />

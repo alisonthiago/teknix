@@ -377,7 +377,7 @@ export default function GlobalFooterRenderer({
         <footer className="teknix-footer-tech-grid" role="contentinfo">
           <div className="tech-grid-inner">
             <div className="tech-grid-top-bar">
-              <strong style={{ fontSize: 16, color: '#f8fafc' }}>{config.companyName || 'TEKNIX Ecosystem'}</strong>
+              <strong style={{ fontSize: 16, color: '#F7F7F7' }}>{config.companyName || 'TEKNIX Ecosystem'}</strong>
               <span style={{ fontSize: 12, color: '#38bdf8' }}>Inovação & Alta Performance</span>
             </div>
             <div className="tech-grid-cols">

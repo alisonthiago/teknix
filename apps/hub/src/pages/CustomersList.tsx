@@ -231,6 +231,7 @@ export default function CustomersList() {
         columns={COLUMNS}
         rows={filteredCustomers}
         loading={loading}
+        onRowClick={(c) => navigate(`/hub/clientes/${c.id}`)}
         searchValue={search}
         onSearchChange={setSearch}
         searchPlaceholder="Buscar por nome, e-mail ou CPF"

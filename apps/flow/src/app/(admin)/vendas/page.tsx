@@ -216,7 +216,7 @@ function SalesTab() {
                   </td>
                   <td className="py-4.5 px-5 font-normal text-[#333]">
                     <div className="flex items-center gap-2">
-                      <User className="w-4 h-4 text-[#94a3b8]" />
+                      <User className="w-4 h-4 text-[#999999]" />
                       <span className="text-[13px] font-medium">{s.customerName}</span>
                     </div>
                   </td>
@@ -226,11 +226,11 @@ function SalesTab() {
                       <span className="font-normal text-[#222] text-[13px]">{s.marketplaceName}</span>
                     </div>
                   </td>
-                  <td className="py-4.5 px-5 text-sm text-[#64748b] font-normal">
+                  <td className="py-4.5 px-5 text-sm text-[#666666] font-normal">
                     {s.accountName}
                   </td>
-                   <td className="py-4.5 px-5 text-[#64748b] font-normal text-[13px]">
-                    {s.date} <span className="text-[#94a3b8] text-sm">{s.time}</span>
+                   <td className="py-4.5 px-5 text-[#666666] font-normal text-[13px]">
+                    {s.date} <span className="text-[#999999] text-sm">{s.time}</span>
                   </td>
                   <td className="py-4.5 px-5 text-right font-medium text-[#111] text-[13px]">
                     {s.itemsCount} un
@@ -252,13 +252,13 @@ function SalesTab() {
                       <button
                         onClick={() => setShareSale(s)}
                         title="Compartilhar no Chat com a Equipe"
-                        className="p-2 rounded-xl border border-[#e2e8f0] hover:bg-[#16a34a] hover:text-white text-[#64748b] transition-all cursor-pointer shadow-xs"
+                        className="p-2 rounded-xl border border-[#e2e8f0] hover:bg-[#16a34a] hover:text-white text-[#666666] transition-all cursor-pointer shadow-xs"
                       >
                         <Share2 className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => router.push(`/pedidos/${s.orderId || s.id}`)}
-                        className="p-2 rounded-xl bg-[#f1f5f9] hover:bg-[#16a34a] hover:text-white transition-all text-[#475569] cursor-pointer shadow-xs"
+                        className="p-2 rounded-xl bg-[#f1f5f9] hover:bg-[#16a34a] hover:text-white transition-all text-[#666666] cursor-pointer shadow-xs"
                         title="Abrir Detalhes do Pedido"
                       >
                         <ChevronRight className="w-4 h-4" />

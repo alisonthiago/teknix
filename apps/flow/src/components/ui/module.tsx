@@ -202,7 +202,7 @@ export function StatusBadge({ status, children }: { status: 'success' | 'warning
     success: 'text-[#00a650] bg-[#ecfdf5] border border-[#bbf7d0]',
     warning: 'text-[#b45309] bg-[#fffbeb] border border-[#fef3c7]',
     error: 'text-[#dc2626] bg-[#fef2f2] border border-[#fee2e2]',
-    neutral: 'text-[#475569] bg-[#f8fafc] border border-[#e2e8f0]',
+    neutral: 'text-[#475569] bg-[#F7F7F7] border border-[#e2e8f0]',
     lime: 'text-[#111111] bg-[#B5F500]/20 border border-[#B5F500]/40 font-semibold',
   }
   return (

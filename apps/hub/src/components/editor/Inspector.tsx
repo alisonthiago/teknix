@@ -1256,7 +1256,7 @@ export default function Inspector({
                             {ICON_LIBRARY.find(i => i.id === (obj.content?.icon || obj.content?.selected_icon || 'check-square'))?.name || 'Ícone Selecionado'}
                           </span>
                         </div>
-                        <span style={{ fontSize: 11, fontWeight: 600, color: '#0071e3', backgroundColor: '#f0f7ff', padding: '3px 7px', borderRadius: 5 }}>
+                        <span style={{ fontSize: 11, fontWeight: 600, color: '#1f2328', backgroundColor: '#F7F7F7', border: '1px solid #e5e7eb', padding: '3px 7px', borderRadius: 5 }}>
                           Biblioteca
                         </span>
                       </div>
@@ -1394,7 +1394,7 @@ export default function Inspector({
                             {ICON_LIBRARY.find(i => i.id === (obj.content?.icon || obj.content?.selected_icon || 'star'))?.name || 'Estrela'}
                           </span>
                         </div>
-                        <span style={{ fontSize: 11, fontWeight: 600, color: '#0071e3', backgroundColor: '#f0f7ff', padding: '3px 7px', borderRadius: 5 }}>
+                        <span style={{ fontSize: 11, fontWeight: 600, color: '#1f2328', backgroundColor: '#F7F7F7', border: '1px solid #e5e7eb', padding: '3px 7px', borderRadius: 5 }}>
                           Biblioteca
                         </span>
                       </div>
@@ -2396,7 +2396,7 @@ export default function Inspector({
                         padding: '10px 14px',
                         borderRadius: 8,
                         border: '1px dashed #0071e3',
-                        backgroundColor: '#f0f7ff',
+                        backgroundColor: '#F7F7F7',
                         color: '#0071e3',
                         fontSize: 13,
                         fontWeight: 600,
@@ -2479,13 +2479,13 @@ export default function Inspector({
                                   alignItems: 'center',
                                   justifyContent: 'space-between',
                                   padding: '10px 12px',
-                                  backgroundColor: isExpanded ? '#f0f7ff' : '#ffffff',
+                                  backgroundColor: isExpanded ? '#F7F7F7' : '#ffffff',
                                   cursor: 'pointer',
                                   gap: 8,
                                 }}
                               >
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
-                                  <span style={{ fontSize: 11, fontWeight: 700, color: '#0071e3', backgroundColor: '#e1effe', padding: '2px 6px', borderRadius: 4 }}>
+                                  <span style={{ fontSize: 11, fontWeight: 700, color: '#1f2328', backgroundColor: '#F7F7F7', border: '1px solid #e5e7eb', padding: '2px 6px', borderRadius: 4 }}>
                                     {fItem.field_type || 'text'}
                                   </span>
                                   <span style={{ fontSize: 13, fontWeight: 600, color: '#1d1d1f', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -2675,7 +2675,7 @@ export default function Inspector({
                           padding: '10px 14px',
                           borderRadius: 8,
                           border: '1px dashed #0071e3',
-                          backgroundColor: '#f0f7ff',
+                          backgroundColor: '#F7F7F7',
                           color: '#0071e3',
                           fontSize: 13,
                           fontWeight: 600,
@@ -2795,7 +2795,7 @@ export default function Inspector({
                                 fontSize: 12,
                                 fontWeight: 500,
                                 border: isSelected ? '1px solid #0071e3' : '1px solid #d2d2d7',
-                                backgroundColor: isSelected ? '#f0f7ff' : '#ffffff',
+                                backgroundColor: isSelected ? '#F7F7F7' : '#ffffff',
                                 color: isSelected ? '#0071e3' : '#1d1d1f',
                                 cursor: 'pointer',
                                 transition: 'all 0.15s ease',

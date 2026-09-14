@@ -42,7 +42,7 @@ const initialConfig: ShippingConfig = {
   free_shipping_regions: ['sudeste', 'sul']
 }
 
-export default function ShippingSettings() {
+export default function ShippingSettings({ embedded = false }: { embedded?: boolean } = {}) {
   const navigate = useNavigate()
   const [config, setConfig] = useState<ShippingConfig>(() => {
     try {
@@ -76,20 +76,22 @@ export default function ShippingSettings() {
   }
 
   return (
-    <div className="shipping-settings-page">
-      <div className="page-header">
+    <div className={`shipping-settings-page ${embedded ? 'embedded' : ''}`}>
+      <div className="page-header" style={{ marginBottom: 16 }}>
         <div className="header-info" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <button
-            type="button"
-            className="btn-back-to-settings"
-            onClick={() => navigate('/hub/configuracoes')}
-            title="Voltar para Configurações"
-            aria-label="Voltar para Configurações"
-          >
-            <ChevronLeft size={20} />
-          </button>
+          {!embedded && (
+            <button
+              type="button"
+              className="btn-back-to-settings"
+              onClick={() => navigate('/hub/configuracoes')}
+              title="Voltar para Configurações"
+              aria-label="Voltar para Configurações"
+            >
+              <ChevronLeft size={20} />
+            </button>
+          )}
           <div>
-            <h2>Meios de Envio & Entregas</h2>
+            <h1 className="settings-main-title" style={{ margin: 0 }}>Meios de Envio & Entregas</h1>
           </div>
         </div>
         <div className="header-actions">

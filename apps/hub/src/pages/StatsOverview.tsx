@@ -12,7 +12,9 @@ import {
   Activity,
   Users,
   Smartphone,
-  Laptop
+  Laptop,
+  ChevronDown,
+  RotateCcw
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import './StatsOverview.css'
@@ -23,6 +25,7 @@ interface HubOrder {
   status?: string | null
   created_at: string
   customer_name?: string | null
+  origin?: string | null
 }
 
 const INVALID_ORDER_STATUSES = new Set(['cancelled', 'canceled', 'refunded', 'cancelado', 'estornado'])
@@ -31,6 +34,9 @@ export default function StatsOverview() {
   const [activeTab, setActiveTab] = useState<'general' | 'products' | 'sales' | 'visits' | 'live' | 'coupons'>('general')
   const [period, setPeriod] = useState('7days')
   const [comparison, setComparison] = useState('none')
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
+  const [channelFilter, setChannelFilter] = useState<'ALL' | 'loja' | 'ml'>('ALL')
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'paid' | 'pending' | 'shipped'>('ALL')
   const [orders, setOrders] = useState<HubOrder[]>([])
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
 
@@ -40,7 +46,7 @@ export default function StatsOverview() {
     async function loadOrders() {
       const { data } = await supabase
         .from('store_orders')
-        .select('id, total, status, created_at, customer_name')
+        .select('id, total, status, created_at, customer_name, origin')
         .order('created_at', { ascending: false })
         .limit(1000)
       if (mounted && data) {
@@ -90,9 +96,26 @@ export default function StatsOverview() {
         : Infinity
     return validOrders.filter(order => {
       const time = new Date(order.created_at).getTime()
-      return time >= start && time < end
+      if (time < start || time >= end) return false
+
+      if (channelFilter === 'loja') {
+        const orig = (order.origin || '').toLowerCase()
+        if (orig.includes('ml') || orig.includes('mercado')) return false
+      } else if (channelFilter === 'ml') {
+        const orig = (order.origin || '').toLowerCase()
+        if (!orig.includes('ml') && !orig.includes('mercado')) return false
+      }
+
+      if (statusFilter !== 'ALL') {
+        const st = (order.status || '').toLowerCase()
+        if (statusFilter === 'paid' && !['paid', 'approved', 'preparing'].includes(st)) return false
+        if (statusFilter === 'pending' && st !== 'pending') return false
+        if (statusFilter === 'shipped' && !['shipped', 'delivered'].includes(st)) return false
+      }
+
+      return true
     })
-  }, [period, validOrders])
+  }, [period, validOrders, channelFilter, statusFilter])
 
   const metrics = useMemo(() => {
     const revenue = periodOrders.reduce((sum, order) => sum + Number(order.total ?? 0), 0)
@@ -113,13 +136,16 @@ export default function StatsOverview() {
   const money = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
   const updatedLabel = lastUpdated ? lastUpdated.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : 'aguardando dados'
 
+  const activeFilterCount = (channelFilter !== 'ALL' ? 1 : 0) + (statusFilter !== 'ALL' ? 1 : 0)
+  const hasActiveFilters = activeFilterCount > 0
+  const hasAnyCustomFilter = period !== '7days' || comparison !== 'none' || hasActiveFilters
+
   return (
     <div className="stats-page-container">
       <div className="stats-wrapper">
-        
 
         {/* Navigation Tabs */}
-        <div className="stats-tab-nav" style={{ display: 'flex', gap: 6, borderBottom: '1px solid var(--tk-color-border, #e5e5e7)', paddingBottom: 8, overflowX: 'auto' }}>
+        <div className="stats-tab-nav" style={{ display: 'flex', gap: 6, borderBottom: '1px solid #e2e8f0', paddingBottom: 10, overflowX: 'auto' }}>
           {[
             { id: 'general', label: 'Visão geral' },
             { id: 'products', label: 'Produtos' },
@@ -133,15 +159,15 @@ export default function StatsOverview() {
               onClick={() => setActiveTab(tab.id as any)}
               className={`stats-tab-button ${activeTab === tab.id ? 'is-active' : ''}`}
               style={{
-                background: activeTab === tab.id ? 'var(--tk-color-primary, #0071e3)' : '#ffffff',
-                color: activeTab === tab.id ? '#ffffff' : 'var(--tk-color-text-primary, #1d1d1f)',
-                border: '1px solid ' + (activeTab === tab.id ? 'var(--tk-color-primary, #0071e3)' : 'var(--tk-color-border-dark, #d2d2d7)'),
+                background: activeTab === tab.id ? '#0f172a' : '#ffffff',
+                color: activeTab === tab.id ? '#ffffff' : '#475569',
+                border: '1px solid ' + (activeTab === tab.id ? '#0f172a' : '#e2e8f0'),
                 borderRadius: 980,
-                padding: '4px 12px',
-                fontSize: '0.78rem',
-                fontWeight: 500,
+                padding: '5px 14px',
+                fontSize: '0.8rem',
+                fontWeight: activeTab === tab.id ? 600 : 500,
                 cursor: 'pointer',
-                transition: 'all 0.12s'
+                transition: 'all 0.15s ease'
               }}
             >
               {tab.label}
@@ -150,51 +176,141 @@ export default function StatsOverview() {
         </div>
 
         {/* Top Filters Bar */}
-        <div className="stats-filter-bar">
-          <div className="stats-filters-left">
-            <div className="filter-select-pill">
-              <span style={{ color: '#6b7280' }}>Data:</span>
-              <select
-                value={period}
-                onChange={(e) => setPeriod(e.target.value)}
-                style={{ border: 'none', background: 'transparent', fontWeight: 600, color: '#000000', outline: 'none', cursor: 'pointer' }}
+        <div className="stats-filter-container">
+          <div className="stats-filter-bar">
+            <div className="stats-filters-left">
+              {/* Filtro de Data */}
+              <label className="filter-select-pill" title="Filtrar por período">
+                <Calendar size={14} className="filter-pill-icon" />
+                <span className="filter-pill-label">Data:</span>
+                <select
+                  value={period}
+                  onChange={(e) => setPeriod(e.target.value)}
+                  className="filter-pill-select raw-select"
+                >
+                  <option value="today">Hoje</option>
+                  <option value="yesterday">Ontem</option>
+                  <option value="7days">Últimos 7 dias</option>
+                  <option value="30days">Últimos 30 dias</option>
+                  <option value="this_month">Este mês</option>
+                  <option value="last_month">Mês passado</option>
+                  <option value="year">Este ano</option>
+                </select>
+                <ChevronDown size={13} className="filter-pill-chevron" />
+              </label>
+
+              {/* Filtro de Comparação */}
+              <label className="filter-select-pill" title="Comparar períodos">
+                <Activity size={14} className="filter-pill-icon" />
+                <span className="filter-pill-label">Comparação:</span>
+                <select
+                  value={comparison}
+                  onChange={(e) => setComparison(e.target.value)}
+                  className="filter-pill-select raw-select"
+                >
+                  <option value="none">Nenhuma</option>
+                  <option value="prev_period">Período anterior</option>
+                  <option value="prev_year">Mesmo período do ano anterior</option>
+                </select>
+                <ChevronDown size={13} className="filter-pill-chevron" />
+              </label>
+
+              {/* Botão Filtros */}
+              <button
+                type="button"
+                className={`filter-btn-pill ${showAdvancedFilters ? 'active' : ''}`}
+                onClick={() => setShowAdvancedFilters(prev => !prev)}
+                title="Filtrar por canal e status"
               >
-                <option value="today">Hoje</option>
-                <option value="yesterday">Ontem</option>
-                <option value="7days">Últimos 7 dias</option>
-                <option value="30days">Últimos 30 dias</option>
-                <option value="this_month">Este mês</option>
-                <option value="last_month">Mês passado</option>
-                <option value="year">Este ano</option>
-              </select>
-              <Calendar size={14} color="#6b7280" />
+                <SlidersHorizontal size={14} className="filter-pill-icon" />
+                <span>Filtros</span>
+                {hasActiveFilters && <span className="filter-pill-badge">{activeFilterCount}</span>}
+              </button>
             </div>
 
-            <div className="filter-select-pill">
-              <span style={{ color: '#6b7280' }}>Comparação:</span>
-              <select
-                value={comparison}
-                onChange={(e) => setComparison(e.target.value)}
-                style={{ border: 'none', background: 'transparent', fontWeight: 600, color: '#000000', outline: 'none', cursor: 'pointer' }}
+            {hasAnyCustomFilter && (
+              <button
+                type="button"
+                className="stats-filter-clear-btn"
+                onClick={() => {
+                  setPeriod('7days')
+                  setComparison('none')
+                  setChannelFilter('ALL')
+                  setStatusFilter('ALL')
+                }}
+                title="Restaurar filtros padrão"
               >
-                <option value="none">Nenhuma</option>
-                <option value="prev_period">Período anterior</option>
-                <option value="prev_year">Mesmo período do ano anterior</option>
-              </select>
-              <Calendar size={14} color="#6b7280" />
-            </div>
-
-            <button className="filter-select-pill" onClick={() => alert('Filtros avançados')}>
-              <SlidersHorizontal size={14} /> Filtros
-            </button>
+                <RotateCcw size={12} />
+                <span>Limpar filtros</span>
+              </button>
+            )}
           </div>
 
-          <button
-            style={{ background: 'none', border: 'none', color: '#6b7280', fontSize: '0.82rem', cursor: 'pointer' }}
-            onClick={() => { setPeriod('7days'); setComparison('none') }}
-          >
-            Apagar filtros
-          </button>
+          {/* Gaveta expansível de Filtros */}
+          {showAdvancedFilters && (
+            <div className="stats-advanced-filters-drawer">
+              <div className="stats-adv-group">
+                <span className="stats-adv-label">Canal:</span>
+                <div className="stats-adv-pills">
+                  <button
+                    type="button"
+                    className={`stats-adv-pill ${channelFilter === 'ALL' ? 'active' : ''}`}
+                    onClick={() => setChannelFilter('ALL')}
+                  >
+                    Todos
+                  </button>
+                  <button
+                    type="button"
+                    className={`stats-adv-pill ${channelFilter === 'loja' ? 'active' : ''}`}
+                    onClick={() => setChannelFilter('loja')}
+                  >
+                    Loja Própria
+                  </button>
+                  <button
+                    type="button"
+                    className={`stats-adv-pill ${channelFilter === 'ml' ? 'active' : ''}`}
+                    onClick={() => setChannelFilter('ml')}
+                  >
+                    Mercado Livre
+                  </button>
+                </div>
+              </div>
+
+              <div className="stats-adv-group">
+                <span className="stats-adv-label">Status:</span>
+                <div className="stats-adv-pills">
+                  <button
+                    type="button"
+                    className={`stats-adv-pill ${statusFilter === 'ALL' ? 'active' : ''}`}
+                    onClick={() => setStatusFilter('ALL')}
+                  >
+                    Todos
+                  </button>
+                  <button
+                    type="button"
+                    className={`stats-adv-pill ${statusFilter === 'paid' ? 'active' : ''}`}
+                    onClick={() => setStatusFilter('paid')}
+                  >
+                    Pagos
+                  </button>
+                  <button
+                    type="button"
+                    className={`stats-adv-pill ${statusFilter === 'pending' ? 'active' : ''}`}
+                    onClick={() => setStatusFilter('pending')}
+                  >
+                    Pendentes
+                  </button>
+                  <button
+                    type="button"
+                    className={`stats-adv-pill ${statusFilter === 'shipped' ? 'active' : ''}`}
+                    onClick={() => setStatusFilter('shipped')}
+                  >
+                    Enviados
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* 1. ABA: VISÃO GERAL */}
@@ -419,11 +535,13 @@ export default function StatsOverview() {
           </>
         )}
 
-        {/* Fallback para outras abas */}
+        {/* Abas complementares */}
         {(activeTab === 'products' || activeTab === 'sales' || activeTab === 'coupons') && (
-          <div className="stat-card" style={{ padding: '40px', textAlign: 'center', color: '#6b7280' }}>
-            <h3 style={{ color: '#000000', margin: '0 0 8px 0' }}>Relatório Detalhado de {activeTab.toUpperCase()}</h3>
-            <p style={{ margin: 0 }}>Todos os dados consolidados e atualizados de acordo com as vendas aprovadas.</p>
+          <div className="stat-card" style={{ padding: '32px 24px', textAlign: 'center', color: '#64748b' }}>
+            <h3 style={{ color: '#0f172a', margin: '0 0 6px 0', fontSize: '1rem', fontWeight: 600 }}>
+              {activeTab === 'products' ? 'Produtos' : activeTab === 'sales' ? 'Vendas e clientes' : 'Relatório de cupons'}
+            </h3>
+            <p style={{ margin: 0, fontSize: '0.85rem' }}>Dados consolidados e atualizados de acordo com as vendas aprovadas.</p>
           </div>
         )}
 

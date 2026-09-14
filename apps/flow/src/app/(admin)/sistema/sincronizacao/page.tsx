@@ -10,7 +10,7 @@ import { useNotification } from '@/contexts/NotificationContext'
 
 const STATUS_STYLES: Record<string, string> = {
   completed: 'bg-[#ecfdf5] text-[#16a34a] border border-[#bbf7d0]',
-  running: 'bg-[#f5f5f5] text-[#1f2328] border border-[#bfdbfe]',
+  running: 'bg-[#f5f5f5] text-[#1f2328] border border-[#e5e7eb]',
   failed: 'bg-[#fff5f5] text-[#e74c3c] border border-[#fecaca]',
   pending: 'bg-[#fffaf0] text-[#e67e22] border border-[#fed7aa]',
   cancelled: 'bg-[#f5f5f5] text-[#999]',

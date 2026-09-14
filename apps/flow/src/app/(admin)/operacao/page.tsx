@@ -309,7 +309,7 @@ function ProductsTab() {
               className={`h-[38px] px-3.5 border rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer ${
                 pendingMatchesCount > 0
                   ? 'bg-[#fef2f2] text-[#dc2626] border-[#fecaca] hover:bg-[#fee2e2]'
-                  : 'bg-white hover:bg-[#f8fafc] text-[#0f172a] border-[#e2e8f0]'
+                  : 'bg-white hover:bg-[#F7F7F7] text-[#111111] border-[#e2e8f0]'
               }`}
             >
               <Layers className="w-3.5 h-3.5 text-[#2563eb]" />
@@ -444,7 +444,7 @@ function ProductsTab() {
                           <p className="font-medium text-[#111] text-[14.5px] leading-snug truncate max-w-lg">{p.name as string}</p>
                           {/* Badges dos Canais Conectados ao Produto Central */}
                           {(p.is_site_published ?? true) && (
-                            <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-[#f1f5f9] text-[#0f172a] border border-[#cbd5e1] text-[10px] font-bold shrink-0">
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-[#f1f5f9] text-[#111111] border border-[#cbd5e1] text-[10px] font-bold shrink-0">
                               Site
                             </span>
                           )}
@@ -489,7 +489,7 @@ function ProductsTab() {
                         className={`p-2 rounded-xl border transition-all cursor-pointer shadow-2xs ${
                           activeActionMenuId === p.id
                             ? 'bg-[#111111] text-white border-[#111111]'
-                            : 'border-[#e6e6e6] bg-white hover:bg-[#f4f4f5] text-[#64748b] hover:text-[#0f172a]'
+                            : 'border-[#e6e6e6] bg-white hover:bg-[#f4f4f5] text-[#666666] hover:text-[#111111]'
                         }`}
                       >
                         <MoreHorizontal className="w-4 h-4" />
@@ -507,9 +507,9 @@ function ProductsTab() {
                               setActiveActionMenuId(null)
                               setDiagnosticModal({ isOpen: true, product: p })
                             }}
-                            className="w-full px-3 py-1.5 text-[12px] font-medium text-[#334155] hover:bg-[#f4f4f5] hover:text-[#0f172a] flex items-center gap-2 transition-colors cursor-pointer"
+                            className="w-full px-3 py-1.5 text-[12px] font-medium text-[#333333] hover:bg-[#f4f4f5] hover:text-[#111111] flex items-center gap-2 transition-colors cursor-pointer"
                           >
-                            <Info className="w-3.5 h-3.5 text-[#64748b]" />
+                            <Info className="w-3.5 h-3.5 text-[#666666]" />
                             <span>Diagnóstico</span>
                           </button>
 
@@ -531,9 +531,9 @@ function ProductsTab() {
                                 setActiveActionMenuId(null)
                                 setActionModal({ isOpen: true, product: p, action: 'pause' })
                               }}
-                              className="w-full px-3 py-1.5 text-[12px] font-medium text-[#334155] hover:bg-[#f4f4f5] hover:text-[#d97706] flex items-center gap-2 transition-colors cursor-pointer"
+                              className="w-full px-3 py-1.5 text-[12px] font-medium text-[#333333] hover:bg-[#f4f4f5] hover:text-[#d97706] flex items-center gap-2 transition-colors cursor-pointer"
                             >
-                              <PauseCircle className="w-3.5 h-3.5 text-[#64748b]" />
+                              <PauseCircle className="w-3.5 h-3.5 text-[#666666]" />
                               <span>Pausar Anúncio</span>
                             </button>
                           )}
@@ -556,9 +556,9 @@ function ProductsTab() {
                                 setActiveActionMenuId(null)
                                 setActionModal({ isOpen: true, product: p, action: 'lock' })
                               }}
-                              className="w-full px-3 py-1.5 text-[12px] font-medium text-[#334155] hover:bg-[#f4f4f5] flex items-center gap-2 transition-colors cursor-pointer"
+                              className="w-full px-3 py-1.5 text-[12px] font-medium text-[#333333] hover:bg-[#f4f4f5] flex items-center gap-2 transition-colors cursor-pointer"
                             >
-                              <Lock className="w-3.5 h-3.5 text-[#64748b]" />
+                              <Lock className="w-3.5 h-3.5 text-[#666666]" />
                               <span>Travar Estoque</span>
                             </button>
                           )}
@@ -569,9 +569,9 @@ function ProductsTab() {
                               setActiveActionMenuId(null)
                               setActionModal({ isOpen: true, product: p, action: 'sync' })
                             }}
-                            className="w-full px-3 py-1.5 text-[12px] font-medium text-[#334155] hover:bg-[#f4f4f5] flex items-center gap-2 transition-colors cursor-pointer"
+                            className="w-full px-3 py-1.5 text-[12px] font-medium text-[#333333] hover:bg-[#f4f4f5] flex items-center gap-2 transition-colors cursor-pointer"
                           >
-                            <RefreshCw className="w-3.5 h-3.5 text-[#64748b]" />
+                            <RefreshCw className="w-3.5 h-3.5 text-[#666666]" />
                             <span>Sincronizar</span>
                           </button>
 
@@ -581,9 +581,9 @@ function ProductsTab() {
                               setActiveActionMenuId(null)
                               setShareProduct(p)
                             }}
-                            className="w-full px-3 py-1.5 text-[12px] font-medium text-[#334155] hover:bg-[#f4f4f5] flex items-center gap-2 transition-colors cursor-pointer"
+                            className="w-full px-3 py-1.5 text-[12px] font-medium text-[#333333] hover:bg-[#f4f4f5] flex items-center gap-2 transition-colors cursor-pointer"
                           >
-                            <Share2 className="w-3.5 h-3.5 text-[#64748b]" />
+                            <Share2 className="w-3.5 h-3.5 text-[#666666]" />
                             <span>Compartilhar</span>
                           </button>
 

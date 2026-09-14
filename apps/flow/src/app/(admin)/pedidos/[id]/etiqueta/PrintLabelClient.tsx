@@ -12,24 +12,24 @@ export default function PrintLabelClient({ order }: { order: OrderDetail }) {
   const pdfUrl = `/api/shipments/mercadolivre/label?orderId=${order.id}`
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] flex flex-col">
+    <div className="min-h-screen bg-[#F7F7F7] flex flex-col">
       {/* Top Header Bar */}
       <div className="bg-white border-b border-[#e2e8f0] px-4 py-3 shadow-2xs">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <button
               onClick={() => router.push(`/pedidos/${order.id}`)}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#475569] hover:text-[#0f172a] bg-[#f1f5f9] hover:bg-[#e2e8f0] px-3 py-2 rounded-xl transition-all cursor-pointer"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#666666] hover:text-[#111111] bg-[#f1f5f9] hover:bg-[#e2e8f0] px-3 py-2 rounded-xl transition-all cursor-pointer"
             >
               <ArrowLeft className="w-4 h-4" /> Voltar ao Pedido
             </button>
             <div className="flex items-center gap-2 border-l border-[#cbd5e1] pl-3">
               <MarketplaceLogo name={order.marketplace} className="w-5 h-5" />
               <div>
-                <h1 className="text-sm font-bold text-[#0f172a] leading-tight">
+                <h1 className="text-sm font-bold text-[#111111] leading-tight">
                   Etiqueta Oficial • Pedido {order.order_number}
                 </h1>
-                <p className="text-[11px] text-[#64748b] font-medium">
+                <p className="text-[11px] text-[#666666] font-medium">
                   {order.customer.name} • {order.shipping.city}/{order.shipping.state}
                 </p>
               </div>
@@ -41,14 +41,14 @@ export default function PrintLabelClient({ order }: { order: OrderDetail }) {
               href={pdfUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#334155] bg-white border border-[#cbd5e1] hover:bg-[#f5f5f5] px-3.5 py-2 rounded-xl transition-all cursor-pointer shadow-xs"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#333333] bg-white border border-[#cbd5e1] hover:bg-[#f5f5f5] px-3.5 py-2 rounded-xl transition-all cursor-pointer shadow-xs"
             >
               <ExternalLink className="w-3.5 h-3.5" /> Abrir em Nova Aba
             </a>
             <a
               href={pdfUrl}
               download={`etiqueta-${order.order_number}.pdf`}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#334155] bg-white border border-[#cbd5e1] hover:bg-[#f5f5f5] px-3.5 py-2 rounded-xl transition-all cursor-pointer shadow-xs"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#333333] bg-white border border-[#cbd5e1] hover:bg-[#f5f5f5] px-3.5 py-2 rounded-xl transition-all cursor-pointer shadow-xs"
             >
               <Download className="w-3.5 h-3.5" /> Baixar PDF
             </a>
@@ -85,10 +85,10 @@ export default function PrintLabelClient({ order }: { order: OrderDetail }) {
         ) : (
           <div className="flex-1 bg-white rounded-2xl border border-[#cbd5e1] p-12 text-center flex flex-col items-center justify-center">
             <AlertCircle className="w-12 h-12 text-[#e67e22] mb-3" />
-            <h3 className="text-base font-bold text-[#0f172a] mb-1">
+            <h3 className="text-base font-bold text-[#111111] mb-1">
               Etiqueta não disponível para reimpressão
             </h3>
-            <p className="text-xs text-[#64748b] max-w-md mb-4">
+            <p className="text-xs text-[#666666] max-w-md mb-4">
               O Mercado Livre só permite gerar o PDF enquanto o envio estiver pendente ou em trânsito. Pedidos já entregues ou cancelados têm o arquivo arquivado pelo marketplace.
             </p>
             <div className="flex items-center gap-3">
@@ -100,7 +100,7 @@ export default function PrintLabelClient({ order }: { order: OrderDetail }) {
               </button>
               <button
                 onClick={() => router.push(`/pedidos/${order.id}/nota`)}
-                className="px-4 py-2 bg-white border border-[#cbd5e1] text-xs font-semibold text-[#334155] rounded-xl hover:bg-[#f8fafc] transition-colors"
+                className="px-4 py-2 bg-white border border-[#cbd5e1] text-xs font-semibold text-[#333333] rounded-xl hover:bg-[#F7F7F7] transition-colors"
               >
                 Ver Comprovante / DANFE
               </button>

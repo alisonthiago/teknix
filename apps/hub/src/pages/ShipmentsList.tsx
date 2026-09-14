@@ -289,14 +289,13 @@ export default function ShipmentsList() {
           <>
             <div className="hub-status-tabs">
               {TABS.map(tab => (
-                <button key={tab.id} onClick={() => setActiveTab(tab.id as TabType)} style={{
-                  padding: '6px 12px', borderRadius: 8, border: 'none', cursor: 'pointer',
-                  fontSize: 13, fontWeight: activeTab === tab.id ? 700 : 500,
-                  background: activeTab === tab.id ? '#fff' : 'transparent',
-                  color: activeTab === tab.id ? '#111' : '#6b7280',
-                  boxShadow: activeTab === tab.id ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                  fontFamily: 'inherit', whiteSpace: 'nowrap'
-                }}>{tab.label}</button>
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as TabType)}
+                  className={activeTab === tab.id ? 'active' : ''}
+                >
+                  {tab.label}
+                </button>
               ))}
             </div>
             <button className="hub-btn hub-btn-secondary" onClick={fetchOrders} disabled={loading}>
@@ -307,6 +306,10 @@ export default function ShipmentsList() {
         columns={COLUMNS}
         rows={filteredOrders}
         loading={loading}
+        onRowClick={(order) => {
+          setSelectedOrder(order)
+          setDrawerOpen(true)
+        }}
         searchValue={search}
         onSearchChange={setSearch}
         searchPlaceholder="Buscar pedido, cliente, rastreio..."
@@ -413,9 +416,13 @@ export default function ShipmentsList() {
                   const { code, labelUrl } = getOrderTracking(selectedOrder)
                   if (!code) return (
                     <div className="label-action-box">
-                      <p className="label-intro">O pagamento foi confirmado. Você já pode emitir a etiqueta via Melhor Envio.</p>
+                      <p className="label-intro">
+                        {['paid', 'approved', 'preparing', 'shipped', 'delivered'].includes((selectedOrder.status || '').toLowerCase()) || selectedOrder.payment_status === 'approved'
+                          ? 'Pagamento confirmado. Você já pode emitir a etiqueta via Melhor Envio.'
+                          : 'Aguardando confirmação de pagamento para liberar a emissão da etiqueta.'}
+                      </p>
                       <button className="btn-generate-label" onClick={() => handleGenerateLabel(selectedOrder)} disabled={generatingLabel}>
-                        {generatingLabel ? <><div className="spinner-white" /><span>Comunicando com Melhor Envio...</span></> : <><Package size={16} /><span>Gerar / Comprar Etiqueta via Melhor Envio</span></>}
+                        {generatingLabel ? <><div className="spinner-white" /><span>Processando envio...</span></> : <><Package size={16} /><span>Gerar Etiqueta via Melhor Envio</span></>}
                       </button>
                     </div>
                   )

@@ -446,7 +446,7 @@ export default function Product() {
               </div>
               {freightError && <div style={{ color: '#ef4444', fontSize: '12px', marginTop: 8 }}>{freightError}</div>}
               {cepPreview && (
-                <div style={{ marginTop: 16, padding: '12px 16px', background: '#f8fafc', borderRadius: 8, fontSize: '13px', color: '#334155', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <div style={{ marginTop: 16, padding: '12px 16px', background: '#F7F7F7', borderRadius: 8, fontSize: '13px', color: '#334155', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: 4 }}>
                   <span style={{ fontWeight: 600, color: '#0f172a' }}>{cepPreview.street || 'Endereço encontrado'}</span>
                   <span>{cepPreview.neighborhood ? `${cepPreview.neighborhood} - ` : ''}{cepPreview.city}, {cepPreview.state}</span>
                 </div>
@@ -784,7 +784,7 @@ export default function Product() {
                             </div>
                           </div>
                         ) : (
-                          <div style={{ position: 'relative', width: '100%', height: '100%', background: '#f8fafc' }}>
+                          <div style={{ position: 'relative', width: '100%', height: '100%', background: '#F7F7F7' }}>
                             <video
                               src={`${currentProduct.video_url}#t=0.2`}
                               preload="metadata"
@@ -1130,7 +1130,7 @@ export default function Product() {
                         </Editable>
                       </div>
                       <div className="btn-buy" style={{ width: '100%' }}>
-                        <Editable as="button" widgetId="product-control-35" type="button" className="add-cart" onClick={handleAddToCart} style={{ width: '100%', height: 48, background: '#fff', color: '#0066cc', border: '1px solid #0066cc', borderRadius: 8, fontWeight: 700, fontSize: '1rem', cursor: 'pointer', transition: 'background 0.2s' }} onMouseOver={(e: any) => e.currentTarget.style.background = '#f8fafc'} onMouseOut={(e: any) => e.currentTarget.style.background = '#fff'}>
+                        <Editable as="button" widgetId="product-control-35" type="button" className="add-cart" onClick={handleAddToCart} style={{ width: '100%', height: 48, background: '#fff', color: '#0066cc', border: '1px solid #0066cc', borderRadius: 8, fontWeight: 700, fontSize: '1rem', cursor: 'pointer', transition: 'background 0.2s' }} onMouseOver={(e: any) => e.currentTarget.style.background = '#F7F7F7'} onMouseOut={(e: any) => e.currentTarget.style.background = '#fff'}>
                           Adicionar ao Carrinho
                         </Editable>
                       </div>
@@ -1175,7 +1175,7 @@ export default function Product() {
                         display: 'flex', 
                         alignItems: 'center', 
                         position: 'relative', 
-                        background: '#f8fafc', 
+                        background: '#F7F7F7', 
                         border: '1.5px solid #cbd5e1', 
                         borderRadius: 8, 
                         overflow: 'hidden', 

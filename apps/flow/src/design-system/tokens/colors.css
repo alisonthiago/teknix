@@ -7,12 +7,14 @@
   --color-surface-hover: #f0f0f0;
   --color-surface-active: #e8e8e8;
 
-  /* ── Escala de Textos Neutros ── */
-  --color-text-primary: #242424;
+  /* ── Escala de Textos Neutros (Oficial TEKNIX) ── */
+  --color-text-title: #111111;
+  --color-text-primary: #333333;
   --color-text-secondary: #666666;
-  --color-text-tertiary: #8a8a8a;
+  --color-text-tertiary: #999999;
+  --color-text-muted: #999999;
   --color-text-inverse: #ffffff;
-  --color-text-disabled: #a3a3a3;
+  --color-text-disabled: #999999;
 
   /* ── Bordas Neutras ── */
   --color-border: #e5e5e5;
@@ -51,8 +53,8 @@
 
   /* Informativo / Ação */
   --color-info: #347ff2;
-  --color-info-bg: #f0f7ff;
-  --color-info-border: #dbeafe;
+  --color-info-bg: #F7F7F7;
+  --color-info-border: #F7F7F7;
 
   /* ── Neutralizadores de Blue-Gray / Slate (Aliases de compatibilidade) ── */
   --color-slate-50: #fafafa;

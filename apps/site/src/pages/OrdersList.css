@@ -580,7 +580,7 @@
 
 .btn-track-external:hover {
   border-color: #0f172a;
-  background: #f8fafc;
+  background: #F7F7F7;
 }
 
 /* ── Items List ── */
@@ -1132,7 +1132,7 @@
 }
 
 .nfe-preview-card {
-  background: #f8fafc;
+  background: #F7F7F7;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   padding: var(--tkn-space-16);

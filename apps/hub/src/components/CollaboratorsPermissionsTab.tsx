@@ -238,9 +238,6 @@ export default function CollaboratorsPermissionsTab() {
           </button>
           <div>
             <h1 className="settings-main-title">Permissões dos Colaboradores</h1>
-            <p className="settings-main-subtitle">
-              Defina o perfil de acesso e controle exatamente o que cada membro da equipe pode visualizar, criar, editar, excluir ou publicar na loja.
-            </p>
           </div>
         </div>
         <button
@@ -332,17 +329,14 @@ export default function CollaboratorsPermissionsTab() {
 
               {selectedColab.is_master && (
                 <div className="colab-master-alert">
-                  <ShieldCheck size={18} />
-                  <div>
-                    <strong>Superadministrador Principal (MASTER)</strong>
-                    <p>Este usuário possui acesso total permanente e protegido contra bloqueio acidental.</p>
-                  </div>
+                  <ShieldCheck size={16} />
+                  <strong>Superadministrador Principal (MASTER) — Acesso Total</strong>
                 </div>
               )}
 
               {/* Seletor de Perfil de Acesso */}
               <div className="colab-role-section">
-                <label className="colab-section-label">Perfil de Acesso do Colaborador</label>
+                <label className="colab-section-label">Perfil de Acesso</label>
                 <div className="colab-role-cards-grid">
                   {(Object.keys(ROLE_LABELS) as Array<CollaboratorProfile['role']>).map(roleKey => {
                     const isCurrent = selectedRole === roleKey
@@ -363,7 +357,6 @@ export default function CollaboratorsPermissionsTab() {
                           />
                           <span className="colab-role-name">{info.name}</span>
                         </div>
-                        <p className="colab-role-desc">{info.desc}</p>
                       </div>
                     )
                   })}
@@ -374,8 +367,7 @@ export default function CollaboratorsPermissionsTab() {
               <div className="colab-matrix-section">
                 <div className="colab-matrix-header-row">
                   <div>
-                    <h3 className="colab-matrix-title">Permissões Detalhadas por Módulo</h3>
-                    <p className="colab-matrix-desc">Controle fino para cada tela e ação do sistema TEKNIX.</p>
+                    <h3 className="colab-matrix-title">Permissões por Módulo</h3>
                   </div>
                 </div>
 
@@ -387,7 +379,7 @@ export default function CollaboratorsPermissionsTab() {
                         <div className="colab-module-header">
                           <div className="colab-module-name-wrap">
                             <span className="colab-module-title">{mod.name}</span>
-                            <span className="colab-module-count">({mod.items.length} permissões)</span>
+                            <span className="colab-module-count">({mod.items.length})</span>
                           </div>
                           
                           <button
@@ -416,10 +408,7 @@ export default function CollaboratorsPermissionsTab() {
                                     disabled={selectedColab.is_master}
                                     className="colab-checkbox"
                                   />
-                                  <div>
-                                    <div className="colab-perm-label">{perm.label}</div>
-                                    <div className="colab-perm-desc">{perm.description}</div>
-                                  </div>
+                                  <span className="colab-perm-label">{perm.label}</span>
                                 </div>
                                 <span className={`colab-action-badge action-${perm.action}`}>
                                   {perm.actionLabel}
@@ -450,7 +439,7 @@ export default function CollaboratorsPermissionsTab() {
           ) : (
             <div className="colab-empty-selection">
               <Users size={32} />
-              <p>Selecione um colaborador na lista ao lado para editar suas permissões.</p>
+              <p>Selecione um colaborador.</p>
             </div>
           )}
         </div>

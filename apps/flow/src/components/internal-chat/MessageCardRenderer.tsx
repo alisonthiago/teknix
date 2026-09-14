@@ -57,7 +57,7 @@ export default function MessageCardRenderer({ message, isMe, showChannel, channe
 
             <div className="flex items-start gap-3.5">
               {meta.product_image ? (
-                <img src={meta.product_image} alt="" className="w-14 h-14 object-contain rounded-xl border border-[#eee] bg-[#f8fafc] p-0.5 shrink-0" />
+                <img src={meta.product_image} alt="" className="w-14 h-14 object-contain rounded-xl border border-[#eee] bg-[#F7F7F7] p-0.5 shrink-0" />
               ) : (
                 <div className="w-14 h-14 rounded-xl bg-[#f1f5f9] flex items-center justify-center text-[#64748b] shrink-0">
                   <Package className="w-6 h-6" />
@@ -95,7 +95,7 @@ export default function MessageCardRenderer({ message, isMe, showChannel, channe
 
             <div className="flex items-start gap-3.5">
               {meta.product_image ? (
-                <img src={meta.product_image} alt="" className="w-14 h-14 object-contain rounded-xl border border-[#eee] bg-[#f8fafc] p-0.5 shrink-0" />
+                <img src={meta.product_image} alt="" className="w-14 h-14 object-contain rounded-xl border border-[#eee] bg-[#F7F7F7] p-0.5 shrink-0" />
               ) : (
                 <div className="w-14 h-14 rounded-xl bg-[#f1f5f9] flex items-center justify-center text-[#64748b] shrink-0">
                   <Package className="w-6 h-6" />
@@ -271,7 +271,7 @@ export default function MessageCardRenderer({ message, isMe, showChannel, channe
             {meta.file_url && meta.file_url.match(/\.(jpg|jpeg|png|webp|gif)$/i) ? (
               <img src={meta.file_url} alt="" className="w-full h-36 object-cover rounded-xl border border-[#eee]" />
             ) : (
-              <div className="flex items-center gap-2.5 p-2 bg-[#f8fafc] rounded-xl border border-[#eee]">
+              <div className="flex items-center gap-2.5 p-2 bg-[#F7F7F7] rounded-xl border border-[#eee]">
                 <Paperclip className="w-4 h-4 text-[#1f2328]" />
                 <span className="text-xs font-bold text-[#1e293b] truncate">{meta.file_name || 'Documento.pdf'}</span>
               </div>

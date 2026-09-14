@@ -47,10 +47,12 @@
   --tk-color-surface-hover: var(--color-surface-hover);
   --tk-color-surface-subtle: var(--color-surface-subtle);
   
-  --tk-color-text-primary: var(--color-text-primary);
-  --tk-color-text-secondary: var(--color-text-secondary);
-  --tk-color-text-tertiary: var(--color-text-tertiary);
-  --tk-color-text-inverse: var(--color-text-inverse);
+  --tk-color-text-title: var(--color-text-title, #111111);
+  --tk-color-text-primary: var(--color-text-primary, #333333);
+  --tk-color-text-secondary: var(--color-text-secondary, #666666);
+  --tk-color-text-tertiary: var(--color-text-tertiary, #999999);
+  --tk-color-text-muted: var(--color-text-muted, #999999);
+  --tk-color-text-inverse: var(--color-text-inverse, #ffffff);
 
   /* Accent & Action */
   --tk-color-primary: var(--color-action-primary);
@@ -58,6 +60,15 @@
   --tk-color-primary-active: var(--color-action-primary-active);
   --tk-color-primary-light: var(--color-action-primary-light);
   --tk-color-primary-surface: var(--color-action-surface);
+
+  /* ── Botões Globais (Regra Oficial: AZUL EXCLUSIVO NOS BOTÕES) ── */
+  --button-primary: var(--button-primary, #0071e3);
+  --button-primary-hover: var(--button-primary-hover, #0062c4);
+  --button-primary-active: var(--button-primary-active, #004f9e);
+  --button-primary-focus: var(--button-primary-focus, #0071e3);
+  --button-primary-focus-shadow: var(--button-primary-focus-shadow, rgba(0, 0, 0, 0.08));
+  --button-primary-disabled: var(--button-primary-disabled, #F7F7F7);
+  --button-primary-text: var(--button-primary-text, #ffffff);
 
   /* Brand Green / Lime */
   --tk-color-brand-green: var(--color-success);

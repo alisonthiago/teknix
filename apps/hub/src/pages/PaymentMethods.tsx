@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Check, ExternalLink, Settings, Key, CheckCircle2, ChevronDown, ChevronLeft } from 'lucide-react'
+import { Check, ExternalLink, Settings, Key, CheckCircle2, ChevronDown, ChevronLeft, X } from 'lucide-react'
 import './PaymentMethods.css'
 import MercadoPagoSettings from './MercadoPagoSettings'
 import { usePermissions } from '../hooks/usePermissions'
 import { notifyHub } from '../lib/hubNotifications'
+import { supabase } from '../lib/supabase'
 
 interface Gateway {
   id: string
@@ -20,6 +21,127 @@ interface Gateway {
   credentials?: Record<string, string>
 }
 
+const DEFAULT_GATEWAYS: Gateway[] = [
+  {
+    id: 'teknix_pay',
+    name: 'TEKNIX Pay',
+    logoText: 'TEKNIX Pay',
+    logoColor: '#00a854',
+    logoBg: '#e6f9f0',
+    isFeatured: true,
+    status: 'active',
+    features: ['PIX com QR Code dinâmico', 'Gestão integrada no painel', 'Checkout transparente', 'Antifraude integrado'],
+    rates: [
+      { method: 'Cartão de crédito', terms: '2 dias', rate: '4.69%', fixed: '+ R$ 0,35' },
+      { method: 'Cartão de crédito', terms: '14 dias', rate: '4.19%', fixed: '+ R$ 0,35' },
+      { method: 'Cartão de crédito', terms: '30 dias', rate: '3.69%', fixed: '+ R$ 0,35' },
+      { method: 'Boleto bancário', terms: '2 dias', rate: '2.39%', fixed: 'fixo' },
+      { method: 'PIX Instantâneo', terms: 'Na hora', rate: '0.99%', fixed: 'sem taxa fixa' },
+    ],
+    linkUrl: 'https://teknix.com.br',
+    credentials: {
+      clientId: 'tkn_live_cli_88492019',
+      secretKey: '••••••••••••••••••••••••',
+      pixKey: '12.345.678/0001-90'
+    }
+  },
+  {
+    id: 'mercado_pago',
+    name: 'Mercado Pago',
+    logoText: 'Mercado Pago',
+    logoColor: '#009ee3',
+    logoBg: '#e5f6fd',
+    status: 'active',
+    features: ['Checkout transparente', 'Cartão, Boleto e PIX', 'Carteira virtual Mercado Pago'],
+    rates: [
+      { method: 'Cartão de crédito', terms: 'Na hora', rate: '4.98%', fixed: '+ taxa fixa' },
+      { method: 'Cartão de crédito', terms: '14 dias', rate: '4.45%', fixed: '+ taxa fixa' },
+      { method: 'Cartão de crédito', terms: '30 dias', rate: '3.98%', fixed: '+ taxa fixa' },
+    ],
+    linkUrl: 'https://mercadopago.com.br',
+    credentials: {
+      publicKey: 'APP_USR-67294819-2049-4819-9481-948194819481',
+      accessToken: 'APP_USR-••••••••••••••••••••••••••••••••',
+      installments: '12',
+      environment: 'production'
+    }
+  },
+  {
+    id: 'paypal',
+    name: 'PayPal',
+    logoText: 'PayPal',
+    logoColor: '#003087',
+    logoBg: '#e6eef7',
+    status: 'inactive',
+    features: ['Cartões internacionais', 'Carteira virtual PayPal', 'Proteção ao comprador'],
+    rates: [
+      { method: 'Cartão de crédito', terms: '1 dia', rate: '4.69%', fixed: '+ R$ 0,60' },
+      { method: 'Cartão de crédito', terms: '30 dias', rate: '3.60%', fixed: '+ R$ 0,60' },
+    ],
+    linkUrl: 'https://paypal.com/br',
+    credentials: {
+      clientId: '',
+      secret: ''
+    }
+  },
+  {
+    id: 'cielo',
+    name: 'Cielo',
+    logoText: 'Cielo',
+    logoColor: '#00a6ce',
+    logoBg: '#e6f7fa',
+    status: 'inactive',
+    features: ['Taxas exclusivas', 'Checkout transparente', 'Débito e Crédito'],
+    rates: [
+      { method: 'Cartão de crédito', terms: '30 dias', rate: '3.29%', fixed: 'fixo' },
+      { method: 'Boleto bancário', terms: '1 dia', rate: 'R$ 0,00', fixed: 'R$ 2,50' },
+    ],
+    linkUrl: 'https://cielo.com.br',
+    credentials: {
+      merchantId: '',
+      merchantKey: ''
+    }
+  },
+  {
+    id: 'custom_transfer',
+    name: 'Personalizado / Transferência / Depósito',
+    logoText: 'Manual / PIX',
+    logoColor: '#4b5563',
+    logoBg: '#f3f4f6',
+    status: 'active',
+    features: ['A combinar com o cliente', 'Transferência em conta', 'PIX chave manual', 'Sem taxas de intermediação'],
+    rates: [
+      { method: 'Transferência bancária', terms: 'Na hora', rate: '0.00%', fixed: 'Sem custo' },
+      { method: 'PIX Chave Direta', terms: 'Na hora', rate: '0.00%', fixed: 'Sem custo' },
+    ],
+    linkUrl: '#',
+    credentials: {
+      pixKey: 'pix@teknix.com.br',
+      bankName: 'Banco Inter (077)',
+      agency: '0001',
+      account: '1234567-8',
+      instructions: 'Após o pagamento via PIX, envie o comprovante no WhatsApp (11) 99888-7766 informando o número do seu pedido.'
+    }
+  },
+  {
+    id: 'pagarme',
+    name: 'Pagar.me / Stone',
+    logoText: 'Pagar.me',
+    logoColor: '#5856d6',
+    logoBg: '#f4f3ff',
+    status: 'inactive',
+    features: ['Multiadquirência', 'Checkout transparente', 'PIX e Boleto rápido'],
+    rates: [
+      { method: 'Cartão de crédito', terms: '30 dias', rate: '3.19%', fixed: '+ R$ 0,40' },
+    ],
+    linkUrl: 'https://pagar.me',
+    credentials: {
+      merchantId: '',
+      merchantKey: ''
+    }
+  }
+]
+
 function GatewayLogo({ gateway }: { gateway: Gateway }) {
   const labels: Record<string, string> = {
     teknix_pay: 'TEKNIX Pay',
@@ -33,7 +155,7 @@ function GatewayLogo({ gateway }: { gateway: Gateway }) {
   const imageByGateway: Record<string, string> = {
     teknix_pay: '/logos/teknix-pay.svg',
     mercado_pago: '/logos/mercado-pago.svg',
-    paypal: '/logos/paypal.svg',
+    paypal: '/logos/paypal.webp',
     cielo: '/logos/cielo.svg',
     custom_transfer: '/logos/pix.svg',
     pagarme: '/logos/pagarme.svg'
@@ -41,24 +163,59 @@ function GatewayLogo({ gateway }: { gateway: Gateway }) {
 
   return (
     <span className={`gateway-logo gateway-logo-${gateway.id}`} role="img" aria-label={labels[gateway.id] || gateway.logoText}>
-      <img src={imageByGateway[gateway.id]} alt={labels[gateway.id] || gateway.logoText} />
+      <img
+        src={imageByGateway[gateway.id] || `/logos/${gateway.id}.svg`}
+        alt={labels[gateway.id] || gateway.logoText}
+        onError={(e) => {
+          const img = e.target as HTMLImageElement
+          if (gateway.id === 'cielo' && !img.src.endsWith('.png')) {
+            img.src = '/logos/cielo.png'
+          } else if (gateway.id === 'mercado_pago' && !img.src.endsWith('.png')) {
+            img.src = '/logos/mercado-pago.png'
+          } else if (gateway.id === 'paypal' && !img.src.endsWith('.png')) {
+            img.src = '/logos/paypal.png'
+          } else if (gateway.id === 'pagarme' && !img.src.endsWith('.png')) {
+            img.src = '/logos/pagarme.png'
+          }
+        }}
+      />
     </span>
   )
 }
 
 function GatewayLogoVisual({ gatewayId, label }: { gatewayId: string; label: string }) {
   const imageByGateway: Record<string, string> = {
-    mercado_pago: '/logos/mercado-pago.svg'
+    teknix_pay: '/logos/teknix-pay.svg',
+    mercado_pago: '/logos/mercado-pago.svg',
+    paypal: '/logos/paypal.webp',
+    cielo: '/logos/cielo.svg',
+    custom_transfer: '/logos/pix.svg',
+    pagarme: '/logos/pagarme.svg'
   }
 
   return (
     <span className={`gateway-logo gateway-logo-${gatewayId}`} role="img" aria-label={label}>
-      <img src={imageByGateway[gatewayId]} alt={label} />
+      <img
+        src={imageByGateway[gatewayId] || `/logos/${gatewayId}.svg`}
+        alt={label}
+        onError={(e) => {
+          const img = e.target as HTMLImageElement
+          if (gatewayId === 'cielo' && !img.src.endsWith('.png')) {
+            img.src = '/logos/cielo.png'
+          } else if (gatewayId === 'mercado_pago' && !img.src.endsWith('.png')) {
+            img.src = '/logos/mercado-pago.png'
+          } else if (gatewayId === 'paypal' && !img.src.endsWith('.png')) {
+            img.src = '/logos/paypal.png'
+          } else if (gatewayId === 'pagarme' && !img.src.endsWith('.png')) {
+            img.src = '/logos/pagarme.png'
+          }
+        }}
+      />
     </span>
   )
 }
 
-export default function PaymentMethods() {
+export default function PaymentMethods({ embedded = false }: { embedded?: boolean } = {}) {
   const navigate = useNavigate()
   const { can } = usePermissions()
   const [activeTab, setActiveTab] = useState<'all' | 'active' | 'inactive' | 'pending'>('all')
@@ -68,128 +225,58 @@ export default function PaymentMethods() {
   const [testing, setTesting] = useState(false)
   const [mercadoPagoOpen, setMercadoPagoOpen] = useState(true)
 
-  const [gateways, setGateways] = useState<Gateway[]>([
-    {
-      id: 'teknix_pay',
-      name: 'TEKNIX Pay',
-      logoText: 'TEKNIX Pay',
-      logoColor: '#00a854',
-      logoBg: '#e6f9f0',
-      isFeatured: true,
-      status: 'active',
-      features: ['PIX com QR Code dinâmico', 'Gestão integrada no painel', 'Checkout transparente', 'Antifraude integrado'],
-      rates: [
-        { method: 'Cartão de crédito', terms: '2 dias', rate: '4.69%', fixed: '+ R$ 0,35' },
-        { method: 'Cartão de crédito', terms: '14 dias', rate: '4.19%', fixed: '+ R$ 0,35' },
-        { method: 'Cartão de crédito', terms: '30 dias', rate: '3.69%', fixed: '+ R$ 0,35' },
-        { method: 'Boleto bancário', terms: '2 dias', rate: '2.39%', fixed: 'fixo' },
-        { method: 'PIX Instantâneo', terms: 'Na hora', rate: '0.99%', fixed: 'sem taxa fixa' },
-      ],
-      linkUrl: 'https://teknix.com.br',
-      credentials: {
-        clientId: 'tkn_live_cli_88492019',
-        secretKey: '••••••••••••••••••••••••',
-        pixKey: '12.345.678/0001-90'
+  const [gateways, setGateways] = useState<Gateway[]>(() => {
+    try {
+      const saved = localStorage.getItem('hub_payment_gateways')
+      if (saved) {
+        const parsed = JSON.parse(saved) as Gateway[]
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return DEFAULT_GATEWAYS.map(def => {
+            const match = parsed.find(p => p.id === def.id)
+            if (match) {
+              return {
+                ...def,
+                status: match.status || def.status,
+                credentials: { ...def.credentials, ...match.credentials }
+              }
+            }
+            return def
+          })
+        }
       }
-    },
-    {
-      id: 'mercado_pago',
-      name: 'Mercado Pago',
-      logoText: 'Mercado Pago',
-      logoColor: '#009ee3',
-      logoBg: '#e5f6fd',
-      status: 'active',
-      features: ['Checkout transparente', 'Cartão, Boleto e PIX', 'Carteira virtual Mercado Pago'],
-      rates: [
-        { method: 'Cartão de crédito', terms: 'Na hora', rate: '4.98%', fixed: '+ taxa fixa' },
-        { method: 'Cartão de crédito', terms: '14 dias', rate: '4.45%', fixed: '+ taxa fixa' },
-        { method: 'Cartão de crédito', terms: '30 dias', rate: '3.98%', fixed: '+ taxa fixa' },
-      ],
-      linkUrl: 'https://mercadopago.com.br',
-      credentials: {
-        publicKey: 'APP_USR-67294819-2049-4819-9481-948194819481',
-        accessToken: 'APP_USR-••••••••••••••••••••••••••••••••',
-        installments: '12',
-        environment: 'production'
-      }
-    },
-    {
-      id: 'paypal',
-      name: 'PayPal',
-      logoText: 'PayPal',
-      logoColor: '#003087',
-      logoBg: '#e6eef7',
-      status: 'inactive',
-      features: ['Cartões internacionais', 'Carteira virtual PayPal', 'Proteção ao comprador'],
-      rates: [
-        { method: 'Cartão de crédito', terms: '1 dia', rate: '4.69%', fixed: '+ R$ 0,60' },
-        { method: 'Cartão de crédito', terms: '30 dias', rate: '3.60%', fixed: '+ R$ 0,60' },
-      ],
-      linkUrl: 'https://paypal.com/br',
-      credentials: {
-        clientId: '',
-        secret: ''
-      }
-    },
-    {
-      id: 'cielo',
-      name: 'Cielo',
-      logoText: 'Cielo',
-      logoColor: '#00a6ce',
-      logoBg: '#e6f7fa',
-      status: 'inactive',
-      features: ['Taxas exclusivas', 'Checkout transparente', 'Débito e Crédito'],
-      rates: [
-        { method: 'Cartão de crédito', terms: '30 dias', rate: '3.29%', fixed: 'fixo' },
-        { method: 'Boleto bancário', terms: '1 dia', rate: 'R$ 0,00', fixed: 'R$ 2,50' },
-      ],
-      linkUrl: 'https://cielo.com.br',
-      credentials: {
-        merchantId: '',
-        merchantKey: ''
-      }
-    },
-    {
-      id: 'custom_transfer',
-      name: 'Personalizado / Transferência / Depósito',
-      logoText: 'Manual / PIX',
-      logoColor: '#4b5563',
-      logoBg: '#f3f4f6',
-      status: 'active',
-      features: ['A combinar com o cliente', 'Transferência em conta', 'PIX chave manual', 'Sem taxas de intermediação'],
-      rates: [
-        { method: 'Transferência bancária', terms: 'Na hora', rate: '0.00%', fixed: 'Sem custo' },
-        { method: 'PIX Chave Direta', terms: 'Na hora', rate: '0.00%', fixed: 'Sem custo' },
-      ],
-      linkUrl: '#',
-      credentials: {
-        pixKey: 'pix@teknix.com.br',
-        bankName: 'Banco Inter (077)',
-        agency: '0001',
-        account: '1234567-8',
-        instructions: 'Após o pagamento via PIX, envie o comprovante no WhatsApp (11) 99888-7766 informando o número do seu pedido.'
-      }
-    },
-    {
-      id: 'pagarme',
-      name: 'Pagar.me / Stone',
-      logoText: 'Pagar.me',
-      logoColor: '#5856d6',
-      logoBg: '#f4f3ff',
-      status: 'inactive',
-      features: ['Multiadquirência', 'Checkout transparente', 'PIX e Boleto rápido'],
-      rates: [
-        { method: 'Cartão de crédito', terms: '30 dias', rate: '3.19%', fixed: '+ R$ 0,40' },
-      ],
-      linkUrl: 'https://pagar.me',
-      credentials: {
-        merchantId: '',
-        merchantKey: ''
-      }
+    } catch (e) {
+      console.warn('[PaymentMethods] Falha ao carregar gateways salvos:', e)
     }
-  ])
+    return DEFAULT_GATEWAYS
+  })
+
+  // Synchronize Mercado Pago status with store_payment_settings
+  useEffect(() => {
+    let mounted = true
+    supabase.from('store_payment_settings').select('enable_pix, enable_credit_card, enable_boleto').eq('id', 'default').maybeSingle().then(({ data }) => {
+      if (!mounted || !data) return
+      const anyActive = !!(data.enable_pix || data.enable_credit_card || data.enable_boleto)
+      setGateways(curr => curr.map(g => {
+        if (g.id === 'mercado_pago') {
+          return { ...g, status: anyActive ? 'active' : 'inactive' }
+        }
+        return g
+      }))
+    })
+    return () => { mounted = false }
+  }, [])
 
   function handleOpenConfig(gw: Gateway) {
+    if (gw.id === 'mercado_pago') {
+      setMercadoPagoOpen(true)
+      setTimeout(() => {
+        const el = document.querySelector('.payments-admin-section')
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
+      }, 50)
+      return
+    }
     setSelectedGateway(gw)
     setCredentialsForm(gw.credentials || {})
     setTestResult(null)
@@ -197,16 +284,20 @@ export default function PaymentMethods() {
 
   function handleSaveCredentials() {
     if (!selectedGateway) return
-    setGateways(gateways.map(g => {
+    const updated = gateways.map(g => {
       if (g.id === selectedGateway.id) {
         return {
           ...g,
           credentials: credentialsForm,
-          status: 'active'
+          status: 'active' as const
         }
       }
       return g
-    }))
+    })
+    setGateways(updated)
+    try {
+      localStorage.setItem('hub_payment_gateways', JSON.stringify(updated))
+    } catch {}
     notifyHub(`Credenciais da API do ${selectedGateway.name} salvas com sucesso! Gateway ativado.`)
     setSelectedGateway(null)
   }
@@ -223,13 +314,17 @@ export default function PaymentMethods() {
 
   function handleToggleGateway(id: string) {
     const gateway = gateways.find(g => g.id === id)
-    setGateways(gateways.map(g => {
+    const updated = gateways.map(g => {
       if (g.id === id) {
-        const nextStatus = g.status === 'active' ? 'inactive' : 'active'
+        const nextStatus = g.status === 'active' ? 'inactive' as const : 'active' as const
         return { ...g, status: nextStatus }
       }
       return g
-    }))
+    })
+    setGateways(updated)
+    try {
+      localStorage.setItem('hub_payment_gateways', JSON.stringify(updated))
+    } catch {}
     if (gateway) {
       notifyHub(`${gateway.name} ${gateway.status === 'active' ? 'desativado' : 'ativado'} com sucesso.`)
     }
@@ -241,21 +336,26 @@ export default function PaymentMethods() {
   })
 
   return (
-    <div className="payments-page-container">
+    <div className={`payments-page-container ${embedded ? 'embedded' : ''}`}>
       <div className="payments-wrapper">
         
-        {/* Back navigation */}
-        <div className="payments-header" style={{ marginBottom: 12 }}>
+        {/* Back navigation & Header */}
+        <div className="payments-header" style={{ marginBottom: 16 }}>
           <div className="title-with-back" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <button
-              type="button"
-              className="btn-back-to-settings"
-              onClick={() => navigate('/hub/configuracoes')}
-              title="Voltar para Configurações"
-              aria-label="Voltar para Configurações"
-            >
-              <ChevronLeft size={20} />
-            </button>
+            {!embedded && (
+              <button
+                type="button"
+                className="btn-back-to-settings"
+                onClick={() => navigate('/hub/configuracoes')}
+                title="Voltar para Configurações"
+                aria-label="Voltar para Configurações"
+              >
+                <ChevronLeft size={20} />
+              </button>
+            )}
+            <div>
+              <h1 className="payments-title">Meios de Pagamento</h1>
+            </div>
           </div>
         </div>
 
@@ -373,12 +473,23 @@ export default function PaymentMethods() {
         <div className="modal-overlay" onClick={() => setSelectedGateway(null)}>
           <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 540 }}>
             <div className="modal-header">
-              <div>
-                <h3 style={{ margin: 0, fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <Key size={18} color="#2563eb" /> Integração API — {selectedGateway.name}
-                </h3>
-                <span style={{ fontSize: '0.78rem', color: '#6b7280' }}>Insira suas credenciais oficiais para processamento seguro</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <GatewayLogoVisual gatewayId={selectedGateway.id} label={selectedGateway.name} />
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.15rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    Integração API — {selectedGateway.name}
+                  </h3>
+                  <span style={{ fontSize: '0.78rem', color: '#6b7280' }}>Insira suas credenciais oficiais para processamento seguro</span>
+                </div>
               </div>
+              <button
+                type="button"
+                className="modal-close-btn"
+                onClick={() => setSelectedGateway(null)}
+                aria-label="Fechar modal"
+              >
+                <X size={18} />
+              </button>
             </div>
 
             <div className="modal-body" style={{ gap: 14 }}>
@@ -576,22 +687,22 @@ export default function PaymentMethods() {
                 </div>
               )}
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
-                <button
-                  type="button"
-                  className="btn-secondary-action"
-                  onClick={handleTestConnection}
-                  disabled={testing}
-                >
-                  {testing ? 'Testando...' : 'Testar Conexão'}
-                </button>
+            </div>
 
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <button type="button" className="btn-secondary-action" onClick={() => setSelectedGateway(null)}>Cancelar</button>
-                  <button type="button" className="btn-primary-action" onClick={handleSaveCredentials}>Salvar Credenciais</button>
-                </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn-secondary-action"
+                onClick={handleTestConnection}
+                disabled={testing}
+              >
+                {testing ? 'Testando...' : 'Testar Conexão'}
+              </button>
+
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button type="button" className="btn-secondary-action" onClick={() => setSelectedGateway(null)}>Cancelar</button>
+                <button type="button" className="btn-primary-action" onClick={handleSaveCredentials}>Salvar Credenciais</button>
               </div>
-
             </div>
           </div>
         </div>

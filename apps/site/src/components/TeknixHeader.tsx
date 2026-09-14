@@ -5,7 +5,14 @@ import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../hooks/useAuth'
-import { CORE_CATEGORIES } from '../services/categories'
+import {
+  CORE_CATEGORIES,
+  CORE_SEGMENTS,
+  fetchPublishedCategories,
+  fetchPublishedSegments,
+  type CentralCategoryWithSegment,
+  type StoreSegment
+} from '../services/categories'
 import { getCustomerByUserId, type Customer } from '../services/customer'
 import CepDeliveryModal from './CepDeliveryModal'
 import './CasasBahiaHeader.css'
@@ -191,6 +198,32 @@ export default function TeknixHeader() {
       return () => { active = false }
     }
   }, [cep])
+
+  const [dbCategories, setDbCategories] = useState<CentralCategoryWithSegment[]>([])
+  const [dbSegments, setDbSegments] = useState<StoreSegment[]>(CORE_SEGMENTS)
+  const [selectedMegaSegmentId, setSelectedMegaSegmentId] = useState<string>('all')
+  const [megaSearchQuery, setMegaSearchQuery] = useState<string>('')
+
+  useEffect(() => {
+    fetchPublishedCategories().then(cats => {
+      if (cats && cats.length > 0) setDbCategories(cats)
+    })
+    fetchPublishedSegments().then(segs => {
+      if (segs && segs.length > 0) setDbSegments(segs)
+    })
+  }, [])
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsDepartmentsOpen(false)
+        setIsCepOpen(false)
+        setIsAccountOpen(false)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   const accountPopoverRef = useRef<HTMLDivElement>(null)
   const departmentsPopoverRef = useRef<HTMLDivElement>(null)
@@ -449,27 +482,27 @@ export default function TeknixHeader() {
                       aria-expanded={isCepOpen ? 'true' : 'false'}
                       aria-haspopup="dialog"
                       aria-label={`Região de ${displayCity}. Alterar o CEP`}
-                      className={`[grid-area:location] flex font-2xsm-regular gap-2xsm items-center w-full bg-transparent cursor-pointer xlg:justify-self-start xlg:w-max xlg:[grid-area:unset] min-w-0 [&>*:last-child]:ml-auto xlg:w-auto xlg:max-w-[250px] dsvia-location-pill ${isSearching ? 'is-searching' : ''}`}
+                      className={`dsvia-location-pill ${isSearching ? 'is-searching' : ''}`}
                       data-testid="header-location"
                       type="button"
                       onClick={() => setIsCepOpen(true)}
                       title={`Região de ${displayCity}. Alterar o CEP`}
                     >
-                      <i className="icon icon-place font-xlg-regular shrink-0 dsvia-icon-place" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <span className="dsvia-icon-place" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" />
                           <circle cx="12" cy="10" r="3" />
                         </svg>
-                      </i>
-                      <span className="block text-left font-2xsm-regular min-w-0 flex-1 w-full dsvia-location-text-col">
-                        <span className="xlg:block dsvia-location-prefix">Região de </span>
-                        <span className="xlg:block xlg:font-2xsm-bold dsvia-location-city">{displayCity}</span>
                       </span>
-                      <i className="icon icon-chevron-down font-xlg-regular shrink-0 xlg:font-md-regular xlg:self-auto dsvia-icon-chevron" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <div className="dsvia-location-text-col">
+                        <span className="dsvia-location-prefix">Região de</span>
+                        <span className="dsvia-location-city">{displayCity}</span>
+                      </div>
+                      <span className="dsvia-icon-chevron" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <path d="m6 9 6 6 6-6" />
                         </svg>
-                      </i>
+                      </span>
                     </button>
                   </div>
                 </div>
@@ -605,30 +638,253 @@ export default function TeknixHeader() {
               aria-label="Menu Horizontal da Loja"
               renderContent={false}
             >
-              {showDeptBtn && (
-                <div className="dsvia-departments-menu" ref={departmentsPopoverRef}>
-                <button
-                  type="button"
-                  className="dsvia-dept-trigger"
-                  aria-label="Abrir todos os departamentos"
-                  aria-expanded={isDepartmentsOpen}
-                  aria-haspopup="menu"
-                  onClick={() => setIsDepartmentsOpen(open => !open)}
-                >
-                  <svg viewBox="0 0 18 12" width="16" height="12" fill="currentColor">
-                    <path d="M1.25 11.635c-.212 0-.391-.072-.534-.216S.5 11.097.5 10.884s.072-.391.216-.534.322-.215.534-.215h15.5c.212 0 .391.072.534.216s.216.322.216.535-.072.391-.216.534-.322.215-.534.215H1.25zm0-4.885c-.212 0-.391-.072-.534-.216S.5 6.212.5 6s.072-.391.216-.534.322-.215.534-.215h15.5c.212 0 .391.072.534.216s.216.322.216.535-.072.391-.216.534-.322.215-.534.215H1.25zm0-4.885c-.212 0-.391-.072-.534-.216S.5 1.328.5 1.115.572.724.716.581s.322-.215.534-.215h15.5c.212 0 .391.072.534.216s.216.322.216.535-.072.391-.216.534-.322.215-.534.215H1.25z" />
-                  </svg>
-                  <span>{deptBtnText}</span>
-                </button>
-                {isDepartmentsOpen && (
-                  <div className="dsvia-departments-popover" role="menu" aria-label="Todos os departamentos">
-                    {CORE_CATEGORIES.map(item => (
-                      <Link key={item.slug} to={`/categoria/${item.slug}`} role="menuitem" onClick={() => setIsDepartmentsOpen(false)}>{item.name}</Link>
-                    ))}
+              {showDeptBtn && (() => {
+                const allCats = dbCategories.length > 0 ? dbCategories : (CORE_CATEGORIES as any as CentralCategoryWithSegment[])
+                const allSegments = dbSegments.length > 0 ? dbSegments : CORE_SEGMENTS
+
+                const filteredCategories = allCats.filter(cat => {
+                  if (!megaSearchQuery.trim()) return true
+                  const q = megaSearchQuery.toLowerCase().trim()
+                  return cat.name.toLowerCase().includes(q) || cat.slug.toLowerCase().includes(q)
+                })
+
+                const displayedCategories = filteredCategories.filter(cat => {
+                  if (selectedMegaSegmentId === 'all') return true
+                  return cat.segment_id === selectedMegaSegmentId
+                })
+
+                const activeSegment = allSegments.find(s => s.id === selectedMegaSegmentId)
+                const activeSegmentName = selectedMegaSegmentId === 'all' ? 'Todos os Departamentos' : (activeSegment?.name || 'Departamento')
+
+                const getCategoryThumbnail = (cat: { slug: string, image_url?: string }) => {
+                  if (cat.image_url) return cat.image_url
+                  switch (cat.slug) {
+                    case 'furadeiras':
+                    case 'parafusadeiras':
+                      return '/images/referencias/parafusadeira.webp'
+                    case 'serras':
+                      return '/images/referencias/lixadeira.webp'
+                    case 'ferramentas-manuais':
+                      return '/images/referencias/morsa-de-bancada.webp'
+                    case 'kits':
+                      return '/images/referencias/macaco-hidraulico.webp'
+                    case 'microfones-e-amplificadores':
+                      return '/images/referencias/microfones.png'
+                    case 'lavadoras':
+                    case 'lavadoras-de-alta-pressao':
+                      return '/images/referencias/pistola-de-lavagem.webp'
+                    case 'pintura':
+                    case 'pistolas-de-pintura':
+                      return '/images/referencias/pistola-de-pintura.webp'
+                    default:
+                      return null
+                  }
+                }
+
+                return (
+                  <div className="dsvia-departments-menu" ref={departmentsPopoverRef}>
+                    <button
+                      type="button"
+                      className={`dsvia-dept-trigger ${isDepartmentsOpen ? 'is-active' : ''}`}
+                      aria-label="Abrir todos os departamentos"
+                      aria-expanded={isDepartmentsOpen}
+                      aria-haspopup="menu"
+                      onClick={() => {
+                        setIsDepartmentsOpen(open => !open)
+                        if (!isDepartmentsOpen) setMegaSearchQuery('')
+                      }}
+                    >
+                      <svg viewBox="0 0 18 12" width="16" height="12" fill="currentColor">
+                        <path d="M1.25 11.635c-.212 0-.391-.072-.534-.216S.5 11.097.5 10.884s.072-.391.216-.534.322-.215.534-.215h15.5c.212 0 .391.072.534.216s.216.322.216.535-.072.391-.216.534-.322.215-.534.215H1.25zm0-4.885c-.212 0-.391-.072-.534-.216S.5 6.212.5 6s.072-.391.216-.534.322-.215.534-.215h15.5c.212 0 .391.072.534.216s.216.322.216.535-.072.391-.216.534-.322.215-.534.215H1.25zm0-4.885c-.212 0-.391-.072-.534-.216S.5 1.328.5 1.115.572.724.716.581s.322-.215.534-.215h15.5c.212 0 .391.072.534.216s.216.322.216.535-.072.391-.216.534-.322.215-.534.215H1.25z" />
+                      </svg>
+                      <span>{deptBtnText}</span>
+                      <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" className={`dsvia-dept-chevron ${isDepartmentsOpen ? 'open' : ''}`}>
+                        <path d="m6 9 6 6 6-6" />
+                      </svg>
+                    </button>
+
+                    {isDepartmentsOpen && (
+                      <>
+                        <div className="dsvia-megamenu-backdrop" onClick={() => setIsDepartmentsOpen(false)} />
+                        <div className="dsvia-megamenu-popover" role="dialog" aria-label="Todos os departamentos">
+                          {/* Top Header of Mega Menu */}
+                          <div className="dsvia-megamenu-header">
+                            <div className="dsvia-megamenu-header-title">
+                              <span className="dsvia-megamenu-header-badge">Catálogo Oficial</span>
+                              <h3>Todos os Departamentos</h3>
+                              <span className="dsvia-megamenu-header-count">({allCats.length} categorias)</span>
+                            </div>
+
+                            <div className="dsvia-megamenu-search-wrap">
+                              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" className="dsvia-megamenu-search-icon">
+                                <circle cx="11" cy="11" r="8" />
+                                <path d="m21 21-4.35-4.35" />
+                              </svg>
+                              <input
+                                type="text"
+                                placeholder="Filtrar categorias..."
+                                value={megaSearchQuery}
+                                onChange={e => setMegaSearchQuery(e.target.value)}
+                                className="dsvia-megamenu-search-input"
+                              />
+                              {megaSearchQuery && (
+                                <button type="button" onClick={() => setMegaSearchQuery('')} className="dsvia-megamenu-search-clear" title="Limpar">
+                                  ✕
+                                </button>
+                              )}
+                            </div>
+
+                            <button
+                              type="button"
+                              className="dsvia-megamenu-close-btn"
+                              onClick={() => setIsDepartmentsOpen(false)}
+                              title="Fechar"
+                              aria-label="Fechar menu"
+                            >
+                              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M18 6 6 18M6 6l12 12" />
+                              </svg>
+                            </button>
+                          </div>
+
+                          {/* Body of Mega Menu */}
+                          <div className="dsvia-megamenu-body">
+                            {/* Left Column: Segments / Departamentos */}
+                            <div className="dsvia-megamenu-sidebar">
+                              <div className="dsvia-megamenu-sidebar-label">Departamentos</div>
+                              <button
+                                type="button"
+                                className={`dsvia-megamenu-dept-btn ${selectedMegaSegmentId === 'all' ? 'active' : ''}`}
+                                onClick={() => setSelectedMegaSegmentId('all')}
+                                onMouseEnter={() => setSelectedMegaSegmentId('all')}
+                              >
+                                <span className="dsvia-megamenu-dept-emoji">🌟</span>
+                                <span className="dsvia-megamenu-dept-text">Todos os Departamentos</span>
+                                <span className="dsvia-megamenu-dept-count">{allCats.length}</span>
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" className="dsvia-megamenu-dept-arrow">
+                                  <path d="m9 18 6-6-6-6" />
+                                </svg>
+                              </button>
+
+                              {allSegments.map(seg => {
+                                const count = allCats.filter(c => c.segment_id === seg.id).length
+                                const emoji = seg.slug.includes('ferramenta') ? '🛠️' : seg.slug.includes('infor') ? '💻' : seg.slug.includes('casa') ? '🏠' : seg.slug.includes('auto') ? '🚗' : '📦'
+                                return (
+                                  <button
+                                    key={seg.id}
+                                    type="button"
+                                    className={`dsvia-megamenu-dept-btn ${selectedMegaSegmentId === seg.id ? 'active' : ''}`}
+                                    onClick={() => setSelectedMegaSegmentId(seg.id)}
+                                    onMouseEnter={() => setSelectedMegaSegmentId(seg.id)}
+                                  >
+                                    <span className="dsvia-megamenu-dept-emoji">{emoji}</span>
+                                    <span className="dsvia-megamenu-dept-text">{seg.name}</span>
+                                    {count > 0 && <span className="dsvia-megamenu-dept-count">{count}</span>}
+                                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" className="dsvia-megamenu-dept-arrow">
+                                      <path d="m9 18 6-6-6-6" />
+                                    </svg>
+                                  </button>
+                                )
+                              })}
+                            </div>
+
+                            {/* Right Column: Categories Cards Grid */}
+                            <div className="dsvia-megamenu-content">
+                              <div className="dsvia-megamenu-content-header">
+                                <div className="dsvia-megamenu-active-title">
+                                  <h4>{activeSegmentName}</h4>
+                                  <span className="dsvia-megamenu-active-count">
+                                    {displayedCategories.length} {displayedCategories.length === 1 ? 'categoria' : 'categorias'}
+                                  </span>
+                                </div>
+                                {selectedMegaSegmentId !== 'all' && (
+                                  <Link
+                                    to={`/${allSegments.find(s => s.id === selectedMegaSegmentId)?.slug || 'produtos'}`}
+                                    className="dsvia-megamenu-view-all-link"
+                                    onClick={() => setIsDepartmentsOpen(false)}
+                                  >
+                                    Ver tudo em {activeSegmentName} →
+                                  </Link>
+                                )}
+                              </div>
+
+                              {displayedCategories.length === 0 ? (
+                                <div className="dsvia-megamenu-empty">
+                                  <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#94a3b8" strokeWidth="1.5">
+                                    <circle cx="11" cy="11" r="8" />
+                                    <path d="m21 21-4.35-4.35" />
+                                  </svg>
+                                  <p>Nenhuma categoria encontrada para "{megaSearchQuery}"</p>
+                                </div>
+                              ) : (
+                                <div className="dsvia-megamenu-grid">
+                                  {displayedCategories.map(cat => {
+                                    const thumb = getCategoryThumbnail(cat)
+                                    return (
+                                      <Link
+                                        key={cat.id || cat.slug}
+                                        to={`/categoria/${cat.slug}`}
+                                        className="dsvia-megamenu-card"
+                                        onClick={() => setIsDepartmentsOpen(false)}
+                                      >
+                                        <div className="dsvia-megamenu-card-thumb">
+                                          {thumb ? (
+                                            <img src={thumb} alt={cat.name} loading="lazy" />
+                                          ) : (
+                                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8">
+                                              <circle cx="12" cy="12" r="10" />
+                                              <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+                                              <path d="M2 12h20" />
+                                            </svg>
+                                          )}
+                                        </div>
+                                        <div className="dsvia-megamenu-card-info">
+                                          <span className="dsvia-megamenu-card-name">{cat.name}</span>
+                                          <span className="dsvia-megamenu-card-action">
+                                            Ver produtos
+                                            <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                              <path d="m9 18 6-6-6-6" />
+                                            </svg>
+                                          </span>
+                                        </div>
+                                      </Link>
+                                    )
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Footer of Mega Menu */}
+                          <div className="dsvia-megamenu-footer">
+                            <div className="dsvia-megamenu-footer-links">
+                              <Link to="/produtos" onClick={() => setIsDepartmentsOpen(false)} className="dsvia-megamenu-footer-item">
+                                <span className="dsvia-megamenu-badge-pill">⚡</span>
+                                <span>Ofertas & Promoções</span>
+                              </Link>
+                              <Link to="/ferramentas" onClick={() => setIsDepartmentsOpen(false)} className="dsvia-megamenu-footer-item">
+                                <span className="dsvia-megamenu-badge-pill">🛠️</span>
+                                <span>Linha Profissional</span>
+                              </Link>
+                              <Link to="/categoria/microfones-e-amplificadores" onClick={() => setIsDepartmentsOpen(false)} className="dsvia-megamenu-footer-item">
+                                <span className="dsvia-megamenu-badge-pill">🎙️</span>
+                                <span>Áudio & Som</span>
+                              </Link>
+                              <Link to="/institucional" onClick={() => setIsDepartmentsOpen(false)} className="dsvia-megamenu-footer-item">
+                                <span className="dsvia-megamenu-badge-pill">🔒</span>
+                                <span>Garantia & Suporte TEKNIX</span>
+                              </Link>
+                            </div>
+                            <Link to="/produtos" onClick={() => setIsDepartmentsOpen(false)} className="dsvia-megamenu-footer-all">
+                              Explorar todo o catálogo →
+                            </Link>
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </div>
-                )}
-                </div>
-              )}
+                )
+              })()}
 
               {visibleDeptItems.map((item, idx) => (
                 <Link key={idx} to={item.url} className="dsvia-nav-link">{item.label}</Link>

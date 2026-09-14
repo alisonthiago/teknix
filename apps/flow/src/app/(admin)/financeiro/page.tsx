@@ -520,12 +520,12 @@ export default function FinanceiroPage() {
                       <p className="text-[10px] font-normal text-[#b45309] mt-0.5">16.0% comissão</p>
                     </div>
 
-                    <div className="p-3 rounded-xl border border-[#dbeafe] bg-[#eff6ff]">
-                      <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#1d4ed8] mb-1">
-                        <span className="w-2 h-2 rounded-full bg-[#3b82f6]" /> Frete & Envios
+                    <div className="p-3 rounded-xl border border-[#e5e7eb] bg-[#F7F7F7]">
+                      <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#1f2328] mb-1">
+                        <span className="w-2 h-2 rounded-full bg-[#1f2328]" /> Frete & Envios
                       </div>
-                      <p className="text-sm font-black text-[#1e40af]">{formatBRL(financialData.freight)}</p>
-                      <p className="text-[10px] font-extrabold text-[#2563eb] mt-0.5">8.0% logística</p>
+                      <p className="text-sm font-black text-[#111111]">{formatBRL(financialData.freight)}</p>
+                      <p className="text-[10px] font-extrabold text-[#666666] mt-0.5">8.0% logística</p>
                     </div>
 
                     <div className="p-3 rounded-xl border border-[#fee2e2] bg-[#fef2f2]">

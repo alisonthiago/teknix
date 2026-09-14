@@ -43,7 +43,7 @@ export default class ErrorBoundary extends Component<Props, State> {
           justifyContent: 'center',
           padding: '24px',
           fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-          background: '#f8fafc',
+          background: '#F7F7F7',
           color: '#000000',
           textAlign: 'center'
         }}>

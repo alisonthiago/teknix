@@ -76,7 +76,7 @@ export default function ShareContextModal({
 
         <div className="p-5 space-y-4">
           {/* Card Preview do que está sendo compartilhado */}
-          <div className="p-3.5 bg-[#f8fafc] rounded-xl border border-[#e2e8f0] space-y-1.5">
+          <div className="p-3.5 bg-[#F7F7F7] rounded-xl border border-[#e2e8f0] space-y-1.5">
             <div className="flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider text-[#64748b]">
               {messageType === 'CARD_ORDER' && <ShoppingCart className="w-3.5 h-3.5 text-[#1f2328]" />}
               {messageType === 'CARD_PRODUCT' && <Package className="w-3.5 h-3.5 text-[#16a34a]" />}
@@ -150,7 +150,7 @@ export default function ShareContextModal({
               onChange={e => setNote(e.target.value)}
               placeholder="Ex: Favor emitir a nota fiscal ou priorizar separação..."
               rows={2}
-              className="w-full p-3 bg-[#f8fafc] border border-[#d0d7de] rounded-xl text-xs text-[#333] focus:outline-none focus:bg-white focus:border-[#16a34a] transition-all resize-none"
+              className="w-full p-3 bg-[#F7F7F7] border border-[#d0d7de] rounded-xl text-xs text-[#333] focus:outline-none focus:bg-white focus:border-[#16a34a] transition-all resize-none"
             />
           </div>
 

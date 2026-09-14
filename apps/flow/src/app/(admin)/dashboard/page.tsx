@@ -142,7 +142,7 @@ export default function DashboardPage() {
           </div>
           <div>
             <h1 className="text-[24px] sm:text-[26px] font-semibold text-[#111827] tracking-tight">Olá, {userProfile.name?.split(' ')[0]}</h1>
-            <p className="text-[13px] text-[#6b7280] font-normal">Bem-vindo de volta!</p>
+            <p className="text-[13px] text-[#666666] font-normal">Bem-vindo de volta!</p>
           </div>
         </div>
       )}

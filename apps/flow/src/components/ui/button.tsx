@@ -10,9 +10,9 @@ const buttonVariants = cva(
       variant: {
         default: "bg-[#1f2328] text-white hover:bg-black font-semibold cursor-pointer shadow-none",
         outline:
-          "border-[#e6e6e6] bg-white text-[#333333] hover:bg-[#f8fafc] hover:text-[#111111] hover:border-[#d1d5db] cursor-pointer aria-expanded:bg-[#f5f5f5] aria-expanded:text-[#111111]",
+          "border-[#e6e6e6] bg-white text-[#333333] hover:bg-[#F7F7F7] hover:text-[#111111] hover:border-[#d1d5db] cursor-pointer aria-expanded:bg-[#f5f5f5] aria-expanded:text-[#111111]",
         secondary:
-          "bg-white text-[#333333] border border-[#e6e6e6] hover:bg-[#f8fafc] hover:border-[#d1d5db] font-medium cursor-pointer aria-expanded:bg-[#f5f5f5] aria-expanded:text-[#1f2328]",
+          "bg-white text-[#333333] border border-[#e6e6e6] hover:bg-[#F7F7F7] hover:border-[#d1d5db] font-medium cursor-pointer aria-expanded:bg-[#f5f5f5] aria-expanded:text-[#1f2328]",
         ghost:
           "hover:bg-[#f5f5f5] hover:text-foreground cursor-pointer aria-expanded:bg-muted aria-expanded:text-foreground",
         destructive:

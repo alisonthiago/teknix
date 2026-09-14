@@ -22,6 +22,8 @@ export type IntegrationProviderId =
   | 'casas_bahia'
   | 'brevo'
   | 'whatsapp'
+  | 'cielo'
+  | 'paypal'
   | 'roteia'
 
 export type IntegrationCategory = 'payment' | 'fiscal' | 'shipping' | 'channel' | 'communication'

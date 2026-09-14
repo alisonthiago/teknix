@@ -40,7 +40,7 @@
 }
 
 .teknix-cart-tray-more:hover {
-  background: #f8fafc;
+  background: #F7F7F7;
   color: #000;
 }
 
@@ -71,7 +71,7 @@
   gap: var(--tkn-space-16);
   padding: var(--tkn-space-12) var(--tkn-space-24);
   border-top: 1px solid #eef0f2;
-  background: #f8fafc;
+  background: #F7F7F7;
   color: #56606e;
   font-size: var(--tkn-text-12);
 }

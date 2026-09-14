@@ -24,11 +24,11 @@
   gap: 8px;
   padding: 24px 0 16px;
   font-size: 13px;
-  color: #6b7280;
+  color: #666666;
 }
 
 .breadcrumb-link {
-  color: #6b7280;
+  color: #666666;
   text-decoration: none;
   transition: color 0.15s ease;
 }
@@ -39,7 +39,7 @@
 }
 
 .breadcrumb-sep {
-  color: #9ca3af;
+  color: #999999;
 }
 
 .breadcrumb-current {
@@ -82,7 +82,7 @@
 
 .apple-lookup-subheading {
   font-size: 14px;
-  color: #6b7280;
+  color: #666666;
   line-height: 1.55;
   margin: 0;
 }
@@ -121,7 +121,7 @@
 .apple-lookup-label {
   font-size: 13px;
   font-weight: 600;
-  color: #374151;
+  color: #333333;
 }
 
 .apple-lookup-input-wrapper {
@@ -146,7 +146,7 @@
 }
 
 .apple-lookup-input::placeholder {
-  color: #9ca3af;
+  color: #999999;
 }
 
 .apple-lookup-input:focus {
@@ -236,14 +236,14 @@
 .apple-lookup-security-card p {
   margin: 2px 0 0;
   font-size: 12px;
-  color: #6b7280;
+  color: #666666;
   line-height: 1.4;
 }
 
 /* ── Coluna Direita: Placeholder ── */
 .apple-lookup-placeholder-card {
   height: 100%;
-  background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%);
+  background: linear-gradient(145deg, #F7F7F7 0%, #f1f5f9 100%);
   border: 1px solid #e2e8f0;
   border-radius: 16px;
   padding: 40px 32px;
@@ -281,7 +281,7 @@
 
 .placeholder-desc {
   font-size: 14px;
-  color: #64748b;
+  color: #666666;
   line-height: 1.5;
   max-width: 400px;
   margin: 0 0 24px 0;
@@ -306,7 +306,7 @@
   align-items: center;
   gap: 10px;
   font-size: 13px;
-  color: #334155;
+  color: #333333;
 }
 
 .benefit-check {
@@ -325,7 +325,7 @@
 .quick-test-label {
   font-size: 11px;
   font-weight: 700;
-  color: #64748b;
+  color: #666666;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -344,7 +344,7 @@
   padding: 7px 14px;
   font-size: 12px;
   font-weight: 600;
-  color: #1e293b;
+  color: #333333;
   cursor: pointer;
   transition: all 0.15s ease;
   font-family: inherit;
@@ -408,7 +408,7 @@
 .order-id-badge {
   font-size: 13px;
   font-weight: 700;
-  color: #4b5563;
+  color: #666666;
   background: #f3f4f6;
   padding: 4px 10px;
   border-radius: 6px;
@@ -456,7 +456,7 @@
   align-items: center;
   gap: 8px;
   font-size: 12px;
-  color: #6b7280;
+  color: #666666;
 }
 
 .carrier-code-row code {
@@ -485,7 +485,7 @@
 }
 
 .copy-tracking-btn:hover {
-  background: #eff6ff;
+  background: #F7F7F7;
 }
 
 /* Timeline */
@@ -499,7 +499,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #6b7280;
+  color: #666666;
   margin: 0 0 14px 0;
 }
 
@@ -577,7 +577,7 @@
 
 .tracker-details span {
   font-size: 12px;
-  color: #6b7280;
+  color: #666666;
 }
 
 /* Produtos */
@@ -620,7 +620,7 @@
 
 .result-product-meta {
   font-size: 12px;
-  color: #6b7280;
+  color: #666666;
 }
 
 .result-product-price {
@@ -637,7 +637,7 @@
   padding: 16px 0;
   border-top: 1px solid #f1f3f5;
   font-size: 14px;
-  color: #4b5563;
+  color: #666666;
 }
 
 .result-total-amount {
@@ -692,7 +692,7 @@
 
 .result-action-secondary:hover {
   background: #f9fafb;
-  border-color: #9ca3af;
+  border-color: #999999;
 }
 
 /* Footer Chat */
@@ -707,7 +707,7 @@
 }
 
 .chatnow-title {
-  color: #6b7280;
+  color: #666666;
 }
 
 .chatnow-links {
@@ -765,7 +765,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #4b5563;
+  color: #666666;
   cursor: pointer;
   transition: all 0.15s ease;
 }
@@ -825,7 +825,7 @@
 .apple-overlay-step-item p {
   margin: 0;
   font-size: 12px;
-  color: #6b7280;
+  color: #666666;
   line-height: 1.45;
 }
 

@@ -11,7 +11,7 @@ import {
   Search, ArrowRight, Check, Settings, Radio, Plus
 } from 'lucide-react'
 import { IntegrationStorage } from '../services/integrations/storage'
-import { IntegrationConfig, IntegrationLog, IntegrationCategory } from '../services/integrations/types'
+import { IntegrationConfig, IntegrationLog, IntegrationCategory, IntegrationStatus } from '../services/integrations/types'
 import { MercadoPagoService } from '../services/integrations/MercadoPagoService'
 import { FocusNfeService } from '../services/integrations/FocusNfeService'
 import { MelhorEnvioService } from '../services/integrations/MelhorEnvioService'
@@ -22,6 +22,8 @@ import './IntegrationsHub.css'
 const INTEGRATION_DOCS: Record<string, { url: string; label: string }> = {
   mercadolivre: { url: 'https://developers.mercadolivre.com.br/', label: 'Documentação Mercado Livre' },
   mercado_pago: { url: 'https://www.mercadopago.com.br/developers/pt/docs', label: 'Documentação Mercado Pago' },
+  cielo: { url: 'https://developercielo.github.io/manual/cielo-ecommerce', label: 'Documentação Cielo 3.0' },
+  paypal: { url: 'https://developer.paypal.com/docs/api/overview/', label: 'Documentação PayPal' },
   shopee: { url: 'https://open.shopee.com/', label: 'Documentação Open Platform Shopee' },
   amazon: { url: 'https://developer-docs.amazon.com/sp-api/', label: 'Documentação Amazon SP-API' },
   magalu: { url: 'https://developers.magalu.com/', label: 'Documentação Magalu Marketplace' },
@@ -109,6 +111,27 @@ export default function IntegrationsHub() {
       console.error('[IntegrationsHub] Erro ao carregar dados:', e)
     } finally {
       if (showLoading) setLoading(false)
+    }
+  }
+
+  async function handleToggleStatus(config: IntegrationConfig) {
+    const isCurrentlyActive = config.status === 'connected' || config.status === 'sandbox'
+    const nextStatus: IntegrationStatus = isCurrentlyActive ? 'pending_credentials' : (config.environment === 'production' ? 'connected' : 'sandbox')
+    const nextEnabled = !isCurrentlyActive
+
+    // Atualização imediata otimista no estado local
+    setConfigs(curr => curr.map(c => c.id === config.id ? { ...c, status: nextStatus, enabled: nextEnabled } : c))
+
+    try {
+      await IntegrationStorage.saveConfig({
+        id: config.id,
+        status: nextStatus,
+        enabled: nextEnabled,
+        environment: config.environment || 'production'
+      })
+    } catch (err: any) {
+      console.warn('[IntegrationsHub] Falha ao alternar status da integração:', err)
+      loadData(false)
     }
   }
 
@@ -207,18 +230,20 @@ export default function IntegrationsHub() {
     }
   }
 
-  // Filtragem por Tab e por Busca
-  const filteredConfigs = configs
+  // Apenas serviços com status 'connected' ou 'sandbox' e enabled !== false aparecem como ativos
+  const activeConfigs = configs.filter(c => (c.status === 'connected' || c.status === 'sandbox') && c.enabled !== false)
+  const activeHealthConfigs = activeConfigs
+  const countConnected = activeConfigs.filter(c => c.status === 'connected').length
+  const countSandbox = activeConfigs.filter(c => c.status === 'sandbox').length
+
+  // Filtragem por Tab e por Busca a partir APENAS das ativas/conectadas
+  const filteredConfigs = activeConfigs
     .filter(c => activeTab === 'all' || c.category === activeTab)
     .filter(c => {
       if (!searchTerm) return true
       const q = searchTerm.toLowerCase()
       return c.name.toLowerCase().includes(q) || c.id.toLowerCase().includes(q) || (CATEGORY_LABELS[c.category] || '').toLowerCase().includes(q)
     })
-
-  const countConnected = configs.filter(c => c.status === 'connected').length
-  const countSandbox = configs.filter(c => c.status === 'sandbox').length
-  const countPending = configs.filter(c => c.status === 'pending_credentials').length
 
   if (loading) {
     return (
@@ -275,24 +300,21 @@ export default function IntegrationsHub() {
           </div>
           <div className="health-summary-badges">
             <span className="health-pill connected">
-              <span className="pill-dot connected" /> {countConnected} Conectados
+              <span className="pill-dot connected" /> {countConnected} Ativo{countConnected === 1 ? '' : 's'}
             </span>
             {countSandbox > 0 && (
               <span className="health-pill sandbox">
                 <span className="pill-dot sandbox" /> {countSandbox} Homologação
               </span>
             )}
-            <span className="health-pill pending">
-              <span className="pill-dot pending" /> {countPending} Disponíveis
-            </span>
             <span className="health-last-check">
-              Checagem: {getLastHealthCheckTime(configs)}
+              Checagem: {getLastHealthCheckTime(activeHealthConfigs)}
             </span>
           </div>
         </div>
 
         <div className="health-grid">
-          {configs.map(cfg => (
+          {activeHealthConfigs.map(cfg => (
             <div key={cfg.id} className="health-item">
               <div className="health-item-heading">
                 <span className="health-item-logo">
@@ -303,14 +325,18 @@ export default function IntegrationsHub() {
               <div className="health-item-status">
                 {cfg.status === 'connected' && <><CheckCircle2 size={15} color="#00cc6a" /> <span style={{ color: '#008744' }}>Conectado</span></>}
                 {cfg.status === 'sandbox' && <><CheckCircle2 size={15} color="#eab308" /> <span style={{ color: '#b78103' }}>Homologação</span></>}
-                {cfg.status === 'pending_credentials' && <><Clock size={15} color="#9ca3af" /> <span style={{ color: '#6b7280' }}>Disponível</span></>}
                 {cfg.status === 'error' && <><XCircle size={15} color="#ef4444" /> <span style={{ color: '#dc2626' }}>Erro</span></>}
               </div>
               <span className="health-item-latency">
-                {cfg.healthLatencyMs ? `Latência: ${cfg.healthLatencyMs}ms` : cfg.status === 'connected' ? 'Operacional' : 'Aguardando'}
+                {cfg.healthLatencyMs ? `Latência: ${cfg.healthLatencyMs}ms` : 'Operacional'}
               </span>
             </div>
           ))}
+          {activeHealthConfigs.length === 0 && (
+            <div style={{ gridColumn: '1 / -1', padding: '14px 18px', textAlign: 'center', color: '#6b7280', fontSize: '13px', background: '#f9fafb', borderRadius: 8 }}>
+              Nenhum serviço operacional ativado no momento. Ative uma integração abaixo para monitorar em tempo real.
+            </div>
+          )}
           <div className="health-item">
             <div className="health-item-heading">
               <span className="health-item-logo">
@@ -334,37 +360,37 @@ export default function IntegrationsHub() {
             className={`nav-tab-btn ${activeTab === 'all' ? 'active' : ''}`}
             onClick={() => setActiveTab('all')}
           >
-            Todas ({configs.length})
+            Todas ({activeConfigs.length})
           </button>
           <button
             className={`nav-tab-btn ${activeTab === 'channel' ? 'active' : ''}`}
             onClick={() => setActiveTab('channel')}
           >
-            Canais & Marketplaces ({configs.filter(c => c.category === 'channel').length})
+            Canais & Marketplaces ({activeConfigs.filter(c => c.category === 'channel').length})
           </button>
           <button
             className={`nav-tab-btn ${activeTab === 'payment' ? 'active' : ''}`}
             onClick={() => setActiveTab('payment')}
           >
-            Pagamentos ({configs.filter(c => c.category === 'payment').length})
+            Pagamentos ({activeConfigs.filter(c => c.category === 'payment').length})
           </button>
           <button
             className={`nav-tab-btn ${activeTab === 'fiscal' ? 'active' : ''}`}
             onClick={() => setActiveTab('fiscal')}
           >
-            Fiscal (NF-e) ({configs.filter(c => c.category === 'fiscal').length})
+            Fiscal (NF-e) ({activeConfigs.filter(c => c.category === 'fiscal').length})
           </button>
           <button
             className={`nav-tab-btn ${activeTab === 'shipping' ? 'active' : ''}`}
             onClick={() => setActiveTab('shipping')}
           >
-            Envios & Fretes ({configs.filter(c => c.category === 'shipping').length})
+            Envios & Fretes ({activeConfigs.filter(c => c.category === 'shipping').length})
           </button>
           <button
             className={`nav-tab-btn ${activeTab === 'communication' ? 'active' : ''}`}
             onClick={() => setActiveTab('communication')}
           >
-            Comunicação & IA ({configs.filter(c => c.category === 'communication').length})
+            Comunicação & IA ({activeConfigs.filter(c => c.category === 'communication').length})
           </button>
           <button
             className={`nav-tab-btn ${activeTab === 'logs' ? 'active' : ''}`}
@@ -396,224 +422,312 @@ export default function IntegrationsHub() {
 
       {/* Cards View */}
       {activeTab !== 'logs' && activeTab !== 'webhook_test' && (
-        <div className="integrations-grid">
-          {filteredConfigs.map(config => (
-            <div key={config.id} className="integration-card">
-              <div className="card-top">
-                <div className="card-logo">
-                  <IntegrationLogoRenderer code={config.id} size={36} />
-                </div>
-                <div className="card-info">
-                  <h3 className="card-title">{config.name}</h3>
-                  <span className="card-category-badge">{CATEGORY_LABELS[config.category] || config.category}</span>
-                </div>
-                <span className={`card-status-badge ${config.status}`}>
-                  {config.status === 'connected' && (
-                    <>
-                      <svg width="8" height="8" viewBox="0 0 8 8" fill="#16a34a" style={{ display: 'inline-block', marginRight: 4 }}><circle cx="4" cy="4" r="4"/></svg>
-                      Conectado
-                    </>
-                  )}
-                  {config.status === 'sandbox' && (
-                    <>
-                      <svg width="8" height="8" viewBox="0 0 8 8" fill="#ca8a04" style={{ display: 'inline-block', marginRight: 4 }}><circle cx="4" cy="4" r="4"/></svg>
-                      Homologação
-                    </>
-                  )}
-                  {config.status === 'pending_credentials' && (
-                    <>
-                      <svg width="8" height="8" viewBox="0 0 8 8" fill="#9ca3af" style={{ display: 'inline-block', marginRight: 4 }}><circle cx="4" cy="4" r="4"/></svg>
-                      Disponível
-                    </>
-                  )}
-                  {config.status === 'error' && (
-                    <>
-                      <svg width="8" height="8" viewBox="0 0 8 8" fill="#dc2626" style={{ display: 'inline-block', marginRight: 4 }}><circle cx="4" cy="4" r="4"/></svg>
-                      Falha
-                    </>
-                  )}
-                </span>
-              </div>
-
-              <div className="card-meta">
-                {config.id === 'mercadolivre' && (
-                  <div className="card-account-line highlight">
-                    <strong>Conta Vinculada:</strong> TEKNIXBRASIL (Seller 470831049)
-                  </div>
-                )}
-                {config.id === 'site_teknix' && (
-                  <div className="card-account-line highlight">
-                    <strong>Loja Oficial:</strong> http://localhost:5173
-                  </div>
-                )}
-                {config.id === 'shopee' && (
-                  <div className="card-account-line">
-                    <strong>Conta Shopee:</strong> TEKNIX Ferramentas & Tech Oficial
-                  </div>
-                )}
-                {config.id === 'focus_nfe' && (
-                  <div className="card-account-line">
-                    <strong>Emissor Fiscal:</strong> CNPJ 38.068.360/0001-06 (Série 1)
-                  </div>
-                )}
-                {config.id === 'brevo' && (
-                  <div className="card-account-line highlight">
-                    <strong>Remetente Oficial:</strong> alisonsilvathiago@gmail.com
-                  </div>
-                )}
-                {config.id === 'whatsapp' && (
-                  <div className="card-account-line highlight">
-                    <strong>WhatsApp Central:</strong> +55 11 99888-7766
-                  </div>
-                )}
-                {config.id === 'mercado_pago' && (
-                  <div className="card-account-line highlight">
-                    <strong>Checkout Oficial:</strong> Pix, Cartão de Crédito e Boleto
-                  </div>
-                )}
-
-                <div style={{ marginTop: 4 }}>
-                  <strong>Ambiente:</strong> {config.environment === 'production' ? 'Produção Oficial' : 'Sandbox / Homologação'}
-                </div>
-
-                {config.webhookUrl && (
-                  <div style={{ marginTop: 4, wordBreak: 'break-all', fontSize: '11.5px' }}>
-                    <strong>Webhook:</strong> {config.webhookUrl}
-                  </div>
-                )}
-                {config.errorMessage && (
-                  <div style={{ color: '#dc2626', marginTop: 4 }}>
-                    <strong>Aviso:</strong> {config.errorMessage}
-                  </div>
-                )}
-              </div>
-
-              {INTEGRATION_DOCS[config.id] && (
-                <div className="card-help">
-                  <span className="card-help-text">
-                    Documentação oficial da API:
-                  </span>
-                  <a
-                    href={INTEGRATION_DOCS[config.id].url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="card-help-link"
-                  >
-                    <ExternalLink size={11} />
-                    {INTEGRATION_DOCS[config.id].label}
-                  </a>
-                </div>
-              )}
-
-              <div className="card-actions">
-                {/* Ações Específicas por Canal */}
-                {config.id === 'mercadolivre' && (
-                  <button
-                    className="btn btn-primary"
-                    style={{ fontSize: '12.5px', padding: '6px 12px' }}
-                    onClick={() => navigate('/hub/mercado-livre')}
-                  >
-                    <ArrowRight size={13} /> Acessar Canal
-                  </button>
-                )}
-                {config.id === 'shopee' && (
-                  <button
-                    className="btn btn-primary"
-                    style={{ fontSize: '12.5px', padding: '6px 12px' }}
-                    onClick={() => navigate('/hub/shopee')}
-                  >
-                    <ArrowRight size={13} /> Acessar Shopee
-                  </button>
-                )}
-                {config.id === 'amazon' && (
-                  <button
-                    className="btn btn-secondary"
-                    style={{ fontSize: '12.5px', padding: '6px 12px' }}
-                    onClick={() => navigate('/hub/amazon')}
-                  >
-                    <ArrowRight size={13} /> Acessar Amazon
-                  </button>
-                )}
-                {config.id === 'magalu' && (
-                  <button
-                    className="btn btn-secondary"
-                    style={{ fontSize: '12.5px', padding: '6px 12px' }}
-                    onClick={() => navigate('/hub/magalu')}
-                  >
-                    <ArrowRight size={13} /> Acessar Magalu
-                  </button>
-                )}
-                {config.id === 'site_teknix' && (
-                  <a
-                    href="http://localhost:5173"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn btn-primary"
-                    style={{ fontSize: '12.5px', padding: '6px 12px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}
-                  >
-                    <ExternalLink size={13} /> Abrir Loja
-                  </a>
-                )}
-                {config.id === 'focus_nfe' && (
-                  <button
-                    className="btn btn-primary"
-                    style={{ fontSize: '12.5px', padding: '6px 12px' }}
-                    onClick={() => navigate('/hub/configuracoes/fiscal')}
-                  >
-                    <Settings size={13} /> Painel Fiscal
-                  </button>
-                )}
-                {config.id === 'melhor_envio' && (
-                  <button
-                    className="btn btn-primary"
-                    style={{ fontSize: '12.5px', padding: '6px 12px' }}
-                    onClick={() => navigate('/hub/envios')}
-                  >
-                    <Settings size={13} /> Painel de Envios
-                  </button>
-                )}
-                {config.id === 'mercado_pago' && (
-                  <button
-                    className="btn btn-primary"
-                    style={{ fontSize: '12.5px', padding: '6px 12px' }}
-                    onClick={() => navigate('/hub/pagamentos')}
-                  >
-                    <Settings size={13} /> Configurar Pagamentos
-                  </button>
-                )}
-                {config.id === 'whatsapp' && (
-                  <button
-                    className="btn btn-primary"
-                    style={{ fontSize: '12.5px', padding: '6px 12px' }}
-                    onClick={() => navigate('/hub/whatsapp')}
-                  >
-                    <Settings size={13} /> Painel WhatsApp
-                  </button>
-                )}
-
-                {/* Ação padrão de teste */}
-                <button
-                  className="btn btn-secondary"
-                  style={{ fontSize: '12.5px', padding: '6px 12px' }}
-                  onClick={() => handleTestConnection(config)}
-                  disabled={testingId === config.id}
-                >
-                  <Activity size={13} />
-                  {testingId === config.id ? 'Testando...' : 'Testar Conexão'}
-                </button>
-
-                {/* Botão de Credenciais */}
-                <button
-                  className="btn btn-secondary"
-                  style={{ fontSize: '12.5px', padding: '6px 12px' }}
-                  onClick={() => setEditingConfig(config)}
-                >
-                  <Key size={13} /> Chaves
-                </button>
-              </div>
+        filteredConfigs.length === 0 ? (
+          <div style={{
+            background: '#ffffff',
+            border: '1px solid #e5e7eb',
+            borderRadius: '16px',
+            padding: '48px 24px',
+            textAlign: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '12px',
+            marginTop: '8px'
+          }}>
+            <div style={{
+              width: 48,
+              height: 48,
+              borderRadius: '50%',
+              background: '#f3f4f6',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#9ca3af'
+            }}>
+              <Plus size={22} />
             </div>
-          ))}
-        </div>
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#111827', margin: 0 }}>
+              Nenhuma integração conectada {activeTab !== 'all' ? `em "${CATEGORY_LABELS[activeTab] || activeTab}"` : ''}
+            </h3>
+            <p style={{ fontSize: '13px', color: '#6b7280', maxWidth: 440, margin: 0, lineHeight: 1.5 }}>
+              Para conectar um novo canal, adquirente de pagamento, emissor fiscal ou transportadora, acesse o catálogo de integrações disponíveis.
+            </p>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => navigate('/hub/integracoes/add')}
+              style={{ marginTop: 8, display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: '13px' }}
+            >
+              <Plus size={15} /> Adicionar Nova Integração
+            </button>
+          </div>
+        ) : (
+          <div className="integrations-grid">
+            {filteredConfigs.map(config => (
+              <div key={config.id} className="integration-card">
+                <div className="card-top">
+                  <div className="card-logo">
+                    <IntegrationLogoRenderer code={config.id} size={36} />
+                  </div>
+                  <div className="card-info">
+                    <h3 className="card-title">{config.name}</h3>
+                    <span className="card-category-badge">{CATEGORY_LABELS[config.category] || config.category}</span>
+                  </div>
+                  <span className={`card-status-badge ${config.status}`}>
+                    {config.status === 'connected' && (
+                      <>
+                        <svg width="8" height="8" viewBox="0 0 8 8" fill="#16a34a" style={{ display: 'inline-block', marginRight: 4 }}><circle cx="4" cy="4" r="4"/></svg>
+                        Conectado
+                      </>
+                    )}
+                    {config.status === 'sandbox' && (
+                      <>
+                        <svg width="8" height="8" viewBox="0 0 8 8" fill="#ca8a04" style={{ display: 'inline-block', marginRight: 4 }}><circle cx="4" cy="4" r="4"/></svg>
+                        Homologação
+                      </>
+                    )}
+                    {config.status === 'pending_credentials' && (
+                      <>
+                        <svg width="8" height="8" viewBox="0 0 8 8" fill="#9ca3af" style={{ display: 'inline-block', marginRight: 4 }}><circle cx="4" cy="4" r="4"/></svg>
+                        Disponível
+                      </>
+                    )}
+                    {config.status === 'error' && (
+                      <>
+                        <svg width="8" height="8" viewBox="0 0 8 8" fill="#dc2626" style={{ display: 'inline-block', marginRight: 4 }}><circle cx="4" cy="4" r="4"/></svg>
+                        Falha
+                      </>
+                    )}
+                  </span>
+                </div>
+
+                <div className="card-meta">
+                  {config.id === 'mercadolivre' && (
+                    <div className="card-account-line highlight">
+                      <strong>Conta Vinculada:</strong> TEKNIXBRASIL (Seller 470831049)
+                    </div>
+                  )}
+                  {config.id === 'site_teknix' && (
+                    <div className="card-account-line highlight">
+                      <strong>Loja Oficial:</strong> http://localhost:5173
+                    </div>
+                  )}
+                  {config.id === 'shopee' && (
+                    <div className="card-account-line">
+                      <strong>Conta Shopee:</strong> TEKNIX Ferramentas & Tech Oficial
+                    </div>
+                  )}
+                  {config.id === 'focus_nfe' && (
+                    <div className="card-account-line">
+                      <strong>Emissor Fiscal:</strong> CNPJ 38.068.360/0001-06 (Série 1)
+                    </div>
+                  )}
+                  {config.id === 'brevo' && (
+                    <div className="card-account-line highlight">
+                      <strong>Remetente Oficial:</strong> alisonsilvathiago@gmail.com
+                    </div>
+                  )}
+                  {config.id === 'whatsapp' && (
+                    <div className="card-account-line highlight">
+                      <strong>WhatsApp Central:</strong> +55 11 99888-7766
+                    </div>
+                  )}
+                  {config.id === 'mercado_pago' && (
+                    <div className="card-account-line highlight">
+                      <strong>Checkout Oficial:</strong> Pix, Cartão de Crédito e Boleto
+                    </div>
+                  )}
+                  {config.id === 'cielo' && (
+                    <div className="card-account-line highlight">
+                      <strong>Adquirente Oficial:</strong> Cartões de Crédito, Débito e API 3.0
+                    </div>
+                  )}
+                  {config.id === 'paypal' && (
+                    <div className="card-account-line highlight">
+                      <strong>Carteira Digital:</strong> Pagamentos Internacionais e Express Checkout
+                    </div>
+                  )}
+
+                  <div style={{ marginTop: 4 }}>
+                    <strong>Ambiente:</strong> {config.environment === 'production' ? 'Produção Oficial' : 'Sandbox / Homologação'}
+                  </div>
+
+                  {config.webhookUrl && (
+                    <div style={{ marginTop: 4, wordBreak: 'break-all', fontSize: '11.5px' }}>
+                      <strong>Webhook:</strong> {config.webhookUrl}
+                    </div>
+                  )}
+                  {config.errorMessage && (
+                    <div style={{ color: '#dc2626', marginTop: 4 }}>
+                      <strong>Aviso:</strong> {config.errorMessage}
+                    </div>
+                  )}
+                </div>
+
+                {INTEGRATION_DOCS[config.id] && (
+                  <div className="card-help">
+                    <span className="card-help-text">
+                      Documentação oficial da API:
+                    </span>
+                    <a
+                      href={INTEGRATION_DOCS[config.id].url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="card-help-link"
+                    >
+                      <ExternalLink size={11} />
+                      {INTEGRATION_DOCS[config.id].label}
+                    </a>
+                  </div>
+                )}
+
+                <div className="card-actions">
+                  {/* Ações Específicas por Canal */}
+                  {config.id === 'mercadolivre' && (
+                    <button
+                      className="btn btn-primary"
+                      style={{ fontSize: '12.5px', padding: '6px 12px' }}
+                      onClick={() => navigate('/hub/mercado-livre')}
+                    >
+                      <ArrowRight size={13} /> Acessar Canal
+                    </button>
+                  )}
+                  {config.id === 'shopee' && (
+                    <button
+                      className="btn btn-primary"
+                      style={{ fontSize: '12.5px', padding: '6px 12px' }}
+                      onClick={() => navigate('/hub/shopee')}
+                    >
+                      <ArrowRight size={13} /> Acessar Shopee
+                    </button>
+                  )}
+                  {config.id === 'amazon' && (
+                    <button
+                      className="btn btn-secondary"
+                      style={{ fontSize: '12.5px', padding: '6px 12px' }}
+                      onClick={() => navigate('/hub/amazon')}
+                    >
+                      <ArrowRight size={13} /> Acessar Amazon
+                    </button>
+                  )}
+                  {config.id === 'magalu' && (
+                    <button
+                      className="btn btn-secondary"
+                      style={{ fontSize: '12.5px', padding: '6px 12px' }}
+                      onClick={() => navigate('/hub/magalu')}
+                    >
+                      <ArrowRight size={13} /> Acessar Magalu
+                    </button>
+                  )}
+                  {config.id === 'site_teknix' && (
+                    <a
+                      href="http://localhost:5173"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-primary"
+                      style={{ fontSize: '12.5px', padding: '6px 12px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                    >
+                      <ExternalLink size={13} /> Abrir Loja
+                    </a>
+                  )}
+                  {config.id === 'focus_nfe' && (
+                    <button
+                      className="btn btn-primary"
+                      style={{ fontSize: '12.5px', padding: '6px 12px' }}
+                      onClick={() => navigate('/hub/configuracoes/fiscal')}
+                    >
+                      <Settings size={13} /> Painel Fiscal
+                    </button>
+                  )}
+                  {config.id === 'melhor_envio' && (
+                    <button
+                      className="btn btn-primary"
+                      style={{ fontSize: '12.5px', padding: '6px 12px' }}
+                      onClick={() => navigate('/hub/envios')}
+                    >
+                      <Settings size={13} /> Painel de Envios
+                    </button>
+                  )}
+                  {config.id === 'mercado_pago' && (
+                    <button
+                      className="btn btn-primary"
+                      style={{ fontSize: '12.5px', padding: '6px 12px' }}
+                      onClick={() => navigate('/hub/pagamentos')}
+                    >
+                      <Settings size={13} /> Configurar Pagamentos
+                    </button>
+                  )}
+                  {config.id === 'cielo' && (
+                    <button
+                      className="btn btn-primary"
+                      style={{ fontSize: '12.5px', padding: '6px 12px' }}
+                      onClick={() => navigate('/hub/configuracoes?tab=payments')}
+                    >
+                      <Settings size={13} /> Configurar Cielo
+                    </button>
+                  )}
+                  {config.id === 'paypal' && (
+                    <button
+                      className="btn btn-primary"
+                      style={{ fontSize: '12.5px', padding: '6px 12px' }}
+                      onClick={() => navigate('/hub/configuracoes?tab=payments')}
+                    >
+                      <Settings size={13} /> Configurar PayPal
+                    </button>
+                  )}
+                  {config.id === 'whatsapp' && (
+                    <button
+                      className="btn btn-primary"
+                      style={{ fontSize: '12.5px', padding: '6px 12px' }}
+                      onClick={() => navigate('/hub/whatsapp')}
+                    >
+                      <Settings size={13} /> Painel WhatsApp
+                    </button>
+                  )}
+
+                  {/* Ação padrão de teste */}
+                  <button
+                    className="btn btn-secondary"
+                    style={{ fontSize: '12.5px', padding: '6px 12px' }}
+                    onClick={() => handleTestConnection(config)}
+                    disabled={testingId === config.id}
+                  >
+                    <Activity size={13} />
+                    {testingId === config.id ? 'Testando...' : 'Testar Conexão'}
+                  </button>
+
+                  {/* Botão de Ativar / Desativar */}
+                  <button
+                    type="button"
+                    className={config.status === 'connected' || config.status === 'sandbox' ? 'btn btn-secondary' : 'btn btn-primary'}
+                    style={{
+                      fontSize: '12.5px',
+                      padding: '6px 12px',
+                      color: config.status === 'connected' || config.status === 'sandbox' ? '#dc2626' : undefined,
+                      borderColor: config.status === 'connected' || config.status === 'sandbox' ? '#fecaca' : undefined,
+                      background: config.status === 'connected' || config.status === 'sandbox' ? '#fff5f5' : undefined
+                    }}
+                    onClick={() => handleToggleStatus(config)}
+                    title={config.status === 'connected' || config.status === 'sandbox' ? 'Desativar este serviço do monitoramento operacional' : 'Ativar este serviço para o monitoramento em tempo real'}
+                  >
+                    {config.status === 'connected' || config.status === 'sandbox' ? 'Desativar' : 'Ativar'}
+                  </button>
+
+                  {/* Botão de Credenciais */}
+                  <button
+                    className="btn btn-secondary"
+                    style={{ fontSize: '12.5px', padding: '6px 12px' }}
+                    onClick={() => setEditingConfig(config)}
+                  >
+                    <Key size={13} /> Chaves
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )
       )}
 
       {/* Logs View */}
@@ -780,6 +894,14 @@ export default function IntegrationsHub() {
                   mercado_pago: [
                     { key: 'accessToken', label: 'Access Token (Produção ou Teste):', type: 'password', placeholder: editingConfig.has_credentials ? '•••••••••••••••••••• (Credencial salva no servidor)' : 'APP_USR-...' },
                     { key: 'publicKey', label: 'Public Key (Opcional):', type: 'text', placeholder: 'APP_USR-...' }
+                  ],
+                  cielo: [
+                    { key: 'merchantId', label: 'Merchant ID (Cielo):', type: 'text', placeholder: 'ID do Estabelecimento Cielo' },
+                    { key: 'merchantKey', label: 'Merchant Key (Chave Secreta):', type: 'password', placeholder: editingConfig.has_credentials ? '•••••••••••••••••••• (Credencial salva)' : 'Chave de Produção Cielo' }
+                  ],
+                  paypal: [
+                    { key: 'clientId', label: 'Client ID PayPal:', type: 'text', placeholder: 'Client ID da API PayPal' },
+                    { key: 'secret', label: 'Secret Key PayPal:', type: 'password', placeholder: editingConfig.has_credentials ? '•••••••••••••••••••• (Credencial salva)' : 'Secret Key do PayPal' }
                   ],
                   focus_nfe: [
                     { key: 'token', label: 'Token de Acesso Focus NFe:', type: 'password', placeholder: editingConfig.has_credentials ? '•••••••••••••••••••• (Credencial salva no servidor)' : 'Token da API Focus NFe' }

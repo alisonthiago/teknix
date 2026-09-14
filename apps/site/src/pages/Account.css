@@ -304,7 +304,7 @@
   padding: 18px 20px;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
-  background: #f8fafc;
+  background: #F7F7F7;
 }
 .cb-account-support-label { margin: 0 0 7px; color: #0033c6; font-weight: var(--tkn-weight-semibold); }
 .cb-account-support-value { margin: 0; color: #1f2937; font-size: 16px; line-height: 1.4; }

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
+import { ChevronLeft, User, Mail, Phone, MapPin, CreditCard, ShoppingBag, MessageCircle, DollarSign, ArrowUpRight } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import type { Customer } from '../types/database'
 import './CustomerDetails.css'
@@ -117,8 +118,8 @@ export default function CustomerDetails() {
       pending: 'badge-warning',
       paid: 'badge-success',
       approved: 'badge-success',
-      preparing: 'badge-primary',
-      shipped: 'badge-primary',
+      preparing: 'badge-info',
+      shipped: 'badge-info',
       delivered: 'badge-success',
       cancelled: 'badge-danger',
       refunded: 'badge-danger'
@@ -135,7 +136,8 @@ export default function CustomerDetails() {
     }
 
     return (
-      <span className={`badge ${classes[status] || 'badge-neutral'}`}>
+      <span className={`cd-badge ${classes[status] || 'badge-neutral'}`}>
+        <span className="cd-badge-dot" />
         {labels[status] || status}
       </span>
     )
@@ -143,9 +145,10 @@ export default function CustomerDetails() {
 
   if (loading) {
     return (
-      <div className="loading-state">
-        <div className="spinner"></div>
-        <p>Carregando dados reais do cliente...</p>
+      <div className="customer-details-page">
+        <div style={{ padding: '60px 20px', textAlign: 'center', color: '#64748b' }}>
+          <p>Carregando dados do cliente...</p>
+        </div>
       </div>
     )
   }
@@ -153,11 +156,11 @@ export default function CustomerDetails() {
   if (!customer) {
     return (
       <div className="customer-details-page">
-        <div style={{ textAlign: 'center', padding: '60px 20px', color: '#888' }}>
+        <div style={{ textAlign: 'center', padding: '60px 20px', color: '#64748b' }}>
           <h2>Cliente não encontrado</h2>
           <p style={{ marginTop: 8 }}>O registro solicitado não existe no banco de dados.</p>
-          <Link to="/hub/clientes" className="btn btn-secondary" style={{ marginTop: 16, display: 'inline-block' }}>
-            ← Voltar para Clientes
+          <Link to="/hub/clientes" className="hub-btn hub-btn-secondary" style={{ marginTop: 16, display: 'inline-flex' }}>
+            <ChevronLeft size={16} /> Voltar para Clientes
           </Link>
         </div>
       </div>
@@ -169,89 +172,130 @@ export default function CustomerDetails() {
 
   return (
     <div className="customer-details-page">
-      <div className="page-header">
-        <div className="header-info">
-          <Link to="/hub/clientes" className="back-link">← Voltar para clientes</Link>
-          <div className="customer-title-group">
-            <div className="customer-avatar-large">{customer.name ? customer.name.charAt(0).toUpperCase() : 'C'}</div>
-            <div className="customer-title-text">
-              <h2>{customer.name}</h2>
-              <span className="customer-since">Cliente desde {formatDate(customer.created_at || '')}</span>
+      {/* Top Header */}
+      <div className="cd-header-row">
+        <div className="cd-header-left">
+          <Link to="/hub/clientes" className="cd-back-btn">
+            <ChevronLeft size={16} />
+            <span>Clientes</span>
+          </Link>
+          <div className="cd-profile-summary">
+            <div className="cd-avatar">
+              {customer.name ? customer.name.charAt(0).toUpperCase() : 'C'}
+            </div>
+            <div className="cd-profile-info">
+              <div className="cd-name-row">
+                <h1>{customer.name}</h1>
+                <span className="cd-since-tag">Cliente desde {formatDate(customer.created_at || '')}</span>
+              </div>
+              <span className="cd-email-sub">{customer.email || 'E-mail não informado'}</span>
             </div>
           </div>
         </div>
-        <div className="header-actions">
+
+        <div className="cd-header-actions">
           {cleanPhone && (
-            <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="btn btn-success">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-              Mensagem WhatsApp
+            <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="cd-btn-whatsapp">
+              <MessageCircle size={15} />
+              <span>Conversar no WhatsApp</span>
             </a>
           )}
         </div>
       </div>
 
-      {/* METRICS ROW */}
-      <div className="metrics-row">
-        <div className="metric-card">
-          <span className="metric-title">Total Gasto (LTV)</span>
-          <span className="metric-value">{formatPrice(customer.metrics.total_spent)}</span>
+      {/* KPI Metrics */}
+      <div className="cd-kpi-grid">
+        <div className="cd-kpi-card">
+          <div className="cd-kpi-top">
+            <span className="cd-kpi-title">Total Gasto (LTV)</span>
+            <div className="cd-kpi-icon"><DollarSign size={15} /></div>
+          </div>
+          <div className="cd-kpi-value">{formatPrice(customer.metrics.total_spent)}</div>
+          <span className="cd-kpi-sub">Receita aprovada deste cliente</span>
         </div>
-        <div className="metric-card">
-          <span className="metric-title">Total de Pedidos</span>
-          <span className="metric-value">{customer.metrics.orders_count}</span>
+
+        <div className="cd-kpi-card">
+          <div className="cd-kpi-top">
+            <span className="cd-kpi-title">Total de Pedidos</span>
+            <div className="cd-kpi-icon"><ShoppingBag size={15} /></div>
+          </div>
+          <div className="cd-kpi-value">{customer.metrics.orders_count}</div>
+          <span className="cd-kpi-sub">Pedidos efetuados na loja</span>
         </div>
-        <div className="metric-card">
-          <span className="metric-title">Ticket Médio</span>
-          <span className="metric-value">{formatPrice(customer.metrics.average_ticket)}</span>
+
+        <div className="cd-kpi-card">
+          <div className="cd-kpi-top">
+            <span className="cd-kpi-title">Ticket Médio</span>
+            <div className="cd-kpi-icon"><CreditCard size={15} /></div>
+          </div>
+          <div className="cd-kpi-value">{formatPrice(customer.metrics.average_ticket)}</div>
+          <span className="cd-kpi-sub">Valor médio por compra paga</span>
         </div>
       </div>
 
-      {/* MAIN CONTENT GRID */}
-      <div className="customer-content-grid">
-        {/* LEFT: INFO CARD */}
-        <div className="card customer-info-card">
-          <h3>Dados Cadastrais</h3>
-          <div className="info-list">
-            <div className="info-item">
-              <span className="info-label">E-mail</span>
-              <span className="info-value">{customer.email || 'Não informado'}</span>
+      {/* 2-Column Content Grid */}
+      <div className="cd-main-grid">
+        {/* Left: Customer Info Card */}
+        <div className="cd-card">
+          <div className="cd-card-header">
+            <User size={16} className="cd-card-icon" />
+            <h3>Dados Cadastrais</h3>
+          </div>
+
+          <div className="cd-info-list">
+            <div className="cd-info-row">
+              <span className="cd-info-label">
+                <Mail size={13} /> E-mail
+              </span>
+              <span className="cd-info-value">{customer.email || 'Não informado'}</span>
             </div>
-            <div className="info-item">
-              <span className="info-label">Telefone</span>
-              <span className="info-value">{customer.phone || 'Não informado'}</span>
+
+            <div className="cd-info-row">
+              <span className="cd-info-label">
+                <Phone size={13} /> Telefone
+              </span>
+              <span className="cd-info-value">{customer.phone || 'Não informado'}</span>
             </div>
-            <div className="info-item">
-              <span className="info-label">CPF / CNPJ</span>
-              <span className="info-value">{customer.cpf || customer.document || 'Não informado'}</span>
+
+            <div className="cd-info-row">
+              <span className="cd-info-label">
+                <CreditCard size={13} /> CPF / CNPJ
+              </span>
+              <span className="cd-info-value font-mono">{customer.cpf || customer.document || 'Não informado'}</span>
             </div>
-            <div className="info-item">
-              <span className="info-label">Endereço</span>
-              <span className="info-value">
+
+            <div className="cd-info-row">
+              <span className="cd-info-label">
+                <MapPin size={13} /> Endereço
+              </span>
+              <span className="cd-info-value">
                 {customer.address ? `${customer.address}${customer.city ? `, ${customer.city}` : ''}${customer.state ? ` - ${customer.state}` : ''}` : 'Não cadastrado'}
               </span>
             </div>
+
             {customer.zip_code && (
-              <div className="info-item">
-                <span className="info-label">CEP</span>
-                <span className="info-value">{customer.zip_code}</span>
+              <div className="cd-info-row">
+                <span className="cd-info-label">CEP</span>
+                <span className="cd-info-value font-mono">{customer.zip_code}</span>
               </div>
             )}
           </div>
         </div>
 
-        {/* RIGHT: ORDERS LIST */}
-        <div className="card customer-orders-card">
-          <div className="card-header-flex">
+        {/* Right: Orders History */}
+        <div className="cd-card">
+          <div className="cd-card-header">
+            <ShoppingBag size={16} className="cd-card-icon" />
             <h3>Histórico de Pedidos ({customer.orders.length})</h3>
           </div>
 
           {customer.orders.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '30px 20px', color: '#888' }}>
+            <div className="cd-empty-orders">
               <p>Nenhum pedido vinculado a este cliente até o momento.</p>
             </div>
           ) : (
-            <div className="orders-table-wrapper">
-              <table className="orders-table">
+            <div className="cd-table-wrap">
+              <table className="cd-table">
                 <thead>
                   <tr>
                     <th>Pedido</th>
@@ -259,16 +303,24 @@ export default function CustomerDetails() {
                     <th>Itens</th>
                     <th>Total</th>
                     <th>Status</th>
+                    <th style={{ width: 36 }}></th>
                   </tr>
                 </thead>
                 <tbody>
                   {customer.orders.map(order => (
-                    <tr key={order.id} onClick={() => navigate(`/hub/pedidos/${order.id}`)} style={{ cursor: 'pointer' }}>
-                      <td><strong>{order.order_number}</strong></td>
-                      <td>{formatDate(order.created_at)}</td>
-                      <td>{order.items?.length || 0} produto(s)</td>
-                      <td><strong>{formatPrice(order.total)}</strong></td>
+                    <tr key={order.id} onClick={() => navigate(`/hub/pedidos/${order.id}`)}>
+                      <td>
+                        <strong className="cd-order-num">{order.order_number}</strong>
+                      </td>
+                      <td className="cd-order-date">{formatDate(order.created_at)}</td>
+                      <td>{order.items?.length || 0} item(ns)</td>
+                      <td>
+                        <strong className="cd-order-total">{formatPrice(order.total)}</strong>
+                      </td>
                       <td>{getStatusBadge(order.status)}</td>
+                      <td style={{ textAlign: 'right', color: '#94a3b8' }}>
+                        <ArrowUpRight size={15} />
+                      </td>
                     </tr>
                   ))}
                 </tbody>

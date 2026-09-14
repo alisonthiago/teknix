@@ -95,7 +95,7 @@ export default function NotificationsList() {
     }
     if (mod === 'pix') {
       return (
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '3px 8px', borderRadius: '6px', background: '#eff6ff', color: '#1e40af', fontSize: '11px', fontWeight: 600 }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '3px 8px', borderRadius: '6px', background: '#F7F7F7', color: '#1f2328', border: '1px solid #e5e7eb', fontSize: '11px', fontWeight: 600 }}>
           <CreditCard size={12} /> Pix
         </span>
       )
@@ -560,7 +560,7 @@ export default function NotificationsList() {
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   padding: '12px 14px',
-                  background: '#f8fafc',
+                  background: '#F7F7F7',
                   border: '1px solid #e2e8f0',
                   borderRadius: '8px',
                   cursor: 'pointer',
@@ -586,7 +586,7 @@ export default function NotificationsList() {
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   padding: '12px 14px',
-                  background: '#f8fafc',
+                  background: '#F7F7F7',
                   border: '1px solid #e2e8f0',
                   borderRadius: '8px',
                   cursor: 'pointer',
@@ -612,7 +612,7 @@ export default function NotificationsList() {
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   padding: '12px 14px',
-                  background: '#f8fafc',
+                  background: '#F7F7F7',
                   border: '1px solid #e2e8f0',
                   borderRadius: '8px',
                   cursor: 'pointer',
@@ -638,7 +638,7 @@ export default function NotificationsList() {
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   padding: '12px 14px',
-                  background: '#f8fafc',
+                  background: '#F7F7F7',
                   border: '1px solid #e2e8f0',
                   borderRadius: '8px',
                   cursor: 'pointer',
@@ -664,7 +664,7 @@ export default function NotificationsList() {
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   padding: '12px 14px',
-                  background: '#f8fafc',
+                  background: '#F7F7F7',
                   border: '1px solid #e2e8f0',
                   borderRadius: '8px',
                   cursor: 'pointer',
@@ -690,7 +690,7 @@ export default function NotificationsList() {
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   padding: '12px 14px',
-                  background: '#f8fafc',
+                  background: '#F7F7F7',
                   border: '1px solid #e2e8f0',
                   borderRadius: '8px',
                   cursor: 'pointer',
@@ -716,7 +716,7 @@ export default function NotificationsList() {
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   padding: '12px 14px',
-                  background: '#f8fafc',
+                  background: '#F7F7F7',
                   border: '1px solid #e2e8f0',
                   borderRadius: '8px',
                   cursor: 'pointer',

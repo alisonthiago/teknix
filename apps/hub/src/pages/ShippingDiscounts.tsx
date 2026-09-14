@@ -75,8 +75,8 @@ export default function ShippingDiscounts() {
         {/* Hero Onboarding Card (Print 4) */}
         {rules.length === 0 ? (
           <div style={{ background: '#ffffff', borderRadius: 12, border: '1px solid #e5e7eb', padding: '40px 30px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 40, boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-            <div style={{ width: 140, height: 140, background: '#eff6ff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Truck size={64} color="#2563eb" />
+            <div style={{ width: 140, height: 140, background: '#F7F7F7', border: '1px solid #e5e7eb', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Truck size={64} color="#1f2328" />
             </div>
             <div style={{ maxWidth: 440 }}>
               <span style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.08em', color: '#6b7280', textTransform: 'uppercase' }}>

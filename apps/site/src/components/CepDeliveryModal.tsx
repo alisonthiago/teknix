@@ -250,7 +250,7 @@ export default function CepDeliveryModal({
           </div>
           {quickError && <div className="dsvia-cep-simple-error" style={{ color: '#ef4444', fontSize: '12px', marginTop: 8 }}>{quickError}</div>}
           {quickCepPreview && (
-            <div className="dsvia-cep-simple-preview" style={{ marginTop: 16, padding: '12px 16px', background: '#f8fafc', borderRadius: 8, fontSize: '13px', color: '#334155', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <div className="dsvia-cep-simple-preview" style={{ marginTop: 16, padding: '12px 16px', background: '#F7F7F7', borderRadius: 8, fontSize: '13px', color: '#334155', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: 4 }}>
               <span style={{ fontWeight: 600, color: '#0f172a' }}>{quickCepPreview.street || 'Endereço encontrado'}</span>
               <span>{quickCepPreview.neighborhood ? `${quickCepPreview.neighborhood} - ` : ''}{quickCepPreview.city}, {quickCepPreview.state}</span>
             </div>

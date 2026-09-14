@@ -271,7 +271,7 @@ function HeaderActions({
             <div className="max-h-[360px] overflow-y-auto divide-y divide-[#f0f0f0] p-3 space-y-2">
               {filteredNotifications.length === 0 ? (
                 <div className="p-8 text-center">
-                  <div className="w-10 h-10 rounded-full bg-[#f8fafc] border border-[#e2e8f0] flex items-center justify-center mx-auto mb-2 text-[#94a3b8]">
+                  <div className="w-10 h-10 rounded-full bg-[#F7F7F7] border border-[#e2e8f0] flex items-center justify-center mx-auto mb-2 text-[#94a3b8]">
                     <Bell className="w-5 h-5" />
                   </div>
                   <p className="text-[13px] font-semibold text-[#333]">Nenhum alerta recente</p>

@@ -382,27 +382,46 @@ export default function AdsList() {
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="hub-kpi-grid">
-        <div className="hub-kpi-card">
-          <div className="hub-kpi-header"><span className="hub-kpi-label">Total de Anúncios</span><div className="hub-kpi-icon"><Megaphone size={16} /></div></div>
-          <span className="hub-kpi-value">{ads.length}</span>
+      {/* Stats - Unified Section */}
+      <div className="ads-unified-kpi-bar">
+        <div className="ads-unified-kpi-item">
+          <div className="ads-unified-kpi-header">
+            <span className="ads-unified-kpi-label">Total de Anúncios</span>
+            <div className="ads-unified-kpi-icon"><Megaphone size={15} /></div>
+          </div>
+          <span className="ads-unified-kpi-value">{ads.length}</span>
         </div>
-        <div className="hub-kpi-card">
-          <div className="hub-kpi-header"><span className="hub-kpi-label">Anúncios Ativos</span><div className="hub-kpi-icon"><CheckCircle2 size={16} /></div></div>
-          <span className="hub-kpi-value">{activeCount}</span>
+        <div className="ads-unified-kpi-divider" />
+        <div className="ads-unified-kpi-item">
+          <div className="ads-unified-kpi-header">
+            <span className="ads-unified-kpi-label">Anúncios Ativos</span>
+            <div className="ads-unified-kpi-icon text-green"><CheckCircle2 size={15} /></div>
+          </div>
+          <span className="ads-unified-kpi-value text-green">{activeCount}</span>
         </div>
-        <div className="hub-kpi-card">
-          <div className="hub-kpi-header"><span className="hub-kpi-label">Meio da Tela</span><div className="hub-kpi-icon"><LayoutTemplate size={16} /></div></div>
-          <span className="hub-kpi-value">{middleCount}</span>
+        <div className="ads-unified-kpi-divider" />
+        <div className="ads-unified-kpi-item">
+          <div className="ads-unified-kpi-header">
+            <span className="ads-unified-kpi-label">Meio da Tela</span>
+            <div className="ads-unified-kpi-icon"><LayoutTemplate size={15} /></div>
+          </div>
+          <span className="ads-unified-kpi-value">{middleCount}</span>
         </div>
-        <div className="hub-kpi-card">
-          <div className="hub-kpi-header"><span className="hub-kpi-label">Carrosséis</span><div className="hub-kpi-icon"><Images size={16} /></div></div>
-          <span className="hub-kpi-value">{carouselCount}</span>
+        <div className="ads-unified-kpi-divider" />
+        <div className="ads-unified-kpi-item">
+          <div className="ads-unified-kpi-header">
+            <span className="ads-unified-kpi-label">Carrosséis</span>
+            <div className="ads-unified-kpi-icon"><Images size={15} /></div>
+          </div>
+          <span className="ads-unified-kpi-value">{carouselCount}</span>
         </div>
-        <div className="hub-kpi-card">
-          <div className="hub-kpi-header"><span className="hub-kpi-label">Inativos / Bloqueados</span><div className="hub-kpi-icon"><Ban size={16} /></div></div>
-          <span className="hub-kpi-value">{inactiveCount}</span>
+        <div className="ads-unified-kpi-divider" />
+        <div className="ads-unified-kpi-item">
+          <div className="ads-unified-kpi-header">
+            <span className="ads-unified-kpi-label">Inativos / Bloqueados</span>
+            <div className="ads-unified-kpi-icon text-muted"><Ban size={15} /></div>
+          </div>
+          <span className="ads-unified-kpi-value text-muted">{inactiveCount}</span>
         </div>
       </div>
 
@@ -418,11 +437,11 @@ export default function AdsList() {
             placeholder="Buscar por nome do anúncio ou produto..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="ads-search-input"
+            className="ads-search-input raw-input"
           />
         </div>
         <select
-          className="ads-placement-filter"
+          className="ads-placement-filter raw-select"
           value={filterPlacement}
           onChange={e => setFilterPlacement(e.target.value)}
         >

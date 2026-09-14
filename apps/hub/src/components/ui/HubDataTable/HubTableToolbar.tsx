@@ -137,7 +137,7 @@ export function HubTableToolbar({
           <input
             ref={inputRef}
             type="text"
-            className="hub-search-input"
+            className="hub-search-input raw-input"
             placeholder={searchPlaceholder}
             value={searchValue}
             onChange={e => onSearchChange(e.target.value)}

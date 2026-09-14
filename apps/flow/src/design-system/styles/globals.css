@@ -221,7 +221,23 @@ button, .btn {
 }
 
 .btn-secondary:hover {
-  background-color: #f8fafc;
+  background-color: #F7F7F7;
   border-color: #d1d5db;
+}
+
+/* ==========================================================================
+   PREVENÇÃO GLOBAL DE ZOOM EM FORMULÁRIOS NO MOBILE (iOS SAFARI / CHROME)
+   ========================================================================== */
+@media (max-width: 768px) {
+  input,
+  select,
+  textarea {
+    font-size: max(16px, 1rem) !important;
+  }
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
 }
 

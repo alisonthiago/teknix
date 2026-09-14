@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import { supabase } from '../lib/supabase'
+import { useParams, useNavigate, Link } from 'react-router-dom'
+import { supabase, supabaseAdmin } from '../lib/supabase'
 import {
   FileText,
   Download,
@@ -12,9 +12,19 @@ import {
   Printer,
   RefreshCw,
   Ban,
-  Send,
   FileCheck,
-  ShieldAlert,
+  ArrowLeft,
+  Check,
+  Package,
+  Truck,
+  User,
+  MapPin,
+  CreditCard,
+  Copy,
+  MessageSquare,
+  ShoppingBag,
+  Sliders,
+  CheckCheck
 } from 'lucide-react'
 import { FiscalService, StoreInvoice, StoreReceipt, FiscalValidationResult } from '../services/fiscal/FiscalService'
 import { OrderWorkflow } from '../services/orderWorkflow'
@@ -32,6 +42,7 @@ interface StoreOrderItem {
   quantity: number
   price: number
   total: number
+  image_url?: string | null
 }
 
 interface StoreOrder {
@@ -64,10 +75,12 @@ interface StoreOrder {
 
 export default function OrderDetails() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const [order, setOrder] = useState<StoreOrder | null>(null)
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(false)
   const [statusMsg, setStatusMsg] = useState('')
+  const [copiedField, setCopiedField] = useState<string | null>(null)
 
   // Estados Fiscais
   const [invoice, setInvoice] = useState<StoreInvoice | null>(null)
@@ -80,7 +93,6 @@ export default function OrderDetails() {
   const [cancelReason, setCancelReason] = useState('')
   const [selectedEnv, setSelectedEnv] = useState<'homologacao' | 'producao'>('homologacao')
 
-
   useEffect(() => {
     fetchOrder()
   }, [id])
@@ -88,17 +100,56 @@ export default function OrderDetails() {
   async function fetchOrder() {
     setLoading(true)
     try {
-      let query = supabase.from('store_orders').select('*, items:store_order_items(*)')
       const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id || '')
+      
+      // Usa supabaseAdmin no HUB para garantir permissão administrativa, com fallback para supabase
+      let query = (supabaseAdmin || supabase)
+        .from('store_orders')
+        .select('*, items:store_order_items(*)')
+
       if (isUuid) {
         query = query.eq('id', id)
       } else {
         query = query.eq('order_number', id)
       }
-      const { data, error } = await query.maybeSingle()
 
-      if (!error && data) {
+      let { data, error } = await query.maybeSingle()
+
+      // Fallback seguro caso haja problema com a query inicial
+      if (error || !data) {
+        const fallbackClient = supabaseAdmin || supabase
+        const fbRes = await fallbackClient
+          .from('store_orders')
+          .select('*, items:store_order_items(*)')
+          .eq(isUuid ? 'id' : 'order_number', id)
+          .maybeSingle()
+        if (fbRes.data) {
+          data = fbRes.data
+          error = null
+        }
+      }
+
+      if (data) {
+        // Enriquecer os itens do pedido com as fotos oficiais da tabela products
+        if (data.items && data.items.length > 0) {
+          const prodIds = data.items.map((i: any) => i.product_id).filter(Boolean)
+          if (prodIds.length > 0) {
+            const { data: prods } = await (supabaseAdmin || supabase)
+              .from('products')
+              .select('id, image_url')
+              .in('id', prodIds)
+            if (prods) {
+              const imgMap = new Map(prods.map(p => [p.id, p.image_url]))
+              data.items = data.items.map((item: any) => ({
+                ...item,
+                image_url: imgMap.get(item.product_id) || null
+              }))
+            }
+          }
+        }
+
         setOrder(data as StoreOrder)
+
         // Busca documentos fiscais vinculados
         const [inv, rec] = await Promise.all([
           FiscalService.getInvoiceByOrderId(data.id),
@@ -114,8 +165,15 @@ export default function OrderDetails() {
     } catch (e) {
       console.error('[OrderDetails] fetchOrder:', e)
       setOrder(null)
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
+  }
+
+  const copyToClipboard = (text: string, fieldName: string) => {
+    navigator.clipboard.writeText(text)
+    setCopiedField(fieldName)
+    setTimeout(() => setCopiedField(null), 2500)
   }
 
   async function handlePreferenceChange(pref: 'none' | 'receipt' | 'nfe' | 'both') {
@@ -217,26 +275,26 @@ export default function OrderDetails() {
   }
 
   async function handleUpdateStatus(newStatus: string) {
-    if (!order || !id) return
+    if (!order) return
     setUpdating(true)
     setStatusMsg('')
     try {
       if (newStatus === 'paid') {
-        const res = await OrderWorkflow.confirmOrderPayment(id, {
+        const res = await OrderWorkflow.confirmOrderPayment(order.id, {
           source: 'manual',
           notes: 'Pagamento confirmado manualmente no TEKNIX HUB'
         })
         if (!res.success) throw new Error(res.message || res.error)
-        setStatusMsg(res.message)
+        setStatusMsg(res.message || 'Pagamento aprovado com sucesso!')
       } else if (['preparing', 'shipped', 'delivered', 'cancelled'].includes(newStatus)) {
-        const res = await OrderWorkflow.updateShippingStatus(id, newStatus as any)
+        const res = await OrderWorkflow.updateShippingStatus(order.id, newStatus as any)
         if (!res.success) throw new Error(res.message || res.error)
-        setStatusMsg(res.message)
+        setStatusMsg(res.message || `Status atualizado para "${getOrderStatusLabel(newStatus)}"`)
       } else {
-        const { error } = await supabase
+        const { error } = await (supabaseAdmin || supabase)
           .from('store_orders')
           .update({ status: newStatus, updated_at: new Date().toISOString() })
-          .eq('id', id)
+          .eq('id', order.id)
 
         if (error) throw error
         setStatusMsg(`Status atualizado para "${getOrderStatusLabel(newStatus)}"`)
@@ -273,11 +331,34 @@ export default function OrderDetails() {
     return doc
   }
 
+  function formatPhone(phone: string | null | undefined): string {
+    if (!phone) return '—'
+    let clean = phone.replace(/\D/g, '')
+    if (clean.startsWith('55') && clean.length >= 12) {
+      clean = clean.substring(2)
+    }
+    if (clean.length === 11) {
+      return clean.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3')
+    }
+    if (clean.length === 10) {
+      return clean.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3')
+    }
+    return phone
+  }
+
+  function getWhatsAppUrl(phone: string | null | undefined): string | null {
+    if (!phone) return null
+    const digits = phone.replace(/\D/g, '')
+    const full = digits.startsWith('55') ? digits : `55${digits}`
+    if (full.length < 10) return null
+    return `https://wa.me/${full}`
+  }
+
   function getOrderStatusLabel(status: string) {
     switch (status) {
       case 'pending': return 'Aguardando Pagamento'
       case 'paid': return 'Pagamento Aprovado'
-      case 'processing': return 'Em análise'
+      case 'processing': return 'Em Análise'
       case 'preparing': return 'Preparando Envio'
       case 'shipped': return 'Enviado'
       case 'delivered': return 'Entregue'
@@ -287,160 +368,314 @@ export default function OrderDetails() {
     }
   }
 
-  function getOrderStatusBadge(status: string) {
+  function getOrderStatusClass(status: string) {
     switch (status) {
-      case 'pending': return 'badge-warning'
-      case 'paid': return 'badge-success'
-      case 'processing': return 'badge-info'
-      case 'preparing': return 'badge-info'
-      case 'shipped': return 'badge-primary'
-      case 'delivered': return 'badge-success'
-      case 'cancelled': return 'badge-danger'
-      default: return 'badge-neutral'
+      case 'pending': return 'pending'
+      case 'paid':
+      case 'delivered': return 'paid'
+      case 'preparing':
+      case 'shipped': return 'shipped'
+      case 'cancelled':
+      case 'refunded': return 'cancelled'
+      default: return 'neutral'
     }
   }
 
   function getPaymentStatusLabel(status: string) {
     switch (status) {
-      case 'pending': return 'Aguardando Pagamento'
+      case 'pending': return 'Pagamento Pendente'
       case 'approved': return 'Pagamento Aprovado ✓'
       case 'rejected': return 'Pagamento Recusado'
-      case 'cancelled': return 'Cancelado'
+      case 'cancelled': return 'Pagamento Cancelado'
       case 'refunded': return 'Reembolsado'
       case 'in_process': return 'Em Análise'
       default: return status || '—'
     }
   }
 
-  function getPaymentStatusBadge(status: string) {
-    switch (status) {
-      case 'pending': return 'badge-warning'
-      case 'approved': return 'badge-success'
-      case 'rejected': return 'badge-danger'
-      case 'cancelled': return 'badge-danger'
-      case 'refunded': return 'badge-neutral'
-      case 'in_process': return 'badge-info'
-      default: return 'badge-neutral'
-    }
+  // Stepper progress index
+  const getStepperIndex = (status: string, paymentStatus: string) => {
+    if (status === 'cancelled' || status === 'refunded') return -1
+    if (status === 'delivered') return 4
+    if (status === 'shipped') return 3
+    if (status === 'preparing') return 2
+    if (status === 'paid' || paymentStatus === 'approved') return 1
+    return 0
   }
 
   if (loading) {
     return (
-      <div className="loading-state">
-        <div className="spinner"></div>
-        <p>Carregando pedido...</p>
+      <div className="order-details-container">
+        <div style={{ padding: '80px', textAlign: 'center', color: '#64748b' }}>
+          <RefreshCw className="hub-spin" size={24} style={{ marginBottom: 12 }} />
+          <div>Carregando ficha completa do pedido...</div>
+        </div>
       </div>
     )
   }
 
   if (!order) {
     return (
-      <div style={{ padding: '40px', textAlign: 'center' }}>
-        <p style={{ color: '#86868b' }}>Pedido não encontrado.</p>
-        <Link to="/hub/pedidos" style={{ color: '#0066cc', textDecoration: 'none' }}>← Voltar para pedidos</Link>
+      <div className="order-details-container">
+        <div className="order-card" style={{ padding: '60px', textAlign: 'center' }}>
+          <ShoppingBag size={48} style={{ color: '#94a3b8', marginBottom: 16 }} />
+          <h2 style={{ fontSize: 18, color: '#0f172a', marginBottom: 8 }}>Pedido não encontrado</h2>
+          <p style={{ color: '#64748b', fontSize: 13, marginBottom: 20 }}>
+            Não encontramos nenhum pedido com o identificador informado.
+          </p>
+          <button
+            type="button"
+            className="hub-btn hub-btn-primary"
+            onClick={() => navigate('/hub/pedidos')}
+          >
+            <ArrowLeft size={14} /> Voltar para Pedidos
+          </button>
+        </div>
       </div>
     )
   }
 
   const totalItems = order.items?.reduce((s, i) => s + i.quantity, 0) || 0
+  const currentStep = getStepperIndex(order.status, order.payment_status)
+  const isCancelled = order.status === 'cancelled' || order.status === 'refunded'
+
+  const steps = [
+    { label: 'Pedido Criado', sub: formatDate(order.created_at), icon: ShoppingBag },
+    { label: 'Pagamento', sub: order.payment_status === 'approved' || order.status !== 'pending' ? 'Aprovado' : 'Aguardando', icon: CreditCard },
+    { label: 'Preparação', sub: ['preparing', 'shipped', 'delivered'].includes(order.status) ? 'Pronto para envio' : 'Separação', icon: Package },
+    { label: 'Despachado', sub: ['shipped', 'delivered'].includes(order.status) ? (order.shipping_method || 'Em trânsito') : 'Aguardando', icon: Truck },
+    { label: 'Entregue', sub: order.status === 'delivered' ? 'Concluído' : 'Aguardando', icon: CheckCircle2 },
+  ]
+
+  const customerInitials = order.customer_name
+    ? order.customer_name.split(' ').map(n => n[0]).filter(Boolean).slice(0, 2).join('').toUpperCase()
+    : 'TK'
 
   return (
-    <div className="order-details-page">
+    <div className="order-details-container">
 
-      {/* Header */}
-      <div className="page-header">
-        <div className="header-info">
-          <Link to="/hub/pedidos" className="back-link">← Voltar para pedidos</Link>
+      {/* ─── TOP HEADER ─────────────────────────────────────────────────── */}
+      <div className="order-top-header">
+        <div>
+          <div className="order-breadcrumb-wrapper">
+            <button
+              type="button"
+              className="hub-btn hub-btn-secondary order-btn-back"
+              onClick={() => navigate('/hub/pedidos')}
+            >
+              <span className="cat-btn-icon-bubble"><ArrowLeft size={14} /></span> Voltar
+            </button>
+
+            <div className="order-breadcrumb">
+              <Link to="/hub/pedidos">Pedidos</Link>
+              <span>/</span>
+              <span>{order.order_number}</span>
+            </div>
+          </div>
+
           <div className="order-title-group">
-            <h2>Pedido {order.order_number}</h2>
-            <span className={`status-badge ${getOrderStatusBadge(order.status)}`}>
+            <h1 className="order-title">Pedido {order.order_number}</h1>
+            <span className={`order-badge ${getOrderStatusClass(order.status)}`}>
               {getOrderStatusLabel(order.status)}
             </span>
-            <span className={`status-badge ${getPaymentStatusBadge(order.payment_status)}`}>
+            <span className={`order-badge ${order.payment_status === 'approved' ? 'paid' : 'pending'}`}>
               {getPaymentStatusLabel(order.payment_status)}
             </span>
           </div>
-          <p className="order-date">
-            Criado em {formatDate(order.created_at)}
+
+          <div style={{ fontSize: 13, color: '#64748b', marginTop: 4 }}>
+            Realizado em {formatDate(order.created_at)}
             {order.updated_at !== order.created_at && ` • Atualizado em ${formatDate(order.updated_at)}`}
-          </p>
+          </div>
+
           {statusMsg && (
-            <div style={{ marginTop: 8, padding: '8px 16px', borderRadius: 8, background: statusMsg.startsWith('Erro') ? '#ffeaea' : '#e9fce9', color: statusMsg.startsWith('Erro') ? '#c00' : '#1d7e40', fontSize: 13, fontWeight: 600 }}>
-              {statusMsg}
+            <div className={`order-status-msg-banner ${statusMsg.startsWith('Erro') ? 'error' : 'success'}`}>
+              {statusMsg.startsWith('Erro') ? <AlertTriangle size={16} /> : <CheckCircle2 size={16} />}
+              <span>{statusMsg}</span>
             </div>
           )}
         </div>
-        <div className="header-actions" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <button className="btn btn-secondary" onClick={() => window.print()}>Imprimir</button>
+
+        <div className="order-header-actions">
+          <button
+            type="button"
+            className="hub-btn hub-btn-secondary"
+            onClick={() => window.print()}
+          >
+            <Printer size={14} /> Imprimir
+          </button>
+
+          {/* Botão Contextual Principal */}
           {order.status === 'pending' && (
-            <button className="btn btn-primary" disabled={updating} onClick={() => handleUpdateStatus('paid')}>
-              {updating ? 'Atualizando...' : 'Aprovar Pagamento'}
+            <button
+              type="button"
+              className="hub-btn hub-btn-primary"
+              disabled={updating}
+              onClick={() => handleUpdateStatus('paid')}
+            >
+              <Check size={14} /> {updating ? 'Atualizando...' : 'Aprovar Pagamento'}
             </button>
           )}
+
           {order.status === 'paid' && (
-            <button className="btn btn-primary" disabled={updating} onClick={() => handleUpdateStatus('preparing')}>
-              {updating ? '...' : 'Mover para Preparando'}
+            <button
+              type="button"
+              className="hub-btn hub-btn-primary"
+              disabled={updating}
+              onClick={() => handleUpdateStatus('preparing')}
+            >
+              <Package size={14} /> {updating ? 'Atualizando...' : 'Iniciar Preparação'}
             </button>
           )}
+
           {order.status === 'preparing' && (
-            <button className="btn btn-primary" disabled={updating} onClick={() => handleUpdateStatus('shipped')}>
-              {updating ? '...' : 'Mover para Enviado'}
+            <button
+              type="button"
+              className="hub-btn hub-btn-primary"
+              disabled={updating}
+              onClick={() => handleUpdateStatus('shipped')}
+            >
+              <Truck size={14} /> {updating ? 'Atualizando...' : 'Despachar Pedido'}
             </button>
           )}
+
           {order.status === 'shipped' && (
-            <button className="btn btn-primary" disabled={updating} onClick={() => handleUpdateStatus('delivered')}>
-              {updating ? '...' : 'Marcar como Entregue'}
+            <button
+              type="button"
+              className="hub-btn hub-btn-primary"
+              disabled={updating}
+              onClick={() => handleUpdateStatus('delivered')}
+            >
+              <CheckCircle2 size={14} /> {updating ? 'Atualizando...' : 'Confirmar Entrega'}
             </button>
           )}
+
           {!['cancelled', 'refunded', 'delivered'].includes(order.status) && (
-            <button className="btn btn-secondary" disabled={updating} onClick={() => handleUpdateStatus('cancelled')}
-              style={{ color: '#c00', borderColor: '#ffd0d0' }}>
-              Cancelar
+            <button
+              type="button"
+              className="hub-btn hub-btn-secondary"
+              disabled={updating}
+              onClick={() => {
+                if (confirm('Deseja realmente cancelar este pedido?')) {
+                  handleUpdateStatus('cancelled')
+                }
+              }}
+              style={{ color: '#dc2626', borderColor: '#fecaca' }}
+            >
+              <Ban size={13} /> Cancelar Pedido
             </button>
           )}
         </div>
       </div>
 
-      <div className="order-grid">
-
-        {/* COLUNA PRINCIPAL */}
-        <div className="order-main">
-
-          {/* Produtos */}
-          <div className="detail-card">
-            <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3>Produtos comprados ({totalItems} {totalItems === 1 ? 'item' : 'itens'})</h3>
-              <span style={{ fontSize: 12, color: '#86868b' }}>{order.items?.length || 0} {order.items?.length === 1 ? 'produto' : 'produtos'}</span>
+      {/* ─── STEPPER / PROGRESSO VISUAL DO PEDIDO ───────────────────────── */}
+      {!isCancelled ? (
+        <div className="order-stepper-card">
+          <div className="order-stepper-track">
+            <div className="order-step-connector">
+              <div
+                className="order-step-connector-fill"
+                style={{ width: `${Math.min(100, Math.max(0, (currentStep / (steps.length - 1)) * 100))}%` }}
+              />
             </div>
-            <div className="card-body no-padding">
-              <table className="items-table">
+
+            {steps.map((s, idx) => {
+              const isCompleted = currentStep > idx
+              const isActive = currentStep === idx
+              const IconComp = s.icon
+              return (
+                <div
+                  key={s.label}
+                  className={`order-step-item ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}`}
+                >
+                  <div className="order-step-circle">
+                    {isCompleted ? <Check size={16} /> : <IconComp size={16} />}
+                  </div>
+                  <div className="order-step-info">
+                    <div className="order-step-label">{s.label}</div>
+                    <div className="order-step-sub">{s.sub}</div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      ) : (
+        <div className="order-card" style={{ padding: '16px 20px', marginBottom: 24, background: '#fef2f2', borderColor: '#fecaca', display: 'flex', alignItems: 'center', gap: 12 }}>
+          <Ban size={20} color="#dc2626" />
+          <div>
+            <div style={{ fontWeight: 600, fontSize: 14, color: '#991b1b' }}>Pedido Cancelado</div>
+            <div style={{ fontSize: 12, color: '#b91c1c' }}>Este pedido foi cancelado e não terá continuidade no fluxo de expedição.</div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── GRID PRINCIPAL DE DETALHES ─────────────────────────────────── */}
+      <div className="order-grid-layout">
+        
+        {/* COLUNA ESQUERDA (PRINCIPAL) */}
+        <div className="order-main-col">
+
+          {/* 1. PRODUTOS DO PEDIDO */}
+          <div className="order-card">
+            <div className="order-card-header">
+              <h3 className="order-card-title">
+                <ShoppingBag size={18} style={{ color: '#0f172a' }} />
+                Produtos do Pedido ({totalItems} {totalItems === 1 ? 'item' : 'itens'})
+              </h3>
+              <span style={{ fontSize: 12, color: '#64748b' }}>
+                {order.items?.length || 0} {order.items?.length === 1 ? 'produto cadastrado' : 'produtos'}
+              </span>
+            </div>
+
+            <div className="order-card-body no-padding">
+              <table className="order-products-table">
                 <thead>
                   <tr>
                     <th>Produto</th>
                     <th style={{ textAlign: 'center' }}>Qtd</th>
                     <th style={{ textAlign: 'right' }}>Preço Unit.</th>
-                    <th style={{ textAlign: 'right' }}>Total Linha</th>
+                    <th style={{ textAlign: 'right' }}>Total</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {order.items && order.items.length > 0 ? order.items.map(item => (
-                    <tr key={item.id}>
-                      <td>
-                        <div className="item-name">{item.product_name}</div>
-                        {item.sku && (
-                          <div style={{ fontSize: 11, color: '#aaa', marginTop: 2, fontFamily: 'monospace' }}>
-                            SKU: {item.sku}
+                  {order.items && order.items.length > 0 ? (
+                    order.items.map(item => (
+                      <tr key={item.id}>
+                        <td>
+                          <div className="order-product-cell">
+                            <div className="order-product-thumb">
+                              {item.image_url ? (
+                                <img src={item.image_url} alt={item.product_name} />
+                              ) : (
+                                <Package size={22} color="#94a3b8" />
+                              )}
+                            </div>
+                            <div className="order-product-info">
+                              <div className="order-product-name">{item.product_name}</div>
+                              {item.sku && (
+                                <div className="order-product-sku">
+                                  SKU: {item.sku}
+                                </div>
+                              )}
+                            </div>
                           </div>
-                        )}
-                      </td>
-                      <td style={{ textAlign: 'center', fontWeight: 600 }}>{item.quantity}</td>
-                      <td style={{ textAlign: 'right', color: '#555' }}>{formatPrice(item.price)}</td>
-                      <td style={{ textAlign: 'right', fontWeight: 700, color: '#1d1d1f' }}>{formatPrice(item.total)}</td>
-                    </tr>
-                  )) : (
+                        </td>
+                        <td style={{ textAlign: 'center', fontWeight: 600, fontSize: 13, color: '#0f172a' }}>
+                          {item.quantity} un.
+                        </td>
+                        <td style={{ textAlign: 'right', color: '#64748b', fontSize: 13 }}>
+                          {formatPrice(item.price)}
+                        </td>
+                        <td style={{ textAlign: 'right', fontWeight: 700, color: '#0f172a', fontSize: 14 }}>
+                          {formatPrice(item.total)}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
                     <tr>
-                      <td colSpan={4} style={{ textAlign: 'center', color: '#aaa', padding: '24px' }}>
-                        Itens não carregados
+                      <td colSpan={4} style={{ textAlign: 'center', color: '#94a3b8', padding: '32px' }}>
+                        Nenhum item listado para este pedido.
                       </td>
                     </tr>
                   )}
@@ -449,87 +684,99 @@ export default function OrderDetails() {
             </div>
           </div>
 
-          {/* Pagamento e Resumo */}
-          <div className="detail-card">
-            <div className="card-header">
-              <h3>Resumo Financeiro</h3>
+          {/* 2. RESUMO FINANCEIRO & PAGAMENTO */}
+          <div className="order-card">
+            <div className="order-card-header">
+              <h3 className="order-card-title">
+                <CreditCard size={18} style={{ color: '#0f172a' }} /> Resumo Financeiro & Pagamento
+              </h3>
             </div>
-            <div className="card-body">
-              <div className="summary-section">
-                <div className="summary-row">
+
+            <div className="order-card-body">
+              <div className="order-finance-rows">
+                <div className="order-finance-row">
                   <span>Subtotal ({totalItems} {totalItems === 1 ? 'item' : 'itens'})</span>
                   <span>{formatPrice(order.subtotal)}</span>
                 </div>
-                <div className="summary-row">
-                  <span>Frete{order.shipping_method ? ` (${order.shipping_method})` : ''}</span>
-                  <span>{order.shipping_cost > 0 ? formatPrice(order.shipping_cost) : <span style={{ color: '#1d7e40' }}>Grátis</span>}</span>
+
+                <div className="order-finance-row">
+                  <span>Frete {order.shipping_method ? `(${order.shipping_method})` : ''}</span>
+                  <span>
+                    {order.shipping_cost > 0 ? (
+                      formatPrice(order.shipping_cost)
+                    ) : (
+                      <span style={{ color: '#16a34a', fontWeight: 600 }}>Grátis</span>
+                    )}
+                  </span>
                 </div>
+
                 {order.discount > 0 && (
-                  <div className="summary-row discount">
-                    <span>Desconto / Cupom</span>
+                  <div className="order-finance-row" style={{ color: '#dc2626' }}>
+                    <span>Desconto Aplicado</span>
                     <span>−{formatPrice(order.discount)}</span>
                   </div>
                 )}
-                <div className="summary-row total">
-                  <span>Total Pago</span>
+
+                <div className="order-finance-row total">
+                  <span>Total do Pedido</span>
                   <span>{formatPrice(order.total)}</span>
                 </div>
               </div>
 
-              {/* Dados de Pagamento */}
-              <div className="payment-details-panel">
-                <div className="payment-details-title">
-                  Dados do Pagamento
-                </div>
-                <div className="payment-details-grid">
-                  <div>
-                    <div style={{ fontSize: 11, color: '#aaa' }}>Método</div>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: '#1d1d1f' }}>{order.payment_method || '—'}</div>
+              {/* Bloco de Dados do Pagamento */}
+              <div className="order-payment-box">
+                <div className="order-payment-header">
+                  <div className="order-payment-method">
+                    <CreditCard size={16} color="#0f172a" />
+                    <span>{order.payment_method || 'Pagamento na Loja'}</span>
                   </div>
-                  <div>
-                    <div style={{ fontSize: 11, color: '#aaa' }}>Status do Pagamento</div>
-                    <span className={`status-badge ${getPaymentStatusBadge(order.payment_status)}`} style={{ fontSize: 11 }}>
-                      {getPaymentStatusLabel(order.payment_status)}
-                    </span>
-                  </div>
-                  {order.payment_id && (
-                    <div style={{ gridColumn: '1 / -1' }}>
-                      <div style={{ fontSize: 11, color: '#aaa' }}>ID Mercado Pago</div>
-                      <div style={{ fontSize: 12, fontFamily: 'monospace', color: '#555', wordBreak: 'break-all' }}>{order.payment_id}</div>
-                    </div>
-                  )}
-                  {order.origin && (
-                    <div>
-                      <div style={{ fontSize: 11, color: '#aaa' }}>Origem</div>
-                      <div style={{ fontSize: 13, color: '#555' }}>{order.origin}</div>
-                    </div>
-                  )}
+                  <span className={`order-badge ${order.payment_status === 'approved' ? 'paid' : 'pending'}`}>
+                    {getPaymentStatusLabel(order.payment_status)}
+                  </span>
                 </div>
+
+                {order.payment_id && (
+                  <div style={{ marginTop: 8, fontSize: 12, color: '#64748b', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span>ID Transação:</span>
+                    <code style={{ background: '#ffffff', padding: '2px 6px', borderRadius: 4, border: '1px solid #e2e8f0' }}>
+                      {order.payment_id}
+                    </code>
+                    <button
+                      type="button"
+                      className="order-copy-btn"
+                      onClick={() => copyToClipboard(order.payment_id || '', 'payment_id')}
+                      title="Copiar ID"
+                    >
+                      {copiedField === 'payment_id' ? <CheckCheck size={13} color="#16a34a" /> : <Copy size={13} />}
+                    </button>
+                  </div>
+                )}
+
+                {order.status === 'pending' && (
+                  <div style={{ marginTop: 10, fontSize: 12, color: '#ca8a04', background: '#fefce8', padding: '8px 12px', borderRadius: 6, border: '1px solid #fef08a' }}>
+                    Aguardando confirmação do pagamento via Pix ou aprovação manual no botão acima.
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
-          {/* ================================================================ */}
-          {/* SEÇÃO OFICIAL: DOCUMENTOS / FISCAL (HUB) */}
-          {/* ================================================================ */}
-          <div className="detail-card fiscal-card">
-            <div className="card-header fiscal-card-header">
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <FileText size={18} color="#0f172a" />
-                <h3>Documentos / Fiscal</h3>
-              </div>
+          {/* 3. DOCUMENTOS FISCAIS (NF-e & RECIBO) */}
+          <div className="order-card">
+            <div className="order-card-header">
+              <h3 className="order-card-title">
+                <FileText size={18} color="#0f172a" /> Documentos Fiscais & Comerciais
+              </h3>
               <span className={`fiscal-header-badge inv-badge-${invoice?.status || order.fiscal_status || 'pending'}`}>
                 {invoice?.status === 'autorizada' && <CheckCircle2 size={13} />}
                 {invoice?.status === 'processando' && <Clock size={13} />}
                 {invoice?.status === 'rejeitada' && <XCircle size={13} />}
                 {invoice?.status === 'cancelada' && <Ban size={13} />}
-                {invoice?.status === 'dados_incompletos' && <AlertTriangle size={13} />}
                 {invoice?.status?.toUpperCase() || 'NÃO EMITIDA'}
               </span>
             </div>
 
-            <div className="card-body">
-              {/* Feedback de ações fiscais */}
+            <div className="order-card-body">
               {fiscalMsg && (
                 <div
                   style={{
@@ -538,8 +785,8 @@ export default function OrderDetails() {
                     marginBottom: 16,
                     fontSize: 13,
                     fontWeight: 600,
-                    background: fiscalMsg.type === 'success' ? '#dcfce7' : fiscalMsg.type === 'error' ? '#fee2e2' : '#f1f5f9',
-                    color: fiscalMsg.type === 'success' ? '#15803d' : fiscalMsg.type === 'error' ? '#b91c1c' : '#111111',
+                    background: fiscalMsg.type === 'success' ? '#dcfce7' : '#fee2e2',
+                    color: fiscalMsg.type === 'success' ? '#15803d' : '#b91c1c',
                     display: 'flex',
                     alignItems: 'center',
                     gap: 8,
@@ -550,9 +797,9 @@ export default function OrderDetails() {
                 </div>
               )}
 
-              {/* 1. Preferência de Documento da Loja */}
+              {/* Preferência Fiscal */}
               <div className="fiscal-pref-container">
-                <span className="fiscal-pref-label">Tipo de Documento / Preferência:</span>
+                <span className="fiscal-pref-label">Preferência de Emissão:</span>
                 <div className="fiscal-pref-pills">
                   {(['nfe', 'receipt', 'both', 'none'] as const).map((p) => (
                     <button
@@ -566,36 +813,7 @@ export default function OrderDetails() {
                 </div>
               </div>
 
-              {/* 2. Alerta se dados fiscais estiverem incompletos */}
-              {validation && !validation.valid && (
-                <div className="fiscal-alert-box fiscal-alert-warning">
-                  <AlertTriangle size={20} className="fiscal-alert-icon" />
-                  <div className="fiscal-alert-content">
-                    <h4>Dados fiscais incompletos para emissão da NF-e</h4>
-                    <p style={{ margin: 0, fontSize: '0.8rem' }}>
-                      A SEFAZ exige que os seguintes campos estejam preenchidos antes de autorizar a emissão:
-                    </p>
-                    <ul className="fiscal-alert-list">
-                      {validation.missingFields.map((f, i) => (
-                        <li key={i}>{f}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              )}
-
-              {/* 3. Alerta de rejeição da SEFAZ se houver */}
-              {invoice?.status === 'rejeitada' && invoice.rejection_message && (
-                <div className="fiscal-alert-box fiscal-alert-error">
-                  <XCircle size={20} className="fiscal-alert-icon" />
-                  <div className="fiscal-alert-content">
-                    <h4>Rejeição SEFAZ ({invoice.rejection_code || 'Erro'})</h4>
-                    <p style={{ margin: 0, fontSize: '0.82rem' }}>{invoice.rejection_message}</p>
-                  </div>
-                </div>
-              )}
-
-              {/* 4. Subcards Grid: Recibo & NF-e */}
+              {/* Grid dos Documentos */}
               <div className="fiscal-docs-grid">
                 {/* SUBCARD RECIBO */}
                 <div className="fiscal-subcard">
@@ -604,7 +822,7 @@ export default function OrderDetails() {
                       <span className="fiscal-subcard-title">
                         <FileCheck size={16} color="#2563eb" /> Recibo Comercial
                       </span>
-                      <span className={`inv-badge ${receipt ? 'inv-badge-authorized' : 'inv-badge-pending'}`}>
+                      <span className={`order-badge ${receipt ? 'paid' : 'neutral'}`} style={{ fontSize: 11 }}>
                         {receipt ? 'GERADO' : 'NÃO GERADO'}
                       </span>
                     </div>
@@ -620,13 +838,10 @@ export default function OrderDetails() {
                         <div className="fiscal-meta-item">
                           <strong>Valor:</strong> {formatPrice(receipt.total)}
                         </div>
-                        <div className="fiscal-meta-item">
-                          <strong>Status:</strong> {receipt.status?.toUpperCase()}
-                        </div>
                       </div>
                     ) : (
-                      <p style={{ fontSize: '0.82rem', color: '#64748b', margin: '8px 0' }}>
-                        Recibo comercial com dados da TEKNIX, cliente, itens e forma de pagamento.
+                      <p style={{ fontSize: '0.82rem', color: '#64748b', margin: '6px 0' }}>
+                        Recibo comercial timbrado da TEKNIX com comprovante de itens e forma de pagamento.
                       </p>
                     )}
                   </div>
@@ -635,21 +850,24 @@ export default function OrderDetails() {
                     {receipt ? (
                       <>
                         <button
+                          type="button"
                           className="btn-fiscal-action primary"
                           onClick={() => setIsReceiptModalOpen(true)}
                         >
-                          <Printer size={14} /> Visualizar / Imprimir
+                          <Printer size={14} /> Imprimir Recibo
                         </button>
                         <button
+                          type="button"
                           className="btn-fiscal-action secondary"
                           onClick={handleGenerateReceipt}
                           disabled={fiscalLoading}
                         >
-                          <RefreshCw size={14} className={fiscalLoading ? 'spin' : ''} /> Atualizar
+                          <RefreshCw size={14} className={fiscalLoading ? 'hub-spin' : ''} /> Atualizar
                         </button>
                       </>
                     ) : (
                       <button
+                        type="button"
                         className="btn-fiscal-action primary"
                         onClick={handleGenerateReceipt}
                         disabled={fiscalLoading}
@@ -660,23 +878,20 @@ export default function OrderDetails() {
                   </div>
                 </div>
 
-                {/* SUBCARD NF-e */}
+                {/* SUBCARD NF-E */}
                 <div className="fiscal-subcard">
                   <div>
                     <div className="fiscal-subcard-header">
                       <span className="fiscal-subcard-title">
                         <FileText size={16} color="#059669" /> Nota Fiscal (NF-e)
                       </span>
-                      <span className={`inv-badge inv-badge-${invoice?.status || 'pending'}`}>
+                      <span className={`order-badge ${invoice?.status === 'autorizada' ? 'paid' : 'neutral'}`} style={{ fontSize: 11 }}>
                         {invoice?.status?.toUpperCase() || 'NÃO EMITIDA'}
                       </span>
                     </div>
 
                     {invoice ? (
                       <div>
-                        <div className="fiscal-meta-item">
-                          <strong>Referência:</strong> {invoice.reference}
-                        </div>
                         {invoice.numero && (
                           <div className="fiscal-meta-item">
                             <strong>Número / Série:</strong> Nº {invoice.numero} (Série {invoice.serie || 1})
@@ -684,55 +899,39 @@ export default function OrderDetails() {
                         )}
                         <div className="fiscal-meta-item">
                           <strong>Ambiente:</strong>{' '}
-                          <span className={`inv-env-badge inv-env-${invoice.ambiente || 'homologacao'}`}>
+                          <span style={{ fontWeight: 600, color: invoice.ambiente === 'producao' ? '#16a34a' : '#ca8a04' }}>
                             {invoice.ambiente === 'producao' ? 'PRODUÇÃO' : 'HOMOLOGAÇÃO'}
                           </span>
                         </div>
-                        {invoice.protocolo && (
-                          <div className="fiscal-meta-item">
-                            <strong>Protocolo SEFAZ:</strong> {invoice.protocolo}
-                          </div>
-                        )}
-                        {invoice.issued_at && (
-                          <div className="fiscal-meta-item">
-                            <strong>Data Emissão:</strong> {formatDate(invoice.issued_at)}
-                          </div>
-                        )}
                         {invoice.chave && (
                           <div className="fiscal-meta-item">
                             <strong>Chave de Acesso:</strong>
                             <div
                               className="fiscal-key-box"
                               title="Clique para copiar"
-                              onClick={() => {
-                                navigator.clipboard.writeText(invoice.chave || '')
-                                alert('Chave de acesso copiada!')
-                              }}
+                              onClick={() => copyToClipboard(invoice.chave || '', 'chave_nfe')}
                             >
                               {invoice.chave}
                             </div>
-                          </div>
-                        )}
-                        {invoice.status === 'cancelada' && invoice.cancellation_reason && (
-                          <div className="fiscal-meta-item" style={{ color: '#dc2626' }}>
-                            <strong>Justificativa Cancelamento:</strong> {invoice.cancellation_reason}
+                            {copiedField === 'chave_nfe' && (
+                              <span style={{ fontSize: 11, color: '#16a34a', fontWeight: 600 }}>Copiada!</span>
+                            )}
                           </div>
                         )}
                       </div>
                     ) : (
                       <div>
-                        <p style={{ fontSize: '0.82rem', color: '#64748b', margin: '4px 0 10px' }}>
-                          Emissão direta via SEFAZ com integração Focus NFe.
+                        <p style={{ fontSize: '0.82rem', color: '#64748b', margin: '4px 0 8px' }}>
+                          Emissão direta e autorização via SEFAZ estadual.
                         </p>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.8rem' }}>
-                          <label style={{ fontWeight: 600, color: '#111111' }}>Ambiente:</label>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.8rem' }}>
+                          <label style={{ fontWeight: 600, color: '#0f172a' }}>Ambiente:</label>
                           <select
-                            className="form-select"
-                            style={{ padding: '4px 8px', fontSize: '0.8rem', borderRadius: 6 }}
+                            style={{ padding: '3px 6px', fontSize: '0.8rem', borderRadius: 6, border: '1px solid #e2e8f0' }}
                             value={selectedEnv}
                             onChange={(e) => setSelectedEnv(e.target.value as any)}
                           >
-                            <option value="homologacao">Homologação (Testes SEFAZ)</option>
+                            <option value="homologacao">Homologação (Testes)</option>
                             <option value="producao">Produção Oficial</option>
                           </select>
                         </div>
@@ -741,34 +940,25 @@ export default function OrderDetails() {
                   </div>
 
                   <div className="fiscal-subcard-actions">
-                    {/* Ações conforme o estado da NF-e */}
                     {(!invoice || invoice.status === 'nao_emitida' || invoice.status === 'dados_incompletos') && (
-                      <>
-                        <button
-                          className="btn-fiscal-action primary"
-                          onClick={handleEmitNfe}
-                          disabled={fiscalLoading || (validation ? !validation.valid : false)}
-                          title={validation && !validation.valid ? 'Preencha os campos obrigatórios' : 'Emitir NF-e'}
-                        >
-                          <FileText size={14} /> Emitir NF-e
-                        </button>
-                        <button
-                          className="btn-fiscal-action secondary"
-                          onClick={handleGenerateBoth}
-                          disabled={fiscalLoading || (validation ? !validation.valid : false)}
-                        >
-                          Gerar Ambos
-                        </button>
-                      </>
+                      <button
+                        type="button"
+                        className="btn-fiscal-action primary"
+                        onClick={handleEmitNfe}
+                        disabled={fiscalLoading}
+                      >
+                        <FileText size={14} /> Emitir NF-e
+                      </button>
                     )}
 
                     {invoice?.status === 'processando' && (
                       <button
+                        type="button"
                         className="btn-fiscal-action secondary"
                         onClick={fetchOrder}
                         disabled={fiscalLoading}
                       >
-                        <RefreshCw size={14} className={fiscalLoading ? 'spin' : ''} /> Consultar Status
+                        <RefreshCw size={14} className={fiscalLoading ? 'hub-spin' : ''} /> Consultar Status
                       </button>
                     )}
 
@@ -795,6 +985,7 @@ export default function OrderDetails() {
                           </a>
                         )}
                         <button
+                          type="button"
                           className="btn-fiscal-action danger"
                           onClick={() => setIsCancelModalOpen(true)}
                           disabled={fiscalLoading}
@@ -806,11 +997,12 @@ export default function OrderDetails() {
 
                     {invoice?.status === 'rejeitada' && (
                       <button
+                        type="button"
                         className="btn-fiscal-action primary"
                         onClick={handleEmitNfe}
                         disabled={fiscalLoading}
                       >
-                        <RefreshCw size={14} className={fiscalLoading ? 'spin' : ''} /> Reprocessar NF-e
+                        <RefreshCw size={14} /> Reprocessar NF-e
                       </button>
                     )}
                   </div>
@@ -819,113 +1011,166 @@ export default function OrderDetails() {
             </div>
           </div>
 
-          {/* Endereço de Entrega */}
-          {order.delivery_address && (
-            <div className="detail-card">
-              <div className="card-header">
-                <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-                  Endereço de Entrega
-                </h3>
-              </div>
-              <div className="card-body">
-                <div className="info-block">
-                  <span style={{ fontWeight: 600, color: '#1d1d1f' }}>{order.customer_name}</span>
-                  <span>{order.delivery_address}</span>
-                  {order.notes && <span style={{ color: '#86868b', fontSize: 13 }}>{order.notes}</span>}
-                </div>
-              </div>
-            </div>
-          )}
-
         </div>
 
-        {/* SIDEBAR */}
-        <div className="order-sidebar">
+        {/* COLUNA DIREITA (SIDEBAR) */}
+        <div className="order-sidebar-col">
 
-          {/* Cliente */}
-          <div className="detail-card">
-            <div className="card-header">
-              <h3>Cliente</h3>
+          {/* CARD CLIENTE */}
+          <div className="order-card">
+            <div className="order-card-header">
+              <h3 className="order-card-title">
+                <User size={18} style={{ color: '#0f172a' }} /> Dados do Cliente
+              </h3>
             </div>
-            <div className="card-body">
-              <div className="info-block">
-                <strong style={{ fontSize: 15 }}>{order.customer_name || '—'}</strong>
-                {order.customer_email && (
-                  <a href={`mailto:${order.customer_email}`} style={{ color: '#0066cc', textDecoration: 'none', fontSize: 13 }}>
-                    {order.customer_email}
-                  </a>
-                )}
-                {order.customer_phone && <span>{order.customer_phone}</span>}
-                {order.customer_document && (
-                  <span style={{ fontFamily: 'monospace', fontSize: 12, color: '#86868b' }}>
-                    CPF/CNPJ: {formatDoc(order.customer_document)}
-                  </span>
-                )}
-              </div>
-              {order.user_id && (
-                <div style={{ marginTop: 12, padding: '8px 12px', background: '#e9fce9', borderRadius: 8, fontSize: 11, color: '#1d7e40', fontWeight: 600 }}>
-                  ✓ Conta TEKNIX vinculada
+
+            <div className="order-card-body">
+              <div className="order-customer-profile">
+                <div className="order-avatar-circle">
+                  {customerInitials}
                 </div>
-              )}
-            </div>
-          </div>
-
-          {/* Status do Pedido — controle manual */}
-          <div className="detail-card">
-            <div className="card-header">
-              <h3>Status do Pedido</h3>
-            </div>
-            <div className="card-body">
-              <div style={{ marginBottom: 12 }}>
-                <span className={`status-badge ${getOrderStatusBadge(order.status)}`} style={{ fontSize: 12 }}>
-                  {getOrderStatusLabel(order.status)}
-                </span>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {(['pending', 'paid', 'preparing', 'shipped', 'delivered', 'cancelled'] as const).map(s => (
-                  <button
-                    key={s}
-                    className={`btn ${order.status === s ? 'btn-primary' : 'btn-secondary'}`}
-                    style={{ fontSize: 12, padding: '6px 12px', opacity: order.status === s ? 1 : 0.7 }}
-                    disabled={updating || order.status === s}
-                    onClick={() => handleUpdateStatus(s)}
-                  >
-                    {order.status === s ? '✓ ' : ''}{getOrderStatusLabel(s)}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Informações do pedido */}
-          <div className="detail-card">
-            <div className="card-header">
-              <h3>Informações do Pedido</h3>
-            </div>
-            <div className="card-body">
-              <div className="info-block">
                 <div>
-                  <div style={{ fontSize: 11, color: '#aaa' }}>Número do pedido</div>
-                  <div style={{ fontWeight: 700, fontSize: 15, color: '#1d1d1f' }}>{order.order_number}</div>
+                  <div className="order-customer-name">{order.customer_name || 'Cliente Sem Nome'}</div>
+                  <div className="order-customer-type">✓ Loja Própria TEKNIX</div>
                 </div>
-                <div style={{ marginTop: 8 }}>
-                  <div style={{ fontSize: 11, color: '#aaa' }}>ID interno</div>
-                  <div style={{ fontSize: 11, fontFamily: 'monospace', color: '#86868b', wordBreak: 'break-all' }}>{order.id}</div>
+              </div>
+
+              <div className="order-info-list">
+                {order.customer_email && (
+                  <div className="order-info-item">
+                    <span className="order-info-label">E-mail</span>
+                    <div className="order-info-value">
+                      <a href={`mailto:${order.customer_email}`} style={{ color: '#0071e3', textDecoration: 'none' }}>
+                        {order.customer_email}
+                      </a>
+                      <button
+                        type="button"
+                        className="order-copy-btn"
+                        onClick={() => copyToClipboard(order.customer_email || '', 'email')}
+                        title="Copiar e-mail"
+                      >
+                        {copiedField === 'email' ? <CheckCheck size={13} color="#16a34a" /> : <Copy size={13} />}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {order.customer_phone && (
+                  <div className="order-info-item">
+                    <span className="order-info-label">Telefone / WhatsApp</span>
+                    <div className="order-info-value">
+                      <span>{formatPhone(order.customer_phone)}</span>
+                    </div>
+
+                    {getWhatsAppUrl(order.customer_phone) && (
+                      <a
+                        href={getWhatsAppUrl(order.customer_phone)!}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="order-whatsapp-btn"
+                      >
+                        <MessageSquare size={14} /> Conversar no WhatsApp
+                      </a>
+                    )}
+                  </div>
+                )}
+
+                {order.customer_document && (
+                  <div className="order-info-item">
+                    <span className="order-info-label">CPF / CNPJ</span>
+                    <div className="order-info-value">
+                      <span style={{ fontFamily: 'monospace' }}>{formatDoc(order.customer_document)}</span>
+                      <button
+                        type="button"
+                        className="order-copy-btn"
+                        onClick={() => copyToClipboard(order.customer_document || '', 'cpf')}
+                        title="Copiar documento"
+                      >
+                        {copiedField === 'cpf' ? <CheckCheck size={13} color="#16a34a" /> : <Copy size={13} />}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* CARD ENTREGA & ENDEREÇO */}
+          <div className="order-card">
+            <div className="order-card-header">
+              <h3 className="order-card-title">
+                <Truck size={18} style={{ color: '#0f172a' }} /> Entrega & Destino
+              </h3>
+            </div>
+
+            <div className="order-card-body">
+              <div className="order-info-list">
+                <div className="order-info-item">
+                  <span className="order-info-label">Método de Envio</span>
+                  <div className="order-info-value" style={{ fontWeight: 600 }}>
+                    {order.shipping_method || 'Entrega Padrão'}
+                  </div>
                 </div>
-                <div style={{ marginTop: 8 }}>
-                  <div style={{ fontSize: 11, color: '#aaa' }}>Data do pedido</div>
-                  <div style={{ fontSize: 13 }}>{formatDate(order.created_at)}</div>
+
+                <div className="order-info-item">
+                  <span className="order-info-label">Endereço de Entrega</span>
+                  <div className="order-info-value" style={{ lineHeight: 1.4 }}>
+                    {order.delivery_address || 'Endereço não informado'}
+                  </div>
                 </div>
-                <div style={{ marginTop: 8 }}>
-                  <div style={{ fontSize: 11, color: '#aaa' }}>Última atualização</div>
-                  <div style={{ fontSize: 13 }}>{formatDate(order.updated_at)}</div>
+
+                {order.notes && (
+                  <div className="order-info-item">
+                    <span className="order-info-label">Observações</span>
+                    <div className="order-info-value" style={{ fontSize: 12, color: '#64748b' }}>
+                      {order.notes}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* CARD GESTÃO DE STATUS DO PEDIDO */}
+          <div className="order-card">
+            <div className="order-card-header">
+              <h3 className="order-card-title">
+                <Sliders size={18} style={{ color: '#0f172a' }} /> Gestão de Status
+              </h3>
+            </div>
+
+            <div className="order-card-body">
+              <div style={{ marginBottom: 12 }}>
+                <span className="order-info-label">Status Atual</span>
+                <div style={{ marginTop: 4 }}>
+                  <span className={`order-badge ${getOrderStatusClass(order.status)}`} style={{ fontSize: 13, width: '100%', justifyContent: 'center' }}>
+                    {getOrderStatusLabel(order.status)}
+                  </span>
                 </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 14 }}>
+                <label className="order-info-label">Alterar Status:</label>
+                <select
+                  className="order-status-select"
+                  value={order.status}
+                  disabled={updating}
+                  onChange={(e) => handleUpdateStatus(e.target.value)}
+                >
+                  <option value="pending">Aguardando Pagamento</option>
+                  <option value="paid">Pagamento Aprovado</option>
+                  <option value="preparing">Preparando Envio</option>
+                  <option value="shipped">Enviado</option>
+                  <option value="delivered">Entregue</option>
+                  <option value="cancelled">Cancelado</option>
+                  <option value="refunded">Reembolsado</option>
+                </select>
               </div>
             </div>
           </div>
 
         </div>
+
       </div>
 
       {/* MODAL DO RECIBO COMERCIAL */}
@@ -953,6 +1198,7 @@ export default function OrderDetails() {
             />
             <div className="cancel-modal-actions">
               <button
+                type="button"
                 className="btn-fiscal-action secondary"
                 onClick={() => setIsCancelModalOpen(false)}
                 disabled={fiscalLoading}
@@ -960,6 +1206,7 @@ export default function OrderDetails() {
                 Voltar
               </button>
               <button
+                type="button"
                 className="btn-fiscal-action danger"
                 onClick={handleConfirmCancelNfe}
                 disabled={fiscalLoading || cancelReason.trim().length < 15}

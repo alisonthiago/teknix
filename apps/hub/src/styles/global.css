@@ -215,13 +215,13 @@ p {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
-/* ── FLOW button system ── */
+/* ── Button system ── */
 .btn-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: #347ff2;
+  background: var(--button-primary, #0071e3);
   color: #ffffff;
   font-weight: 500;
   font-size: 15px;
@@ -234,28 +234,26 @@ p {
 }
 
 .btn-primary:hover {
-  background: #2469d8;
+  background: var(--button-primary-hover, #0062c4);
   color: #ffffff;
 }
 
 .hub-layout .btn-action-primary {
-  background: var(--tk-color-primary) !important;
-  border-color: var(--tk-color-primary) !important;
+  background: var(--button-primary, #0071e3) !important;
+  border-color: var(--button-primary, #0071e3) !important;
   color: #fff !important;
 }
 .hub-layout .btn-action-primary:hover {
-  background: var(--tk-color-primary-hover) !important;
-  border-color: var(--tk-color-primary-hover) !important;
+  background: var(--button-primary-hover, #0062c4) !important;
+  border-color: var(--button-primary-hover, #0062c4) !important;
 }
 
 /* ── Padrão global dos botões de ação do Hub ──
-   Ações principais usam a mesma cor, largura e altura em todas as páginas. */
+   Ações principais usam o padrão azul oficial TEKNIX. */
 .hub-layout :where(
-  .btn,
   .btn-primary,
-  .hub-btn,
-  .btn-secondary.btn-action-primary,
   .hub-btn-primary,
+  .btn-secondary.btn-action-primary,
   .pages-primary-btn,
   .ads-new-btn,
   .btn-fisc-save,
@@ -265,14 +263,13 @@ p {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  width: 180px !important;
-  height: 44px !important;
-  min-width: 180px !important;
-  min-height: 44px !important;
-  padding: 0 16px;
-  background: var(--tk-color-primary, #347ff2) !important;
-  border: 1px solid var(--tk-color-primary, #347ff2) !important;
+  width: auto !important;
+  min-width: 140px;
+  height: 42px !important;
+  min-height: 42px !important;
+  padding: 0 20px !important;
+  background: var(--button-primary, #0071e3) !important;
+  border: 1px solid var(--button-primary, #0071e3) !important;
   border-radius: 8px;
   color: #ffffff !important;
   font-family: inherit;
@@ -285,33 +282,46 @@ p {
 }
 
 .hub-layout :where(
-  .btn,
   .btn-primary,
-  .hub-btn,
-  .btn-secondary.btn-action-primary,
   .hub-btn-primary,
+  .btn-secondary.btn-action-primary,
   .pages-primary-btn,
   .ads-new-btn,
   .btn-fisc-save,
   .btn-primary-action
 ):hover:not(:disabled) {
-  background: var(--tk-color-primary-hover, #2469d8) !important;
-  border-color: var(--tk-color-primary-hover, #2469d8) !important;
+  background: var(--button-primary-hover, #0062c4) !important;
+  border-color: var(--button-primary-hover, #0062c4) !important;
   color: #ffffff !important;
 }
 
 .hub-layout :where(
-  .btn,
   .btn-primary,
-  .hub-btn,
-  .btn-secondary.btn-action-primary,
   .hub-btn-primary,
+  .btn-secondary.btn-action-primary,
+  .pages-primary-btn,
+  .ads-new-btn,
+  .btn-fisc-save,
+  .btn-primary-action
+):active {
+  background: var(--button-primary-active, #004f9e) !important;
+  border-color: var(--button-primary-active, #004f9e) !important;
+  color: #ffffff !important;
+}
+
+.hub-layout :where(
+  .btn-primary,
+  .hub-btn-primary,
+  .btn-secondary.btn-action-primary,
   .pages-primary-btn,
   .ads-new-btn,
   .btn-fisc-save,
   .btn-primary-action
 ):disabled {
-  opacity: 0.6;
+  background: var(--button-primary-disabled, #F7F7F7) !important;
+  border-color: var(--button-primary-disabled, #F7F7F7) !important;
+  color: #999999 !important;
+  opacity: 0.65;
   cursor: not-allowed;
 }
 
@@ -807,7 +817,7 @@ p {
 [style*="#dbeafe"], [style*="#e0efff"], [style*="#bfdbfe"],
 [class*="bg-[#eff6ff]"], [class*="bg-[#f0f7ff]"], [class*="bg-[#f8faff]"],
 [class*="bg-[#edf5ff]"], [class*="bg-[#eaf2ff]"], [class*="bg-[#ecf3fe]"],
-[class*="bg-[#dbeafe]"], [class*="bg-[#e0efff]"] { background: #f5f5f5 !important; }
+[class*="bg-[#dbeafe]"], [class*="bg-[#e0efff]"] { background: #F7F7F7 !important; }
 
 /* Limpeza global de hovers azulados em abas, filtros e controles. */
 [class*="hover:bg-[#f1f5f9]"]:hover,
@@ -838,4 +848,20 @@ html, body, .hub-layout, aside, nav, table, button, input, select {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+}
+
+/* ==========================================================================
+   PREVENÇÃO GLOBAL DE ZOOM EM FORMULÁRIOS NO MOBILE (iOS SAFARI / CHROME)
+   ========================================================================== */
+@media (max-width: 768px) {
+  input,
+  select,
+  textarea {
+    font-size: max(16px, 1rem) !important;
+  }
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
 }

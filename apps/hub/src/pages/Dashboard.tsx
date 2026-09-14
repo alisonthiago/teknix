@@ -36,6 +36,7 @@ export default function Dashboard() {
   // Abas do Card de Faturamento e Gráfico
   const [tab, setTab] = useState<'faturamento' | 'vendas' | 'lucro'>('faturamento')
   const [chartPeriod, setChartPeriod] = useState<'7d' | '30d' | '12m'>('7d')
+  const [hoveredPoint, setHoveredPoint] = useState<{ label: string; value: number; x: number; y: number } | null>(null)
 
   // UI States
   const [hidden, setHidden] = useState(() => {
@@ -526,7 +527,7 @@ export default function Dashboard() {
               <button
                 className={`dn-period-btn ${chartPeriod === '7d' ? 'active' : ''}`}
                 type="button"
-                onClick={() => setChartPeriod('7d')}
+                onClick={() => { setChartPeriod('7d'); setHoveredPoint(null); }}
               >
                 {chartPeriod === '7d' && <span className="dn-period-btn-dot" />}
                 7 dias
@@ -534,7 +535,7 @@ export default function Dashboard() {
               <button
                 className={`dn-period-btn ${chartPeriod === '30d' ? 'active' : ''}`}
                 type="button"
-                onClick={() => setChartPeriod('30d')}
+                onClick={() => { setChartPeriod('30d'); setHoveredPoint(null); }}
               >
                 {chartPeriod === '30d' && <span className="dn-period-btn-dot" />}
                 30 dias
@@ -542,7 +543,7 @@ export default function Dashboard() {
               <button
                 className={`dn-period-btn ${chartPeriod === '12m' ? 'active' : ''}`}
                 type="button"
-                onClick={() => setChartPeriod('12m')}
+                onClick={() => { setChartPeriod('12m'); setHoveredPoint(null); }}
               >
                 {chartPeriod === '12m' && <span className="dn-period-btn-dot" />}
                 12 meses
@@ -550,91 +551,144 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="dn-svg-wrap">
-            <svg fill="none" preserveAspectRatio="none" viewBox="0 0 700 200">
-              <defs>
-                <linearGradient id="dn-areaGrad" x1="0" x2="0" y1="0" y2="1">
-                  <stop offset="0%" stopColor="#B4F400" stopOpacity="0.35" />
-                  <stop offset="40%" stopColor="#84CC16" stopOpacity="0.12" />
-                  <stop offset="100%" stopColor="#fff" stopOpacity="0" />
-                </linearGradient>
-                <linearGradient id="dn-lineGrad" x1="0" x2="1" y1="0" y2="0">
-                  <stop offset="0%" stopColor="#65A30D" />
-                  <stop offset="50%" stopColor="#84CC16" />
-                  <stop offset="100%" stopColor="#D9F99D" />
-                </linearGradient>
-                <pattern height="28" id="dn-dots" patternUnits="userSpaceOnUse" width="28">
-                  <circle cx="2" cy="2" fill="#E2E8F0" opacity="0.6" r="1" />
-                </pattern>
-              </defs>
-              <rect fill="url(#dn-dots)" height="170" width="650" x="45" y="15" />
-              {chartData.gridLevels.map(({ y, label }) => (
-                <g key={y}>
-                  <line stroke="#F1F5F9" strokeDasharray="4 4" strokeWidth="1" x1="45" x2="695" y1={y} y2={y} />
-                  <text fill="#94A3B8" fontSize="9" fontWeight="500" x="0" y={y + 3}>{label}</text>
-                </g>
-              ))}
-              <line stroke="#E2E8F0" strokeWidth="1.5" x1="45" x2="695" y1="185" y2="185" />
-              <text fill="#94A3B8" fontSize="9" fontWeight="500" x="14" y="188">R$ 0</text>
-              <line opacity="0.7" stroke="#B4F400" strokeDasharray="3 3" strokeWidth="1.5" x1={chartData.latestPoint.x} x2={chartData.latestPoint.x} y1={chartData.latestPoint.y} y2="185" />
-              <path d={chartData.areaPath} fill="url(#dn-areaGrad)" />
-              <path d={chartData.linePath} fill="none" stroke="url(#dn-lineGrad)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" />
-            </svg>
+          {(() => {
+            const activePoint = hoveredPoint || chartData.peakPoint
+            const isHovering = hoveredPoint !== null
 
-            {/* Pontos no gráfico */}
-            {chartData.points.slice(1, -1).map((pt, i) => (
+            return (
               <div
-                key={i}
-                className="dn-chart-dot"
-                style={{
-                  left: `${(pt.x / 700) * 100}%`,
-                  top: `calc(${(pt.y / 200) * 100}% - 4px)`
+                className="dn-svg-wrap"
+                onMouseMove={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect()
+                  if (rect.width <= 0) return
+                  const mouseX = e.clientX - rect.left
+                  const svgX = (mouseX / rect.width) * 700
+                  let closest = chartData.points[0]
+                  let minDist = Infinity
+                  for (const pt of chartData.points) {
+                    const dist = Math.abs(pt.x - svgX)
+                    if (dist < minDist) {
+                      minDist = dist
+                      closest = pt
+                    }
+                  }
+                  if (closest) {
+                    setHoveredPoint(closest)
+                  }
                 }}
-              />
-            ))}
+                onMouseLeave={() => setHoveredPoint(null)}
+              >
+                <svg fill="none" preserveAspectRatio="none" viewBox="0 0 700 200">
+                  <defs>
+                    <linearGradient id="dn-areaGrad" x1="0" x2="0" y1="0" y2="1">
+                      <stop offset="0%" stopColor="#B4F400" stopOpacity="0.35" />
+                      <stop offset="40%" stopColor="#84CC16" stopOpacity="0.12" />
+                      <stop offset="100%" stopColor="#fff" stopOpacity="0" />
+                    </linearGradient>
+                    <linearGradient id="dn-lineGrad" x1="0" x2="1" y1="0" y2="0">
+                      <stop offset="0%" stopColor="#65A30D" />
+                      <stop offset="50%" stopColor="#84CC16" />
+                      <stop offset="100%" stopColor="#D9F99D" />
+                    </linearGradient>
+                    <pattern height="28" id="dn-dots" patternUnits="userSpaceOnUse" width="28">
+                      <circle cx="2" cy="2" fill="#E2E8F0" opacity="0.6" r="1" />
+                    </pattern>
+                  </defs>
+                  <rect fill="url(#dn-dots)" height="170" width="650" x="45" y="15" />
+                  {chartData.gridLevels.map(({ y, label }) => (
+                    <g key={y}>
+                      <line stroke="#F1F5F9" strokeDasharray="4 4" strokeWidth="1" x1="45" x2="695" y1={y} y2={y} />
+                      <text fill="#94A3B8" fontSize="9" fontWeight="500" x="0" y={y + 3}>{label}</text>
+                    </g>
+                  ))}
+                  <line stroke="#E2E8F0" strokeWidth="1.5" x1="45" x2="695" y1="185" y2="185" />
+                  <text fill="#94A3B8" fontSize="9" fontWeight="500" x="14" y="188">R$ 0</text>
+                  
+                  {/* Linha vertical de destaque no ponto ativo/hover */}
+                  {activePoint && (
+                    <line
+                      opacity={isHovering ? 0.9 : 0.6}
+                      stroke="#B4F400"
+                      strokeDasharray="3 3"
+                      strokeWidth="1.5"
+                      x1={activePoint.x}
+                      x2={activePoint.x}
+                      y1={activePoint.y}
+                      y2="185"
+                    />
+                  )}
+                  
+                  <path d={chartData.areaPath} fill="url(#dn-areaGrad)" />
+                  <path d={chartData.linePath} fill="none" stroke="url(#dn-lineGrad)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" />
+                </svg>
 
-            {/* Ponto Live mais recente */}
-            <div
-              className="dn-chart-live-dot"
-              style={{
-                left: `${(chartData.latestPoint.x / 700) * 100}%`,
-                top: `calc(${(chartData.latestPoint.y / 200) * 100}% - 6px)`
-              }}
-            >
-              <span className="dn-chart-live-ring" />
-              <span className="dn-chart-live-core">
-                <span className="dn-chart-live-center" />
-              </span>
-            </div>
+                {/* Pontos no gráfico (todos os pontos menos o último que tem pulse live) */}
+                {chartData.points.map((pt, i) => {
+                  const isLatest = i === chartData.points.length - 1
+                  if (isLatest) return null
+                  const isActive = activePoint?.x === pt.x
+                  return (
+                    <div
+                      key={i}
+                      className={`dn-chart-dot ${isActive ? 'active' : ''}`}
+                      style={{
+                        left: `${(pt.x / 700) * 100}%`,
+                        top: `${(pt.y / 200) * 100}%`
+                      }}
+                    />
+                  )
+                })}
 
-            {/* Tooltip Dinâmica de Pico */}
-            <div
-              className="dn-chart-tooltip"
-              style={{
-                left: `${(chartData.peakPoint.x / 700) * 100}%`,
-                top: `calc(${(chartData.peakPoint.y / 200) * 100}% - 38px)`
-              }}
-            >
-              <span className="dn-chart-tooltip-dot" />
-              <span className="dn-chart-tooltip-val">R$ {fmtBRL(chartData.peakPoint.value)}</span>
-              <span className="dn-chart-tooltip-sep">Pico</span>
-            </div>
-
-            {/* Eixo X com datas reais */}
-            <div className="dn-chart-x-axis">
-              {chartData.points.map((pt, idx) => {
-                const isLast = idx === chartData.points.length - 1
-                return isLast ? (
-                  <span key={idx} className="dn-chart-x-today">
-                    <span className="dn-chart-x-today-dot" />
-                    Hoje
+                {/* Ponto Live mais recente */}
+                <div
+                  className={`dn-chart-live-dot ${activePoint?.x === chartData.latestPoint.x ? 'active' : ''}`}
+                  style={{
+                    left: `${(chartData.latestPoint.x / 700) * 100}%`,
+                    top: `${(chartData.latestPoint.y / 200) * 100}%`
+                  }}
+                >
+                  <span className="dn-chart-live-ring" />
+                  <span className="dn-chart-live-core">
+                    <span className="dn-chart-live-center" />
                   </span>
-                ) : (
-                  <span key={idx}>{pt.label}</span>
-                )
-              })}
-            </div>
-          </div>
+                </div>
+
+                {/* Tooltip Dinâmica de Hover / Pico */}
+                {activePoint && (
+                  <div
+                    className="dn-chart-tooltip"
+                    style={{
+                      left: `${(activePoint.x / 700) * 100}%`,
+                      top: `${(activePoint.y / 200) * 100}%`
+                    }}
+                  >
+                    <span className="dn-chart-tooltip-dot" />
+                    <span className="dn-chart-tooltip-val">R$ {fmtBRL(activePoint.value)}</span>
+                    <span className="dn-chart-tooltip-sep">
+                      {isHovering
+                        ? activePoint.label
+                        : (activePoint === chartData.peakPoint ? 'Pico' : activePoint.label)}
+                    </span>
+                  </div>
+                )}
+
+                {/* Eixo X com datas reais */}
+                <div className="dn-chart-x-axis">
+                  {chartData.points.map((pt, idx) => {
+                    const isLast = idx === chartData.points.length - 1
+                    return isLast ? (
+                      <span key={idx} className="dn-chart-x-today">
+                        <span className="dn-chart-x-today-dot" />
+                        Hoje
+                      </span>
+                    ) : (
+                      <span key={idx}>{pt.label}</span>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })()}
         </div>
 
         {/* Fluxo de Entregas & Coletas */}

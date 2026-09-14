@@ -38,6 +38,24 @@ const AVAILABLE_INTEGRATIONS: AvailableIntegration[] = [
     docLabel: 'Documentação Mercado Pago'
   },
   {
+    id: 'cielo',
+    name: 'Cielo E-commerce',
+    category: 'payment',
+    description: 'Captura oficial de cartões de crédito e débito, parcelamento flexível e API 3.0.',
+    defaultEnv: 'sandbox',
+    docUrl: 'https://developercielo.github.io/manual/cielo-ecommerce',
+    docLabel: 'Documentação Cielo 3.0'
+  },
+  {
+    id: 'paypal',
+    name: 'PayPal',
+    category: 'payment',
+    description: 'Carteira digital internacional, pagamentos em cartão de crédito e checkout rápido.',
+    defaultEnv: 'sandbox',
+    docUrl: 'https://developer.paypal.com/docs/api/overview/',
+    docLabel: 'Documentação PayPal'
+  },
+  {
     id: 'asaas',
     name: 'Asaas',
     category: 'payment',
@@ -267,27 +285,46 @@ export default function IntegrationsAdd() {
     setSaving(true)
 
     try {
+      const nextStatus = editingItem.environment === 'production' ? 'connected' : 'sandbox'
       await IntegrationStorage.saveConfig({
         id: editingItem.id,
         name: editingItem.name,
         category: editingItem.category,
         environment: editingItem.environment,
+        status: nextStatus,
         credentials: editingItem.credentials,
         webhookUrl: editingItem.webhookUrl,
         enabled: true
       })
 
-      setFeedback('✓ Integração configurada com sucesso! Redirecionando para as integrações...')
+      setFeedback('✓ Integração configurada com sucesso! Redirecionando para as integrações ativas...')
 
       // Redireciona para http://localhost:5174/hub/integracoes conforme solicitado
       setTimeout(() => {
         setSaving(false)
         setEditingItem(null)
         navigate('/hub/integracoes')
-      }, 1000)
+      }, 900)
     } catch (err: any) {
       setSaving(false)
       setFeedback(`✗ Erro ao salvar credenciais: ${err.message}`)
+    }
+  }
+
+  async function handleQuickActivate(item: AvailableIntegration) {
+    try {
+      const nextStatus = item.defaultEnv === 'production' ? 'connected' : 'sandbox'
+      await IntegrationStorage.saveConfig({
+        id: item.id,
+        name: item.name,
+        category: item.category,
+        environment: item.defaultEnv,
+        status: nextStatus,
+        enabled: true
+      })
+      navigate('/hub/integracoes')
+    } catch (err: any) {
+      alert(`Falha ao conectar ${item.name}: ${err.message}`)
     }
   }
 
@@ -407,24 +444,46 @@ export default function IntegrationsAdd() {
               </div>
 
               <div className="card-actions">
-                {hasCredentials && (
-                  <button
-                    className="btn btn-secondary"
-                    style={{ fontSize: '12.5px', padding: '6px 12px' }}
-                    onClick={() => handleTestConnection(item.id, item.name)}
-                    disabled={testingId === item.id}
-                  >
-                    <Activity size={13} className={testingId === item.id ? 'spin-icon' : ''} />
-                    {testingId === item.id ? 'Testando...' : 'Testar Conexão'}
-                  </button>
+                {isConnected || isSandbox ? (
+                  <>
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      style={{ fontSize: '12.5px', padding: '6px 12px' }}
+                      onClick={() => navigate('/hub/integracoes')}
+                    >
+                      Ver Conectado
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      style={{ fontSize: '12.5px', padding: '6px 12px' }}
+                      onClick={() => handleOpenConfigure(item)}
+                    >
+                      <Key size={13} /> Reconfigurar
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      style={{ fontSize: '12.5px', padding: '6px 12px', flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+                      onClick={() => handleOpenConfigure(item)}
+                    >
+                      <Key size={13} /> Conectar & Configurar
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      style={{ fontSize: '12.5px', padding: '6px 12px' }}
+                      onClick={() => handleQuickActivate(item)}
+                      title="Ativar rapidamente este serviço"
+                    >
+                      Ativar
+                    </button>
+                  </>
                 )}
-                <button
-                  className="btn btn-primary"
-                  style={{ fontSize: '12.5px', padding: '6px 12px', flex: hasCredentials ? 'none' : '1' }}
-                  onClick={() => handleOpenConfigure(item)}
-                >
-                  <Key size={13} /> {hasCredentials ? 'Reconfigurar' : 'Configurar'}
-                </button>
               </div>
             </div>
           )
@@ -471,6 +530,14 @@ export default function IntegrationsAdd() {
                   mercado_pago: [
                     { key: 'accessToken', label: 'Access Token (Produção ou Teste):', type: 'password', placeholder: 'APP_USR-...' },
                     { key: 'publicKey', label: 'Public Key (Chave Pública):', type: 'text', placeholder: 'APP_USR-...' }
+                  ],
+                  cielo: [
+                    { key: 'merchantId', label: 'Merchant ID (Cielo):', type: 'text', placeholder: 'ID do Estabelecimento Cielo' },
+                    { key: 'merchantKey', label: 'Merchant Key (Chave Secreta):', type: 'password', placeholder: 'Chave de Produção Cielo' }
+                  ],
+                  paypal: [
+                    { key: 'clientId', label: 'Client ID PayPal:', type: 'text', placeholder: 'Client ID da API PayPal' },
+                    { key: 'secret', label: 'Secret Key PayPal:', type: 'password', placeholder: 'Secret Key do PayPal' }
                   ],
                   asaas: [
                     { key: 'apiKey', label: 'API Key do Asaas:', type: 'password', placeholder: '$aact_...' }

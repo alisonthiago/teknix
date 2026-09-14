@@ -8,7 +8,7 @@ import {
   Percent, Tag, DollarSign, Package, Layers, Sparkles,
   X, ExternalLink, Check, Play, Loader2, Film,
   HelpCircle, Wand2, Sliders, Zap, Battery, Shield, Wrench, Truck, Star,
-  LayoutTemplate, Copy, ArrowRight, MessageSquare
+  LayoutTemplate, Copy, ArrowRight, MessageSquare, Search
 } from 'lucide-react'
 import './ProductForm.css'
 import './ProductCommerce.css'
@@ -270,7 +270,9 @@ export default function ProductForm() {
   const [uploadStatus, setUploadStatus] = useState('')
   const [isDragging, setIsDragging] = useState(false)
   const [previewVideoModal, setPreviewVideoModal] = useState<string | null>(null)
-    const [categorySearch, setCategorySearch] = useState('')
+  const [isDropzoneLinkMode, setIsDropzoneLinkMode] = useState(false)
+  const [dropzoneMediaLink, setDropzoneMediaLink] = useState('')
+  const [categorySearch, setCategorySearch] = useState('')
   const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false)
   const categoryDropdownRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -719,6 +721,18 @@ export default function ProductForm() {
     }
   }
 
+  function handleConfirmLink() {
+    const url = dropzoneMediaLink.trim()
+    if (!url) return
+    if (url.match(/\.(mp4|webm|mov|m4v)(\?.*)?$/i) || getYoutubeVideoId(url) || url.includes('vimeo.com') || url.includes('youtu.be')) {
+      setForm(f => ({ ...f, video_url: url }))
+    } else {
+      handleAddImageUrl(url)
+    }
+    setIsDropzoneLinkMode(false)
+    setDropzoneMediaLink('')
+  }
+
   function handleAddVariation() {
     const newVar = {
       id: Math.random().toString(36).substr(2, 9),
@@ -1056,65 +1070,10 @@ export default function ProductForm() {
                 {form.name || (isEditing ? 'Editar Produto' : 'Novo Produto')}
               </span>
               <span className={`product-status-pill ${form.published ? 'published' : form.status === 'active' ? 'active' : 'draft'}`}>
-                {form.published ? 'Publicado' : form.status === 'active' ? 'Ativo' : 'Rascunho'}
+                <span className="status-pill-dot" />
+                <span>{form.published ? 'Publicado' : form.status === 'active' ? 'Ativo' : 'Rascunho'}</span>
               </span>
             </h1>
-          </div>
-          <div className="header-right">
-            {isEditing && (
-              <button
-                type="button"
-                onClick={handleOpenVisualEditor}
-                className="btn-secondary-action"
-                title="Abrir Apresentação do Produto no Page Builder em Nova Aba"
-              >
-                <Sparkles size={14} color="#7c3aed" />
-                <span>Editor Visual</span>
-              </button>
-            )}
-            <button
-              type="button"
-              className="btn-secondary-action"
-              onClick={() => handleSubmit(undefined, false)}
-              disabled={saving}
-              title="Salva no catálogo interno TEKNIX sem exibir na vitrine pública"
-            >
-              Salvar Catálogo
-            </button>
-            <button
-              type="button"
-              className="btn-primary-action"
-              onClick={() => handleSubmit(undefined, true)}
-              disabled={saving}
-              title={form.published ? 'Atualizar publicação na vitrine oficial da loja' : 'Publicar produto imediatamente na vitrine oficial da loja'}
-            >
-              {saving ? (
-                <>
-                  <Loader2 size={14} className="spinner-icon" />
-                  <span>Salvando...</span>
-                </>
-              ) : form.published ? (
-                <>
-                  <Check size={14} strokeWidth={2.5} />
-                  <span>Atualizar Publicação</span>
-                </>
-              ) : (
-                <span>Publicar</span>
-              )}
-            </button>
-          </div>
-        </div>
-
-        {/* Navegação do formulário */}
-        <div className="product-form-tabs-bar">
-          <div className="product-form-tabs">
-            <button
-              type="button"
-              className="product-form-tab-btn active"
-            >
-              <Package size={15} />
-              <span>Dados</span>
-            </button>
           </div>
         </div>
 
@@ -1182,243 +1141,281 @@ export default function ProductForm() {
           </div>
         </div>
 
-        {/* 2. CATEGORIAS */}
-        <div className="form-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <h2 className="card-title" style={{ margin: 0 }}>Categorias</h2>
-          </div>
+        {/* 2. TIPO DE PRODUTO & CATEGORIAS (COMBINADOS E HARMONIZADOS) */}
+        <div className="form-card product-type-cat-card">
+          <div className="product-type-cat-grid">
+            {/* Coluna 1: Tipo de produto */}
+            <div className="product-type-column">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                <h2 className="card-title" style={{ margin: 0 }}>Tipo de produto</h2>
+              </div>
 
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
-            {[form.category_id, ...form.additional_categories].filter(Boolean).map(id => {
-              const cat = categories.find(c => c.id === id)
-              if (!cat) return null
-              const isPrimary = id === form.category_id
-              return (
-                <div
-                  key={id}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    background: '#f0fdf4',
-                    border: '1px solid #bbf7d0',
-                    color: '#15803d',
-                    padding: '5px 12px',
-                    borderRadius: 20,
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    gap: 6,
-                    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
-                    transition: 'all 0.15s ease'
-                  }}
+              <div className="product-type-cards">
+                <button
+                  type="button"
+                  className={`product-type-option-card ${form.product_type === 'physical' ? 'active' : ''}`}
+                  onClick={() => setForm({ ...form, product_type: 'physical' })}
                 >
-                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#16a34a', flexShrink: 0 }} />
-                  <span>{cat.name}</span>
-                  {isPrimary && (
-                    <span style={{ fontSize: '10px', background: '#dcfce7', color: '#166534', padding: '1px 6px', borderRadius: 10, fontWeight: 700, marginLeft: 2 }}>
-                      Principal
+                  <div className="type-option-radio">
+                    <span className={`type-radio-dot ${form.product_type === 'physical' ? 'active' : ''}`} />
+                  </div>
+                  <div className="type-option-text">
+                    <strong className="type-option-title">Físico</strong>
+                    <span className="type-option-desc">Requer frete e envio</span>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  className={`product-type-option-card ${form.product_type === 'digital' ? 'active' : ''}`}
+                  onClick={() => setForm({ ...form, product_type: 'digital' })}
+                >
+                  <div className="type-option-radio">
+                    <span className={`type-radio-dot ${form.product_type === 'digital' ? 'active' : ''}`} />
+                  </div>
+                  <div className="type-option-text">
+                    <strong className="type-option-title">Digital / serviço</strong>
+                    <span className="type-option-desc">Sem cálculo de frete</span>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            {/* Divisor Vertical */}
+            <div className="product-type-cat-divider" />
+
+            {/* Coluna 2: Categorias */}
+            <div className="product-cat-column">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <h2 className="card-title" style={{ margin: 0 }}>Categorias</h2>
+                  {([form.category_id, ...form.additional_categories].filter(Boolean).length > 0) && (
+                    <span className="section-sub-hint">
+                      {`${[form.category_id, ...form.additional_categories].filter(Boolean).length} vinculada(s)`}
                     </span>
                   )}
-                  <button 
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      if (id === form.category_id) {
-                        setForm({ ...form, category_id: form.additional_categories[0] || '', additional_categories: form.additional_categories.slice(1) })
-                      } else {
-                        setForm({ ...form, additional_categories: form.additional_categories.filter(x => x !== id) })
-                      }
-                    }}
-                    title="Remover categoria"
-                    style={{
-                      background: 'rgba(22, 163, 74, 0.12)',
-                      border: 'none',
-                      marginLeft: 4,
-                      cursor: 'pointer',
-                      color: '#15803d',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      width: 18,
-                      height: 18,
-                      borderRadius: '50%',
-                      padding: 0,
-                      transition: 'all 0.15s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = '#fee2e2'
-                      e.currentTarget.style.color = '#dc2626'
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'rgba(22, 163, 74, 0.12)'
-                      e.currentTarget.style.color = '#15803d'
-                    }}
-                  >
-                    <X size={11} strokeWidth={2.5} />
-                  </button>
                 </div>
-              )
-            })}
-          </div>
 
-          <div className="form-group" ref={categoryDropdownRef} style={{ position: 'relative' }}>
-            <div 
-              className="form-select" 
-              style={{
-                cursor: 'text',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '4px 8px 4px 12px',
-                minHeight: 38,
-                borderRadius: 8,
-                border: isCategoryDropdownOpen ? '1px solid #16a34a' : '1px solid #e2e8f0',
-                boxShadow: isCategoryDropdownOpen ? '0 0 0 2px rgba(22, 163, 74, 0.15)' : 'none',
-                background: '#ffffff',
-                transition: 'all 0.15s ease'
-              }}
-              onClick={() => setIsCategoryDropdownOpen(true)}
-            >
-              <input 
-                type="text" 
-                placeholder="Pesquise ou selecione para adicionar..."
-                value={categorySearch}
-                onChange={e => {
-                  setCategorySearch(e.target.value)
-                  setIsCategoryDropdownOpen(true)
-                }}
-                onFocus={() => setIsCategoryDropdownOpen(true)}
-                style={{ flex: '1 1 150px', minWidth: 150, border: 'none', background: 'transparent', outline: 'none', padding: '0 4px', height: 28, fontSize: '13px', color: '#1e293b' }}
-              />
-              <ChevronDown size={16} style={{ marginRight: 6, color: isCategoryDropdownOpen ? '#16a34a' : '#9ca3af', transition: 'transform 0.15s ease', transform: isCategoryDropdownOpen ? 'rotate(180deg)' : 'none' }} />
-            </div>
-            {isCategoryDropdownOpen && (
-              <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#fff', border: '1px solid #e2e8f0', borderRadius: 8, marginTop: 4, zIndex: 10, maxHeight: 200, overflowY: 'auto', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04)' }}>
-                {categories.filter(c => c.name.toLowerCase().includes(categorySearch.toLowerCase())).map(c => {
-                  const isSelected = c.id === form.category_id || form.additional_categories.includes(c.id)
-                  return (
-                    <div 
-                      key={c.id} 
-                      style={{ padding: '8px 12px', cursor: 'pointer', background: isSelected ? '#f0fdf4' : 'transparent', fontSize: '13px', color: isSelected ? '#15803d' : '#334155', fontWeight: isSelected ? 600 : 400, display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'background 0.1s ease' }}
-                      onClick={() => {
-                        if (isSelected) {
-                          if (c.id === form.category_id) {
-                            setForm({ ...form, category_id: form.additional_categories[0] || '', additional_categories: form.additional_categories.slice(1) })
-                          } else {
-                            setForm({ ...form, additional_categories: form.additional_categories.filter(x => x !== c.id) })
-                          }
-                        } else {
-                          if (!form.category_id) {
-                            setForm({ ...form, category_id: c.id })
-                          } else {
-                            setForm({ ...form, additional_categories: [...form.additional_categories, c.id] })
-                          }
-                        }
-                        setCategorySearch('')
-                      }}
-                      onMouseEnter={e => (e.currentTarget.style.background = isSelected ? '#dcfce7' : '#f8fafc')}
-                      onMouseLeave={e => (e.currentTarget.style.background = isSelected ? '#f0fdf4' : 'transparent')}
-                    >
-                      <span>{c.name}</span>
-                      {isSelected && <CheckCircle2 size={15} color="#16a34a" />}
-                    </div>
-                  )
-                })}
-                {categories.filter(c => c.name.toLowerCase().includes(categorySearch.toLowerCase())).length === 0 && (
-                  <div style={{ padding: '10px 12px', color: '#9ca3af', fontSize: '13px' }}>Nenhuma categoria encontrada.</div>
+                {!showAddCategory ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowAddCategory(true)}
+                    className="btn-add-category-action"
+                    title="Adicionar categoria"
+                  >
+                    <Plus size={15} strokeWidth={2.5} />
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => { setShowAddCategory(false); setNewCategoryName('') }}
+                    className="btn-add-category-action cancel"
+                    title="Fechar"
+                  >
+                    <X size={15} strokeWidth={2.5} />
+                  </button>
                 )}
               </div>
-            )}
-            
-            {!showAddCategory ? (
-              <button
-                type="button"
-                onClick={() => setShowAddCategory(true)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#16a34a',
-                  fontWeight: 600,
-                  fontSize: '0.82rem',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  marginTop: 8,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 5,
-                  padding: '4px 0',
-                  transition: 'color 0.15s ease'
-                }}
-                onMouseEnter={e => e.currentTarget.style.color = '#15803d'}
-                onMouseLeave={e => e.currentTarget.style.color = '#16a34a'}
-              >
-                <Plus size={15} strokeWidth={2.5} />
-                Adicionar nova categoria
-              </button>
-            ) : (
-              <div style={{ display: 'flex', gap: 8, marginTop: 8, alignItems: 'center' }}>
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="Nome da categoria"
-                  value={newCategoryName}
-                  onChange={(e) => setNewCategoryName(e.target.value)}
-                  style={{ maxWidth: 280, height: 34, fontSize: '13px' }}
-                />
-                <button
-                  type="button"
-                  onClick={handleCreateCategory}
-                  style={{
-                    background: '#16a34a',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: 6,
-                    padding: '0 14px',
-                    height: 34,
-                    fontWeight: 600,
-                    fontSize: '13px',
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 4,
-                    transition: 'background 0.15s ease'
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.background = '#15803d'}
-                  onMouseLeave={e => e.currentTarget.style.background = '#16a34a'}
+
+              {/* Form Inline para Adicionar Nova Categoria */}
+              {showAddCategory && (
+                <div className="add-category-inline-box">
+                  <input
+                    type="text"
+                    className="form-input add-cat-input"
+                    placeholder="Nome da categoria..."
+                    value={newCategoryName}
+                    onChange={(e) => setNewCategoryName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        handleCreateCategory()
+                      } else if (e.key === 'Escape') {
+                        setShowAddCategory(false)
+                        setNewCategoryName('')
+                      }
+                    }}
+                    autoFocus
+                  />
+                  <button
+                    type="button"
+                    className="btn-create-category-confirm"
+                    onClick={handleCreateCategory}
+                  >
+                    <Check size={14} strokeWidth={2.5} />
+                    <span>Criar</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-create-category-cancel"
+                    onClick={() => { setShowAddCategory(false); setNewCategoryName('') }}
+                  >
+                    <X size={14} strokeWidth={2.5} />
+                    <span>Cancelar</span>
+                  </button>
+                </div>
+              )}
+
+              {/* Categorias Selecionadas */}
+              {([form.category_id, ...form.additional_categories].filter(Boolean).length > 0) && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+                  {[form.category_id, ...form.additional_categories].filter(Boolean).map(id => {
+                    const cat = categories.find(c => c.id === id)
+                    if (!cat) return null
+                    const isPrimary = id === form.category_id
+                    return (
+                      <div
+                        key={id}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          background: isPrimary ? 'rgba(181, 245, 0, 0.22)' : 'rgba(181, 245, 0, 0.10)',
+                          border: isPrimary ? '1px solid rgba(163, 230, 53, 0.65)' : '1px solid rgba(181, 245, 0, 0.35)',
+                          color: '#111111',
+                          padding: '4px 10px',
+                          borderRadius: 20,
+                          fontSize: '12px',
+                          fontWeight: 600,
+                          gap: 6,
+                          boxShadow: '0 1px 2px rgba(0, 0, 0, 0.02)',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        <span style={{
+                          width: 6,
+                          height: 6,
+                          borderRadius: '50%',
+                          background: isPrimary ? '#B5F500' : '#84cc16',
+                          boxShadow: '0 0 0 1px rgba(0, 0, 0, 0.12)',
+                          flexShrink: 0
+                        }} />
+                        <span>{cat.name}</span>
+                        {isPrimary && (
+                          <span style={{
+                            fontSize: '10px',
+                            background: '#B5F500',
+                            color: '#000000',
+                            padding: '1px 6px',
+                            borderRadius: 8,
+                            fontWeight: 700,
+                            marginLeft: 2
+                          }}>
+                            Principal
+                          </span>
+                        )}
+                        <button 
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            if (id === form.category_id) {
+                              setForm({ ...form, category_id: form.additional_categories[0] || '', additional_categories: form.additional_categories.slice(1) })
+                            } else {
+                              setForm({ ...form, additional_categories: form.additional_categories.filter(x => x !== id) })
+                            }
+                          }}
+                          title="Remover categoria"
+                          style={{
+                            background: 'rgba(0, 0, 0, 0.05)',
+                            border: 'none',
+                            marginLeft: 4,
+                            cursor: 'pointer',
+                            color: '#374151',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: 16,
+                            height: 16,
+                            borderRadius: '50%',
+                            padding: 0,
+                            transition: 'all 0.15s ease'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = '#fee2e2'
+                            e.currentTarget.style.color = '#dc2626'
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'rgba(0, 0, 0, 0.05)'
+                            e.currentTarget.style.color = '#374151'
+                          }}
+                        >
+                          <X size={10} strokeWidth={2.5} />
+                        </button>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+
+              {/* Input de Busca com Dropdown */}
+              <div className="cat-selector-wrap" ref={categoryDropdownRef}>
+                <div 
+                  className={`cat-select-box ${isCategoryDropdownOpen ? 'open' : ''}`}
+                  onClick={() => setIsCategoryDropdownOpen(true)}
                 >
-                  Criar
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowAddCategory(false)}
-                  style={{
-                    background: '#f1f5f9',
-                    color: '#64748b',
-                    border: 'none',
-                    borderRadius: 6,
-                    padding: '0 10px',
-                    height: 34,
-                    fontWeight: 600,
-                    fontSize: '13px',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Cancelar
-                </button>
+                  <Search size={15} className="cat-search-icon" />
+                  <input 
+                    type="text" 
+                    className="cat-search-input"
+                    placeholder="Pesquise ou selecione para adicionar..."
+                    value={categorySearch}
+                    onChange={e => {
+                      setCategorySearch(e.target.value)
+                      setIsCategoryDropdownOpen(true)
+                    }}
+                    onFocus={() => setIsCategoryDropdownOpen(true)}
+                  />
+                  <ChevronDown size={16} className={`cat-chevron ${isCategoryDropdownOpen ? 'rotated' : ''}`} />
+                </div>
+                {isCategoryDropdownOpen && (
+                  <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#fff', border: '1px solid #e2e8f0', borderRadius: 8, marginTop: 4, zIndex: 20, maxHeight: 200, overflowY: 'auto', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04)' }}>
+                    {categories.filter(c => c.name.toLowerCase().includes(categorySearch.toLowerCase())).map(c => {
+                      const isSelected = c.id === form.category_id || form.additional_categories.includes(c.id)
+                      return (
+                        <div 
+                          key={c.id} 
+                          style={{ padding: '8px 12px', cursor: 'pointer', background: isSelected ? '#F7F7F7' : 'transparent', fontSize: '13px', color: isSelected ? '#111111' : '#334155', fontWeight: isSelected ? 600 : 400, display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'background 0.1s ease' }}
+                          onClick={() => {
+                            if (isSelected) {
+                              if (c.id === form.category_id) {
+                                setForm({ ...form, category_id: form.additional_categories[0] || '', additional_categories: form.additional_categories.slice(1) })
+                              } else {
+                                setForm({ ...form, additional_categories: form.additional_categories.filter(x => x !== id) })
+                              }
+                            } else {
+                              if (!form.category_id) {
+                                setForm({ ...form, category_id: c.id })
+                              } else {
+                                setForm({ ...form, additional_categories: [...form.additional_categories, c.id] })
+                              }
+                            }
+                            setCategorySearch('')
+                          }}
+                          onMouseEnter={e => (e.currentTarget.style.background = isSelected ? '#F7F7F7' : '#fafafa')}
+                          onMouseLeave={e => (e.currentTarget.style.background = isSelected ? '#F7F7F7' : 'transparent')}
+                        >
+                          <span>{c.name}</span>
+                          {isSelected && <CheckCircle2 size={15} color="#111111" />}
+                        </div>
+                      )
+                    })}
+                    {categories.filter(c => c.name.toLowerCase().includes(categorySearch.toLowerCase())).length === 0 && (
+                      <div style={{ padding: '10px 12px', color: '#9ca3af', fontSize: '13px' }}>Nenhuma categoria encontrada.</div>
+                    )}
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
         </div>
 
         {/* 3. FOTOS E VÍDEOS */}
         <div className="form-card">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
             <h2 className="card-title" style={{ margin: 0 }}>Fotos e vídeos do produto</h2>
             <span style={{ background: '#ecfdf5', color: '#059669', fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', borderRadius: 10 }}>
               Suporta Fotos e Vídeo
             </span>
           </div>
-          <p className="card-subtitle">
-            Arraste e solte, ou selecione fotos e vídeo do produto. Tamanho mínimo recomendado: 1280px (WEBP, PNG, JPEG, GIF) e Vídeos (MP4, WEBM ou link do YouTube).
-          </p>
 
           {/* Input de Arquivos Oculto (Imagens e Vídeos) */}
           <input
@@ -1436,19 +1433,73 @@ export default function ProductForm() {
           />
 
           <div
-            className={`upload-dropzone ${isDragging ? 'is-dragging' : ''} ${isUploadingMedia ? 'is-uploading' : ''}`}
-            onClick={() => setMediaModalState({ isOpen: true, target: 'gallery' })}
-            onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
+            className={`upload-dropzone ${isDragging ? 'is-dragging' : ''} ${isUploadingMedia ? 'is-uploading' : ''} ${isDropzoneLinkMode ? 'is-link-mode' : ''}`}
+            onClick={() => {
+              if (!isDropzoneLinkMode && !isUploadingMedia) {
+                setMediaModalState({ isOpen: true, target: 'gallery' })
+              }
+            }}
+            onDragOver={(e) => { e.preventDefault(); if (!isDropzoneLinkMode) setIsDragging(true) }}
             onDragLeave={() => setIsDragging(false)}
             onDrop={(e) => {
               e.preventDefault()
               setIsDragging(false)
-              if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+              if (!isDropzoneLinkMode && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
                 handleUploadFiles(e.dataTransfer.files)
               }
             }}
           >
-            {isUploadingMedia ? (
+            {isDropzoneLinkMode ? (
+              <div className="dropzone-link-box" onClick={(e) => e.stopPropagation()}>
+                <div className="dropzone-link-header">
+                  <div className="dropzone-link-icon-wrap">
+                    <Video size={20} />
+                  </div>
+                  <div>
+                    <div className="dropzone-link-title">Adicionar vídeo ou imagem por link</div>
+                    <div className="dropzone-link-sub">Cole a URL do YouTube, Vimeo, arquivo direto (.mp4, .webm) ou imagem</div>
+                  </div>
+                </div>
+                <div className="dropzone-link-input-row">
+                  <input
+                    type="url"
+                    className="dropzone-link-input"
+                    placeholder="https://www.youtube.com/watch?v=... ou link .mp4"
+                    value={dropzoneMediaLink}
+                    onChange={(e) => setDropzoneMediaLink(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        handleConfirmLink()
+                      } else if (e.key === 'Escape') {
+                        setIsDropzoneLinkMode(false)
+                        setDropzoneMediaLink('')
+                      }
+                    }}
+                    autoFocus
+                  />
+                  <button
+                    type="button"
+                    className="btn-dropzone-confirm"
+                    onClick={handleConfirmLink}
+                  >
+                    <Check size={14} strokeWidth={2.5} />
+                    Carregar
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-dropzone-cancel"
+                    onClick={() => {
+                      setIsDropzoneLinkMode(false)
+                      setDropzoneMediaLink('')
+                    }}
+                  >
+                    <X size={14} strokeWidth={2.5} />
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            ) : isUploadingMedia ? (
               <>
                 <Loader2 size={30} className="upload-icon spinner-icon" />
                 <div className="upload-prompt">{uploadStatus || 'Enviando arquivos...'}</div>
@@ -1472,14 +1523,8 @@ export default function ProductForm() {
                     type="button"
                     className="btn-upload-link"
                     onClick={() => {
-                      const url = prompt('Cole a URL de uma imagem ou vídeo:')
-                      if (url) {
-                        if (url.match(/\.(mp4|webm|mov|m4v)(\?.*)?$/i) || getYoutubeVideoId(url)) {
-                          setForm(f => ({ ...f, video_url: url }))
-                        } else {
-                          handleAddImageUrl(url)
-                        }
-                      }
+                      setIsDropzoneLinkMode(true)
+                      setDropzoneMediaLink('')
                     }}
                   >
                     Adicionar por Link
@@ -1489,8 +1534,82 @@ export default function ProductForm() {
             )}
           </div>
 
-          {/* Grid de Fotos e Vídeos Cadastrados */}
-          {(form.images.length > 0 || Boolean(form.video_url)) && (
+          {/* Card do Vídeo Carregado com o Link Exibido */}
+          {form.video_url && (
+            <div className="video-loaded-card">
+              <div 
+                className="video-loaded-thumb" 
+                onClick={() => {
+                  if (getYoutubeVideoId(form.video_url)) {
+                    window.open(form.video_url, '_blank')
+                  } else {
+                    setPreviewVideoModal(form.video_url)
+                  }
+                }}
+                title="Clique para assistir o vídeo"
+              >
+                {getYoutubeVideoId(form.video_url) ? (
+                  <img
+                    src={`https://img.youtube.com/vi/${getYoutubeVideoId(form.video_url)}/hqdefault.jpg`}
+                    alt="Vídeo do Produto YouTube"
+                    className="video-loaded-media"
+                  />
+                ) : (
+                  <video src={form.video_url} className="video-loaded-media" muted preload="metadata" />
+                )}
+                <div className="video-loaded-overlay">
+                  <Play size={20} fill="#ffffff" color="#ffffff" />
+                </div>
+                <span className={`video-loaded-badge ${getYoutubeVideoId(form.video_url) ? 'youtube' : 'mp4'}`}>
+                  {getYoutubeVideoId(form.video_url) ? '▶ YouTube' : '▶ Vídeo MP4'}
+                </span>
+              </div>
+
+              <div className="video-loaded-details">
+                <div className="video-loaded-meta">
+                  <span className="video-loaded-tag">Vídeo do Produto</span>
+                  <span className="video-loaded-status">
+                    <span className="video-loaded-status-dot" /> Carregado
+                  </span>
+                </div>
+                <a
+                  href={form.video_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="video-loaded-url"
+                  title="Abrir URL do vídeo"
+                >
+                  <ExternalLink size={13} style={{ flexShrink: 0 }} />
+                  <span className="video-loaded-url-text">{form.video_url}</span>
+                </a>
+              </div>
+
+              <div className="video-loaded-actions">
+                <button
+                  type="button"
+                  className="btn-video-card-edit"
+                  onClick={() => {
+                    setDropzoneMediaLink(form.video_url)
+                    setIsDropzoneLinkMode(true)
+                  }}
+                  title="Alterar URL do vídeo"
+                >
+                  Alterar link
+                </button>
+                <button
+                  type="button"
+                  className="btn-video-card-delete"
+                  onClick={() => setForm(prev => ({ ...prev, video_url: '' }))}
+                  title="Remover vídeo"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Grid de Fotos Cadastradas */}
+          {form.images.length > 0 && (
             <div className="photos-grid">
               {form.images.map((img, idx) => (
                 <div key={idx} className={`photo-card ${form.main_image === img ? 'is-main' : ''}`} onClick={() => handleSetMainImage(img)}>
@@ -1506,68 +1625,8 @@ export default function ProductForm() {
                   </button>
                 </div>
               ))}
-
-              {/* Card do Vídeo (YouTube ou MP4 enviado) */}
-              {form.video_url && (
-                <div className="photo-card is-video">
-                  {getYoutubeVideoId(form.video_url) ? (
-                    <div className="video-thumb-container" onClick={() => window.open(form.video_url, '_blank')} title="Clique para assistir no YouTube">
-                      <img
-                        src={`https://img.youtube.com/vi/${getYoutubeVideoId(form.video_url)}/hqdefault.jpg`}
-                        alt="Vídeo do Produto YouTube"
-                      />
-                      <div className="video-play-overlay">
-                        <Play size={24} fill="#ffffff" color="#ffffff" />
-                      </div>
-                      <span className="photo-badge-video youtube">
-                        ▶ YouTube
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="video-thumb-container" onClick={() => setPreviewVideoModal(form.video_url)} title="Clique para pré-visualizar vídeo">
-                      <video src={form.video_url} className="video-thumb-player" muted preload="metadata" />
-                      <div className="video-play-overlay">
-                        <Play size={24} fill="#ffffff" color="#ffffff" />
-                      </div>
-                      <span className="photo-badge-video mp4">
-                        ▶ Vídeo MP4
-                      </span>
-                    </div>
-                  )}
-                  <button
-                    type="button"
-                    className="photo-delete-btn"
-                    onClick={(e) => { e.stopPropagation(); setForm(prev => ({ ...prev, video_url: '' })) }}
-                    title="Remover vídeo do produto"
-                  >
-                    <Trash2 size={12} />
-                  </button>
-                </div>
-              )}
             </div>
           )}
-
-          <div className="form-group" style={{ marginTop: 12 }}>
-            <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span><Video size={15} style={{ verticalAlign: 'middle', marginRight: 4 }} /> Link para vídeo externo (YouTube ou Vimeo)</span>
-              {form.video_url && (
-                <button
-                  type="button"
-                  style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}
-                  onClick={() => setForm(prev => ({ ...prev, video_url: '' }))}
-                >
-                  Remover Vídeo
-                </button>
-              )}
-            </label>
-            <input
-              type="text"
-              className="form-input"
-              placeholder="Cole um link do YouTube (ex: https://youtube.com/watch?v=...) ou Vimeo"
-              value={form.video_url}
-              onChange={(e) => setForm({ ...form, video_url: e.target.value })}
-            />
-          </div>
         </div>
 
         {/* 3. PREÇOS */}
@@ -1686,36 +1745,6 @@ export default function ProductForm() {
           </div>
         </div>
 
-        {/* 4. TIPO DE PRODUTO */}
-        <div className="form-card">
-          <h2 className="card-title">Tipo de produto</h2>
-          <div className="radio-group">
-            <label className={`radio-card ${form.product_type === 'physical' ? 'active' : ''}`}>
-              <input
-                type="radio"
-                name="product_type"
-                checked={form.product_type === 'physical'}
-                onChange={() => setForm({ ...form, product_type: 'physical' })}
-              />
-              <div>
-                <strong>Físico</strong>
-                <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>Requer frete e envio</div>
-              </div>
-            </label>
-            <label className={`radio-card ${form.product_type === 'digital' ? 'active' : ''}`}>
-              <input
-                type="radio"
-                name="product_type"
-                checked={form.product_type === 'digital'}
-                onChange={() => setForm({ ...form, product_type: 'digital' })}
-              />
-              <div>
-                <strong>Digital / serviço</strong>
-                <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>Sem cálculo de frete</div>
-              </div>
-            </label>
-          </div>
-        </div>
 
         {/* 5. INVENTÁRIO & CÓDIGOS */}
         <div className="form-card">
@@ -1798,11 +1827,6 @@ export default function ProductForm() {
             </div>
           </div>
         </div>
-                </>
-              )}
-              {mainTab === 'shipping' && (
-                <>
-
 
         {/* 6. PESO E DIMENSÕES */}
         {form.product_type === 'physical' && (
@@ -1911,11 +1935,6 @@ export default function ProductForm() {
             </div>
           </div>
         )}
-                </>
-              )}
-              {mainTab === 'seo' && (
-                <>
-
 
         {/* 7. INSTAGRAM E GOOGLE SHOPPING */}
         <div className="form-card">
@@ -3311,32 +3330,63 @@ export default function ProductForm() {
         </div>
 
         <div className="product-form-footer">
-          <button type="button" className="btn-secondary-action" onClick={() => navigate('/hub/produtos')}>
-            Cancelar
-          </button>
-          <button
-            type="button"
-            className="btn-secondary-action"
-            onClick={() => handleSubmit(undefined, false)}
-            disabled={saving}
-            title="Salva no catálogo e marketplaces sem publicar na loja própria"
-            style={{ fontWeight: 600 }}
-          >
-            Salvar no Catálogo
-          </button>
-          <button
-            type="button"
-            className="btn-primary-action"
-            onClick={() => handleSubmit(undefined, true)}
-            disabled={saving}
-            style={{
-              fontWeight: 600,
-              transition: 'all 0.2s ease'
-            }}
-            title={form.published ? 'Atualizar publicação na loja oficial TEKNIX' : 'Publicar imediatamente na loja oficial TEKNIX'}
-          >
-            {saving ? 'Salvando...' : form.published ? '✓ Atualizar Publicação' : 'Publicar'}
-          </button>
+          <div className="product-form-footer-content">
+            <button type="button" className="btn-secondary-action" onClick={() => navigate('/hub/produtos')}>
+              Cancelar
+            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              {isEditing && (
+                <button
+                  type="button"
+                  onClick={handleOpenVisualEditor}
+                  className="btn-secondary-action"
+                  title="Abrir Apresentação do Produto no Page Builder em Nova Aba"
+                  style={{ fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                >
+                  <Sparkles size={14} color="#7c3aed" />
+                  <span>Editor Visual</span>
+                </button>
+              )}
+              <button
+                type="button"
+                className="btn-secondary-action"
+                onClick={() => handleSubmit(undefined, false)}
+                disabled={saving}
+                title="Salva no catálogo e marketplaces sem publicar na loja própria"
+                style={{ fontWeight: 600 }}
+              >
+                Salvar no Catálogo
+              </button>
+              <button
+                type="button"
+                className="btn-primary-action"
+                onClick={() => handleSubmit(undefined, true)}
+                disabled={saving}
+                style={{
+                  fontWeight: 600,
+                  transition: 'all 0.2s ease',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6
+                }}
+                title={form.published ? 'Atualizar publicação na loja oficial TEKNIX' : 'Publicar imediatamente na loja oficial TEKNIX'}
+              >
+                {saving ? (
+                  <>
+                    <Loader2 size={14} className="spinner-icon" />
+                    <span>Salvando...</span>
+                  </>
+                ) : form.published ? (
+                  <>
+                    <Check size={14} strokeWidth={2.5} />
+                    <span>Atualizar Publicação</span>
+                  </>
+                ) : (
+                  <span>Publicar</span>
+                )}
+              </button>
+            </div>
+          </div>
         </div>
 
       </div>

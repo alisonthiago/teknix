@@ -191,31 +191,67 @@ export default function CategoriesList() {
       key: 'name',
       label: 'CATEGORIA',
       sortable: true,
-      render: (row) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: 8,
-              background: '#f1f5f9',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#475569',
-              flexShrink: 0
-            }}
-          >
-            {row.parent_id ? <FolderTree size={16} /> : <Globe size={16} />}
-          </div>
-          <div>
-            <div style={{ fontWeight: 600, color: '#0f172a', fontSize: 13 }}>{row.name}</div>
-            <div style={{ fontSize: 11, color: '#64748b' }}>
-              <code>/categoria/{row.slug}</code>
+      render: (row) => {
+        const photoUrl = row.mosaic_image_url || row.image_url
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div
+              style={{
+                width: 38,
+                height: 38,
+                borderRadius: 10,
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#64748b',
+                flexShrink: 0,
+                overflow: 'hidden'
+              }}
+            >
+              {photoUrl ? (
+                <img
+                  src={photoUrl}
+                  alt={row.name}
+                  style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 2 }}
+                />
+              ) : row.parent_id ? (
+                <FolderTree size={16} />
+              ) : (
+                <Globe size={16} />
+              )}
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
+              <span
+                style={{
+                  fontWeight: 600,
+                  color: '#0f172a',
+                  fontSize: '13.5px',
+                  letterSpacing: '-0.01em',
+                  lineHeight: 1.3
+                }}
+              >
+                {row.name}
+              </span>
+              <span
+                style={{
+                  fontSize: '11.5px',
+                  color: '#64748b',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 2,
+                  fontFamily: 'inherit'
+                }}
+              >
+                <span style={{ color: '#94a3b8' }}>/categoria/</span>
+                <span style={{ color: '#475569', fontWeight: 500 }}>{row.slug}</span>
+              </span>
             </div>
           </div>
-        </div>
-      ),
+        )
+      },
       exportValue: (row) => row.name
     },
     {
@@ -250,9 +286,9 @@ export default function CategoriesList() {
             borderRadius: 999,
             fontSize: 11,
             fontWeight: 700,
-            background: row.linking_mode === 'automatic' ? '#fefce8' : row.linking_mode === 'hybrid' ? '#eff6ff' : '#f8fafc',
-            color: row.linking_mode === 'automatic' ? '#ca8a04' : row.linking_mode === 'hybrid' ? '#1d4ed8' : '#475569',
-            border: `1px solid ${row.linking_mode === 'automatic' ? '#fef08a' : row.linking_mode === 'hybrid' ? '#bfdbfe' : '#e2e8f0'}`
+            background: row.linking_mode === 'automatic' ? '#fefce8' : row.linking_mode === 'hybrid' ? '#F7F7F7' : '#F7F7F7',
+            color: row.linking_mode === 'automatic' ? '#ca8a04' : row.linking_mode === 'hybrid' ? '#1f2328' : '#475569',
+            border: `1px solid ${row.linking_mode === 'automatic' ? '#fef08a' : row.linking_mode === 'hybrid' ? '#e5e7eb' : '#e2e8f0'}`
           }}
         >
           {row.linking_mode !== 'manual' && <Zap size={11} />}
@@ -285,7 +321,7 @@ export default function CategoriesList() {
             borderRadius: 6,
             fontSize: 11,
             fontWeight: 700,
-            background: row.is_published ? '#f0fdf4' : '#f8fafc',
+            background: row.is_published ? '#f0fdf4' : '#F7F7F7',
             color: row.is_published ? '#16a34a' : '#64748b',
             border: `1px solid ${row.is_published ? '#bbf7d0' : '#e2e8f0'}`
           }}
@@ -368,7 +404,7 @@ export default function CategoriesList() {
 
           <button
             className="hub-btn hub-btn-primary"
-            onClick={() => navigate('/hub/categorias/nova')}
+            onClick={() => navigate('/hub/categorias/add')}
           >
             <Plus size={14} /> Nova Categoria
           </button>
@@ -448,6 +484,7 @@ export default function CategoriesList() {
       bulkActions={[
         { label: 'Excluir Selecionadas', icon: <Trash2 size={13} />, action: confirmDelete, variant: 'danger' }
       ]}
+      onRowClick={(cat) => navigate(`/hub/categorias/${cat.id}`)}
     />
   )
 }

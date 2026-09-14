@@ -30,7 +30,7 @@
 .hub-toast-success > svg { color: #16a34a; }
 .hub-toast-error { border-color: #fecaca; }
 .hub-toast-error > svg { color: #dc2626; }
-.hub-toast-info { border-color: #bfdbfe; }
+.hub-toast-info { border-color: #e5e7eb; }
 .hub-toast-info > svg { color: #2563eb; }
 .hub-toast span { flex: 1; }
 .hub-toast button { display: inline-flex; padding: 3px; border: 0; background: transparent; color: #9ca3af; }

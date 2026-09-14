@@ -284,22 +284,23 @@ export default function OrdersList() {
           <>
             <div className="hub-status-tabs">
               {STATUS_TABS.map(tab => (
-                <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{
-                  padding: '6px 14px', borderRadius: 8, border: 'none', cursor: 'pointer',
-                  fontSize: 13, fontWeight: activeTab === tab.id ? 700 : 500,
-                  background: activeTab === tab.id ? '#fff' : 'transparent',
-                  color: activeTab === tab.id ? '#111' : '#6b7280',
-                  boxShadow: activeTab === tab.id ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                  display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'inherit'
-                }}>
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={activeTab === tab.id ? 'active' : ''}
+                >
                   {tab.label}
-                  {tab.id !== 'all' && <span style={{
-                    fontSize: 11, fontWeight: 700, minWidth: 18, height: 18,
-                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                    borderRadius: 100, padding: '0 5px',
-                    background: activeTab === tab.id ? '#1a1a1a' : '#e5e7eb',
-                    color: activeTab === tab.id ? '#fff' : '#6b7280',
-                  }}>{orders.filter(o => o.status === tab.id).length}</span>}
+                  {tab.id !== 'all' && (
+                    <span style={{
+                      fontSize: 11, fontWeight: 700, minWidth: 18, height: 18,
+                      display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                      borderRadius: 100, padding: '0 5px',
+                      background: activeTab === tab.id ? '#1e293b' : '#e2e8f0',
+                      color: activeTab === tab.id ? '#ffffff' : '#64748b',
+                    }}>
+                      {orders.filter(o => o.status === tab.id).length}
+                    </span>
+                  )}
                 </button>
               ))}
             </div>
@@ -311,6 +312,7 @@ export default function OrdersList() {
         columns={COLUMNS}
         rows={filteredOrders}
         loading={loading}
+        onRowClick={(order) => navigate(`/hub/pedidos/${order.id}`)}
         searchValue={search}
         onSearchChange={setSearch}
         searchPlaceholder="Buscar por número, cliente ou e-mail"

@@ -14,20 +14,20 @@
 
 .invoices-breadcrumb {
   font-size: 0.8rem;
-  color: #64748b;
+  color: #666666;
   margin-bottom: 4px;
 }
 
 .invoices-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #0f172a;
+  color: #111111;
   margin: 0 0 6px 0;
 }
 
 .invoices-subtitle {
   font-size: 0.875rem;
-  color: #64748b;
+  color: #666666;
   margin: 0;
 }
 
@@ -102,14 +102,14 @@
 .inv-stat-label {
   font-size: 0.78rem;
   font-weight: 600;
-  color: #64748b;
+  color: #666666;
   margin-bottom: 4px;
 }
 
 .inv-stat-value {
   font-size: 1.4rem;
   font-weight: 800;
-  color: #0f172a;
+  color: #111111;
 }
 
 .inv-stat-icon {
@@ -121,7 +121,7 @@
   justify-content: center;
 }
 
-.inv-icon-blue { background: #eff6ff; color: #2563eb; }
+.inv-icon-blue { background: #F7F7F7; color: #1f2328; }
 .inv-icon-green { background: #f0fdf4; color: #16a34a; }
 .inv-icon-amber { background: #fffbeb; color: #d97706; }
 .inv-icon-red { background: #fef2f2; color: #dc2626; }
@@ -149,8 +149,8 @@
 
 .inv-tab-btn {
   padding: 6px 14px;
-  background: #f8fafc;
-  color: #64748b;
+  background: #F7F7F7;
+  color: #666666;
   border: 1px solid #e2e8f0;
   border-radius: 6px;
   font-size: 0.82rem;
@@ -161,13 +161,13 @@
 
 .inv-tab-btn:hover {
   background: #f1f5f9;
-  color: #0f172a;
+  color: #111111;
 }
 
 .inv-tab-btn.active {
   background: #0f172a;
   color: #ffffff;
-  border-color: #0f172a;
+  border-color: #111111;
 }
 
 .invoices-search-bar {
@@ -187,7 +187,7 @@
   left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: #94a3b8;
+  color: #999999;
 }
 
 .inv-search-input {
@@ -240,8 +240,8 @@
 }
 
 .invoices-table th {
-  background: #f8fafc;
-  color: #475569;
+  background: #F7F7F7;
+  color: #666666;
   font-weight: 600;
   font-size: 0.78rem;
   text-transform: uppercase;
@@ -257,7 +257,7 @@
 }
 
 .invoices-table tr:hover td {
-  background: #f8fafc;
+  background: #F7F7F7;
 }
 
 .inv-order-link {
@@ -272,7 +272,7 @@
 
 .inv-nfe-num {
   font-weight: 700;
-  color: #0f172a;
+  color: #111111;
   display: block;
 }
 
@@ -291,8 +291,9 @@
 }
 
 .inv-env-producao {
-  background: #dbeafe;
-  color: #1e40af;
+  background: #F7F7F7;
+  color: #1f2328;
+  border: 1px solid #e5e7eb;
 }
 
 .inv-customer-name {
@@ -303,12 +304,12 @@
 
 .inv-customer-doc {
   font-size: 0.78rem;
-  color: #64748b;
+  color: #666666;
 }
 
 .inv-date {
   font-size: 0.82rem;
-  color: #475569;
+  color: #666666;
 }
 
 .inv-amount {
@@ -319,7 +320,7 @@
 .inv-key-code {
   font-family: monospace;
   font-size: 0.75rem;
-  background: #f8fafc;
+  background: #F7F7F7;
   padding: 4px 6px;
   border-radius: 4px;
   cursor: pointer;
@@ -392,14 +393,14 @@
 
 .inv-badge-authorized { background: #dcfce7; color: #15803d; }
 .inv-badge-processing { background: #fef3c7; color: #b45309; }
-.inv-badge-pending { background: #f1f5f9; color: #475569; }
+.inv-badge-pending { background: #f1f5f9; color: #666666; }
 .inv-badge-rejected { background: #fee2e2; color: #b91c1c; }
-.inv-badge-cancelled { background: #f1f5f9; color: #64748b; text-decoration: line-through; }
+.inv-badge-cancelled { background: #f1f5f9; color: #666666; text-decoration: line-through; }
 .inv-badge-incomplete { background: #ffedd5; color: #c2410c; }
-.inv-badge-neutral { background: #f8fafc; color: #64748b; }
+.inv-badge-neutral { background: #F7F7F7; color: #666666; }
 
 .inv-text-muted {
-  color: #94a3b8;
+  color: #999999;
   font-size: 0.8rem;
 }
 
@@ -408,18 +409,18 @@
 .invoices-empty-box {
   padding: 60px 20px;
   text-align: center;
-  color: #64748b;
+  color: #666666;
 }
 
 .invoices-empty-box h3 {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #0f172a;
+  color: #111111;
   margin: 12px 0 6px;
 }
 
 .inv-empty-icon {
-  color: #94a3b8;
+  color: #999999;
 }
 
 .spin {

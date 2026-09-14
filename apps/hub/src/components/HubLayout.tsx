@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { usePermissions } from '../hooks/usePermissions'
+import { useAuth } from '../hooks/useAuth'
 import { useHubNotifications } from '../contexts/HubNotificationContext'
 import { resolveNotificationUrl, type HubNotification } from '../services/notificationService'
 import { resolveNotificationIcon } from '@teknix/notifications'
@@ -18,7 +19,7 @@ import {
 import { InternalChatProvider } from '../contexts/InternalChatContext'
 import FloatingMessenger from './internal-chat/FloatingMessenger'
 import { TeknixLogo } from './TeknixLogo'
-import { User, Users, Settings, Layers, LogOut, Eye, EyeOff } from 'lucide-react'
+import { User, Users, Settings, Layers, LogOut, Eye, EyeOff, ChevronDown, ChevronRight, CreditCard, Shield, RefreshCw, ExternalLink } from 'lucide-react'
 import './HubLayout.css'
 
 // ─── Ícones originais + logos de integração ────────────────────────────────
@@ -51,7 +52,9 @@ const icons: Record<string, React.ReactElement> = {
   whatsappLogo: <WhatsAppLogo size={22} />,
   truck: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="20" height="20"><rect x="1" y="3" width="15" height="13" rx="1"/><polygon points="16 8 20 8 23 11 23 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>,
   fileText: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="20" height="20"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>,
-  plusLogo: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  plusLogo: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+  external: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="20" height="20"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>,
+  logout: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="20" height="20"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
 }
 
 // ─── Componente principal interno ──────────────────────────────────────────
@@ -64,6 +67,15 @@ function HubLayoutContent() {
   const userDropdownRef = useRef<HTMLDivElement>(null)
   const location = useLocation()
   const navigate = useNavigate()
+  const { signOut } = useAuth()
+
+  const handleLogout = async () => {
+    try {
+      localStorage.removeItem('demo_user_active')
+      await signOut()
+    } catch {}
+    navigate('/login')
+  }
 
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useHubNotifications()
 
@@ -229,23 +241,6 @@ function HubLayoutContent() {
     }
   }
 
-  // ─── Itens dinâmicos de Integrações ──────────────────────────────────────
-  const integrationMenuItems = [
-    { icon: 'mercadoLivreLogo', label: 'Mercado Livre', path: '/hub/mercado-livre' },
-    { icon: 'shopeeLogo', label: 'Shopee', path: '/hub/shopee' },
-    { icon: 'amazonLogo', label: 'Amazon', path: '/hub/amazon' },
-    { icon: 'magaluLogo', label: 'Magalu', path: '/hub/magalu' },
-    { icon: 'whatsappLogo', label: 'WhatsApp', path: '/hub/whatsapp' },
-    { icon: 'plusLogo', label: 'Ver Todas', path: '/hub/integracoes' },
-  ]
-
-  // Mantém o menu lateral compacto; a página de Integrações continua
-  // reunindo todos os canais pelo item "Ver Todas".
-  const compactIntegrationMenuItems = [
-    ...integrationMenuItems.slice(0, 2),
-    integrationMenuItems[integrationMenuItems.length - 1],
-  ]
-
   // ─── menuItems do HUB (Filtrados por Permissão Real) ──────────────────────
   interface MenuItemDef {
     icon: string
@@ -282,13 +277,8 @@ function HubLayoutContent() {
       section: 'Financeiro',
       items: [
         { icon: 'dollar', label: 'Financeiro', path: '/hub/financeiro', perm: 'finance.view' },
-        { icon: 'creditCard', label: 'Pagamentos', path: '/hub/pagamentos', perm: 'mercado_pago.view' },
         { icon: 'fileText', label: 'Notas Fiscais', path: '/hub/notas-fiscais', perm: 'finance.view' },
       ]
-    },
-    {
-      section: 'Integrações',
-      items: can('integrations.view') ? compactIntegrationMenuItems : []
     },
     {
       section: 'Conteúdo',
@@ -296,13 +286,6 @@ function HubLayoutContent() {
         { icon: 'layout', label: 'Páginas', path: '/hub/paginas', perm: 'pages.view' },
         { icon: 'blog', label: 'Blog', path: '/hub/blog', perm: 'pages.view' },
         { icon: 'ads', label: 'Ads', path: '/hub/ads', perm: 'pages.view' },
-      ]
-    },
-    {
-      section: 'Sistema',
-      items: [
-        { icon: 'user', label: 'Usuários', path: '/hub/usuarios', perm: 'users.view' },
-        { icon: 'settings', label: 'Configurações', path: '/hub/configuracoes', perm: 'settings.view' },
       ]
     },
   ]
@@ -374,12 +357,27 @@ function HubLayoutContent() {
           ))}
         </nav>
 
-        {/* Footer original */}
+        {/* Footer com Ver Site e Sair */}
         <div className="sidebar-footer">
-          <a href="/" className="sidebar-link" target="_blank" rel="noopener noreferrer">
+          <a
+            href="/"
+            className="sidebar-link"
+            target="_blank"
+            rel="noopener noreferrer"
+            title={!sidebarOpen ? 'Ver site público' : undefined}
+          >
             <span className="nav-icon">{icons.external}</span>
             <span className="nav-label">Ver site público</span>
           </a>
+          <button
+            type="button"
+            className="sidebar-link sidebar-logout-btn"
+            title={!sidebarOpen ? 'Sair' : undefined}
+            onClick={handleLogout}
+          >
+            <span className="nav-icon">{icons.logout}</span>
+            <span className="nav-label">Sair</span>
+          </button>
         </div>
       </aside>
 
@@ -497,60 +495,23 @@ function HubLayoutContent() {
                   </svg>
                 </button>
 
-                {/* Ao Vivo com Ocultação de Valores */}
-                <div className="hub-live-revenue-capsule header-live-button">
-                  <button
-                    type="button"
-                    onClick={() => navigate('/hub/financeiro')}
-                    className="hub-live-revenue-btn"
-                    title="Monitor ao Vivo em Tempo Real — Ver Financeiro"
-                  >
-                    <span className="hub-live-pulse-wrapper">
-                      <span className="hub-live-pulse-ring" />
-                      <span className="hub-live-pulse-dot" />
-                    </span>
-                    <span className="hub-live-revenue-label">
-                      {hideValues ? '••••••' : (
-                        todayRevenue > 0
-                          ? `R$ ${todayRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                          : 'R$ 0,00'
-                      )}
-                    </span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={toggleHideValues}
-                    className="hub-live-eye-btn"
-                    title={hideValues ? 'Mostrar valores' : 'Ocultar valores'}
-                    aria-label={hideValues ? 'Mostrar valores' : 'Ocultar valores'}
-                  >
-                    {hideValues ? (
-                      <EyeOff size={14} strokeWidth={1.8} />
-                    ) : (
-                      <Eye size={14} strokeWidth={1.8} />
-                    )}
-                  </button>
-                </div>
-
-
-                {/* Usuário logado */}
+                {/* Usuário / Perfil TEKNIX (Padrão Mercado Pago / TEKNIX Multi-Accounts) */}
                 <button
                   type="button"
-                  className="flow-user-btn"
+                  className="mp-wpn-header-user-btn"
+                  style={{ background: '#ffffff' }}
                   onClick={() => { setShowUserDropdown(!showUserDropdown); setShowNotifications(false) }}
+                  aria-label="TEKNIX Imagem do perfil"
                 >
-                  <div className="flow-user-avatar-wrap">
+                  <div className="mp-wpn-avatar-box">
                     <img
-                      src={userPhoto}
-                      alt={userNickname}
-                      className="flow-user-avatar-img"
+                      src="https://mla-s1-p.mlstatic.com/794912-MLA114955335454_082026-O.jpg"
+                      alt="TEKNIX"
+                      className="mp-wpn-avatar-img"
                     />
                   </div>
-                  <span className="flow-user-name-text">{userNickname}</span>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14" style={{ color: '#4b5563' }}>
-                    <polyline points="6 9 12 15 18 9"/>
-                  </svg>
+                  <span className="mp-wpn-user-title">TEKNIX</span>
+                  <ChevronDown size={14} className="mp-wpn-chevron" />
                 </button>
               </div>
             </div>
@@ -769,29 +730,113 @@ function HubLayoutContent() {
 
         <div ref={userDropdownRef}>
           {showUserDropdown && (
-            <div className="flow-user-dropdown" onClick={() => setShowUserDropdown(false)}>
-              <div className="flow-user-dropdown-header">
-                <div className="flow-dropdown-name">{userName}</div>
-                <div className="flow-dropdown-email">{userEmail}</div>
+            <div className="flow-user-dropdown mp-account-widget-dropdown" onClick={() => setShowUserDropdown(false)}>
+              {/* Header do Perfil TEKNIX */}
+              <Link to="/hub/usuarios" className="mp-widget-header-row">
+                <div className="mp-widget-avatar-wrap">
+                  <img
+                    src="https://mla-s1-p.mlstatic.com/794912-MLA114955335454_082026-O.jpg"
+                    alt="TEKNIX"
+                    className="mp-widget-avatar-img"
+                  />
+                </div>
+                <div className="mp-widget-header-text">
+                  <div className="mp-widget-header-title-row">
+                    <span className="mp-widget-title">TEKNIX</span>
+                    <span className="mp-widget-status-badge">Ativo</span>
+                  </div>
+                  <span className="mp-widget-subtitle">contatobovek@gmail.com</span>
+                </div>
+                <ChevronRight size={16} className="mp-widget-header-arrow" />
+              </Link>
+
+              <div className="mp-widget-divider" />
+
+              {/* Seção Trocar de Conta */}
+              <div className="mp-widget-section-label">
+                <RefreshCw size={12} />
+                <span>Trocar de conta</span>
               </div>
-              <div className="flow-dropdown-divider" />
-              <Link to="/hub/usuarios" className="flow-dropdown-item">
-                <User size={15} />
-                <span>Perfil</span>
-              </Link>
-              <Link to="/hub/configuracoes?tab=users" className="flow-dropdown-item">
-                <Users size={15} />
-                <span>Usuários</span>
-              </Link>
-              <Link to="/hub/configuracoes" className="flow-dropdown-item">
-                <Settings size={15} />
-                <span>Configuração</span>
-              </Link>
-              <Link to="/hub/integracoes" className="flow-dropdown-item">
-                <Layers size={15} />
-                <span>Integrações</span>
-              </Link>
-              <div className="flow-dropdown-divider" />
+
+              <div className="mp-widget-accounts-list">
+                {/* 1. Conta HUB (Loja Própria & Gestão) */}
+                <Link
+                  to="/hub"
+                  className="mp-widget-account-item active"
+                  onClick={() => setShowUserDropdown(false)}
+                  title="Conta ativa: Teknix HUB (Loja Própria & Administração)"
+                >
+                  <div className="mp-widget-account-avatar">
+                    <img src="https://mla-s1-p.mlstatic.com/898663-MLA115505734482_082026-O.jpg?id=1407117743" alt="Alison Thiago" />
+                  </div>
+                  <div className="mp-widget-account-info">
+                    <div className="mp-widget-account-title-row">
+                      <span className="mp-widget-account-name">Alison Thiago</span>
+                      <span className="mp-widget-badge hub">HUB</span>
+                    </div>
+                    <span className="mp-widget-account-email">alisonsilvathiago@gmail.com</span>
+                  </div>
+                  <span className="mp-widget-active-dot" title="Sessão ativa no HUB" />
+                </Link>
+
+                {/* 2. Conta FLOW (Marketplace & Operação) */}
+                <a
+                  href="http://localhost:3000"
+                  className="mp-widget-account-item flow"
+                  onClick={() => setShowUserDropdown(false)}
+                  title="Ir para a conta Teknix FLOW (Marketplaces & Operação)"
+                >
+                  <div className="mp-widget-account-avatar initials flow">
+                    <span>AT</span>
+                  </div>
+                  <div className="mp-widget-account-info">
+                    <div className="mp-widget-account-title-row">
+                      <span className="mp-widget-account-name">Alison Thiago</span>
+                      <span className="mp-widget-badge flow">FLOW</span>
+                    </div>
+                    <span className="mp-widget-account-email">alisonnegoh@gmail.com</span>
+                  </div>
+                  <ExternalLink size={13} className="mp-widget-flow-icon" />
+                </a>
+              </div>
+
+              <div className="mp-widget-divider" />
+
+              {/* Links Administrativos incluindo Pagamentos */}
+              <div className="mp-widget-actions-list">
+                <Link to="/hub/usuarios" className="flow-dropdown-item">
+                  <User size={15} />
+                  <span>Configurar perfil</span>
+                </Link>
+
+                <Link to="/hub/pagamentos" className="flow-dropdown-item">
+                  <CreditCard size={15} />
+                  <span>Pagamentos & Checkout</span>
+                </Link>
+
+                <Link to="/hub/configuracoes?tab=users" className="flow-dropdown-item">
+                  <Users size={15} />
+                  <span>Usuários & Colaboradores</span>
+                </Link>
+
+                <Link to="/hub/configuracoes" className="flow-dropdown-item">
+                  <Settings size={15} />
+                  <span>Configurações da loja</span>
+                </Link>
+
+                <Link to="/hub/integracoes" className="flow-dropdown-item">
+                  <Layers size={15} />
+                  <span>Integrações</span>
+                </Link>
+
+                <Link to="/hub/seguranca" className="flow-dropdown-item">
+                  <Shield size={15} />
+                  <span>Reportar um problema de segurança</span>
+                </Link>
+              </div>
+
+              <div className="mp-widget-divider" />
+
               <Link
                 to="/login"
                 className="flow-dropdown-item logout"
@@ -847,7 +892,7 @@ function getPageTitle(pathname: string): string {
   if (pathname.includes('/tabelas-de-precos')) return 'Tabelas de Preços'
   if (pathname.includes('/assinaturas')) return 'Assinaturas'
   if (pathname.includes('/avisos-estoque')) return 'Avisos de Estoque'
-  if (pathname.includes('/categorias/nova')) return 'Nova Categoria'
+  if (pathname.includes('/categorias/nova') || pathname.includes('/categorias/add')) return 'Nova Categoria'
   if (pathname.includes('/categorias/editar')) return 'Editar Categoria'
   if (pathname.includes('/categorias')) return 'Categorias'
   if (pathname.includes('/pedidos')) return 'Pedidos'

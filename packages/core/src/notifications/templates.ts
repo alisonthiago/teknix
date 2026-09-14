@@ -177,7 +177,7 @@ const templates: Record<string, TemplateDefinition> = {
     bodyHtml: wrapEmail(`
       <h1 style="font-size:26px;font-weight:700;color:#1d1d1f;margin:0 0 8px 0;letter-spacing:-0.5px;">Seu pedido está a caminho!</h1>
       <p style="font-size:15px;color:#6e6e73;margin:0 0 32px 0;">Olá <strong>{{name}}</strong>, separamos e despachamos seu pedido.</p>
-      <div style="background-color:#f0f7ff;border-radius:12px;padding:24px;margin:0 0 28px 0;border-left:4px solid #0071e3;">
+      <div style="background-color:#f7f7f7;border-radius:12px;padding:24px;margin:0 0 28px 0;border-left:4px solid #0071e3;">
         <p style="font-size:13px;color:#0071e3;font-weight:600;margin:0 0 4px 0;text-transform:uppercase;letter-spacing:0.5px;">Código de rastreamento</p>
         <p style="font-size:22px;font-weight:700;color:#1d1d1f;margin:0 0 8px 0;letter-spacing:2px;">{{trackingCode}}</p>
         <p style="font-size:13px;color:#86868b;margin:0;">Transportadora: {{carrier}} · Previsão: <strong>{{deliveryEstimate}}</strong></p>

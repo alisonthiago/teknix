@@ -1,8 +1,44 @@
 import { useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import './WhatsAppFloat.css'
 import { DEFAULT_WHATSAPP_SETTINGS, loadWhatsappSettings, type WhatsappSettings } from '../services/storeSettings'
 
+function shouldShowOnPath(pathname: string, settings: WhatsappSettings): boolean {
+  if (!settings.enabled) return false
+  const mode = settings.pageDisplayMode || 'all'
+  if (mode === 'all') return true
+
+  const isHome = pathname === '/'
+  const isProduct = pathname.startsWith('/produto/')
+  const isCart = pathname === '/sacola' || pathname === '/carrinho'
+  const isCheckout = pathname.startsWith('/checkout')
+  const isAccount = pathname.startsWith('/conta') || pathname.startsWith('/pedidos') || pathname.startsWith('/itens-salvos') || pathname.startsWith('/buscar-pedido')
+  const isInstitutional = pathname.startsWith('/ajuda') || pathname.startsWith('/legal') || pathname.startsWith('/news') || pathname.startsWith('/blog') || pathname === '/sobre-nos'
+  const isCategories = pathname.startsWith('/produtos') || pathname.startsWith('/categoria') || (!isHome && !isProduct && !isCart && !isCheckout && !isAccount && !isInstitutional)
+
+  const matchedKeys: string[] = []
+  if (isHome) matchedKeys.push('home')
+  if (isProduct) matchedKeys.push('products')
+  if (isCart) matchedKeys.push('cart')
+  if (isCheckout) matchedKeys.push('checkout')
+  if (isAccount) matchedKeys.push('account')
+  if (isInstitutional) matchedKeys.push('institutional')
+  if (isCategories) matchedKeys.push('categories')
+
+  const selected = settings.selectedPages || []
+  const hasMatch = matchedKeys.some(k => selected.includes(k)) || selected.includes(pathname)
+
+  if (mode === 'specific') {
+    return hasMatch
+  }
+  if (mode === 'exclude') {
+    return !hasMatch
+  }
+  return true
+}
+
 export default function WhatsAppFloat() {
+  const location = useLocation()
   const [isOpen, setIsOpen] = useState(false)
   const [settings, setSettings] = useState<WhatsappSettings | null>(null)
 
@@ -15,6 +51,7 @@ export default function WhatsAppFloat() {
   }, [])
 
   if (!settings?.enabled || !/^\d{10,15}$/.test(settings.phoneNumber.replace(/\D/g, ''))) return null
+  if (!shouldShowOnPath(location.pathname, settings)) return null
 
   const handleSendMessage = (message?: string) => {
     const text = message || settings.defaultMessage

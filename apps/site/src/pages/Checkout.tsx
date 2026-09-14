@@ -1519,7 +1519,7 @@ export default function Checkout() {
                     )}
 
                     {!selectedShipping && shippingOptions.length > 0 && (
-                      <div style={{ marginTop: 8, padding: '9px 14px', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 8, color: '#1d4ed8', fontSize: '0.85rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <div style={{ marginTop: 8, padding: '9px 14px', background: '#F7F7F7', border: '1px solid #e5e7eb', borderRadius: 8, color: '#1d4ed8', fontSize: '0.85rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 6 }}>
                         <span>👉 Por favor, selecione uma das opções de frete acima para continuar com a compra.</span>
                       </div>
                     )}

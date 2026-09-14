@@ -95,7 +95,7 @@ function VisaoGeralTab({ product }: { product: ProductDetail }) {
 
         <div className="bg-white border border-[#e6e6e6] rounded-2xl p-5 shadow-xs">
           <SectionTitle>Descrição Completa do Produto</SectionTitle>
-          <div className="mt-2 text-[13px] text-[#334155] leading-relaxed whitespace-pre-line bg-white p-4 rounded-xl border border-[#e6e6e6] max-h-96 overflow-y-auto font-sans">
+          <div className="mt-2 text-[13px] text-[#333333] leading-relaxed whitespace-pre-line bg-white p-4 rounded-xl border border-[#e6e6e6] max-h-96 overflow-y-auto font-sans">
             {product.description || (
               `PRODUTO: ${product.name}
 SKU: ${product.sku}
@@ -296,7 +296,7 @@ function VendasTab({ product }: { product: ProductDetail }) {
                           {sale.order_id}
                         </Link>
                       </td>
-                      <td className="py-3 px-4 font-medium text-[#1e293b]">
+                      <td className="py-3 px-4 font-medium text-[#333333]">
                         {sale.customer_name || 'Cliente Mercado Livre'}
                       </td>
                       <td className="py-3 px-4 text-[#333]">
@@ -306,17 +306,17 @@ function VendasTab({ product }: { product: ProductDetail }) {
                         </div>
                         <div className="text-[9px] text-[#999]">{sale.account_name || 'TEKNIXBRASIL'}</div>
                       </td>
-                      <td className="py-3 px-4 text-right text-[#64748b] font-medium">{sale.quantity}</td>
-                      <td className="py-3 px-4 text-right text-[#64748b]">{formatBRL(sale.price)}</td>
-                      <td className="py-3 px-4 text-right font-bold text-[#1e293b]">{formatBRL(sale.revenue)}</td>
+                      <td className="py-3 px-4 text-right text-[#666666] font-medium">{sale.quantity}</td>
+                      <td className="py-3 px-4 text-right text-[#666666]">{formatBRL(sale.price)}</td>
+                      <td className="py-3 px-4 text-right font-bold text-[#333333]">{formatBRL(sale.revenue)}</td>
                       <td className="py-3 px-4 text-right font-bold text-[#16a34a]">{formatBRL(sale.profit)}</td>
-                      <td className="py-3 px-4 text-right font-medium text-[#64748b]">{sale.margin}%</td>
+                      <td className="py-3 px-4 text-right font-medium text-[#666666]">{sale.margin}%</td>
                       <td className="py-3 px-4 text-center">
                         <span className="inline-flex px-2 py-0.5 rounded text-xs font-bold bg-[#f0fdf4] text-[#16a34a] border border-[#bbf7d0]">
                           {sale.status}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-right text-[#64748b] font-mono text-[11px]">{sale.date}</td>
+                      <td className="py-3 px-4 text-right text-[#666666] font-mono text-[11px]">{sale.date}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -343,12 +343,12 @@ function EstoqueTab({ product }: { product: ProductDetail }) {
             <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold uppercase ${isCritical ? 'bg-[#dc2626] text-white' : 'bg-[#16a34a] text-white'}`}>
               {isCritical ? 'Atenção Necessária' : 'Estoque Saudável'}
             </span>
-            <h4 className="text-sm font-extrabold text-[#0f172a]">
+            <h4 className="text-sm font-extrabold text-[#111111]">
               {isCritical ? 'Risco de Ruptura de Estoque' : 'Previsão de Suprimento Normal'}
             </h4>
           </div>
-          <p className="text-xs text-[#64748b]">
-            Estoque atual: <strong className="text-[#0f172a]">{product.stock.physical} un</strong> • Média diária: <strong className="text-[#0f172a]">{dailyAverage.toFixed(1)} un/dia</strong> • Previsão de término em aproximadamente <strong className="text-[#0f172a]">{daysRemaining > 365 ? 'Mais de 1 ano' : `${daysRemaining} dias`}</strong>.
+          <p className="text-xs text-[#666666]">
+            Estoque atual: <strong className="text-[#111111]">{product.stock.physical} un</strong> • Média diária: <strong className="text-[#111111]">{dailyAverage.toFixed(1)} un/dia</strong> • Previsão de término em aproximadamente <strong className="text-[#111111]">{daysRemaining > 365 ? 'Mais de 1 ano' : `${daysRemaining} dias`}</strong>.
           </p>
         </div>
 
@@ -698,27 +698,27 @@ function MarketplacesTab({ product }: { product: ProductDetail }) {
   return (
     <div className="space-y-5">
       {/* Banner Informativo de Arquitetura */}
-      <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-2xl p-5 shadow-2xs">
+      <div className="bg-[#F7F7F7] border border-[#e2e8f0] rounded-2xl p-5 shadow-2xs">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <Layers className="w-4 h-4 text-[#2563eb]" />
-              <h4 className="text-sm font-extrabold text-[#0f172a]">
+              <h4 className="text-sm font-extrabold text-[#111111]">
                 Gestão Multicanal: 1 Produto Central → Ofertas Independentes
               </h4>
             </div>
-            <p className="text-xs text-[#64748b] leading-relaxed max-w-2xl">
-              Este produto físico central compartilha seu estoque físico (<strong className="text-[#0f172a]">{product.stock.physical} unidades</strong>) entre o Site Próprio, Catálogo Oficial do Mercado Livre e demais marketplaces. Cada oferta possui seu próprio preço independente.
+            <p className="text-xs text-[#666666] leading-relaxed max-w-2xl">
+              Este produto físico central compartilha seu estoque físico (<strong className="text-[#111111]">{product.stock.physical} unidades</strong>) entre o Site Próprio, Catálogo Oficial do Mercado Livre e demais marketplaces. Cada oferta possui seu próprio preço independente.
             </p>
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
             <div className="px-3 py-1.5 bg-white border border-[#cbd5e1] rounded-xl text-center">
-              <div className="text-[10px] text-[#64748b] uppercase font-bold">Estoque Central</div>
-              <div className="text-sm font-black text-[#0f172a]">{product.stock.physical} un</div>
+              <div className="text-[10px] text-[#666666] uppercase font-bold">Estoque Central</div>
+              <div className="text-sm font-black text-[#111111]">{product.stock.physical} un</div>
             </div>
             <div className="px-3 py-1.5 bg-white border border-[#cbd5e1] rounded-xl text-center">
-              <div className="text-[10px] text-[#64748b] uppercase font-bold">Total Ofertas</div>
+              <div className="text-[10px] text-[#666666] uppercase font-bold">Total Ofertas</div>
               <div className="text-sm font-black text-[#2563eb]">{listings.length + (product.site_published ? 1 : 0)}</div>
             </div>
           </div>
@@ -733,13 +733,13 @@ function MarketplacesTab({ product }: { product: ProductDetail }) {
               SITE
             </div>
             <div>
-              <div className="text-sm font-bold text-[#0f172a] flex items-center gap-2">
+              <div className="text-sm font-bold text-[#111111] flex items-center gap-2">
                 Loja Oficial TEKNIX (Site Próprio)
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#f0fdf4] text-[#16a34a] border border-[#bbf7d0]">
                   Publicado
                 </span>
               </div>
-              <div className="text-xs text-[#64748b]">Canal Direto D2C • teknixbrasil.com.br</div>
+              <div className="text-xs text-[#666666]">Canal Direto D2C • teknixbrasil.com.br</div>
             </div>
           </div>
 
@@ -759,23 +759,23 @@ function MarketplacesTab({ product }: { product: ProductDetail }) {
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
           <div>
-            <div className="text-[11px] font-medium text-[#64748b]">Preço no Site</div>
-            <div className="text-base font-black text-[#0f172a] mt-0.5">
+            <div className="text-[11px] font-medium text-[#666666]">Preço no Site</div>
+            <div className="text-base font-black text-[#111111] mt-0.5">
               {formatBRL(product.site_price || product.pricing.current_price)}
             </div>
           </div>
           <div>
-            <div className="text-[11px] font-medium text-[#64748b]">Estoque Compartilhado</div>
+            <div className="text-[11px] font-medium text-[#666666]">Estoque Compartilhado</div>
             <div className="text-base font-bold text-[#16a34a] mt-0.5">{product.stock.physical} un</div>
           </div>
           <div>
-            <div className="text-[11px] font-medium text-[#64748b]">Canal Isolado</div>
-            <div className="text-xs text-[#64748b] mt-1 flex items-center gap-1">
+            <div className="text-[11px] font-medium text-[#666666]">Canal Isolado</div>
+            <div className="text-xs text-[#666666] mt-1 flex items-center gap-1">
               <CheckCircle2 className="w-3.5 h-3.5 text-[#16a34a]" /> Não afeta Marketplaces
             </div>
           </div>
           <div>
-            <div className="text-[11px] font-medium text-[#64748b]">Checkout</div>
+            <div className="text-[11px] font-medium text-[#666666]">Checkout</div>
             <div className="text-xs font-bold text-[#2563eb] mt-1">Teknix Play Ativo</div>
           </div>
         </div>
@@ -785,10 +785,10 @@ function MarketplacesTab({ product }: { product: ProductDetail }) {
       <div className="space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1">
           <div>
-            <h3 className="text-sm font-bold text-[#0f172a] flex items-center gap-2">
-              <Store className="w-4 h-4 text-[#64748b]" /> Ofertas & Publicações nos Marketplaces ({listings.length})
+            <h3 className="text-sm font-bold text-[#111111] flex items-center gap-2">
+              <Store className="w-4 h-4 text-[#666666]" /> Ofertas & Publicações nos Marketplaces ({listings.length})
             </h3>
-            <p className="text-xs text-[#64748b]">
+            <p className="text-xs text-[#666666]">
               Venda no Catálogo Oficial (Buy Box) ou crie anúncios tradicionais com preços independentes
             </p>
           </div>
@@ -821,22 +821,22 @@ function MarketplacesTab({ product }: { product: ProductDetail }) {
                   </div>
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-sm font-bold text-[#0f172a]">{l.title || product.name}</span>
+                      <span className="text-sm font-bold text-[#111111]">{l.title || product.name}</span>
                       {l.is_best_seller && (
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#fef3c7] text-[#92400e] border border-[#fde68a]">
                           <Award className="w-3 h-3 text-[#f59e0b]" /> MELHOR ANÚNCIO
                         </span>
                       )}
                       {(l as any).catalog_product_id && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#eff6ff] text-[#1d4ed8] border border-[#bfdbfe]">
-                          <Sparkles className="w-3 h-3 text-[#2563eb]" /> Catálogo Oficial
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#F7F7F7] text-[#1f2328] border border-[#e5e7eb]">
+                          <Sparkles className="w-3 h-3 text-[#1f2328]" /> Catálogo Oficial
                         </span>
                       )}
                       <MarketplaceStatusBadge status={l.status.toUpperCase()} />
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-3 text-xs text-[#64748b] mt-1 font-mono">
-                      <span>ID: <strong className="text-[#0f172a]">{l.listing_id || l.external_id}</strong></span>
+                    <div className="flex flex-wrap items-center gap-3 text-xs text-[#666666] mt-1 font-mono">
+                      <span>ID: <strong className="text-[#111111]">{l.listing_id || l.external_id}</strong></span>
                       {(l as any).catalog_product_id && (
                         <>
                           <span className="text-[#cbd5e1]">•</span>
@@ -846,7 +846,7 @@ function MarketplacesTab({ product }: { product: ProductDetail }) {
                       {l.account_name && (
                         <>
                           <span className="text-[#cbd5e1]">•</span>
-                          <span className="font-sans">Conta: <strong className="text-[#0f172a]">{l.account_name}</strong></span>
+                          <span className="font-sans">Conta: <strong className="text-[#111111]">{l.account_name}</strong></span>
                         </>
                       )}
                       {l.permalink && (
@@ -875,9 +875,9 @@ function MarketplacesTab({ product }: { product: ProductDetail }) {
                       channelName: l.channel_name || 'Mercado Livre',
                       externalId: l.listing_id || l.external_id
                     })}
-                    className="px-3.5 py-1.5 bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#0f172a] text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                    className="px-3.5 py-1.5 bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#111111] text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
                   >
-                    <Pencil className="w-3.5 h-3.5 text-[#64748b]" /> Editar Preço
+                    <Pencil className="w-3.5 h-3.5 text-[#666666]" /> Editar Preço
                   </button>
                 </div>
               </div>
@@ -885,26 +885,26 @@ function MarketplacesTab({ product }: { product: ProductDetail }) {
               {/* Métricas da Oferta */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
                 <div>
-                  <div className="text-[11px] font-medium text-[#64748b]">Preço Desta Oferta</div>
-                  <div className="text-base font-black text-[#0f172a] mt-0.5">
+                  <div className="text-[11px] font-medium text-[#666666]">Preço Desta Oferta</div>
+                  <div className="text-base font-black text-[#111111] mt-0.5">
                     {formatBRL(l.price)}
                   </div>
                 </div>
                 <div>
-                  <div className="text-[11px] font-medium text-[#64748b]">Total Vendido (Oferta)</div>
-                  <div className="text-base font-bold text-[#0f172a] mt-0.5">
+                  <div className="text-[11px] font-medium text-[#666666]">Total Vendido (Oferta)</div>
+                  <div className="text-base font-bold text-[#111111] mt-0.5">
                     {l.sold_quantity} un
                   </div>
                 </div>
                 <div>
-                  <div className="text-[11px] font-medium text-[#64748b]">Faturamento Acumulado</div>
+                  <div className="text-[11px] font-medium text-[#666666]">Faturamento Acumulado</div>
                   <div className="text-base font-bold text-[#16a34a] mt-0.5">
                     {formatBRL(l.total_revenue || (l.sold_quantity * l.price))}
                   </div>
                 </div>
                 <div>
-                  <div className="text-[11px] font-medium text-[#64748b]">Última Sincronização</div>
-                  <div className="text-xs text-[#64748b] mt-1 font-mono">
+                  <div className="text-[11px] font-medium text-[#666666]">Última Sincronização</div>
+                  <div className="text-xs text-[#666666] mt-1 font-mono">
                     {new Date(l.last_sync).toLocaleString('pt-BR')}
                   </div>
                 </div>
@@ -923,16 +923,16 @@ function MarketplacesTab({ product }: { product: ProductDetail }) {
                 <span className="text-[10px] font-extrabold uppercase text-[#2563eb] tracking-wider">
                   Publicação Multicanal TEKNIX
                 </span>
-                <h3 className="text-lg font-extrabold text-[#0f172a] mt-0.5">
+                <h3 className="text-lg font-extrabold text-[#111111] mt-0.5">
                   Publicar Nova Oferta no Canal
                 </h3>
-                <p className="text-xs text-[#64748b] mt-0.5">
+                <p className="text-xs text-[#666666] mt-0.5">
                   Produto Central: <strong>{product.name}</strong> • Estoque: <strong>{product.stock.physical} un</strong>
                 </p>
               </div>
               <button
                 onClick={() => setPublishModalOpen(false)}
-                className="text-[#94a3b8] hover:text-[#0f172a] text-lg font-bold p-1 cursor-pointer"
+                className="text-[#999999] hover:text-[#111111] text-lg font-bold p-1 cursor-pointer"
               >
                 ✕
               </button>
@@ -941,7 +941,7 @@ function MarketplacesTab({ product }: { product: ProductDetail }) {
             <div className="space-y-4">
               {/* Seleção do Canal */}
               <div>
-                <label className="block text-xs font-bold text-[#0f172a] mb-2">Selecione o Canal de Destino</label>
+                <label className="block text-xs font-bold text-[#111111] mb-2">Selecione o Canal de Destino</label>
                 <div className="grid grid-cols-3 gap-2">
                   <button
                     type="button"
@@ -951,15 +951,15 @@ function MarketplacesTab({ product }: { product: ProductDetail }) {
                     }}
                     className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-1 ${
                       selectedChannel === 'mercadolivre'
-                        ? 'border-[#0f172a] bg-[#f8fafc] ring-2 ring-[#0f172a]/20'
+                        ? 'border-[#0f172a] bg-[#F7F7F7] ring-2 ring-[#0f172a]/20'
                         : 'border-[#e2e8f0] hover:border-[#cbd5e1]'
                     }`}
                   >
                     <div className="flex items-center gap-1.5">
                       <MarketplaceLogo name="Mercado Livre" className="w-4 h-4" />
-                      <span className="text-xs font-bold text-[#0f172a]">Mercado Livre</span>
+                      <span className="text-xs font-bold text-[#111111]">Mercado Livre</span>
                     </div>
-                    <span className="text-[10px] text-[#64748b]">Catálogo Buy Box</span>
+                    <span className="text-[10px] text-[#666666]">Catálogo Buy Box</span>
                   </button>
 
                   <button
@@ -967,15 +967,15 @@ function MarketplacesTab({ product }: { product: ProductDetail }) {
                     onClick={() => setSelectedChannel('shopee')}
                     className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-1 ${
                       selectedChannel === 'shopee'
-                        ? 'border-[#0f172a] bg-[#f8fafc] ring-2 ring-[#0f172a]/20'
+                        ? 'border-[#0f172a] bg-[#F7F7F7] ring-2 ring-[#0f172a]/20'
                         : 'border-[#e2e8f0] hover:border-[#cbd5e1]'
                     }`}
                   >
                     <div className="flex items-center gap-1.5">
                       <MarketplaceLogo name="Shopee" className="w-4 h-4" />
-                      <span className="text-xs font-bold text-[#0f172a]">Shopee</span>
+                      <span className="text-xs font-bold text-[#111111]">Shopee</span>
                     </div>
-                    <span className="text-[10px] text-[#64748b]">Anúncio Shopee</span>
+                    <span className="text-[10px] text-[#666666]">Anúncio Shopee</span>
                   </button>
 
                   <button
@@ -983,15 +983,15 @@ function MarketplacesTab({ product }: { product: ProductDetail }) {
                     onClick={() => setSelectedChannel('magalu')}
                     className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-1 ${
                       selectedChannel === 'magalu'
-                        ? 'border-[#0f172a] bg-[#f8fafc] ring-2 ring-[#0f172a]/20'
+                        ? 'border-[#0f172a] bg-[#F7F7F7] ring-2 ring-[#0f172a]/20'
                         : 'border-[#e2e8f0] hover:border-[#cbd5e1]'
                     }`}
                   >
                     <div className="flex items-center gap-1.5">
                       <MarketplaceLogo name="Magazine Luiza" className="w-4 h-4" />
-                      <span className="text-xs font-bold text-[#0f172a]">Magalu</span>
+                      <span className="text-xs font-bold text-[#111111]">Magalu</span>
                     </div>
-                    <span className="text-[10px] text-[#64748b]">Open API SKU</span>
+                    <span className="text-[10px] text-[#666666]">Open API SKU</span>
                   </button>
                 </div>
               </div>
@@ -999,13 +999,13 @@ function MarketplacesTab({ product }: { product: ProductDetail }) {
               {/* Se for Mercado Livre: Escolha de Modo (Catálogo vs Tradicional) */}
               {selectedChannel === 'mercadolivre' && (
                 <div className="space-y-3 pt-2 border-t border-[#f1f5f9]">
-                  <label className="block text-xs font-bold text-[#0f172a]">Modo de Publicação no Mercado Livre</label>
+                  <label className="block text-xs font-bold text-[#111111]">Modo de Publicação no Mercado Livre</label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     <div
                       onClick={() => setMlMode('CATALOG')}
                       className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
                         mlMode === 'CATALOG'
-                          ? 'border-[#2563eb] bg-[#eff6ff] ring-2 ring-[#2563eb]/20'
+                          ? 'border-[#2563eb] bg-[#F7F7F7] ring-2 ring-[#000000]/5'
                           : 'border-[#e2e8f0] hover:border-[#cbd5e1]'
                       }`}
                     >
@@ -1017,9 +1017,9 @@ function MarketplacesTab({ product }: { product: ProductDetail }) {
                           onChange={() => setMlMode('CATALOG')}
                           className="text-[#2563eb]"
                         />
-                        <span className="text-xs font-bold text-[#0f172a]">Vender no Catálogo (Buy Box)</span>
+                        <span className="text-xs font-bold text-[#111111]">Vender no Catálogo (Buy Box)</span>
                       </div>
-                      <p className="text-[11px] text-[#64748b] mt-1.5 leading-tight">
+                      <p className="text-[11px] text-[#666666] mt-1.5 leading-tight">
                         Aproveite a ficha oficial existente com tráfego e avaliações para disputar a primeira opção de compra.
                       </p>
                     </div>
@@ -1028,7 +1028,7 @@ function MarketplacesTab({ product }: { product: ProductDetail }) {
                       onClick={() => setMlMode('TRADITIONAL')}
                       className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
                         mlMode === 'TRADITIONAL'
-                          ? 'border-[#0f172a] bg-[#f8fafc] ring-2 ring-[#0f172a]/20'
+                          ? 'border-[#0f172a] bg-[#F7F7F7] ring-2 ring-[#0f172a]/20'
                           : 'border-[#e2e8f0] hover:border-[#cbd5e1]'
                       }`}
                     >
@@ -1038,11 +1038,11 @@ function MarketplacesTab({ product }: { product: ProductDetail }) {
                           name="mlMode"
                           checked={mlMode === 'TRADITIONAL'}
                           onChange={() => setMlMode('TRADITIONAL')}
-                          className="text-[#0f172a]"
+                          className="text-[#111111]"
                         />
-                        <span className="text-xs font-bold text-[#0f172a]">Criar Anúncio Tradicional</span>
+                        <span className="text-xs font-bold text-[#111111]">Criar Anúncio Tradicional</span>
                       </div>
-                      <p className="text-[11px] text-[#64748b] mt-1.5 leading-tight">
+                      <p className="text-[11px] text-[#666666] mt-1.5 leading-tight">
                         Publicação independente com fotos, ficha e título próprios.
                       </p>
                     </div>
@@ -1052,7 +1052,7 @@ function MarketplacesTab({ product }: { product: ProductDetail }) {
                   {mlMode === 'CATALOG' && (
                     <div className="space-y-2 pt-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-[#0f172a] flex items-center gap-1.5">
+                        <span className="text-xs font-bold text-[#111111] flex items-center gap-1.5">
                           <Search className="w-3.5 h-3.5 text-[#2563eb]" /> Produto Encontrado no Catálogo do ML:
                         </span>
                         <button
@@ -1072,7 +1072,7 @@ function MarketplacesTab({ product }: { product: ProductDetail }) {
                               onClick={() => setSelectedCatalogId(c.catalog_product_id)}
                               className={`p-3 rounded-xl border flex items-center justify-between gap-3 cursor-pointer transition-all ${
                                 selectedCatalogId === c.catalog_product_id
-                                  ? 'border-[#2563eb] bg-[#eff6ff]'
+                                  ? 'border-[#2563eb] bg-[#F7F7F7]'
                                   : 'border-[#e2e8f0] hover:border-[#cbd5e1]'
                               }`}
                             >
@@ -1081,30 +1081,30 @@ function MarketplacesTab({ product }: { product: ProductDetail }) {
                                   {c.thumbnail ? (
                                     <img src={c.thumbnail} alt="" className="w-full h-full object-contain p-0.5" />
                                   ) : (
-                                    <Package className="w-4 h-4 text-[#94a3b8]" />
+                                    <Package className="w-4 h-4 text-[#999999]" />
                                   )}
                                 </div>
                                 <div className="min-w-0">
-                                  <div className="text-xs font-bold text-[#0f172a] truncate">{c.title}</div>
-                                  <div className="text-[10px] text-[#64748b] font-mono">
+                                  <div className="text-xs font-bold text-[#111111] truncate">{c.title}</div>
+                                  <div className="text-[10px] text-[#666666] font-mono">
                                     Catalog ID: <strong>{c.catalog_product_id}</strong> • Confiança: {c.confidence}%
                                   </div>
                                 </div>
                               </div>
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white text-[#2563eb] border border-[#bfdbfe] shrink-0">
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white text-[#2563eb] border border-[#e5e7eb] shrink-0">
                                 {selectedCatalogId === c.catalog_product_id ? 'Selecionado' : 'Usar Este'}
                               </span>
                             </div>
                           ))}
                         </div>
                       ) : (
-                        <div className="p-3 bg-[#f8fafc] border border-dashed border-[#cbd5e1] rounded-xl text-center text-xs text-[#64748b]">
+                        <div className="p-3 bg-[#F7F7F7] border border-dashed border-[#cbd5e1] rounded-xl text-center text-xs text-[#666666]">
                           {catalogSearching ? 'Pesquisando produtos oficiais no catálogo...' : 'Nenhum item automático retornado. Você pode digitar o Catalog ID abaixo.'}
                         </div>
                       )}
 
                       <div>
-                        <label className="block text-[11px] font-medium text-[#64748b] mb-1">
+                        <label className="block text-[11px] font-medium text-[#666666] mb-1">
                           Catalog Product ID (MLB...)
                         </label>
                         <input
@@ -1121,7 +1121,7 @@ function MarketplacesTab({ product }: { product: ProductDetail }) {
                   {/* Se Tradicional: Título Customizado */}
                   {mlMode === 'TRADITIONAL' && (
                     <div>
-                      <label className="block text-xs font-bold text-[#0f172a] mb-1">Título do Anúncio Tradicional</label>
+                      <label className="block text-xs font-bold text-[#111111] mb-1">Título do Anúncio Tradicional</label>
                       <input
                         type="text"
                         value={customTitle}
@@ -1136,11 +1136,11 @@ function MarketplacesTab({ product }: { product: ProductDetail }) {
 
               {/* Se for Shopee ou Magalu: Informações do Canal */}
               {selectedChannel !== 'mercadolivre' && (
-                <div className="p-3.5 bg-[#f8fafc] border border-[#e2e8f0] rounded-xl space-y-1">
-                  <div className="text-xs font-bold text-[#0f172a]">
+                <div className="p-3.5 bg-[#F7F7F7] border border-[#e2e8f0] rounded-xl space-y-1">
+                  <div className="text-xs font-bold text-[#111111]">
                     Modo: {selectedChannel === 'shopee' ? 'Publicação de Produto/Anúncio Shopee' : 'Publicação de Produto/SKU Magalu'}
                   </div>
-                  <p className="text-[11px] text-[#64748b]">
+                  <p className="text-[11px] text-[#666666]">
                     Esta oferta será criada e associada ao produto central, debitando do estoque físico único ({product.stock.physical} un).
                   </p>
                 </div>
@@ -1149,9 +1149,9 @@ function MarketplacesTab({ product }: { product: ProductDetail }) {
               {/* Preço e Tipo de Oferta */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-[#f1f5f9]">
                 <div>
-                  <label className="block text-xs font-bold text-[#0f172a] mb-1">Preço da Oferta (R$)</label>
+                  <label className="block text-xs font-bold text-[#111111] mb-1">Preço da Oferta (R$)</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-[#64748b]">R$</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-[#666666]">R$</span>
                     <input
                       type="number"
                       step="0.01"
@@ -1162,12 +1162,12 @@ function MarketplacesTab({ product }: { product: ProductDetail }) {
                       className="w-full pl-9 pr-3 py-2 text-sm font-bold bg-white border border-[#cbd5e1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f172a]"
                     />
                   </div>
-                  <span className="text-[10px] text-[#64748b] mt-0.5 block">Preço isolado deste canal</span>
+                  <span className="text-[10px] text-[#666666] mt-0.5 block">Preço isolado deste canal</span>
                 </div>
 
                 {selectedChannel === 'mercadolivre' && (
                   <div>
-                    <label className="block text-xs font-bold text-[#0f172a] mb-1">Tipo de Anúncio no ML</label>
+                    <label className="block text-xs font-bold text-[#111111] mb-1">Tipo de Anúncio no ML</label>
                     <select
                       value={listingType}
                       onChange={e => setListingType(e.target.value as any)}
@@ -1181,9 +1181,9 @@ function MarketplacesTab({ product }: { product: ProductDetail }) {
               </div>
 
               {/* Callout de Garantia de Isolamento */}
-              <div className="p-3 bg-[#eff6ff] border border-[#bfdbfe] rounded-xl flex items-start gap-2.5">
-                <ShieldAlert className="w-4 h-4 text-[#2563eb] shrink-0 mt-0.5" />
-                <p className="text-[11px] text-[#1e40af] leading-relaxed">
+              <div className="p-3 bg-[#F7F7F7] border border-[#e5e7eb] rounded-xl flex items-start gap-2.5">
+                <ShieldAlert className="w-4 h-4 text-[#1f2328] shrink-0 mt-0.5" />
+                <p className="text-[11px] text-[#1f2328] leading-relaxed">
                   <strong>Regra Permanente TEKNIX:</strong> O estoque físico central único ({product.stock.physical} un) será debitado a cada venda. O preço desta oferta é 100% independente e não alterará o SITE próprio nem os demais anúncios.
                 </p>
               </div>
@@ -1203,7 +1203,7 @@ function MarketplacesTab({ product }: { product: ProductDetail }) {
                   type="button"
                   onClick={() => setPublishModalOpen(false)}
                   disabled={publishLoading}
-                  className="px-4 py-2 text-xs font-semibold text-[#64748b] hover:text-[#0f172a] rounded-xl transition-colors cursor-pointer"
+                  className="px-4 py-2 text-xs font-semibold text-[#666666] hover:text-[#111111] rounded-xl transition-colors cursor-pointer"
                 >
                   Cancelar
                 </button>
@@ -1231,33 +1231,33 @@ function MarketplacesTab({ product }: { product: ProductDetail }) {
                 <span className="text-[10px] font-extrabold uppercase text-[#2563eb] tracking-wider">
                   Isolamento de Preço • {modalData.channelName}
                 </span>
-                <h3 className="text-base font-extrabold text-[#0f172a] mt-0.5">
+                <h3 className="text-base font-extrabold text-[#111111] mt-0.5">
                   Ajustar Preço Individual
                 </h3>
-                <p className="text-xs font-mono text-[#64748b]">Anúncio: {modalData.externalId}</p>
+                <p className="text-xs font-mono text-[#666666]">Anúncio: {modalData.externalId}</p>
               </div>
               <button
                 onClick={() => setModalData(null)}
-                className="text-[#94a3b8] hover:text-[#0f172a] text-lg font-bold p-1 cursor-pointer"
+                className="text-[#999999] hover:text-[#111111] text-lg font-bold p-1 cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
             <div className="space-y-4">
-              <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-3.5">
-                <div className="text-xs text-[#64748b]">Preço atual:</div>
-                <div className="text-lg font-black text-[#0f172a]">
+              <div className="bg-[#F7F7F7] border border-[#e2e8f0] rounded-xl p-3.5">
+                <div className="text-xs text-[#666666]">Preço atual:</div>
+                <div className="text-lg font-black text-[#111111]">
                   {formatBRL(modalData.currentPrice)}
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#0f172a] mb-1.5">
+                <label className="block text-xs font-bold text-[#111111] mb-1.5">
                   Novo Preço (R$)
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-[#64748b]">R$</span>
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-[#666666]">R$</span>
                   <input
                     type="number"
                     step="0.01"
@@ -1272,7 +1272,7 @@ function MarketplacesTab({ product }: { product: ProductDetail }) {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-[#64748b] mb-1.5">
+                <label className="block text-xs font-medium text-[#666666] mb-1.5">
                   Motivo da Alteração (Opcional)
                 </label>
                 <input
@@ -1285,9 +1285,9 @@ function MarketplacesTab({ product }: { product: ProductDetail }) {
               </div>
 
               {/* Callout de Garantia de Isolamento */}
-              <div className="p-3 bg-[#eff6ff] border border-[#bfdbfe] rounded-xl flex items-start gap-2.5">
-                <ShieldAlert className="w-4 h-4 text-[#2563eb] shrink-0 mt-0.5" />
-                <p className="text-[11px] text-[#1e40af] leading-relaxed">
+              <div className="p-3 bg-[#F7F7F7] border border-[#e5e7eb] rounded-xl flex items-start gap-2.5">
+                <ShieldAlert className="w-4 h-4 text-[#1f2328] shrink-0 mt-0.5" />
+                <p className="text-[11px] text-[#1f2328] leading-relaxed">
                   <strong>Regra de Isolamento:</strong> Esta alteração será aplicada <em>somente</em> a este anúncio. Os outros anúncios do Mercado Livre e o preço da loja própria TEKNIX não sofrerão nenhuma alteração.
                 </p>
               </div>
@@ -1307,7 +1307,7 @@ function MarketplacesTab({ product }: { product: ProductDetail }) {
                   type="button"
                   onClick={() => setModalData(null)}
                   disabled={loading}
-                  className="px-4 py-2 text-xs font-semibold text-[#64748b] hover:text-[#0f172a] rounded-xl transition-colors cursor-pointer"
+                  className="px-4 py-2 text-xs font-semibold text-[#666666] hover:text-[#111111] rounded-xl transition-colors cursor-pointer"
                 >
                   Cancelar
                 </button>
@@ -1495,19 +1495,19 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
               </div>
 
               {/* Product Title */}
-              <h1 className="text-xl sm:text-2xl font-extrabold text-[#0f172a] leading-snug mb-2">
+              <h1 className="text-xl sm:text-2xl font-extrabold text-[#111111] leading-snug mb-2">
                 {product.name}
               </h1>
 
               {/* Sub-info */}
-              <div className="flex flex-wrap items-center gap-3 text-xs text-[#64748b] mb-4">
-                <span>Marca: <strong className="text-[#0f172a]">{product.brand}</strong></span>
+              <div className="flex flex-wrap items-center gap-3 text-xs text-[#666666] mb-4">
+                <span>Marca: <strong className="text-[#111111]">{product.brand}</strong></span>
                 <span className="text-[#cbd5e1]">•</span>
-                <span>SKU: <strong className="font-mono text-[#0f172a]">{product.sku}</strong></span>
+                <span>SKU: <strong className="font-mono text-[#111111]">{product.sku}</strong></span>
                 {product.ean && product.ean !== '—' && (
                   <>
                     <span className="text-[#cbd5e1]">•</span>
-                    <span>EAN: <strong className="font-mono text-[#0f172a]">{product.ean}</strong></span>
+                    <span>EAN: <strong className="font-mono text-[#111111]">{product.ean}</strong></span>
                   </>
                 )}
               </div>
@@ -1515,22 +1515,22 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
               {/* Price & Stock Quick Highlight Cards */}
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 bg-white border border-[#e6e6e6] rounded-2xl mb-2 shadow-2xs">
                 <div>
-                  <span className="text-[10px] uppercase font-bold text-[#64748b] tracking-wider">Estoque Físico Central</span>
+                  <span className="text-[10px] uppercase font-bold text-[#666666] tracking-wider">Estoque Físico Central</span>
                   <div className={`text-xl font-black mt-0.5 ${product.stock.physical > 0 ? 'text-[#16a34a]' : 'text-[#dc2626]'}`}>
                     {product.stock.physical} unidades
                   </div>
-                  <div className="text-[11px] text-[#64748b] mt-0.5">Disponível: <strong>{product.stock.available} un</strong></div>
+                  <div className="text-[11px] text-[#666666] mt-0.5">Disponível: <strong>{product.stock.available} un</strong></div>
                 </div>
                 <div>
-                  <span className="text-[10px] uppercase font-bold text-[#64748b] tracking-wider">Preço Loja Oficial (Site)</span>
-                  <div className="text-xl font-black text-[#0f172a] mt-0.5">
+                  <span className="text-[10px] uppercase font-bold text-[#666666] tracking-wider">Preço Loja Oficial (Site)</span>
+                  <div className="text-xl font-black text-[#111111] mt-0.5">
                     {formatBRL(product.site_price || product.pricing.current_price || product.costs.real || 0)}
                   </div>
                   <div className="text-[11px] text-[#2563eb] mt-0.5 font-medium">Canal D2C Direto</div>
                 </div>
                 <div className="hidden sm:block">
-                  <span className="text-[10px] uppercase font-bold text-[#64748b] tracking-wider">Anúncios & Marketplaces</span>
-                  <div className="text-xl font-black text-[#0f172a] mt-0.5">
+                  <span className="text-[10px] uppercase font-bold text-[#666666] tracking-wider">Anúncios & Marketplaces</span>
+                  <div className="text-xl font-black text-[#111111] mt-0.5">
                     {(product.channel_listings?.length || product.marketplaces.length) + (product.site_published ? 1 : 0)} canais
                   </div>
                   <div className="text-[11px] text-[#16a34a] mt-0.5 font-medium">Preços Independentes</div>

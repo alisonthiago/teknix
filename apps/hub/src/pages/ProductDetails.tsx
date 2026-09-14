@@ -17,13 +17,23 @@ import {
   Package,
   Layers,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   ShieldCheck,
   Edit
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { createPage } from '../services/pageBuilder'
 import { normalizeShowcase } from '../../../../packages/core/src/productCommerce'
+import { MercadoLivreLogo, IntegrationLogoRenderer } from '../components/IntegrationLogos'
 import './ProductDetails.css'
+
+function summarizeProductName(name: string, maxLength = 48) {
+  const normalized = (name || '').trim().replace(/\s+/g, ' ')
+  if (normalized.length <= maxLength) return normalized
+  const shortened = normalized.slice(0, maxLength).replace(/\s+\S*$/, '')
+  return `${shortened}…`
+}
 
 export default function ProductDetails() {
   const { id } = useParams<{ id: string }>()
@@ -35,6 +45,7 @@ export default function ProductDetails() {
   const [isExpanded, setIsExpanded] = useState(false)
   const [copiedSku, setCopiedSku] = useState(false)
   const [selectedPhotoIdx, setSelectedPhotoIdx] = useState(0)
+  const [connectedListings, setConnectedListings] = useState<any[]>([])
 
   const [salesInfo, setSalesInfo] = useState<{
     totalSold: number
@@ -88,10 +99,11 @@ export default function ProductDetails() {
       try {
         const { data: listings } = await supabase
           .from('marketplace_listings')
-          .select('sold_quantity, status, external_id, external_listing_id')
+          .select('*')
           .or(`product_id.eq.${resolved.id},external_id.eq.${resolved.sku},external_listing_id.eq.${resolved.sku}`)
 
         if (listings && listings.length > 0) {
+          setConnectedListings(listings)
           mlSold = listings.reduce((acc: number, l: any) => acc + (Number(l.sold_quantity) || 0), 0)
           if (listings[0].status) mlStat = listings[0].status
         }
@@ -255,7 +267,10 @@ export default function ProductDetails() {
         <div style={{ padding: '80px 0', textAlign: 'center', color: '#64748b' }}>
           Produto não encontrado.
           <br /><br />
-          <Link to="/hub/produtos" className="pd-btn-back">Voltar para a lista</Link>
+          <Link to="/hub/produtos" className="pd-btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, height: 40, padding: '0 16px', borderRadius: 12 }}>
+            <ArrowLeft size={16} />
+            Voltar para a lista
+          </Link>
         </div>
       </div>
     )
@@ -332,9 +347,8 @@ export default function ProductDetails() {
       <header className="pd-topbar">
         {/* Left: Voltar & Breadcrumbs */}
         <div className="pd-topbar-left">
-          <Link to="/hub/produtos" className="pd-btn-back">
-            <ArrowLeft size={16} />
-            Voltar para Produtos
+          <Link to="/hub/produtos" className="pd-btn-back" title="Voltar para Produtos" aria-label="Voltar para Produtos">
+            <ArrowLeft size={18} />
           </Link>
           <nav aria-label="Breadcrumb" className="pd-breadcrumbs">
             <Link to="/hub">Início</Link>
@@ -345,60 +359,6 @@ export default function ProductDetails() {
               {product.name}
             </span>
           </nav>
-        </div>
-
-        {/* Right: Ações Rápidas */}
-        <div className="pd-topbar-right">
-          <button
-            className="pd-icon-btn"
-            type="button"
-            title="Reordenar fotos"
-            onClick={() => navigate(`/hub/produtos/editar/${product.id}#fotos`)}
-          >
-            <Grid size={16} />
-          </button>
-
-          <a
-            className="pd-icon-btn"
-            href={productPublicUrl}
-            target="_blank"
-            rel="noreferrer"
-            title="Ver na loja"
-          >
-            <ExternalLink size={16} />
-          </a>
-
-          <button
-            className="pd-icon-btn"
-            type="button"
-            title="Duplicar produto"
-            onClick={() => {
-              navigator.clipboard.writeText(window.location.href)
-              alert('Link do produto copiado!')
-            }}
-          >
-            <Copy size={16} />
-          </button>
-
-          <button
-            className="pd-icon-btn"
-            type="button"
-            title={isPublished ? 'Despublicar' : 'Publicar na Loja'}
-            onClick={handleTogglePublish}
-            disabled={togglingPublish}
-          >
-            {isPublished ? <EyeOff size={16} /> : <Eye size={16} />}
-          </button>
-
-          <div className="pd-topbar-divider" />
-
-          <Link
-            to={`/hub/produtos/editar/${product.id}`}
-            className="pd-btn-primary"
-          >
-            <Check size={16} />
-            Salvar produto
-          </Link>
         </div>
       </header>
       {/* ── END: TopBar ── */}
@@ -423,9 +383,37 @@ export default function ProductDetails() {
             <div className="pd-header-content">
               {/* Badges */}
               <div className="pd-badges-row">
-                <span className="pd-badge-brand">
-                  {product.brand || 'TEKNIX'}
+                {/* Logo da Marca / Empresa conectada */}
+                <span className="pd-badge-brand" title={`Marca / Empresa: ${product.brand || 'TEKNIX'}`}>
+                  {(!product.brand || product.brand.trim().toUpperCase() === 'TEKNIX') ? (
+                    <img src="/teknix-logo.svg" alt="TEKNIX" className="pd-badge-brand-logo" />
+                  ) : (
+                    <span>{product.brand}</span>
+                  )}
                 </span>
+
+                {/* Canal Conectado: Loja Própria TEKNIX */}
+                <span className="pd-badge-channel pd-badge-channel-teknix" title="Canal Conectado: Loja Oficial TEKNIX">
+                  <span className="pd-badge-channel-dot" />
+                  <span>Loja Oficial</span>
+                </span>
+
+                {/* Canal Conectado: Mercado Livre */}
+                <span className="pd-badge-channel pd-badge-channel-ml" title="Canal Conectado: Mercado Livre">
+                  <MercadoLivreLogo size={14} />
+                  <span>Mercado Livre</span>
+                </span>
+
+                {/* Outros Canais Conectados Dinâmicos */}
+                {connectedListings
+                  .filter(l => l.channel && l.channel !== 'mercadolivre' && l.channel !== 'site')
+                  .map((l, idx) => (
+                    <span key={idx} className="pd-badge-channel" title={`Canal Conectado: ${l.channel}`}>
+                      <IntegrationLogoRenderer code={l.channel} size={14} />
+                      <span style={{ textTransform: 'capitalize' }}>{l.channel}</span>
+                    </span>
+                  ))}
+
                 {product.sku && (
                   <span
                     className="pd-badge-sku"
@@ -443,7 +431,7 @@ export default function ProductDetails() {
 
               {/* Product Title */}
               <h1 className="pd-header-title" title={product.name}>
-                {product.name}
+                {summarizeProductName(product.name, 48)}
               </h1>
 
               {/* Meta Row: Categoria, Avaliações, Estoque */}
@@ -483,44 +471,54 @@ export default function ProductDetails() {
           <div className="pd-header-summary-right">
             <div className="pd-right-actions-row">
               <button
-                type="button"
                 className="pd-icon-btn"
-                title="Compartilhar"
+                type="button"
+                title="Reordenar fotos"
+                onClick={() => navigate(`/hub/produtos/editar/${product.id}#fotos`)}
+              >
+                <Grid size={16} />
+              </button>
+
+              <a
+                className="pd-icon-btn"
+                href={productPublicUrl}
+                target="_blank"
+                rel="noreferrer"
+                title="Ver no SITE"
+              >
+                <ExternalLink size={16} />
+              </a>
+
+              <button
+                className="pd-icon-btn"
+                type="button"
+                title="Duplicar produto"
                 onClick={() => {
-                  navigator.clipboard.writeText(productPublicUrl)
-                  alert('Link copiado para a área de transferência!')
+                  navigator.clipboard.writeText(window.location.href)
+                  alert('Link do produto copiado!')
                 }}
               >
-                <Share2 size={16} />
+                <Copy size={16} />
               </button>
 
               <button
-                type="button"
                 className="pd-icon-btn"
-                title="Documento"
-                onClick={() => window.print()}
+                type="button"
+                title={isPublished ? 'Despublicar' : 'Publicar na Loja'}
+                onClick={handleTogglePublish}
+                disabled={togglingPublish}
               >
-                <FileText size={16} />
+                {isPublished ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
 
-              <button
-                type="button"
-                className="pd-icon-btn"
-                style={{ backgroundColor: '#0f172a', color: '#ffffff', borderColor: '#0f172a' }}
-                title="Imprimir etiqueta"
-                onClick={() => window.print()}
+              <Link
+                to={`/hub/produtos/editar/${product.id}`}
+                className="pd-btn-primary"
+                style={{ height: 38, padding: '0 16px', borderRadius: 8, display: 'inline-flex', alignItems: 'center', gap: 6 }}
               >
-                <Printer size={16} />
-              </button>
-
-              <button
-                type="button"
-                className="pd-icon-btn"
-                title="Imprimir espelho"
-                onClick={() => window.print()}
-              >
-                <Printer size={16} />
-              </button>
+                <Check size={15} />
+                Salvar produto
+              </Link>
             </div>
 
             <div className="pd-price-block">
@@ -693,12 +691,12 @@ export default function ProductDetails() {
                 className="pd-btn-expand"
                 onClick={() => setIsExpanded(!isExpanded)}
               >
-                <Grid size={14} />
+                {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                 {isExpanded ? 'Recolher' : 'Expandir tudo'}
               </button>
             </div>
 
-            <div className="pd-desc-body">
+            <div className={`pd-desc-body ${!isExpanded ? 'is-collapsed' : 'is-expanded'}`}>
               <div>
                 <p className="pd-desc-lead-title">
                   {product.name} - Super Potente e Multifuncional
@@ -799,6 +797,17 @@ export default function ProductDetails() {
                 </div>
               </div>
             </div>
+
+            {!isExpanded && (
+              <button
+                type="button"
+                className="pd-desc-expand-bar"
+                onClick={() => setIsExpanded(true)}
+              >
+                <span>Ver apresentação técnica completa</span>
+                <ChevronDown size={13} />
+              </button>
+            )}
           </section>
 
           {/* Card 3: Storytelling & Apresentação */}
@@ -919,25 +928,25 @@ export default function ProductDetails() {
                 <span className="pd-gallery-tag-principal">Principal</span>
               </div>
 
-              {/* Thumbnails ao lado */}
-              <div className="pd-gallery-thumbs-col">
-                {sideThumbs.map((url, tIdx) => (
-                  <div
-                    key={tIdx}
-                    className="pd-gallery-thumb-item"
-                    onClick={() => {
-                      const realIdx = allImages.indexOf(url)
-                      if (realIdx >= 0) setSelectedPhotoIdx(realIdx)
-                    }}
-                  >
-                    <img
-                      src={url}
-                      alt={`Foto miniatura ${tIdx + 1}`}
-                      className="pd-gallery-thumb-img"
-                    />
-                  </div>
-                ))}
-              </div>
+              {/* Todas as Fotos Cadastradas */}
+              {allImages.length > 0 && (
+                <div className="pd-gallery-all-thumbs">
+                  {allImages.map((url, tIdx) => (
+                    <div
+                      key={tIdx}
+                      className={`pd-gallery-thumb-item ${selectedPhotoIdx === tIdx ? 'selected' : ''}`}
+                      onClick={() => setSelectedPhotoIdx(tIdx)}
+                      title={`Foto ${tIdx + 1}`}
+                    >
+                      <img
+                        src={url}
+                        alt={`Foto miniatura ${tIdx + 1}`}
+                        className="pd-gallery-thumb-img"
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </section>
 
@@ -954,8 +963,8 @@ export default function ProductDetails() {
               {/* Canal 1: Loja Própria TEKNIX */}
               <div className="pd-channel-item">
                 <div className="pd-channel-left">
-                  <div className="pd-channel-icon-box pd-channel-icon-tx">
-                    TX
+                  <div className="pd-channel-icon-box pd-channel-icon-tx" title="Loja Própria TEKNIX">
+                    <img src="/teknix-logo.svg" alt="TEKNIX" style={{ width: 26, height: 'auto', objectFit: 'contain' }} />
                   </div>
                   <div>
                     <div className="pd-channel-name">Loja Própria TEKNIX</div>
@@ -972,8 +981,8 @@ export default function ProductDetails() {
               {/* Canal 2: MercadoLivre */}
               <div className="pd-channel-item">
                 <div className="pd-channel-left">
-                  <div className="pd-channel-icon-box pd-channel-icon-ml">
-                    ML
+                  <div className="pd-channel-icon-box pd-channel-icon-ml" title="Mercado Livre">
+                    <MercadoLivreLogo size={22} />
                   </div>
                   <div>
                     <div className="pd-channel-name">MercadoLivre (Lojas)</div>

@@ -78,7 +78,7 @@
 
   /* Botão Secundário (Branco com borda sutil) */
   --hub-btn-secondary-bg: #ffffff;
-  --hub-btn-secondary-hover: #f8fafc;
+  --hub-btn-secondary-hover: #F7F7F7;
   --hub-btn-secondary-border: 1px solid #e6e6e6;
   --hub-btn-secondary-color: #333333;
   --hub-btn-secondary-size: 13px;
@@ -479,7 +479,7 @@
 :is(.hub-layout, .flow-layout) .hub-badge.neutral,
 :is(.hub-layout, .flow-layout) .hub-badge.enviado,
 :is(.hub-layout, .flow-layout) .hub-badge.processando {
-  background: #f8fafc;
+  background: #F7F7F7;
   color: #475569;
   border: 1px solid #e2e8f0;
 }
@@ -617,7 +617,7 @@
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: #f8fafc;
+  background: #F7F7F7;
   border: 1px solid #e2e8f0;
   display: flex;
   align-items: center;

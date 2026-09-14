@@ -90,22 +90,82 @@ export function WhatsAppLogo({ size = 26, className = '' }: LogoProps) {
 
 export function MercadoPagoLogo({ size = 26, className = '' }: LogoProps) {
   return (
-    <svg
-      width={size}
+    <img
+      src="/logos/mercado-pago.svg"
+      alt="Mercado Pago"
+      width={Math.round(size * 2.2)}
       height={size}
-      viewBox="0 0 24 24"
-      xmlns="http://www.w3.org/2000/svg"
+      style={{
+        width: 'auto',
+        maxWidth: `${Math.round(size * 2.4)}px`,
+        height: `${size}px`,
+        maxHeight: `${size}px`,
+        objectFit: 'contain',
+        display: 'inline-block',
+        verticalAlign: 'middle'
+      }}
       className={className}
-    >
-      <rect width="24" height="24" rx="6" fill="#009EE3" />
-      <path
-        d="M5 11.5C5 11.5 7.5 9 10 11C12.5 13 13.5 12 13.5 12L12.5 10L10 10.5C9 9 10 7.5 11.5 8C13 8.5 15.5 10.5 17 9.5C18.5 8.5 18.5 8.5 18.5 8.5"
-        stroke="#ffffff"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
-      <circle cx="8" cy="7.5" r="1" fill="#ffffff" />
-    </svg>
+      onError={(e) => {
+        const img = e.target as HTMLImageElement
+        if (!img.src.endsWith('.png')) {
+          img.src = '/logos/mercado-pago.png'
+        }
+      }}
+    />
+  )
+}
+
+export function CieloLogo({ size = 26, className = '' }: LogoProps) {
+  return (
+    <img
+      src="/logos/cielo.svg"
+      alt="Cielo"
+      width={Math.round(size * 2.4)}
+      height={size}
+      style={{
+        width: 'auto',
+        maxWidth: `${Math.round(size * 2.6)}px`,
+        height: `${size}px`,
+        maxHeight: `${size}px`,
+        objectFit: 'contain',
+        display: 'inline-block',
+        verticalAlign: 'middle'
+      }}
+      className={className}
+      onError={(e) => {
+        const img = e.target as HTMLImageElement
+        if (!img.src.endsWith('.png')) {
+          img.src = '/logos/cielo.png'
+        }
+      }}
+    />
+  )
+}
+
+export function PayPalLogo({ size = 26, className = '' }: LogoProps) {
+  return (
+    <img
+      src="/logos/paypal.webp"
+      alt="PayPal"
+      width={Math.round(size * 2)}
+      height={size}
+      style={{
+        width: 'auto',
+        maxWidth: `${Math.round(size * 2.2)}px`,
+        height: `${size}px`,
+        maxHeight: `${size}px`,
+        objectFit: 'contain',
+        display: 'inline-block',
+        verticalAlign: 'middle'
+      }}
+      className={className}
+      onError={(e) => {
+        const img = e.target as HTMLImageElement
+        if (!img.src.endsWith('.png')) {
+          img.src = '/logos/paypal.png'
+        }
+      }}
+    />
   )
 }
 
@@ -262,21 +322,28 @@ const LOGO_PATHS: Record<string, string> = {
   ml: '/logos/mercado-livre.svg',
   mercado_pago: '/logos/mercado-pago.svg',
   mercadopago: '/logos/mercado-pago.svg',
+  mp: '/logos/mercado-pago.svg',
+  cielo: '/logos/cielo.svg',
+  paypal: '/logos/paypal.webp',
+  pagarme: '/logos/pagarme.svg',
+  pagar_me: '/logos/pagarme.svg',
   shopee: '/logos/shopee.svg',
   amazon: '/logos/amazon.svg',
   magalu: '/logos/magalu.svg',
   magazine: '/logos/magalu.svg',
   casas_bahia: '/logos/casas-bahia.svg',
   casasbahia: '/logos/casas-bahia.svg',
-  melhor_envio: '/logos/melhor-envio.svg',
-  melhorenvio: '/logos/melhor-envio.svg',
-  focus_nfe: '/logos/focus-nfe.svg',
-  focusnfe: '/logos/focus-nfe.svg',
+  melhor_envio: '/logos/melhor-envio.webp',
+  melhorenvio: '/logos/melhor-envio.webp',
+  focus_nfe: '/logos/focus-nfe.png',
+  focusnfe: '/logos/focus-nfe.png',
   bling: '/logos/bling.svg',
-  asaas: '/logos/asaas.svg',
-  frenet: '/logos/frenet.svg',
+  asaas: '/logos/asaas.png',
+  frenet: '/logos/frenet.webp',
   correios: '/logos/correios.svg',
-  brevo: '/logos/brevo.svg',
+  brevo: '/logos/brevo.png',
+  webhook: '/logos/webhook.png',
+  webhooks: '/logos/webhook.png',
   whatsapp: '/logos/whatsapp.svg',
   tiktok: '/logos/tiktok.svg',
   shopify: '/logos/shopify.svg',
@@ -295,20 +362,25 @@ export function IntegrationLogoRenderer({
   className?: string
 }) {
   const c = (code || '').toLowerCase().replace(/-/g, '_')
-  
-  // Verifica se há logo oficial SVG disponível
-  const matchedKey = Object.keys(LOGO_PATHS).find(k => c === k || c.includes(k) || k.includes(c))
-  if (matchedKey && LOGO_PATHS[matchedKey]) {
+
+  // Normalização e busca da logo oficial
+  let logoUrl: string | undefined = LOGO_PATHS[c]
+  if (!logoUrl) {
+    const matchedKey = Object.keys(LOGO_PATHS).find(k => c === k || c.startsWith(k) || k.startsWith(c) || c.includes(k))
+    if (matchedKey) logoUrl = LOGO_PATHS[matchedKey]
+  }
+
+  if (logoUrl) {
     return (
       <img
-        src={LOGO_PATHS[matchedKey]}
+        src={logoUrl}
         alt={code}
         width={size}
         height={size}
         style={{
-          width: `${size}px`,
-          height: `${size}px`,
-          maxWidth: `${size}px`,
+          width: 'auto',
+          height: 'auto',
+          maxWidth: `${Math.round(size * 2.2)}px`,
           maxHeight: `${size}px`,
           objectFit: 'contain',
           display: 'inline-block',
@@ -316,14 +388,28 @@ export function IntegrationLogoRenderer({
         }}
         className={className}
         onError={(e) => {
-          // Fallback gracioso se não carregar a imagem
-          (e.target as HTMLElement).style.display = 'none'
+          const img = e.target as HTMLImageElement
+          if (c.includes('cielo') && !img.src.endsWith('.png')) {
+            img.src = '/logos/cielo.png'
+          } else if (c.includes('pago') && !img.src.endsWith('.png')) {
+            img.src = '/logos/mercado-pago.png'
+          } else if (c.includes('paypal') && !img.src.endsWith('.png')) {
+            img.src = '/logos/paypal.png'
+          } else if (c.includes('pagar') && !img.src.endsWith('.png')) {
+            img.src = '/logos/pagarme.png'
+          } else if (c.includes('melhor') && !img.src.endsWith('.svg')) {
+            img.src = '/logos/melhor-envio.svg'
+          } else if (c.includes('frenet') && !img.src.endsWith('.svg')) {
+            img.src = '/logos/frenet.svg'
+          }
         }}
       />
     )
   }
 
+  if (c.includes('cielo')) return <CieloLogo size={size} className={className} />
   if (c.includes('pago')) return <MercadoPagoLogo size={size} className={className} />
+  if (c.includes('paypal')) return <PayPalLogo size={size} className={className} />
   if (c.includes('mercado') || c.includes('meli') || c === 'ml') return <MercadoLivreLogo size={size} className={className} />
   if (c.includes('shopee')) return <ShopeeLogo size={size} className={className} />
   if (c.includes('amazon')) return <AmazonLogo size={size} className={className} />

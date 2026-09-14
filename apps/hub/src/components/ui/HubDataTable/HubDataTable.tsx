@@ -70,6 +70,8 @@ export interface HubDataTableProps<T extends { id: string }> {
   pageSize?: number
   /** Contador */
   totalCount?: number
+  /** Ação ao clicar na linha da tabela */
+  onRowClick?: (row: T) => void
   /** Extra na toolbar */
   toolbarExtra?: React.ReactNode
 }
@@ -123,6 +125,7 @@ export function HubDataTable<T extends { id: string }>({
   emptyDescription,
   pageSize = 50,
   totalCount,
+  onRowClick,
   toolbarExtra,
 }: HubDataTableProps<T>) {
   const [selectedIds, setSelectedIds] = useState<string[]>([])
@@ -291,15 +294,33 @@ export function HubDataTable<T extends { id: string }>({
               {emptyDescription && <p className="hub-empty-desc">{emptyDescription}</p>}
             </div>
           ) : (
-            paginatedRows.map(row => {
+            paginatedRows.map((row, index) => {
               const isSelected = selectedIds.includes(row.id)
+              const isMenuOpen = openMenuId === row.id
+              const isNearBottom = index >= Math.max(0, paginatedRows.length - 2) && paginatedRows.length >= 3
+
               return (
                 <div
                   key={row.id}
-                  className={`hub-table-row${isSelected ? ' selected' : ''}`}
-                  style={{ gridTemplateColumns: colWidths }}
+                  className={`hub-table-row${isSelected ? ' selected' : ''}${isMenuOpen ? ' menu-open' : ''}`}
+                  style={{ gridTemplateColumns: colWidths, cursor: onRowClick ? 'pointer' : undefined }}
                   role="row"
                   aria-selected={isSelected}
+                  onClick={(e) => {
+                    const target = e.target as HTMLElement
+                    if (
+                      target.closest('.hub-checkbox-cell') ||
+                      target.closest('.hub-actions-cell') ||
+                      target.closest('a') ||
+                      target.closest('button') ||
+                      target.closest('input')
+                    ) {
+                      return
+                    }
+                    if (onRowClick) {
+                      onRowClick(row)
+                    }
+                  }}
                 >
                   {/* Checkbox */}
                   <div className="hub-checkbox-cell">
@@ -350,7 +371,7 @@ export function HubDataTable<T extends { id: string }>({
 
                         {openMenuId === row.id && (
                           <div
-                            className="hub-action-dropdown"
+                            className={`hub-action-dropdown${isNearBottom ? ' dropdown-up' : ''}`}
                             onClick={e => e.stopPropagation()}
                             role="menu"
                           >

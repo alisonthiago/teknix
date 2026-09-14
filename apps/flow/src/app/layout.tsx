@@ -1,5 +1,10 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
 
 export const metadata: Metadata = {
   title: "TEKNIX — Gestão inteligente de vendas e marketplaces",
@@ -17,6 +22,7 @@ export const metadata: Metadata = {
 
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import { ToastContainer } from '@/components/ui/ToastContainer';
+import { MobileViewportGuard } from '@/components/MobileViewportGuard';
 import { Inter } from "next/font/google";
 
 const inter = Inter({
@@ -30,6 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="pt-BR" className={`h-full antialiased ${inter.variable}`}>
       <body className="min-h-full flex flex-col font-sans">
+        <MobileViewportGuard />
         <NotificationProvider>
           {children}
           <ToastContainer />

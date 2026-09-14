@@ -318,7 +318,7 @@ export default function LiveMonitorDrawer({ open, onClose }: LiveMonitorDrawerPr
                   key={o.id}
                   href={`/pedidos/${o.id || o.order_number}`}
                   onClick={onClose}
-                  className="block p-2.5 rounded-xl bg-[#fafafa] hover:bg-[#f5f5f5] border border-[#eee] hover:border-[#bfdbfe] text-[11px] transition-all group cursor-pointer"
+                  className="block p-2.5 rounded-xl bg-[#fafafa] hover:bg-[#f5f5f5] border border-[#eee] hover:border-[#e5e7eb] text-[11px] transition-all group cursor-pointer"
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-[#111] group-hover:text-[#1f2328] transition-colors">{o.order_number}</span>

@@ -110,7 +110,7 @@ export default function ConversasPage() {
                 placeholder="Buscar conversa ou grupo..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="w-full h-9 pl-8 pr-3 bg-[#f8fafc] border border-[#d0d7de] rounded-xl text-xs text-[#333] focus:outline-none focus:bg-white focus:border-[#16a34a] transition-all"
+                className="w-full h-9 pl-8 pr-3 bg-[#F7F7F7] border border-[#d0d7de] rounded-xl text-xs text-[#333] focus:outline-none focus:bg-white focus:border-[#16a34a] transition-all"
               />
             </div>
 
@@ -158,7 +158,7 @@ export default function ConversasPage() {
                       return convColab?.photo_url ? (
                         <img src={convColab.photo_url} alt={convColab.name} className="w-10 h-10 rounded-2xl object-cover border border-[#e2e8f0] shadow-xs" />
                       ) : (
-                        <div className="w-10 h-10 rounded-2xl bg-[#f1f5f9] text-[#334155] border border-[#e2e8f0] flex items-center justify-center text-xs font-black">
+                        <div className="w-10 h-10 rounded-2xl bg-[#f1f5f9] text-[#333333] border border-[#e2e8f0] flex items-center justify-center text-xs font-black">
                           {conv.type === 'GROUP' ? <Users className="w-4 h-4 text-[#16a34a]" /> : getConversationDisplayName(conv, currentUser?.id, collaborators).slice(0, 1).toUpperCase()}
                         </div>
                       )
@@ -206,7 +206,7 @@ export default function ConversasPage() {
                     return activeColab?.photo_url ? (
                       <img src={activeColab.photo_url} alt={activeColab.name} className="w-9 h-9 rounded-xl object-cover border border-[#e2e8f0] shadow-xs" />
                     ) : (
-                      <div className="w-9 h-9 rounded-xl bg-[#f1f5f9] text-[#334155] border border-[#e2e8f0] flex items-center justify-center text-xs font-extrabold">
+                      <div className="w-9 h-9 rounded-xl bg-[#f1f5f9] text-[#333333] border border-[#e2e8f0] flex items-center justify-center text-xs font-extrabold">
                         {activeConversation.type === 'GROUP' ? <Users className="w-4 h-4 text-[#16a34a]" /> : getConversationDisplayName(activeConversation, currentUser?.id, collaborators).slice(0, 1).toUpperCase()}
                       </div>
                     )
@@ -220,14 +220,14 @@ export default function ConversasPage() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <div className="hidden sm:flex items-center gap-1 text-xs font-bold text-[#64748b]">
+                  <div className="hidden sm:flex items-center gap-1 text-xs font-bold text-[#666666]">
                     <span>{activeConversation.members.length} participantes</span>
                   </div>
                 </div>
               </div>
 
               {/* Linha do Tempo das Mensagens Clean */}
-              <div className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4 bg-[#f8fafc]">
+              <div className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4 bg-[#F7F7F7]">
                 {messages.map(msg => (
                   <MessageCardRenderer
                     key={msg.id}
@@ -252,7 +252,7 @@ export default function ConversasPage() {
                         handleSend()
                       }
                     }}
-                    className="flex-1 h-11 px-4 bg-[#f8fafc] border border-[#d0d7de] rounded-xl text-xs text-[#1e293b] focus:outline-none focus:bg-white focus:border-[#16a34a] transition-all"
+                    className="flex-1 h-11 px-4 bg-[#F7F7F7] border border-[#d0d7de] rounded-xl text-xs text-[#333333] focus:outline-none focus:bg-white focus:border-[#16a34a] transition-all"
                   />
 
                   <button

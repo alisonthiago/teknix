@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import {
@@ -32,18 +32,83 @@ import {
   CheckCircle2,
   Layers,
   FileCode,
-  AlertCircle
+  AlertCircle,
+  Upload,
+  Image,
+  X,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react'
 import './CategoryEdit.css'
+
+const PRESET_CUTOUTS = [
+  { label: 'Microfones & Áudio', url: '/images/referencias/microfones.png', alt: 'Microfone' },
+  { label: 'Pistola de Lavagem', url: '/images/referencias/pistola-de-lavagem.webp', alt: 'Lavagem' },
+  { label: 'Parafusadeira', url: '/images/referencias/parafusadeira.webp', alt: 'Parafusadeira' },
+  { label: 'Morsa de Bancada', url: '/images/referencias/morsa-de-bancada.webp', alt: 'Morsa' },
+  { label: 'Macaco Hidráulico', url: '/images/referencias/macaco-hidraulico.webp', alt: 'Macaco' },
+  { label: 'Lixadeira', url: '/images/referencias/lixadeira.webp', alt: 'Lixadeira' },
+  { label: 'Pistola de Pintura', url: '/images/referencias/pistola-de-pintura.webp', alt: 'Pintura' },
+]
 
 export default function CategoryEdit() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const isNew = !id || id === 'nova'
+  const isNew = !id || id === 'nova' || id === 'add'
 
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [activeTab, setActiveTab] = useState<'general' | 'rules' | 'products' | 'seo' | 'marketplaces'>('general')
+  const [activeTab, setActiveTab] = useState<'general' | 'mosaic' | 'rules' | 'products' | 'seo' | 'marketplaces'>('general')
+  const [showAdvanced, setShowAdvanced] = useState(false)
+  const [showDirectUrlInput, setShowDirectUrlInput] = useState(false)
+
+  // Upload de Foto da Categoria
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [uploadingPhoto, setUploadingPhoto] = useState(false)
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setUploadingPhoto(true)
+    try {
+      const ext = file.name.split('.').pop() || 'png'
+      const fileName = `${Date.now()}_cat_${Math.random().toString(36).substring(2, 7)}.${ext}`
+      const path = `categories/${fileName}`
+
+      const { error: uploadError } = await supabase.storage.from('media').upload(path, file, {
+        upsert: true,
+        contentType: file.type
+      })
+
+      if (uploadError) {
+        const { error: uploadError2 } = await supabase.storage.from('uploads').upload(path, file, {
+          upsert: true,
+          contentType: file.type
+        })
+        if (uploadError2) throw uploadError2
+        const { data: urlData2 } = supabase.storage.from('uploads').getPublicUrl(path)
+        setForm(prev => ({
+          ...prev,
+          image_url: urlData2.publicUrl,
+          mosaic_image_url: prev.mosaic_image_url || urlData2.publicUrl
+        }))
+      } else {
+        const { data: urlData } = supabase.storage.from('media').getPublicUrl(path)
+        setForm(prev => ({
+          ...prev,
+          image_url: urlData.publicUrl,
+          mosaic_image_url: prev.mosaic_image_url || urlData.publicUrl
+        }))
+      }
+    } catch (err: any) {
+      console.error('Erro ao fazer upload da imagem da categoria:', err)
+      alert('Erro ao enviar imagem. Verifique o arquivo e tente novamente.')
+    } finally {
+      setUploadingPhoto(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
 
   // Catálogo completo para preview e vinculação
   const [allProducts, setAllProducts] = useState<any[]>([])
@@ -63,6 +128,9 @@ export default function CategoryEdit() {
     sort_order: 0,
     linking_mode: 'hybrid',
     rule_operator: 'OR',
+    show_in_mosaic: true,
+    mosaic_image_url: '',
+    mosaic_label: '',
     rules: [
       {
         id: crypto.randomUUID(),
@@ -308,7 +376,7 @@ export default function CategoryEdit() {
 
         if (error) throw error
         alert('Categoria criada com sucesso!')
-        navigate(`/hub/categorias/${data.id || form.id}`)
+        navigate('/hub/categorias')
       } else {
         const { error } = await supabase
           .from('store_categories')
@@ -352,14 +420,18 @@ export default function CategoryEdit() {
             <span>{isNew ? 'Nova Categoria' : form.name || 'Editar'}</span>
           </div>
           <div className="cat-edit-title-group">
-            <h1 className="cat-edit-title">{form.name || 'Nova Categoria Central'}</h1>
-            <span className={`cat-edit-badge ${form.status === 'active' ? 'active' : 'inactive'}`}>
-              {form.status === 'active' ? 'Ativa no Catálogo' : 'Inativa'}
-            </span>
-            {form.linking_mode !== 'manual' && (
-              <span className="cat-edit-badge smart">
-                <Zap size={11} /> Regras Inteligentes
-              </span>
+            <h1 className="cat-edit-title">{isNew ? 'Nova Categoria' : (form.name || 'Categoria Sem Nome')}</h1>
+            {!isNew && (
+              <>
+                <span className={`cat-edit-badge ${form.status === 'active' ? 'active' : 'inactive'}`}>
+                  {form.status === 'active' ? 'Ativa' : 'Inativa'}
+                </span>
+                {form.linking_mode !== 'manual' && (
+                  <span className="cat-edit-badge smart">
+                    <Zap size={11} /> Regras
+                  </span>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -370,7 +442,7 @@ export default function CategoryEdit() {
             className="hub-btn hub-btn-secondary"
             onClick={() => navigate('/hub/categorias')}
           >
-            <ArrowLeft size={15} /> Voltar
+            <span className="cat-btn-icon-bubble"><ArrowLeft size={14} /></span> Voltar
           </button>
 
           {!isNew && form.slug && (
@@ -382,14 +454,14 @@ export default function CategoryEdit() {
                 className="hub-btn hub-btn-secondary"
                 title="Visualizar a categoria no SITE público"
               >
-                <ExternalLink size={15} /> Ver no SITE
+                <span className="cat-btn-icon-bubble"><ExternalLink size={13} /></span> Ver no SITE
               </a>
               <Link
                 to={pageBuilderUrl}
                 className="hub-btn hub-btn-secondary"
                 title="Abrir no Page Builder oficial"
               >
-                <FileCode size={15} /> Editar Página
+                <span className="cat-btn-icon-bubble"><FileCode size={13} /></span> Editar Página
               </Link>
             </>
           )}
@@ -400,47 +472,416 @@ export default function CategoryEdit() {
             onClick={handleSave}
             disabled={saving}
           >
-            <Save size={15} /> {saving ? 'Salvando...' : 'Salvar Categoria'}
+            <Save size={15} /> {saving ? 'Salvando...' : (isNew ? 'Criar Categoria' : 'Salvar')}
           </button>
         </div>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="cat-edit-tabs">
-        <button
-          className={`cat-edit-tab-btn ${activeTab === 'general' ? 'active' : ''}`}
-          onClick={() => setActiveTab('general')}
-        >
-          <Sliders size={16} /> Geral & Hierarquia
-        </button>
-        <button
-          className={`cat-edit-tab-btn ${activeTab === 'rules' ? 'active' : ''}`}
-          onClick={() => setActiveTab('rules')}
-        >
-          <Zap size={16} /> Regras Inteligentes & Preview
-          {form.rules?.length > 0 && (
-            <span className="cat-edit-tab-badge">{form.rules.length}</span>
-          )}
-        </button>
-        <button
-          className={`cat-edit-tab-btn ${activeTab === 'products' ? 'active' : ''}`}
-          onClick={() => setActiveTab('products')}
-        >
-          <Package size={16} /> Produtos Vinculados
-          <span className="cat-edit-tab-badge">{resolvedLinkedProducts.length}</span>
-        </button>
-        <button
-          className={`cat-edit-tab-btn ${activeTab === 'seo' ? 'active' : ''}`}
-          onClick={() => setActiveTab('seo')}
-        >
-          <Globe size={16} /> Página & SEO
-        </button>
-        <button
-          className={`cat-edit-tab-btn ${activeTab === 'marketplaces' ? 'active' : ''}`}
-          onClick={() => setActiveTab('marketplaces')}
-        >
-          <Store size={16} /> Marketplaces
-        </button>
+      {/* Se for Nova Categoria, exibe fluxo simplificado e direto com texto mínimo e limpo */}
+      {isNew ? (
+        <div className="cat-new-flow-container">
+          <div className="cat-new-flow-grid">
+            {/* Coluna Principal */}
+            <div className="cat-new-flow-main">
+              {/* Informações Básicas */}
+              <div className="cat-card">
+                <div className="cat-card-header" style={{ marginBottom: 14 }}>
+                  <h3 className="cat-card-title">Informações</h3>
+                </div>
+
+                <div className="cat-form-group" style={{ marginBottom: 16 }}>
+                  <label className="cat-form-label">Nome *</label>
+                  <input
+                    type="text"
+                    className="cat-form-input"
+                    style={{ fontSize: 14, fontWeight: 500 }}
+                    placeholder="Ex: Microfones & Áudio"
+                    value={form.name}
+                    onChange={e => handleNameChange(e.target.value)}
+                    autoFocus
+                  />
+                  {form.slug && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: '#0369a1', marginTop: 4 }}>
+                      <span>URL:</span>
+                      <code style={{ background: '#f0f9ff', padding: '1px 6px', borderRadius: 4, border: '1px solid #bae6fd' }}>
+                        /categoria/{form.slug}
+                      </code>
+                    </div>
+                  )}
+                </div>
+
+                <div className="cat-form-group" style={{ marginBottom: 16 }}>
+                  <label className="cat-form-label">Categoria Superior</label>
+                  <select
+                    className="cat-form-select"
+                    value={form.parent_id || ''}
+                    onChange={e => setForm({ ...form, parent_id: e.target.value || null })}
+                  >
+                    <option value="">Nenhuma (Principal)</option>
+                    {categoriesList
+                      .filter(c => c.id !== form.id)
+                      .map(c => (
+                        <option key={c.id} value={c.id}>
+                          {c.name}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+
+                <div className="cat-form-group">
+                  <label className="cat-form-label">Descrição</label>
+                  <textarea
+                    className="cat-form-textarea"
+                    style={{ minHeight: 64 }}
+                    placeholder="Descrição opcional..."
+                    value={form.description}
+                    onChange={e => setForm({ ...form, description: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              {/* Foto da Categoria */}
+              <div className="cat-card">
+                <div className="cat-card-header" style={{ marginBottom: 14 }}>
+                  <h3 className="cat-card-title">Foto</h3>
+                </div>
+
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  style={{ display: 'none' }}
+                />
+
+                <div className="cat-photo-manager-box" style={{ background: '#F7F7F7', padding: 14, borderRadius: 12, border: '1px solid #e2e8f0' }}>
+                  <div className="cat-photo-preview-container">
+                    {form.image_url ? (
+                      <div className="cat-photo-preview-card">
+                        <img
+                          src={form.image_url}
+                          alt={form.name || 'Foto'}
+                          className="cat-photo-preview-image"
+                        />
+                        <button
+                          type="button"
+                          className="cat-photo-remove-action"
+                          onClick={() => setForm(prev => ({ ...prev, image_url: '', mosaic_image_url: '' }))}
+                          title="Remover foto"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="cat-photo-placeholder" onClick={() => fileInputRef.current?.click()} title="Clique para enviar foto">
+                        <Image size={24} color="#94a3b8" />
+                        <span className="cat-photo-placeholder-text">Enviar foto</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="cat-photo-controls">
+                    <div className="cat-photo-actions-row">
+                      <button
+                        type="button"
+                        className="cat-upload-file-btn"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={uploadingPhoto}
+                      >
+                        <Upload size={14} />
+                        {uploadingPhoto ? 'Enviando...' : 'Escolher Imagem'}
+                      </button>
+                      {form.image_url && (
+                        <button
+                          type="button"
+                          className="hub-btn hub-btn-secondary"
+                          style={{ height: 38, fontSize: 12 }}
+                          onClick={() => setForm(prev => ({ ...prev, image_url: '', mosaic_image_url: '' }))}
+                        >
+                          Remover
+                        </button>
+                      )}
+                    </div>
+
+                    <div style={{ marginTop: 8 }}>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: '#64748b', display: 'block', marginBottom: 4 }}>
+                        Sugestões:
+                      </span>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                        {PRESET_CUTOUTS.map(preset => {
+                          const isSelected = form.image_url === preset.url
+                          return (
+                            <button
+                              key={preset.url}
+                              type="button"
+                              className={`cat-photo-preset-chip ${isSelected ? 'selected' : ''}`}
+                              onClick={() => setForm(prev => ({
+                                ...prev,
+                                image_url: preset.url,
+                                mosaic_image_url: prev.mosaic_image_url || preset.url
+                              }))}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 6,
+                                padding: '4px 10px',
+                                borderRadius: 16,
+                                border: isSelected ? '1px solid #0f172a' : '1px solid #e2e8f0',
+                                background: isSelected ? '#0f172a' : '#ffffff',
+                                color: isSelected ? '#ffffff' : '#334155',
+                                fontSize: 11,
+                                fontWeight: isSelected ? 600 : 400,
+                                cursor: 'pointer',
+                                transition: 'all 0.15s ease'
+                              }}
+                            >
+                              <img src={preset.url} alt={preset.alt} style={{ width: 16, height: 16, objectFit: 'contain' }} />
+                              <span>{preset.alt}</span>
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+
+                    <div style={{ marginTop: 6 }}>
+                      {!showDirectUrlInput ? (
+                        <button
+                          type="button"
+                          onClick={() => setShowDirectUrlInput(true)}
+                          style={{ background: 'none', border: 'none', color: '#0071e3', fontSize: 11, cursor: 'pointer', padding: 0, textDecoration: 'underline' }}
+                        >
+                          Inserir link direto
+                        </button>
+                      ) : (
+                        <input
+                          type="text"
+                          className="cat-form-input raw-input"
+                          placeholder="Cole o link da imagem (URL)..."
+                          value={form.image_url}
+                          onChange={e => {
+                            const val = e.target.value
+                            setForm(prev => ({ ...prev, image_url: val, mosaic_image_url: prev.mosaic_image_url || val }))
+                          }}
+                          style={{ height: 32, fontSize: 12 }}
+                        />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Coluna Lateral */}
+            <div className="cat-new-flow-side">
+              {/* Visibilidade */}
+              <div className="cat-card">
+                <div className="cat-card-header" style={{ marginBottom: 12 }}>
+                  <h3 className="cat-card-title">Visibilidade</h3>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #f1f5f9' }}>
+                  <span style={{ fontSize: 13, fontWeight: 500, color: '#0f172a' }}>Ativa no Catálogo</span>
+                  <label className="cat-mosaic-switch">
+                    <input
+                      type="checkbox"
+                      checked={form.status === 'active'}
+                      onChange={e => setForm({ ...form, status: e.target.checked ? 'active' : 'inactive', is_published: e.target.checked })}
+                    />
+                    <span className="cat-mosaic-slider" />
+                  </label>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0' }}>
+                  <span style={{ fontSize: 13, fontWeight: 500, color: '#0f172a' }}>Destaque na Home</span>
+                  <label className="cat-mosaic-switch">
+                    <input
+                      type="checkbox"
+                      checked={form.show_in_mosaic !== false}
+                      onChange={e => setForm({ ...form, show_in_mosaic: e.target.checked })}
+                    />
+                    <span className="cat-mosaic-slider" />
+                  </label>
+                </div>
+
+                {form.show_in_mosaic !== false && (
+                  <div style={{ background: '#F7F7F7', padding: 10, borderRadius: 10, border: '1px solid #e2e8f0', marginTop: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <div style={{ width: 44, height: 44, borderRadius: 10, background: '#ffffff', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
+                        {form.image_url ? (
+                          <img src={form.image_url} alt="" style={{ width: 34, height: 34, objectFit: 'contain' }} />
+                        ) : (
+                          <span style={{ fontSize: 9, color: '#94a3b8' }}>Sem foto</span>
+                        )}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 12, fontWeight: 600, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {form.mosaic_label || form.name || 'Nome da Categoria'}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ marginTop: 8 }}>
+                      <label style={{ fontSize: 11, fontWeight: 500, color: '#64748b', display: 'block', marginBottom: 3 }}>
+                        Rótulo na Home (opcional):
+                      </label>
+                      <input
+                        type="text"
+                        className="cat-form-input"
+                        style={{ height: 30, fontSize: 12 }}
+                        placeholder={form.name || 'Ex: Microfones'}
+                        value={form.mosaic_label || ''}
+                        onChange={e => setForm({ ...form, mosaic_label: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Opções Avançadas (Recolhido) */}
+              <div className="cat-card" style={{ padding: 14 }}>
+                <button
+                  type="button"
+                  onClick={() => setShowAdvanced(!showAdvanced)}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    background: 'none',
+                    border: 'none',
+                    padding: 0,
+                    cursor: 'pointer',
+                    color: '#475569',
+                    fontWeight: 500,
+                    fontSize: 12
+                  }}
+                >
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Sliders size={13} /> Opções Avançadas
+                  </span>
+                  {showAdvanced ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                </button>
+
+                {showAdvanced && (
+                  <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid #f1f5f9', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    <div className="cat-form-group">
+                      <label className="cat-form-label" style={{ fontSize: 12 }}>Ordem</label>
+                      <input
+                        type="number"
+                        className="cat-form-input"
+                        style={{ height: 32 }}
+                        value={form.sort_order}
+                        onChange={e => setForm({ ...form, sort_order: Number(e.target.value) })}
+                      />
+                    </div>
+
+                    <div className="cat-form-group">
+                      <label className="cat-form-label" style={{ fontSize: 12 }}>Slug</label>
+                      <input
+                        type="text"
+                        className="cat-form-input"
+                        style={{ height: 32 }}
+                        value={form.slug}
+                        onChange={e => setForm({ ...form, slug: normalizeText(e.target.value).replace(/\s+/g, '-') })}
+                      />
+                    </div>
+
+                    <div className="cat-form-group">
+                      <label className="cat-form-label" style={{ fontSize: 12 }}>Título SEO</label>
+                      <input
+                        type="text"
+                        className="cat-form-input"
+                        style={{ height: 32 }}
+                        placeholder="Ex: Microfones | TEKNIX"
+                        value={form.seo_title}
+                        onChange={e => setForm({ ...form, seo_title: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Botões de Ação */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <button
+                  type="button"
+                  className="hub-btn hub-btn-primary"
+                  style={{ width: '100%', height: 42, justifyContent: 'center', fontSize: 13, fontWeight: 600 }}
+                  onClick={handleSave}
+                  disabled={saving}
+                >
+                  <Save size={15} /> {saving ? 'Salvando...' : 'Criar Categoria'}
+                </button>
+                <button
+                  type="button"
+                  className="hub-btn hub-btn-secondary"
+                  style={{ width: '100%', height: 36, justifyContent: 'center', fontSize: 12 }}
+                  onClick={() => navigate('/hub/categorias')}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* Navigation Tabs - Padrão Oficial 1:1 do Sistema (StatsOverview) */}
+          <div className="stats-tab-nav" style={{ display: 'flex', gap: 6, borderBottom: '1px solid #e2e8f0', paddingBottom: 10, overflowX: 'auto', marginBottom: 24 }}>
+            {[
+              { id: 'general', label: 'Geral & Hierarquia' },
+          { id: 'mosaic', label: 'Mosaico da Home' },
+          { id: 'rules', label: 'Regras Inteligentes & Preview', count: form.rules?.length },
+          { id: 'products', label: 'Produtos Vinculados', count: resolvedLinkedProducts.length },
+          { id: 'seo', label: 'Página & SEO' },
+          { id: 'marketplaces', label: 'Marketplaces' },
+        ].map(tab => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setActiveTab(tab.id as any)}
+            className={`stats-tab-button ${activeTab === tab.id ? 'is-active' : ''}`}
+            style={{
+              background: activeTab === tab.id ? '#0f172a' : '#ffffff',
+              color: activeTab === tab.id ? '#ffffff' : '#475569',
+              border: '1px solid ' + (activeTab === tab.id ? '#0f172a' : '#e2e8f0'),
+              borderRadius: 980,
+              padding: '5px 14px',
+              fontSize: '0.8rem',
+              fontWeight: activeTab === tab.id ? 600 : 500,
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              whiteSpace: 'nowrap',
+              height: 'auto',
+              minHeight: 'unset',
+              lineHeight: 1.4
+            }}
+          >
+            <span>{tab.label}</span>
+            {tab.count !== undefined && tab.count > 0 && (
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minWidth: 16,
+                  height: 16,
+                  padding: '0 4px',
+                  borderRadius: 999,
+                  fontSize: '10px',
+                  fontWeight: 700,
+                  background: activeTab === tab.id ? 'rgba(255, 255, 255, 0.2)' : '#f1f5f9',
+                  color: activeTab === tab.id ? '#ffffff' : '#64748b'
+                }}
+              >
+                {tab.count}
+              </span>
+            )}
+          </button>
+        ))}
       </div>
 
       {/* ─── ABA 1: GERAL & HIERARQUIA ────────────────────────────────────────── */}
@@ -519,15 +960,102 @@ export default function CategoryEdit() {
               />
             </div>
 
-            <div className="cat-form-group">
-              <label className="cat-form-label">URL da Imagem / Banner</label>
-              <input
-                type="text"
-                className="cat-form-input"
-                placeholder="https://exemplo.com/banner-ferramentas.jpg"
-                value={form.image_url}
-                onChange={e => setForm({ ...form, image_url: e.target.value })}
-              />
+            {/* Foto e Banner da Categoria com Upload Direto */}
+            <div className="cat-form-group full cat-photo-upload-section">
+              <label className="cat-form-label">
+                <span>Foto & Imagem de Apresentação da Categoria</span>
+                <span className="cat-form-hint-tag">Formatos aceitos: PNG, WEBP, JPG</span>
+              </label>
+
+              <div className="cat-photo-manager-box">
+                {/* Input oculto para upload de arquivo */}
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  style={{ display: 'none' }}
+                />
+
+                {/* Prévia da Imagem */}
+                <div className="cat-photo-preview-container">
+                  {form.image_url ? (
+                    <div className="cat-photo-preview-card">
+                      <img
+                        src={form.image_url}
+                        alt={form.name || 'Foto da Categoria'}
+                        className="cat-photo-preview-image"
+                      />
+                      <button
+                        type="button"
+                        className="cat-photo-remove-action"
+                        onClick={() => setForm(prev => ({ ...prev, image_url: '' }))}
+                        title="Remover foto"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="cat-photo-placeholder" onClick={() => fileInputRef.current?.click()} title="Clique para enviar uma imagem">
+                      <Image size={28} color="#94a3b8" />
+                      <span className="cat-photo-placeholder-text">Clique para enviar imagem</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Controles de Upload e URL */}
+                <div className="cat-photo-controls">
+                  <div className="cat-photo-actions-row">
+                    <button
+                      type="button"
+                      className="cat-upload-file-btn"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploadingPhoto}
+                    >
+                      <Upload size={14} />
+                      {uploadingPhoto ? 'Enviando foto...' : 'Subir Foto / Imagem'}
+                    </button>
+                    <span className="cat-photo-or-text">ou informe uma URL direta:</span>
+                  </div>
+
+                  <input
+                    type="text"
+                    className="cat-form-input raw-input"
+                    placeholder="Cole ou edite a URL da imagem da categoria..."
+                    value={form.image_url}
+                    onChange={e => {
+                      const val = e.target.value
+                      setForm(prev => ({
+                        ...prev,
+                        image_url: val,
+                        mosaic_image_url: prev.mosaic_image_url || val
+                      }))
+                    }}
+                  />
+
+                  {/* Recortes oficiais rápidos */}
+                  <div className="cat-photo-presets-row">
+                    <span className="cat-photo-presets-label">Fotos prontas da loja:</span>
+                    <div className="cat-photo-presets-tags">
+                      {PRESET_CUTOUTS.map(preset => (
+                        <button
+                          key={preset.url}
+                          type="button"
+                          className={`cat-photo-preset-chip ${form.image_url === preset.url ? 'selected' : ''}`}
+                          onClick={() => setForm(prev => ({
+                            ...prev,
+                            image_url: preset.url,
+                            mosaic_image_url: prev.mosaic_image_url || preset.url
+                          }))}
+                        >
+                          <img src={preset.url} alt={preset.alt} className="cat-photo-chip-thumb" />
+                          <span>{preset.alt}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="cat-form-group">
@@ -563,6 +1091,159 @@ export default function CategoryEdit() {
                 <option value="true">Publicada no SITE Público</option>
                 <option value="false">Rascunho (Não visível para clientes)</option>
               </select>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── SEÇÃO / ABA: CARROSSEL & MOSAICO DA HOME ────────────────────────── */}
+      {activeTab === 'mosaic' && (
+        <div className="cat-card cat-mosaic-settings-card">
+          <div className="cat-card-header cat-mosaic-card-header">
+            <div>
+              <h3 className="cat-card-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Layers size={18} style={{ color: 'var(--button-primary, #0071e3)' }} /> Exibição no Mosaico de Categorias da Home (Página Inicial)
+              </h3>
+              <p className="cat-card-desc">
+                Defina a imagem de recorte (cutout), o rótulo e a presença desta categoria no carrossel de categorias da Home pública do SITE.
+              </p>
+            </div>
+
+            <div className="cat-mosaic-toggle-box">
+              <label className="cat-mosaic-switch">
+                <input
+                  type="checkbox"
+                  checked={form.show_in_mosaic !== false}
+                  onChange={e => setForm({ ...form, show_in_mosaic: e.target.checked })}
+                />
+                <span className="cat-mosaic-slider" />
+              </label>
+              <span className="cat-mosaic-switch-label">
+                {form.show_in_mosaic !== false ? 'Exibição Ativa no Mosaico' : 'Oculta no Mosaico'}
+              </span>
+            </div>
+          </div>
+
+          <div className="cat-mosaic-grid">
+            {/* 1:1 Live Preview exatamente como renderizado na Home */}
+            <div className="cat-mosaic-preview-col">
+              <div className="cat-mosaic-preview-title">
+                <span>Prévia 1:1 no Carrossel da Home</span>
+                <span className="cat-mosaic-live-badge">Tempo Real</span>
+              </div>
+
+              <div className="cat-mosaic-preview-frame">
+                <div className="dsvia-mosaic-wrapper-simulated">
+                  <div className="dsvia-mosaic-item" style={{ width: 110 }}>
+                    <div
+                      className="dsvia-mosaic-card is-cutout"
+                      style={{ width: 90, height: 90, borderRadius: 20 }}
+                    >
+                      {(form.mosaic_image_url || form.image_url) ? (
+                        <img
+                          alt={form.mosaic_label || form.name || 'Categoria'}
+                          src={form.mosaic_image_url || form.image_url}
+                          loading="lazy"
+                        />
+                      ) : (
+                        <span className="cat-label-tip">Sem foto</span>
+                      )}
+                    </div>
+                    <span className="dsvia-mosaic-label" style={{ maxWidth: 110 }}>
+                      {form.mosaic_label || form.name || 'Nome da Categoria'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="cat-mosaic-preview-meta">
+                <div className="cat-mosaic-meta-item">
+                  <span className="cat-meta-lbl">URL no SITE:</span>
+                  <code>{`/categoria/${form.slug || 'slug'}`}</code>
+                </div>
+                {!isNew && (
+                  <a
+                    href={publicCategoryUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="cat-mosaic-view-site-link"
+                  >
+                    <ExternalLink size={13} /> Testar no SITE
+                  </a>
+                )}
+              </div>
+            </div>
+
+            {/* Controles de Configuração e Galeria */}
+            <div className="cat-mosaic-fields-col">
+              <div className="cat-form-group">
+                <label className="cat-form-label">
+                  <span>Rótulo Curto no Carrossel</span>
+                  <span className="cat-label-tip">Texto compacto exibido abaixo do card</span>
+                </label>
+                <input
+                  type="text"
+                  className="cat-form-input"
+                  placeholder={form.name || 'Ex: Microfones'}
+                  value={form.mosaic_label || ''}
+                  onChange={e => setForm({ ...form, mosaic_label: e.target.value })}
+                />
+              </div>
+
+              <div className="cat-form-group">
+                <label className="cat-form-label">
+                  <span>URL da Imagem de Recorte (Cutout PNG/WebP)</span>
+                  <span className="cat-label-tip">Fundo transparente ou branco de estúdio isolado</span>
+                </label>
+                <input
+                  type="text"
+                  className="cat-form-input"
+                  placeholder="/images/referencias/microfones.png ou https://..."
+                  value={form.mosaic_image_url || form.image_url || ''}
+                  onChange={e => {
+                    const val = e.target.value
+                    setForm({
+                      ...form,
+                      mosaic_image_url: val,
+                      image_url: val || form.image_url
+                    })
+                  }}
+                />
+              </div>
+
+              {/* Galeria de Recortes Oficiais Disponíveis */}
+              <div className="cat-preset-section">
+                <div className="cat-preset-header">
+                  <span className="cat-preset-title">Galeria de Recortes Padrão TEKNIX</span>
+                  <span className="cat-preset-subtitle">Clique em uma imagem para aplicar instantaneamente:</span>
+                </div>
+
+                <div className="cat-preset-list">
+                  {PRESET_CUTOUTS.map(preset => {
+                    const isSelected = (form.mosaic_image_url === preset.url) || (form.image_url === preset.url)
+                    return (
+                      <button
+                        type="button"
+                        key={preset.url}
+                        className={`cat-preset-card ${isSelected ? 'active' : ''}`}
+                        onClick={() => {
+                          setForm({
+                            ...form,
+                            mosaic_image_url: preset.url,
+                            image_url: preset.url,
+                            mosaic_label: form.mosaic_label || preset.alt
+                          })
+                        }}
+                      >
+                        <div className="cat-preset-img-wrap">
+                          <img src={preset.url} alt={preset.label} loading="lazy" />
+                        </div>
+                        <span className="cat-preset-lbl">{preset.label}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -891,7 +1572,7 @@ export default function CategoryEdit() {
           </div>
 
           {/* Integração com Page Builder */}
-          <div style={{ marginTop: 28, padding: 20, background: '#f8fafc', borderRadius: 10, border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+          <div style={{ marginTop: 28, padding: 20, background: '#F7F7F7', borderRadius: 10, border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
             <div>
               <h4 style={{ margin: '0 0 4px', fontSize: 15, fontWeight: 700, color: '#0f172a' }}>
                 Page Builder da Categoria
@@ -950,6 +1631,8 @@ export default function CategoryEdit() {
           </div>
         </div>
       )}
+        </>
+      )}
 
       {/* MODAL PARA ADICIONAR PRODUTOS MANUALMENTE */}
       {showProductModal && (
@@ -1001,7 +1684,7 @@ export default function CategoryEdit() {
                           padding: '10px 14px',
                           borderRadius: 8,
                           border: isSelected ? '1px solid #0f172a' : '1px solid #e2e8f0',
-                          background: isSelected ? '#f8fafc' : '#ffffff',
+                          background: isSelected ? '#F7F7F7' : '#ffffff',
                           cursor: 'pointer'
                         }}
                       >

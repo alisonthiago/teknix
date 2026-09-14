@@ -123,7 +123,7 @@ export default function AtividadesPage() {
               URGENT: { label: 'URGENTE', bg: 'bg-[#fee2e2] text-[#dc2626] border-[#fecaca]' },
               HIGH: { label: 'ALTA', bg: 'bg-[#fef3c7] text-[#d97706] border-[#fde68a]' },
               MEDIUM: { label: 'MÉDIA', bg: 'bg-[#e0e7ff] text-[#4338ca] border-[#c7d2fe]' },
-              LOW: { label: 'BAIXA', bg: 'bg-[#f1f5f9] text-[#475569] border-[#e2e8f0]' },
+              LOW: { label: 'BAIXA', bg: 'bg-[#f1f5f9] text-[#666666] border-[#e2e8f0]' },
             }[task.priority]
 
             return (
@@ -150,7 +150,7 @@ export default function AtividadesPage() {
 
                   <div className="min-w-0 space-y-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h4 className={`text-sm font-black ${isDone ? 'line-through text-[#888]' : 'text-[#1e293b]'}`}>
+                      <h4 className={`text-sm font-black ${isDone ? 'line-through text-[#888]' : 'text-[#333333]'}`}>
                         {task.title}
                       </h4>
                       <span className={`px-2 py-0.5 rounded-md text-[9px] font-black border ${priorityConfig.bg}`}>
@@ -158,20 +158,20 @@ export default function AtividadesPage() {
                       </span>
                     </div>
 
-                    <p className="text-xs text-[#64748b] leading-relaxed max-w-2xl">
+                    <p className="text-xs text-[#666666] leading-relaxed max-w-2xl">
                       {task.description}
                     </p>
 
-                    <div className="flex items-center gap-3 text-[11px] text-[#64748b] pt-1 flex-wrap font-medium">
+                    <div className="flex items-center gap-3 text-[11px] text-[#666666] pt-1 flex-wrap font-medium">
                       <span className="flex items-center gap-1">
-                        <User className="w-3.5 h-3.5 text-[#1f2328]" /> Responsável: <strong className="text-[#1e293b]">{task.assigned_to.name}</strong>
+                        <User className="w-3.5 h-3.5 text-[#1f2328]" /> Responsável: <strong className="text-[#333333]">{task.assigned_to.name}</strong>
                       </span>
                       {task.related_order_number && (
-                        <span className="flex items-center gap-1 font-mono text-[#1e293b]">
+                        <span className="flex items-center gap-1 font-mono text-[#333333]">
                           <ShoppingCart className="w-3.5 h-3.5 text-[#16a34a]" /> Pedido: {task.related_order_number}
                         </span>
                       )}
-                      <span className="text-[#94a3b8]">
+                      <span className="text-[#999999]">
                         Criado há {new Date(task.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
@@ -183,10 +183,10 @@ export default function AtividadesPage() {
                   {task.related_order_number && (
                     <Link
                       href="/pedidos"
-                      className="px-3.5 py-1.5 bg-[#f8fafc] hover:bg-[#f1f5f9] border border-[#e2e8f0] text-xs font-bold text-[#1e293b] rounded-xl flex items-center gap-1.5 transition-all"
+                      className="px-3.5 py-1.5 bg-[#F7F7F7] hover:bg-[#f1f5f9] border border-[#e2e8f0] text-xs font-bold text-[#333333] rounded-xl flex items-center gap-1.5 transition-all"
                     >
                       <span>Abrir Pedido</span>
-                      <ExternalLink className="w-3.5 h-3.5 text-[#64748b]" />
+                      <ExternalLink className="w-3.5 h-3.5 text-[#666666]" />
                     </Link>
                   )}
 
@@ -194,7 +194,7 @@ export default function AtividadesPage() {
                     onClick={() => updateTaskStatus(task.id, isDone ? 'TODO' : 'DONE')}
                     className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                       isDone
-                        ? 'bg-[#f1f5f9] text-[#64748b] hover:bg-[#e2e8f0]'
+                        ? 'bg-[#f1f5f9] text-[#666666] hover:bg-[#e2e8f0]'
                         : 'bg-[#16a34a] hover:bg-[#15803d] text-white shadow-sm'
                     }`}
                   >

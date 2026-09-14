@@ -59,6 +59,9 @@ export interface CentralCategory {
   seo_title?: string
   seo_description?: string
   canonical_url?: string
+  show_in_mosaic?: boolean
+  mosaic_image_url?: string
+  mosaic_label?: string
   marketplace_mappings?: MarketplaceMapping[]
   page_id?: string | null
   created_at?: string
@@ -289,6 +292,9 @@ export function parseCategoryRow(row: any): CentralCategory {
     seo_title: row.seo_title || seo.seo_title || row.name || '',
     seo_description: row.seo_description || seo.seo_description || row.description || '',
     canonical_url: row.canonical_url || seo.canonical_url || `/categoria/${row.slug}`,
+    show_in_mosaic: row.show_in_mosaic ?? seo.show_in_mosaic ?? true,
+    mosaic_image_url: row.mosaic_image_url || seo.mosaic_image_url || row.image_url || seo.image_url || '',
+    mosaic_label: row.mosaic_label || seo.mosaic_label || row.name || '',
     marketplace_mappings: Array.isArray(row.marketplace_mappings)
       ? row.marketplace_mappings
       : Array.isArray(seo.marketplace_mappings)
@@ -318,17 +324,22 @@ export function formatCategoryPayload(cat: Partial<CentralCategory>) {
     seo_title: cat.seo_title || cat.name || '',
     seo_description: cat.seo_description || cat.description || '',
     canonical_url: cat.canonical_url || `/categoria/${cat.slug}`,
+    show_in_mosaic: cat.show_in_mosaic !== false,
+    mosaic_image_url: cat.mosaic_image_url || cat.image_url || '',
+    mosaic_label: cat.mosaic_label || cat.name || '',
     icon: cat.icon || '',
     is_published: cat.is_published !== false,
     marketplace_mappings: cat.marketplace_mappings || []
   }
+
+  const effectiveImageUrl = cat.image_url || cat.mosaic_image_url || ''
 
   return {
     name: cat.name?.trim(),
     slug: cat.slug?.trim(),
     description: cat.description || '',
     parent_id: cat.parent_id || null,
-    image_url: cat.image_url || '',
+    image_url: effectiveImageUrl,
     status: cat.status || (cat.is_published === false ? 'inactive' : 'active'),
     sort_order: Number(cat.sort_order ?? 0),
     page_id: cat.page_id || null,

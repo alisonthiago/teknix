@@ -113,7 +113,7 @@
 
 .tkn-shipping-option.is-selected {
   border-color: #0066cc !important;
-  background: #f0f7ff !important;
+  background: #F7F7F7 !important;
 }
 
 .tkn-shipping-option input[type="radio"],
@@ -416,7 +416,7 @@
   align-items: center;
   gap: 6px;
   background: #f5f5f7;
-  color: #6e6e73;
+  color: #666666;
   padding: 6px 12px;
   border-radius: 20px;
   font-size: 12px;
@@ -473,7 +473,7 @@
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  color: #86868b;
+  color: #999999;
   font-weight: 500;
 }
 
@@ -538,7 +538,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  color: #86868b;
+  color: #999999;
   margin: 0 0 4px;
 }
 
@@ -553,7 +553,7 @@
 
 .tkn-pay-headline-order {
   font-size: 13px;
-  color: #6e6e73;
+  color: #666666;
   margin: 0;
   font-weight: 500;
 }
@@ -707,12 +707,12 @@
   align-items: center;
   gap: 8px;
   font-size: 12px;
-  color: #86868b;
+  color: #999999;
 }
 
 .tkn-pay-qr-hint {
   font-size: 11px;
-  color: #86868b;
+  color: #999999;
   text-align: center;
   margin: 0;
   line-height: 1.4;
@@ -758,7 +758,7 @@
   min-height: 40px;
   border-radius: 10px;
   background: #f5f5f7;
-  color: #1d1d1f;
+  color: #111111;
   border: 1px solid #e5e5ea;
   font-size: 13px;
   font-weight: 600;
@@ -770,10 +770,10 @@
 
 .tkn-pay-link-help {
   font-size: 12px;
-  color: #6e6e73;
+  color: #666666;
   text-decoration: none;
 }
-.tkn-pay-link-help:hover { color: #1d1d1f; text-decoration: underline; }
+.tkn-pay-link-help:hover { color: #111111; text-decoration: underline; }
 
 /* Responsivo: 1 coluna em mobile */
 @media (max-width: 600px) {
@@ -954,7 +954,7 @@
 .tkn-pix-amount-label {
   font-size: 12px;
   font-weight: 600;
-  color: #86868b;
+  color: #999999;
   text-transform: uppercase;
   letter-spacing: 0.6px;
 }
@@ -962,7 +962,7 @@
 .tkn-pix-amount-val {
   font-size: 34px;
   font-weight: 700;
-  color: #1d1d1f;
+  color: #111111;
   letter-spacing: -0.8px;
   line-height: 1.15;
 }
@@ -1055,7 +1055,7 @@
 
 .tkn-pix-qr-caption {
   font-size: 13px;
-  color: #6e6e73;
+  color: #666666;
   max-width: 320px;
   line-height: 1.45;
   margin: 0;
@@ -1079,12 +1079,12 @@
 .tkn-pix-copy-label {
   font-size: 14px;
   font-weight: 600;
-  color: #1d1d1f;
+  color: #111111;
 }
 
 .tkn-pix-copy-sub {
   font-size: 12px;
-  color: #86868b;
+  color: #999999;
 }
 
 .tkn-pix-input-box {
@@ -1151,7 +1151,7 @@
 .tkn-pix-instructions-title {
   font-size: 12px;
   font-weight: 600;
-  color: #1d1d1f;
+  color: #111111;
   margin: 0 0 14px 0;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -1192,12 +1192,12 @@
 .tkn-pix-step-text strong {
   font-size: 13px;
   font-weight: 600;
-  color: #1d1d1f;
+  color: #111111;
 }
 
 .tkn-pix-step-text span {
   font-size: 12px;
-  color: #6e6e73;
+  color: #666666;
   line-height: 1.4;
 }
 
@@ -1272,7 +1272,7 @@
   min-height: 44px;
   border-radius: 12px;
   background: #f5f5f7;
-  color: #1d1d1f;
+  color: #111111;
   border: 1px solid #e5e5ea;
   font-size: 14px;
   font-weight: 600;
@@ -1747,7 +1747,7 @@
 
 .tkn-boleto-barcode-hint {
   font-size: 11px;
-  color: #86868b;
+  color: #999999;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -1774,7 +1774,7 @@
 .tkn-boleto-line-label {
   font-size: 11px;
   font-weight: 800;
-  color: #1d1d1f;
+  color: #111111;
   letter-spacing: 0.8px;
   text-transform: uppercase;
 }
@@ -1782,7 +1782,7 @@
 .tkn-boleto-line-sub {
   font-size: 10px;
   font-weight: 500;
-  color: #86868b;
+  color: #999999;
   letter-spacing: 0.4px;
   text-transform: uppercase;
 }
@@ -1802,7 +1802,7 @@
   border: 1.5px solid #e5e5ea;
   border-radius: 12px;
   background: #f5f5f7;
-  color: #1d1d1f;
+  color: #111111;
   font-size: 14px;
   font-weight: 600;
   font-family: inherit;
@@ -1827,7 +1827,7 @@
 .tkn-boleto-mp-info-title {
   font-size: 11px;
   font-weight: 800;
-  color: #1d1d1f;
+  color: #111111;
   letter-spacing: 0.6px;
   text-transform: uppercase;
   margin: 0 0 14px;
@@ -1934,7 +1934,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  color: #86868b;
+  color: #999999;
   margin: 0 0 6px 0;
 }
 
@@ -1953,7 +1953,7 @@
   gap: 8px;
   font-size: 13px;
   font-weight: 500;
-  color: #6e6e73;
+  color: #666666;
 }
 
 .tkn-pix-order-badge {
@@ -2071,7 +2071,7 @@
 
 .tkn-pix-qr-instruction {
   font-size: 14px;
-  color: #6e6e73;
+  color: #666666;
   margin: 16px auto 0;
   max-width: 380px;
   line-height: 1.45;
@@ -2092,7 +2092,7 @@
 .tkn-pix-copy-title {
   font-size: 11px;
   font-weight: 700;
-  color: #1d1d1f;
+  color: #111111;
   letter-spacing: 0.6px;
   text-transform: uppercase;
 }
@@ -2100,7 +2100,7 @@
 .tkn-pix-copy-hint {
   font-size: 11px;
   font-weight: 600;
-  color: #86868b;
+  color: #999999;
   letter-spacing: 0.5px;
   text-transform: uppercase;
 }
@@ -2127,7 +2127,7 @@
 .tkn-pix-copy-code-area code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 12px;
-  color: #1d1d1f;
+  color: #111111;
   word-break: break-all;
   display: block;
   line-height: 1.4;
@@ -2169,8 +2169,8 @@
   align-items: center;
   gap: 12px;
   padding: 14px 18px;
-  background: #f0f7ff;
-  border: 1px solid #d0e5ff;
+  background: #F7F7F7;
+  border: 1px solid #e5e7eb;
   border-radius: 14px;
 }
 
@@ -2211,7 +2211,7 @@
 .tkn-pix-steps-title {
   font-size: 11px;
   font-weight: 700;
-  color: #1d1d1f;
+  color: #111111;
   letter-spacing: 0.8px;
   text-transform: uppercase;
   margin: 0 0 14px 0;
@@ -2296,7 +2296,7 @@
 }
 
 .tkn-btn-view-boleto:hover {
-  background: #f0f7ff;
+  background: #F7F7F7;
   border-color: #005bb5;
   color: #005bb5;
 }
@@ -2341,7 +2341,7 @@
   gap: 8px;
   font-size: 16px;
   font-weight: 700;
-  color: #1d1d1f;
+  color: #111111;
 }
 
 .tkn-boleto-modal-actions {
@@ -2860,8 +2860,8 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  background: #f0f7ff;
-  border: 1px solid #d0e5ff;
+  background: #F7F7F7;
+  border: 1px solid #e5e7eb;
   border-radius: 12px;
   padding: 12px 16px;
   font-size: 12px;

@@ -326,7 +326,7 @@ export default function CentralEtiquetasPage() {
         <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
           <button
             onClick={() => setShowConfigModal(true)}
-            className="h-[38px] px-3.5 bg-white border border-[#e6e6e6] hover:bg-[#f8fafc] text-[#333] rounded-lg text-sm font-normal flex items-center gap-2 transition-colors cursor-pointer shadow-2xs"
+            className="h-[38px] px-3.5 bg-white border border-[#e6e6e6] hover:bg-[#F7F7F7] text-[#333] rounded-lg text-sm font-normal flex items-center gap-2 transition-colors cursor-pointer shadow-2xs"
           >
             <Sliders className="w-4 h-4 text-[#666]" />
             <span>Configurar Impressora</span>
@@ -357,8 +357,8 @@ export default function CentralEtiquetasPage() {
       {/* ── 2. CARDS RESUMO COM RESPIRO E MINIMALISMO ────────────────────── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-white p-6 rounded-2xl border border-[#eef2f6] shadow-xs space-y-1">
-          <p className="text-xs font-semibold text-[#64748b] tracking-wide">Total de Pedidos</p>
-          <p className="text-3xl font-bold text-[#0f172a]">{stats.total}</p>
+          <p className="text-xs font-semibold text-[#666666] tracking-wide">Total de Pedidos</p>
+          <p className="text-3xl font-bold text-[#111111]">{stats.total}</p>
         </div>
 
         <div className="bg-white p-6 rounded-2xl border border-[#eef2f6] shadow-xs space-y-1">
@@ -370,13 +370,13 @@ export default function CentralEtiquetasPage() {
         </div>
 
         <div className="bg-white p-6 rounded-2xl border border-[#eef2f6] shadow-xs space-y-1">
-          <p className="text-xs font-semibold text-[#64748b] tracking-wide">Impressas Hoje</p>
-          <p className="text-3xl font-bold text-[#0f172a]">{stats.printedToday}</p>
+          <p className="text-xs font-semibold text-[#666666] tracking-wide">Impressas Hoje</p>
+          <p className="text-3xl font-bold text-[#111111]">{stats.printedToday}</p>
         </div>
 
         <div className="bg-white p-6 rounded-2xl border border-[#eef2f6] shadow-xs space-y-1">
-          <p className="text-xs font-semibold text-[#64748b] tracking-wide">Com Erro / Indisponível</p>
-          <p className="text-3xl font-bold text-[#64748b]">{stats.errors}</p>
+          <p className="text-xs font-semibold text-[#666666] tracking-wide">Com Erro / Indisponível</p>
+          <p className="text-3xl font-bold text-[#666666]">{stats.errors}</p>
         </div>
       </div>
 
@@ -423,8 +423,8 @@ export default function CentralEtiquetasPage() {
           </div>
 
           {/* Filtros de Status (Estilo HostGator) */}
-          <div className="flex items-center gap-1.5 text-xs font-medium text-[#64748b]">
-            <span className="pr-1 text-[#94a3b8]">Filtrar:</span>
+          <div className="flex items-center gap-1.5 text-xs font-medium text-[#666666]">
+            <span className="pr-1 text-[#999999]">Filtrar:</span>
             {[
               { key: 'ALL', label: 'Todos' },
               { key: 'AVAILABLE', label: 'Disponíveis' },
@@ -437,7 +437,7 @@ export default function CentralEtiquetasPage() {
                 className={`label-status-filter px-3 py-1.5 rounded-full transition-colors cursor-pointer ${
                   statusFilter === f.key
                     ? 'is-active bg-white text-[#1f2328] font-bold'
-                    : 'bg-white text-[#64748b] hover:bg-white hover:text-[#1f2328]'
+                    : 'bg-white text-[#666666] hover:bg-white hover:text-[#1f2328]'
                 }`}
               >
                 {f.label}
@@ -449,16 +449,16 @@ export default function CentralEtiquetasPage() {
         {/* Campo de Busca & Filtro de Canais */}
         <div className="flex flex-col sm:flex-row items-center gap-3 py-2">
           <div className="relative flex-1 w-full">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94a3b8]" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#999999]" />
             <input
               type="text"
               placeholder="Buscar por pedido, SKU, produto, rastreamento ou comprador..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full pl-11 pr-4 py-3 bg-white border border-[#e2e8f0] focus:border-[#0f172a] rounded-2xl text-sm text-[#0f172a] placeholder:text-[#94a3b8] focus:outline-none transition-all shadow-xs"
+              className="w-full pl-11 pr-4 py-3 bg-white border border-[#e2e8f0] focus:border-[#0f172a] rounded-2xl text-sm text-[#111111] placeholder:text-[#999999] focus:outline-none transition-all shadow-xs"
             />
             {search && (
-              <button onClick={() => setSearch('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#94a3b8] hover:text-[#0f172a]">
+              <button onClick={() => setSearch('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#999999] hover:text-[#111111]">
                 <X className="w-4 h-4" />
               </button>
             )}
@@ -475,7 +475,7 @@ export default function CentralEtiquetasPage() {
                   className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
                     isSelected
                       ? 'bg-[#347ff2] text-white border-[#347ff2]'
-                      : 'bg-white text-[#64748b] border-[#e2e8f0] hover:border-[#347ff2] hover:bg-[#347ff2] hover:text-white'
+                      : 'bg-white text-[#666666] border-[#e2e8f0] hover:border-[#347ff2] hover:bg-[#347ff2] hover:text-white'
                   }`}
                 >
                   {label}
@@ -488,12 +488,12 @@ export default function CentralEtiquetasPage() {
 
       {/* ── BARRA FLUTUANTE DE AÇÃO EM LOTE (ESTILO BRANCO CLEAN) ────────── */}
       {selectedOrderIds.length > 0 && (
-        <div className="bg-white text-[#0f172a] px-6 py-4 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.08)] border border-[#e2e8f0] flex items-center justify-between gap-4 animate-in slide-in-from-bottom-4 duration-200">
+        <div className="bg-white text-[#111111] px-6 py-4 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.08)] border border-[#e2e8f0] flex items-center justify-between gap-4 animate-in slide-in-from-bottom-4 duration-200">
           <div className="flex items-center gap-3">
             <span className="w-7 h-7 rounded-full bg-[#16a34a] text-white flex items-center justify-center font-bold text-xs shadow-xs">
               {selectedOrderIds.length}
             </span>
-            <p className="font-bold text-sm text-[#0f172a]">
+            <p className="font-bold text-sm text-[#111111]">
               {selectedOrderIds.length} etiqueta{selectedOrderIds.length > 1 ? 's' : ''} selecionada{selectedOrderIds.length > 1 ? 's' : ''}
             </p>
           </div>
@@ -501,7 +501,7 @@ export default function CentralEtiquetasPage() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSelectedOrderIds([])}
-              className="text-xs font-semibold text-[#64748b] hover:text-[#0f172a] transition-colors cursor-pointer px-2 py-1"
+              className="text-xs font-semibold text-[#666666] hover:text-[#111111] transition-colors cursor-pointer px-2 py-1"
             >
               Desmarcar
             </button>
@@ -523,20 +523,20 @@ export default function CentralEtiquetasPage() {
         <div className="bg-white rounded-3xl border border-[#eef2f6] shadow-xs overflow-hidden">
           {filteredOrders.length === 0 ? (
             <div className="py-20 px-6 text-center space-y-2">
-              <div className="w-12 h-12 rounded-2xl bg-[#f8fafc] flex items-center justify-center mx-auto text-[#94a3b8] mb-3">
+              <div className="w-12 h-12 rounded-2xl bg-[#F7F7F7] flex items-center justify-center mx-auto text-[#999999] mb-3">
                 <Package className="w-6 h-6" />
               </div>
-              <h3 className="text-base font-bold text-[#0f172a]">Nenhuma etiqueta encontrada</h3>
-              <p className="text-xs text-[#64748b] max-w-sm mx-auto">
+              <h3 className="text-base font-bold text-[#111111]">Nenhuma etiqueta encontrada</h3>
+              <p className="text-xs text-[#666666] max-w-sm mx-auto">
                 Não há etiquetas correspondentes aos filtros selecionados.
               </p>
             </div>
           ) : (
             <div className="divide-y divide-[#f1f5f9]">
               {/* Header da Lista */}
-              <div className="flex items-center justify-between px-6 py-4 bg-[#f8fafc] text-xs font-semibold text-[#64748b]">
+              <div className="flex items-center justify-between px-6 py-4 bg-[#F7F7F7] text-xs font-semibold text-[#666666]">
                 <div className="flex items-center gap-4">
-                  <button onClick={selectAll} className="cursor-pointer text-[#64748b]">
+                  <button onClick={selectAll} className="cursor-pointer text-[#666666]">
                     {selectedOrderIds.length === filteredOrders.length && filteredOrders.length > 0 ? (
                       <CheckSquare className="w-4 h-4 text-[#16a34a]" />
                     ) : (
@@ -569,21 +569,21 @@ export default function CentralEtiquetasPage() {
                         {isSelected ? (
                           <CheckSquare className="w-4 h-4 text-[#16a34a]" />
                         ) : (
-                          <Square className="w-4 h-4 text-[#cbd5e1] hover:text-[#64748b]" />
+                          <Square className="w-4 h-4 text-[#cbd5e1] hover:text-[#666666]" />
                         )}
                       </button>
 
                       <img
                         src={order.productImage}
                         alt={order.productName}
-                        className="w-11 h-11 rounded-xl object-contain border border-[#e2e8f0] bg-[#f8fafc] p-0.5 shrink-0"
+                        className="w-11 h-11 rounded-xl object-contain border border-[#e2e8f0] bg-[#F7F7F7] p-0.5 shrink-0"
                       />
 
                       <div className="min-w-0 space-y-0.5">
                         <p className="font-medium text-[13.5px] text-[#1f2328] truncate max-w-[320px]">
                           {order.productName}
                         </p>
-                        <div className="flex items-center gap-2 text-xs text-[#64748b]">
+                        <div className="flex items-center gap-2 text-xs text-[#666666]">
                           <span className="font-mono">SKU: {order.productSku}</span>
                           <span>·</span>
                           <span className="font-normal text-[#1f2328]">#{order.orderNumber}</span>
@@ -596,7 +596,7 @@ export default function CentralEtiquetasPage() {
                       {/* Canal */}
                       <div className="hidden md:flex items-center gap-2 min-w-[110px]">
                         <MarketplaceLogo name={order.marketplaceName} className="w-4 h-4" />
-                        <span className="text-xs font-medium text-[#334155]">{order.marketplaceName}</span>
+                        <span className="text-xs font-medium text-[#333333]">{order.marketplaceName}</span>
                       </div>
 
                       {/* Rastreio */}
@@ -623,7 +623,7 @@ export default function CentralEtiquetasPage() {
                           </span>
                         )}
                         {order.labelStatus === 'UNAVAILABLE' && (
-                          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-[#f1f5f9] text-[#64748b]">
+                          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-[#f1f5f9] text-[#666666]">
                             Indisponível
                           </span>
                         )}
@@ -636,7 +636,7 @@ export default function CentralEtiquetasPage() {
                             setPreviewOrder(order)
                             setShowPreviewModal(true)
                           }}
-                          className="p-2 rounded-xl text-[#94a3b8] hover:text-[#0f172a] hover:bg-[#f1f5f9] transition-colors cursor-pointer"
+                          className="p-2 rounded-xl text-[#999999] hover:text-[#111111] hover:bg-[#f1f5f9] transition-colors cursor-pointer"
                           title="Prévia da Etiqueta"
                         >
                           <Eye className="w-4 h-4" />
@@ -647,7 +647,7 @@ export default function CentralEtiquetasPage() {
                           className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                             order.labelStatus === 'AVAILABLE'
                               ? 'bg-[#16a34a] hover:bg-[#15803d] text-white shadow-xs'
-                              : 'bg-white border border-[#e2e8f0] text-[#334155] hover:border-[#0f172a]'
+                              : 'bg-white border border-[#e2e8f0] text-[#333333] hover:border-[#0f172a]'
                           }`}
                         >
                           {order.labelStatus === 'PRINTED' ? 'Reimprimir' : 'Imprimir'}
@@ -677,11 +677,11 @@ export default function CentralEtiquetasPage() {
                   <img
                     src={group.image}
                     alt={group.name}
-                    className="w-14 h-14 rounded-2xl object-contain border border-[#e2e8f0] bg-[#f8fafc] p-1 shrink-0"
+                    className="w-14 h-14 rounded-2xl object-contain border border-[#e2e8f0] bg-[#F7F7F7] p-1 shrink-0"
                   />
                   <div className="space-y-0.5">
-                    <h3 className="font-bold text-base text-[#0f172a]">{group.name}</h3>
-                    <div className="flex items-center gap-2 text-xs text-[#64748b]">
+                    <h3 className="font-bold text-base text-[#111111]">{group.name}</h3>
+                    <div className="flex items-center gap-2 text-xs text-[#666666]">
                       <span className="font-mono">SKU: {group.sku}</span>
                       <span>·</span>
                       <span className="font-bold text-[#16a34a]">{group.orders.length} vendas</span>
@@ -694,7 +694,7 @@ export default function CentralEtiquetasPage() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => selectProductOrders(group.orders)}
-                    className="px-4 py-2 bg-white border border-[#e2e8f0] hover:border-[#0f172a] text-[#0f172a] rounded-xl text-xs font-semibold transition-all cursor-pointer"
+                    className="px-4 py-2 bg-white border border-[#e2e8f0] hover:border-[#0f172a] text-[#111111] rounded-xl text-xs font-semibold transition-all cursor-pointer"
                   >
                     Selecionar Todas ({group.orders.length})
                   </button>
@@ -730,8 +730,8 @@ export default function CentralEtiquetasPage() {
                           <Square className="w-4 h-4 text-[#cbd5e1] shrink-0" />
                         )}
                         <div className="min-w-0 space-y-0.5">
-                          <p className="font-bold text-xs text-[#0f172a] truncate">Pedido #{order.orderNumber}</p>
-                          <p className="text-xs text-[#64748b] truncate">{order.customerName}</p>
+                          <p className="font-bold text-xs text-[#111111] truncate">Pedido #{order.orderNumber}</p>
+                          <p className="text-xs text-[#666666] truncate">{order.customerName}</p>
                           <p className="font-mono text-xs text-[#16a34a]">{order.trackingCode}</p>
                         </div>
                       </div>
@@ -759,12 +759,12 @@ export default function CentralEtiquetasPage() {
         <div className="bg-white rounded-3xl border border-[#eef2f6] shadow-xs overflow-hidden">
           <div className="p-6 border-b border-[#f1f5f9] flex items-center justify-between">
             <div>
-              <h3 className="font-bold text-base text-[#0f172a]">Histórico de Impressões</h3>
-              <p className="text-xs text-[#64748b]">Registro cronológico de etiquetas emitidas</p>
+              <h3 className="font-bold text-base text-[#111111]">Histórico de Impressões</h3>
+              <p className="text-xs text-[#666666]">Registro cronológico de etiquetas emitidas</p>
             </div>
             <button
               onClick={fetchLabelsData}
-              className="p-2 border border-[#e2e8f0] hover:border-[#0f172a] rounded-xl text-[#64748b] hover:text-[#0f172a] transition-all cursor-pointer"
+              className="p-2 border border-[#e2e8f0] hover:border-[#0f172a] rounded-xl text-[#666666] hover:text-[#111111] transition-all cursor-pointer"
             >
               <RefreshCw className="w-4 h-4" />
             </button>
@@ -772,19 +772,19 @@ export default function CentralEtiquetasPage() {
 
           <div className="divide-y divide-[#f1f5f9]">
             {printLogs.length === 0 ? (
-              <div className="py-16 text-center text-xs text-[#94a3b8]">
+              <div className="py-16 text-center text-xs text-[#999999]">
                 Nenhum registro de impressão encontrado.
               </div>
             ) : (
               printLogs.map(log => (
                 <div key={log.id} className="flex items-center justify-between px-6 py-4 hover:bg-[#fafafa]">
                   <div className="space-y-0.5">
-                    <p className="font-bold text-sm text-[#0f172a]">Pedido #{log.orderNumber}</p>
-                    <p className="text-xs text-[#64748b]">{log.marketplace} · {log.printedAt}</p>
+                    <p className="font-bold text-sm text-[#111111]">Pedido #{log.orderNumber}</p>
+                    <p className="text-xs text-[#666666]">{log.marketplace} · {log.printedAt}</p>
                   </div>
 
                   <div className="flex items-center gap-4">
-                    <span className="text-xs font-semibold text-[#0f172a]">{log.operator}</span>
+                    <span className="text-xs font-semibold text-[#111111]">{log.operator}</span>
                     <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-[#ecfdf5] text-[#16a34a]">
                       {log.attempt === 1 ? '1ª Impressão' : `${log.attempt}ª Reimpressão`}
                     </span>
@@ -793,7 +793,7 @@ export default function CentralEtiquetasPage() {
                         const found = orders.find(o => o.orderNumber === log.orderNumber)
                         if (found) handleBatchPrint([found.id], true)
                       }}
-                      className="px-3.5 py-1.5 bg-white border border-[#e2e8f0] hover:border-[#0f172a] text-[#0f172a] rounded-xl text-xs font-semibold transition-all cursor-pointer"
+                      className="px-3.5 py-1.5 bg-white border border-[#e2e8f0] hover:border-[#0f172a] text-[#111111] rounded-xl text-xs font-semibold transition-all cursor-pointer"
                     >
                       Reimprimir
                     </button>
@@ -817,19 +817,19 @@ export default function CentralEtiquetasPage() {
                   <Printer className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-base text-[#0f172a]">Fila de Impressão</h3>
-                  <p className="text-xs text-[#64748b]">Padrão térmico 100x150mm</p>
+                  <h3 className="font-bold text-base text-[#111111]">Fila de Impressão</h3>
+                  <p className="text-xs text-[#666666]">Padrão térmico 100x150mm</p>
                 </div>
               </div>
               {queueProgress.isFinished && (
-                <button onClick={() => setShowQueueModal(false)} className="text-[#94a3b8] hover:text-[#0f172a]">
+                <button onClick={() => setShowQueueModal(false)} className="text-[#999999] hover:text-[#111111]">
                   <X className="w-4 h-4" />
                 </button>
               )}
             </div>
 
             <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs font-bold text-[#0f172a]">
+              <div className="flex items-center justify-between text-xs font-bold text-[#111111]">
                 <span>{queueProgress.activeOrder}</span>
                 <span>{queueProgress.current}/{queueProgress.total}</span>
               </div>
@@ -866,20 +866,20 @@ export default function CentralEtiquetasPage() {
                 <div className="w-9 h-9 rounded-xl bg-[#ecfdf5] border border-[#bbf7d0] flex items-center justify-center text-[#16a34a] shadow-xs">
                   <Printer className="w-5 h-5" />
                 </div>
-                <h3 className="font-bold text-base text-[#0f172a]">Configurações da Impressora</h3>
+                <h3 className="font-bold text-base text-[#111111]">Configurações da Impressora</h3>
               </div>
-              <button onClick={() => setShowConfigModal(false)} className="text-[#94a3b8] hover:text-[#0f172a]">
+              <button onClick={() => setShowConfigModal(false)} className="text-[#999999] hover:text-[#111111]">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="space-y-4 text-xs">
               <div>
-                <label className="block font-semibold text-[#334155] mb-1.5">Tamanho da Etiqueta</label>
+                <label className="block font-semibold text-[#333333] mb-1.5">Tamanho da Etiqueta</label>
                 <select
                   value={printerConfig.paperSize}
                   onChange={e => setPrinterConfig({ ...printerConfig, paperSize: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-[#e2e8f0] rounded-xl text-xs font-semibold text-[#0f172a]"
+                  className="w-full px-3.5 py-2.5 bg-[#F7F7F7] border border-[#e2e8f0] rounded-xl text-xs font-semibold text-[#111111]"
                 >
                   <option value="100x150">100mm x 150mm (Padrão Mercado Envios / Shopee / Correios)</option>
                   <option value="100x100">100mm x 100mm</option>
@@ -895,7 +895,7 @@ export default function CentralEtiquetasPage() {
             <div className="pt-3 border-t border-[#f1f5f9] flex justify-end gap-2.5">
               <button
                 onClick={() => window.open('/api/shipments/mercadolivre/label?original=false&cropPackagingOnly=true', '_blank')}
-                className="px-4 py-2 bg-white border border-[#e2e8f0] text-[#334155] rounded-xl text-xs font-semibold"
+                className="px-4 py-2 bg-white border border-[#e2e8f0] text-[#333333] rounded-xl text-xs font-semibold"
               >
                 Imprimir Teste
               </button>
@@ -925,24 +925,24 @@ export default function CentralEtiquetasPage() {
                   <Printer className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-base text-[#0f172a] leading-tight">
+                  <h3 className="font-bold text-base text-[#111111] leading-tight">
                     Etiqueta Oficial da Plataforma (PDF 100x150mm)
                   </h3>
-                  <p className="text-xs text-[#64748b] mt-0.5">
+                  <p className="text-xs text-[#666666] mt-0.5">
                     {previewOrder.marketplaceName} • Pedido #{previewOrder.orderNumber} • {previewOrder.customerName}
                   </p>
                 </div>
               </div>
               <button 
                 onClick={() => setShowPreviewModal(false)} 
-                className="w-8 h-8 rounded-xl flex items-center justify-center text-[#94a3b8] hover:text-[#0f172a] hover:bg-[#f1f5f9] transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-xl flex items-center justify-center text-[#999999] hover:text-[#111111] hover:bg-[#f1f5f9] transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Visualizador do PDF Real da Plataforma */}
-            <div className="flex-1 bg-[#f8fafc] border border-[#e2e8f0] rounded-2xl overflow-hidden min-h-[480px] flex items-center justify-center relative shadow-inner">
+            <div className="flex-1 bg-[#F7F7F7] border border-[#e2e8f0] rounded-2xl overflow-hidden min-h-[480px] flex items-center justify-center relative shadow-inner">
               <iframe
                 src={`/api/shipments/mercadolivre/label?orderId=${encodeURIComponent(previewOrder.id)}&cropPackagingOnly=true#toolbar=0&navpanes=0`}
                 className="w-full h-[480px] rounded-2xl bg-white border-0"
@@ -952,7 +952,7 @@ export default function CentralEtiquetasPage() {
 
             {/* Barra de Ações */}
             <div className="pt-2 flex items-center justify-between gap-3 border-t border-[#f1f5f9]">
-              <span className="text-xs text-[#94a3b8] font-medium hidden sm:inline">
+              <span className="text-xs text-[#999999] font-medium hidden sm:inline">
                 Formato térmico padrão 100x150mm pronto para expedição
               </span>
 
@@ -962,7 +962,7 @@ export default function CentralEtiquetasPage() {
                     const printUrl = `/api/shipments/mercadolivre/label?orderId=${encodeURIComponent(previewOrder.id)}&cropPackagingOnly=true`
                     window.open(printUrl, '_blank')
                   }}
-                  className="px-4 py-2.5 text-xs font-semibold text-[#475569] hover:text-[#0f172a] hover:bg-[#f1f5f9] rounded-xl border border-[#e2e8f0] transition-colors cursor-pointer"
+                  className="px-4 py-2.5 text-xs font-semibold text-[#666666] hover:text-[#111111] hover:bg-[#f1f5f9] rounded-xl border border-[#e2e8f0] transition-colors cursor-pointer"
                 >
                   Abrir PDF em Nova Aba
                 </button>

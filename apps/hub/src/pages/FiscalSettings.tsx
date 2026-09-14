@@ -18,7 +18,7 @@ import {
 import { supabase } from '../lib/supabase'
 import './FiscalSettings.css'
 
-export default function FiscalSettings() {
+export default function FiscalSettings({ embedded = false }: { embedded?: boolean } = {}) {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -147,26 +147,31 @@ export default function FiscalSettings() {
   }
 
   return (
-    <div className="fiscal-settings-page">
+    <div className={`fiscal-settings-page ${embedded ? 'embedded' : ''}`}>
       {/* Top Header */}
       <div className="fisc-header">
-        <Link to="/hub/configuracoes" className="fisc-back-link">
-          <ArrowLeft size={16} /> Voltar para Configurações
-        </Link>
+        {!embedded && (
+          <Link to="/hub/configuracoes" className="fisc-back-link">
+            <ArrowLeft size={16} /> Voltar para Configurações
+          </Link>
+        )}
         <div className="fisc-header-row">
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <button
-              type="button"
-              className="btn-back-to-settings"
-              onClick={() => navigate('/hub/configuracoes')}
-              title="Voltar para Configurações"
-              aria-label="Voltar para Configurações"
-            >
-              <ChevronLeft size={20} />
-            </button>
+            {!embedded && (
+              <button
+                type="button"
+                className="btn-back-to-settings"
+                onClick={() => navigate('/hub/configuracoes')}
+                title="Voltar para Configurações"
+                aria-label="Voltar para Configurações"
+              >
+                <ChevronLeft size={20} />
+              </button>
+            )}
+            <h1 className="settings-main-title" style={{ margin: 0 }}>NF-e (Nota Fiscal & SEFAZ)</h1>
           </div>
           <button
-            className="btn-fisc-save"
+            className="btn btn-primary btn-fisc-save"
             onClick={handleSave}
             disabled={saving}
           >

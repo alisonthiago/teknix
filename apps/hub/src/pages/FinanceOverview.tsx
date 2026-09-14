@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { DollarSign, ShoppingBag, TrendingUp, CreditCard, CheckCircle2, Clock, Inbox } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import './FinanceOverview.css'
@@ -16,6 +16,7 @@ interface StoreOrderRow {
 }
 
 export default function FinanceOverview() {
+  const navigate = useNavigate()
   const [orders, setOrders] = useState<StoreOrderRow[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -134,14 +135,18 @@ export default function FinanceOverview() {
                 recentOrders.map(order => {
                   const isPaid = ['paid', 'approved', 'preparing', 'shipped', 'delivered'].includes((order.status || '').toLowerCase())
                   return (
-                    <tr key={order.id}>
+                    <tr
+                      key={order.id}
+                      onClick={() => navigate(`/hub/pedidos/${order.id}`)}
+                      style={{ cursor: 'pointer' }}
+                    >
                       <td style={{ color: '#888888', fontSize: 12 }}>
                         {order.created_at ? new Date(order.created_at).toLocaleDateString('pt-BR') : '-'}
                       </td>
                       <td>
-                        <Link to={`/hub/pedidos/${order.id}`} className="finance-order-link">
+                        <span className="finance-order-link" style={{ fontWeight: 600 }}>
                           {order.order_number || `#${order.id.slice(0, 8).toUpperCase()}`}
-                        </Link>
+                        </span>
                       </td>
                       <td style={{ fontWeight: 600, color: '#333333' }}>
                         {order.customer_name || 'Cliente'}

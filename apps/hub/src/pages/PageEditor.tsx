@@ -2131,8 +2131,8 @@ export default function PageEditor() {
                                 height: 'auto',
                                 padding: '10px 12px',
                                 width: '100%',
-                                background: selected === item.id ? '#eff6ff' : '#ffffff',
-                                borderColor: selected === item.id ? '#2563eb' : '#e2e8f0'
+                                background: selected === item.id ? '#F7F7F7' : '#ffffff',
+                                borderColor: selected === item.id ? '#1f2328' : '#e2e8f0'
                               }}
                               onClick={() => {
                                 setEditScope('global')
@@ -2238,7 +2238,7 @@ export default function PageEditor() {
                             }}
                           >
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                              <span style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', background: '#eff6ff', color: '#2563eb', padding: '2px 6px', borderRadius: 4 }}>
+                              <span style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', background: '#F7F7F7', color: '#1f2328', padding: '2px 6px', borderRadius: 4 }}>
                                 {tpl.badge}
                               </span>
                             </div>
@@ -2312,12 +2312,12 @@ export default function PageEditor() {
                                         style={{
                                           flex: 1,
                                           padding: '5px 8px',
-                                          background: '#eff6ff',
-                                          border: '1px solid #bfdbfe',
+                                          background: '#F7F7F7',
+                                          border: '1px solid #e5e7eb',
                                           borderRadius: 4,
                                           fontSize: 10,
                                           fontWeight: 600,
-                                          color: '#1d4ed8',
+                                          color: '#1f2328',
                                           cursor: 'pointer'
                                         }}
                                         onClick={() => {
@@ -2376,8 +2376,8 @@ export default function PageEditor() {
                                   padding: '8px 12px',
                                   width: '100%',
                                   opacity: isHidden ? 0.6 : 1,
-                                  background: selected === w.id ? '#eff6ff' : '#ffffff',
-                                  borderColor: selected === w.id ? '#2563eb' : '#e2e8f0'
+                                  background: selected === w.id ? '#F7F7F7' : '#ffffff',
+                                  borderColor: selected === w.id ? '#1f2328' : '#e2e8f0'
                                 }}
                                 onClick={() => {
                                   setSelected(w.id)
@@ -3609,7 +3609,7 @@ export default function PageEditor() {
                                 <button
                                   type="button"
                                   onClick={() => setEditingImage(true)}
-                                  style={{ width: '100%', padding: '6px 12px', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 12, cursor: 'pointer', marginTop: 4 }}
+                                  style={{ width: '100%', padding: '6px 12px', background: '#F7F7F7', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 12, cursor: 'pointer', marginTop: 4 }}
                                 >
                                   Trocar / Enviar Nova Imagem
                                 </button>
@@ -3956,7 +3956,7 @@ export default function PageEditor() {
                               Adicione ou edite os depoimentos exibidos na grade de avaliações:
                             </p>
                             {(Array.isArray(c.items) ? c.items : [{ name: 'Alison Silva', role: 'Mestre de Obras', rating: 5, text: 'Equipamentos de altíssima qualidade!' }]).map((rev: any, idx: number) => (
-                              <div key={idx} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, padding: 10, marginBottom: 8 }}>
+                              <div key={idx} style={{ background: '#F7F7F7', border: '1px solid #e2e8f0', borderRadius: 8, padding: 10, marginBottom: 8 }}>
                                 <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 6, marginBottom: 6 }}>
                                   <input
                                     type="text"
@@ -4708,7 +4708,7 @@ export default function PageEditor() {
                                 </div>
 
                                 {/* EDIÇÃO RÁPIDA EM MASSA */}
-                                <div style={{ marginTop: 14, padding: 10, background: '#f8fafc', borderRadius: 8, border: '1px solid #e2e8f0' }}>
+                                <div style={{ marginTop: 14, padding: 10, background: '#F7F7F7', borderRadius: 8, border: '1px solid #e2e8f0' }}>
                                   <div style={{ fontSize: 11, fontWeight: 700, color: '#1e293b', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
                                     <Type size={13} color="#0071e3" /> Edição Rápida em Massa (Texto)
                                   </div>
@@ -5224,7 +5224,7 @@ export default function PageEditor() {
 
                                 {c.source === 'manual' && (
                                   <ControlRow label="Categorias Selecionadas" description="Marque as categorias que devem aparecer no menu">
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 180, overflowY: 'auto', padding: 8, background: '#f8fafc', borderRadius: 8, border: '1px solid #e2e8f0' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 180, overflowY: 'auto', padding: 8, background: '#F7F7F7', borderRadius: 8, border: '1px solid #e2e8f0' }}>
                                       {availableCats.map((catName) => {
                                         const isChecked = manualCats.includes(catName)
                                         return (
@@ -5900,7 +5900,7 @@ export default function PageEditor() {
                                                     width: 28,
                                                     height: 28,
                                                     borderRadius: 6,
-                                                    background: '#eff6ff',
+                                                    background: '#F7F7F7',
                                                     color: '#0071e3',
                                                     display: 'flex',
                                                     alignItems: 'center',
@@ -5951,7 +5951,7 @@ export default function PageEditor() {
                                                 alignItems: 'center',
                                                 gap: 14,
                                                 padding: '12px 14px',
-                                                background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+                                                background: 'linear-gradient(135deg, #ffffff 0%, #F7F7F7 100%)',
                                                 border: '1px solid #e2e8f0',
                                                 borderRadius: 10,
                                                 boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)'
@@ -6060,7 +6060,7 @@ export default function PageEditor() {
                                                     alignItems: 'center',
                                                     justifyContent: 'center',
                                                     cursor: 'pointer',
-                                                    background: '#f8fafc'
+                                                    background: '#F7F7F7'
                                                   }} title="Escolher cor personalizada">
                                                     <SlidersHorizontal size={11} color="#64748b" />
                                                     <input
@@ -7330,9 +7330,9 @@ export default function PageEditor() {
                                       fontWeight: 600,
                                       padding: '2px 6px',
                                       borderRadius: 4,
-                                      background: isTransparent ? '#eff6ff' : '#f5f5f7',
-                                      color: isTransparent ? '#0071e3' : '#1d1d1f',
-                                      border: isTransparent ? '1px solid #bfdbfe' : '1px solid #d2d2d7'
+                                      background: isTransparent ? '#F7F7F7' : '#f5f5f7',
+                                      color: isTransparent ? '#1d1d1f' : '#1d1d1f',
+                                      border: isTransparent ? '1px solid #e5e7eb' : '1px solid #d2d2d7'
                                     }}>
                                       {isTransparent ? 'Transparente' : currentBg.toUpperCase()}
                                     </span>
@@ -7496,9 +7496,9 @@ export default function PageEditor() {
                                       fontWeight: 600,
                                       padding: '2px 6px',
                                       borderRadius: 4,
-                                      background: isTransparent ? '#eff6ff' : '#f5f5f7',
-                                      color: isTransparent ? '#0071e3' : '#1d1d1f',
-                                      border: isTransparent ? '1px solid #bfdbfe' : '1px solid #d2d2d7'
+                                      background: isTransparent ? '#F7F7F7' : '#f5f5f7',
+                                      color: isTransparent ? '#1d1d1f' : '#1d1d1f',
+                                      border: isTransparent ? '1px solid #e5e7eb' : '1px solid #d2d2d7'
                                     }}>
                                       {isTransparent ? 'Sem borda' : currentBorder.toUpperCase()}
                                     </span>
@@ -7658,7 +7658,7 @@ export default function PageEditor() {
                         {widgetType === 'chrome:footer' && (
                           <ElementorAccordion title="Estilo do Rodapé" icon={Palette} isOpen={openSections.reference_section_36 !== false} onToggle={() => toggleSection('reference_section_36')}>
                             <ControlRow label="Cor de Fundo do Rodapé">
-                              <input type="color" value={String(s.footer_bg || '#f8fafc')} onChange={e => patch({ schema: { footer_bg: e.target.value } })} style={{ width: '100%', height: 30, padding: 0 }} />
+                              <input type="color" value={String(s.footer_bg || '#F7F7F7')} onChange={e => patch({ schema: { footer_bg: e.target.value } })} style={{ width: '100%', height: 30, padding: 0 }} />
                             </ControlRow>
                             <ControlRow label="Cor dos Textos">
                               <input type="color" value={String(s.footer_text_color || '#64748b')} onChange={e => patch({ schema: { footer_text_color: e.target.value } })} style={{ width: '100%', height: 30, padding: 0 }} />
@@ -8956,7 +8956,7 @@ export default function PageEditor() {
                               delete next[global ? widget.globalKey! : selected]
                               change(global ? { ...edits, __global__: { tree: next } } : next)
                             }}
-                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%', padding: '10px 12px', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 12, cursor: 'pointer', color: '#475569', fontWeight: 600 }}
+                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%', padding: '10px 12px', background: '#F7F7F7', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 12, cursor: 'pointer', color: '#475569', fontWeight: 600 }}
                           >
                             <RotateCcw size={14} /> Restaurar Padrões deste Widget
                           </button>
@@ -9002,7 +9002,7 @@ export default function PageEditor() {
             <span className={`topbar-status ${target?.row?.status === 'published' ? 'published' : 'draft'}`}>
               {dirty ? '● Não salvo' : target?.row?.status === 'published' ? '● Publicado' : '○ Rascunho'}
             </span>
-            <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 4, background: target?.row?.type === 'template' ? '#eff6ff' : '#f5f5f7', color: target?.row?.type === 'template' ? '#1d4ed8' : '#64748b', fontWeight: 600 }}>
+            <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 4, background: target?.row?.type === 'template' ? '#F7F7F7' : '#f5f5f7', color: target?.row?.type === 'template' ? '#1f2328' : '#64748b', fontWeight: 600 }}>
               {target?.row?.type === 'template' ? 'Template Padrão' : target?.row?.type === 'landing' ? 'Landing Page' : 'Página Normal'}
             </span>
           </div>
@@ -10165,14 +10165,14 @@ function ColorPickerControl({ id, label, child, description }: { id: string; lab
                       padding: '6px 8px',
                       borderRadius: 6,
                       border: 'none',
-                      background: isSelected ? '#f0f7ff' : 'transparent',
+                      background: isSelected ? '#F7F7F7' : 'transparent',
                       cursor: 'pointer',
                       textAlign: 'left',
                       width: '100%',
                       transition: 'all 0.12s ease'
                     }}
                     onMouseEnter={e => {
-                      if (!isSelected) e.currentTarget.style.background = '#f8fafc'
+                      if (!isSelected) e.currentTarget.style.background = '#F7F7F7'
                     }}
                     onMouseLeave={e => {
                       if (!isSelected) e.currentTarget.style.background = 'transparent'

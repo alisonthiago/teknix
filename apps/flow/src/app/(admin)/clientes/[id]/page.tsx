@@ -427,7 +427,7 @@ export default function ClienteProfilePage() {
 
                           <Link
                             href={`/pedidos/${ord.id}/etiqueta`}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#334155] border border-[#e2e8f0] text-[11px] font-bold transition-colors"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#333333] border border-[#e2e8f0] text-[11px] font-bold transition-colors"
                           >
                             <Printer className="w-3.5 h-3.5" />
                             Etiqueta

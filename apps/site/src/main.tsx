@@ -7,6 +7,10 @@ import ErrorBoundary from './components/ErrorBoundary.tsx'
 import './styles/global.css'
 import './styles/typography.css'
 import './styles/spacing.css'
+import { setupMobileViewportGuard } from './utils/mobileViewport'
+
+// Inicializa a proteção global contra zoom residual de formulários no mobile
+setupMobileViewportGuard()
 
 const hostname = typeof window !== 'undefined' ? window.location.hostname : ''
 const port = typeof window !== 'undefined' ? window.location.port : ''

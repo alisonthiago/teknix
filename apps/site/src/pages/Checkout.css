@@ -664,3 +664,18 @@ fieldset {
 .flex-1 {
   flex: 1;
 }
+
+/* Prevenção de zoom mobile persistente no checkout */
+@media (max-width: 768px) {
+  .tkn-checkout-input,
+  .tkn-checkout-select,
+  .form-input,
+  .form-select,
+  .form-textbox-input,
+  .rs-shipping-input,
+  input,
+  select,
+  textarea {
+    font-size: max(16px, 1rem) !important;
+  }
+}

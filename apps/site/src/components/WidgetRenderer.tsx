@@ -1937,7 +1937,7 @@ export default function WidgetRenderer({ widget, product }: WidgetRendererProps)
       const alertColors: Record<string, { bg: string; border: string; color: string }> = {
         success: { bg: '#f0fdf4', border: '#bbf7d0', color: '#166534' },
         error: { bg: '#fef2f2', border: '#fecaca', color: '#991b1b' },
-        info: { bg: '#eff6ff', border: '#bfdbfe', color: '#1e40af' },
+        info: { bg: '#F7F7F7', border: '#e5e7eb', color: '#1e40af' },
         warning: { bg: '#fffbeb', border: '#fef3c7', color: '#b45309' },
       }
       const ac = alertColors[alertType] || alertColors.warning
@@ -4128,7 +4128,7 @@ export function ProductVariationsWidget({
                     padding: '8px 16px',
                     borderRadius: 980,
                     border: isActive ? '2px solid #0071e3' : '1px solid #d2d2d7',
-                    background: isActive ? '#f0f7ff' : '#fff',
+                    background: isActive ? '#F7F7F7' : '#fff',
                     color: isActive ? '#0071e3' : '#1d1d1f',
                     fontWeight: isActive ? 600 : 400,
                     fontSize: '0.88rem',

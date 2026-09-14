@@ -76,7 +76,7 @@ export default function DashboardClient({ metrics }: { metrics: DashboardMetrics
                   cursor={{ fill: '#f5f5f5' }}
                   contentStyle={{ borderRadius: '12px', border: '1px solid #e6e6e6', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
                 />
-                <Bar dataKey={p.canViewRevenue ? 'revenue' : 'count'} fill="#dbeafe" radius={[4, 4, 0, 0]} barSize={40} activeBar={{ fill: '#1f2328' }} name={p.canViewRevenue ? 'Faturamento' : 'Vendas'} />
+                <Bar dataKey={p.canViewRevenue ? 'revenue' : 'count'} fill="#e5e7eb" radius={[4, 4, 0, 0]} barSize={40} activeBar={{ fill: '#1f2328' }} name={p.canViewRevenue ? 'Faturamento' : 'Vendas'} />
               </BarChart>
             </ResponsiveContainer>
           </div>

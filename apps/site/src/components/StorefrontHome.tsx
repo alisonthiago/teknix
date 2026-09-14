@@ -12,6 +12,8 @@ import { Ads } from './Ads'
 import StorefrontProductCard, { type CbProductItem } from './StorefrontProductCard'
 import { OfferCountdown } from './ProductSignals'
 import { getProducts } from '../services/products'
+import { fetchPublishedCategories } from '../services/categories'
+import type { CentralCategory } from '../../../../packages/core/src/categoryRules'
 import { storefrontCard } from '../services/storefrontCommerce'
 import type { Product } from '../types/database'
 import { DEFAULT_WHATSAPP_SETTINGS, loadWhatsappSettings, type WhatsappSettings } from '../services/storeSettings'
@@ -220,6 +222,21 @@ export default function StorefrontHome() {
   const mc = (mosaicEdit?.content || {}) as Record<string, any>
   const ms = (mosaicEdit?.style || {}) as Record<string, any>
 
+  // Categorias ativas cadastradas em store_categories
+  const [dbCategories, setDbCategories] = useState<CentralCategory[]>([])
+
+  useEffect(() => {
+    let cancelled = false
+    fetchPublishedCategories()
+      .then(cats => {
+        if (!cancelled && Array.isArray(cats)) setDbCategories(cats)
+      })
+      .catch(err => {
+        console.warn('Falha ao carregar categorias dinâmicas para o mosaico:', err)
+      })
+    return () => { cancelled = true }
+  }, [])
+
   const rawMosaicItems: any[] = useMemo(() => {
     if (Array.isArray(mc.items) && mc.items.length > 0) {
       return mc.items
@@ -228,6 +245,17 @@ export default function StorefrontHome() {
   }, [mc.items])
 
   const mosaicoCategories: MosaicoCategory[] = useMemo(() => {
+    // 1. Categorias dinâmicas ativas cadastradas no Hub (store_categories)
+    const dbMosaicItems: MosaicoCategory[] = dbCategories
+      .filter(c => c.show_in_mosaic !== false && (c.mosaic_image_url || c.image_url))
+      .map(c => ({
+        name: c.mosaic_label || c.name,
+        link: `/categoria/${c.slug}`,
+        bgType: 'normal' as any,
+        iconUrl: c.mosaic_image_url || c.image_url || '',
+        is_cutout: true
+      }))
+
     const cleaned = rawMosaicItems
       .map(item => ({
         ...item,
@@ -250,7 +278,14 @@ export default function StorefrontHome() {
         cardBg: item.cardBg
       }))
 
-    let list = cleaned.length > 0 ? cleaned : (DEFAULT_MOSAIC_CONTENT.items as unknown as MosaicoCategory[])
+    // Injeta as categorias cadastradas no banco no início do mosaico, evitando duplicação por nome
+    const dbNames = new Set(dbMosaicItems.map(d => d.name.toLowerCase()))
+    const mergedList = [
+      ...dbMosaicItems,
+      ...cleaned.filter(item => !dbNames.has(item.name.toLowerCase()))
+    ]
+
+    let list = mergedList.length > 0 ? mergedList : (DEFAULT_MOSAIC_CONTENT.items as unknown as MosaicoCategory[])
 
     // Garantir exatamente pelo menos 8 itens duplicando itens existentes conforme solicitado
     if (list.length > 0 && list.length < 8) {
@@ -260,7 +295,7 @@ export default function StorefrontHome() {
     }
 
     return list
-  }, [rawMosaicItems])
+  }, [rawMosaicItems, dbCategories])
 
   const money = (val: number) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 

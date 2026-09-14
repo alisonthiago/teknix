@@ -53,7 +53,7 @@ export default function AdminChrome({
               onToggleCollapse={() => setCollapsed(!collapsed)}
             />
           </div>
-          <main className="flex-1 w-full max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16 py-4 lg:py-8 print:p-0 print:max-w-none print:w-full">
+          <main className="flex-1 w-full max-w-[1400px] mx-auto px-3 sm:px-6 lg:px-12 xl:px-16 py-4 lg:py-8 print:p-0 print:max-w-none print:w-full">
             {children}
           </main>
         </div>

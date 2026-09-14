@@ -231,7 +231,7 @@ export default function PedidosPage() {
         <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
           <button
             onClick={handleExportAll}
-            className="px-4 py-2 bg-white border border-[#e6e6e6] hover:bg-[#f8fafc] hover:border-[#d1d5db] text-[#333333] rounded-lg text-[13px] font-medium flex items-center gap-2 transition-all cursor-pointer shadow-none"
+            className="px-4 py-2 bg-white border border-[#e6e6e6] hover:bg-[#F7F7F7] hover:border-[#d1d5db] text-[#333333] rounded-lg text-[13px] font-medium flex items-center gap-2 transition-all cursor-pointer shadow-none"
           >
             <Download className="w-4 h-4 text-[#666666]" />
             <span>Exportar Excel</span>
@@ -318,8 +318,8 @@ export default function PedidosPage() {
 
           {/* Filtros de Data (para a aba de pedidos) */}
           {activeTab === 'pedidos' && (
-            <div className="flex items-center gap-1.5 text-xs font-medium text-[#64748b]">
-              <span className="pr-1 text-[#94a3b8]">Período:</span>
+            <div className="flex items-center gap-1.5 text-xs font-medium text-[#666666]">
+              <span className="pr-1 text-[#999999]">Período:</span>
               {[
                 { key: 'ALL', label: 'Todos' },
                 { key: 'TODAY', label: `Hoje (${stats.today})` },
@@ -331,8 +331,8 @@ export default function PedidosPage() {
                   onClick={() => setDateFilter(f.key as any)}
                   className={`px-3 py-1.5 rounded-full transition-all cursor-pointer ${
                     dateFilter === f.key
-                      ? 'bg-[#e2e8f0] text-[#0f172a] font-bold'
-                      : 'bg-[#f8fafc] text-[#64748b] hover:bg-[#f1f5f9] hover:text-[#0f172a]'
+                      ? 'bg-[#e2e8f0] text-[#111111] font-bold'
+                      : 'bg-[#F7F7F7] text-[#666666] hover:bg-[#f1f5f9] hover:text-[#111111]'
                   }`}
                 >
                   {f.label}
@@ -387,7 +387,7 @@ export default function PedidosPage() {
             >
               <Printer className="w-4 h-4" /> Imprimir Etiquetas
             </button>
-            <button onClick={handleExportSelected} className="px-3.5 py-2 bg-white hover:bg-[#f8fafc] text-[#333333] hover:text-[#111111] rounded-lg text-xs font-medium border border-[#e6e6e6] cursor-pointer">
+            <button onClick={handleExportSelected} className="px-3.5 py-2 bg-white hover:bg-[#F7F7F7] text-[#333333] hover:text-[#111111] rounded-lg text-xs font-medium border border-[#e6e6e6] cursor-pointer">
               <Download className="w-3.5 h-3.5 inline mr-1 text-[#666666]" /> Exportar
             </button>
             <button onClick={() => setShowDeleteModal(true)} className="px-3.5 py-2 bg-[#fef2f2] hover:bg-[#fee2e2] text-[#dc2626] rounded-lg text-xs font-medium border border-[#fecaca] cursor-pointer">
@@ -403,14 +403,14 @@ export default function PedidosPage() {
       {activeTab === 'pedidos' && (
         <div className="bg-white rounded-2xl border border-[#e6e6e6] shadow-none overflow-hidden">
           {loading ? (
-            <div className="py-20 text-center text-xs text-[#94a3b8]">Carregando pedidos...</div>
+            <div className="py-20 text-center text-xs text-[#999999]">Carregando pedidos...</div>
           ) : filteredOrders.length === 0 ? (
             <div className="py-20 px-6 text-center space-y-2">
-              <div className="w-12 h-12 rounded-2xl bg-[#f8fafc] flex items-center justify-center mx-auto text-[#94a3b8] mb-3">
+              <div className="w-12 h-12 rounded-2xl bg-[#F7F7F7] flex items-center justify-center mx-auto text-[#999999] mb-3">
                 <Package className="w-6 h-6" />
               </div>
               <h3 className="text-base font-bold text-[#111111]">Nenhum pedido encontrado</h3>
-              <p className="text-xs text-[#64748b] max-w-sm mx-auto">
+              <p className="text-xs text-[#666666] max-w-sm mx-auto">
                 {dateFilter === 'TODAY'
                   ? 'Nenhum pedido novo recebido hoje até o momento.'
                   : 'Nenhum pedido corresponde aos critérios de busca selecionados.'}
@@ -427,9 +427,9 @@ export default function PedidosPage() {
           ) : (
             <div className="divide-y divide-[#f1f5f9]">
               {/* Header da Tabela */}
-              <div className="flex items-center justify-between px-6 py-4 bg-[#f8fafc] text-xs font-semibold text-[#64748b]">
+              <div className="flex items-center justify-between px-6 py-4 bg-[#F7F7F7] text-xs font-semibold text-[#666666]">
                 <div className="flex items-center gap-4 min-w-0 flex-1">
-                  <button onClick={toggleSelectAll} className="cursor-pointer text-[#64748b]">
+                  <button onClick={toggleSelectAll} className="cursor-pointer text-[#666666]">
                     {selectedItems.length === filteredOrders.length && filteredOrders.length > 0 ? (
                       <CheckSquare className="w-4 h-4 text-[#16a34a]" />
                     ) : (
@@ -475,7 +475,7 @@ export default function PedidosPage() {
                           {isSelected ? (
                             <CheckSquare className="w-4.5 h-4.5 text-[#16a34a]" />
                           ) : (
-                            <Square className="w-4.5 h-4.5 text-[#cbd5e1] hover:text-[#64748b]" />
+                            <Square className="w-4.5 h-4.5 text-[#cbd5e1] hover:text-[#666666]" />
                           )}
                         </button>
                       </div>
@@ -491,7 +491,7 @@ export default function PedidosPage() {
                           {productName}
                         </p>
                         <div className="flex items-center gap-2 text-xs flex-wrap">
-                          <span className="px-2 py-0.5 rounded-md bg-[#f1f5f9] text-[10px] font-mono font-medium text-[#475569]">
+                          <span className="px-2 py-0.5 rounded-md bg-[#f1f5f9] text-[10px] font-mono font-medium text-[#666666]">
                             SKU: {productSku}
                           </span>
                           <span className="px-2 py-0.5 rounded-md bg-[#f5f5f5] border border-[#e2e8f0] text-[10px] font-mono font-medium text-[#1f2328]">
@@ -505,7 +505,7 @@ export default function PedidosPage() {
                     <div className="flex items-center gap-8 lg:gap-12 shrink-0 pr-4">
                       <div className="hidden md:flex items-center gap-2 min-w-[120px]">
                         <MarketplaceLogo name={mp?.name || 'Mercado Livre'} className="w-4 h-4" />
-                        <span className="text-[13px] font-medium text-[#334155]">{mp?.name || 'Mercado Livre'}</span>
+                        <span className="text-[13px] font-medium text-[#333333]">{mp?.name || 'Mercado Livre'}</span>
                       </div>
 
                       <div className="hidden sm:block min-w-[170px] space-y-0.5">
@@ -548,8 +548,8 @@ export default function PedidosPage() {
           {pickingOrders.length === 0 ? (
             <div className="bg-white rounded-3xl border border-[#eef2f6] p-16 text-center shadow-xs space-y-2">
               <CheckCircle2 className="w-10 h-10 text-[#16a34a] mx-auto mb-2" />
-              <p className="text-base font-bold text-[#0f172a]">Tudo separado!</p>
-              <p className="text-xs text-[#64748b]">Nenhum pedido pendente de separação no momento</p>
+              <p className="text-base font-bold text-[#111111]">Tudo separado!</p>
+              <p className="text-xs text-[#666666]">Nenhum pedido pendente de separação no momento</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">

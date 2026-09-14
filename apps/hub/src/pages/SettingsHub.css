@@ -4,13 +4,16 @@
 
 .settings-page-layout {
   display: flex;
-  gap: 32px;
+  gap: 28px;
   width: 100%;
-  max-width: var(--tk-content-max-width, 1140px);
-  margin: 0 auto;
-  padding: 24px 0 80px;
+  max-width: 100%;
+  margin: 0;
+  margin-left: 0;
+  margin-right: auto;
+  padding: 0 0 80px;
   font-family: var(--tk-font-family);
   box-sizing: border-box;
+  align-items: flex-start;
 }
 
 /* Sidebar Menu of Settings */
@@ -64,40 +67,55 @@
   padding: 4px 8px 4px;
 }
 
+.settings-nav-sidebar button.settings-nav-item,
 .settings-nav-item {
-  display: flex;
-  align-items: center;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  text-align: left !important;
   gap: 10px;
-  padding: 7px 10px;
+  padding: 8px 12px;
   border-radius: var(--tk-radius-btn, 8px);
   font-size: 13px;
   font-weight: 400;
   color: var(--tk-color-text-secondary, #4b5563);
   text-decoration: none;
-  background: none;
+  background: transparent;
   border: none;
-  width: 100%;
-  text-align: left;
+  width: 100% !important;
   cursor: pointer;
   transition: all var(--tk-transition-fast, 0.12s);
   box-sizing: border-box;
 }
 
+.settings-nav-sidebar button.settings-nav-item svg,
+.settings-nav-item svg {
+  flex-shrink: 0;
+}
+
+.settings-nav-sidebar button.settings-nav-item:hover,
 .settings-nav-item:hover {
   background: var(--tk-color-surface-hover, #f3f4f6);
   color: var(--tk-color-text-primary, #000000);
+  justify-content: flex-start !important;
+  text-align: left !important;
 }
 
+.settings-nav-sidebar button.settings-nav-item.active,
 .settings-nav-item.active {
   background: #f5f5f5;
   color: #111111;
   font-weight: 600;
+  justify-content: flex-start !important;
+  text-align: left !important;
 }
 
 /* Settings Content Area */
 .settings-content-area {
   flex: 1;
   min-width: 0;
+  max-width: 1080px;
+  width: 100%;
 }
 
 .settings-content-wrapper {
@@ -106,7 +124,7 @@
   gap: 16px;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 768px) {
   .settings-page-layout { flex-direction: column; padding: 16px 0 56px; }
   .settings-nav-sidebar { position: static; width: 100%; }
   .settings-nav-sidebar .settings-group { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -279,3 +297,538 @@
   text-decoration: underline;
   opacity: 0.85;
 }
+
+/* ============================================================
+   WHATSAPP LIVE PREVIEW & PAGE DISPLAY RULES
+   ============================================================ */
+
+.whatsapp-config-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(350px, 0.95fr);
+  gap: 24px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+@media (max-width: 1080px) {
+  .whatsapp-config-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Selector de Modo de Exibição */
+.display-modes-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.display-mode-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #ffffff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.display-mode-card:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.display-mode-card.active {
+  border-color: #0071e3;
+  background: #f0f7ff;
+  box-shadow: 0 0 0 1px #0071e3;
+}
+
+.display-mode-radio-circle {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.display-mode-card.active .display-mode-radio-circle {
+  border-color: #0071e3;
+  background: #0071e3;
+}
+
+.display-mode-radio-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.display-mode-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.display-mode-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.display-mode-desc {
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+/* Grade de Páginas Selecionáveis */
+.pages-selection-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 12px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+}
+
+.page-select-checkbox-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.page-select-checkbox-item:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.page-select-checkbox-item.selected {
+  border-color: #10b981;
+  background: #f0fdf4;
+}
+
+.page-checkbox-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.page-checkbox-custom {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1.5px solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.12s ease;
+}
+
+.page-select-checkbox-item.selected .page-checkbox-custom {
+  background: #10b981;
+  border-color: #10b981;
+  color: #ffffff;
+}
+
+.page-item-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.page-item-path {
+  font-size: 11px;
+  color: #64748b;
+  background: #f1f5f9;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+}
+
+/* Moldura do Navegador de Prévia */
+.whatsapp-preview-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+  position: sticky;
+  top: 80px;
+}
+
+.whatsapp-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.preview-badge-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #15803d;
+  background: #dcfce7;
+  padding: 3px 8px;
+  border-radius: 20px;
+}
+
+.preview-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #16a34a;
+  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.25);
+  animation: tk-pulse 1.8s infinite ease-in-out;
+}
+
+@keyframes tk-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.2); }
+}
+
+/* Miniatura Browser */
+.browser-window-mockup {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f8fafc;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+}
+
+.browser-top-bar {
+  background: #f1f5f9;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.browser-traffic-dots {
+  display: flex;
+  gap: 5px;
+}
+
+.browser-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.browser-dot.red { background: #ff5f56; }
+.browser-dot.yellow { background: #ffbd2e; }
+.browser-dot.green { background: #27c93f; }
+
+.browser-url-pill {
+  flex: 1;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 11.5px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Tabs de Simulação da Loja na Prévia */
+.preview-page-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 8px 10px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  overflow-x: auto;
+}
+
+.preview-tab-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #64748b;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.12s;
+}
+
+.preview-tab-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.preview-tab-btn.active {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+/* Viewport Mockup */
+.browser-viewport-content {
+  height: 350px;
+  position: relative;
+  background: #ffffff;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.viewport-store-header {
+  height: 40px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+}
+
+.viewport-logo-text {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #000000;
+}
+
+.viewport-nav-items {
+  display: flex;
+  gap: 10px;
+  font-size: 10px;
+  color: #6b7280;
+}
+
+.viewport-body-mock {
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+}
+
+.viewport-hero-banner {
+  background: #f1f5f9;
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.viewport-hero-title {
+  height: 14px;
+  background: #cbd5e1;
+  border-radius: 4px;
+  width: 55%;
+}
+
+.viewport-hero-desc {
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 3px;
+  width: 80%;
+}
+
+.viewport-cards-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.viewport-card-box {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 10px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.viewport-card-img {
+  width: 100%;
+  height: 42px;
+  background: #f8fafc;
+  border-radius: 4px;
+}
+
+.viewport-card-line {
+  width: 70%;
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 2px;
+}
+
+/* Botão Flutuante de WhatsApp na Prévia */
+.preview-whatsapp-btn {
+  position: absolute;
+  bottom: 16px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #25D366;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(37, 211, 102, 0.45);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 10;
+}
+
+.preview-whatsapp-btn:hover {
+  transform: scale(1.08);
+}
+
+.preview-whatsapp-btn.pos-br {
+  right: 16px;
+}
+
+.preview-whatsapp-btn.pos-bl {
+  left: 16px;
+}
+
+/* Balão Popup na Prévia */
+.preview-whatsapp-popup {
+  position: absolute;
+  bottom: 72px;
+  width: 250px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  z-index: 20;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  animation: tk-fade-up 0.2s ease-out;
+}
+
+.preview-whatsapp-popup.pos-br {
+  right: 16px;
+}
+
+.preview-whatsapp-popup.pos-bl {
+  left: 16px;
+}
+
+@keyframes tk-fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.preview-popup-top {
+  background: #075E54;
+  padding: 10px 12px;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.preview-popup-top h4 {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.preview-popup-top span {
+  font-size: 9.5px;
+  color: #a7f3d0;
+}
+
+.preview-popup-content {
+  padding: 10px 12px;
+  background: #e5ddd5;
+  min-height: 70px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.preview-speech-bubble {
+  background: #ffffff;
+  border-radius: 8px 8px 8px 2px;
+  padding: 8px 10px;
+  font-size: 11px;
+  color: #111827;
+  line-height: 1.35;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  word-break: break-word;
+  max-width: 100%;
+}
+
+.preview-send-btn-mock {
+  background: #25D366;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 5px 8px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  align-self: flex-end;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Aviso de Botão Oculto na Página */
+.preview-hidden-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(2px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px;
+  text-align: center;
+  z-index: 5;
+}
+
+.preview-hidden-badge {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+

@@ -158,6 +158,19 @@ export default function ProductsList() {
     }
   }
 
+  async function handleBulkDelete() {
+    if (selectedIds.length === 0) return
+    if (!confirm(`Deseja realmente excluir os ${selectedIds.length} produtos selecionados?`)) return
+    try {
+      await supabase.from('products').delete().in('id', selectedIds)
+      setProducts(products.filter(p => !selectedIds.includes(p.id)))
+      setSelectedIds([])
+    } catch (e) {
+      console.error('Erro ao excluir produtos em massa:', e)
+      alert('Erro ao excluir produtos.')
+    }
+  }
+
   async function handleDuplicate(product: Product) {
     const duplicatedName = `${product.name} (Cópia)`
     try {
@@ -313,35 +326,65 @@ export default function ProductsList() {
           </Link>
         </div>
 
-        {/* Search & Filters */}
-        <div className="products-search-bar">
-          <div className="products-search-input-wrap">
-            <input
-              type="text"
-              className="products-search-input"
-              placeholder="Buscar produtos por nome, SKU ou tags"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-
-          <button className="btn-filter-action" onClick={() => {}}>
-            <SlidersHorizontal size={12} /> Filtrar
-          </button>
-
-          <button className="btn-filter-action" onClick={() => {}}>
-            <ArrowUpDown size={12} /> Mais novo
-          </button>
-
-          <div className="products-export-actions" aria-label="Exportar produtos">
-            <button className="btn-filter-action" onClick={() => exportProducts('xlsx')} title="Exportar para Excel">
-              <FileSpreadsheet size={12} /> Excel
+        {/* Search & Filters / Bulk Actions Bar */}
+        {selectedIds.length > 0 ? (
+          <div className="products-search-bar" style={{ background: '#F7F7F7', borderColor: '#cbd5e1' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>
+                {selectedIds.length} produto{selectedIds.length !== 1 ? 's' : ''} selecionado{selectedIds.length !== 1 ? 's' : ''}
+              </span>
+              <button
+                className="btn-filter-action"
+                onClick={handleBulkDelete}
+                style={{ color: '#dc2626', borderColor: '#fca5a5', background: '#fef2f2', fontWeight: 600 }}
+              >
+                <Trash2 size={13} /> Excluir selecionados
+              </button>
+              <button className="btn-filter-action" onClick={() => exportProducts('xlsx')}>
+                <FileSpreadsheet size={13} /> Exportar Excel
+              </button>
+              <button className="btn-filter-action" onClick={() => exportProducts('pdf')}>
+                <FileText size={13} /> Exportar PDF
+              </button>
+            </div>
+            <button
+              className="btn-filter-action"
+              onClick={() => setSelectedIds([])}
+              style={{ background: 'transparent' }}
+            >
+              Limpar seleção
             </button>
-            <button className="btn-filter-action" onClick={() => exportProducts('pdf')} title="Exportar para PDF">
-              <FileText size={12} /> PDF
-            </button>
           </div>
-        </div>
+        ) : (
+          <div className="products-search-bar">
+            <div className="products-search-input-wrap">
+              <input
+                type="text"
+                className="products-search-input raw-input"
+                placeholder="Buscar produtos por nome, SKU ou tags"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+
+            <button className="btn-filter-action" onClick={() => {}}>
+              <SlidersHorizontal size={12} /> Filtrar
+            </button>
+
+            <button className="btn-filter-action" onClick={() => {}}>
+              <ArrowUpDown size={12} /> Mais novo
+            </button>
+
+            <div className="products-export-actions" aria-label="Exportar produtos">
+              <button className="btn-filter-action" onClick={() => exportProducts('xlsx')} title="Exportar para Excel">
+                <FileSpreadsheet size={12} /> Excel
+              </button>
+              <button className="btn-filter-action" onClick={() => exportProducts('pdf')} title="Exportar para PDF">
+                <FileText size={12} /> PDF
+              </button>
+            </div>
+          </div>
+        )}
 
         <div style={{ fontSize: '0.82rem', color: '#6b7280', fontWeight: 600 }}>
           {filteredProducts.length} produto{filteredProducts.length !== 1 ? 's' : ''}
@@ -374,7 +417,7 @@ export default function ProductsList() {
               Nenhum produto encontrado.
             </div>
           ) : (
-            filteredProducts.map(product => {
+            filteredProducts.map((product, index) => {
               const storeMeta = Array.isArray((product as any).store_meta) ? (product as any).store_meta[0] : (product as any).store_meta
               const rawPrice = storeMeta?.sale_price ?? (product as any).sell_price ?? product.price ?? 0
               const salePrice = Number(rawPrice)
@@ -382,9 +425,28 @@ export default function ProductsList() {
               const promoPrice = (rawPromo && Number(rawPromo) > 0) ? Number(rawPromo) : null
               const imgUrl = (product.images && product.images[0]) || product.image_url || (product as any).main_image || ''
               const isPub = Boolean(storeMeta?.published ?? (product as any).published)
+              const isMenuOpen = openMenuId === product.id
+              const isNearBottom = index >= Math.max(0, filteredProducts.length - 2) && filteredProducts.length >= 3
 
               return (
-                <div key={product.id} className="products-table-row">
+                <div
+                  key={product.id}
+                  className={`products-table-row${isMenuOpen ? ' menu-open' : ''}`}
+                  onClick={(e) => {
+                    const target = e.target as HTMLElement
+                    if (
+                      target.closest('input') ||
+                      target.closest('button') ||
+                      target.closest('a') ||
+                      target.closest('.product-dropdown-wrapper') ||
+                      target.closest('.product-editable-price-group')
+                    ) {
+                      return
+                    }
+                    navigate(`/hub/produtos/${product.id}`)
+                  }}
+                  style={{ cursor: 'pointer' }}
+                >
                   <div>
                     <input
                       type="checkbox"
@@ -468,7 +530,7 @@ export default function ProductsList() {
                       </button>
 
                       {openMenuId === product.id && (
-                        <div className="product-action-dropdown-menu" onClick={(e) => e.stopPropagation()}>
+                        <div className={`product-action-dropdown-menu${isNearBottom ? ' dropdown-up' : ''}`} onClick={(e) => e.stopPropagation()}>
                           <Link
                             to={`/hub/produtos/${product.id}`}
                             className="product-dropdown-item"

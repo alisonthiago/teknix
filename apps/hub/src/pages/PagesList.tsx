@@ -739,7 +739,7 @@ export default function PagesList() {
                             padding: '12px 10px',
                             borderRadius: 10,
                             border: isSelected ? '2px solid #0071e3' : '1px solid #e5e5ea',
-                            background: isSelected ? '#f0f7ff' : '#ffffff',
+                            background: isSelected ? '#F7F7F7' : '#ffffff',
                             cursor: 'pointer',
                             transition: 'all 0.15s ease',
                             display: 'flex',

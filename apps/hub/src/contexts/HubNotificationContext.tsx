@@ -184,8 +184,8 @@ export function HubNotificationProvider({ children }: { children: React.ReactNod
                 alignItems: 'center',
                 justifyContent: 'center',
                 flexShrink: 0,
-                background: toast.type === 'success' ? '#ecfdf5' : toast.type === 'error' ? '#fef2f2' : toast.type === 'warning' ? '#fffbeb' : '#eff6ff',
-                color: toast.type === 'success' ? '#059669' : toast.type === 'error' ? '#dc2626' : toast.type === 'warning' ? '#d97706' : '#2563eb',
+                background: toast.type === 'success' ? '#ecfdf5' : toast.type === 'error' ? '#fef2f2' : toast.type === 'warning' ? '#fffbeb' : '#F7F7F7',
+                color: toast.type === 'success' ? '#059669' : toast.type === 'error' ? '#dc2626' : toast.type === 'warning' ? '#d97706' : '#1f2328',
                 fontWeight: 'bold',
                 fontSize: '14px'
               }}>

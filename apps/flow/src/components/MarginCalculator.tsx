@@ -277,64 +277,65 @@ function SimulatorTab({ initialProduct, onShare }: { initialProduct?: Product | 
           )}
         </div>
 
-        <div>
-          <h3 className="text-sm font-semibold text-[#333] mb-2">Custos Fixos (Valores em R$)</h3>
-          <div className="grid grid-cols-3 sm:grid-cols-3 gap-3">
+        {/* Custos e Variáveis em grid compacto único */}
+        <div className="space-y-2">
+          <h3 className="text-xs font-bold text-[#999] uppercase tracking-wider">Custos (R$)</h3>
+          <div className="grid grid-cols-3 gap-2">
             <div>
-              <label className="block text-[10px] font-medium text-[#999] mb-1 uppercase tracking-wider">Custo Fornec.</label>
-              <input type="number" value={custo || ''} onChange={e => setCusto(+e.target.value)} className="w-full border border-[#e6e6e6] rounded-xl px-3 py-1.5 text-sm outline-none focus:border-[#1f2328] transition-colors text-[#333]" />
-            </div>
-            <div>
-              <label className="block text-[10px] font-medium text-[#999] mb-1 uppercase tracking-wider">Frete Logística</label>
-              <input type="number" value={freteLogistica || ''} onChange={e => setFreteLogistica(+e.target.value)} className="w-full border border-[#e6e6e6] rounded-xl px-3 py-1.5 text-sm outline-none focus:border-[#1f2328] transition-colors text-[#333]" />
+              <label className="block text-[10px] text-[#999] mb-1">Produto</label>
+              <input type="number" value={custo || ''} onChange={e => setCusto(+e.target.value)} className="w-full border border-[#e6e6e6] rounded-lg px-2 py-1.5 text-sm outline-none focus:border-[#1f2328] transition-colors text-[#333]" />
             </div>
             <div>
-              <label className="block text-[10px] font-medium text-[#999] mb-1 uppercase tracking-wider">Embalagem</label>
-              <input type="number" value={embalagem || ''} onChange={e => setEmbalagem(+e.target.value)} className="w-full border border-[#e6e6e6] rounded-xl px-3 py-1.5 text-sm outline-none focus:border-[#1f2328] transition-colors text-[#333]" />
+              <label className="block text-[10px] text-[#999] mb-1">Frete</label>
+              <input type="number" value={freteLogistica || ''} onChange={e => setFreteLogistica(+e.target.value)} className="w-full border border-[#e6e6e6] rounded-lg px-2 py-1.5 text-sm outline-none focus:border-[#1f2328] transition-colors text-[#333]" />
             </div>
-            <div className="">
-              <label className="block text-[10px] font-medium text-[#999] mb-1 uppercase tracking-wider">Frete MKT</label>
-              <input type="number" value={freteMarketplace || ''} onChange={e => setFreteMarketplace(+e.target.value)}  className="w-full border border-[#e6e6e6] rounded-xl px-3 py-1.5 text-sm outline-none focus:border-[#1f2328] transition-colors text-[#333]" />
+            <div>
+              <label className="block text-[10px] text-[#999] mb-1">Embalagem</label>
+              <input type="number" value={embalagem || ''} onChange={e => setEmbalagem(+e.target.value)} className="w-full border border-[#e6e6e6] rounded-lg px-2 py-1.5 text-sm outline-none focus:border-[#1f2328] transition-colors text-[#333]" />
             </div>
-            <div className="">
-              <label className="block text-[10px] font-medium text-[#999] mb-1 uppercase tracking-wider">Tarifa Fixa</label>
-              <input type="number" value={tarifaFixa || ''} onChange={e => setTarifaFixa(+e.target.value)}  className="w-full border border-[#e6e6e6] rounded-xl px-3 py-1.5 text-sm outline-none focus:border-[#1f2328] transition-colors text-[#333]" />
+            <div>
+              <label className="block text-[10px] text-[#999] mb-1">Frete MKT</label>
+              <input type="number" value={freteMarketplace || ''} onChange={e => setFreteMarketplace(+e.target.value)} className="w-full border border-[#e6e6e6] rounded-lg px-2 py-1.5 text-sm outline-none focus:border-[#1f2328] transition-colors text-[#333]" />
+            </div>
+            <div>
+              <label className="block text-[10px] text-[#999] mb-1">Tarifa Fixa</label>
+              <input type="number" value={tarifaFixa || ''} onChange={e => setTarifaFixa(+e.target.value)} className="w-full border border-[#e6e6e6] rounded-lg px-2 py-1.5 text-sm outline-none focus:border-[#1f2328] transition-colors text-[#333]" />
             </div>
           </div>
         </div>
 
-        <div>
-          <h3 className="text-sm font-semibold text-[#333] mb-2">Variáveis (Porcentagens %)</h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <div className="space-y-2">
+          <h3 className="text-xs font-bold text-[#999] uppercase tracking-wider">Variáveis (%)</h3>
+          <div className="grid grid-cols-3 gap-2">
             <div>
-              <label className="block text-[10px] font-medium text-[#999] mb-1 uppercase tracking-wider text-[#1f2328]">Margem Líquida</label>
-              <input type="number" value={margemLiquida || ''} onChange={e => setMargemLiquida(+e.target.value)} className="w-full border border-[#e6e6e6] rounded-xl px-3 py-1.5 text-sm outline-none focus:border-[#1f2328] transition-colors text-[#333]" />
-            </div>
-            <div>
-              <label className="block text-[10px] font-medium text-[#999] mb-1 uppercase tracking-wider">Imposto</label>
-              <input type="number" value={imposto || ''} onChange={e => setImposto(+e.target.value)} className="w-full border border-[#e6e6e6] rounded-xl px-3 py-1.5 text-sm outline-none focus:border-[#1f2328] transition-colors text-[#333]" />
-            </div>
-            <div className="">
-              <label className="block text-[10px] font-medium text-[#999] mb-1 uppercase tracking-wider">Comissão MKT</label>
-              <input type="number" value={comissaoMkt || ''} onChange={e => setComissaoMkt(+e.target.value)}  className="w-full border border-[#e6e6e6] rounded-xl px-3 py-1.5 text-sm outline-none focus:border-[#1f2328] transition-colors text-[#333]" />
+              <label className="block text-[10px] font-bold text-[#1f2328] mb-1">Margem</label>
+              <input type="number" value={margemLiquida || ''} onChange={e => setMargemLiquida(+e.target.value)} className="w-full border border-[#1f2328] rounded-lg px-2 py-1.5 text-sm outline-none transition-colors text-[#333]" />
             </div>
             <div>
-              <label className="block text-[10px] font-medium text-[#999] mb-1 uppercase tracking-wider">Publicidade (Ads)</label>
-              <input type="number" value={publicidade || ''} onChange={e => setPublicidade(+e.target.value)} className="w-full border border-[#e6e6e6] rounded-xl px-3 py-1.5 text-sm outline-none focus:border-[#1f2328] transition-colors text-[#333]" />
-            </div>
-            <div className="">
-              <label className="block text-[10px] font-medium text-[#999] mb-1 uppercase tracking-wider">Juros (Premium)</label>
-              <input type="number" value={juros || ''} onChange={e => setJuros(+e.target.value)}  className="w-full border border-[#e6e6e6] rounded-xl px-3 py-1.5 text-sm outline-none focus:border-[#1f2328] transition-colors text-[#333]" />
+              <label className="block text-[10px] text-[#999] mb-1">Imposto</label>
+              <input type="number" value={imposto || ''} onChange={e => setImposto(+e.target.value)} className="w-full border border-[#e6e6e6] rounded-lg px-2 py-1.5 text-sm outline-none focus:border-[#1f2328] transition-colors text-[#333]" />
             </div>
             <div>
-              <label className="block text-[10px] font-medium text-[#999] mb-1 uppercase tracking-wider">Reserva (Garantia)</label>
-              <input type="number" value={reserva || ''} onChange={e => setReserva(+e.target.value)} className="w-full border border-[#e6e6e6] rounded-xl px-3 py-1.5 text-sm outline-none focus:border-[#1f2328] transition-colors text-[#333]" />
+              <label className="block text-[10px] text-[#999] mb-1">Comissão</label>
+              <input type="number" value={comissaoMkt || ''} onChange={e => setComissaoMkt(+e.target.value)} className="w-full border border-[#e6e6e6] rounded-lg px-2 py-1.5 text-sm outline-none focus:border-[#1f2328] transition-colors text-[#333]" />
+            </div>
+            <div>
+              <label className="block text-[10px] text-[#999] mb-1">Ads</label>
+              <input type="number" value={publicidade || ''} onChange={e => setPublicidade(+e.target.value)} className="w-full border border-[#e6e6e6] rounded-lg px-2 py-1.5 text-sm outline-none focus:border-[#1f2328] transition-colors text-[#333]" />
+            </div>
+            <div>
+              <label className="block text-[10px] text-[#999] mb-1">Juros</label>
+              <input type="number" value={juros || ''} onChange={e => setJuros(+e.target.value)} className="w-full border border-[#e6e6e6] rounded-lg px-2 py-1.5 text-sm outline-none focus:border-[#1f2328] transition-colors text-[#333]" />
+            </div>
+            <div>
+              <label className="block text-[10px] text-[#999] mb-1">Reserva</label>
+              <input type="number" value={reserva || ''} onChange={e => setReserva(+e.target.value)} className="w-full border border-[#e6e6e6] rounded-lg px-2 py-1.5 text-sm outline-none focus:border-[#1f2328] transition-colors text-[#333]" />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Coluna Direita: Painel de Decisão Super Simples */}
+      {/* Coluna Direita: Painel de Decisão */}
       <div className="bg-[#f5f5f5] rounded-2xl p-3.5 sm:p-4 border border-[#e6e6e6] flex flex-col justify-between space-y-2.5">
         {sumPct >= 1 ? (
           <div className="p-4 text-center text-[#f23d4f] font-medium text-sm flex-1 flex items-center justify-center">
@@ -342,97 +343,77 @@ function SimulatorTab({ initialProduct, onShare }: { initialProduct?: Product | 
           </div>
         ) : (
           <div className="space-y-2.5 flex-1 flex flex-col justify-between">
-            {/* 1. Frase Explicativa Clara */}
-            <div className="bg-[#f0fdf4] border border-[#bbf7d0] rounded-xl p-4 flex items-center gap-2">
+            {/* Resumo direto */}
+            <div className="bg-[#f0fdf4] border border-[#bbf7d0] rounded-xl p-3 flex items-center gap-2">
               <div className="w-6 h-6 rounded-full bg-[#16a34a] text-white flex items-center justify-center shrink-0">
                 <Check className="w-3.5 h-3.5" />
               </div>
-              <p className="text-[10px] sm:text-[11px] font-bold text-[#15803d] leading-snug">
+              <p className="text-[11px] font-bold text-[#15803d] leading-snug">
                 Vendendo por <span className="underline decoration-2">{formatCurrency(precoSugerido)}</span>, você ganha <span className="underline decoration-2">{formatCurrency(lucroLiq)}</span> por venda.
               </p>
             </div>
 
-            {/* 2. Destaques das 3 Perguntas (Preço, Lucro e Custos) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {/* Preço de Venda */}
+            {/* Preço e Lucro */}
+            <div className="grid grid-cols-2 gap-2">
               <div className="bg-white border border-[#e6e6e6] rounded-xl p-3 shadow-2xs">
                 <span className="text-[9px] font-bold uppercase tracking-wider text-[#666]">Preço de Venda</span>
                 <p className="text-xl font-black text-[#1f2328] mt-0.5">{formatCurrency(precoSugerido)}</p>
               </div>
-
-              {/* Seu Lucro */}
               <div className="bg-[#16a34a] text-white rounded-xl p-3 shadow-2xs">
                 <div className="flex items-center justify-between">
-                  <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-100">Seu Lucro Real</span>
-                  <span className="text-[10px] font-extrabold bg-white/20 px-1.5 py-0.5 rounded-full">{margemLiquida}% margem</span>
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-100">Lucro Real</span>
+                  <span className="text-[10px] font-extrabold bg-white/20 px-1.5 py-0.5 rounded-full">{margemLiquida}%</span>
                 </div>
                 <p className="text-xl font-black mt-0.5">{formatCurrency(lucroLiq)}</p>
               </div>
             </div>
 
-            {/* Resumo dos Custos */}
-            <div className="bg-white rounded-xl border border-[#e6e6e6] p-3 shadow-2xs space-y-1.5">
-              <div className="flex items-center justify-between pb-1.5 border-b border-[#eeeeee]">
+            {/* Custos resumidos */}
+            <div className="bg-white rounded-xl border border-[#e6e6e6] p-3 shadow-2xs space-y-1">
+              <div className="flex items-center justify-between pb-1 border-b border-[#eeeeee]">
                 <span className="text-[11px] font-bold text-[#333] uppercase tracking-wider">Custos Totais</span>
                 <span className="text-xs font-black text-[#1f2328]">{formatCurrency(custoTotal)}</span>
               </div>
               <div className="space-y-1 text-[11px] text-[#666]">
-                <div className="flex justify-between">
-                  <span>Produto (Investimento)</span>
-                  <span className="font-medium text-[#333]">{formatCurrency(custo)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Comissão MKT ({comissaoMkt}%)</span>
-                  <span className="font-medium text-[#333]">{formatCurrency(valComissao)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Imposto ({imposto}%)</span>
-                  <span className="font-medium text-[#333]">{formatCurrency(valImposto)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Outros custos (Fretes/Embalagem/Tarifas)</span>
-                  <span className="font-medium text-[#333]">{formatCurrency(outrosCustosVal)}</span>
-                </div>
+                <div className="flex justify-between"><span>Produto</span><span className="font-medium text-[#333]">{formatCurrency(custo)}</span></div>
+                <div className="flex justify-between"><span>Comissão ({comissaoMkt}%)</span><span className="font-medium text-[#333]">{formatCurrency(valComissao)}</span></div>
+                <div className="flex justify-between"><span>Imposto ({imposto}%)</span><span className="font-medium text-[#333]">{formatCurrency(valImposto)}</span></div>
+                <div className="flex justify-between"><span>Outros</span><span className="font-medium text-[#333]">{formatCurrency(outrosCustosVal)}</span></div>
               </div>
             </div>
 
-            {/* 3. Simulação Visual de Cenários (3 Cards) */}
+            {/* Cenários */}
             <div>
               <p className="text-[10px] font-bold uppercase tracking-wider text-[#999] mb-1.5 flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-[#1f2328]" /> Cenários Recomendados de Preço
+                <Sparkles className="w-3 h-3 text-[#1f2328]" /> Cenários
               </p>
               <div className="grid grid-cols-3 gap-1.5">
-                {/* Preço Mínimo */}
                 <div className="bg-white border border-[#e6e6e6] rounded-xl p-2 text-center shadow-2xs">
                   <span className="text-[9px] font-bold text-[#999] block">Mínimo</span>
                   <span className="text-xs font-bold text-[#555] block mt-0.5">{formatCurrency(precoMinimo)}</span>
                   <span className="text-[9px] text-[#999] block">Lucro: R$ 0</span>
                 </div>
-
-                {/* Preço Recomendado (Alvo) */}
                 <div className="bg-[#f5f5f5] border-2 border-[#1f2328] rounded-xl p-2 text-center shadow-2xs relative">
-                  <span className="text-[8px] font-black text-white bg-[#1f2328] px-1 py-0.2 rounded-full absolute -top-2 left-1/2 -translate-x-1/2 whitespace-nowrap">Ideal</span>
+                  <span className="text-[8px] font-black text-white bg-[#1f2328] px-1 rounded-full absolute -top-2 left-1/2 -translate-x-1/2 whitespace-nowrap">Ideal</span>
                   <span className="text-[9px] font-bold text-[#1f2328] block">Recomendado</span>
                   <span className="text-xs font-black text-[#1f2328] block mt-0.5">{formatCurrency(precoSugerido)}</span>
-                  <span className="text-[9px] font-bold text-[#16a34a] block">Lucro: {formatCurrency(lucroLiq)}</span>
+                  <span className="text-[9px] font-bold text-[#16a34a] block">{formatCurrency(lucroLiq)}</span>
                 </div>
-
-                {/* Maior Margem */}
                 <div className="bg-white border border-[#e6e6e6] rounded-xl p-2 text-center shadow-2xs">
-                  <span className="text-[9px] font-bold text-[#999] block">Maior Margem</span>
+                  <span className="text-[9px] font-bold text-[#999] block">+ Margem</span>
                   <span className="text-xs font-bold text-[#555] block mt-0.5">{formatCurrency(precoAlto)}</span>
-                  <span className="text-[9px] font-bold text-[#16a34a] block">Lucro: {formatCurrency(lucroAlto)}</span>
+                  <span className="text-[9px] font-bold text-[#16a34a] block">{formatCurrency(lucroAlto)}</span>
                 </div>
               </div>
             </div>
 
-            {/* 4. Acordeão: Detalhamento Avançado */}
+            {/* Detalhamento colapsável */}
             <div className="border-t border-[#e6e6e6] pt-1.5">
               <button
                 onClick={() => setShowDetails(!showDetails)}
                 className="w-full flex items-center justify-between py-1 text-[11px] font-bold text-[#666] hover:text-[#1f2328] transition-colors cursor-pointer"
               >
-                <span>Ver detalhamento dos custos</span>
+                <span>Ver detalhamento</span>
                 {showDetails ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
               </button>
 
@@ -462,7 +443,7 @@ function SimulatorTab({ initialProduct, onShare }: { initialProduct?: Product | 
               )}
             </div>
 
-            {/* 5. Botão Compartilhar Precificação */}
+            {/* Compartilhar */}
             <div className="pt-1">
               <button
                 onClick={() => {
@@ -483,7 +464,7 @@ MEU LUCRO REAL: ${formatCurrency(lucroLiq)} (Margem: ${margemLiquida}%)
 Vendendo por ${formatCurrency(precoSugerido)}, você ganha ${formatCurrency(lucroLiq)} por venda.`
                   onShare(summary)
                 }}
-                className="w-full flex items-center justify-center gap-2 px-4 py-4 bg-[#347ff2] hover:bg-[#2469d8] text-white text-sm font-bold rounded-xl transition-all cursor-pointer shadow-xs"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#347ff2] hover:bg-[#2469d8] text-white text-sm font-bold rounded-xl transition-all cursor-pointer shadow-xs"
               >
                 <Share2 className="w-3.5 h-3.5" />
                 Compartilhar Precificação
