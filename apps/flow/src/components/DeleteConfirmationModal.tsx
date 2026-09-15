@@ -34,18 +34,18 @@ export default function DeleteConfirmationModal({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 z-[100] flex items-center justify-center p-3 sm:p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-slate-900/65 backdrop-blur-[4px] z-[100] flex items-center justify-center p-3 sm:p-4" onClick={onClose}>
       <div 
-        className="bg-white rounded-xl w-[calc(100%-24px)] sm:w-full sm:max-w-md shadow-xl"
+        className="bg-white rounded-[14px] border border-[#e6e6e6] w-[calc(100%-24px)] sm:w-full sm:max-w-md shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#e6e6e6]">
-          <div className="flex items-center gap-2 text-[#e74c3c]">
-            <AlertTriangle className="w-5 h-5" />
-            <h2 className="text-sm font-semibold">Confirmar {actionTitle}</h2>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#e6e6e6] bg-white">
+          <div className="flex items-center gap-2 text-[#dc2626]">
+            <AlertTriangle className="w-4 h-4" />
+            <h2 className="text-[16px] font-semibold text-[#111111]">Confirmar {actionTitle}</h2>
           </div>
-          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#f5f5f5] transition-colors">
-            <X className="w-4 h-4 text-[#666]" />
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg text-[#64748b] hover:bg-[#f1f5f9] hover:text-[#111111] transition-colors cursor-pointer">
+            <X className="w-4 h-4" />
           </button>
         </div>
 

@@ -247,9 +247,9 @@ export default function IntegrationsHub() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 350, flexDirection: 'column', gap: 14 }}>
-        <RefreshCw size={32} className="spin-icon" color="#0071e3" />
-        <span style={{ color: '#6b7280', fontSize: 15, fontWeight: 500 }}>Carregando ecossistema de integrações…</span>
+      <div style={{ padding: '80px 20px', textAlign: 'center', color: '#64748b', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        <RefreshCw size={24} className="hub-spin" style={{ marginBottom: 12 }} />
+        <div>Carregando ecossistema de integrações...</div>
       </div>
     )
   }

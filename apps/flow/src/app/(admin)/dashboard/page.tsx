@@ -133,12 +133,15 @@ export default function DashboardPage() {
       {/* User Welcome Banner */}
       {userProfile && (
         <div className="flex items-center gap-4 mb-2">
-          <div className="w-14 h-14 rounded-full overflow-hidden bg-[#f5f5f5] border-2 border-[#e6e6e6] flex items-center justify-center flex-shrink-0">
-            {userProfile.photo_url ? (
-              <Image src={userProfile.photo_url} alt={userProfile.name} width={56} height={56} className="w-full h-full object-cover" unoptimized />
-            ) : (
-              <User className="w-6 h-6 text-[#ccc]" />
-            )}
+          <div className="relative p-[2px] rounded-full bg-gradient-to-br from-[#ff4b3e] via-[#ff8b1f] to-[#ffd21c] flex-shrink-0 shadow-sm">
+            <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white bg-white flex items-center justify-center">
+              {userProfile.photo_url ? (
+                <Image src={userProfile.photo_url} alt={userProfile.name} width={56} height={56} className="w-full h-full object-cover" unoptimized />
+              ) : (
+                <User className="w-6 h-6 text-[#ccc]" />
+              )}
+            </div>
+            <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#19c968] border-2 border-white" aria-label="Online" title="Online" />
           </div>
           <div>
             <h1 className="text-[24px] sm:text-[26px] font-semibold text-[#111827] tracking-tight">Olá, {userProfile.name?.split(' ')[0]}</h1>
@@ -214,7 +217,7 @@ export default function DashboardPage() {
               {(stats?.todayRevenue ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
             <p className="text-[11px] font-normal text-[#444]">
-               {new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' })}, {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} • Sincronização ativa
+              Hoje, {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} • Atualizado
             </p>
           </div>
         </div>
@@ -281,24 +284,21 @@ export default function DashboardPage() {
         </div>
 
         {/* Card pedidos */}
-        <div className="xl:col-span-3 mp-card flex flex-col justify-between min-h-[260px]">
+        <div className="xl:col-span-3 mp-card flex flex-col justify-between min-h-[240px]">
           <div>
             <h3 className="text-base font-semibold text-[#333]">Pedidos</h3>
-            <p className="text-sm text-[#666] mt-4 leading-relaxed">
-              Você tem <strong className="text-[#333]">{stats?.totalOrders || 0}</strong> pedidos este mês.
-            </p>
+            <p className="text-3xl font-bold text-[#111] mt-3">{stats?.totalOrders || 0}</p>
+            <p className="text-xs text-[#999] mt-1">Total acumulado</p>
           </div>
           <Link href="/pedidos" className="mp-btn-secondary w-full mt-6 text-center">Ver pedidos</Link>
         </div>
 
         {/* Card produtos ativos */}
-        <div className="xl:col-span-4 mp-card flex flex-col justify-between min-h-[260px]">
+        <div className="xl:col-span-4 mp-card flex flex-col justify-between min-h-[240px]">
           <div>
-            <h3 className="text-base font-semibold text-[#333]">Produtos ativos</h3>
-            <p className="text-sm text-[#666] mt-4 leading-relaxed">
-              Você tem <strong className="text-[#333]">{stats?.activeProducts || 0}</strong> produtos cadastrados.
-            </p>
-            <p className="text-3xl font-bold text-[#111] mt-4">{stats?.activeProducts || 0}</p>
+            <h3 className="text-base font-semibold text-[#333]">Produtos Ativos</h3>
+            <p className="text-3xl font-bold text-[#111] mt-3">{stats?.activeProducts || 0}</p>
+            <p className="text-xs text-[#999] mt-1">Itens no catálogo</p>
           </div>
           <Link href="/operacao" className="mp-btn-secondary w-full mt-6 text-center">
             Ver produtos
@@ -306,23 +306,29 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Linha 2 — Últimos Pedidos Responsivo */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
-        <div className="xl:col-span-12 mp-card p-5 sm:p-6 shadow-2xs">
-          <div className="flex items-center justify-between pb-4 border-b border-[#f0f0f0] mb-4">
-            <div>
-              <h2 className="mp-section-title">Últimos Pedidos</h2>
-              <p className="mp-list-item-sub mt-1">Vendas recentes</p>
-            </div>
-            <Link href="/pedidos" className="mp-see-all-link">
-              Conferir todos →
-            </Link>
+      {/* ── Últimos Pedidos (1:1 com o HUB) ── */}
+      <div className="mp-card" style={{ padding: '20px 24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 16, borderBottom: '1px solid #f0f0f0', marginBottom: 4 }}>
+          <div>
+            <h2 className="mp-section-title">Últimos Pedidos</h2>
           </div>
+          <Link href="/pedidos" className="mp-see-all-link">
+            Conferir todos →
+          </Link>
+        </div>
 
-          <div className="divide-y divide-[#f0f0f0]">
-            {(stats?.orders || []).map((order: Record<string, any>) => {
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          {(stats?.orders || []).length === 0 ? (
+            <div style={{ padding: '40px 20px', textAlign: 'center', color: '#888888' }}>
+              <ShoppingCart size={32} style={{ margin: '0 auto 12px', opacity: 0.4 }} />
+              <p style={{ fontWeight: 600, color: '#333333', fontSize: 15 }}>Nenhum pedido realizado no filtro selecionado</p>
+              <p style={{ fontSize: 13, color: '#888888', marginTop: 4 }}>
+                As vendas aparecerão aqui em tempo real.
+              </p>
+            </div>
+          ) : (
+            (stats?.orders || []).map((order: Record<string, any>) => {
               const mp = order.marketplaces as Record<string, unknown> | null
-              const acc = order.marketplace_accounts as Record<string, unknown> | null
               const firstItem = order.order_items?.[0]
               const prod = firstItem?.products
               const prodTitle = prod?.name || order.product_name || 'Lava Jato Lavadora Portátil De Alta Pressão 21v'
@@ -333,55 +339,64 @@ export default function DashboardPage() {
               return (
                 <div
                   key={order.id as string}
+                  className="dash-order-row"
                   onClick={() => router.push(`/pedidos/${order.id}`)}
-                  className="py-5 px-3 sm:py-6 sm:px-4 hover:bg-[#fafafa] rounded-xl transition-all cursor-pointer flex items-center gap-3 sm:gap-3.5 group"
+                  title="Clique para abrir detalhes do pedido"
                 >
-                  {/* Foto */}
-                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-[#f5f5f5] border border-[#e6e6e6] p-1 flex items-center justify-center shrink-0 overflow-hidden">
+                  {/* Thumbnail */}
+                  <div className="dash-order-thumb">
                     {prodImage ? (
-                      <img src={prodImage} alt={prodTitle} className="w-full h-full object-contain" />
+                      <img src={prodImage} alt={prodTitle} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                     ) : (
-                      <ShoppingCart className="w-5 h-5 text-[#666]" strokeWidth={1.5} />
+                      <ShoppingCart size={18} color="#666" aria-hidden />
                     )}
                   </div>
 
-                  {/* Conteúdo: título + cliente + status (limpo no mobile) */}
-                  <div className="flex-1 min-w-0">
-                    <p className="mp-list-item-title truncate text-[14px] font-medium">{prodTitle}</p>
-                    <div className="flex items-center gap-1.5 mt-0.5 min-w-0">
-                      <span className="text-[11px] text-[#888] truncate">{(order.customer_name as string) || 'Comprador'}</span>
-                      <span className="hidden sm:inline text-[#bbb]">•</span>
-                      <span className="hidden sm:inline font-mono text-[12px] text-[#999] truncate">SKU: {prodSku}</span>
-                      <span className={`inline-flex px-1.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-medium border shrink-0 ${
-                        isCancelled
-                          ? 'bg-[#fee2e2] text-[#dc2626] border-[#fecaca]'
-                          : 'bg-[#ecfdf5] text-[#16a34a] border-[#bbf7d0]'
-                      }`}>
+                  {/* Nome + detalhes */}
+                  <div className="dash-order-info">
+                    <p className="mp-list-item-title" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {prodTitle}
+                    </p>
+                    <div className="dash-order-meta">
+                      <span className="dash-order-buyer">{(order.customer_name as string) || 'Comprador'}</span>
+                      {prodSku && (
+                        <>
+                          <span className="dash-meta-dot">•</span>
+                          <span className="dash-order-sku">SKU: {prodSku}</span>
+                        </>
+                      )}
+                      <span className={`dash-badge ${isCancelled ? 'badge-red' : 'badge-success'}`}>
                         {isCancelled ? 'Cancelado' : 'Aprovado'}
                       </span>
                     </div>
                   </div>
 
-                  {/* Pedido + data (somente desktop) */}
-                  <div className="hidden sm:block text-right shrink-0">
-                    <div className="font-mono font-medium text-[13px] text-[#111]">{order.order_number}</div>
-                    <div className="text-[12px] text-[#888] font-normal">• {new Date(order.created_at).toLocaleDateString('pt-BR')}</div>
+                  {/* ID Marketplace + data */}
+                  <div className="dash-order-id-col">
+                    {order.order_number && (
+                      <div style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: 13, color: '#111' }}>
+                        {order.order_number}
+                      </div>
+                    )}
+                    <div style={{ fontSize: 12, color: '#888888', fontWeight: 500 }}>
+                      • {new Date(order.created_at).toLocaleDateString('pt-BR')}
+                    </div>
                   </div>
 
-                  {/* Marketplace (desktop) + Valor */}
-                  <div className="flex items-center gap-3 shrink-0">
-                    <div className="hidden sm:flex items-center gap-1.5 px-2 py-1 rounded-lg bg-[#fafafa] border border-[#eee] text-[11px] font-medium text-[#555]">
+                  {/* Marketplace badge + Valor */}
+                  <div className="dash-order-right">
+                    <div className="dash-mp-badge">
                       <MarketplaceLogo name={(mp?.name as string) || 'Mercado Livre'} className="w-3.5 h-3.5 shrink-0" />
-                      <span>{(mp?.name as string) || 'ML'}</span>
+                      <span>{(mp?.name as string) || 'Loja Própria'}</span>
                     </div>
-                    <span className="font-semibold text-[#111] text-[14px] text-right">
-                      R$ {Number(order.total_amount || 0).toFixed(2).replace('.', ',')}
+                    <span className="dash-order-price">
+                      R$ {Number(order.total_amount || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
                   </div>
                 </div>
               )
-            })}
-          </div>
+            })
+          )}
         </div>
       </div>
     </div>

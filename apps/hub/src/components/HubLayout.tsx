@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { usePermissions } from '../hooks/usePermissions'
@@ -19,7 +19,7 @@ import {
 import { InternalChatProvider } from '../contexts/InternalChatContext'
 import FloatingMessenger from './internal-chat/FloatingMessenger'
 import { TeknixLogo } from './TeknixLogo'
-import { User, Users, Settings, Layers, LogOut, Eye, EyeOff, ChevronDown, ChevronRight, CreditCard, Shield, RefreshCw, ExternalLink } from 'lucide-react'
+import { User, Users, Settings, Layers, LogOut, Eye, EyeOff, ChevronDown, ChevronRight, CreditCard, Shield, RefreshCw, ExternalLink, X, PanelLeft, ChevronsUpDown, Bell, CheckCheck } from 'lucide-react'
 import './HubLayout.css'
 
 // ─── Ícones originais + logos de integração ────────────────────────────────
@@ -79,14 +79,30 @@ function HubLayoutContent() {
 
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useHubNotifications()
 
-  // Fechar popup de notificações e usuário ao clicar fora ou apertar Esc
+  // Telas com botão voltar próprio no topo (evita título solto duplicado no mobile)
+  const isDetailPageWithBack = 
+    (location.pathname.startsWith('/hub/produtos/') && location.pathname !== '/hub/produtos') ||
+    (location.pathname.startsWith('/hub/pedidos/') && location.pathname !== '/hub/pedidos') ||
+    (location.pathname.startsWith('/hub/clientes/') && location.pathname !== '/hub/clientes')
+
+  // Fechar popup de notificações e usuário ao clicar fora, apertar Esc ou voltar no celular
   useEffect(() => {
-    function handleDocumentClick(e: MouseEvent) {
-      if (notifDropdownRef.current && !notifDropdownRef.current.contains(e.target as Node)) {
-        setShowNotifications(false)
+    function handleDocumentClick(e: MouseEvent | TouchEvent) {
+      const target = e.target as HTMLElement | null
+      if (!target) return
+
+      if (notifDropdownRef.current && !notifDropdownRef.current.contains(target)) {
+        // Se não clicou no botão disparador de notificações
+        if (!target.closest('.flow-pill-btn') && !target.closest('.hub-mobile-pill button[title="Notificações"]')) {
+          setShowNotifications(false)
+        }
       }
-      if (userDropdownRef.current && !userDropdownRef.current.contains(e.target as Node)) {
-        setShowUserDropdown(false)
+
+      if (userDropdownRef.current && !userDropdownRef.current.contains(target)) {
+        // Se não clicou nos botões disparadores do perfil
+        if (!target.closest('.mp-wpn-header-user-btn') && !target.closest('.hub-mobile-pill button')) {
+          setShowUserDropdown(false)
+        }
       }
     }
 
@@ -97,13 +113,28 @@ function HubLayoutContent() {
       }
     }
 
+    let originalOverflow = ''
+    if (showUserDropdown && window.innerWidth <= 768) {
+      originalOverflow = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+    }
+
+    const handlePop = () => setShowUserDropdown(false)
+    window.addEventListener('popstate', handlePop)
+
     if (showNotifications || showUserDropdown) {
       document.addEventListener('mousedown', handleDocumentClick)
+      document.addEventListener('touchstart', handleDocumentClick)
       document.addEventListener('keydown', handleKeyDown)
     }
 
     return () => {
+      if (originalOverflow) {
+        document.body.style.overflow = originalOverflow
+      }
+      window.removeEventListener('popstate', handlePop)
       document.removeEventListener('mousedown', handleDocumentClick)
+      document.removeEventListener('touchstart', handleDocumentClick)
       document.removeEventListener('keydown', handleKeyDown)
     }
   }, [showNotifications, showUserDropdown])
@@ -139,8 +170,10 @@ function HubLayoutContent() {
 
   const [userName, setUserName] = useState(() => localStorage.getItem('user_name') || 'Alison Thiago')
   const [userNickname, setUserNickname] = useState(() => localStorage.getItem('user_nickname') || 'Alison')
-  const [userEmail, setUserEmail] = useState(() => localStorage.getItem('user_email') || 'alison@teknix.com.br')
+  const [userEmail, setUserEmail] = useState(() => localStorage.getItem('user_email') || 'alison@teknixbrasil.com.br')
   const [userPhoto, setUserPhoto] = useState(() => localStorage.getItem('user_photo_url') || 'https://ykgprfzfnffooqmfbeox.supabase.co/storage/v1/object/public/user-avatars/3af9068a-4b78-4c9c-8657-f83b93c01588-1787179225140.jpg')
+
+  const canAccessFlow = isMaster || role === 'MASTER' || role === 'ADMIN' || can('flow.access')
 
   // Contas de integração dinâmicas
   const [marketplaceAccounts, setMarketplaceAccounts] = useState<any[]>([])
@@ -324,19 +357,19 @@ function HubLayoutContent() {
               </g>
             </svg>
           </Link>
+          {/* Botão toggle / fechar sidebar com ícone PanelLeft */}
           <button
+            type="button"
             className="sidebar-toggle"
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            aria-label={sidebarOpen ? 'Recolher menu' : 'Expandir menu'}
-            aria-expanded={sidebarOpen}
+            aria-label="Alternar menu lateral"
+            title="Menu lateral"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" width="18" height="18">
-              {sidebarOpen ? <path d="M15 18l-6-6 6-6"/> : <path d="M9 18l6-6-6-6"/>}
-            </svg>
+            <PanelLeft className="w-5 h-5 text-[#64748b] hover:text-[#111]" strokeWidth={1.75} />
           </button>
         </div>
 
-        {/* Navigation — estrutura original com visual FLOW */}
+        {/* Navigation — estrutura com ondulações e largura 90% */}
         <nav className="sidebar-nav">
           {menuItems.map((group) => (
             <div key={group.section} className="nav-group">
@@ -392,8 +425,8 @@ function HubLayoutContent() {
       {/* ── Main Content Area ── */}
       <main className="hub-main">
         {/* ── Mobile Header Oficial — Barra Verde #B5F500 (1:1 com FLOW) ── */}
-        <div className="hub-mobile-header-bar">
-          <div className="bg-[#B5F500] rounded-full flex items-center justify-between px-3.5 py-2.5 shadow-sm hub-mobile-pill">
+        <div className={`hub-mobile-header-bar ${showUserDropdown || showNotifications ? 'user-dropdown-open' : ''}`}>
+          <div className="bg-[#B5F500] rounded-full flex items-center justify-between px-3.5 py-2.5 shadow-sm hub-mobile-pill relative z-[1005]">
             <div className="flex items-center gap-2">
               <button
                 type="button"
@@ -446,14 +479,15 @@ function HubLayoutContent() {
                   }}
                   className="flex items-center gap-1.5 pl-1 pr-1.5 py-1 rounded-full hover:bg-black/10 transition-colors cursor-pointer"
                 >
-                  <div className="relative">
-                    <div className="h-10 w-10 rounded-full overflow-hidden border border-black/20">
+                  <div className="relative hub-header-avatar-frame">
+                    <div className="h-10 w-10 rounded-full overflow-hidden hub-gradient-avatar">
                       <img
                         alt={userNickname}
                         src={userPhoto}
                         className="h-full w-full object-cover"
                       />
                     </div>
+                    <span className="hub-online-dot" aria-label="Online" title="Online" />
                   </div>
                   <span className="hidden sm:block text-sm font-semibold text-[#111] max-w-[90px] truncate">{userNickname}</span>
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-down w-4 h-4 text-[#111] hidden sm:block" aria-hidden="true">
@@ -464,10 +498,12 @@ function HubLayoutContent() {
             </div>
           </div>
 
-          {/* Título da Página no Mobile (1:1 com FLOW) */}
-          <div className="hub-mobile-header-title-row">
-            <h1 className="hub-mobile-page-title">{getPageTitle(location.pathname)}</h1>
-          </div>
+          {/* Título da Página no Mobile (oculto no Painel no celular) */}
+          {!isDetailPageWithBack && getPageTitle(location.pathname) !== 'Painel' && (
+            <div className="hub-mobile-header-title-row">
+              <h1 className="hub-mobile-page-title">{getPageTitle(location.pathname)}</h1>
+            </div>
+          )}
         </div>
 
         {/* ── Desktop Header — título + pill (FLOW 1:1) ── */}
@@ -501,16 +537,16 @@ function HubLayoutContent() {
                   className="mp-wpn-header-user-btn"
                   style={{ background: '#ffffff' }}
                   onClick={() => { setShowUserDropdown(!showUserDropdown); setShowNotifications(false) }}
-                  aria-label="TEKNIX Imagem do perfil"
+                  aria-label={`${userNickname || userName || 'Perfil'} Imagem do perfil`}
                 >
                   <div className="mp-wpn-avatar-box">
                     <img
-                      src="https://mla-s1-p.mlstatic.com/794912-MLA114955335454_082026-O.jpg"
-                      alt="TEKNIX"
+                      src={userPhoto || "https://ykgprfzfnffooqmfbeox.supabase.co/storage/v1/object/public/user-avatars/3af9068a-4b78-4c9c-8657-f83b93c01588-1787179225140.jpg"}
+                      alt={userNickname || userName || "Perfil"}
                       className="mp-wpn-avatar-img"
                     />
                   </div>
-                  <span className="mp-wpn-user-title">TEKNIX</span>
+                  <span className="mp-wpn-user-title">{userNickname || userName || 'Alison'}</span>
                   <ChevronDown size={14} className="mp-wpn-chevron" />
                 </button>
               </div>
@@ -521,335 +557,380 @@ function HubLayoutContent() {
         {/* Modais Globais de Notificações e Usuário */}
         <div ref={notifDropdownRef}>
           {showNotifications && (
-            <div className="flow-notification-dropdown" onClick={e => e.stopPropagation()}>
-              {/* Cabeçalho compacto no mesmo padrão do painel de notificações */}
-              <div className="flow-notification-header">
-                <div className="flow-notification-top-row">
-                  <h3 className="flow-notification-title">Notificações</h3>
+            <div className="flow-notification-drawer-wrapper">
+              {/* Backdrop escurecido no mobile */}
+              <div
+                className="flow-notification-drawer-backdrop"
+                onClick={() => setShowNotifications(false)}
+                aria-hidden="true"
+              />
+
+              {/* Menu Moderno de Notificações — 1:1 com o Menu do Usuário */}
+              <div className="flow-notification-dropdown mp-modern-user-menu mp-modern-notification-menu" onClick={e => e.stopPropagation()}>
+                {/* 1. Header Card: Título + Badge + Botão Marcar Todas Lidas */}
+                <div className="modern-user-header-card modern-notification-header-card flow-notification-header">
+                  <div className="modern-user-header-info">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <h3 className="modern-user-name flow-notification-title">Notificações</h3>
+                      {unreadCount > 0 ? (
+                        <span className="modern-badge flow" style={{ padding: '2px 7.5px', fontSize: '11px' }}>
+                          {unreadCount} nova{unreadCount > 1 ? 's' : ''}
+                        </span>
+                      ) : (
+                        <span className="modern-badge hub" style={{ padding: '2px 7.5px', fontSize: '11px' }}>
+                          Atualizado
+                        </span>
+                      )}
+                    </div>
+                    <span className="modern-user-email">
+                      {unreadCount > 0
+                        ? `${unreadCount} não lida${unreadCount > 1 ? 's' : ''} no momento`
+                        : 'Você leu todas as notificações recentes'}
+                    </span>
+                  </div>
+
+                  <div className="modern-notification-header-actions">
+                    <button
+                      type="button"
+                      className="flow-notification-settings"
+                      aria-label="Marcar todas como lidas"
+                      title={unreadCount > 0 ? "Marcar todas como lidas" : "Todas as notificações já foram lidas"}
+                      onClick={() => markAllAsRead()}
+                    >
+                      <CheckCheck size={18} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* 2. Abas Modernas (Todas / Não lidas) */}
+                <div className="modern-notification-tabs">
                   <button
                     type="button"
-                    className="flow-notification-settings"
-                    aria-label="Configurações de notificações"
-                    title="Configurações de notificações"
-                    onClick={() => markAllAsRead()}
+                    className={`modern-notification-tab ${notificationTab === 'all' ? 'active' : ''}`}
+                    onClick={() => setNotificationTab('all')}
                   >
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                      <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
-                      <path d="m19.4 15 .1.1a1.8 1.8 0 0 1-2.5 2.5l-.1-.1a1.8 1.8 0 0 0-3.1 1.3v.2a1.8 1.8 0 0 1-3.6 0v-.2a1.8 1.8 0 0 0-3.1-1.3l-.1.1a1.8 1.8 0 0 1-2.5-2.5l.1-.1a1.8 1.8 0 0 0-1.3-3.1h-.2a1.8 1.8 0 0 1 0-3.6h.2a1.8 1.8 0 0 0 1.3-3.1l-.1-.1a1.8 1.8 0 0 1 2.5-2.5l.1.1a1.8 1.8 0 0 0 3.1-1.3V3a1.8 1.8 0 0 1 3.6 0v.2a1.8 1.8 0 0 0 3.1 1.3l.1-.1a1.8 1.8 0 0 1 2.5 2.5l-.1.1a1.8 1.8 0 0 0 1.3 3.1h.2a1.8 1.8 0 0 1 0 3.6h-.2a1.8 1.8 0 0 0-1.3 1.3Z" />
-                    </svg>
+                    <span>Todas</span>
+                    <span className="modern-notification-tab-count">{notifications.length}</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`modern-notification-tab ${notificationTab === 'unread' ? 'active' : ''}`}
+                    onClick={() => setNotificationTab('unread')}
+                  >
+                    <span>Não lidas</span>
+                    {unreadCount > 0 && (
+                      <span className="modern-notification-tab-count unread">{unreadCount}</span>
+                    )}
                   </button>
                 </div>
-              </div>
 
-              {/* Notification Items List */}
-              <div className="flow-notification-list">
-                {(() => {
-                  const list = notificationTab === 'unread'
-                    ? notifications.filter(n => !n.is_read)
-                    : notifications
+                {/* 3. Lista de Notificações com o estilo dos itens modernos */}
+                <div className="flow-notification-list modern-user-menu-list">
+                  {(() => {
+                    const list = notificationTab === 'unread'
+                      ? notifications.filter(n => !n.is_read)
+                      : notifications
 
-                  if (list.length === 0) {
-                    return (
-                      <div className="flow-notification-empty">
-                        <div className="flow-notification-empty-icon">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width="22" height="22">
-                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-                          </svg>
+                    if (list.length === 0) {
+                      return (
+                        <div className="flow-notification-empty">
+                          <div className="flow-notification-empty-icon">
+                            <Bell size={22} />
+                          </div>
+                          <p className="flow-notification-empty-title">
+                            {notificationTab === 'unread'
+                              ? 'Nenhuma notificação não lida'
+                              : 'Você não tem notificações'}
+                          </p>
+                          <p className="flow-notification-empty-desc">
+                            {notificationTab === 'unread'
+                              ? 'Você leu todas as notificações recentes.'
+                              : 'Atualizações sobre vendas, pedidos e novidades aparecerão aqui.'}
+                          </p>
                         </div>
-                        <p className="flow-notification-empty-title">
-                          {notificationTab === 'unread'
-                            ? 'Nenhuma notificação não lida'
-                            : 'Você não tem notificações'}
-                        </p>
-                        <p className="flow-notification-empty-desc">
-                          {notificationTab === 'unread'
-                            ? 'Você leu todas as notificações recentes.'
-                            : 'Atualizações sobre vendas, pedidos e novidades aparecerão aqui.'}
-                        </p>
-                      </div>
-                    )
-                  }
-
-                  return list.slice(0, 18).map((item) => {
-                    const mod = String(item.module || '').toLowerCase()
-                    const type = String(item.type || '').toLowerCase()
-                    const isSale = mod === 'sale' || mod === 'order' || type === 'order'
-                    const isPix = mod === 'pix'
-                    const isPayment = mod === 'payment'
-                    const isStock = mod === 'stock'
-                    const isShipment = mod === 'shipment'
-                    const isInvoice = mod === 'invoice'
-                    const isError = type === 'error'
-
-                    let iconSymbol: React.ReactElement = (
-                      <svg viewBox="0 0 24 24">
-                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-                      </svg>
-                    )
-                    let iconBg = '#f0f4f8'
-                    let iconColor = '#475569'
-
-                    if (isSale) {
-                      iconSymbol = (
-                        <svg viewBox="0 0 24 24">
-                          <circle cx="9" cy="20" r="1.5"/>
-                          <circle cx="19" cy="20" r="1.5"/>
-                          <path d="M2.5 3h3l2.4 10.5a2 2 0 0 0 2 1.5h7.6a2 2 0 0 0 1.9-1.4l2.1-8.6H6.5"/>
-                        </svg>
                       )
-                      iconBg = '#e8f8ee'
-                      iconColor = '#00a650'
-                    } else if (isPix || isPayment) {
-                      iconSymbol = (
-                        <svg viewBox="0 0 24 24">
-                          <rect x="2.5" y="5" width="19" height="14" rx="2.5"/>
-                          <line x1="2.5" y1="10" x2="21.5" y2="10"/>
-                          <line x1="6" y1="15" x2="10" y2="15"/>
-                        </svg>
-                      )
-                      iconBg = '#ebf3fe'
-                      iconColor = '#2563eb'
-                    } else if (isStock) {
-                      iconSymbol = (
-                        <svg viewBox="0 0 24 24">
-                          <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
-                          <path d="m3.3 7 8.7 5 8.7-5"/>
-                          <path d="M12 22V12"/>
-                        </svg>
-                      )
-                      iconBg = '#fff5e5'
-                      iconColor = '#ea580c'
-                    } else if (isShipment) {
-                      iconSymbol = (
-                        <svg viewBox="0 0 24 24">
-                          <rect x="2" y="4" width="13" height="11" rx="1.5"/>
-                          <polygon points="15 8 19 8 22 12 22 15 15 15 15 8"/>
-                          <circle cx="6" cy="18.5" r="2"/>
-                          <circle cx="18" cy="18.5" r="2"/>
-                        </svg>
-                      )
-                      iconBg = '#e5f5fc'
-                      iconColor = '#0284c7'
-                    } else if (isInvoice) {
-                      iconSymbol = (
-                        <svg viewBox="0 0 24 24">
-                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                          <polyline points="14 2 14 8 20 8"/>
-                          <line x1="16" y1="13" x2="8" y2="13"/>
-                          <line x1="16" y1="17" x2="8" y2="17"/>
-                        </svg>
-                      )
-                      iconBg = '#f3ebff'
-                      iconColor = '#7c3aed'
-                    } else if (isError) {
-                      iconSymbol = (
-                        <svg viewBox="0 0 24 24">
-                          <circle cx="12" cy="12" r="10"/>
-                          <line x1="12" y1="8" x2="12" y2="12"/>
-                          <line x1="12" y1="16" x2="12.01" y2="16"/>
-                        </svg>
-                      )
-                      iconBg = '#feeaea'
-                      iconColor = '#dc2626'
                     }
 
-                    const timeStr = formatRelativeTime(item.created_at)
-                    const approvedAsset = resolveNotificationIcon({
-                      module: item.module,
-                      type: item.type,
-                      title: item.title,
-                      message: item.message,
-                      metadata: item.metadata
-                    })
+                    return list.slice(0, 18).map((item) => {
+                      const mod = String(item.module || '').toLowerCase()
+                      const type = String(item.type || '').toLowerCase()
+                      const isSale = mod === 'sale' || mod === 'order' || type === 'order'
+                      const isPix = mod === 'pix'
+                      const isPayment = mod === 'payment'
+                      const isStock = mod === 'stock'
+                      const isShipment = mod === 'shipment'
+                      const isInvoice = mod === 'invoice'
+                      const isError = type === 'error'
 
-                    return (
-                      <div
-                        key={item.id}
-                        className={`flow-notification-item ${item.is_read ? 'read' : 'unread'}`}
-                        onClick={() => {
-                          if (!item.is_read) markAsRead(item.id)
-                          setShowNotifications(false)
-                          navigate(resolveNotificationUrl(item))
-                        }}
-                      >
-                        <div className="flow-notification-icon" style={{ background: approvedAsset ? 'transparent' : iconBg, color: iconColor }}>
-                          {approvedAsset ? (
-                            <img
-                              src={approvedAsset}
-                              alt={cleanNotificationText(item.title)}
-                              className="flow-notification-img-icon"
-                              onError={(e) => {
-                                e.currentTarget.style.display = 'none'
-                                const next = e.currentTarget.nextElementSibling as HTMLElement
-                                if (next) next.style.display = 'flex'
-                              }}
-                            />
-                          ) : null}
-                          <span
-                            style={{
-                              display: approvedAsset ? 'none' : 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              width: '100%',
-                              height: '100%'
-                            }}
-                          >
-                            {iconSymbol}
-                          </span>
-                        </div>
-                        <div className="flow-notification-content">
-                          <h4 className="flow-notification-item-title">{cleanNotificationText(item.title)}</h4>
-                          <p className="flow-notification-item-description">
-                            {cleanNotificationText(item.message)}
-                          </p>
-                          <span className="flow-notification-item-time">{timeStr}</span>
-                        </div>
-                        {!item.is_read && <span className="flow-notification-dot" title="Não lida" />}
-                        <svg className="flow-notification-chevron" viewBox="0 0 24 24" aria-hidden="true">
-                          <path d="m9 18 6-6-6-6" />
+                      let iconSymbol: React.ReactElement = (
+                        <svg viewBox="0 0 24 24">
+                          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                         </svg>
-                      </div>
-                    )
-                  })
-                })()}
-              </div>
+                      )
+                      let iconBg = '#f0f4f8'
+                      let iconColor = '#475569'
 
-              {/* Modeless Footer */}
-              <Link
-                to="/hub/notificacoes"
-                onClick={() => setShowNotifications(false)}
-                className="flow-notification-footer"
-              >
-                Ver todas as notificações →
-              </Link>
+                      if (isSale) {
+                        iconSymbol = (
+                          <svg viewBox="0 0 24 24">
+                            <circle cx="9" cy="20" r="1.5"/>
+                            <circle cx="19" cy="20" r="1.5"/>
+                            <path d="M2.5 3h3l2.4 10.5a2 2 0 0 0 2 1.5h7.6a2 2 0 0 0 1.9-1.4l2.1-8.6H6.5"/>
+                          </svg>
+                        )
+                        iconBg = '#e8f8ee'
+                        iconColor = '#00a650'
+                      } else if (isPix || isPayment) {
+                        iconSymbol = (
+                          <svg viewBox="0 0 24 24">
+                            <rect x="2.5" y="5" width="19" height="14" rx="2.5"/>
+                            <line x1="2.5" y1="10" x2="21.5" y2="10"/>
+                            <line x1="6" y1="15" x2="10" y2="15"/>
+                          </svg>
+                        )
+                        iconBg = '#ebf3fe'
+                        iconColor = '#2563eb'
+                      } else if (isStock) {
+                        iconSymbol = (
+                          <svg viewBox="0 0 24 24">
+                            <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
+                            <path d="m3.3 7 8.7 5 8.7-5"/>
+                            <path d="M12 22V12"/>
+                          </svg>
+                        )
+                        iconBg = '#fff5e5'
+                        iconColor = '#ea580c'
+                      } else if (isShipment) {
+                        iconSymbol = (
+                          <svg viewBox="0 0 24 24">
+                            <rect x="2" y="4" width="13" height="11" rx="1.5"/>
+                            <polygon points="15 8 19 8 22 12 22 15 15 15 8"/>
+                            <circle cx="6" cy="18.5" r="2"/>
+                            <circle cx="18" cy="18.5" r="2"/>
+                          </svg>
+                        )
+                        iconBg = '#e5f5fc'
+                        iconColor = '#0284c7'
+                      } else if (isInvoice) {
+                        iconSymbol = (
+                          <svg viewBox="0 0 24 24">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                          </svg>
+                        )
+                        iconBg = '#f3ebff'
+                        iconColor = '#7c3aed'
+                      } else if (isError) {
+                        iconSymbol = (
+                          <svg viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                          </svg>
+                        )
+                        iconBg = '#feeaea'
+                        iconColor = '#dc2626'
+                      }
+
+                      const timeStr = formatRelativeTime(item.created_at)
+                      const approvedAsset = resolveNotificationIcon({
+                        module: item.module,
+                        type: item.type,
+                        title: item.title,
+                        message: item.message,
+                        metadata: item.metadata
+                      })
+
+                      return (
+                        <div
+                          key={item.id}
+                          className={`flow-notification-item modern-user-item ${item.is_read ? 'read' : 'unread'}`}
+                          onClick={() => {
+                            if (!item.is_read) markAsRead(item.id)
+                            setShowNotifications(false)
+                            navigate(resolveNotificationUrl(item))
+                          }}
+                        >
+                          <div className="flow-notification-icon" style={{ background: approvedAsset ? 'transparent' : iconBg, color: iconColor }}>
+                            {approvedAsset ? (
+                              <img
+                                src={approvedAsset}
+                                alt={cleanNotificationText(item.title)}
+                                className="flow-notification-img-icon"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none'
+                                  const next = e.currentTarget.nextElementSibling as HTMLElement
+                                  if (next) next.style.display = 'flex'
+                                }}
+                              />
+                            ) : null}
+                            <span
+                              style={{
+                                display: approvedAsset ? 'none' : 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: '100%',
+                                height: '100%'
+                              }}
+                            >
+                              {iconSymbol}
+                            </span>
+                          </div>
+                          <div className="flow-notification-content">
+                            <div className="flow-notification-header-row">
+                              <h4 className="flow-notification-item-title">{cleanNotificationText(item.title)}</h4>
+                              <span className="flow-notification-item-time">{timeStr}</span>
+                            </div>
+                            <p className="flow-notification-item-description">
+                              {cleanNotificationText(item.message)}
+                            </p>
+                          </div>
+                          {!item.is_read && <span className="flow-notification-dot" title="Não lida" />}
+                          <ChevronRight size={15} className="flow-notification-chevron modern-item-icon" aria-hidden="true" />
+                        </div>
+                      )
+                    })
+                  })()}
+                </div>
+
+                {/* 4. Divisor e Link de Rodapé no Estilo Moderno */}
+                <div className="modern-menu-divider" />
+                <Link
+                  to="/hub/notificacoes"
+                  onClick={() => setShowNotifications(false)}
+                  className="modern-user-item modern-notification-footer-btn"
+                >
+                  <Bell size={17} className="modern-item-icon" />
+                  <span>Ver todas as notificações</span>
+                  <span className="modern-badge flow" style={{ marginLeft: 'auto' }}>
+                    Ver tudo →
+                  </span>
+                </Link>
+              </div>
             </div>
           )}
         </div>
 
         <div ref={userDropdownRef}>
           {showUserDropdown && (
-            <div className="flow-user-dropdown mp-account-widget-dropdown" onClick={() => setShowUserDropdown(false)}>
-              {/* Header do Perfil TEKNIX */}
-              <Link to="/hub/usuarios" className="mp-widget-header-row">
-                <div className="mp-widget-avatar-wrap">
-                  <img
-                    src="https://mla-s1-p.mlstatic.com/794912-MLA114955335454_082026-O.jpg"
-                    alt="TEKNIX"
-                    className="mp-widget-avatar-img"
-                  />
-                </div>
-                <div className="mp-widget-header-text">
-                  <div className="mp-widget-header-title-row">
-                    <span className="mp-widget-title">TEKNIX</span>
-                    <span className="mp-widget-status-badge">Ativo</span>
-                  </div>
-                  <span className="mp-widget-subtitle">contatobovek@gmail.com</span>
-                </div>
-                <ChevronRight size={16} className="mp-widget-header-arrow" />
-              </Link>
+            <div className="flow-user-drawer-wrapper">
+              {/* Backdrop escurecido no mobile */}
+              <div
+                className="flow-user-drawer-backdrop"
+                onClick={() => setShowUserDropdown(false)}
+                aria-hidden="true"
+              />
 
-              <div className="mp-widget-divider" />
-
-              {/* Seção Trocar de Conta */}
-              <div className="mp-widget-section-label">
-                <RefreshCw size={12} />
-                <span>Trocar de conta</span>
-              </div>
-
-              <div className="mp-widget-accounts-list">
-                {/* 1. Conta HUB (Loja Própria & Gestão) */}
+              {/* Menu Moderno 1:1 com a Referência Visual */}
+              <div className="flow-user-dropdown mp-modern-user-menu" onClick={(e) => e.stopPropagation()}>
+                {/* 1. Header do Usuário: Nome e E-mail à Esquerda + Avatar com Anel Gradiente à Direita */}
                 <Link
-                  to="/hub"
-                  className="mp-widget-account-item active"
+                  to="/hub/usuarios"
+                  className="modern-user-header-card"
                   onClick={() => setShowUserDropdown(false)}
-                  title="Conta ativa: Teknix HUB (Loja Própria & Administração)"
                 >
-                  <div className="mp-widget-account-avatar">
-                    <img src="https://mla-s1-p.mlstatic.com/898663-MLA115505734482_082026-O.jpg?id=1407117743" alt="Alison Thiago" />
+                  <div className="modern-user-header-info">
+                    <span className="modern-user-name">{userNickname || userName || 'Alison'}</span>
+                    <span className="modern-user-email">{userEmail || 'alison@teknixbrasil.com.br'}</span>
                   </div>
-                  <div className="mp-widget-account-info">
-                    <div className="mp-widget-account-title-row">
-                      <span className="mp-widget-account-name">Alison Thiago</span>
-                      <span className="mp-widget-badge hub">HUB</span>
-                    </div>
-                    <span className="mp-widget-account-email">alisonsilvathiago@gmail.com</span>
+                  <div className="modern-user-avatar-ring">
+                    {userPhoto ? (
+                      <img
+                        src={userPhoto}
+                        alt={userNickname || userName || 'Perfil'}
+                        className="modern-user-avatar-img"
+                      />
+                    ) : (
+                      <img
+                        src={`https://api.dicebear.com/7.x/notionists/svg?seed=${userEmail || 'user'}`}
+                        alt={userNickname || userName || 'Perfil'}
+                        className="modern-user-avatar-img"
+                      />
+                    )}
                   </div>
-                  <span className="mp-widget-active-dot" title="Sessão ativa no HUB" />
                 </Link>
 
-                {/* 2. Conta FLOW (Marketplace & Operação) */}
-                <a
-                  href="http://localhost:3000"
-                  className="mp-widget-account-item flow"
-                  onClick={() => setShowUserDropdown(false)}
-                  title="Ir para a conta Teknix FLOW (Marketplaces & Operação)"
-                >
-                  <div className="mp-widget-account-avatar initials flow">
-                    <span>AT</span>
-                  </div>
-                  <div className="mp-widget-account-info">
-                    <div className="mp-widget-account-title-row">
-                      <span className="mp-widget-account-name">Alison Thiago</span>
-                      <span className="mp-widget-badge flow">FLOW</span>
-                    </div>
-                    <span className="mp-widget-account-email">alisonnegoh@gmail.com</span>
-                  </div>
-                  <ExternalLink size={13} className="mp-widget-flow-icon" />
-                </a>
+                {/* 2. Lista de Itens do Menu */}
+                <div className="modern-user-menu-list">
+                  {/* Perfil em Destaque */}
+                  <Link
+                    to="/hub/usuarios"
+                    className="modern-user-item active"
+                    onClick={() => setShowUserDropdown(false)}
+                  >
+                    <User size={17} className="modern-item-icon" />
+                    <span>Configurar perfil</span>
+                  </Link>
+
+                  {/* Troca de Conta: Foco no FLOW com Badge PRO */}
+                  {canAccessFlow && (
+                    <a
+                      href="http://localhost:3000"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="modern-user-item"
+                      onClick={() => setShowUserDropdown(false)}
+                      title="Acessar conta Teknix FLOW (Marketplaces & Operação)"
+                    >
+                      <RefreshCw size={17} className="modern-item-icon" />
+                      <span>Teknix FLOW</span>
+                      <span className="modern-badge flow">
+                        ⚡ FLOW
+                      </span>
+                    </a>
+                  )}
+
+                  <Link
+                    to="/hub/pagamentos"
+                    className="modern-user-item"
+                    onClick={() => setShowUserDropdown(false)}
+                  >
+                    <CreditCard size={17} className="modern-item-icon" />
+                    <span>Pagamentos & Checkout</span>
+                  </Link>
+
+                  <Link
+                    to="/hub/configuracoes?tab=users"
+                    className="modern-user-item"
+                    onClick={() => setShowUserDropdown(false)}
+                  >
+                    <Users size={17} className="modern-item-icon" />
+                    <span>Usuários & Colaboradores</span>
+                  </Link>
+
+                  <Link
+                    to="/hub/configuracoes"
+                    className="modern-user-item"
+                    onClick={() => setShowUserDropdown(false)}
+                  >
+                    <Settings size={17} className="modern-item-icon" />
+                    <span>Configurações da loja</span>
+                  </Link>
+
+                  <Link
+                    to="/hub/integracoes"
+                    className="modern-user-item"
+                    onClick={() => setShowUserDropdown(false)}
+                  >
+                    <Layers size={17} className="modern-item-icon" />
+                    <span>Integrações</span>
+                  </Link>
+
+                  <div className="modern-menu-divider" />
+
+                  <Link
+                    to="/hub/seguranca"
+                    className="modern-user-item"
+                    onClick={() => setShowUserDropdown(false)}
+                  >
+                    <Shield size={17} className="modern-item-icon" />
+                    <span>Segurança da conta</span>
+                  </Link>
+                </div>
               </div>
-
-              <div className="mp-widget-divider" />
-
-              {/* Links Administrativos incluindo Pagamentos */}
-              <div className="mp-widget-actions-list">
-                <Link to="/hub/usuarios" className="flow-dropdown-item">
-                  <User size={15} />
-                  <span>Configurar perfil</span>
-                </Link>
-
-                <Link to="/hub/pagamentos" className="flow-dropdown-item">
-                  <CreditCard size={15} />
-                  <span>Pagamentos & Checkout</span>
-                </Link>
-
-                <Link to="/hub/configuracoes?tab=users" className="flow-dropdown-item">
-                  <Users size={15} />
-                  <span>Usuários & Colaboradores</span>
-                </Link>
-
-                <Link to="/hub/configuracoes" className="flow-dropdown-item">
-                  <Settings size={15} />
-                  <span>Configurações da loja</span>
-                </Link>
-
-                <Link to="/hub/integracoes" className="flow-dropdown-item">
-                  <Layers size={15} />
-                  <span>Integrações</span>
-                </Link>
-
-                <Link to="/hub/seguranca" className="flow-dropdown-item">
-                  <Shield size={15} />
-                  <span>Reportar um problema de segurança</span>
-                </Link>
-              </div>
-
-              <div className="mp-widget-divider" />
-
-              <Link
-                to="/login"
-                className="flow-dropdown-item logout"
-                onClick={async () => {
-                  try {
-                    localStorage.removeItem('demo_user_active')
-                    await supabase.auth.signOut()
-                  } catch {}
-                }}
-              >
-                <LogOut size={15} />
-                <span>Sair</span>
-              </Link>
             </div>
           )}
         </div>
@@ -875,8 +956,39 @@ function HubLayoutContent() {
 
 // ─── Export Principal Envolvido com o Contexto Global do Chat ──────────────
 export default function HubLayout() {
+  const { user } = useAuth()
+
+  const initialChatUser = useMemo(() => {
+    if (!user) return undefined
+    let name = user.user_metadata?.name || user.email?.split('@')[0] || 'Colaborador'
+    let photo = user.user_metadata?.avatar_url || user.user_metadata?.photo_url
+    let role = 'ADMIN'
+
+    if (user.id === 'bad56b70-dcfd-44a9-a76b-76469e84db1c' || user.email === 'teste@teste.com') {
+      name = 'Admin Demo Teknix'
+      role = 'MASTER'
+      photo = 'https://ykgprfzfnffooqmfbeox.supabase.co/storage/v1/object/public/user-avatars/bad56b70-dcfd-44a9-a76b-76469e84db1c-1788492640182.png'
+    } else if (user.id === '3af9068a-4b78-4c9c-8657-f83b93c01588' || user.email?.includes('alison')) {
+      name = 'Alison'
+      role = 'MASTER'
+      photo = 'https://ykgprfzfnffooqmfbeox.supabase.co/storage/v1/object/public/user-avatars/3af9068a-4b78-4c9c-8657-f83b93c01588-1787179225140.jpg'
+    } else if (user.id === 'cea2102a-360f-44bb-9e86-75c878650bab' || user.email?.includes('nadia')) {
+      name = 'Nádia luz'
+      role = 'ADMIN'
+      photo = 'https://ykgprfzfnffooqmfbeox.supabase.co/storage/v1/object/public/user-avatars/6f58029b-c770-4f25-a9f9-86dec6fb6137-1787168051706.jpeg'
+    }
+
+    return {
+      id: user.id,
+      name,
+      email: user.email || '',
+      role,
+      photo_url: photo
+    }
+  }, [user])
+
   return (
-    <InternalChatProvider>
+    <InternalChatProvider initialUser={initialChatUser}>
       <HubLayoutContent />
     </InternalChatProvider>
   )

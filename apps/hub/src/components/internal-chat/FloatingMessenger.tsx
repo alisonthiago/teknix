@@ -17,7 +17,9 @@ import {
   Hash,
   Search,
   ArrowLeft,
-  MessageCircle
+  MessageCircle,
+  Package,
+  ShoppingCart
 } from 'lucide-react'
 import './FloatingMessenger.css'
 
@@ -63,9 +65,29 @@ export default function FloatingMessenger() {
   }
 
   const handleOpenChat = (conv: typeof conversations[0]) => {
-    setActiveConversation(conv)
-    setActiveChatRoomId(conv.id)
-    markAsRead(conv.id)
+    let targetConv = conv
+    const isDirect = targetConv.type === 'DIRECT' || targetConv.id.startsWith('direct-')
+    if (isDirect && currentUser?.id) {
+      const colab = getConversationColab(targetConv, currentUser.id, collaborators)
+      if (colab?.id) {
+        const correctDirectId = getDirectConvId(currentUser.id, colab.id)
+        if (targetConv.id !== correctDirectId) {
+          const existing = conversations.find(c => c.id === correctDirectId)
+          if (existing) {
+            targetConv = existing
+          } else {
+            targetConv = {
+              ...targetConv,
+              id: correctDirectId,
+              name: colab.name
+            }
+          }
+        }
+      }
+    }
+    setActiveConversation(targetConv)
+    setActiveChatRoomId(targetConv.id)
+    markAsRead(targetConv.id)
     setCurrentView('chat')
   }
 
@@ -84,6 +106,218 @@ export default function FloatingMessenger() {
     setIsFloatingMinimized(true)
   }
 
+function formatBytes(bytes: number, decimals = 1) {
+  if (!+bytes) return '0 B'
+  const k = 1024
+  const dm = decimals < 0 ? 0 : decimals
+  const sizes = ['B', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
+}
+
+function getChannelCollaborators(channel: { id: string; name?: string; members?: any[] }, collaborators: any[]) {
+  const channelId = channel.id.toLowerCase()
+  const name = (channel.name || '').toLowerCase()
+
+  if (channelId === 'conv-geral' || name.includes('geral')) {
+    return collaborators
+  }
+
+  if (channelId === 'conv-financeiro' || name.includes('financeiro') || name.includes('fiscal')) {
+    const matched = collaborators.filter(c => {
+      const r = (c.role || '').toLowerCase()
+      const n = (c.name || '').toLowerCase()
+      return (
+        r.includes('finan') ||
+        r.includes('fisc') ||
+        r.includes('contab') ||
+        r.includes('master') ||
+        r.includes('admin') ||
+        r.includes('propriet') ||
+        n.includes('alison')
+      )
+    })
+    return matched.length > 0 ? matched : collaborators
+  }
+
+  if (channelId === 'conv-expedicao' || name.includes('exped') || name.includes('logíst') || name.includes('estoq')) {
+    const matched = collaborators.filter(c => {
+      const r = (c.role || '').toLowerCase()
+      const n = (c.name || '').toLowerCase()
+      return (
+        r.includes('exped') ||
+        r.includes('logist') ||
+        r.includes('estoq') ||
+        r.includes('oper') ||
+        r.includes('master') ||
+        r.includes('admin') ||
+        r.includes('propriet') ||
+        n.includes('alison')
+      )
+    })
+    return matched.length > 0 ? matched : collaborators
+  }
+
+  return collaborators
+}
+
+  // Estados para envio de imagem / arquivo
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const docInputRef = useRef<HTMLInputElement>(null)
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null)
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null)
+  const [imageCaption, setImageCaption] = useState('')
+  const [isUploadingImage, setIsUploadingImage] = useState(false)
+  const [isUploadingDoc, setIsUploadingDoc] = useState(false)
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false)
+
+  const handleOpenPhotoPicker = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+    setIsImageModalOpen(true)
+  }
+
+  const handleOpenDocPicker = () => {
+    if (docInputRef.current) {
+      docInputRef.current.value = ''
+      docInputRef.current.click()
+    }
+  }
+
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setSelectedImageFile(file)
+    setImagePreviewUrl(URL.createObjectURL(file))
+    setIsImageModalOpen(true)
+  }
+
+  const handleCloseImageModal = () => {
+    setIsImageModalOpen(false)
+    setSelectedImageFile(null)
+    if (imagePreviewUrl) {
+      URL.revokeObjectURL(imagePreviewUrl)
+      setImagePreviewUrl(null)
+    }
+    setImageCaption('')
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
+
+  const handleSendImage = async () => {
+    if (!selectedImageFile || !activeConversation) return
+    setIsUploadingImage(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', selectedImageFile)
+      const res = await fetch('/api/chat/upload', {
+        method: 'POST',
+        body: formData
+      })
+      if (!res.ok) {
+        throw new Error('Falha no upload da imagem')
+      }
+      const data = await res.json()
+      if (data.url) {
+        await sendMessage(
+          activeConversation.id,
+          imageCaption.trim() || 'Imagem enviada',
+          'IMAGE',
+          {
+            image_url: data.url,
+            file_name: data.fileName || selectedImageFile.name,
+            file_size: formatBytes(selectedImageFile.size)
+          }
+        )
+      }
+      handleCloseImageModal()
+    } catch (err: any) {
+      alert(err.message || 'Erro ao enviar imagem')
+    } finally {
+      setIsUploadingImage(false)
+    }
+  }
+
+  const handleDocFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !activeConversation) return
+
+    if (file.size > 50 * 1024 * 1024) {
+      alert('O arquivo selecionado excede o limite de 50MB')
+      return
+    }
+
+    setIsUploadingDoc(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      const res = await fetch('/api/chat/upload', {
+        method: 'POST',
+        body: formData
+      })
+      if (!res.ok) {
+        throw new Error('Falha no upload do arquivo')
+      }
+      const data = await res.json()
+      if (data.url) {
+        const isVideo = file.type.startsWith('video/') || /\.(mp4|mov|webm|avi|mkv)$/i.test(file.name)
+        await sendMessage(
+          activeConversation.id,
+          file.name,
+          'FILE',
+          {
+            file_url: data.url,
+            file_name: data.fileName || file.name,
+            file_size: formatBytes(file.size),
+            mime_type: file.type,
+            is_video: isVideo
+          }
+        )
+      }
+    } catch (err: any) {
+      alert(err.message || 'Erro ao enviar arquivo')
+    } finally {
+      setIsUploadingDoc(false)
+      if (docInputRef.current) {
+        docInputRef.current.value = ''
+      }
+    }
+  }
+
+  const handleShareProduct = async () => {
+    if (!activeConversation) return
+    await sendMessage(
+      activeConversation.id,
+      'Produto compartilhado na conversa',
+      'CARD_PRODUCT',
+      {
+        product_name: 'Parafusadeira / Furadeira de Impacto TEKNIX Pro 20V',
+        product_sku: 'TK-FUR-20V-PRO',
+        product_image: 'https://ykgprfzfnffooqmfbeox.supabase.co/storage/v1/object/public/user-avatars/bad56b70-dcfd-44a9-a76b-76469e84db1c-1788492640182.png',
+        total_amount: 14
+      }
+    )
+  }
+
+  const handleShareOrder = async () => {
+    if (!activeConversation) return
+    await sendMessage(
+      activeConversation.id,
+      'Comprovante / Pedido compartilhado',
+      'CARD_ORDER',
+      {
+        order_number: 'TK-' + Math.floor(100000 + Math.random() * 900000),
+        marketplace_name: 'TEKNIX Store',
+        total_amount: 489.90,
+        customer_name: 'Alison Thiago',
+        product_name: 'Kit de Ferramentas Industriais 128 Peças',
+        invoice_number: 'NF-e 004.892'
+      }
+    )
+  }
+
   const handleSend = async () => {
     if (!input.trim() || !activeConversation) return
     const text = input
@@ -98,6 +332,16 @@ export default function FloatingMessenger() {
     if (!conv) {
       const created = await createConversation(colabName, 'DIRECT', [colabId], directId)
       if (created) conv = created
+    }
+    if (!conv) {
+      conv = {
+        id: directId,
+        type: 'DIRECT',
+        name: colabName,
+        members: [{ id: currentUser.id, name: currentUser.name }, { id: colabId, name: colabName }],
+        unread_count: 0,
+        created_at: new Date().toISOString()
+      }
     }
     if (conv) {
       setActiveConversation(conv)
@@ -136,17 +380,17 @@ export default function FloatingMessenger() {
       .filter(c => {
         const isDirect = c.type === 'DIRECT' || c.id.startsWith('direct-')
         if (!isDirect) return false
-        if (currentUser?.id) {
-          const isParticipant = c.id.includes(currentUser.id) ||
-            (Array.isArray(c.members) && c.members.some((m: any) => m.id === currentUser.id))
-          if (!isParticipant) return false
-        }
+        if (!currentUser?.id) return false
+        const isParticipant = c.id.includes(currentUser.id) ||
+          (Array.isArray(c.members) && c.members.some((m: any) => m.id === currentUser.id))
+        if (!isParticipant) return false
         // Apenas conversas com mensagens OU que sejam a conversa aberta no momento
         return !!c.last_message || c.id === activeConversation?.id
       })
       .forEach(c => {
         const colab = getConversationColab(c, currentUser?.id, collaborators)
-        const partnerKey = colab?.id || c.id
+        if (!colab?.id) return
+        const partnerKey = colab.id
         if (!map.has(partnerKey)) {
           map.set(partnerKey, c)
         } else {
@@ -243,7 +487,6 @@ export default function FloatingMessenger() {
               </div>
               <div>
                 <h2 className="hub-chat-header-title">Chat Interno</h2>
-                <p className="hub-chat-header-subtitle">Equipe & Operação TEKNIX</p>
               </div>
             </div>
 
@@ -370,9 +613,49 @@ export default function FloatingMessenger() {
                       <p className="hub-chat-item-name" style={{ fontWeight: 700 }}>
                         {c.name}
                       </p>
-                      <p className="hub-chat-item-msg">
-                        {c.last_message?.content || c.description || 'Canal de comunicação da equipe'}
-                      </p>
+                      {(() => {
+                        const channelColabs = getChannelCollaborators(c, collaborators)
+                        const maxAvatars = 5
+                        const displayed = channelColabs.slice(0, maxAvatars)
+                        const remaining = channelColabs.length - maxAvatars
+
+                        return (
+                          <div className="hub-chat-channel-avatars-row">
+                            <div className="hub-chat-channel-avatars-stack">
+                              {displayed.map(colab => (
+                                <div
+                                  key={colab.id}
+                                  className="hub-chat-channel-avatar-item"
+                                  title={`${colab.name}${colab.role ? ` (${colab.role})` : ''}${colab.online ? ' • Online' : ''}`}
+                                >
+                                  {colab.photo_url ? (
+                                    <img
+                                      src={colab.photo_url}
+                                      alt={colab.name}
+                                      className="hub-chat-channel-avatar-img"
+                                    />
+                                  ) : (
+                                    <div className="hub-chat-channel-avatar-fallback">
+                                      {colab.name.slice(0, 1).toUpperCase()}
+                                    </div>
+                                  )}
+                                  {colab.online && (
+                                    <span className="hub-chat-channel-online-dot" />
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                            {remaining > 0 && (
+                              <span className="hub-chat-channel-more-badge">
+                                +{remaining}
+                              </span>
+                            )}
+                            <span className="hub-chat-channel-count-tag">
+                              {channelColabs.length} {channelColabs.length === 1 ? 'membro' : 'membros'}
+                            </span>
+                          </div>
+                        )
+                      })()}
                     </div>
                   </div>
                   {c.unread_count > 0 && (
@@ -394,8 +677,7 @@ export default function FloatingMessenger() {
                   <button
                     key={c.id}
                     onClick={() => handleSelectCollaborator(c.id, c.name)}
-                    className="hub-chat-item-btn"
-                    style={{ padding: '10px 18px' }}
+                    className="hub-chat-item-btn colab"
                   >
                     <div className="hub-chat-item-left">
                       <div className="hub-chat-avatar-wrap">
@@ -404,10 +686,9 @@ export default function FloatingMessenger() {
                             src={c.photo_url}
                             alt={c.name}
                             className="hub-chat-avatar-img"
-                            style={{ width: 36, height: 36 }}
                           />
                         ) : (
-                          <div className="hub-chat-avatar-placeholder" style={{ width: 36, height: 36, fontSize: 13 }}>
+                          <div className="hub-chat-avatar-placeholder">
                             {c.name.slice(0, 1).toUpperCase()}
                           </div>
                         )}
@@ -417,22 +698,11 @@ export default function FloatingMessenger() {
                         />
                       </div>
                       <div className="hub-chat-item-text">
-                        <p className="hub-chat-item-name" style={{ fontSize: 13 }}>{c.name}</p>
-                        <p className="hub-chat-item-msg" style={{ fontSize: 11 }}>{c.role || 'Colaborador'}</p>
+                        <p className="hub-chat-item-name">{c.name}</p>
+                        <p className="hub-chat-item-msg">{c.role || 'Colaborador'}</p>
                       </div>
                     </div>
-                    <span
-                      style={{
-                        fontSize: 11,
-                        fontWeight: 600,
-                        padding: '2px 8px',
-                        borderRadius: 9999,
-                        marginLeft: 8,
-                        flexShrink: 0,
-                        backgroundColor: c.online ? '#ecfdf5' : '#f1f5f9',
-                        color: c.online ? '#16a34a' : '#94a3b8'
-                      }}
-                    >
+                    <span className={`hub-chat-colab-status ${c.online ? 'online' : 'offline'}`}>
                       {c.presenceStatus || (c.online ? 'Online' : 'Offline')}
                     </span>
                   </button>
@@ -581,25 +851,147 @@ export default function FloatingMessenger() {
             </div>
 
             <div className="hub-chat-input-actions">
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept="image/png,image/jpeg,image/webp,image/gif"
+                onChange={handleImageFileChange}
+                style={{ display: 'none' }}
+              />
+              <input
+                type="file"
+                ref={docInputRef}
+                accept=".pdf,.xlsx,.xls,.doc,.docx,.csv,.txt,.zip,.rar,.mp4,.mov,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/csv,text/plain,video/mp4,video/quicktime"
+                onChange={handleDocFileChange}
+                style={{ display: 'none' }}
+              />
               <div className="hub-chat-quick-actions">
                 <button
                   type="button"
-                  onClick={() => alert('Envio de foto em desenvolvimento')}
+                  onClick={handleOpenPhotoPicker}
                   className="hub-chat-quick-btn"
                 >
                   <ImageIcon size={14} color="#16a34a" /> Foto
                 </button>
                 <button
                   type="button"
-                  onClick={() => alert('Envio de arquivo em desenvolvimento')}
+                  onClick={handleOpenDocPicker}
+                  disabled={isUploadingDoc}
                   className="hub-chat-quick-btn"
+                  style={{ opacity: isUploadingDoc ? 0.5 : 1 }}
                 >
-                  <Paperclip size={14} color="#64748b" /> Arquivo
+                  <Paperclip size={14} color="#64748b" /> {isUploadingDoc ? 'Enviando...' : 'Arquivo'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleShareProduct}
+                  className="hub-chat-quick-btn"
+                  title="Compartilhar Produto"
+                >
+                  <Package size={14} color="#d97706" /> Produto
+                </button>
+                <button
+                  type="button"
+                  onClick={handleShareOrder}
+                  className="hub-chat-quick-btn"
+                  title="Compartilhar Pedido / NF-e"
+                >
+                  <ShoppingCart size={14} color="#3b82f6" /> Pedido
                 </button>
               </div>
               <span className="hub-chat-input-hint">Enter para enviar</span>
             </div>
           </div>
+
+          {/* Modal de Upload de Foto */}
+          {isImageModalOpen && (
+            <div className="hub-chat-upload-modal">
+              <div className="hub-chat-upload-header">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 10, background: '#ecfdf5', border: '1px solid #bbf7d0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ImageIcon size={16} color="#16a34a" />
+                  </div>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: '#0f172a' }}>Enviar Foto</h3>
+                    <p style={{ margin: 0, fontSize: 11, color: '#94a3b8' }}>Para {activeDisplayName}</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleCloseImageModal}
+                  className="hub-chat-icon-btn"
+                  title="Fechar"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              <div className="hub-chat-upload-body">
+                {imagePreviewUrl ? (
+                  <div className="hub-chat-upload-preview-box">
+                    <img
+                      src={imagePreviewUrl}
+                      alt="Prévia"
+                      className="hub-chat-upload-preview-img"
+                    />
+                  </div>
+                ) : (
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    style={{ width: '100%', maxWidth: 320, height: 180, border: '2px dashed #cbd5e1', borderRadius: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: '#f8fafc', gap: 8 }}
+                  >
+                    <ImageIcon size={32} color="#94a3b8" />
+                    <span style={{ fontSize: 13, color: '#64748b', fontWeight: 600 }}>Clique para escolher uma imagem</span>
+                    <span style={{ fontSize: 11, color: '#94a3b8' }}>PNG, JPG, WEBP até 10MB</span>
+                  </div>
+                )}
+
+                {imagePreviewUrl && (
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      style={{ padding: '6px 12px', fontSize: 12, fontWeight: 600, color: '#475569', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 8, cursor: 'pointer' }}
+                    >
+                      Trocar Foto
+                    </button>
+                  </div>
+                )}
+
+                <input
+                  type="text"
+                  placeholder="Escreva uma legenda opcional..."
+                  value={imageCaption}
+                  onChange={e => setImageCaption(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      handleSendImage()
+                    }
+                  }}
+                  className="hub-chat-upload-caption-input"
+                />
+              </div>
+
+              <div className="hub-chat-upload-footer">
+                <button
+                  type="button"
+                  onClick={handleCloseImageModal}
+                  className="hub-chat-upload-btn-cancel"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSendImage}
+                  disabled={!selectedImageFile || isUploadingImage}
+                  className="hub-chat-upload-btn-send"
+                >
+                  {isUploadingImage ? 'Enviando...' : 'Enviar Foto'}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -865,3 +865,46 @@ html, body, .hub-layout, aside, nav, table, button, input, select {
     overflow-x: hidden;
   }
 }
+
+/* ==========================================================================
+   ANIMAÇÃO E ESTADOS DE CARREGAMENTO PADRÃO TEKNIX HUB
+   ========================================================================== */
+@keyframes hubSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.hub-spin,
+.animate-spin,
+.spin-icon,
+.tkn-spin,
+.spinning {
+  animation: hubSpin 0.85s linear infinite !important;
+  display: inline-block;
+  transform-origin: center center;
+}
+
+.hub-loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: #64748b;
+  font-size: 13.5px;
+  font-weight: 500;
+  width: 100%;
+}
+
+.hub-loading-state svg,
+.hub-loading-state .hub-loading-icon {
+  margin-bottom: 12px;
+  color: #64748b;
+  animation: hubSpin 0.85s linear infinite;
+}
+

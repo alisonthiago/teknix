@@ -1153,7 +1153,7 @@ export default function Product() {
                   boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.95rem', fontWeight: 600, color: '#1e293b' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.95rem', fontWeight: 600, color: '#000000' }}>
                       <Truck size={18} style={{ color: '#0066cc' }} />
                       <span>Calcular frete e prazo</span>
                     </div>
@@ -1161,7 +1161,7 @@ export default function Product() {
                       href="https://buscacepinter.correios.com.br/app/endereco/index.php" 
                       target="_blank" 
                       rel="noreferrer" 
-                      style={{ fontSize: '0.8rem', color: '#0066cc', textDecoration: 'none', fontWeight: 500 }}
+                      style={{ fontSize: '0.8rem', color: '#000000', textDecoration: 'none', fontWeight: 600 }}
                     >
                       Não sei meu CEP
                     </a>
@@ -1385,7 +1385,7 @@ export default function Product() {
 
                 {/* 3. Ações Extras de Contato / Disponibilidade */}
                 <div className="tkx-extra-actions">
-                  <button type="button" className="tkx-btn-immediate">Disponibilidade Imediata</button>
+                  <button type="button" className="tkx-btn-immediate">Disponível</button>
                   <a href={`https://api.whatsapp.com/send?phone=5546999155875&text=${encodeURIComponent(`Olá, tenho dúvidas sobre o produto: ${currentProduct.name} - Código: ${currentProduct.sku || '58'}`)}`} target="_blank" rel="noreferrer" className="tkx-btn-whatsapp">
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2z"/></svg>
                     Tire suas dúvidas

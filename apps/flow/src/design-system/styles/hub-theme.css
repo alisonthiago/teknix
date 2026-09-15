@@ -10,7 +10,7 @@
   
   /* Título da Página (H1) */
   --hub-h1-size: 24px;
-  --hub-h1-weight: 700;
+  --hub-h1-weight: 600;
   --hub-h1-color: #111111;
   --hub-h1-line-height: 1.2;
 
@@ -22,20 +22,20 @@
 
   /* Título dos Cards (H2) */
   --hub-card-title-size: 16px;
-  --hub-card-title-weight: 700;
+  --hub-card-title-weight: 600;
   --hub-card-title-color: #111111;
   --hub-card-title-line-height: 1.25;
 
   /* Subtítulo dos Cards (P) */
   --hub-card-desc-size: 12px;
   --hub-card-desc-weight: 400;
-  --hub-card-desc-color: #888888;
+  --hub-card-desc-color: #666666;
   --hub-card-desc-line-height: 1.35;
 
   /* Labels dos Formulários */
   --hub-label-size: 12.5px;
-  --hub-label-weight: 700;
-  --hub-label-color: #333333;
+  --hub-label-weight: 500;
+  --hub-label-color: #666666;
   --hub-label-gap: 6px;
 
   /* Inputs, Selects & Textareas */
@@ -640,3 +640,104 @@
   max-width: 380px;
   line-height: 1.45;
 }
+
+/* ==========================================================================
+   SISTEMA CANÔNICO DE MODAIS E POPUPS (1:1 COM O HUB)
+   ========================================================================== */
+
+:root {
+  --hub-modal-overlay-bg: rgba(15, 23, 42, 0.65);
+  --hub-modal-overlay-blur: 4px;
+  --hub-modal-bg: #ffffff;
+  --hub-modal-border: 1px solid #e6e6e6;
+  --hub-modal-radius: 14px;
+  --hub-modal-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --hub-modal-header-p: 16px 24px;
+  --hub-modal-body-p: 24px;
+  --hub-modal-footer-p: 16px 24px;
+  --hub-modal-footer-bg: #fafafa;
+}
+
+/* Overlays / Backdrops */
+.hub-modal-overlay,
+.dialog-overlay,
+[data-slot="dialog-overlay"] {
+  background: var(--hub-modal-overlay-bg) !important;
+  backdrop-filter: blur(var(--hub-modal-overlay-blur)) !important;
+  -webkit-backdrop-filter: blur(var(--hub-modal-overlay-blur)) !important;
+}
+
+/* Modal Containers */
+.hub-modal-container,
+.dialog-content,
+[data-slot="dialog-content"] {
+  background: var(--hub-modal-bg) !important;
+  border: var(--hub-modal-border) !important;
+  border-radius: var(--hub-modal-radius) !important;
+  box-shadow: var(--hub-modal-shadow) !important;
+  color: #111111;
+  font-family: inherit;
+}
+
+/* Modal Header */
+.hub-modal-header,
+[data-slot="dialog-header"] {
+  padding: var(--hub-modal-header-p) !important;
+  border-bottom: var(--hub-modal-border) !important;
+  background: #ffffff;
+}
+
+.hub-modal-header h2,
+.hub-modal-header h3,
+.hub-modal-title,
+[data-slot="dialog-title"] {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  color: #111111 !important;
+  line-height: 1.3 !important;
+  margin: 0 !important;
+}
+
+.hub-modal-header p,
+.hub-modal-desc,
+[data-slot="dialog-description"] {
+  font-size: 12.5px !important;
+  font-weight: 400 !important;
+  color: #666666 !important;
+  margin: 2px 0 0 !important;
+}
+
+/* Modal Close Button */
+.hub-modal-close,
+.dialog-close-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  color: #64748b;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.hub-modal-close:hover,
+.dialog-close-btn:hover {
+  background: #f1f5f9;
+  color: #111111;
+}
+
+/* Modal Footer */
+.hub-modal-footer,
+[data-slot="dialog-footer"] {
+  padding: var(--hub-modal-footer-p) !important;
+  border-top: var(--hub-modal-border) !important;
+  background: var(--hub-modal-footer-bg) !important;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+

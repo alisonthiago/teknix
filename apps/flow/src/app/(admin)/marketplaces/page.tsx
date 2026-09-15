@@ -10,6 +10,7 @@ import ConnectMarketplaceModal from '@/components/ConnectMarketplaceModal'
 import { PageHeader, PrimaryButton } from '@/components/ui/module'
 import { createClient } from '@/utils/supabase/client'
 import { useNotification } from '@/contexts/NotificationContext'
+import LoadingState from '@/components/ui/LoadingState'
 
 interface AccountSummary {
   id: string
@@ -243,9 +244,8 @@ export default function MarketplacesPage() {
 
       {/* Loading / Error */}
       {loading && (
-        <div className="bg-white border border-[#e6e6e6] rounded-lg p-12 text-center text-sm text-[#999]">
-          <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-[#1f2328]" />
-          Carregando marketplaces...
+        <div className="bg-white border border-[#e6e6e6] rounded-2xl">
+          <LoadingState message="Carregando marketplaces..." padding={60} />
         </div>
       )}
       {error && (

@@ -165,7 +165,7 @@
   overflow-y: visible;
   scrollbar-width: none;
   box-sizing: border-box;
-  background: #ffffff;
+  background: transparent;
   box-shadow: none;
 }
 
@@ -1009,8 +1009,12 @@
     max-width: 100%;
   }
   .hub-table-toolbar {
-    align-items: flex-start;
-    row-gap: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 8px;
+    margin: 12px 0;
+    padding: 0;
   }
   /* Search ocupa a linha inteira em mobile */
   .hub-search-wrap {
@@ -1019,12 +1023,61 @@
     max-width: 100%;
     flex-basis: auto;
   }
-  .hub-export-wrapper {
+  .hub-toolbar-header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+    justify-content: space-between;
+  }
+  .hub-toolbar-header-actions > .hub-btn {
+    flex: 1;
+    justify-content: center;
+    height: 38px;
+  }
+  .hub-toolbar-export-container {
+    flex: 1 1 100%;
+    width: 100%;
     margin-left: 0;
+  }
+  .hub-export-wrapper {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    margin-left: 0;
+  }
+  .hub-export-wrapper .hub-export-btn {
+    flex: 1;
+    justify-content: center;
+    height: 38px;
   }
   /* Status tabs com scroll horizontal suave */
   .hub-status-tabs {
-    -webkit-overflow-scrolling: touch;
+    flex: 1 1 100% !important;
+    width: 100% !important;
+    display: flex !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 4px 0 !important;
+    scrollbar-width: none !important;
+  }
+  .hub-status-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .hub-status-tabs button {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+  }
+  /* Card da tabela com scroll horizontal suave e contenção */
+  .hub-table-card {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    border-radius: 12px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+  .hub-table-header,
+  .hub-table-row {
+    min-width: 740px !important;
   }
   /* Paginação centralizada e quebra de linha em mobile */
   .hub-table-footer {

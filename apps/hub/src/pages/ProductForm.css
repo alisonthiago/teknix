@@ -4,7 +4,7 @@
 
 .product-form-container {
   min-height: 100vh;
-  background: #ffffff;
+  background: #f5f5f5;
   padding: 24px 28px 120px;
   display: flex;
   flex-direction: column;
@@ -12,9 +12,12 @@
   font-family: var(--sf-font);
 }
 
-/* O formulário segue o canvas branco e os tokens atuais do Hub. */
+/* O formulário segue o fundo #f5f5f5 e cards brancos destacados. */
 .product-form-container,
-.product-form-container .product-form-wrapper,
+.product-form-container .product-form-wrapper {
+  background-color: #f5f5f5;
+}
+
 .product-form-container .form-card,
 .product-form-container .upload-dropzone,
 .product-form-container .commerce-settings {
@@ -2101,5 +2104,152 @@
   }
   .product-form-title {
     font-size: 1.15rem;
+  }
+}
+
+/* ============================================================
+   WIZARD STEPPER — 3 ETAPAS DO CADASTRO (HUB Design System)
+   ============================================================ */
+.product-wizard-stepper {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 10px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.stepper-steps-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.stepper-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+  text-align: left;
+}
+
+.stepper-step:hover:not(:disabled) {
+  background: #f8fafc;
+}
+
+.stepper-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+/* Etapa Ativa */
+.stepper-step.active .stepper-circle {
+  background: #0f172a;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
+}
+
+.stepper-step.active .stepper-label {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+/* Etapa Concluída */
+.stepper-step.completed .stepper-circle {
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+}
+
+.stepper-step.completed .stepper-label {
+  color: #059669;
+  font-weight: 600;
+}
+
+/* Etapa Pendente */
+.stepper-step.pending .stepper-circle {
+  background: #f1f5f9;
+  color: #94a3b8;
+  border: 1px solid #e2e8f0;
+}
+
+.stepper-step.pending .stepper-label {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.stepper-label {
+  font-size: 13.5px;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.stepper-divider {
+  flex: 1;
+  height: 2px;
+  background: #e2e8f0;
+  margin: 0 14px;
+  min-width: 20px;
+  border-radius: 2px;
+  transition: background 0.25s ease;
+}
+
+.stepper-divider.active {
+  background: #a7f3d0;
+}
+
+.stepper-mobile-summary {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .product-wizard-stepper {
+    padding: 10px 14px;
+  }
+
+  .stepper-step {
+    padding: 4px;
+    gap: 6px;
+  }
+
+  .stepper-label {
+    display: none;
+  }
+
+  .stepper-divider {
+    margin: 0 8px;
+    min-width: 14px;
+  }
+
+  .stepper-mobile-summary {
+    display: block;
+    text-align: center;
+    font-size: 12.5px;
+    color: #475569;
+    padding-top: 6px;
+    border-top: 1px solid #f1f5f9;
+  }
+
+  .stepper-mobile-summary strong {
+    color: #0f172a;
   }
 }

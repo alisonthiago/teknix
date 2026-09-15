@@ -8,6 +8,7 @@ import { PageHeader, StatCard, SearchInput, ModuleTable, TableHead, Th, Td } fro
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
 import ShareContextModal from '@/components/internal-chat/ShareContextModal'
+import LoadingState from '@/components/ui/LoadingState'
 
 function formatBRL(val: number) {
   return `R$ ${val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -148,13 +149,13 @@ function SalesTab() {
         </div>
       </div>
 
-      {/* Filtros */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-2.5">
-        <div className="flex-1 relative">
+      {/* Filtros em uma única linha */}
+      <div className="flex items-center gap-2.5 flex-nowrap overflow-x-auto [&::-webkit-scrollbar]:hidden">
+        <div className="flex-1 min-w-[200px] relative">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#999]" />
           <input
             type="text"
-            placeholder="Buscar por pedido, comprador ou canal..."
+            placeholder="Buscar por pedido ou canal..."
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="w-full pl-9 pr-3.5 h-[38px] border border-[#e6e6e6] rounded-lg text-sm font-normal text-[#111] focus:outline-none focus:border-[#1f2328] bg-white transition-colors"
@@ -163,7 +164,7 @@ function SalesTab() {
         <select 
           value={filterMp} 
           onChange={e => { setFilterMp(e.target.value); setFilterAcc('all') }} 
-          className="h-[38px] px-3 border border-[#e6e6e6] rounded-lg text-sm font-normal text-[#111] focus:outline-none focus:border-[#1f2328] bg-white transition-colors cursor-pointer"
+          className="h-[38px] px-3 border border-[#e6e6e6] rounded-lg text-sm font-normal text-[#111] focus:outline-none focus:border-[#1f2328] bg-white transition-colors cursor-pointer shrink-0"
         >
           <option value="all">Todos marketplaces</option>
           <option value="Mercado Livre">Mercado Livre</option>
@@ -174,7 +175,7 @@ function SalesTab() {
         <select 
           value={filterAcc} 
           onChange={e => setFilterAcc(e.target.value)} 
-          className="h-[38px] px-3 border border-[#e6e6e6] rounded-lg text-sm font-normal text-[#111] focus:outline-none focus:border-[#1f2328] bg-white transition-colors cursor-pointer"
+          className="h-[38px] px-3 border border-[#e6e6e6] rounded-lg text-sm font-normal text-[#111] focus:outline-none focus:border-[#1f2328] bg-white transition-colors cursor-pointer shrink-0"
         >
           <option value="all">Todas contas</option>
           {(accounts || []).map((a: Record<string, unknown>) => (
@@ -185,90 +186,84 @@ function SalesTab() {
 
       {/* Tabela de Vendas Ativa */}
       {loading ? (
-        <div className="bg-white rounded-2xl border border-[#e6e6e6] p-12 text-center text-[#999] text-[13px]">
-          Carregando vendas...
+        <div className="bg-white rounded-xl border border-[#e6e6e6]">
+          <LoadingState message="Carregando vendas..." padding={60} />
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-[#e6e6e6] overflow-hidden shadow-2xs">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-[#fafafa] border-b border-[#eee]">
-              <tr>
-                <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Pedido / ID</th>
-                <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Comprador</th>
-                <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Marketplace</th>
-                <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Conta</th>
-                <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Data</th>
-                <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Itens</th>
-                <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Valor Total</th>
-                <th className="text-center py-3.5 px-5 font-medium text-[#999] text-xs">Status</th>
-                <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Ação</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#f0f0f0]">
-              {filtered.map(s => (
-                <tr 
-                  key={s.id} 
-                  onClick={() => router.push(`/pedidos/${s.orderId || s.id}`)} 
-                  className="hover:bg-[#f8f9fa] transition-colors cursor-pointer group"
-                >
-                  <td className="py-4.5 px-5 font-mono font-medium text-[#111] text-[13px]">
-                    {s.orderId}
-                  </td>
-                  <td className="py-4.5 px-5 font-normal text-[#333]">
-                    <div className="flex items-center gap-2">
-                      <User className="w-4 h-4 text-[#999999]" />
-                      <span className="text-[13px] font-medium">{s.customerName}</span>
-                    </div>
-                  </td>
-                  <td className="py-4.5 px-5 text-[#555]">
-                    <div className="flex items-center gap-2">
-                      <MarketplaceLogo name={s.marketplaceName} className="w-4 h-4" />
-                      <span className="font-normal text-[#222] text-[13px]">{s.marketplaceName}</span>
-                    </div>
-                  </td>
-                  <td className="py-4.5 px-5 text-sm text-[#666666] font-normal">
-                    {s.accountName}
-                  </td>
-                   <td className="py-4.5 px-5 text-[#666666] font-normal text-[13px]">
-                    {s.date} <span className="text-[#999999] text-sm">{s.time}</span>
-                  </td>
-                  <td className="py-4.5 px-5 text-right font-medium text-[#111] text-[13px]">
-                    {s.itemsCount} un
-                  </td>
-                  <td className="py-4.5 px-5 text-right font-semibold text-[#111] text-[13.5px]">
-                    {formatBRL(s.revenue)}
-                  </td>
-                  <td className="py-4.5 px-5 text-center">
-                    <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
-                      s.status === 'CONCLUIDO' 
-                        ? 'bg-[#ecfdf5] text-[#16a34a] border border-[#bbf7d0]' 
-                        : 'bg-[#fef2f2] text-[#ef4444] border border-[#fecaca]'
-                    }`}>
-                      {s.status === 'CONCLUIDO' ? 'Concluída' : 'Cancelada'}
-                    </span>
-                  </td>
-                  <td className="py-4.5 px-5 text-right">
-                    <div className="flex items-center justify-end gap-2" onClick={e => e.stopPropagation()}>
-                      <button
-                        onClick={() => setShareSale(s)}
-                        title="Compartilhar no Chat com a Equipe"
-                        className="p-2 rounded-xl border border-[#e2e8f0] hover:bg-[#16a34a] hover:text-white text-[#666666] transition-all cursor-pointer shadow-xs"
-                      >
-                        <Share2 className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => router.push(`/pedidos/${s.orderId || s.id}`)}
-                        className="p-2 rounded-xl bg-[#f1f5f9] hover:bg-[#16a34a] hover:text-white transition-all text-[#666666] cursor-pointer shadow-xs"
-                        title="Abrir Detalhes do Pedido"
-                      >
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
+        <div className="bg-white rounded-xl border border-[#e6e6e6] overflow-hidden shadow-none">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead className="bg-[#fafafa] border-b border-[#f0f0f0]">
+                <tr>
+                  <th className="text-left py-2.5 px-4 font-semibold text-[#666666] text-[11px] uppercase tracking-wider">Pedido / ID</th>
+                  <th className="text-left py-2.5 px-4 font-semibold text-[#666666] text-[11px] uppercase tracking-wider">Marketplace</th>
+                  <th className="text-left py-2.5 px-4 font-semibold text-[#666666] text-[11px] uppercase tracking-wider">Conta</th>
+                  <th className="text-left py-2.5 px-4 font-semibold text-[#666666] text-[11px] uppercase tracking-wider">Data</th>
+                  <th className="text-right py-2.5 px-4 font-semibold text-[#666666] text-[11px] uppercase tracking-wider">Itens</th>
+                  <th className="text-right py-2.5 px-4 font-semibold text-[#666666] text-[11px] uppercase tracking-wider">Valor Total</th>
+                  <th className="text-center py-2.5 px-4 font-semibold text-[#666666] text-[11px] uppercase tracking-wider">Status</th>
+                  <th className="text-right py-2.5 px-4 font-semibold text-[#666666] text-[11px] uppercase tracking-wider">Ação</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-[#f0f0f0]">
+                {filtered.map(s => (
+                  <tr 
+                    key={s.id} 
+                    onClick={() => router.push(`/pedidos/${s.orderId || s.id}`)} 
+                    className="hover:bg-[#fafafa] transition-colors cursor-pointer group"
+                  >
+                    <td className="py-3 px-4 font-mono font-medium text-[#111111] text-[12.5px]">
+                      {s.orderId}
+                    </td>
+                    <td className="py-3 px-4 text-[#555555]">
+                      <div className="flex items-center" title={s.marketplaceName}>
+                        <MarketplaceLogo name={s.marketplaceName} className="w-4 h-4" />
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 text-[12px] text-[#666666] font-normal">
+                      {s.accountName}
+                    </td>
+                    <td className="py-3 px-4 text-[#666666] font-normal text-[12px]">
+                      {s.date} <span className="text-[#999999] text-[11px]">{s.time}</span>
+                    </td>
+                    <td className="py-3 px-4 text-right font-medium text-[#333333] text-[12.5px]">
+                      {s.itemsCount} un
+                    </td>
+                    <td className="py-3 px-4 text-right font-semibold text-[#111111] text-[13px]">
+                      {formatBRL(s.revenue)}
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      <span className={`inline-flex px-2 py-0.5 rounded-full text-[11px] font-medium ${
+                        s.status === 'CONCLUIDO' 
+                          ? 'bg-[#ecfdf5] text-[#16a34a] border border-[#bbf7d0]' 
+                          : 'bg-[#fef2f2] text-[#ef4444] border border-[#fecaca]'
+                      }`}>
+                        {s.status === 'CONCLUIDO' ? 'Concluída' : 'Cancelada'}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <div className="flex items-center justify-end gap-1.5" onClick={e => e.stopPropagation()}>
+                        <button
+                          onClick={() => setShareSale(s)}
+                          title="Compartilhar no Chat com a Equipe"
+                          className="w-7 h-7 flex items-center justify-center rounded-lg border border-[#e6e6e6] bg-white hover:bg-[#F7F7F7] text-[#555555] transition-all cursor-pointer shadow-none"
+                        >
+                          <Share2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => router.push(`/pedidos/${s.orderId || s.id}`)}
+                          className="w-7 h-7 flex items-center justify-center rounded-lg border border-[#e6e6e6] bg-white hover:bg-[#F7F7F7] text-[#555555] transition-all cursor-pointer shadow-none"
+                          title="Abrir Detalhes do Pedido"
+                        >
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
@@ -301,8 +296,8 @@ function MarketplacesTab() {
   return (
     <div className="space-y-4">
       {loading ? (
-        <div className="bg-white rounded-2xl border border-[#e6e6e6] p-10 text-center text-[#999] text-[13px]">
-          Carregando canais...
+        <div className="bg-white rounded-2xl border border-[#e6e6e6]">
+          <LoadingState message="Carregando canais..." padding={60} />
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -330,16 +325,19 @@ function MarketplacesTab() {
 
 export default function VendasPage() {
   return (
-    <div className="mp-stack">
-      <PageHeader title="Vendas" />
-      <Tabs defaultValue="vendas">
-        <TabsList>
-          <TabsTrigger value="vendas"><DollarSign className="w-3.5 h-3.5 mr-1 inline" /> Vendas</TabsTrigger>
-          <TabsTrigger value="marketplaces"><Store className="w-3.5 h-3.5 mr-1 inline" /> Canais</TabsTrigger>
-        </TabsList>
-        <TabsContent value="vendas"><SalesTab /></TabsContent>
-        <TabsContent value="marketplaces"><MarketplacesTab /></TabsContent>
-      </Tabs>
+    <div className="-mx-3 sm:-mx-6 lg:-mx-12 xl:-mx-16 px-3 sm:px-4 lg:px-6 xl:px-8">
+      <div className="mp-stack">
+        <PageHeader title="Vendas" />
+        <Tabs defaultValue="vendas">
+          <TabsList>
+            <TabsTrigger value="vendas"><DollarSign className="w-3.5 h-3.5 mr-1 inline" /> Vendas</TabsTrigger>
+            <TabsTrigger value="marketplaces"><Store className="w-3.5 h-3.5 mr-1 inline" /> Canais</TabsTrigger>
+          </TabsList>
+          <TabsContent value="vendas"><SalesTab /></TabsContent>
+          <TabsContent value="marketplaces"><MarketplacesTab /></TabsContent>
+        </Tabs>
+      </div>
     </div>
   )
 }
+

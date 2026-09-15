@@ -23,6 +23,7 @@ import {
 import { PageHeader, ModuleTable, TableHead, Th, Td } from '@/components/ui/module'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
+import LoadingState from '@/components/ui/LoadingState'
 import { createClient } from '@/utils/supabase/client'
 import { exportToExcel } from '@/utils/excel'
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal'
@@ -231,7 +232,7 @@ export default function PedidosPage() {
         <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
           <button
             onClick={handleExportAll}
-            className="px-4 py-2 bg-white border border-[#e6e6e6] hover:bg-[#F7F7F7] hover:border-[#d1d5db] text-[#333333] rounded-lg text-[13px] font-medium flex items-center gap-2 transition-all cursor-pointer shadow-none"
+            className="h-[36px] px-4 bg-white border border-[#e6e6e6] hover:bg-[#F7F7F7] hover:border-[#d1d5db] text-[#333333] rounded-lg text-[13px] font-medium flex items-center gap-2 transition-all cursor-pointer shadow-none"
           >
             <Download className="w-4 h-4 text-[#666666]" />
             <span>Exportar Excel</span>
@@ -239,7 +240,7 @@ export default function PedidosPage() {
 
           <button
             onClick={() => router.push('/etiquetas')}
-            className="px-4 py-2 bg-[#1f2328] hover:bg-black text-white rounded-lg text-[13.5px] font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-none"
+            className="h-[36px] px-4 bg-[#0071e3] hover:bg-[#0062c4] text-white rounded-lg text-[13.5px] font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-none"
           >
             <Printer className="w-4 h-4" />
             <span>Central de Etiquetas</span>
@@ -403,7 +404,7 @@ export default function PedidosPage() {
       {activeTab === 'pedidos' && (
         <div className="bg-white rounded-2xl border border-[#e6e6e6] shadow-none overflow-hidden">
           {loading ? (
-            <div className="py-20 text-center text-xs text-[#999999]">Carregando pedidos...</div>
+            <LoadingState message="Carregando pedidos..." padding={80} />
           ) : filteredOrders.length === 0 ? (
             <div className="py-20 px-6 text-center space-y-2">
               <div className="w-12 h-12 rounded-2xl bg-[#F7F7F7] flex items-center justify-center mx-auto text-[#999999] mb-3">

@@ -13,7 +13,8 @@ import {
   Loader2,
   Check,
   ChevronUp,
-  ChevronDown
+  ChevronDown,
+  RefreshCw
 } from 'lucide-react'
 import { notifyHub } from '../lib/hubNotifications'
 import './Showcases.css'
@@ -179,9 +180,9 @@ export default function Showcases() {
 
   if (loading) {
     return (
-      <div style={{ padding: 60, textAlign: 'center', color: '#666666', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
-        <Loader2 size={32} className="tkn-spin" style={{ color: '#111111' }} />
-        <span>Carregando organização de vitrines...</span>
+      <div style={{ padding: '80px 20px', textAlign: 'center', color: '#64748b', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <RefreshCw size={24} className="hub-spin" style={{ marginBottom: 12 }} />
+        <div>Carregando organização de vitrines...</div>
       </div>
     )
   }

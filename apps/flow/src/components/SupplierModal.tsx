@@ -121,18 +121,18 @@ export default function SupplierModal({ isOpen, onClose, supplierId, onSuccess }
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 z-[100] flex items-center justify-center p-3 sm:p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-slate-900/65 backdrop-blur-[4px] z-[100] flex items-center justify-center p-3 sm:p-4" onClick={onClose}>
       <div 
-        className="bg-white rounded-xl w-full max-w-5xl shadow-xl flex flex-col max-h-[90vh]"
+        className="bg-white rounded-[14px] border border-[#e6e6e6] w-full max-w-5xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] flex flex-col max-h-[90vh] overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#e6e6e6]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#e6e6e6] bg-white">
           <div>
-            <h2 className="text-lg font-bold text-[#333]">{supplierId ? 'Editar Fornecedor' : 'Novo Fornecedor'}</h2>
-            <p className="text-xs text-[#999]">Preencha os dados e múltiplos contatos se necessário</p>
+            <h2 className="text-[16px] font-semibold text-[#111111]">{supplierId ? 'Editar Fornecedor' : 'Novo Fornecedor'}</h2>
+            <p className="text-[12.5px] text-[#666666]">Preencha os dados e múltiplos contatos se necessário</p>
           </div>
-          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#f5f5f5] transition-colors">
-            <X className="w-4 h-4 text-[#666]" />
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg text-[#64748b] hover:bg-[#f1f5f9] hover:text-[#111111] transition-colors cursor-pointer">
+            <X className="w-4 h-4" />
           </button>
         </div>
 
@@ -244,11 +244,11 @@ export default function SupplierModal({ isOpen, onClose, supplierId, onSuccess }
               </div>
             </div>
 
-            <div className="border-t border-[#e6e6e6] p-4 bg-[#fcfcfc] flex items-center justify-end gap-3 rounded-b-xl">
-              <button type="button" onClick={onClose} className="px-5 py-2.5 rounded-lg border border-[#e6e6e6] text-[#666] text-sm font-medium hover:bg-white transition-colors">
+            <div className="border-t border-[#e6e6e6] px-6 py-4 bg-[#fafafa] flex items-center justify-end gap-2.5">
+              <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg border border-[#e6e6e6] text-[#333] text-sm font-medium hover:bg-[#F7F7F7] transition-colors cursor-pointer">
                 Cancelar
               </button>
-              <button type="submit" disabled={loading} className="px-5 py-2.5 rounded-lg bg-[#1f2328] text-white text-sm font-semibold hover:bg-[#111827] transition-colors disabled:opacity-50">
+              <button type="submit" disabled={loading} className="px-5 py-2 rounded-lg bg-[#0071e3] hover:bg-[#0062c4] active:bg-[#004f9e] text-white text-sm font-semibold transition-colors disabled:opacity-50 cursor-pointer shadow-none">
                 {loading ? 'Salvando...' : (supplierId ? 'Salvar Alterações' : 'Criar Fornecedor')}
               </button>
             </div>

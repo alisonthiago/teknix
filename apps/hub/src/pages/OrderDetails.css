@@ -8,6 +8,7 @@
   margin: 0 auto;
   padding: 24px 32px 64px;
   font-family: inherit;
+  min-width: 0;
 }
 
 /* ─── TOP HEADER ────────────────────────────────────────────────────────── */
@@ -28,33 +29,26 @@
 }
 
 .order-btn-back {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 6px !important;
-  height: 32px !important;
-  min-height: 32px !important;
-  padding: 0 12px !important;
-  font-size: 13px !important;
-  font-weight: 500 !important;
-  border-radius: 8px !important;
-  cursor: pointer !important;
-}
-
-.cat-btn-icon-bubble {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 6px;
-  background: #f0f0f0;
-  color: #333333;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #666666;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
   transition: all 0.15s ease;
 }
 
-.hub-btn-secondary:hover .cat-btn-icon-bubble {
-  background: #e5e7eb;
+.order-btn-back:hover {
+  background: #F7F7F7;
   color: #111111;
+  border-color: #cbd5e1;
 }
 
 .order-breadcrumb {
@@ -171,8 +165,8 @@
   background: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 16px;
-  padding: 34px 32px;
-  margin: 32px 0 38px 0;
+  padding: 42px 32px 40px 32px;
+  margin: 40px 0 48px 0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02), 0 4px 14px rgba(0, 0, 0, 0.02);
 }
 
@@ -279,8 +273,9 @@
 
 @media (max-width: 768px) {
   .order-stepper-card {
-    padding: 24px 20px;
-    margin: 24px 0 30px 0;
+    padding: 32px 20px 30px 20px;
+    margin: 28px 0 36px 0;
+    border-radius: 18px;
   }
   .order-stepper-track {
     flex-direction: column;
@@ -298,7 +293,7 @@
     text-align: left;
     width: 100%;
     position: relative;
-    padding-bottom: 22px;
+    padding-bottom: 26px;
   }
   .order-step-item:last-child {
     padding-bottom: 0;
@@ -307,37 +302,190 @@
   .order-step-item:not(:last-child)::after {
     content: '';
     position: absolute;
-    top: 38px;
-    left: 19px;
+    top: 46px;
+    left: 22px;
     bottom: 0;
     width: 2px;
-    background: #f0f0f0;
+    background: #e5e7eb;
     z-index: 1;
   }
   .order-step-item.completed:not(:last-child)::after {
     background: #111111;
   }
   .order-step-circle {
-    width: 38px;
-    height: 38px;
-    font-size: 12px;
+    width: 46px;
+    height: 46px;
+    font-size: 14px;
     margin-bottom: 0;
     flex-shrink: 0;
     position: relative;
     z-index: 2;
   }
+  .order-step-circle svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
   .order-step-info {
     align-items: flex-start;
     text-align: left;
-    padding-top: 2px;
+    padding-top: 3px;
   }
   .order-step-label {
-    font-size: 13.5px;
+    font-size: 15px;
+    font-weight: 600;
     line-height: 1.3;
+    color: #111111;
   }
   .order-step-sub {
-    font-size: 11.5px;
-    margin-top: 2px;
+    font-size: 13px;
+    margin-top: 3px;
+    color: #666666;
+  }
+
+  /* Wrapper de scroll da tabela de produtos */
+  .order-products-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    width: 100%;
+  }
+
+  .order-products-table {
+    min-width: 500px;
+    font-size: 12px;
+  }
+
+  .order-products-table th {
+    padding: 9px 12px;
+    font-size: 10px;
+    white-space: nowrap;
+  }
+
+  .order-products-table td {
+    padding: 11px 12px;
+    white-space: nowrap;
+    font-size: 12px;
+  }
+
+  .order-product-name {
+    white-space: normal;
+    min-width: 130px;
+    font-size: 12px;
+  }
+
+  .order-product-sku {
+    font-size: 10px;
+  }
+
+  .order-product-thumb {
+    width: 38px;
+    height: 38px;
+  }
+
+  /* ─── Container e layout geral ─── */
+  .order-details-container {
+    padding: 16px 14px 48px;
+  }
+
+  .order-main-col {
+    gap: 14px;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .order-grid-layout {
+    gap: 14px;
+  }
+
+  /* ─── Cards ─── */
+  .order-card {
+    border-radius: 12px;
+  }
+
+  .order-card-header {
+    padding: 14px 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: flex-start;
+  }
+
+  .order-card-title {
+    font-size: 13px;
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+
+  .order-card-body {
+    padding: 16px;
+  }
+
+  /* ─── Resumo Financeiro ─── */
+  .order-finance-row {
+    font-size: 13px;
+  }
+
+  .order-finance-row.total {
+    font-size: 15px;
+  }
+
+  .order-payment-box {
+    padding: 12px;
+  }
+
+  .order-payment-header {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+
+  /* ─── Documentos Fiscais ─── */
+  .fiscal-docs-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .fiscal-pref-pills {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .fiscal-pref-btn {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+  }
+
+  .fiscal-pref-label {
+    font-size: 0.7rem;
+  }
+
+  .fiscal-subcard {
+    padding: 12px;
+  }
+
+  .fiscal-subcard-header {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .fiscal-subcard-actions {
+    flex-wrap: wrap;
+  }
+
+  /* ─── Top Header ─── */
+  .order-top-header {
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .order-title {
+    font-size: 18px;
+  }
+
+  .order-header-actions {
+    gap: 8px;
+  }
+
+  .order-breadcrumb {
+    font-size: 12px;
   }
 }
 

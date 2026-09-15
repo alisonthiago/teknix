@@ -1,5 +1,6 @@
 export type MessageType = 
   | 'TEXT'
+  | 'IMAGE'
   | 'CARD_ORDER'
   | 'CARD_PRODUCT'
   | 'CARD_CUSTOMER'
@@ -51,6 +52,9 @@ export interface InternalMessage {
     file_url?: string
     file_name?: string
     file_size?: string
+    image_url?: string
+    is_video?: boolean
+    mime_type?: string
     task_id?: string
     task_title?: string
     priority?: string

@@ -13,6 +13,7 @@ import {
   Eye, EyeOff, Pencil, Trash2
 } from 'lucide-react'
 import { getUsers, updateUserRole, toggleUserActive, setUserPermission, removeUserPermission, createUser } from './actions'
+import LoadingState from '@/components/ui/LoadingState'
 
 interface Permission {
   code: string
@@ -235,7 +236,7 @@ export default function UsersClient({
             </CardHeader>
             <CardContent className="p-0">
               {loading ? (
-                <div className="p-6 text-center text-[#999] text-sm">Carregando...</div>
+                <LoadingState message="Carregando usuários..." padding={40} />
               ) : users.length === 0 ? (
                 <div className="p-6 text-center text-[#999] text-sm">Nenhum usuário encontrado.</div>
               ) : (

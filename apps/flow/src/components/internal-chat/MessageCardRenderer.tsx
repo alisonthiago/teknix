@@ -265,20 +265,92 @@ export default function MessageCardRenderer({ message, isMe, showChannel, channe
           </div>
         )
 
-      case 'FILE':
+      case 'FILE': {
+        const fileUrl = meta.file_url || ''
+        const fileName = meta.file_name || message.content || 'Arquivo'
+        const fileSize = meta.file_size || ''
+        const isVideo = meta.is_video || /\.(mp4|webm|mov|ogg)$/i.test(fileUrl) || /\.(mp4|webm|mov|ogg)$/i.test(fileName)
+        const isImage = /\.(jpg|jpeg|png|webp|gif)$/i.test(fileUrl) || /\.(jpg|jpeg|png|webp|gif)$/i.test(fileName)
+        const isPdf = /\.pdf$/i.test(fileName)
+        const isSheet = /\.(xlsx|xls|csv)$/i.test(fileName)
+
+        if (isVideo && fileUrl) {
+          return (
+            <div className="flex flex-col gap-1.5 max-w-[280px]">
+              <div className="rounded-2xl overflow-hidden border border-black/10 bg-black shadow-xs">
+                <video src={fileUrl} controls playsInline className="w-full max-h-72 rounded-2xl" />
+              </div>
+              {fileName && <p className="text-[11px] text-[#64748b] truncate px-1">{fileName}</p>}
+            </div>
+          )
+        }
+
+        if (isImage && fileUrl) {
+          return (
+            <div className="flex flex-col gap-1.5 max-w-[280px]">
+              <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="block overflow-hidden rounded-2xl border border-black/10 bg-black/5 hover:opacity-95 transition-opacity shadow-xs">
+                <img src={fileUrl} alt={fileName} className="w-full max-h-72 object-cover rounded-2xl" loading="lazy" />
+              </a>
+              {fileName && <p className="text-[11px] text-[#64748b] truncate px-1">{fileName}</p>}
+            </div>
+          )
+        }
+
         return (
-          <div className="p-3 bg-white rounded-2xl border border-[#e2e8f0] shadow-2xs space-y-2 max-w-xs text-left">
-            {meta.file_url && meta.file_url.match(/\.(jpg|jpeg|png|webp|gif)$/i) ? (
-              <img src={meta.file_url} alt="" className="w-full h-36 object-cover rounded-xl border border-[#eee]" />
-            ) : (
-              <div className="flex items-center gap-2.5 p-2 bg-[#F7F7F7] rounded-xl border border-[#eee]">
-                <Paperclip className="w-4 h-4 text-[#1f2328]" />
-                <span className="text-xs font-bold text-[#1e293b] truncate">{meta.file_name || 'Documento.pdf'}</span>
+          <div className="p-3 bg-white rounded-2xl border border-[#e2e8f0] shadow-2xs space-y-2 max-w-[280px] text-left">
+            <div className="flex items-center gap-2.5 p-2 bg-[#F7F7F7] rounded-xl border border-[#eee]">
+              <div className="w-8 h-8 rounded-lg bg-white border border-[#e2e8f0] flex items-center justify-center shrink-0">
+                {isPdf ? (
+                  <FileText className="w-4 h-4 text-[#ef4444]" />
+                ) : isSheet ? (
+                  <FileText className="w-4 h-4 text-[#16a34a]" />
+                ) : (
+                  <Paperclip className="w-4 h-4 text-[#3b82f6]" />
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[12px] font-bold text-[#1e293b] truncate leading-tight">{fileName}</p>
+                {fileSize && <p className="text-[10px] text-[#94a3b8] mt-0.5">{fileSize}</p>}
+              </div>
+            </div>
+            {fileUrl && (
+              <div className="flex items-center justify-end pt-1">
+                <a
+                  href={fileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  download={fileName}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#1e293b] hover:bg-[#0f172a] text-white text-[11px] font-semibold rounded-lg transition-colors cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  Baixar Arquivo
+                </a>
               </div>
             )}
-            <p className="text-xs text-[#333]">{message.content}</p>
           </div>
         )
+      }
+
+      case 'IMAGE': {
+        const imageUrl = meta.image_url || message.content
+        return (
+          <div className="flex flex-col gap-1.5 max-w-[280px]">
+            <a href={imageUrl} target="_blank" rel="noopener noreferrer" className="block overflow-hidden rounded-2xl border border-black/10 bg-black/5 hover:opacity-95 transition-opacity shadow-xs">
+              <img
+                src={imageUrl}
+                alt={meta.file_name || 'Foto'}
+                className="w-full max-h-72 object-cover rounded-2xl"
+                loading="lazy"
+              />
+            </a>
+            {message.content && message.content !== 'Imagem enviada' && message.content !== imageUrl && (
+              <div className={`px-3 py-1.5 rounded-xl text-[13px] ${isMe ? 'bg-[#16a34a] text-white' : 'bg-white border border-[#e2e8f0] text-[#1e293b]'}`}>
+                <p className="whitespace-pre-wrap leading-snug">{message.content}</p>
+              </div>
+            )}
+          </div>
+        )
+      }
 
       default:
         return (

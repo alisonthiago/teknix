@@ -4,12 +4,13 @@ import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { TeknixLogo } from './TeknixLogo'
 import { usePathname, useRouter } from 'next/navigation'
-import { Bell, ChevronDown, LogOut, User, Settings, Calculator, BadgeDollarSign, Menu, X, ShoppingCart, AlertCircle, RefreshCw, Package, MessageSquare, CheckSquare } from 'lucide-react'
+import { Bell, ChevronDown, LogOut, User, Settings, Calculator, BadgeDollarSign, Menu, X, ShoppingCart, AlertCircle, RefreshCw, Package, MessageSquare, CheckSquare, Eye, EyeOff, ChevronRight, CreditCard, Users, Layers, Shield, ExternalLink, Building2, Store } from 'lucide-react'
 import Image from 'next/image'
 import { createClient } from '@/utils/supabase/client'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
 import MarginCalculator from '@/components/MarginCalculator'
 import BasicCalculatorPopup from '@/components/BasicCalculatorPopup'
+import { usePermissions } from '@/lib/permissions-context'
 
 const ROUTE_LABELS: Record<string, string> = {
   dashboard: 'Início',
@@ -64,6 +65,8 @@ function HeaderActions({
   userId,
   userAvatarUrl,
   onCalcOpen,
+  isMobile = false,
+  onUserOpenChange,
 }: {
   userName: string
   userRole: string
@@ -71,8 +74,14 @@ function HeaderActions({
   userId: string
   userAvatarUrl?: string | null
   onCalcOpen: () => void
+  isMobile?: boolean
+  onUserOpenChange?: (open: boolean) => void
 }) {
   const [userOpen, setUserOpen] = useState(false)
+
+  useEffect(() => {
+    onUserOpenChange?.(userOpen)
+  }, [userOpen, onUserOpenChange])
   const [notifOpen, setNotifOpen] = useState(false)
   const [liveDrawerOpen, setLiveDrawerOpen] = useState(false)
   const userRef = useRef<HTMLDivElement>(null)
@@ -81,6 +90,54 @@ function HeaderActions({
   const { totalUnreadCount, setIsFloatingOpen, setIsFloatingMinimized } = useInternalChat()
   const pathname = usePathname()
   const router = useRouter()
+
+  let userPerms: { has: (c: string) => boolean; isAdmin: boolean; role: string } | null = null
+  try {
+    userPerms = usePermissions()
+  } catch {}
+
+  const effectiveRole = String(userRole || userPerms?.role || '').toUpperCase()
+  const canAccessHub = 
+    Boolean(userPerms?.isAdmin) || 
+    effectiveRole === 'ADMIN' || 
+    effectiveRole === 'MASTER' || 
+    effectiveRole === 'GERENTE' || 
+    effectiveRole === 'DIRETOR' || 
+    effectiveRole === 'OWNER' ||
+    Boolean(userPerms?.has?.('hub.access')) || 
+    Boolean(userPerms?.has?.('settings.manage'))
+
+  // Ocultar / Exibir valores (persistido no localStorage e sincronizado 1:1 HUB)
+  const [hideValues, setHideValues] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('flow_hide_values') === 'true'
+    } catch {
+      return false
+    }
+  })
+
+  const toggleHideValues = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation()
+    setHideValues(prev => {
+      const next = !prev
+      try {
+        localStorage.setItem('flow_hide_values', String(next))
+        window.dispatchEvent(new CustomEvent('flow_hide_values_changed', { detail: { hide: next } }))
+      } catch {}
+      return next
+    })
+  }
+
+  useEffect(() => {
+    const handleHideChanged = (ev: Event) => {
+      const customEv = ev as CustomEvent
+      if (typeof customEv.detail?.hide === 'boolean') {
+        setHideValues(customEv.detail.hide)
+      }
+    }
+    window.addEventListener('flow_hide_values_changed', handleHideChanged)
+    return () => window.removeEventListener('flow_hide_values_changed', handleHideChanged)
+  }, [])
 
   // Buscar total de vendas estritamente de hoje para o badge do Header
   const { data: todayRevenue } = useSupabaseQuery<number>(async (supabase) => {
@@ -104,12 +161,39 @@ function HeaderActions({
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
-      if (userRef.current && !userRef.current.contains(e.target as Node)) setUserOpen(false)
+      if (userRef.current && !userRef.current.contains(e.target as Node)) {
+        if (window.innerWidth > 768) setUserOpen(false)
+      }
       if (notifRef.current && !notifRef.current.contains(e.target as Node)) setNotifOpen(false)
     }
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
   }, [setUserOpen, setNotifOpen])
+
+  useEffect(() => {
+    if (userOpen) {
+      let originalOverflow = ''
+      if (window.innerWidth <= 768) {
+        originalOverflow = document.body.style.overflow
+        document.body.style.overflow = 'hidden'
+      }
+      const handlePop = () => setUserOpen(false)
+      window.addEventListener('popstate', handlePop)
+
+      const handleKey = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') setUserOpen(false)
+      }
+      window.addEventListener('keydown', handleKey)
+
+      return () => {
+        if (originalOverflow) {
+          document.body.style.overflow = originalOverflow
+        }
+        window.removeEventListener('popstate', handlePop)
+        window.removeEventListener('keydown', handleKey)
+      }
+    }
+  }, [userOpen])
 
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'mensagens' | 'vendas' | 'perguntas' | 'estoque'>('all')
 
@@ -231,22 +315,34 @@ function HeaderActions({
 
   return (
     <>
+      {/* Notificações */}
       <div ref={notifRef} className="relative">
         <button
-          onClick={() => setNotifOpen(!notifOpen)}
-          className="w-10 h-10 rounded-full flex items-center justify-center text-[#333] hover:bg-[#EEFFB3]/60 transition-colors relative cursor-pointer"
-          title="Notificações"
+          type="button"
+          onClick={() => {
+            setNotifOpen(!notifOpen)
+            setUserOpen(false)
+          }}
+          className={isMobile ? "w-9 h-9 rounded-full flex items-center justify-center text-[#111] hover:bg-black/10 transition-colors relative cursor-pointer" : "flow-pill-btn"}
+          title="Notificações e Alertas"
         >
-          <Bell className="w-5 h-5" strokeWidth={1.5} />
+          {isMobile ? (
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-bell text-[#111]" aria-hidden="true">
+              <path d="M10.268 21a2 2 0 0 0 3.464 0" />
+              <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" />
+            </svg>
+          ) : (
+            <Bell className="w-[21px] h-[21px]" strokeWidth={1.8} />
+          )}
           {activeUnreadCount > 0 && (
-            <span className="absolute top-1.5 right-1.5 min-w-[18px] h-[18px] px-1 bg-[#e74c3c] text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white shadow-sm animate-in zoom-in-50 duration-200">
+            <span className="flow-badge-red" style={isMobile ? { top: 2, right: 2 } : undefined}>
               {activeUnreadCount > 99 ? '99+' : activeUnreadCount}
             </span>
           )}
         </button>
 
         {notifOpen && (
-          <div className="absolute right-0 top-full mt-3 w-[390px] max-w-[94vw] bg-white rounded-2xl border border-[#e0e0e0] shadow-[0_10px_28px_rgba(0,0,0,0.12)] overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+          <div className={isMobile ? "fixed right-3 top-[60px] w-[min(420px,calc(100vw-24px))] max-h-[calc(100vh-75px)] bg-white rounded-2xl border border-[#e0e0e0] shadow-[0_10px_28px_rgba(0,0,0,0.12)] overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150" : "absolute right-0 top-full mt-3 w-[390px] max-w-[94vw] bg-white rounded-2xl border border-[#e0e0e0] shadow-[0_10px_28px_rgba(0,0,0,0.12)] overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150"}>
             {/* Header Notificações Inteligentes */}
             <div className="px-4 py-3 border-b border-[#eeeeee] flex items-center justify-between bg-white">
               <div className="flex items-center gap-2">
@@ -267,61 +363,81 @@ function HeaderActions({
               )}
             </div>
 
-            {/* Notification Items List Estilo Mercado Livre */}
-            <div className="max-h-[360px] overflow-y-auto divide-y divide-[#f0f0f0] p-3 space-y-2">
+            {/* Categorias de Filtro */}
+            <div className="flex items-center gap-1.5 px-3 py-2 border-b border-[#f0f0f0] bg-[#fafafa] overflow-x-auto scrollbar-none">
+              <button
+                onClick={() => setSelectedCategory('all')}
+                className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-all shrink-0 cursor-pointer ${
+                  selectedCategory === 'all'
+                    ? 'bg-[#0f172a] text-white shadow-xs'
+                    : 'bg-white text-[#64748b] border border-[#e2e8f0] hover:bg-[#f1f5f9]'
+                }`}
+              >
+                Todas ({activeNotifs.length})
+              </button>
+              <button
+                onClick={() => setSelectedCategory('vendas')}
+                className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-all shrink-0 cursor-pointer ${
+                  selectedCategory === 'vendas'
+                    ? 'bg-[#16a34a] text-white shadow-xs'
+                    : 'bg-white text-[#64748b] border border-[#e2e8f0] hover:bg-[#f1f5f9]'
+                }`}
+              >
+                Vendas
+              </button>
+              <button
+                onClick={() => setSelectedCategory('mensagens')}
+                className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-all shrink-0 cursor-pointer ${
+                  selectedCategory === 'mensagens'
+                    ? 'bg-[#2563eb] text-white shadow-xs'
+                    : 'bg-white text-[#64748b] border border-[#e2e8f0] hover:bg-[#f1f5f9]'
+                }`}
+              >
+                Mensagens
+              </button>
+              <button
+                onClick={() => setSelectedCategory('perguntas')}
+                className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-all shrink-0 cursor-pointer ${
+                  selectedCategory === 'perguntas'
+                    ? 'bg-[#d97706] text-white shadow-xs'
+                    : 'bg-white text-[#64748b] border border-[#e2e8f0] hover:bg-[#f1f5f9]'
+                }`}
+              >
+                Perguntas
+              </button>
+            </div>
+
+            {/* Lista */}
+            <div className="max-h-[340px] overflow-y-auto divide-y divide-[#f0f0f0]">
               {filteredNotifications.length === 0 ? (
-                <div className="p-8 text-center">
-                  <div className="w-10 h-10 rounded-full bg-[#F7F7F7] border border-[#e2e8f0] flex items-center justify-center mx-auto mb-2 text-[#94a3b8]">
-                    <Bell className="w-5 h-5" />
-                  </div>
-                  <p className="text-[13px] font-semibold text-[#333]">Nenhum alerta recente</p>
-                  <p className="text-[11px] text-[#999] mt-1">Você está em dia com todas as perguntas, vendas e estoque do Mercado Livre.</p>
+                <div className="py-8 text-center text-[#888]">
+                  <Bell className="w-8 h-8 mx-auto mb-2 text-[#ccc]" />
+                  <p className="text-xs font-semibold">Nenhuma notificação encontrada</p>
                 </div>
               ) : (
-                filteredNotifications.map(n => (
+                filteredNotifications.slice(0, 10).map((n) => (
                   <div
                     key={n.id}
                     onClick={() => {
-                      if (!n.is_read) markAsRead(n.id)
-                      
-                      let path = ''
-                      const mod = String(n.module || n.type || n.title || '').toLowerCase()
-                       if (mod.includes('sale') || mod.includes('venda') || mod.includes('vendeu') || mod.includes('order') || mod.includes('pedido')) {
-                         path = '/pedidos'
-                       } else if (mod.includes('product') || mod.includes('produto') || mod.includes('stock') || mod.includes('estoque')) {
-                         path = '/operacao'
-                       } else {
-                         path = '/pedidos'
-                       }
-
+                      markAsRead(n.id)
+                      const path = n.module === 'orders' && n.entity_id ? `/pedidos/${n.entity_id}` : '/notifications'
                       setNotifOpen(false)
                       router.push(path)
                     }}
-                     className={`p-3.5 rounded-xl transition-all cursor-pointer flex gap-3 items-center ${
-                       n.is_read
-                         ? 'bg-white hover:bg-[#fafafa]'
-                         : 'bg-[#fafafa] hover:bg-[#f5f5f5] border border-[#e2e8f0]'
-                     }`}
+                    className={`p-3 hover:bg-[#f9fafb] transition-colors cursor-pointer flex gap-3 items-start ${
+                      !n.is_read ? 'bg-[#fcfdfa]' : ''
+                    }`}
                   >
-                     {renderNotificationIcon(n)}
+                    {renderNotificationIcon(n)}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-1">
-                          <p className={`text-[12px] leading-snug line-clamp-1 ${n.is_read ? 'text-[#333]' : 'text-[#111] font-extrabold'}`}>
-                          {cleanTitle(n.title)}
-                        </p>
-                        <span className="text-[9px] text-[#999] shrink-0 font-medium">{formatTimeAgo(n.created_at)}</span>
-                      </div>
-                       <p className="text-[9px] text-[#666] leading-tight mt-0.5 line-clamp-1">{cleanTitle(n.message)}</p>
+                      <p className="text-xs font-bold text-[#111827] truncate">{cleanTitle(n.title)}</p>
+                      <p className="text-[11px] text-[#4b5563] line-clamp-2 mt-0.5">{cleanTitle(n.message)}</p>
+                      <span className="text-[9px] text-[#9ca3af] mt-1 block">{formatTimeAgo(n.created_at)}</span>
                     </div>
-                    {!n.is_read && (
-                      <span className="w-2 h-2 rounded-full bg-[#16a34a] shrink-0" />
-                    )}
                   </div>
                 ))
               )}
             </div>
-
-            {/* Footer */}
 
             {/* Footer */}
             <div className="p-3 border-t border-[#f0f0f0] bg-[#fafafa] text-center">
@@ -337,105 +453,237 @@ function HeaderActions({
         )}
       </div>
 
-      {/* 🔴 BOTÃO AO VIVO DENTRO DA PÍLULA VERDE (AGORA PRETO CLEAN CONFORME PEDIDO) */}
-      <button
-        onClick={() => setLiveDrawerOpen(true)}
-        className="header-live-button flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white hover:bg-[#f5f5f5] text-[#111111] text-[11px] font-black shadow-sm transition-all tracking-wider uppercase cursor-pointer"
-        title="Monitor ao Vivo em Tempo Real"
-      >
-        <span className="relative flex h-2 w-2 shrink-0">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#e74c3c] opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-[#e74c3c]"></span>
-        </span>
-        <span className="font-mono font-bold whitespace-nowrap">
-          {todayRevenue && todayRevenue > 0
-            ? `R$ ${todayRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-            : 'R$ 0,00'}
-        </span>
-      </button>
+      {/* Somente no Desktop: Botão Ao Vivo + Drawer + Precificação */}
+      {!isMobile && (
+        <>
+          <div className="hidden lg:inline-flex hub-live-revenue-capsule header-live-button">
+            <button
+              type="button"
+              onClick={() => setLiveDrawerOpen(true)}
+              className="hub-live-revenue-btn"
+              title="Monitor ao Vivo em Tempo Real"
+            >
+              <span className="hub-live-pulse-wrapper">
+                <span className="hub-live-pulse-ring" />
+                <span className="hub-live-pulse-dot" />
+              </span>
+              <span className="hub-live-revenue-label">
+                {hideValues ? '••••••' : (
+                  todayRevenue && todayRevenue > 0
+                    ? `R$ ${todayRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                    : 'R$ 0,00'
+                )}
+              </span>
+            </button>
 
-      {/* Drawer Deslizante no Canto Direito */}
-      <LiveMonitorDrawer
-        open={liveDrawerOpen}
-        onClose={() => setLiveDrawerOpen(false)}
-      />
+            <button
+              type="button"
+              onClick={toggleHideValues}
+              className="hub-live-eye-btn"
+              title={hideValues ? 'Mostrar valores' : 'Ocultar valores'}
+              aria-label={hideValues ? 'Mostrar valores' : 'Ocultar valores'}
+            >
+              {hideValues ? (
+                <EyeOff size={13} strokeWidth={1.8} />
+              ) : (
+                <Eye size={13} strokeWidth={1.8} />
+              )}
+            </button>
+          </div>
 
-      <button
-        onClick={onCalcOpen}
-        className="flex w-9 h-9 lg:w-10 lg:h-10 rounded-full items-center justify-center text-[#333] hover:bg-[#EEFFB3]/60 transition-colors cursor-pointer"
-        title="Precificação"
-      >
-        <BadgeDollarSign className="w-5 h-5" strokeWidth={1.5} />
-      </button>
+          <LiveMonitorDrawer
+            open={liveDrawerOpen}
+            onClose={() => setLiveDrawerOpen(false)}
+          />
 
+          <button
+            type="button"
+            onClick={onCalcOpen}
+            className="flow-pill-btn"
+            title="Precificação Inteligente"
+          >
+            <BadgeDollarSign className="w-5 h-5" strokeWidth={1.6} />
+          </button>
+        </>
+      )}
+
+      {/* Usuário / Avatar — Mobile (1:1 HUB) ou Desktop (mp-wpn-header-user-btn) */}
       <div ref={userRef} className="relative">
-        <button
-          onClick={() => setUserOpen(!userOpen)}
-          className="flex items-center gap-1.5 pl-1 pr-2 py-1 rounded-full hover:bg-[#EEFFB3]/60 transition-colors"
-        >
-          <div className="relative">
-            <div className="h-9 w-9 rounded-full overflow-hidden bg-[#f5f5f5]">
+        {isMobile ? (
+          <button
+            type="button"
+            onClick={() => {
+              setUserOpen(!userOpen)
+              setNotifOpen(false)
+            }}
+            className="flex items-center gap-1.5 pl-1 pr-1.5 py-1 rounded-full hover:bg-black/10 transition-colors cursor-pointer"
+          >
+            <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-[#f1f5f9] border border-black/10 shrink-0">
+              {userAvatarUrl ? (
+                <img
+                  alt={userName}
+                  src={userAvatarUrl}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <img
+                  alt="Avatar"
+                  src={`https://api.dicebear.com/7.x/notionists/svg?seed=${userEmail || 'user'}`}
+                  className="h-full w-full object-cover"
+                />
+              )}
+            </div>
+            <span className="hidden sm:block text-sm font-semibold text-[#111] max-w-[90px] truncate">{userName}</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-down w-4 h-4 text-[#111] hidden sm:block" aria-hidden="true">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setUserOpen(!userOpen)}
+            className="mp-wpn-header-user-btn"
+            aria-label="Imagem do perfil e dados da conta"
+          >
+            <div className="mp-wpn-avatar-box">
               {userAvatarUrl ? (
                 <Image
                   src={userAvatarUrl}
                   alt={userName}
-                  width={36}
-                  height={36}
-                  className="h-full w-full object-cover"
+                  width={28}
+                  height={28}
+                  className="mp-wpn-avatar-img"
                 />
               ) : (
                 <Image
                   src={`https://api.dicebear.com/7.x/notionists/svg?seed=${userEmail || 'user'}`}
                   alt="Avatar"
-                  width={36}
-                  height={36}
-                  className="h-full w-full object-cover"
+                  width={28}
+                  height={28}
+                  className="mp-wpn-avatar-img"
                 />
               )}
             </div>
-          </div>
-          <span className="hidden sm:block text-sm font-medium text-[#333] max-w-[90px] truncate">{userName}</span>
-          <ChevronDown className="w-4 h-4 text-[#666] hidden sm:block" strokeWidth={2} />
+            <span className="mp-wpn-user-title hidden sm:block">{userName}</span>
+            <ChevronDown size={14} className="mp-wpn-chevron hidden sm:block" />
           </button>
+        )}
+
         {userOpen && (
-          <div className="absolute right-0 top-full mt-2 w-[230px] bg-white rounded-2xl border border-[#e6e6e6] shadow-[0_10px_30px_rgba(0,0,0,0.12)] overflow-hidden z-50 p-1.5">
-            <div className="px-2.5 py-1.5">
-              <p className="text-xs font-bold text-[#111827]">{userName}</p>
-              <p className="text-[11px] text-[#999] mt-0.5">{userRole}</p>
-            </div>
-            <div className="h-px bg-[#f0f0f0] my-1" />
-            <div>
-              <button 
-                onClick={() => {
-                  setUserOpen(false)
-                  router.push('/sistema/perfil')
-                }}
-                className="w-full text-left px-2.5 py-2 text-[13px] font-medium text-[#111827] hover:bg-[#f5f5f5] rounded-md"
+          <div className="flow-user-drawer-wrapper">
+            {/* Backdrop escurecido no mobile */}
+            <div
+              className="flow-user-drawer-backdrop"
+              onClick={() => setUserOpen(false)}
+              aria-hidden="true"
+            />
+
+            {/* Menu Moderno 1:1 com a Referência Visual */}
+            <div className="flow-user-dropdown mp-modern-user-menu" onClick={(e) => e.stopPropagation()}>
+              {/* 1. Header do Usuário: Nome e E-mail à Esquerda + Avatar com Anel Gradiente à Direita */}
+              <Link
+                href="/sistema/perfil"
+                className="modern-user-header-card"
+                onClick={() => setUserOpen(false)}
               >
-                Dados da conta
-              </button>
-              <button 
-                onClick={() => {
-                  setUserOpen(false)
-                  router.push('/sistema')
-                }}
-                className="w-full text-left px-2.5 py-2 text-[13px] font-medium text-[#111827] hover:bg-[#f5f5f5] rounded-md"
-              >
-                Configurações da loja
-              </button>
-            </div>
-            <div className="h-px bg-[#f0f0f0] my-1" />
-            <div>
-              <button 
-                onClick={async () => {
-                  const supabase = createClient()
-                  await supabase.auth.signOut()
-                  window.location.href = '/login'
-                }}
-                className="w-full text-left px-2.5 py-2 text-[13px] font-medium text-[#ef4444] hover:bg-[#fff5f5] rounded-md"
-              >
-                Sair
-              </button>
+                <div className="modern-user-header-info">
+                  <span className="modern-user-name">{userName || 'Alison'}</span>
+                  <span className="modern-user-email">{userEmail || 'alison@teknixbrasil.com.br'}</span>
+                </div>
+                <div className="modern-user-avatar-ring">
+                  {userAvatarUrl ? (
+                    <img
+                      src={userAvatarUrl}
+                      alt={userName || 'Perfil'}
+                      className="modern-user-avatar-img"
+                    />
+                  ) : (
+                    <img
+                      src={`https://api.dicebear.com/7.x/notionists/svg?seed=${userEmail || 'user'}`}
+                      alt={userName || 'Perfil'}
+                      className="modern-user-avatar-img"
+                    />
+                  )}
+                </div>
+              </Link>
+
+              {/* 2. Lista de Itens do Menu */}
+              <div className="modern-user-menu-list">
+                {/* Perfil em Destaque */}
+                <Link
+                  href="/sistema/perfil"
+                  className="modern-user-item active"
+                  onClick={() => setUserOpen(false)}
+                >
+                  <User size={17} className="modern-item-icon" />
+                  <span>Informações do perfil</span>
+                </Link>
+
+                {/* Troca de Conta: Foco no HUB com Badge PRO */}
+                {canAccessHub && (
+                  <a
+                    href="http://localhost:5174/hub"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="modern-user-item"
+                    onClick={() => setUserOpen(false)}
+                    title="Acessar conta Teknix HUB (Loja Própria & E-commerce)"
+                  >
+                    <RefreshCw size={17} className="modern-item-icon" />
+                    <span>Teknix HUB</span>
+                    <span className="modern-badge hub">
+                      ⚡ HUB
+                    </span>
+                  </a>
+                )}
+
+                <Link
+                  href="/sistema/empresa"
+                  className="modern-user-item"
+                  onClick={() => setUserOpen(false)}
+                >
+                  <Building2 size={17} className="modern-item-icon" />
+                  <span>Dados da empresa</span>
+                </Link>
+
+                <Link
+                  href="/sistema/colaboradores"
+                  className="modern-user-item"
+                  onClick={() => setUserOpen(false)}
+                >
+                  <Users size={17} className="modern-item-icon" />
+                  <span>Colaboradores & Permissões</span>
+                </Link>
+
+                <Link
+                  href="/sistema"
+                  className="modern-user-item"
+                  onClick={() => setUserOpen(false)}
+                >
+                  <Settings size={17} className="modern-item-icon" />
+                  <span>Configurações do sistema</span>
+                </Link>
+
+                <Link
+                  href="/sistema/marketplaces"
+                  className="modern-user-item"
+                  onClick={() => setUserOpen(false)}
+                >
+                  <Store size={17} className="modern-item-icon" />
+                  <span>Marketplaces & Integrações</span>
+                </Link>
+
+                <div className="modern-menu-divider" />
+
+                <Link
+                  href="/sistema/seguranca"
+                  className="modern-user-item"
+                  onClick={() => setUserOpen(false)}
+                >
+                  <Shield size={17} className="modern-item-icon" />
+                  <span>Segurança da conta</span>
+                </Link>
+              </div>
             </div>
           </div>
         )}
@@ -451,6 +699,7 @@ export default function Header({ userName, userRole, userEmail, userId, userAvat
   const [calcOpen, setCalcOpen] = useState(false)
   const [showBasicCalc, setShowBasicCalc] = useState(false)
   const [liveDrawerOpen, setLiveDrawerOpen] = useState(false)
+  const [mobileUserOpen, setMobileUserOpen] = useState(false)
 
   // Buscar faturamento de hoje em tempo real
   const { data: todayRevenue } = useSupabaseQuery<number>(async (supabase) => {
@@ -464,23 +713,46 @@ export default function Header({ userName, userRole, userEmail, userId, userAvat
 
   return (
     <>
-      {/* Mobile — barra verde limpa e elegante */}
-      <div className="lg:hidden sticky top-0 z-30 px-3 pt-2 pb-2 bg-[#f5f5f5]">
-        <div className="bg-[#B5F500] rounded-full flex items-center justify-between px-2.5 py-1.5 shadow-sm">
+      {/* ── Mobile Header Oficial — Barra Verde #B5F500 (1:1 com HUB) ── */}
+      <div className={`lg:hidden sticky top-0 z-30 hub-mobile-header-bar ${mobileUserOpen ? 'user-dropdown-open' : ''}`}>
+        <div className="bg-[#B5F500] rounded-full flex items-center justify-between px-3.5 py-2.5 shadow-sm hub-mobile-pill relative z-[1005]">
           <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={onMenuOpen}
-              className="w-9 h-9 rounded-full bg-white/80 flex items-center justify-center shrink-0 shadow-2xs"
+              className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 text-[#111] hover:bg-black/10 transition-colors cursor-pointer"
               aria-label="Abrir menu"
             >
-              <Menu className="w-5 h-5 text-[#111]" strokeWidth={2} />
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-menu w-7 h-7 text-[#111]" aria-hidden="true">
+                <path d="M4 5h16" />
+                <path d="M4 12h16" />
+                <path d="M4 19h16" />
+              </svg>
             </button>
-            <div className="flex items-center text-[#111]">
-              <TeknixLogo className="h-4 w-auto fill-[#111]" />
-            </div>
+            <Link href="/" className="flex items-center text-[#111]">
+              <TeknixLogo height={28} style={{ fill: '#111', color: '#111' }} />
+            </Link>
           </div>
 
           <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setCalcOpen(true)}
+              className="w-9 h-9 rounded-full flex items-center justify-center text-[#111] hover:bg-black/10 transition-colors cursor-pointer"
+              title="Precificação Inteligente"
+            >
+              <BadgeDollarSign className="w-5 h-5 text-[#111]" strokeWidth={1.6} />
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowBasicCalc(!showBasicCalc)}
+              className="w-9 h-9 rounded-full flex items-center justify-center text-[#111] hover:bg-black/10 transition-colors cursor-pointer"
+              title="Abrir Calculadora Básica"
+            >
+              <Calculator className="w-5 h-5 text-[#111]" strokeWidth={1.6} />
+            </button>
+            {showBasicCalc && <BasicCalculatorPopup onClose={() => setShowBasicCalc(false)} />}
+
             <HeaderActions
               userName={userName}
               userRole={userRole}
@@ -488,48 +760,38 @@ export default function Header({ userName, userRole, userEmail, userId, userAvat
               userId={userId}
               userAvatarUrl={userAvatarUrl}
               onCalcOpen={() => setCalcOpen(true)}
+              isMobile={true}
+              onUserOpenChange={setMobileUserOpen}
             />
           </div>
         </div>
-        <div className="flex items-center justify-between mt-4 px-1">
-          <h1 className="text-2xl font-semibold text-[#333]">{pageTitle}</h1>
-          <div className="relative">
-            <button
-              onClick={() => setShowBasicCalc(!showBasicCalc)}
-              className="w-10 h-10 rounded-full hover:bg-[#f5f5f5] text-[#1f2328] flex items-center justify-center transition-colors border border-[#e6e6e6] hover:border-[#1f2328] bg-white shadow-sm"
-              title="Abrir Calculadora Básica"
-            >
-              <Calculator className="w-5 h-5" strokeWidth={1.5} />
-            </button>
-            {showBasicCalc && <BasicCalculatorPopup onClose={() => setShowBasicCalc(false)} />}
-          </div>
-        </div>
+
       </div>
 
-      {/* Desktop — título + pill verde */}
-      <header className="hidden lg:flex sticky top-0 z-30 bg-[#f5f5f5] items-center justify-between py-5 px-10">
-        <h1 className="text-[24px] sm:text-[26px] font-bold text-[#111111] tracking-tight leading-tight">{pageTitle}</h1>
+      {/* Desktop — título + pill oficial HUB */}
+      <header className="hidden lg:flex sticky top-0 z-30 bg-[#f5f5f5] items-center justify-between py-4 px-8">
+        <h1 className="text-[22px] font-semibold text-[#1f2328] tracking-tight">{pageTitle}</h1>
         
         <div className="flex items-center gap-3">
-          <div className="relative flex items-center gap-1">
+          <div className="relative flex items-center gap-1.5">
             <button
               onClick={() => setShowBasicCalc(!showBasicCalc)}
-              className="w-10 h-10 rounded-full hover:bg-[#EEFFB3]/60 text-[#111] flex items-center justify-center transition-colors border border-transparent hover:border-[#16a34a]"
+              className="w-9 h-9 rounded-full hover:bg-[#f5f5f5] text-[#1f2328] flex items-center justify-center transition-colors border border-[#e6e6e6] hover:border-[#1f2328] bg-white shadow-xs cursor-pointer"
               title="Abrir Calculadora Básica"
             >
-              <Calculator className="w-5 h-5" strokeWidth={1.5} />
+              <Calculator className="w-4.5 h-4.5" strokeWidth={1.6} />
             </button>
             <a
               href="/atividades"
-              className="w-10 h-10 rounded-full hover:bg-[#EEFFB3]/60 text-[#111] flex items-center justify-center transition-colors border border-transparent hover:border-[#16a34a] relative"
+              className="w-9 h-9 rounded-full hover:bg-[#f5f5f5] text-[#1f2328] flex items-center justify-center transition-colors border border-[#e6e6e6] hover:border-[#1f2328] bg-white shadow-xs relative cursor-pointer"
               title="Atividades & Tarefas"
             >
-              <CheckSquare className="w-5 h-5" strokeWidth={1.5} />
+              <CheckSquare className="w-4.5 h-4.5" strokeWidth={1.6} />
             </a>
             {showBasicCalc && <BasicCalculatorPopup onClose={() => setShowBasicCalc(false)} />}
           </div>
 
-          <div className="mp-header-pill gap-0.5 py-1 px-2">
+          <div className="mp-header-pill-hub">
             <HeaderActions
               userName={userName}
               userRole={userRole}

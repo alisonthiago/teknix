@@ -38,10 +38,20 @@
 }
 
 .stats-tab-nav {
+  display: flex !important;
   align-items: center;
+  gap: 6px !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: none !important;
+  white-space: nowrap !important;
   padding: 2px 0 10px !important;
-  border-bottom-color: #e6e6e6 !important;
+  border-bottom: 1px solid #e6e6e6 !important;
   margin-bottom: 24px !important;
+}
+
+.stats-tab-nav::-webkit-scrollbar {
+  display: none;
 }
 
 .stats-tab-button {
@@ -53,6 +63,8 @@
   font-family: inherit;
   font-size: 12px !important;
   font-weight: 500 !important;
+  flex-shrink: 0 !important;
+  white-space: nowrap !important;
 }
 
 .stats-tab-button:hover { background: #f3f4f6 !important; color: #1f2328 !important; }
@@ -310,23 +322,37 @@
   font-weight: 600;
 }
 
-@media (max-width: 700px) {
+@media (max-width: 768px) {
   .stats-filter-bar {
-    align-items: stretch;
-    flex-direction: column;
+    align-items: stretch !important;
+    flex-direction: column !important;
+    padding: 10px 12px !important;
+    gap: 8px !important;
   }
 
   .stats-filters-left {
-    flex-wrap: wrap;
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 8px !important;
   }
 
   .filter-select-pill {
-    flex: 1 1 auto;
-    min-width: 0;
+    width: 100% !important;
+    min-width: 100% !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    box-sizing: border-box !important;
+  }
+
+  .filter-btn-pill {
+    width: 100% !important;
+    justify-content: center !important;
   }
 
   .stats-filter-clear-btn {
-    align-self: flex-start;
+    align-self: stretch !important;
+    justify-content: center !important;
   }
 }
 
@@ -364,6 +390,27 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
+}
+
+@media (max-width: 900px) {
+  .stats-metrics-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-metrics-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+  .stat-card {
+    padding: 16px !important;
+    min-height: auto !important;
+  }
+  .stat-card-value {
+    font-size: 1.35rem !important;
+  }
 }
 
 .stat-card {
@@ -432,6 +479,13 @@
   display: grid;
   grid-template-columns: 1.4fr 1fr;
   gap: 14px;
+}
+
+@media (max-width: 900px) {
+  .stats-dual-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px;
+  }
 }
 
 .stat-card-large {

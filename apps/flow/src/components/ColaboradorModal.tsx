@@ -91,47 +91,47 @@ export default function ColaboradorModal({ open, onClose, onSuccess, colaborador
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-white rounded-lg w-full max-w-md shadow-xl flex flex-col max-h-[90vh]">
-        <div className="flex items-center justify-between p-4 border-b border-[#e6e6e6]">
-          <h2 className="text-[16px] font-semibold text-[#1f2328]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/65 backdrop-blur-[4px] p-3 sm:p-4">
+      <div className="bg-white rounded-[14px] border border-[#e6e6e6] w-full max-w-md shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] flex flex-col max-h-[90vh] overflow-hidden">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#e6e6e6] bg-white">
+          <h2 className="text-[16px] font-semibold text-[#111111]">
             {colaborador ? 'Editar Colaborador' : 'Novo Colaborador'}
           </h2>
-          <button onClick={onClose} className="p-1.5 rounded-md text-[#999] hover:bg-[#f5f5f5] hover:text-[#333] transition-colors">
-            <X className="w-5 h-5" />
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg text-[#64748b] hover:bg-[#f1f5f9] hover:text-[#111111] transition-colors cursor-pointer">
+            <X className="w-4 h-4" />
           </button>
         </div>
-        <div className="p-4 overflow-y-auto">
+        <div className="p-6 overflow-y-auto">
           {errorMsg && (
-            <div className="mb-4 p-3 rounded-md bg-[#fff5f5] border border-[#ffcdd2] text-[#e74c3c] text-[13px]">
+            <div className="mb-4 p-3 rounded-lg bg-[#fef2f2] border border-[#fecaca] text-[#dc2626] text-[13px] font-medium">
               {errorMsg}
             </div>
           )}
           <form id="colab-form" onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label className="text-[12px] text-[#666] mb-1">Nome</Label>
+              <Label className="text-[12.5px] text-[#666666] mb-1.5 font-medium">Nome</Label>
               <Input
                 required
                 value={form.name}
                 onChange={e => setForm({ ...form, name: e.target.value })}
                 placeholder="Ex: João Silva"
-                className="text-[13px]"
+                className="text-[13.5px]"
               />
             </div>
             <div>
-              <Label className="text-[12px] text-[#666] mb-1">E-mail</Label>
+              <Label className="text-[12.5px] text-[#666666] mb-1.5 font-medium">E-mail</Label>
               <Input
                 required
                 type="email"
                 value={form.email}
                 onChange={e => setForm({ ...form, email: e.target.value })}
                 placeholder="Ex: joao@empresa.com"
-                className="text-[13px]"
+                className="text-[13.5px]"
                 disabled={!!colaborador?.is_master}
               />
             </div>
             <div>
-              <Label className="text-[12px] text-[#666] mb-1">
+              <Label className="text-[12.5px] text-[#666666] mb-1.5 font-medium">
                 Senha {colaborador && '(Deixe em branco para manter)'}
               </Label>
               <Input
@@ -140,16 +140,16 @@ export default function ColaboradorModal({ open, onClose, onSuccess, colaborador
                 value={form.password}
                 onChange={e => setForm({ ...form, password: e.target.value })}
                 placeholder={colaborador ? "Nova senha" : "Senha de acesso"}
-                className="text-[13px]"
+                className="text-[13.5px]"
               />
             </div>
             <div>
-              <Label className="text-[12px] text-[#666] mb-1">Função</Label>
+              <Label className="text-[12.5px] text-[#666666] mb-1.5 font-medium">Função</Label>
               <select
                 required
                 value={form.role}
                 onChange={e => setForm({ ...form, role: e.target.value })}
-                className="w-full h-10 px-3 rounded-md border border-input bg-transparent text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                className="w-full h-10 px-3 rounded-lg border border-[#e6e6e6] bg-white text-sm shadow-none transition-colors focus-visible:outline-none focus-visible:border-[#111111]"
                 disabled={!!colaborador?.is_master}
               >
                 {Object.entries(ROLE_LABELS).map(([k, v]) => (
@@ -159,9 +159,9 @@ export default function ColaboradorModal({ open, onClose, onSuccess, colaborador
             </div>
           </form>
         </div>
-        <div className="p-4 border-t border-[#e6e6e6] flex justify-end gap-2 bg-[#fafafa] rounded-b-lg">
+        <div className="px-6 py-4 border-t border-[#e6e6e6] flex justify-end gap-2.5 bg-[#fafafa]">
           <Button type="button" variant="outline" onClick={onClose} disabled={saving}>Cancelar</Button>
-          <Button type="submit" form="colab-form" className="bg-[#1f2328] hover:bg-[#111827] text-white" disabled={saving}>
+          <Button type="submit" form="colab-form" variant="default" disabled={saving}>
             {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
             {colaborador ? 'Salvar Alterações' : 'Criar Colaborador'}
           </Button>

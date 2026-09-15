@@ -13,17 +13,10 @@ export function PageHeader({
   actions?: React.ReactNode
   children?: React.ReactNode
 }) {
-  if (!title && !description && !actions && !children) return null
+  if (!description && !actions && !children) return null
   return (
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5">
-      {title ? (
-        <div className="space-y-0.5">
-          <h1 className="text-[24px] sm:text-[26px] font-bold text-[#111111] tracking-tight leading-tight">
-            {title}
-          </h1>
-          {description && <p className="text-[13px] text-[#666666] leading-relaxed">{description}</p>}
-        </div>
-      ) : description ? (
+      {description ? (
         <p className="text-[13px] text-[#666666] leading-relaxed">{description}</p>
       ) : null}
       {(actions || children) && (
@@ -146,7 +139,7 @@ export function SearchInput({
 
 export function ModuleTable({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`bg-white rounded-2xl border border-[#e6e6e6] overflow-hidden shadow-none ${className}`}>
+    <div className={`bg-white rounded-xl border border-[#e6e6e6] overflow-hidden shadow-none ${className}`}>
       <div className="overflow-x-auto">
         <table className="w-full text-sm border-collapse text-left">{children}</table>
       </div>
@@ -157,7 +150,7 @@ export function ModuleTable({ children, className = '' }: { children: React.Reac
 export function TableHead({ children }: { children: React.ReactNode }) {
   return (
     <thead>
-      <tr className="bg-[#fafafa] border-b border-[#e5e5e5]">
+      <tr className="bg-[#fafafa] border-b border-[#f0f0f0]">
         {children}
       </tr>
     </thead>
@@ -165,11 +158,11 @@ export function TableHead({ children }: { children: React.ReactNode }) {
 }
 
 export function Th({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <th className={`py-3 px-5 font-medium text-[#8a8a8a] text-xs uppercase tracking-wider ${className}`}>{children}</th>
+  return <th className={`py-2.5 px-4 font-semibold text-[#666666] text-[11px] uppercase tracking-wider ${className}`}>{children}</th>
 }
 
 export function Td({ children, className = '', style }: { children: React.ReactNode; className?: string; style?: React.CSSProperties }) {
-  return <td className={`py-3.5 px-5 text-[#242424] border-b border-[#eeeeee] text-[13.5px] ${className}`} style={style}>{children}</td>
+  return <td className={`py-3 px-4 text-[#333333] border-b border-[#f0f0f0] text-[13px] ${className}`} style={style}>{children}</td>
 }
 
 export function ActivityList({ children, title, linkText, linkHref }: {

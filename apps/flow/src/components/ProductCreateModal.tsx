@@ -288,14 +288,14 @@ export default function ProductCreateModal({ open, onClose, onCreated }: Product
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3 sm:p-4">
-      <div className="relative w-[calc(100%-24px)] sm:w-full sm:max-w-5xl max-h-[90vh] overflow-y-auto bg-white rounded-2xl shadow-xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/65 backdrop-blur-[4px] p-3 sm:p-4">
+      <div className="relative w-[calc(100%-24px)] sm:w-full sm:max-w-5xl max-h-[90vh] overflow-y-auto bg-white rounded-[14px] border border-[#e6e6e6] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)]">
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 bg-white border-b border-[#e6e6e6] rounded-t-2xl">
-          <h2 className="text-[16px] font-semibold text-[#333]">Novo Produto</h2>
+        <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 bg-white border-b border-[#e6e6e6] rounded-t-[14px]">
+          <h2 className="text-[16px] font-semibold text-[#111111]">Novo Produto</h2>
           <button
             onClick={onClose}
-            className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-md text-[#999] hover:bg-[#f5f5f5] hover:text-[#333] transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-[#64748b] hover:bg-[#f1f5f9] hover:text-[#111111] transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>

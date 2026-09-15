@@ -11,14 +11,13 @@ import {
   ShoppingCart,
   DollarSign,
   TrendingUp,
-  X,
-  PanelLeftClose,
-  PanelLeftOpen,
+  PanelLeft,
   User,
   Store,
   Radio,
-  MessageSquareQuote,
   Tag,
+  ExternalLink,
+  X,
 } from 'lucide-react'
 import { logout } from '@/app/login/actions'
 import { TeknixLogo } from './TeknixLogo'
@@ -38,7 +37,7 @@ interface NavGroup {
 
 const NAV_GROUPS: NavGroup[] = [
   {
-    label: '',
+    label: 'Principal',
     items: [
       { href: '/dashboard', label: 'Início', icon: LayoutDashboard, permission: null },
       { href: '/ao-vivo', label: 'Monitor ao Vivo', icon: Radio, permission: null, isLive: true },
@@ -71,9 +70,17 @@ interface SidebarProps {
   setMobileOpen: (open: boolean) => void
   collapsed: boolean
   setCollapsed: (collapsed: boolean) => void
+  onHoverChange?: (hovered: boolean) => void
 }
 
-export default function Sidebar({ permissions, mobileOpen, setMobileOpen, collapsed, setCollapsed }: SidebarProps) {
+export default function Sidebar({
+  permissions,
+  mobileOpen,
+  setMobileOpen,
+  collapsed,
+  setCollapsed,
+  onHoverChange,
+}: SidebarProps) {
   const pathname = usePathname()
   const permSet = new Set(permissions)
 
@@ -87,136 +94,127 @@ export default function Sidebar({ permissions, mobileOpen, setMobileOpen, collap
     [pathname],
   )
 
-  const renderNavLinks = (isNavCollapsed: boolean) => (
-    <>
-      {visibleGroups.map((group, gi) => (
-        <div key={gi}>
-          {group.label && !isNavCollapsed && (
-            <p className="px-4 pt-5 pb-2 text-xs text-[#999]">
-              {group.label}
-            </p>
-          )}
-          {group.label && isNavCollapsed && <div className="pt-4" />}
-          <div>
-            {group.items.map(item => {
-              const Icon = item.icon
-              const active = isActive(item.href)
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setMobileOpen(false)}
-                  title={isNavCollapsed ? item.label : undefined}
-                  className={`flex items-center transition-colors min-h-[42px] relative text-[13.5px] rounded-lg mx-2 ${
-                    isNavCollapsed ? 'justify-center px-0 py-2.5 my-0.5' : 'gap-3 px-3.5 py-2.5 my-0.5 justify-between'
-                  } ${
-                    active
-                      ? item.isLive ? 'text-[#e74c3c] font-semibold bg-[#fff5f5]' : 'text-[#000000] font-medium bg-[#f5f5f5]'
-                      : item.isLive ? 'text-[#e74c3c] font-medium hover:bg-[#fafafa]' : 'text-[#4b5563] font-normal hover:bg-[#fafafa] hover:text-[#000000]'
-                  }`}
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <Icon
-                      className={`w-[20px] h-[20px] shrink-0 ${
-                        active ? (item.isLive ? 'text-[#e74c3c]' : 'text-[#000000]') : (item.isLive ? 'text-[#e74c3c] animate-pulse' : 'text-[#000000]')
-                      }`}
-                      strokeWidth={1.5}
-                    />
-                    {!isNavCollapsed && <span className="truncate">{item.label}</span>}
-                  </div>
-                  {!isNavCollapsed && item.isLive && (
-                    <span className="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-[#e74c3c] text-white tracking-wider uppercase">
-                      AO VIVO
-                    </span>
-                  )}
-                </Link>
-              )
-            })}
-          </div>
-        </div>
-      ))}
-    </>
-  )
+  const handleMouseEnter = () => {
+    if (typeof window !== 'undefined' && window.matchMedia('(min-width: 1025px)').matches) {
+      onHoverChange?.(true)
+    }
+  }
+
+  const handleMouseLeave = () => {
+    if (typeof window !== 'undefined' && window.matchMedia('(min-width: 1025px)').matches) {
+      onHoverChange?.(false)
+    }
+  }
 
   return (
     <>
+      {/* ── Sidebar (1:1 com referência HUB Floating Apple Clean) ── */}
+      <aside
+        className="hub-sidebar"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        {/* Sidebar Header — logo TEKNIX vetorial + botão fechar mobile */}
+        <div className="sidebar-header flex items-center justify-between px-4 sm:px-5 h-[64px] shrink-0">
+          <Link href="/dashboard" className="sidebar-logo-link flex items-center shrink-0" onClick={() => setMobileOpen(false)}>
+            <TeknixLogo height={22} className="sidebar-logo-svg h-[22px] max-h-[22px] w-auto fill-[#111827] text-[#111827] block" style={{ height: '22px', maxHeight: '22px', width: 'auto', display: 'block' }} />
+          </Link>
+
+          {/* Botão toggle / fechar mobile com ícone PanelLeft */}
+          <button
+            type="button"
+            className="sidebar-toggle w-8 h-8 rounded-lg flex items-center justify-center text-[#64748b] hover:bg-black/5 hover:text-[#111] transition-colors cursor-pointer shrink-0"
+            onClick={() => {
+              if (typeof window !== 'undefined' && window.innerWidth <= 1024) {
+                setMobileOpen(false)
+              } else {
+                setCollapsed(!collapsed)
+                onHoverChange?.(false)
+              }
+            }}
+            aria-label="Alternar menu lateral"
+            title="Menu lateral"
+          >
+            <PanelLeft className="w-5 h-5 text-[#64748b] hover:text-[#111]" strokeWidth={1.75} />
+          </button>
+        </div>
+
+        {/* Navigation — estrutura com ondulações e largura 90% */}
+        <nav className="sidebar-nav">
+          {visibleGroups.map((group, gi) => (
+            <div key={gi} className="nav-group">
+              {group.label && <span className="nav-group-label">{group.label}</span>}
+              {group.items.map(item => {
+                const Icon = item.icon
+                const active = isActive(item.href)
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobileOpen(false)}
+                    className={`nav-item ${active ? 'active' : ''}`}
+                    title={collapsed ? item.label : undefined}
+                  >
+                    <span className="nav-icon">
+                      <Icon
+                        className={`w-[18px] h-[18px] shrink-0 ${
+                          active
+                            ? item.isLive ? 'text-[#e74c3c]' : 'text-[#000000]'
+                            : item.isLive ? 'text-[#e74c3c]' : 'text-[#000000]'
+                        }`}
+                        strokeWidth={1.5}
+                      />
+                    </span>
+                    <span className="nav-label">{item.label}</span>
+                    {item.isLive && (
+                      <span className="nav-live-badge px-2 py-0.5 rounded-full text-[9px] font-semibold bg-[#e74c3c] text-white tracking-wider uppercase ml-auto">
+                        AO VIVO
+                      </span>
+                    )}
+                  </Link>
+                )
+              })}
+            </div>
+          ))}
+        </nav>
+
+        {/* Footer com Ver site público e Sair */}
+        <div className="sidebar-footer">
+          <a
+            href="/"
+            className="sidebar-link"
+            target="_blank"
+            rel="noopener noreferrer"
+            title={collapsed ? 'Ver site público' : undefined}
+          >
+            <span className="nav-icon">
+              <ExternalLink className="w-[18px] h-[18px] text-[#000000]" strokeWidth={1.5} />
+            </span>
+            <span className="nav-label">Ver site público</span>
+          </a>
+
+          <form action={logout}>
+            <button
+              type="submit"
+              className="sidebar-link sidebar-logout-btn"
+              title={collapsed ? 'Sair' : undefined}
+            >
+              <span className="nav-icon">
+                <LogOut className="w-[18px] h-[18px]" strokeWidth={1.5} />
+              </span>
+              <span className="nav-label">Sair</span>
+            </button>
+          </form>
+        </div>
+      </aside>
+
+      {/* Backdrop Mobile para fechar Sidebar ao tocar fora */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 bg-black/25 z-[40] lg:hidden"
+          className="hub-sidebar-backdrop"
           onClick={() => setMobileOpen(false)}
         />
       )}
-
-      {/* Desktop Sidebar */}
-      <aside className={`hidden lg:flex fixed top-0 left-0 h-full bg-white border-r border-[#e6e6e6] z-50 flex-col transition-all duration-300 ${collapsed ? 'w-[72px]' : 'w-[240px]'}`}>
-        <div className={`h-[72px] flex items-center shrink-0 ${collapsed ? 'justify-center px-0' : 'justify-between px-5'}`}>
-          {!collapsed && (
-            <Link href="/dashboard" className="flex items-center">
-              <TeknixLogo className="h-6 w-auto fill-[#333]" />
-            </Link>
-          )}
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            className="w-8 h-8 flex items-center justify-center text-[#666] hover:text-[#333] transition-colors"
-            title={collapsed ? 'Expandir menu' : 'Recolher menu'}
-          >
-            {collapsed ? (
-              <PanelLeftOpen className="w-5 h-5" strokeWidth={1.5} />
-            ) : (
-              <PanelLeftClose className="w-5 h-5" strokeWidth={1.5} />
-            )}
-          </button>
-        </div>
-
-        <nav className="flex-1 overflow-y-auto pb-4">{renderNavLinks(collapsed)}</nav>
-
-        <div className={`shrink-0 ${collapsed ? 'p-2' : 'p-4'}`}>
-          <form action={logout}>
-            <button
-              type="submit"
-              title={collapsed ? 'Sair' : undefined}
-              className={`flex items-center transition-colors text-sm text-[#666] hover:text-[#333] min-h-[44px] ${
-                collapsed ? 'w-full justify-center px-0 py-2' : 'w-full gap-3 px-4 py-2'
-              }`}
-            >
-              <LogOut className="w-[22px] h-[22px] shrink-0" strokeWidth={1.5} />
-              {!collapsed && <span>Sair</span>}
-            </button>
-          </form>
-        </div>
-      </aside>
-
-      {/* Mobile Sidebar */}
-      <aside
-        className={`fixed top-0 left-0 h-full w-[280px] bg-white z-50 flex flex-col transition-transform duration-200 lg:hidden ${
-          mobileOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-      >
-        <div className="flex items-center justify-between h-16 px-4 shrink-0">
-          <Link href="/dashboard" className="flex items-center" onClick={() => setMobileOpen(false)}>
-            <TeknixLogo className="h-6 w-auto fill-[#333]" />
-          </Link>
-          <button
-            onClick={() => setMobileOpen(false)}
-            className="w-9 h-9 rounded-full bg-[#f5f5f5] flex items-center justify-center"
-            aria-label="Fechar menu"
-          >
-            <X className="w-5 h-5 text-[#333]" strokeWidth={1.75} />
-          </button>
-        </div>
-        <nav className="flex-1 overflow-y-auto pb-4">{renderNavLinks(false)}</nav>
-        <div className="p-4 shrink-0 border-t border-[#eeeeee]">
-          <form action={logout}>
-            <button
-              type="submit"
-              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-[#666] hover:text-[#333] transition-colors"
-            >
-              <LogOut className="w-[22px] h-[22px] shrink-0" strokeWidth={1.5} />
-              <span>Sair</span>
-            </button>
-          </form>
-        </div>
-      </aside>
     </>
   )
 }

@@ -460,10 +460,12 @@ export default function OrderDetails() {
           <div className="order-breadcrumb-wrapper">
             <button
               type="button"
-              className="hub-btn hub-btn-secondary order-btn-back"
+              className="order-btn-back"
               onClick={() => navigate('/hub/pedidos')}
+              title="Voltar para Pedidos"
+              aria-label="Voltar para Pedidos"
             >
-              <span className="cat-btn-icon-bubble"><ArrowLeft size={14} /></span> Voltar
+              <ArrowLeft size={18} />
             </button>
 
             <div className="order-breadcrumb">
@@ -629,6 +631,7 @@ export default function OrderDetails() {
             </div>
 
             <div className="order-card-body no-padding">
+              <div className="order-products-table-wrap">
               <table className="order-products-table">
                 <thead>
                   <tr>
@@ -681,6 +684,7 @@ export default function OrderDetails() {
                   )}
                 </tbody>
               </table>
+              </div>
             </div>
           </div>
 

@@ -8,16 +8,16 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-[#1f2328] text-white hover:bg-black font-semibold cursor-pointer shadow-none",
+        default: "bg-[#0071e3] text-white hover:bg-[#0062c4] active:bg-[#004f9e] font-semibold cursor-pointer shadow-none border border-[#0071e3]",
         outline:
           "border-[#e6e6e6] bg-white text-[#333333] hover:bg-[#F7F7F7] hover:text-[#111111] hover:border-[#d1d5db] cursor-pointer aria-expanded:bg-[#f5f5f5] aria-expanded:text-[#111111]",
         secondary:
-          "bg-white text-[#333333] border border-[#e6e6e6] hover:bg-[#F7F7F7] hover:border-[#d1d5db] font-medium cursor-pointer aria-expanded:bg-[#f5f5f5] aria-expanded:text-[#1f2328]",
+          "bg-white text-[#333333] border border-[#e6e6e6] hover:bg-[#F7F7F7] hover:border-[#d1d5db] font-medium cursor-pointer aria-expanded:bg-[#f5f5f5] aria-expanded:text-[#111111]",
         ghost:
           "hover:bg-[#f5f5f5] hover:text-foreground cursor-pointer aria-expanded:bg-muted aria-expanded:text-foreground",
         destructive:
-          "bg-destructive/10 text-destructive hover:bg-destructive/20 cursor-pointer focus-visible:border-destructive/40 focus-visible:ring-destructive/20",
-        link: "text-[#1f2328] underline-offset-4 hover:underline cursor-pointer",
+          "bg-[#fee2e2] text-[#dc2626] border border-[#fecaca] hover:bg-[#fecaca] font-semibold cursor-pointer focus-visible:border-destructive/40 focus-visible:ring-destructive/20",
+        link: "text-[#0071e3] underline-offset-4 hover:underline cursor-pointer",
       },
       size: {
         default:

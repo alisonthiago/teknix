@@ -1,4 +1,5 @@
 import React from 'react'
+import { RefreshCw } from 'lucide-react'
 
 interface LoadingScreenProps {
   message?: string
@@ -8,7 +9,7 @@ interface LoadingScreenProps {
 
 export default function LoadingScreen({
   message = 'Carregando...',
-  subtitle = 'Aguarde um momento',
+  subtitle,
   fullscreen = true
 }: LoadingScreenProps) {
   return (
@@ -21,8 +22,8 @@ export default function LoadingScreen({
         height: fullscreen ? '100vh' : '100%',
         width: '100%',
         background: '#ffffff',
-        color: '#1d1d1f',
-        fontFamily: '"SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        color: '#64748b',
+        fontFamily: 'var(--tk-font-family, Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif)',
         userSelect: 'none',
         zIndex: 99999,
         position: fullscreen ? 'fixed' : 'relative',
@@ -35,29 +36,15 @@ export default function LoadingScreen({
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: '16px',
           textAlign: 'center',
         }}
       >
-        {/* Minimal Spinner without any text */}
-        <div
-          style={{
-            width: '28px',
-            height: '28px',
-            border: '2.5px solid #e5e5ea',
-            borderTopColor: '#0071e3',
-            borderRadius: '50%',
-            animation: 'simpleSpin 0.6s linear infinite',
-          }}
-        />
+        <RefreshCw className="hub-spin" size={24} style={{ marginBottom: 12, color: '#64748b' }} />
+        <div style={{ fontSize: '14px', fontWeight: 500, color: '#64748b' }}>{message}</div>
+        {subtitle && (
+          <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: 4 }}>{subtitle}</div>
+        )}
       </div>
-
-      <style>{`
-        @keyframes simpleSpin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   )
 }

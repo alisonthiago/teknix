@@ -35,7 +35,7 @@ const inter = Inter({
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR" className={`h-full antialiased ${inter.variable}`}>
-      <body className="min-h-full flex flex-col font-sans">
+      <body className="min-h-full flex flex-col font-sans hub-layout">
         <MobileViewportGuard />
         <NotificationProvider>
           {children}

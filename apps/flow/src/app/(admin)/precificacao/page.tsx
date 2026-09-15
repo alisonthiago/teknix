@@ -6,6 +6,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { PageHeader, StatCard, ModuleTable, TableHead, Th, Td } from '@/components/ui/module'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
+import LoadingState from '@/components/ui/LoadingState'
 
 function CustoRealTab() {
   const { data: products, loading } = useSupabaseQuery(async (s) => {
@@ -27,7 +28,9 @@ function CustoRealTab() {
         <StatCard label="Menor Custo" value={`R$ ${minCost.toFixed(2)}`} />
       </div>
       {loading ? (
-        <div className="bg-white rounded-2xl border border-[#e6e6e6] p-10 text-center text-[#999] text-[13px]">Carregando...</div>
+        <div className="bg-white rounded-2xl border border-[#e6e6e6]">
+          <LoadingState message="Carregando produtos e custos..." padding={60} />
+        </div>
       ) : (
         <ModuleTable>
           <TableHead><Th>SKU</Th><Th>Produto</Th><Th className="text-right">Compra</Th><Th className="text-right">Frete</Th><Th className="text-right">Embalagem</Th><Th className="text-right">Outros</Th><Th className="text-right">Custo Real</Th></TableHead>
@@ -82,7 +85,9 @@ function PrecoSugeridoTab() {
         ))}
       </div>
       {loading ? (
-        <div className="bg-white rounded-2xl border border-[#e6e6e6] p-10 text-center text-[#999] text-[13px]">Carregando...</div>
+        <div className="bg-white rounded-2xl border border-[#e6e6e6]">
+          <LoadingState message="Carregando produtos e taxas..." padding={60} />
+        </div>
       ) : (
         <ModuleTable>
           <TableHead><Th>SKU</Th><Th>Produto</Th><Th className="text-right">Custo</Th><Th className="text-right">ML</Th><Th className="text-right">Shopee</Th><Th className="text-right">Amazon</Th><Th className="text-right">TikTok</Th></TableHead>

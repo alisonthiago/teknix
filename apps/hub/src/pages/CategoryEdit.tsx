@@ -113,6 +113,7 @@ export default function CategoryEdit() {
   // Catálogo completo para preview e vinculação
   const [allProducts, setAllProducts] = useState<any[]>([])
   const [categoriesList, setCategoriesList] = useState<{ id: string; name: string; slug: string }[]>([])
+  const [segmentsList, setSegmentsList] = useState<{ id: string; name: string; slug: string }[]>([])
 
   // Estado do formulário
   const [form, setForm] = useState<CentralCategory>({
@@ -120,6 +121,7 @@ export default function CategoryEdit() {
     name: '',
     slug: '',
     parent_id: null,
+    segment_id: null,
     description: '',
     image_url: '',
     icon: '',
@@ -168,12 +170,13 @@ export default function CategoryEdit() {
     async function loadData() {
       setLoading(true)
       try {
-        // 1. Carrega todas as categorias para a seleção de Categoria Pai
-        const { data: cats } = await supabase
-          .from('store_categories')
-          .select('id, name, slug')
-          .order('name')
+        // 1. Carrega todas as categorias para a seleção de Categoria Pai e Segmentos
+        const [{ data: cats }, { data: segs }] = await Promise.all([
+          supabase.from('store_categories').select('id, name, slug').order('name'),
+          supabase.from('store_segments').select('id, name, slug').order('sort_order', { ascending: true })
+        ])
         if (active && cats) setCategoriesList(cats)
+        if (active && segs) setSegmentsList(segs)
 
         // 2. Carrega todos os produtos para avaliação das regras em tempo real
         const { data: prods } = await supabase
@@ -422,16 +425,9 @@ export default function CategoryEdit() {
           <div className="cat-edit-title-group">
             <h1 className="cat-edit-title">{isNew ? 'Nova Categoria' : (form.name || 'Categoria Sem Nome')}</h1>
             {!isNew && (
-              <>
-                <span className={`cat-edit-badge ${form.status === 'active' ? 'active' : 'inactive'}`}>
-                  {form.status === 'active' ? 'Ativa' : 'Inativa'}
-                </span>
-                {form.linking_mode !== 'manual' && (
-                  <span className="cat-edit-badge smart">
-                    <Zap size={11} /> Regras
-                  </span>
-                )}
-              </>
+              <span className={`cat-edit-badge ${form.status === 'active' ? 'active' : 'inactive'}`}>
+                {form.status === 'active' ? 'Ativa' : 'Inativa'}
+              </span>
             )}
           </div>
         </div>
@@ -439,10 +435,12 @@ export default function CategoryEdit() {
         <div className="cat-edit-actions">
           <button
             type="button"
-            className="hub-btn hub-btn-secondary"
+            className="order-btn-back"
             onClick={() => navigate('/hub/categorias')}
+            title="Voltar para Categorias"
+            aria-label="Voltar para Categorias"
           >
-            <span className="cat-btn-icon-bubble"><ArrowLeft size={14} /></span> Voltar
+            <ArrowLeft size={18} />
           </button>
 
           {!isNew && form.slug && (
@@ -508,6 +506,22 @@ export default function CategoryEdit() {
                       </code>
                     </div>
                   )}
+                </div>
+
+                <div className="cat-form-group" style={{ marginBottom: 16 }}>
+                  <label className="cat-form-label">Departamento / Segmento (Mega Menu)</label>
+                  <select
+                    className="cat-form-select"
+                    value={form.segment_id || ''}
+                    onChange={e => setForm({ ...form, segment_id: e.target.value || null })}
+                  >
+                    <option value="">Nenhum (Geral / Sem Departamento)</option>
+                    {segmentsList.map(s => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="cat-form-group" style={{ marginBottom: 16 }}>
@@ -826,811 +840,735 @@ export default function CategoryEdit() {
         </div>
       ) : (
         <>
-          {/* Navigation Tabs - Padrão Oficial 1:1 do Sistema (StatsOverview) */}
+          {/* Navigation Tabs - Padrão Oficial 1:1 do Sistema */}
           <div className="stats-tab-nav" style={{ display: 'flex', gap: 6, borderBottom: '1px solid #e2e8f0', paddingBottom: 10, overflowX: 'auto', marginBottom: 24 }}>
             {[
-              { id: 'general', label: 'Geral & Hierarquia' },
-          { id: 'mosaic', label: 'Mosaico da Home' },
-          { id: 'rules', label: 'Regras Inteligentes & Preview', count: form.rules?.length },
-          { id: 'products', label: 'Produtos Vinculados', count: resolvedLinkedProducts.length },
-          { id: 'seo', label: 'Página & SEO' },
-          { id: 'marketplaces', label: 'Marketplaces' },
-        ].map(tab => (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => setActiveTab(tab.id as any)}
-            className={`stats-tab-button ${activeTab === tab.id ? 'is-active' : ''}`}
-            style={{
-              background: activeTab === tab.id ? '#0f172a' : '#ffffff',
-              color: activeTab === tab.id ? '#ffffff' : '#475569',
-              border: '1px solid ' + (activeTab === tab.id ? '#0f172a' : '#e2e8f0'),
-              borderRadius: 980,
-              padding: '5px 14px',
-              fontSize: '0.8rem',
-              fontWeight: activeTab === tab.id ? 600 : 500,
-              cursor: 'pointer',
-              transition: 'all 0.15s ease',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 6,
-              whiteSpace: 'nowrap',
-              height: 'auto',
-              minHeight: 'unset',
-              lineHeight: 1.4
-            }}
-          >
-            <span>{tab.label}</span>
-            {tab.count !== undefined && tab.count > 0 && (
-              <span
+              { id: 'general', label: 'Geral' },
+              { id: 'mosaic', label: 'Mosaico Home' },
+              { id: 'rules', label: 'Regras', count: form.rules?.length },
+              { id: 'products', label: 'Produtos', count: resolvedLinkedProducts.length },
+              { id: 'seo', label: 'SEO' },
+              { id: 'marketplaces', label: 'Marketplaces' },
+            ].map(tab => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`stats-tab-button ${activeTab === tab.id ? 'is-active' : ''}`}
                 style={{
+                  background: activeTab === tab.id ? '#0f172a' : '#ffffff',
+                  color: activeTab === tab.id ? '#ffffff' : '#475569',
+                  border: '1px solid ' + (activeTab === tab.id ? '#0f172a' : '#e2e8f0'),
+                  borderRadius: 980,
+                  padding: '5px 14px',
+                  fontSize: '0.8rem',
+                  fontWeight: activeTab === tab.id ? 600 : 500,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  minWidth: 16,
-                  height: 16,
-                  padding: '0 4px',
-                  borderRadius: 999,
-                  fontSize: '10px',
-                  fontWeight: 700,
-                  background: activeTab === tab.id ? 'rgba(255, 255, 255, 0.2)' : '#f1f5f9',
-                  color: activeTab === tab.id ? '#ffffff' : '#64748b'
+                  gap: 6,
+                  whiteSpace: 'nowrap',
+                  height: 'auto',
+                  minHeight: 'unset',
+                  lineHeight: 1.4
                 }}
               >
-                {tab.count}
-              </span>
-            )}
-          </button>
-        ))}
-      </div>
-
-      {/* ─── ABA 1: GERAL & HIERARQUIA ────────────────────────────────────────── */}
-      {activeTab === 'general' && (
-        <div className="cat-card">
-          <div className="cat-card-header">
-            <h3 className="cat-card-title">Informações Básicas e Hierarquia</h3>
-          </div>
-
-          <div className="cat-form-grid">
-            <div className="cat-form-group">
-              <label className="cat-form-label">Nome da Categoria *</label>
-              <input
-                type="text"
-                className="cat-form-input"
-                placeholder="Ex: Furadeiras, Parafusadeiras..."
-                value={form.name}
-                onChange={e => handleNameChange(e.target.value)}
-              />
-              <span className="cat-form-hint">Nome oficial exibido no menu e nos produtos.</span>
-            </div>
-
-            <div className="cat-form-group">
-              <label className="cat-form-label">URL Amigável (Slug) *</label>
-              <input
-                type="text"
-                className="cat-form-input"
-                placeholder="Ex: furadeiras"
-                value={form.slug}
-                onChange={e => setForm({ ...form, slug: normalizeText(e.target.value).replace(/\s+/g, '-') })}
-              />
-              <span className="cat-form-hint">
-                URL pública no site: <code>/categoria/{form.slug || 'slug'}</code>
-              </span>
-            </div>
-
-            <div className="cat-form-group">
-              <label className="cat-form-label">Categoria Superior (Pai / Subcategoria)</label>
-              <select
-                className="cat-form-select"
-                value={form.parent_id || ''}
-                onChange={e => setForm({ ...form, parent_id: e.target.value || null })}
-              >
-                <option value="">Nenhuma (Categoria Principal / Raiz)</option>
-                {categoriesList
-                  .filter(c => c.id !== form.id)
-                  .map(c => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-              </select>
-              <span className="cat-form-hint">
-                Define a árvore de navegação e os breadcrumbs oficiais.
-              </span>
-            </div>
-
-            <div className="cat-form-group">
-              <label className="cat-form-label">Ordem de Exibição</label>
-              <input
-                type="number"
-                className="cat-form-input"
-                value={form.sort_order}
-                onChange={e => setForm({ ...form, sort_order: Number(e.target.value) })}
-              />
-              <span className="cat-form-hint">Ordem relativa de ordenação nos menus da loja.</span>
-            </div>
-
-            <div className="cat-form-group full">
-              <label className="cat-form-label">Descrição da Categoria</label>
-              <textarea
-                className="cat-form-textarea"
-                placeholder="Descrição resumida exibida no cabeçalho da categoria no SITE e para SEO..."
-                value={form.description}
-                onChange={e => setForm({ ...form, description: e.target.value })}
-              />
-            </div>
-
-            {/* Foto e Banner da Categoria com Upload Direto */}
-            <div className="cat-form-group full cat-photo-upload-section">
-              <label className="cat-form-label">
-                <span>Foto & Imagem de Apresentação da Categoria</span>
-                <span className="cat-form-hint-tag">Formatos aceitos: PNG, WEBP, JPG</span>
-              </label>
-
-              <div className="cat-photo-manager-box">
-                {/* Input oculto para upload de arquivo */}
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  accept="image/*"
-                  onChange={handleFileUpload}
-                  style={{ display: 'none' }}
-                />
-
-                {/* Prévia da Imagem */}
-                <div className="cat-photo-preview-container">
-                  {form.image_url ? (
-                    <div className="cat-photo-preview-card">
-                      <img
-                        src={form.image_url}
-                        alt={form.name || 'Foto da Categoria'}
-                        className="cat-photo-preview-image"
-                      />
-                      <button
-                        type="button"
-                        className="cat-photo-remove-action"
-                        onClick={() => setForm(prev => ({ ...prev, image_url: '' }))}
-                        title="Remover foto"
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="cat-photo-placeholder" onClick={() => fileInputRef.current?.click()} title="Clique para enviar uma imagem">
-                      <Image size={28} color="#94a3b8" />
-                      <span className="cat-photo-placeholder-text">Clique para enviar imagem</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Controles de Upload e URL */}
-                <div className="cat-photo-controls">
-                  <div className="cat-photo-actions-row">
-                    <button
-                      type="button"
-                      className="cat-upload-file-btn"
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={uploadingPhoto}
-                    >
-                      <Upload size={14} />
-                      {uploadingPhoto ? 'Enviando foto...' : 'Subir Foto / Imagem'}
-                    </button>
-                    <span className="cat-photo-or-text">ou informe uma URL direta:</span>
-                  </div>
-
-                  <input
-                    type="text"
-                    className="cat-form-input raw-input"
-                    placeholder="Cole ou edite a URL da imagem da categoria..."
-                    value={form.image_url}
-                    onChange={e => {
-                      const val = e.target.value
-                      setForm(prev => ({
-                        ...prev,
-                        image_url: val,
-                        mosaic_image_url: prev.mosaic_image_url || val
-                      }))
+                <span>{tab.label}</span>
+                {tab.count !== undefined && tab.count > 0 && (
+                  <span
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      minWidth: 16,
+                      height: 16,
+                      padding: '0 4px',
+                      borderRadius: 999,
+                      fontSize: '10px',
+                      fontWeight: 700,
+                      background: activeTab === tab.id ? 'rgba(255, 255, 255, 0.2)' : '#f1f5f9',
+                      color: activeTab === tab.id ? '#ffffff' : '#64748b'
                     }}
-                  />
-
-                  {/* Recortes oficiais rápidos */}
-                  <div className="cat-photo-presets-row">
-                    <span className="cat-photo-presets-label">Fotos prontas da loja:</span>
-                    <div className="cat-photo-presets-tags">
-                      {PRESET_CUTOUTS.map(preset => (
-                        <button
-                          key={preset.url}
-                          type="button"
-                          className={`cat-photo-preset-chip ${form.image_url === preset.url ? 'selected' : ''}`}
-                          onClick={() => setForm(prev => ({
-                            ...prev,
-                            image_url: preset.url,
-                            mosaic_image_url: prev.mosaic_image_url || preset.url
-                          }))}
-                        >
-                          <img src={preset.url} alt={preset.alt} className="cat-photo-chip-thumb" />
-                          <span>{preset.alt}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="cat-form-group">
-              <label className="cat-form-label">Ícone do Menu</label>
-              <input
-                type="text"
-                className="cat-form-input"
-                placeholder="Ex: drill, wrench, cpu, box..."
-                value={form.icon}
-                onChange={e => setForm({ ...form, icon: e.target.value })}
-              />
-            </div>
-
-            <div className="cat-form-group">
-              <label className="cat-form-label">Status no Catálogo</label>
-              <select
-                className="cat-form-select"
-                value={form.status}
-                onChange={e => setForm({ ...form, status: e.target.value as 'active' | 'inactive' })}
-              >
-                <option value="active">Ativa</option>
-                <option value="inactive">Inativa / Oculta</option>
-              </select>
-            </div>
-
-            <div className="cat-form-group">
-              <label className="cat-form-label">Publicação no SITE</label>
-              <select
-                className="cat-form-select"
-                value={form.is_published ? 'true' : 'false'}
-                onChange={e => setForm({ ...form, is_published: e.target.value === 'true' })}
-              >
-                <option value="true">Publicada no SITE Público</option>
-                <option value="false">Rascunho (Não visível para clientes)</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ─── SEÇÃO / ABA: CARROSSEL & MOSAICO DA HOME ────────────────────────── */}
-      {activeTab === 'mosaic' && (
-        <div className="cat-card cat-mosaic-settings-card">
-          <div className="cat-card-header cat-mosaic-card-header">
-            <div>
-              <h3 className="cat-card-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Layers size={18} style={{ color: 'var(--button-primary, #0071e3)' }} /> Exibição no Mosaico de Categorias da Home (Página Inicial)
-              </h3>
-              <p className="cat-card-desc">
-                Defina a imagem de recorte (cutout), o rótulo e a presença desta categoria no carrossel de categorias da Home pública do SITE.
-              </p>
-            </div>
-
-            <div className="cat-mosaic-toggle-box">
-              <label className="cat-mosaic-switch">
-                <input
-                  type="checkbox"
-                  checked={form.show_in_mosaic !== false}
-                  onChange={e => setForm({ ...form, show_in_mosaic: e.target.checked })}
-                />
-                <span className="cat-mosaic-slider" />
-              </label>
-              <span className="cat-mosaic-switch-label">
-                {form.show_in_mosaic !== false ? 'Exibição Ativa no Mosaico' : 'Oculta no Mosaico'}
-              </span>
-            </div>
-          </div>
-
-          <div className="cat-mosaic-grid">
-            {/* 1:1 Live Preview exatamente como renderizado na Home */}
-            <div className="cat-mosaic-preview-col">
-              <div className="cat-mosaic-preview-title">
-                <span>Prévia 1:1 no Carrossel da Home</span>
-                <span className="cat-mosaic-live-badge">Tempo Real</span>
-              </div>
-
-              <div className="cat-mosaic-preview-frame">
-                <div className="dsvia-mosaic-wrapper-simulated">
-                  <div className="dsvia-mosaic-item" style={{ width: 110 }}>
-                    <div
-                      className="dsvia-mosaic-card is-cutout"
-                      style={{ width: 90, height: 90, borderRadius: 20 }}
-                    >
-                      {(form.mosaic_image_url || form.image_url) ? (
-                        <img
-                          alt={form.mosaic_label || form.name || 'Categoria'}
-                          src={form.mosaic_image_url || form.image_url}
-                          loading="lazy"
-                        />
-                      ) : (
-                        <span className="cat-label-tip">Sem foto</span>
-                      )}
-                    </div>
-                    <span className="dsvia-mosaic-label" style={{ maxWidth: 110 }}>
-                      {form.mosaic_label || form.name || 'Nome da Categoria'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="cat-mosaic-preview-meta">
-                <div className="cat-mosaic-meta-item">
-                  <span className="cat-meta-lbl">URL no SITE:</span>
-                  <code>{`/categoria/${form.slug || 'slug'}`}</code>
-                </div>
-                {!isNew && (
-                  <a
-                    href={publicCategoryUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="cat-mosaic-view-site-link"
                   >
-                    <ExternalLink size={13} /> Testar no SITE
-                  </a>
+                    {tab.count}
+                  </span>
                 )}
-              </div>
-            </div>
-
-            {/* Controles de Configuração e Galeria */}
-            <div className="cat-mosaic-fields-col">
-              <div className="cat-form-group">
-                <label className="cat-form-label">
-                  <span>Rótulo Curto no Carrossel</span>
-                  <span className="cat-label-tip">Texto compacto exibido abaixo do card</span>
-                </label>
-                <input
-                  type="text"
-                  className="cat-form-input"
-                  placeholder={form.name || 'Ex: Microfones'}
-                  value={form.mosaic_label || ''}
-                  onChange={e => setForm({ ...form, mosaic_label: e.target.value })}
-                />
-              </div>
-
-              <div className="cat-form-group">
-                <label className="cat-form-label">
-                  <span>URL da Imagem de Recorte (Cutout PNG/WebP)</span>
-                  <span className="cat-label-tip">Fundo transparente ou branco de estúdio isolado</span>
-                </label>
-                <input
-                  type="text"
-                  className="cat-form-input"
-                  placeholder="/images/referencias/microfones.png ou https://..."
-                  value={form.mosaic_image_url || form.image_url || ''}
-                  onChange={e => {
-                    const val = e.target.value
-                    setForm({
-                      ...form,
-                      mosaic_image_url: val,
-                      image_url: val || form.image_url
-                    })
-                  }}
-                />
-              </div>
-
-              {/* Galeria de Recortes Oficiais Disponíveis */}
-              <div className="cat-preset-section">
-                <div className="cat-preset-header">
-                  <span className="cat-preset-title">Galeria de Recortes Padrão TEKNIX</span>
-                  <span className="cat-preset-subtitle">Clique em uma imagem para aplicar instantaneamente:</span>
-                </div>
-
-                <div className="cat-preset-list">
-                  {PRESET_CUTOUTS.map(preset => {
-                    const isSelected = (form.mosaic_image_url === preset.url) || (form.image_url === preset.url)
-                    return (
-                      <button
-                        type="button"
-                        key={preset.url}
-                        className={`cat-preset-card ${isSelected ? 'active' : ''}`}
-                        onClick={() => {
-                          setForm({
-                            ...form,
-                            mosaic_image_url: preset.url,
-                            image_url: preset.url,
-                            mosaic_label: form.mosaic_label || preset.alt
-                          })
-                        }}
-                      >
-                        <div className="cat-preset-img-wrap">
-                          <img src={preset.url} alt={preset.label} loading="lazy" />
-                        </div>
-                        <span className="cat-preset-lbl">{preset.label}</span>
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ─── ABA 2: REGRAS INTELIGENTES & PREVIEW ──────────────────────────────── */}
-      {activeTab === 'rules' && (
-        <div className="cat-card">
-          <div className="cat-card-header">
-            <h3 className="cat-card-title">Motor de Regras Inteligentes Determinísticas</h3>
-          </div>
-
-          {/* Seletor de Modo de Vinculação */}
-          <div className="cat-mode-selector">
-            <div
-              className={`cat-mode-card ${form.linking_mode === 'manual' ? 'active' : ''}`}
-              onClick={() => setForm({ ...form, linking_mode: 'manual' })}
-            >
-              <div className="cat-mode-title">
-                <Package size={16} /> Vínculo Manual
-              </div>
-              <p className="cat-mode-desc">
-                Você escolhe e vincula os produtos individualmente ou em lote pelo catálogo.
-              </p>
-            </div>
-
-            <div
-              className={`cat-mode-card ${form.linking_mode === 'automatic' ? 'active' : ''}`}
-              onClick={() => setForm({ ...form, linking_mode: 'automatic' })}
-            >
-              <div className="cat-mode-title">
-                <Zap size={16} color="#ca8a04" /> 100% Automática
-              </div>
-              <p className="cat-mode-desc">
-                Produtos entram na categoria estritamente se atenderem às condições abaixo.
-              </p>
-            </div>
-
-            <div
-              className={`cat-mode-card ${form.linking_mode === 'hybrid' ? 'active' : ''}`}
-              onClick={() => setForm({ ...form, linking_mode: 'hybrid' })}
-            >
-              <div className="cat-mode-title">
-                <Layers size={16} color="#2563eb" /> Híbrida (Recomendada)
-              </div>
-              <p className="cat-mode-desc">
-                Regras automáticas sugerem e incluem produtos, e você pode adicionar itens manuais.
-              </p>
-            </div>
-          </div>
-
-          {/* Construtor de Condições */}
-          <div className="cat-rules-builder">
-            <div className="cat-rules-header">
-              <div className="cat-rules-operator">
-                <span>Corresponder quando:</span>
-                <select
-                  value={form.rule_operator}
-                  onChange={e => setForm({ ...form, rule_operator: e.target.value as RuleOperator })}
-                >
-                  <option value="OR">QUALQUER uma das regras for atendida (OU)</option>
-                  <option value="AND">TODAS as regras forem atendidas (E)</option>
-                </select>
-              </div>
-
-              <button type="button" className="hub-btn hub-btn-secondary" onClick={addRule}>
-                <Plus size={14} /> Adicionar Regra
               </button>
-            </div>
-
-            {form.rules.map((rule, idx) => (
-              <div key={rule.id} className="cat-rule-row">
-                <select
-                  className="cat-form-select"
-                  value={rule.field}
-                  onChange={e => updateRule(rule.id, { field: e.target.value as RuleField })}
-                >
-                  <option value="name">Nome do Produto</option>
-                  <option value="description">Descrição</option>
-                  <option value="brand">Marca</option>
-                  <option value="sku">SKU do Produto</option>
-                  <option value="model">Modelo</option>
-                  <option value="tag">Tag do Produto</option>
-                  <option value="min_price">Preço Maior ou Igual a</option>
-                  <option value="max_price">Preço Menor ou Igual a</option>
-                  <option value="in_stock">Somente em Estoque</option>
-                </select>
-
-                <select
-                  className="cat-form-select"
-                  value={rule.condition}
-                  onChange={e => updateRule(rule.id, { condition: e.target.value as RuleCondition })}
-                >
-                  <option value="contains">contém</option>
-                  <option value="equals">é exatamente igual a</option>
-                  <option value="starts_with">começa com</option>
-                  <option value="ends_with">termina com</option>
-                </select>
-
-                <input
-                  type="text"
-                  className="cat-form-input"
-                  placeholder="Ex: Furadeira, 21V, FUR-, Bomvink..."
-                  value={String(rule.value ?? '')}
-                  onChange={e => updateRule(rule.id, { value: e.target.value })}
-                />
-
-                <button
-                  type="button"
-                  className="cat-rule-del-btn"
-                  title="Remover regra"
-                  onClick={() => removeRule(rule.id)}
-                  disabled={form.rules.length <= 1}
-                >
-                  <Trash2 size={16} />
-                </button>
-              </div>
             ))}
           </div>
 
-          {/* PAINEL DE PREVIEW DINÂMICO EM TEMPO REAL */}
-          <div className="cat-preview-panel">
-            <div className="cat-preview-header">
-              <div className="cat-preview-count">
-                <CheckCircle2 size={18} color="#16a34a" />
-                <span>Prévia em Tempo Real:</span>
-                <span className="cat-preview-count-pill">
-                  {ruleMatchedProducts.length} produtos correspondem a estas regras
-                </span>
+          {/* ─── ABA 1: GERAL ────────────────────────────────────────── */}
+          {activeTab === 'general' && (
+            <div className="cat-card">
+              <div className="cat-card-header">
+                <h3 className="cat-card-title">Informações</h3>
               </div>
-            </div>
 
-            {ruleMatchedProducts.length === 0 ? (
-              <div style={{ padding: '30px', textAlign: 'center', color: '#64748b', fontSize: 13 }}>
-                Nenhum produto do catálogo corresponde a estas condições atualmente.
-              </div>
-            ) : (
-              <div className="cat-preview-grid">
-                {ruleMatchedProducts.slice(0, 12).map(p => (
-                  <div key={p.id} className="cat-preview-card">
-                    <img
-                      src={p.image_url || 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=100'}
-                      alt=""
-                      className="cat-preview-img"
-                    />
-                    <div className="cat-preview-info">
-                      <span className="cat-preview-name" title={p.name}>{p.name}</span>
-                      <span className="cat-preview-sku">SKU: {p.sku || '—'} | Marca: {p.brand || 'TEKNIX'}</span>
-                      <span className="cat-preview-price">
-                        Estoque: {p.stock ?? 0} un.
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ─── ABA 3: PRODUTOS VINCULADOS ───────────────────────────────────────── */}
-      {activeTab === 'products' && (
-        <div className="cat-card">
-          <div className="cat-card-header">
-            <h3 className="cat-card-title">Produtos Vinculados à Categoria</h3>
-          </div>
-
-          {recalcFeedback && (
-            <div style={{ padding: '12px 16px', background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#166534', borderRadius: 8, marginBottom: 16, fontSize: 13, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <CheckCircle2 size={16} /> {recalcFeedback}
-            </div>
-          )}
-
-          {/* Barra de Ações da Tabela de Produtos */}
-          <div className="cat-prod-toolbar">
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, maxWidth: 400 }}>
-              <div className="hub-search-wrap" style={{ width: '100%' }}>
-                <Search className="hub-search-icon" size={16} />
-                <input
-                  type="text"
-                  className="hub-search-input"
-                  placeholder="Buscar produto por nome, SKU ou marca..."
-                  value={linkedSearch}
-                  onChange={e => setLinkedSearch(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <button
-                type="button"
-                className="hub-btn hub-btn-secondary"
-                onClick={handleRecalculate}
-                title="Executar regras novamente sobre o catálogo"
-              >
-                <RefreshCw size={14} /> Recalcular Regras
-              </button>
-
-              <button
-                type="button"
-                className="hub-btn hub-btn-primary"
-                onClick={() => setShowProductModal(true)}
-              >
-                <Plus size={14} /> Vincular Produtos Manualmente
-              </button>
-            </div>
-          </div>
-
-          {/* Tabela de Produtos Vinculados */}
-          {filteredLinkedProducts.length === 0 ? (
-            <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>
-              <Package size={32} style={{ margin: '0 auto 8px', color: '#94a3b8' }} />
-              <p style={{ margin: 0, fontWeight: 600 }}>Nenhum produto vinculado encontrado.</p>
-              <p style={{ margin: '4px 0 0', fontSize: 12 }}>
-                Configure regras automáticas na aba anterior ou vincule manualmente pelo botão acima.
-              </p>
-            </div>
-          ) : (
-            <table className="cat-prod-table">
-              <thead>
-                <tr>
-                  <th>PRODUTO</th>
-                  <th>SKU</th>
-                  <th>MARCA</th>
-                  <th>ESTOQUE</th>
-                  <th>PREÇO SITE</th>
-                  <th>FORMA DE VÍNCULO</th>
-                  <th style={{ textAlign: 'right' }}>AÇÃO</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredLinkedProducts.map(item => (
-                  <tr key={item.productId}>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <div style={{ fontWeight: 600 }}>{item.productName}</div>
-                      </div>
-                    </td>
-                    <td><code>{item.sku || '—'}</code></td>
-                    <td>{item.brand}</td>
-                    <td>{item.stock} un.</td>
-                    <td>{item.price > 0 ? `R$ ${item.price.toFixed(2).replace('.', ',')}` : 'Sob consulta'}</td>
-                    <td>
-                      <span className={`cat-source-badge ${item.source === 'MANUAL' ? 'manual' : 'rule'}`}>
-                        {item.source === 'MANUAL' ? 'MANUAL' : 'REGRA AUTOMÁTICA'}
-                      </span>
-                    </td>
-                    <td style={{ textAlign: 'right' }}>
-                      <button
-                        type="button"
-                        className="cat-rule-del-btn"
-                        style={{ marginLeft: 'auto' }}
-                        title="Desvincular produto desta categoria"
-                        onClick={() => handleUnlinkProduct(item.productId)}
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-      )}
-
-      {/* ─── ABA 4: PÁGINA & SEO ──────────────────────────────────────────────── */}
-      {activeTab === 'seo' && (
-        <div className="cat-card">
-          <div className="cat-card-header">
-            <h3 className="cat-card-title">Configurações de SEO e Integração com Page Builder</h3>
-          </div>
-
-          <div className="cat-form-grid">
-            <div className="cat-form-group">
-              <label className="cat-form-label">Título SEO (Tag Title)</label>
-              <input
-                type="text"
-                className="cat-form-input"
-                placeholder="Ex: Ferramentas Elétricas e Manuais Profissionais | TEKNIX"
-                value={form.seo_title}
-                onChange={e => setForm({ ...form, seo_title: e.target.value })}
-              />
-              <span className="cat-form-hint">{form.seo_title?.length || 0}/60 caracteres recomendados</span>
-            </div>
-
-            <div className="cat-form-group">
-              <label className="cat-form-label">URL Canônica</label>
-              <input
-                type="text"
-                className="cat-form-input"
-                placeholder="/categoria/ferramentas"
-                value={form.canonical_url}
-                onChange={e => setForm({ ...form, canonical_url: e.target.value })}
-              />
-            </div>
-
-            <div className="cat-form-group full">
-              <label className="cat-form-label">Meta Descrição (Snippet de Busca)</label>
-              <textarea
-                className="cat-form-textarea"
-                placeholder="Ex: Conheça a linha completa de ferramentas TEKNIX com pronta entrega, garantia oficial e suporte especializado..."
-                value={form.seo_description}
-                onChange={e => setForm({ ...form, seo_description: e.target.value })}
-              />
-              <span className="cat-form-hint">{form.seo_description?.length || 0}/160 caracteres recomendados</span>
-            </div>
-          </div>
-
-          {/* Prévia SERP do Google */}
-          <div style={{ marginTop: 20 }}>
-            <span style={{ fontSize: 13, fontWeight: 600, color: '#111111' }}>
-              Prévia de Visualização nos Mecanismos de Busca (Google SERP):
-            </span>
-            <div className="cat-serp-preview">
-              <div className="cat-serp-url">
-                https://teknixbrasil.com.br/categoria/{form.slug || 'categoria'}
-              </div>
-              <div className="cat-serp-title">
-                {form.seo_title || form.name || 'Nome da Categoria | TEKNIX'}
-              </div>
-              <p className="cat-serp-desc">
-                {form.seo_description || form.description || 'Descrição detalhada da categoria no catálogo oficial TEKNIX.'}
-              </p>
-            </div>
-          </div>
-
-          {/* Integração com Page Builder */}
-          <div style={{ marginTop: 28, padding: 20, background: '#F7F7F7', borderRadius: 10, border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
-            <div>
-              <h4 style={{ margin: '0 0 4px', fontSize: 15, fontWeight: 700, color: '#0f172a' }}>
-                Page Builder da Categoria
-              </h4>
-              <p style={{ margin: 0, fontSize: 13, color: '#64748b' }}>
-                URL Pública: <code>{publicCategoryUrl}</code> — Edite o layout visual, banners e vitrines no editor oficial.
-              </p>
-            </div>
-
-            <Link
-              to={pageBuilderUrl}
-              className="hub-btn hub-btn-primary"
-            >
-              <FileCode size={15} /> Editar no Page Builder
-            </Link>
-          </div>
-        </div>
-      )}
-
-      {/* ─── ABA 5: MARKETPLACES ──────────────────────────────────────────────── */}
-      {activeTab === 'marketplaces' && (
-        <div className="cat-card">
-          <div className="cat-card-header">
-            <h3 className="cat-card-title">Mapeamento Central de Marketplaces (FLOW)</h3>
-          </div>
-
-          <div className="cat-form-grid">
-            {['mercadolivre', 'shopee', 'amazon', 'magalu'].map(channel => {
-              const current = form.marketplace_mappings?.find(m => m.channel === channel)
-              const labelName =
-                channel === 'mercadolivre' ? 'Mercado Livre' :
-                channel === 'shopee' ? 'Shopee' :
-                channel === 'amazon' ? 'Amazon' : 'Magazine Luiza'
-
-              const placeholderCode =
-                channel === 'mercadolivre' ? 'MLB1771' :
-                channel === 'shopee' ? '100644' :
-                channel === 'amazon' ? 'B07X...' : 'CAT_MAGALU_12'
-
-              return (
-                <div key={channel} className="cat-form-group">
-                  <label className="cat-form-label">
-                    {labelName} (ID Externo)
-                  </label>
+              <div className="cat-form-grid">
+                <div className="cat-form-group">
+                  <label className="cat-form-label">Nome *</label>
                   <input
                     type="text"
                     className="cat-form-input"
-                    placeholder={`Ex: ${placeholderCode}`}
-                    value={current?.external_category_id || ''}
-                    onChange={e => handleMarketplaceChange(channel, e.target.value, current?.external_category_name)}
+                    placeholder="Nome da categoria"
+                    value={form.name}
+                    onChange={e => handleNameChange(e.target.value)}
                   />
-                  <span className="cat-form-hint">Código de categoria na API do {labelName}.</span>
                 </div>
-              )
-            })}
-          </div>
-        </div>
-      )}
+
+                <div className="cat-form-group">
+                  <label className="cat-form-label">URL (Slug) *</label>
+                  <input
+                    type="text"
+                    className="cat-form-input"
+                    placeholder="slug"
+                    value={form.slug}
+                    onChange={e => setForm({ ...form, slug: normalizeText(e.target.value).replace(/\s+/g, '-') })}
+                  />
+                </div>
+
+                <div className="cat-form-group">
+                  <label className="cat-form-label">Categoria Superior</label>
+                  <select
+                    className="cat-form-select"
+                    value={form.parent_id || ''}
+                    onChange={e => setForm({ ...form, parent_id: e.target.value || null })}
+                  >
+                    <option value="">Nenhuma (Principal)</option>
+                    {categoriesList
+                      .filter(c => c.id !== form.id)
+                      .map(c => (
+                        <option key={c.id} value={c.id}>
+                          {c.name}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+
+                <div className="cat-form-group">
+                  <label className="cat-form-label">Ordem</label>
+                  <input
+                    type="number"
+                    className="cat-form-input"
+                    value={form.sort_order}
+                    onChange={e => setForm({ ...form, sort_order: Number(e.target.value) })}
+                  />
+                </div>
+
+                <div className="cat-form-group full">
+                  <label className="cat-form-label">Descrição</label>
+                  <textarea
+                    className="cat-form-textarea"
+                    placeholder="Descrição opcional..."
+                    value={form.description}
+                    onChange={e => setForm({ ...form, description: e.target.value })}
+                  />
+                </div>
+
+                {/* Foto da Categoria com Upload Direto */}
+                <div className="cat-form-group full cat-photo-upload-section">
+                  <label className="cat-form-label">Foto</label>
+
+                  <div className="cat-photo-manager-box">
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      accept="image/*"
+                      onChange={handleFileUpload}
+                      style={{ display: 'none' }}
+                    />
+
+                    <div className="cat-photo-preview-container">
+                      {form.image_url ? (
+                        <div className="cat-photo-preview-card">
+                          <img
+                            src={form.image_url}
+                            alt={form.name || 'Foto'}
+                            className="cat-photo-preview-image"
+                          />
+                          <button
+                            type="button"
+                            className="cat-photo-remove-action"
+                            onClick={() => setForm(prev => ({ ...prev, image_url: '' }))}
+                            title="Remover foto"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="cat-photo-placeholder" onClick={() => fileInputRef.current?.click()} title="Clique para enviar foto">
+                          <Image size={28} color="#94a3b8" />
+                          <span className="cat-photo-placeholder-text">Enviar imagem</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="cat-photo-controls">
+                      <div className="cat-photo-actions-row">
+                        <button
+                          type="button"
+                          className="cat-upload-file-btn"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={uploadingPhoto}
+                        >
+                          <Upload size={14} />
+                          {uploadingPhoto ? 'Enviando foto...' : 'Escolher Imagem'}
+                        </button>
+                      </div>
+
+                      <input
+                        type="text"
+                        className="cat-form-input raw-input"
+                        placeholder="URL da imagem..."
+                        value={form.image_url}
+                        onChange={e => {
+                          const val = e.target.value
+                          setForm(prev => ({
+                            ...prev,
+                            image_url: val,
+                            mosaic_image_url: prev.mosaic_image_url || val
+                          }))
+                        }}
+                      />
+
+                      {/* Recortes rápidos */}
+                      <div className="cat-photo-presets-row">
+                        <div className="cat-photo-presets-tags">
+                          {PRESET_CUTOUTS.map(preset => (
+                            <button
+                              key={preset.url}
+                              type="button"
+                              className={`cat-photo-preset-chip ${form.image_url === preset.url ? 'selected' : ''}`}
+                              onClick={() => setForm(prev => ({
+                                ...prev,
+                                image_url: preset.url,
+                                mosaic_image_url: prev.mosaic_image_url || preset.url
+                              }))}
+                            >
+                              <img src={preset.url} alt={preset.alt} className="cat-photo-chip-thumb" />
+                              <span>{preset.alt}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="cat-form-group">
+                  <label className="cat-form-label">Ícone</label>
+                  <input
+                    type="text"
+                    className="cat-form-input"
+                    placeholder="Ex: drill, wrench..."
+                    value={form.icon}
+                    onChange={e => setForm({ ...form, icon: e.target.value })}
+                  />
+                </div>
+
+                <div className="cat-form-group">
+                  <label className="cat-form-label">Status</label>
+                  <select
+                    className="cat-form-select"
+                    value={form.status}
+                    onChange={e => setForm({ ...form, status: e.target.value as 'active' | 'inactive' })}
+                  >
+                    <option value="active">Ativa</option>
+                    <option value="inactive">Inativa</option>
+                  </select>
+                </div>
+
+                <div className="cat-form-group">
+                  <label className="cat-form-label">Publicação</label>
+                  <select
+                    className="cat-form-select"
+                    value={form.is_published ? 'true' : 'false'}
+                    onChange={e => setForm({ ...form, is_published: e.target.value === 'true' })}
+                  >
+                    <option value="true">Publicada</option>
+                    <option value="false">Rascunho</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ─── ABA 2: MOSAICO DA HOME ────────────────────────── */}
+          {activeTab === 'mosaic' && (
+            <div className="cat-card cat-mosaic-settings-card">
+              <div className="cat-card-header cat-mosaic-card-header">
+                <div>
+                  <h3 className="cat-card-title">Mosaico da Home</h3>
+                </div>
+
+                <div className="cat-mosaic-toggle-box">
+                  <label className="cat-mosaic-switch">
+                    <input
+                      type="checkbox"
+                      checked={form.show_in_mosaic !== false}
+                      onChange={e => setForm({ ...form, show_in_mosaic: e.target.checked })}
+                    />
+                    <span className="cat-mosaic-slider" />
+                  </label>
+                  <span className="cat-mosaic-switch-label">
+                    {form.show_in_mosaic !== false ? 'Exibição Ativa' : 'Oculta'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="cat-mosaic-grid">
+                {/* Live Preview */}
+                <div className="cat-mosaic-preview-col">
+                  <div className="cat-mosaic-preview-title">
+                    <span>Prévia no Carrossel</span>
+                  </div>
+
+                  <div className="cat-mosaic-preview-frame">
+                    <div className="dsvia-mosaic-wrapper-simulated">
+                      <div className="dsvia-mosaic-item" style={{ width: 110 }}>
+                        <div
+                          className="dsvia-mosaic-card is-cutout"
+                          style={{ width: 90, height: 90, borderRadius: 20 }}
+                        >
+                          {(form.mosaic_image_url || form.image_url) ? (
+                            <img
+                              alt={form.mosaic_label || form.name || 'Categoria'}
+                              src={form.mosaic_image_url || form.image_url}
+                              loading="lazy"
+                            />
+                          ) : (
+                            <span className="cat-label-tip">Sem foto</span>
+                          )}
+                        </div>
+                        <span className="dsvia-mosaic-label" style={{ maxWidth: 110 }}>
+                          {form.mosaic_label || form.name || 'Nome da Categoria'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="cat-mosaic-preview-meta">
+                    <div className="cat-mosaic-meta-item">
+                      <span className="cat-meta-lbl">URL:</span>
+                      <code>{`/categoria/${form.slug || 'slug'}`}</code>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Controles de Configuração e Galeria */}
+                <div className="cat-mosaic-fields-col">
+                  <div className="cat-form-group">
+                    <label className="cat-form-label">Rótulo no Carrossel</label>
+                    <input
+                      type="text"
+                      className="cat-form-input"
+                      placeholder={form.name || 'Ex: Microfones'}
+                      value={form.mosaic_label || ''}
+                      onChange={e => setForm({ ...form, mosaic_label: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="cat-form-group">
+                    <label className="cat-form-label">URL da Imagem (Cutout)</label>
+                    <input
+                      type="text"
+                      className="cat-form-input"
+                      placeholder="/images/referencias/... ou https://..."
+                      value={form.mosaic_image_url || form.image_url || ''}
+                      onChange={e => {
+                        const val = e.target.value
+                        setForm({
+                          ...form,
+                          mosaic_image_url: val,
+                          image_url: val || form.image_url
+                        })
+                      }}
+                    />
+                  </div>
+
+                  {/* Galeria de Recortes */}
+                  <div className="cat-preset-section">
+                    <div className="cat-preset-header">
+                      <span className="cat-preset-title">Imagens Prontas</span>
+                    </div>
+
+                    <div className="cat-preset-list">
+                      {PRESET_CUTOUTS.map(preset => {
+                        const isSelected = (form.mosaic_image_url === preset.url) || (form.image_url === preset.url)
+                        return (
+                          <button
+                            type="button"
+                            key={preset.url}
+                            className={`cat-preset-card ${isSelected ? 'active' : ''}`}
+                            onClick={() => {
+                              setForm({
+                                ...form,
+                                mosaic_image_url: preset.url,
+                                image_url: preset.url,
+                                mosaic_label: form.mosaic_label || preset.alt
+                              })
+                            }}
+                          >
+                            <div className="cat-preset-img-wrap">
+                              <img src={preset.url} alt={preset.label} loading="lazy" />
+                            </div>
+                            <span className="cat-preset-lbl">{preset.label}</span>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ─── ABA 3: REGRAS INTELIGENTES & PREVIEW ──────────────────────────────── */}
+          {activeTab === 'rules' && (
+            <div className="cat-card">
+              <div className="cat-card-header">
+                <h3 className="cat-card-title">Regras de Vinculação</h3>
+              </div>
+
+              {/* Seletor de Modo de Vinculação */}
+              <div className="cat-mode-selector">
+                <div
+                  className={`cat-mode-card ${form.linking_mode === 'manual' ? 'active' : ''}`}
+                  onClick={() => setForm({ ...form, linking_mode: 'manual' })}
+                >
+                  <div className="cat-mode-title">
+                    <Package size={16} /> Manual
+                  </div>
+                </div>
+
+                <div
+                  className={`cat-mode-card ${form.linking_mode === 'automatic' ? 'active' : ''}`}
+                  onClick={() => setForm({ ...form, linking_mode: 'automatic' })}
+                >
+                  <div className="cat-mode-title">
+                    <Zap size={16} color="#ca8a04" /> Automática
+                  </div>
+                </div>
+
+                <div
+                  className={`cat-mode-card ${form.linking_mode === 'hybrid' ? 'active' : ''}`}
+                  onClick={() => setForm({ ...form, linking_mode: 'hybrid' })}
+                >
+                  <div className="cat-mode-title">
+                    <Layers size={16} color="#2563eb" /> Híbrida
+                  </div>
+                </div>
+              </div>
+
+              {/* Construtor de Condições */}
+              <div className="cat-rules-builder">
+                <div className="cat-rules-header">
+                  <div className="cat-rules-operator">
+                    <span>Corresponder quando:</span>
+                    <select
+                      value={form.rule_operator}
+                      onChange={e => setForm({ ...form, rule_operator: e.target.value as RuleOperator })}
+                    >
+                      <option value="OR">Qualquer regra (OU)</option>
+                      <option value="AND">Todas as regras (E)</option>
+                    </select>
+                  </div>
+
+                  <button type="button" className="hub-btn hub-btn-secondary" onClick={addRule}>
+                    <Plus size={14} /> Adicionar Regra
+                  </button>
+                </div>
+
+                {form.rules.map((rule) => (
+                  <div key={rule.id} className="cat-rule-row">
+                    <select
+                      className="cat-form-select"
+                      value={rule.field}
+                      onChange={e => updateRule(rule.id, { field: e.target.value as RuleField })}
+                    >
+                      <option value="name">Nome do Produto</option>
+                      <option value="description">Descrição</option>
+                      <option value="brand">Marca</option>
+                      <option value="sku">SKU</option>
+                      <option value="model">Modelo</option>
+                      <option value="tag">Tag</option>
+                      <option value="min_price">Preço Mínimo</option>
+                      <option value="max_price">Preço Máximo</option>
+                      <option value="in_stock">Em Estoque</option>
+                    </select>
+
+                    <select
+                      className="cat-form-select"
+                      value={rule.condition}
+                      onChange={e => updateRule(rule.id, { condition: e.target.value as RuleCondition })}
+                    >
+                      <option value="contains">contém</option>
+                      <option value="equals">igual a</option>
+                      <option value="starts_with">começa com</option>
+                      <option value="ends_with">termina com</option>
+                    </select>
+
+                    <input
+                      type="text"
+                      className="cat-form-input"
+                      placeholder="Valor..."
+                      value={String(rule.value ?? '')}
+                      onChange={e => updateRule(rule.id, { value: e.target.value })}
+                    />
+
+                    <button
+                      type="button"
+                      className="cat-rule-del-btn"
+                      title="Remover regra"
+                      onClick={() => removeRule(rule.id)}
+                      disabled={form.rules.length <= 1}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {/* PAINEL DE PREVIEW */}
+              <div className="cat-preview-panel">
+                <div className="cat-preview-header">
+                  <div className="cat-preview-count">
+                    <CheckCircle2 size={18} color="#16a34a" />
+                    <span>Prévia:</span>
+                    <span className="cat-preview-count-pill">
+                      {ruleMatchedProducts.length} produtos encontrados
+                    </span>
+                  </div>
+                </div>
+
+                {ruleMatchedProducts.length === 0 ? (
+                  <div style={{ padding: '24px', textAlign: 'center', color: '#64748b', fontSize: 13 }}>
+                    Nenhum produto corresponde a estas condições.
+                  </div>
+                ) : (
+                  <div className="cat-preview-grid">
+                    {ruleMatchedProducts.slice(0, 12).map(p => (
+                      <div key={p.id} className="cat-preview-card">
+                        <img
+                          src={p.image_url || 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=100'}
+                          alt=""
+                          className="cat-preview-img"
+                        />
+                        <div className="cat-preview-info">
+                          <span className="cat-preview-name" title={p.name}>{p.name}</span>
+                          <span className="cat-preview-sku">SKU: {p.sku || '—'}</span>
+                          <span className="cat-preview-price">
+                            Estoque: {p.stock ?? 0}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ─── ABA 4: PRODUTOS VINCULADOS ───────────────────────────────────────── */}
+          {activeTab === 'products' && (
+            <div className="cat-card">
+              <div className="cat-card-header">
+                <h3 className="cat-card-title">Produtos Vinculados</h3>
+              </div>
+
+              {recalcFeedback && (
+                <div style={{ padding: '10px 14px', background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#166534', borderRadius: 8, marginBottom: 16, fontSize: 13, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <CheckCircle2 size={16} /> {recalcFeedback}
+                </div>
+              )}
+
+              {/* Barra de Ações da Tabela de Produtos */}
+              <div className="cat-prod-toolbar">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, maxWidth: 400 }}>
+                  <div className="hub-search-wrap" style={{ width: '100%' }}>
+                    <Search className="hub-search-icon" size={16} />
+                    <input
+                      type="text"
+                      className="hub-search-input"
+                      placeholder="Buscar produto..."
+                      value={linkedSearch}
+                      onChange={e => setLinkedSearch(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <button
+                    type="button"
+                    className="hub-btn hub-btn-secondary"
+                    onClick={handleRecalculate}
+                  >
+                    <RefreshCw size={14} /> Recalcular
+                  </button>
+
+                  <button
+                    type="button"
+                    className="hub-btn hub-btn-primary"
+                    onClick={() => setShowProductModal(true)}
+                  >
+                    <Plus size={14} /> Vincular Produtos
+                  </button>
+                </div>
+              </div>
+
+              {/* Tabela de Produtos Vinculados */}
+              {filteredLinkedProducts.length === 0 ? (
+                <div style={{ padding: '32px', textAlign: 'center', color: '#64748b' }}>
+                  <Package size={28} style={{ margin: '0 auto 8px', color: '#94a3b8' }} />
+                  <p style={{ margin: 0, fontWeight: 500, fontSize: 13 }}>Nenhum produto vinculado.</p>
+                </div>
+              ) : (
+                <table className="cat-prod-table">
+                  <thead>
+                    <tr>
+                      <th>PRODUTO</th>
+                      <th>SKU</th>
+                      <th>MARCA</th>
+                      <th>ESTOQUE</th>
+                      <th>PREÇO</th>
+                      <th>ORIGEM</th>
+                      <th style={{ textAlign: 'right' }}>AÇÃO</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredLinkedProducts.map(item => (
+                      <tr key={item.productId}>
+                        <td>
+                          <div style={{ fontWeight: 600 }}>{item.productName}</div>
+                        </td>
+                        <td><code>{item.sku || '—'}</code></td>
+                        <td>{item.brand}</td>
+                        <td>{item.stock} un.</td>
+                        <td>{item.price > 0 ? `R$ ${item.price.toFixed(2).replace('.', ',')}` : 'Sob consulta'}</td>
+                        <td>
+                          <span className={`cat-source-badge ${item.source === 'MANUAL' ? 'manual' : 'rule'}`}>
+                            {item.source === 'MANUAL' ? 'MANUAL' : 'AUTOMÁTICO'}
+                          </span>
+                        </td>
+                        <td style={{ textAlign: 'right' }}>
+                          <button
+                            type="button"
+                            className="cat-rule-del-btn"
+                            style={{ marginLeft: 'auto' }}
+                            title="Desvincular produto"
+                            onClick={() => handleUnlinkProduct(item.productId)}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          )}
+
+          {/* ─── ABA 5: PÁGINA & SEO ──────────────────────────────────────────────── */}
+          {activeTab === 'seo' && (
+            <div className="cat-card">
+              <div className="cat-card-header">
+                <h3 className="cat-card-title">SEO</h3>
+              </div>
+
+              <div className="cat-form-grid">
+                <div className="cat-form-group">
+                  <label className="cat-form-label">Título SEO</label>
+                  <input
+                    type="text"
+                    className="cat-form-input"
+                    placeholder="Título para motores de busca..."
+                    value={form.seo_title}
+                    onChange={e => setForm({ ...form, seo_title: e.target.value })}
+                  />
+                </div>
+
+                <div className="cat-form-group">
+                  <label className="cat-form-label">URL Canônica</label>
+                  <input
+                    type="text"
+                    className="cat-form-input"
+                    placeholder="/categoria/..."
+                    value={form.canonical_url}
+                    onChange={e => setForm({ ...form, canonical_url: e.target.value })}
+                  />
+                </div>
+
+                <div className="cat-form-group full">
+                  <label className="cat-form-label">Meta Descrição</label>
+                  <textarea
+                    className="cat-form-textarea"
+                    placeholder="Descrição para busca..."
+                    value={form.seo_description}
+                    onChange={e => setForm({ ...form, seo_description: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              {/* Prévia SERP do Google */}
+              <div style={{ marginTop: 20 }}>
+                <span style={{ fontSize: 13, fontWeight: 600, color: '#111111' }}>
+                  Prévia no Google:
+                </span>
+                <div className="cat-serp-preview">
+                  <div className="cat-serp-url">
+                    https://teknixbrasil.com.br/categoria/{form.slug || 'categoria'}
+                  </div>
+                  <div className="cat-serp-title">
+                    {form.seo_title || form.name || 'Nome da Categoria | TEKNIX'}
+                  </div>
+                  <p className="cat-serp-desc">
+                    {form.seo_description || form.description || 'Descrição da categoria.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ─── ABA 6: MARKETPLACES ──────────────────────────────────────────────── */}
+          {activeTab === 'marketplaces' && (
+            <div className="cat-card">
+              <div className="cat-card-header">
+                <h3 className="cat-card-title">Marketplaces</h3>
+              </div>
+
+              <div className="cat-form-grid">
+                {['mercadolivre', 'shopee', 'amazon', 'magalu'].map(channel => {
+                  const current = form.marketplace_mappings?.find(m => m.channel === channel)
+                  const labelName =
+                    channel === 'mercadolivre' ? 'Mercado Livre' :
+                    channel === 'shopee' ? 'Shopee' :
+                    channel === 'amazon' ? 'Amazon' : 'Magazine Luiza'
+
+                  const placeholderCode =
+                    channel === 'mercadolivre' ? 'MLB1771' :
+                    channel === 'shopee' ? '100644' :
+                    channel === 'amazon' ? 'B07X...' : 'CAT_MAGALU_12'
+
+                  return (
+                    <div key={channel} className="cat-form-group">
+                      <label className="cat-form-label">
+                        {labelName}
+                      </label>
+                      <input
+                        type="text"
+                        className="cat-form-input"
+                        placeholder={`Código ou ID (${placeholderCode})`}
+                        value={current?.external_category_id || ''}
+                        onChange={e => handleMarketplaceChange(channel, e.target.value, current?.external_category_name)}
+                      />
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
         </>
       )}
 

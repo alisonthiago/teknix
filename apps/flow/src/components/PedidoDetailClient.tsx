@@ -14,6 +14,13 @@ function formatBRL(value: number) {
   return `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }
 
+function summarizeTitle(title?: string, maxLength = 36) {
+  if (!title) return ''
+  const clean = title.trim()
+  if (clean.length <= maxLength) return clean
+  return clean.slice(0, maxLength).trim() + '...'
+}
+
 const SC: Record<string, { l: string; c: string }> = {
   NOVO: { l: 'Novo', c: 'bg-[#f5f5f5] text-[#1f2328]' },
   PAGO: { l: 'Pago', c: 'bg-[#f5f5f5] text-[#1f2328]' },
@@ -26,24 +33,24 @@ const SC: Record<string, { l: string; c: string }> = {
 }
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
-  return <h3 className="text-base font-semibold text-[#333] mb-3">{children}</h3>
+  return <h3 className="text-[14px] font-semibold text-[#111111] mb-3">{children}</h3>
 }
 
 function InfoRow({ label, value, mono, bold }: { label: string; value: string; mono?: boolean; bold?: boolean }) {
   return (
-    <div className="flex justify-between py-1.5 border-b border-[#f5f5f5] last:border-0">
-      <span className="text-sm text-[#999]">{label}</span>
-      <span className={`text-sm ${mono ? 'font-mono' : ''} ${bold ? 'font-medium text-[#333]' : 'text-[#666]'}`}>{value}</span>
+    <div className="flex justify-between py-1.5 border-b border-[#f5f5f5] last:border-0 text-[12.5px]">
+      <span className="text-[#777777]">{label}</span>
+      <span className={`${mono ? 'font-mono' : ''} ${bold ? 'font-semibold text-[#111111]' : 'text-[#444444]'}`}>{value}</span>
     </div>
   )
 }
 
 function StatBox({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="bg-white border border-[#e6e6e6] rounded-md p-3">
-      <div className="text-sm text-[#999] mb-1">{label}</div>
-      <div className="text-[16px] font-semibold text-[#333]">{value}</div>
-      {sub && <div className="text-xs text-[#ccc] mt-0.5">{sub}</div>}
+    <div className="bg-white border border-[#e6e6e6] rounded-xl p-3.5 shadow-none">
+      <div className="text-[11px] font-medium text-[#888888] uppercase tracking-wide mb-1">{label}</div>
+      <div className="text-[16px] font-semibold text-[#111111]">{value}</div>
+      {sub && <div className="text-[11px] text-[#999999] mt-0.5">{sub}</div>}
     </div>
   )
 }
@@ -52,43 +59,43 @@ function VisaoGeralTab({ order }: { order: OrderDetail }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
       <div className="lg:col-span-2 space-y-4">
-        <div className="bg-white border border-[#e6e6e6] rounded-md p-4">
+        <div className="bg-white border border-[#e6e6e6] rounded-xl p-4 shadow-none">
           <SectionTitle>Itens do pedido</SectionTitle>
           <div className="table-container">
-            <table className="w-full text-sm">
+            <table className="w-full text-left">
               <thead>
-                <tr className="border-b border-[#f5f5f5]">
-                  <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">SKU</th>
-                  <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Produto</th>
-                  <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Qtd</th>
-                  <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Preço</th>
-                  <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Total</th>
+                <tr className="border-b border-[#f0f0f0] bg-[#fafafa]">
+                  <th className="text-left py-2.5 px-3 font-semibold text-[#666666] text-[11px] uppercase tracking-wider">SKU</th>
+                  <th className="text-left py-2.5 px-3 font-semibold text-[#666666] text-[11px] uppercase tracking-wider">Produto</th>
+                  <th className="text-right py-2.5 px-3 font-semibold text-[#666666] text-[11px] uppercase tracking-wider">Qtd</th>
+                  <th className="text-right py-2.5 px-3 font-semibold text-[#666666] text-[11px] uppercase tracking-wider">Preço</th>
+                  <th className="text-right py-2.5 px-3 font-semibold text-[#666666] text-[11px] uppercase tracking-wider">Total</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#eeeeee]">
+              <tbody className="divide-y divide-[#f5f5f5]">
                 {order.items.map((item, i) => (
                   <tr key={i} className="hover:bg-[#fafafa] transition-colors">
-                    <td className="py-2.5 px-3 font-mono text-[#999]">{item.sku}</td>
-                    <td className="py-2.5 px-3 text-[#333] font-medium">
+                    <td className="py-2.5 px-3 font-mono text-[11px] text-[#777777]">{item.sku}</td>
+                    <td className="py-2.5 px-3 text-[#111111]">
                       {item.product_id ? (
-                        <Link 
+                        <Link
                           href={`/produtos/${item.product_id}`}
-                          className="flex items-center gap-3 group hover:text-[#1f2328] transition-colors cursor-pointer"
-                          title="Clique para abrir os detalhes deste produto"
+                          className="flex items-center gap-3 group hover:text-[#0071e3] transition-colors cursor-pointer min-w-0"
+                          title={item.name}
                         >
-                          <div className="w-10 h-10 rounded-lg bg-[#f5f5f5] border border-[#e6e6e6] group-hover:border-[#1f2328]/50 overflow-hidden flex items-center justify-center shrink-0 transition-all shadow-2xs">
+                          <div className="w-10 h-10 rounded-lg bg-[#f5f5f5] border border-[#e6e6e6] group-hover:border-[#0071e3]/40 overflow-hidden flex items-center justify-center shrink-0 transition-all shadow-none">
                             {item.image ? (
                               <img src={item.image} alt="" className="w-full h-full object-cover" />
                             ) : (
                               <Package className="w-4 h-4 text-[#ccc]" />
                             )}
                           </div>
-                           <span className="font-semibold text-[13px] group-hover:underline underline-offset-2">
-                            {item.name}
+                          <span className="font-medium text-[13px] text-[#111111] group-hover:underline underline-offset-2 truncate max-w-[280px] sm:max-w-[420px]" title={item.name}>
+                            {summarizeTitle(item.name)}
                           </span>
                         </Link>
                       ) : (
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 min-w-0" title={item.name}>
                           <div className="w-10 h-10 rounded-lg bg-[#f5f5f5] border border-[#e6e6e6] overflow-hidden flex items-center justify-center shrink-0">
                             {item.image ? (
                               <img src={item.image} alt="" className="w-full h-full object-cover" />
@@ -96,13 +103,15 @@ function VisaoGeralTab({ order }: { order: OrderDetail }) {
                               <Package className="w-4 h-4 text-[#ccc]" />
                             )}
                           </div>
-                          <span className="font-semibold text-base">{item.name}</span>
+                          <span className="font-medium text-[13px] text-[#111111] truncate max-w-[280px] sm:max-w-[420px]" title={item.name}>
+                            {summarizeTitle(item.name)}
+                          </span>
                         </div>
                       )}
                     </td>
-                    <td className="py-2.5 px-3 text-right text-[#999] font-medium">{item.quantity}</td>
-                    <td className="py-2.5 px-3 text-right text-[#999]">{formatBRL(item.price)}</td>
-                    <td className="py-2.5 px-3 text-right font-bold text-[#333]">{formatBRL(item.total)}</td>
+                    <td className="py-2.5 px-3 text-right text-[#555555] font-medium text-[12.5px]">{item.quantity}</td>
+                    <td className="py-2.5 px-3 text-right text-[#777777] text-[12.5px]">{formatBRL(item.price)}</td>
+                    <td className="py-2.5 px-3 text-right font-semibold text-[#111111] text-[13px]">{formatBRL(item.total)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -110,7 +119,7 @@ function VisaoGeralTab({ order }: { order: OrderDetail }) {
           </div>
         </div>
 
-        <div className="bg-white border border-[#e6e6e6] rounded-md p-4">
+        <div className="bg-white border border-[#e6e6e6] rounded-xl p-4 shadow-none">
           <SectionTitle>Pagamento</SectionTitle>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
             <InfoRow label="Método" value={order.payment.method} bold />
@@ -124,16 +133,16 @@ function VisaoGeralTab({ order }: { order: OrderDetail }) {
 
       <div className="space-y-4">
         {/* Card Cliente */}
-        <div className="bg-white border border-[#e6e6e6] rounded-2xl p-5 shadow-xs">
+        <div className="bg-white border border-[#e6e6e6] rounded-xl p-4 shadow-none">
           <SectionTitle>Dados do Cliente</SectionTitle>
-          <div className="p-3 bg-[#F7F7F7] rounded-xl border border-[#e2e8f0] mb-3">
+          <div className="p-3 bg-[#fafafa] rounded-lg border border-[#eef2f6] mb-3">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-full bg-[#F7F7F7] border border-[#e5e7eb] flex items-center justify-center text-[#1f2328] font-bold text-sm shrink-0">
+              <div className="w-8 h-8 rounded-full bg-[#f0f0f0] border border-[#e5e7eb] flex items-center justify-center text-[#333333] font-semibold text-xs shrink-0">
                 {order.customer.name.slice(0, 1).toUpperCase()}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-base font-extrabold text-[#111111] truncate">{order.customer.name}</p>
-                <span className="inline-flex items-center gap-1 text-xs font-bold text-[#666666]">
+                <p className="text-[13.5px] font-semibold text-[#111111] truncate">{order.customer.name}</p>
+                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[#666666]">
                   <MarketplaceLogo name={order.marketplace} className="w-3 h-3" />
                   Comprador {order.marketplace}
                 </span>
@@ -141,7 +150,7 @@ function VisaoGeralTab({ order }: { order: OrderDetail }) {
             </div>
           </div>
 
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <InfoRow label="Telefone / Contato" value={order.customer.phone || '—'} />
             <InfoRow label="E-mail" value={order.customer.email || '—'} />
             <InfoRow label="Total Pago pelo Cliente" value={formatBRL(order.payment.total || order.items.reduce((a, b) => a + b.total, 0))} bold />
@@ -150,16 +159,16 @@ function VisaoGeralTab({ order }: { order: OrderDetail }) {
 
           <Link
             href={`/clientes/${encodeURIComponent(order.customer.name.trim().toLowerCase().replace(/\s+/g, '-'))}`}
-            className="mt-3.5 w-full py-2 px-3 bg-[#F7F7F7] hover:bg-[#f0f0f0] border border-[#e5e7eb] rounded-xl text-xs font-bold text-[#1f2328] flex items-center justify-center gap-1.5 transition-colors"
+            className="mt-3.5 w-full py-2 px-3 bg-[#fafafa] hover:bg-[#f0f0f0] border border-[#e5e7eb] rounded-lg text-[12px] font-medium text-[#333333] flex items-center justify-center gap-1.5 transition-colors"
           >
             Ver Perfil e Histórico do Cliente ➔
           </Link>
         </div>
 
         {/* Card Frete & Envio */}
-        <div className="bg-white border border-[#e6e6e6] rounded-2xl p-5 shadow-xs">
+        <div className="bg-white border border-[#e6e6e6] rounded-xl p-4 shadow-none">
           <SectionTitle>Frete & Entrega</SectionTitle>
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <InfoRow label="Canal de Envio" value={order.marketplace} bold />
             <InfoRow label="Método" value={order.shipping.method || 'Mercado Envios'} />
             <InfoRow label="Destino" value={`${order.shipping.city} / ${order.shipping.state}`} />
@@ -171,15 +180,15 @@ function VisaoGeralTab({ order }: { order: OrderDetail }) {
         </div>
 
         {/* Card Resumo Financeiro */}
-        <div className="bg-white border border-[#e6e6e6] rounded-2xl p-5 shadow-xs">
+        <div className="bg-white border border-[#e6e6e6] rounded-xl p-4 shadow-none">
           <SectionTitle>Resumo da Cobrança</SectionTitle>
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <InfoRow label="Subtotal dos Itens" value={formatBRL(order.items.reduce((a, b) => a + b.total, 0))} />
             <InfoRow label="Frete cobrado" value={order.shipping.cost > 0 ? formatBRL(order.shipping.cost) : 'Grátis'} />
             <InfoRow label="Taxas do Marketplace" value={formatBRL(order.payment.fee)} />
-            <div className="pt-2 mt-2 border-t border-[#e2e8f0] flex justify-between items-center">
-              <span className="text-xs font-bold text-[#111111]">Total Cobrado do Cliente:</span>
-              <span className="text-sm font-black text-[#16a34a]">{formatBRL(order.payment.total || order.items.reduce((a, b) => a + b.total, 0))}</span>
+            <div className="pt-2 mt-2 border-t border-[#e2e8f0] flex justify-between items-center text-[12.5px]">
+              <span className="font-medium text-[#111111]">Total Cobrado do Cliente:</span>
+              <span className="text-[13.5px] font-semibold text-[#16a34a]">{formatBRL(order.payment.total || order.items.reduce((a, b) => a + b.total, 0))}</span>
             </div>
           </div>
         </div>
@@ -339,6 +348,16 @@ function OrderActions({ order }: { order: OrderDetail }) {
       />
 
       <div className="flex items-center gap-2 mt-3 pb-6 sm:justify-end">
+        {/* Botão Imprimir — sempre visível */}
+        <button
+          onClick={() => window.print()}
+          className="inline-flex items-center gap-1.5 bg-white border border-[#e6e6e6] text-[#444444] text-sm font-medium px-3 py-1.5 rounded-xl hover:bg-[#f5f5f5] hover:border-[#d0d0d0] transition-colors print:hidden"
+          title="Imprimir pedido"
+        >
+          <Printer className="w-3.5 h-3.5" />
+          Imprimir
+        </button>
+
         {order.status === 'NOVO' && (
           <button
             onClick={() => handleAction(() => moveOrderToPaid(order.id))}

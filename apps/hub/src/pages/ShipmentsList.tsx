@@ -361,12 +361,12 @@ export default function ShipmentsList() {
               <div className="drawer-card">
                 <div className="drawer-card-title"><User size={15} /><h4>Destinatário</h4></div>
                 <div className="drawer-fields-grid">
-                  <div className="field-group"><span className="field-label">Nome Completo</span><span className="field-value font-medium">{selectedOrder.customer_name || '—'}</span></div>
-                  <div className="field-group"><span className="field-label">CPF / CNPJ</span><span className="field-value font-mono">{selectedOrder.customer_document || '—'}</span></div>
-                  <div className="field-group"><span className="field-label">Telefone / WhatsApp</span><span className="field-value">{selectedOrder.customer_phone || '—'}</span></div>
+                  <div className="field-group"><span className="field-label">Cliente</span><span className="field-value font-medium">{selectedOrder.customer_name || '—'}</span></div>
+                  <div className="field-group"><span className="field-label">Documento</span><span className="field-value font-mono">{selectedOrder.customer_document || '—'}</span></div>
+                  <div className="field-group"><span className="field-label">Telefone</span><span className="field-value">{selectedOrder.customer_phone || '—'}</span></div>
                   <div className="field-group"><span className="field-label">E-mail</span><span className="field-value">{selectedOrder.customer_email || '—'}</span></div>
                   <div className="field-group full-width">
-                    <span className="field-label">Endereço de Entrega</span>
+                    <span className="field-label">Endereço</span>
                     <div className="address-box"><MapPin size={14} className="address-icon" /><span>{selectedOrder.delivery_address || 'Endereço não informado.'}</span></div>
                   </div>
                 </div>
@@ -374,7 +374,7 @@ export default function ShipmentsList() {
 
               {/* Produtos */}
               <div className="drawer-card">
-                <div className="drawer-card-title"><ShoppingBag size={15} /><h4>Produtos ({selectedOrder.items?.reduce((s, i) => s + i.quantity, 0) || 0} itens)</h4></div>
+                <div className="drawer-card-title"><ShoppingBag size={15} /><h4>Produtos ({selectedOrder.items?.reduce((s, i) => s + i.quantity, 0) || 0})</h4></div>
                 <div className="drawer-items-list">
                   {selectedOrder.items && selectedOrder.items.length > 0 ? (
                     selectedOrder.items.map(it => (
@@ -384,28 +384,19 @@ export default function ShipmentsList() {
                           <span className="item-title">{it.product_name}</span>
                           <span className="item-meta">SKU: {it.sku || 'N/A'} • {it.quantity}x {formatPrice(it.price)}</span>
                         </div>
-                        <span className="item-total">{formatPrice(it.total)}</span>
+                        <span className="item-total font-medium">{formatPrice(it.total)}</span>
                       </div>
                     ))
-                  ) : <div className="empty-items-notice">Itens vinculados a store_order_items.</div>}
-                </div>
-                <div className="package-specs-summary">
-                  <span className="spec-tag" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                    <Package size={13} /> Pacote padrão: 30x20x15 cm
-                  </span>
-                  <span className="spec-tag" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="m16 10-4 4-4-4"/></svg> Peso estimado: 1.2 kg
-                  </span>
+                  ) : <div className="empty-items-notice">Sem itens listados.</div>}
                 </div>
               </div>
 
               {/* Frete */}
               <div className="drawer-card">
-                <div className="drawer-card-title"><Truck size={15} /><h4>Frete Contratado</h4></div>
+                <div className="drawer-card-title"><Truck size={15} /><h4>Frete</h4></div>
                 <div className="drawer-freight-info">
-                  <div className="freight-row"><span>Provedor Logístico:</span><strong>Melhor Envio</strong></div>
-                  <div className="freight-row"><span>Serviço / Transportadora:</span><strong>{selectedOrder.shipping_method || 'Correios PAC'}</strong></div>
-                  <div className="freight-row"><span>Valor pago:</span><strong>{selectedOrder.shipping_cost > 0 ? formatPrice(selectedOrder.shipping_cost) : 'Frete Grátis'}</strong></div>
+                  <div className="freight-row"><span>Serviço:</span><strong>{selectedOrder.shipping_method || 'Correios PAC'} (Melhor Envio)</strong></div>
+                  <div className="freight-row"><span>Valor:</span><strong>{selectedOrder.shipping_cost > 0 ? formatPrice(selectedOrder.shipping_cost) : 'Frete Grátis'}</strong></div>
                 </div>
               </div>
 
@@ -416,13 +407,8 @@ export default function ShipmentsList() {
                   const { code, labelUrl } = getOrderTracking(selectedOrder)
                   if (!code) return (
                     <div className="label-action-box">
-                      <p className="label-intro">
-                        {['paid', 'approved', 'preparing', 'shipped', 'delivered'].includes((selectedOrder.status || '').toLowerCase()) || selectedOrder.payment_status === 'approved'
-                          ? 'Pagamento confirmado. Você já pode emitir a etiqueta via Melhor Envio.'
-                          : 'Aguardando confirmação de pagamento para liberar a emissão da etiqueta.'}
-                      </p>
                       <button className="btn-generate-label" onClick={() => handleGenerateLabel(selectedOrder)} disabled={generatingLabel}>
-                        {generatingLabel ? <><div className="spinner-white" /><span>Processando envio...</span></> : <><Package size={16} /><span>Gerar Etiqueta via Melhor Envio</span></>}
+                        {generatingLabel ? <><div className="spinner-white" /><span>Processando...</span></> : <><Package size={16} /><span>Gerar Etiqueta de Envio</span></>}
                       </button>
                     </div>
                   )

@@ -717,7 +717,7 @@
   white-space: nowrap;
   width: max-content;
   max-width: max-content;
-  z-index: 50;
+  z-index: 2;
   transition: left 0.08s cubic-bezier(0.16, 1, 0.3, 1), top 0.08s cubic-bezier(0.16, 1, 0.3, 1);
 }
 

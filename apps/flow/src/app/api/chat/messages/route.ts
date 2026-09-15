@@ -19,11 +19,12 @@ export async function GET(req: NextRequest) {
 
     const supabase = getAdminClient()
 
-    // Canal "Geral" = feed global de TODAS as mensagens
+    // Canal "Geral" = mensagens do canal conv-geral
     if (conversationId === 'conv-geral') {
       const { data, error } = await supabase
         .from('internal_messages')
         .select('*')
+        .eq('conversation_id', 'conv-geral')
         .order('created_at', { ascending: true })
         .limit(500)
 

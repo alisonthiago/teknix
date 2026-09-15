@@ -4569,3 +4569,12 @@
 }
 @keyframes spin { 100% { transform: rotate(360deg); } }
 
+@media (max-width: 768px) {
+  .pdp-tab-btn {
+    font-size: 17px;
+  }
+
+  .pdp-tabs-nav {
+    gap: 24px;
+  }
+}

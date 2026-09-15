@@ -10,9 +10,15 @@ import {
   CORE_SEGMENTS,
   fetchPublishedCategories,
   fetchPublishedSegments,
+  fetchMegaMenuCatalog,
   type CentralCategoryWithSegment,
-  type StoreSegment
+  type StoreSegment,
+  type MegaMenuDepartmentData
 } from '../services/categories'
+import {
+  CATALOG_MENU_DEPARTMENTS,
+  TOTAL_MENU_CATEGORIES_COUNT
+} from '../data/catalogMenuData'
 import { getCustomerByUserId, type Customer } from '../services/customer'
 import CepDeliveryModal from './CepDeliveryModal'
 import './CasasBahiaHeader.css'
@@ -201,10 +207,16 @@ export default function TeknixHeader() {
 
   const [dbCategories, setDbCategories] = useState<CentralCategoryWithSegment[]>([])
   const [dbSegments, setDbSegments] = useState<StoreSegment[]>(CORE_SEGMENTS)
+  const [megaDepartments, setMegaDepartments] = useState<MegaMenuDepartmentData[]>([])
   const [selectedMegaSegmentId, setSelectedMegaSegmentId] = useState<string>('all')
   const [megaSearchQuery, setMegaSearchQuery] = useState<string>('')
+  const [activeDeptIndex, setActiveDeptIndex] = useState<number>(0)
+  const [mobileOpenDeptIndex, setMobileOpenDeptIndex] = useState<number | null>(null)
 
   useEffect(() => {
+    fetchMegaMenuCatalog().then(data => {
+      if (data && data.length > 0) setMegaDepartments(data)
+    })
     fetchPublishedCategories().then(cats => {
       if (cats && cats.length > 0) setDbCategories(cats)
     })
@@ -417,6 +429,58 @@ export default function TeknixHeader() {
               </Editable>
             </EditableFlow>
 
+            {/* Modal Completo de CEP / Endereço de Entrega */}
+            <CepDeliveryModal
+              isOpen={isCepOpen}
+              onClose={() => setIsCepOpen(false)}
+              currentCep={cep}
+              onSelectCep={handleSelectCep}
+            />
+
+            {/* ── LOCATION PILL (IP/CEP) — Posicionado Atrás do Logo TEKNIX ── */}
+            {(() => {
+              const displayCity = locationDetails?.city
+                ? `${locationDetails.city}${locationDetails.state ? `/${locationDetails.state}` : ''}`
+                : geoCity
+                ? (geoCity.includes('/') ? geoCity : `${geoCity}/SP`)
+                : cep
+                ? `CEP ${cep}`
+                : 'Cotia/SP'
+
+              return (
+                <div className={`dsvia-location-wrapper ${isSearching ? 'is-searching' : ''}`}>
+                  <div className="published-flow-node" data-canvas-node="header-top-row:chrome:header:location" draggable="false" style={{ display: 'contents' }}>
+                    <button
+                      aria-expanded={isCepOpen ? 'true' : 'false'}
+                      aria-haspopup="dialog"
+                      aria-label={`Região de ${displayCity}. Alterar o CEP`}
+                      className={`dsvia-location-pill ${isSearching ? 'is-searching' : ''}`}
+                      data-testid="header-location"
+                      type="button"
+                      onClick={() => setIsCepOpen(true)}
+                      title={`Região de ${displayCity}. Alterar o CEP`}
+                    >
+                      <span className="dsvia-icon-place" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" />
+                          <circle cx="12" cy="10" r="2.8" fill="currentColor" stroke="none" />
+                        </svg>
+                      </span>
+                      <div className="dsvia-location-text-col">
+                        <span className="dsvia-location-prefix">Região de</span>
+                        <span className="dsvia-location-city">{displayCity}</span>
+                      </div>
+                      <span className="dsvia-icon-chevron" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="m6 9 6 6 6-6" />
+                        </svg>
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              )
+            })()}
+
             {/* Barra de Busca Central */}
             <Editable as="div" widgetId="chrome:header:search-box" globalKey="chrome:header:search-box" label="Barra de busca" widgetType="container" editorKind="container" className="dsvia-search-box" renderContent={false} style={{ display: (headerEdit?.schema as any)?.hide_search ? 'none' : undefined }}>
               <form className="dsvia-search-form" role="search" onSubmit={handleSearchSubmit}>
@@ -457,58 +521,6 @@ export default function TeknixHeader() {
               </form>
             </Editable>
 
-            {/* Modal Completo de CEP / Endereço de Entrega */}
-            <CepDeliveryModal
-              isOpen={isCepOpen}
-              onClose={() => setIsCepOpen(false)}
-              currentCep={cep}
-              onSelectCep={handleSelectCep}
-            />
-
-            {/* ── LOCATION PILL (IP/CEP) ── */}
-            {(() => {
-              const displayCity = locationDetails?.city
-                ? `${locationDetails.city}${locationDetails.state ? `/${locationDetails.state}` : ''}`
-                : geoCity
-                ? geoCity
-                : cep
-                ? `CEP ${cep}`
-                : 'Sao Paulo/SP'
-
-              return (
-                <div className={`dsvia-location-wrapper ${isSearching ? 'is-searching' : ''}`}>
-                  <div className="published-flow-node" data-canvas-node="header-top-row:chrome:header:location" draggable="false" style={{ display: 'contents' }}>
-                    <button
-                      aria-expanded={isCepOpen ? 'true' : 'false'}
-                      aria-haspopup="dialog"
-                      aria-label={`Região de ${displayCity}. Alterar o CEP`}
-                      className={`dsvia-location-pill ${isSearching ? 'is-searching' : ''}`}
-                      data-testid="header-location"
-                      type="button"
-                      onClick={() => setIsCepOpen(true)}
-                      title={`Região de ${displayCity}. Alterar o CEP`}
-                    >
-                      <span className="dsvia-icon-place" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" />
-                          <circle cx="12" cy="10" r="3" />
-                        </svg>
-                      </span>
-                      <div className="dsvia-location-text-col">
-                        <span className="dsvia-location-prefix">Região de</span>
-                        <span className="dsvia-location-city">{displayCity}</span>
-                      </div>
-                      <span className="dsvia-icon-chevron" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="m6 9 6 6 6-6" />
-                        </svg>
-                      </span>
-                    </button>
-                  </div>
-                </div>
-              )
-            })()}
-
             {/* Ações da Direita: Acesse sua Conta, Pedidos, Favoritos, Carrinho */}
             <Editable as="div" widgetId="chrome:header:actions" globalKey="chrome:header:actions" label="Ícones e ações do cabeçalho" widgetType="container" editorKind="container" className="dsvia-actions-right" renderContent={false}>
               <EditableFlow id="header-actions" label="Ações do cabeçalho" globalKey="layout:chrome:header:actions" compact>
@@ -534,7 +546,10 @@ export default function TeknixHeader() {
                   aria-expanded={user ? isAccountOpen : undefined}
                 >
                   {account.avatarUrl ? (
-                    <img className="dsvia-account-avatar" src={account.avatarUrl} alt="Foto de perfil" referrerPolicy="no-referrer" />
+                    <span className="dsvia-account-avatar-frame">
+                      <img className="dsvia-account-avatar" src={account.avatarUrl} alt="Foto de perfil" referrerPolicy="no-referrer" />
+                      <span className="dsvia-account-online-dot" aria-label="Online" title="Online" />
+                    </span>
                   ) : user ? (
                     <div className="dsvia-account-initials-badge">
                       {account.firstName.charAt(0).toUpperCase()}
@@ -542,7 +557,7 @@ export default function TeknixHeader() {
                   ) : accountEdit?.content?.icon ? (
                     renderDynamicIcon(String(accountEdit.content.icon), Number(accountEdit.content.icon_size) || 18, String(accountEdit.content.icon_color || 'currentColor'))
                   ) : (
-                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="dsvia-account-icon">
                       <circle cx="12" cy="12" r="10" />
                       <circle cx="12" cy="10" r="3" />
                       <path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662" />
@@ -550,11 +565,14 @@ export default function TeknixHeader() {
                   )}
                   <div className="dsvia-account-user-text">
                     {user ? (
-                      <span className="dsvia-account-logged-in-label" aria-hidden="true" />
+                      <>
+                        <span className="dsvia-account-greeting">Olá, {account.firstName || 'Cliente'}</span>
+                        <span className="dsvia-account-subtext">Minha Conta</span>
+                      </>
                     ) : (
                       <>
-                        <span className="dsvia-account-greeting">Boas-vindas :)</span>
-                        <span className="dsvia-account-subtext">Entre ou cadastre-se</span>
+                        <span className="dsvia-account-greeting">Boas vindas :)</span>
+                        <span className="dsvia-account-subtext">Entre ou Cadastre-se</span>
                       </>
                     )}
                   </div>
@@ -703,185 +721,153 @@ export default function TeknixHeader() {
                       </svg>
                     </button>
 
-                    {isDepartmentsOpen && (
-                      <>
-                        <div className="dsvia-megamenu-backdrop" onClick={() => setIsDepartmentsOpen(false)} />
-                        <div className="dsvia-megamenu-popover" role="dialog" aria-label="Todos os departamentos">
-                          {/* Top Header of Mega Menu */}
-                          <div className="dsvia-megamenu-header">
-                            <div className="dsvia-megamenu-header-title">
-                              <span className="dsvia-megamenu-header-badge">Catálogo Oficial</span>
-                              <h3>Todos os Departamentos</h3>
-                              <span className="dsvia-megamenu-header-count">({allCats.length} categorias)</span>
-                            </div>
+                    {isDepartmentsOpen && (() => {
+                      const departmentsList = megaDepartments.length > 0
+                        ? megaDepartments
+                        : CATALOG_MENU_DEPARTMENTS.map(dept => {
+                            const half = Math.ceil(dept.subcategories.length / 2)
+                            return {
+                              id: dept.slug,
+                              title: dept.title,
+                              slug: dept.slug,
+                              categories: dept.subcategories.slice(0, half).map(s => ({ title: s.title, slug: s.slug })),
+                              models: dept.subcategories.slice(half).map(s => ({ title: s.title, slug: s.slug })),
+                              usageLines: [
+                                { title: 'Uso Profissional', slug: 'produtos?filtro=profissional' },
+                                { title: 'Industrial Pesado', slug: 'produtos?filtro=industrial' },
+                                { title: 'Equipamento Novo 100%', slug: 'produtos?filtro=novo' }
+                              ]
+                            }
+                          })
 
-                            <div className="dsvia-megamenu-search-wrap">
-                              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" className="dsvia-megamenu-search-icon">
-                                <circle cx="11" cy="11" r="8" />
-                                <path d="m21 21-4.35-4.35" />
-                              </svg>
-                              <input
-                                type="text"
-                                placeholder="Filtrar categorias..."
-                                value={megaSearchQuery}
-                                onChange={e => setMegaSearchQuery(e.target.value)}
-                                className="dsvia-megamenu-search-input"
-                              />
-                              {megaSearchQuery && (
-                                <button type="button" onClick={() => setMegaSearchQuery('')} className="dsvia-megamenu-search-clear" title="Limpar">
-                                  ✕
-                                </button>
-                              )}
-                            </div>
+                      const currentDept = departmentsList[activeDeptIndex] || departmentsList[0] || {
+                        id: 'ferramentas-eletricas',
+                        title: 'Ferramentas Elétricas',
+                        slug: 'ferramentas-eletricas',
+                        categories: [],
+                        models: [],
+                        usageLines: []
+                      }
 
-                            <button
-                              type="button"
-                              className="dsvia-megamenu-close-btn"
-                              onClick={() => setIsDepartmentsOpen(false)}
-                              title="Fechar"
-                              aria-label="Fechar menu"
-                            >
-                              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M18 6 6 18M6 6l12 12" />
-                              </svg>
-                            </button>
-                          </div>
-
-                          {/* Body of Mega Menu */}
-                          <div className="dsvia-megamenu-body">
-                            {/* Left Column: Segments / Departamentos */}
-                            <div className="dsvia-megamenu-sidebar">
-                              <div className="dsvia-megamenu-sidebar-label">Departamentos</div>
-                              <button
-                                type="button"
-                                className={`dsvia-megamenu-dept-btn ${selectedMegaSegmentId === 'all' ? 'active' : ''}`}
-                                onClick={() => setSelectedMegaSegmentId('all')}
-                                onMouseEnter={() => setSelectedMegaSegmentId('all')}
-                              >
-                                <span className="dsvia-megamenu-dept-emoji">🌟</span>
-                                <span className="dsvia-megamenu-dept-text">Todos os Departamentos</span>
-                                <span className="dsvia-megamenu-dept-count">{allCats.length}</span>
-                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" className="dsvia-megamenu-dept-arrow">
-                                  <path d="m9 18 6-6-6-6" />
-                                </svg>
-                              </button>
-
-                              {allSegments.map(seg => {
-                                const count = allCats.filter(c => c.segment_id === seg.id).length
-                                const emoji = seg.slug.includes('ferramenta') ? '🛠️' : seg.slug.includes('infor') ? '💻' : seg.slug.includes('casa') ? '🏠' : seg.slug.includes('auto') ? '🚗' : '📦'
-                                return (
-                                  <button
-                                    key={seg.id}
-                                    type="button"
-                                    className={`dsvia-megamenu-dept-btn ${selectedMegaSegmentId === seg.id ? 'active' : ''}`}
-                                    onClick={() => setSelectedMegaSegmentId(seg.id)}
-                                    onMouseEnter={() => setSelectedMegaSegmentId(seg.id)}
-                                  >
-                                    <span className="dsvia-megamenu-dept-emoji">{emoji}</span>
-                                    <span className="dsvia-megamenu-dept-text">{seg.name}</span>
-                                    {count > 0 && <span className="dsvia-megamenu-dept-count">{count}</span>}
-                                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" className="dsvia-megamenu-dept-arrow">
-                                      <path d="m9 18 6-6-6-6" />
-                                    </svg>
-                                  </button>
-                                )
-                              })}
-                            </div>
-
-                            {/* Right Column: Categories Cards Grid */}
-                            <div className="dsvia-megamenu-content">
-                              <div className="dsvia-megamenu-content-header">
-                                <div className="dsvia-megamenu-active-title">
-                                  <h4>{activeSegmentName}</h4>
-                                  <span className="dsvia-megamenu-active-count">
-                                    {displayedCategories.length} {displayedCategories.length === 1 ? 'categoria' : 'categorias'}
-                                  </span>
-                                </div>
-                                {selectedMegaSegmentId !== 'all' && (
-                                  <Link
-                                    to={`/${allSegments.find(s => s.id === selectedMegaSegmentId)?.slug || 'produtos'}`}
-                                    className="dsvia-megamenu-view-all-link"
-                                    onClick={() => setIsDepartmentsOpen(false)}
-                                  >
-                                    Ver tudo em {activeSegmentName} →
-                                  </Link>
-                                )}
-                              </div>
-
-                              {displayedCategories.length === 0 ? (
-                                <div className="dsvia-megamenu-empty">
-                                  <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#94a3b8" strokeWidth="1.5">
-                                    <circle cx="11" cy="11" r="8" />
-                                    <path d="m21 21-4.35-4.35" />
-                                  </svg>
-                                  <p>Nenhuma categoria encontrada para "{megaSearchQuery}"</p>
-                                </div>
-                              ) : (
-                                <div className="dsvia-megamenu-grid">
-                                  {displayedCategories.map(cat => {
-                                    const thumb = getCategoryThumbnail(cat)
-                                    return (
+                      return (
+                        <>
+                          <div className="fixedMenu-backdrop" onClick={() => setIsDepartmentsOpen(false)} />
+                          <div className="fixedMenu active" role="dialog" aria-label="Todas as categorias">
+                            <div className="fixedMenu-card">
+                            {/* Coluna 1: Departamentos Principais */}
+                            <div className="fixedMenu-left-col">
+                              <ul className="fixedMenu-dept-list">
+                                {departmentsList.map((dept, idx) => {
+                                  const isDeptActive = activeDeptIndex === idx
+                                  return (
+                                    <li
+                                      key={dept.slug}
+                                      className={`fixedMenu-dept-item ${isDeptActive ? 'active' : ''}`}
+                                      onMouseEnter={() => setActiveDeptIndex(idx)}
+                                    >
                                       <Link
-                                        key={cat.id || cat.slug}
-                                        to={`/categoria/${cat.slug}`}
-                                        className="dsvia-megamenu-card"
+                                        to={`/categoria/${dept.slug}`}
+                                        className="fixedMenu-dept-link"
                                         onClick={() => setIsDepartmentsOpen(false)}
                                       >
-                                        <div className="dsvia-megamenu-card-thumb">
-                                          {thumb ? (
-                                            <img src={thumb} alt={cat.name} loading="lazy" />
-                                          ) : (
-                                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8">
-                                              <circle cx="12" cy="12" r="10" />
-                                              <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
-                                              <path d="M2 12h20" />
-                                            </svg>
-                                          )}
-                                        </div>
-                                        <div className="dsvia-megamenu-card-info">
-                                          <span className="dsvia-megamenu-card-name">{cat.name}</span>
-                                          <span className="dsvia-megamenu-card-action">
-                                            Ver produtos
-                                            <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                              <path d="m9 18 6-6-6-6" />
-                                            </svg>
-                                          </span>
-                                        </div>
+                                        <span>{dept.title}</span>
+                                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" className="fixedMenu-chevron">
+                                          <path d="m9 18 6-6-6-6" />
+                                        </svg>
                                       </Link>
-                                    )
-                                  })}
-                                </div>
-                              )}
+                                    </li>
+                                  )
+                                })}
+                              </ul>
                             </div>
-                          </div>
 
-                          {/* Footer of Mega Menu */}
-                          <div className="dsvia-megamenu-footer">
-                            <div className="dsvia-megamenu-footer-links">
-                              <Link to="/produtos" onClick={() => setIsDepartmentsOpen(false)} className="dsvia-megamenu-footer-item">
-                                <span className="dsvia-megamenu-badge-pill">⚡</span>
-                                <span>Ofertas & Promoções</span>
-                              </Link>
-                              <Link to="/ferramentas" onClick={() => setIsDepartmentsOpen(false)} className="dsvia-megamenu-footer-item">
-                                <span className="dsvia-megamenu-badge-pill">🛠️</span>
-                                <span>Linha Profissional</span>
-                              </Link>
-                              <Link to="/categoria/microfones-e-amplificadores" onClick={() => setIsDepartmentsOpen(false)} className="dsvia-megamenu-footer-item">
-                                <span className="dsvia-megamenu-badge-pill">🎙️</span>
-                                <span>Áudio & Som</span>
-                              </Link>
-                              <Link to="/institucional" onClick={() => setIsDepartmentsOpen(false)} className="dsvia-megamenu-footer-item">
-                                <span className="dsvia-megamenu-badge-pill">🔒</span>
-                                <span>Garantia & Suporte TEKNIX</span>
-                              </Link>
+                            {/* Colunas Centrais: 3 colunas de links (Categorias, Modelos, Linha/Uso) */}
+                            <div className="fixedMenu-middle-cols">
+                              {/* Coluna 1: Categorias */}
+                              <div className="fixedMenu-col">
+                                <span className="fixedMenu-col-title">Categorias</span>
+                                <ul className="fixedMenu-link-list">
+                                  {currentDept.categories.map(cat => (
+                                    <li key={cat.slug}>
+                                      <Link
+                                        to={cat.slug.startsWith('/') ? cat.slug : `/categoria/${cat.slug}`}
+                                        className="fixedMenu-sub-link"
+                                        onClick={() => setIsDepartmentsOpen(false)}
+                                      >
+                                        {cat.title}
+                                      </Link>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+
+                              {/* Coluna 2: Modelos & Tipos */}
+                              <div className="fixedMenu-col">
+                                <span className="fixedMenu-col-title">Modelos & Tipos</span>
+                                <ul className="fixedMenu-link-list">
+                                  {currentDept.models.length > 0 ? (
+                                    currentDept.models.map(mod => (
+                                      <li key={mod.slug}>
+                                        <Link
+                                          to={mod.slug.startsWith('/') ? mod.slug : (mod.slug.includes('?') ? `/categoria/${mod.slug}` : `/categoria/${mod.slug}`)}
+                                          className="fixedMenu-sub-link"
+                                          onClick={() => setIsDepartmentsOpen(false)}
+                                        >
+                                          {mod.title}
+                                        </Link>
+                                      </li>
+                                    ))
+                                  ) : (
+                                    <>
+                                      <li>
+                                        <Link to={`/categoria/${currentDept.slug}?tipo=bateria`} className="fixedMenu-sub-link" onClick={() => setIsDepartmentsOpen(false)}>
+                                          Linha a Bateria 20V
+                                        </Link>
+                                      </li>
+                                      <li>
+                                        <Link to={`/categoria/${currentDept.slug}?tipo=eletrico`} className="fixedMenu-sub-link" onClick={() => setIsDepartmentsOpen(false)}>
+                                          Linha Elétrica 220V
+                                        </Link>
+                                      </li>
+                                      <li>
+                                        <Link to={`/categoria/${currentDept.slug}?tipo=kits`} className="fixedMenu-sub-link" onClick={() => setIsDepartmentsOpen(false)}>
+                                          Kits com Maleta
+                                        </Link>
+                                      </li>
+                                    </>
+                                  )}
+                                </ul>
+                              </div>
+
+                              {/* Coluna 3: Linha & Uso */}
+                              <div className="fixedMenu-col">
+                                <span className="fixedMenu-col-title">Linha & Uso</span>
+                                <ul className="fixedMenu-link-list">
+                                  {currentDept.usageLines.map(line => (
+                                    <li key={line.slug}>
+                                      <Link
+                                        to={line.slug.startsWith('/') ? line.slug : `/${line.slug}`}
+                                        className="fixedMenu-sub-link"
+                                        onClick={() => setIsDepartmentsOpen(false)}
+                                      >
+                                        {line.title}
+                                      </Link>
+                                    </li>
+                                  ))}
+                                  <li>
+                                    <Link to={`/categoria/${currentDept.slug}`} className="fixedMenu-sub-link fixedMenu-see-all" onClick={() => setIsDepartmentsOpen(false)}>
+                                      Ver todos os produtos →
+                                    </Link>
+                                  </li>
+                                </ul>
+                              </div>
                             </div>
-                            <Link to="/produtos" onClick={() => setIsDepartmentsOpen(false)} className="dsvia-megamenu-footer-all">
-                              Explorar todo o catálogo →
-                            </Link>
+
                           </div>
                         </div>
                       </>
-                    )}
+                    )
+                  })()}
                   </div>
                 )
               })()}
@@ -938,9 +924,6 @@ export default function TeknixHeader() {
                     <img src="/teknix-logo.svg" alt="TEKNIX" />
                   )}
                 </Link>
-                <span className="tkn-drawer-greeting">
-                  {user ? `Olá, ${account.firstName}` : 'Olá! Seja bem-vindo'}
-                </span>
               </div>
               <button
                 type="button"
@@ -957,8 +940,8 @@ export default function TeknixHeader() {
 
             {/* Banner rápido de usuário / Login */}
             <div className="tkn-drawer-user-strip">
-              <div className="tkn-drawer-user-meta">
-                {account.avatarUrl ? <img className="tkn-drawer-user-avatar" src={account.avatarUrl} alt="Foto de perfil" referrerPolicy="no-referrer" /> : <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <div className="tkn-drawer-user-meta tkn-drawer-user-meta-clickable" role="button" tabIndex={0} onClick={() => navigate(user ? '/conta' : '/login')} onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') navigate(user ? '/conta' : '/login') }}>
+                {account.avatarUrl ? <img className="tkn-drawer-user-avatar" src={account.avatarUrl} alt="Foto de perfil" referrerPolicy="no-referrer" /> : user ? <span className="tkn-drawer-user-initials">{account.firstName.charAt(0).toUpperCase()}</span> : <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                   <circle cx="12" cy="7" r="4" />
                 </svg>}
@@ -976,7 +959,7 @@ export default function TeknixHeader() {
             {/* Conteúdo rolável resumido */}
             <div className="tkn-drawer-scroll-body">
               {/* Seção 1: Departamentos em Destaque */}
-              <div className="tkn-drawer-section">
+              <div className="tkn-drawer-section tkn-drawer-category-section">
                 <div className="tkn-drawer-section-header">
                   <h3 className="tkn-drawer-section-title">Departamentos</h3>
                   <span className="tkn-drawer-section-badge">Categorias</span>
@@ -1013,6 +996,26 @@ export default function TeknixHeader() {
                       </svg>
                     </Link>
                   </li>
+                </ul>
+              </div>
+
+              {/* Menu completo do desktop, incorporado ao menu mobile */}
+              <div className="tkn-drawer-section tkn-drawer-all-departments">
+                <div className="tkn-drawer-section-header">
+                  <h3 className="tkn-drawer-section-title">Todos os departamentos</h3>
+                </div>
+                <ul className="tkn-drawer-list">
+                  {CATALOG_MENU_DEPARTMENTS.map(department => (
+                    <li key={department.slug} className="tkn-drawer-item">
+                      <Link to={`/categoria/${department.slug}`} className="tkn-drawer-link" onClick={() => setIsMenuOpen(false)}>
+                        <span className="tkn-drawer-icon-wrap">{getCategoryIcon(department.slug)}</span>
+                        <span className="tkn-drawer-item-text">{department.title}</span>
+                        <svg className="tkn-drawer-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="9 18 15 12 9 6" />
+                        </svg>
+                      </Link>
+                    </li>
+                  ))}
                 </ul>
               </div>
 
@@ -1083,20 +1086,22 @@ export default function TeknixHeader() {
             </div>
 
             {/* Rodapé Resumido e Direto */}
-            <div className="tkn-drawer-footer" data-testid="header-sidebar-footer">
-              <a
-                className="tkn-drawer-btn-primary"
-                href="https://wa.me/5546999155875"
-                target="_blank"
-                rel="noreferrer"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                </svg>
-                <span>WhatsApp: (46) 99915-5875</span>
-              </a>
-            </div>
+            {user && (
+              <div className="tkn-drawer-footer" data-testid="header-sidebar-footer">
+                <button
+                  type="button"
+                  className="tkn-drawer-btn-primary"
+                  onClick={async () => { await signOut(); setIsMenuOpen(false); navigate('/') }}
+                >
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <path d="m16 17 5-5-5-5" />
+                    <path d="M21 12H9" />
+                  </svg>
+                  <span>Sair</span>
+                </button>
+              </div>
+            )}
           </aside>
         </>
       )}

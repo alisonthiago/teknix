@@ -21,6 +21,14 @@ const ProductCreateModal = dynamic(() => import('@/components/ProductCreateModal
 const SupplierCreateModal = dynamic(() => import('@/components/SupplierCreateModal'), { ssr: false })
 const PurchaseCreateModal = dynamic(() => import('@/components/PurchaseCreateModal'), { ssr: false })
 const DeleteConfirmationModal = dynamic(() => import('@/components/DeleteConfirmationModal'), { ssr: false })
+import LoadingState from '@/components/ui/LoadingState'
+
+function summarizeTitle(title?: string, maxLength = 36) {
+  if (!title) return ''
+  const clean = title.trim()
+  if (clean.length <= maxLength) return clean
+  return clean.slice(0, maxLength).trim() + '...'
+}
 
 function ProductsTab() {
   const router = useRouter()
@@ -279,18 +287,19 @@ function ProductsTab() {
 
       {/* TOOLBAR UNIFICADA: BUSCA + FILTRO DE SITUAÇÃO COMPACTO & CLEAN */}
       <div className="bg-white rounded-2xl border border-[#e6e6e6] p-3 shadow-2xs space-y-3">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+        {/* Barra de Ações: Busca + Filtro de Situação + Botões de Ação em uma única linha */}
+        <div className="flex items-center justify-between gap-3 mb-4 flex-nowrap overflow-x-auto [&::-webkit-scrollbar]:hidden">
           {/* Campo de Busca */}
-          <div className="flex-1 max-w-md">
-            <SearchInput placeholder="Buscar por título, SKU, marca..." value={search} onChange={setSearch} />
+          <div className="flex-1 min-w-[200px] max-w-sm">
+            <SearchInput placeholder="Buscar por título, SKU, marca..." value={search} onChange={setSearch} className="w-full max-w-none" />
           </div>
 
-          {/* Filtro de Situação — somente dropdown limpo */}
-          <div className="flex items-center gap-2 flex-wrap">
+          {/* Filtro de Situação + Botões de Ação — todos alinhados em uma única linha */}
+          <div className="flex items-center gap-2 shrink-0 flex-nowrap">
             <select
               value={situationFilter}
               onChange={(e) => setSituationFilter(e.target.value as any)}
-              className="h-[38px] px-3.5 bg-[#f8f9fa] hover:bg-[#f0f0f0] border border-[#e6e6e6] rounded-xl text-xs font-medium text-[#333] focus:outline-none focus:border-[#16a34a] cursor-pointer shadow-sm transition-all"
+              className="h-[38px] px-3 bg-[#f8f9fa] hover:bg-[#f0f0f0] border border-[#e6e6e6] rounded-xl text-xs font-medium text-[#333] focus:outline-none focus:border-[#16a34a] cursor-pointer shadow-none shrink-0 transition-all"
             >
               <option value="ALL">Todas Situações ({counts.ALL})</option>
               <option value="ACTIVE">Ativos ({counts.ACTIVE})</option>
@@ -306,7 +315,7 @@ function ProductsTab() {
             {/* Botão Atalho para Vincular Anúncios */}
             <Link
               href="/marketplaces/vincular"
-              className={`h-[38px] px-3.5 border rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer ${
+              className={`h-[38px] px-3.5 border rounded-xl text-xs font-bold transition-all shadow-none flex items-center gap-1.5 cursor-pointer shrink-0 whitespace-nowrap ${
                 pendingMatchesCount > 0
                   ? 'bg-[#fef2f2] text-[#dc2626] border-[#fecaca] hover:bg-[#fee2e2]'
                   : 'bg-white hover:bg-[#F7F7F7] text-[#111111] border-[#e2e8f0]'
@@ -323,14 +332,14 @@ function ProductsTab() {
 
             {/* Ações em Lote ou Botões de Ação */}
             {selectedItems.length > 0 ? (
-              <div className="flex items-center gap-2 bg-[#f5f5f5] px-3 py-1 rounded-xl border border-[#1f2328]/20 shadow-2xs">
+              <div className="flex items-center gap-2 bg-[#f5f5f5] px-3 py-1 rounded-xl border border-[#1f2328]/20 shrink-0">
                 <span className="text-xs font-bold text-[#1f2328]">{selectedItems.length} sel.</span>
                 <button onClick={handleExportSelected} className="text-xs font-bold text-[#1f2328] hover:underline cursor-pointer">Exportar</button>
                 <button onClick={handleDeleteSelected} className="text-xs font-bold text-[#dc2626] hover:underline cursor-pointer">Excluir</button>
               </div>
             ) : (
-              <div className="flex items-center gap-2">
-                <SecondaryButton onClick={() => document.getElementById('import-products')?.click()}><Upload className="w-3.5 h-3.5" /> Importar</SecondaryButton>
+              <div className="flex items-center gap-2 shrink-0 flex-nowrap">
+                <SecondaryButton className="shrink-0 whitespace-nowrap" onClick={() => document.getElementById('import-products')?.click()}><Upload className="w-3.5 h-3.5" /> Importar</SecondaryButton>
                 <input 
                   type="file" 
                   id="import-products" 
@@ -361,8 +370,8 @@ function ProductsTab() {
                     e.target.value = ''
                   }} 
                 />
-                <SecondaryButton onClick={handleExportAll}><Download className="w-3.5 h-3.5" /> Exportar</SecondaryButton>
-                <PrimaryButton onClick={() => setShowCreate(true)}><Plus className="w-3.5 h-3.5" /> Novo</PrimaryButton>
+                <SecondaryButton className="shrink-0 whitespace-nowrap" onClick={handleExportAll}><Download className="w-3.5 h-3.5" /> Exportar</SecondaryButton>
+                <PrimaryButton className="shrink-0 whitespace-nowrap" onClick={() => setShowCreate(true)}><Plus className="w-3.5 h-3.5" /> Novo</PrimaryButton>
               </div>
             )}
           </div>
@@ -370,7 +379,9 @@ function ProductsTab() {
       </div>
 
       {loading ? (
-        <div className="bg-white rounded-2xl border border-[#e6e6e6] p-10 text-center text-[#999] text-[13px]">Carregando catálogo...</div>
+        <div className="bg-white rounded-2xl border border-[#e6e6e6]">
+          <LoadingState message="Carregando catálogo operacional..." padding={60} />
+        </div>
       ) : filtered.length === 0 ? (
         <div className="bg-white rounded-2xl border border-[#e6e6e6] p-10 text-center space-y-2">
           <Package className="w-8 h-8 text-[#ccc] mx-auto" />
@@ -388,13 +399,13 @@ function ProductsTab() {
                 className="rounded border-[#ccc] text-[#111] focus:ring-[#16a34a]"
               />
             </Th>
-            <Th>SKU</Th>
-            <Th>Produto & Canal</Th>
-            <Th>Fornecedor</Th>
-            <Th className="text-right">Custo</Th>
-            <Th className="text-right">Estoque</Th>
-            <Th className="text-center">Situação</Th>
-            <Th className="text-right">Controle Central</Th>
+            <Th className="whitespace-nowrap">SKU</Th>
+            <Th className="min-w-[300px]">Produto & Canal</Th>
+            <Th className="whitespace-nowrap">Fornecedor</Th>
+            <Th className="text-right whitespace-nowrap">Custo</Th>
+            <Th className="text-right whitespace-nowrap">Estoque</Th>
+            <Th className="text-center whitespace-nowrap">Situação</Th>
+            <Th className="text-right whitespace-nowrap w-24">Ações</Th>
           </TableHead>
           <tbody className="divide-y divide-[#eeeeee]">
             {filtered.map((p: Record<string, any>) => {
@@ -418,33 +429,38 @@ function ProductsTab() {
               }[status] || { label: 'Ativo', bg: 'bg-[#ecfdf5] text-[#16a34a] border-[#bbf7d0]' }
 
               return (
-                <tr key={p.id as string} onClick={() => router.push(`/produtos/${p.id}`)} className="hover:bg-[#f8f9fa] transition-colors cursor-pointer group">
+                <tr key={p.id as string} onClick={() => router.push(`/produtos/${p.id}`)} className="hover:bg-[#fafafa] transition-colors cursor-pointer group">
                   <Td>
                     <div onClick={(e) => e.stopPropagation()}>
                       <input 
                         type="checkbox" 
                         checked={selectedItems.includes(p.id as string)}
                         onChange={() => toggleSelect(p.id as string)}
-                        className="rounded border-[#ccc] text-[#111] focus:ring-[#16a34a]"
+                        className="rounded border-[#d1d5db] text-[#0071e3] focus:ring-[#0071e3] accent-[#0071e3]"
                       />
                     </div>
                   </Td>
-                  <Td className="font-mono text-[#777] text-xs">{p.sku as string}</Td>
-                  <Td>
-                    <div className="flex items-center gap-3.5">
-                      <div className="w-11 h-11 rounded-xl bg-[#f5f5f5] border border-[#e6e6e6] overflow-hidden flex items-center justify-center shrink-0">
+                  <Td className="font-mono text-[#777777] text-[12px] whitespace-nowrap">{p.sku as string}</Td>
+                  <Td className="min-w-[300px]">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-white border border-[#e6e6e6] overflow-hidden flex items-center justify-center shrink-0 p-0.5">
                         {(p.image_url || (p.product_images as any)?.[0]?.url) ? (
-                          <img src={(p.image_url as string) || (p.product_images as any)[0].url} alt="" className="w-full h-full object-contain p-0.5" />
+                          <img src={(p.image_url as string) || (p.product_images as any)[0].url} alt="" className="w-full h-full object-contain" />
                         ) : (
-                          <Package className="w-5 h-5 text-[#ccc]" />
+                          <Package className="w-4 h-4 text-[#ccc]" />
                         )}
                       </div>
-                      <div className="flex flex-col justify-center min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <p className="font-medium text-[#111] text-[14.5px] leading-snug truncate max-w-lg">{p.name as string}</p>
+                      <div className="flex flex-col justify-center min-w-0 flex-1">
+                        <p className="font-medium text-[#111111] text-[13px] leading-snug truncate max-w-sm" title={p.name as string}>
+                          {summarizeTitle(p.name as string, 36)}
+                        </p>
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <span className="text-[11px] text-[#888888] leading-none shrink-0">
+                            {p.brand as string || 'Sem marca'}
+                          </span>
                           {/* Badges dos Canais Conectados ao Produto Central */}
                           {(p.is_site_published ?? true) && (
-                            <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-[#f1f5f9] text-[#111111] border border-[#cbd5e1] text-[10px] font-bold shrink-0">
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-[#f1f5f9] text-[#334155] border border-[#cbd5e1] text-[10px] font-medium shrink-0 leading-none">
                               Site
                             </span>
                           )}
@@ -452,53 +468,52 @@ function ProductsTab() {
                             const mlCount = (p.marketplace_listings as any[])?.filter((l: any) => !l.channel || l.channel === 'mercadolivre' || l.marketplace_id === 'mercadolivre').length || (String(p.sku || '').startsWith('MLB') ? 1 : 0)
                             if (mlCount === 0) return null
                             return (
-                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#fffde7] text-[#856404] border border-[#ffeeba] text-[10px] font-medium shrink-0">
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#fffde7] text-[#856404] border border-[#ffeeba] text-[10px] font-medium shrink-0 leading-none">
                                 <MarketplaceLogo name="Mercado Livre" className="w-3 h-3" /> ML {mlCount > 1 ? `(${mlCount})` : ''}
                               </span>
                             )
                           })()}
                         </div>
-                        <p className="text-[11px] text-[#777] leading-tight mt-0.5">{p.brand as string || 'Sem marca'}</p>
                       </div>
                     </div>
                   </Td>
-                  <Td className="text-[#666] text-xs">{supplierName}</Td>
-                  <Td className="text-right text-xs font-medium text-[#111] whitespace-nowrap">
+                  <Td className="text-[#666666] text-[12.5px] whitespace-nowrap">{supplierName}</Td>
+                  <Td className="text-right text-[12.5px] font-medium text-[#111111] whitespace-nowrap">
                     R$ {cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </Td>
                   <Td className="text-right whitespace-nowrap">
-                    <span className={`font-medium text-xs ${stock === 0 ? 'text-[#dc2626]' : stock <= minStock ? 'text-[#d97706]' : 'text-[#111]'}`}>
+                    <span className={`font-semibold text-[12.5px] ${stock === 0 ? 'text-[#dc2626]' : stock <= minStock ? 'text-[#d97706]' : 'text-[#111111]'}`}>
                       {stock}
                     </span>
                   </Td>
                   <Td className="text-center whitespace-nowrap">
-                    <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-medium border ${statusBadgeConfig.bg}`}>
+                    <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[10.5px] font-medium border ${statusBadgeConfig.bg}`}>
                       {stock === 0 && status === 'ACTIVE' ? 'Sem Estoque' : statusBadgeConfig.label}
                     </span>
                   </Td>
                   
                   {/* MENU DE 3 PONTOS (DESIGN CLEAN & POPUP DE AÇÕES) */}
-                  <Td className="text-right relative">
-                    <div className="flex items-center justify-end" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+                  <Td className="text-right">
+                    <div className="relative inline-flex items-center justify-end" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
                       <button
                         onClick={(e) => {
                           e.stopPropagation()
                           setActiveActionMenuId(activeActionMenuId === p.id ? null : p.id)
                         }}
                         title="Opções do Produto"
-                        className={`p-2 rounded-xl border transition-all cursor-pointer shadow-2xs ${
+                        className={`w-7 h-7 flex items-center justify-center rounded-lg border transition-all cursor-pointer shadow-none ${
                           activeActionMenuId === p.id
                             ? 'bg-[#111111] text-white border-[#111111]'
-                            : 'border-[#e6e6e6] bg-white hover:bg-[#f4f4f5] text-[#666666] hover:text-[#111111]'
+                            : 'border-[#e6e6e6] bg-white hover:bg-[#F7F7F7] text-[#666666] hover:text-[#111111]'
                         }`}
                       >
-                        <MoreHorizontal className="w-4 h-4" />
+                        <MoreHorizontal className="w-3.5 h-3.5" />
                       </button>
 
                       {/* POPUP DROPDOWN DE AÇÕES DAS 3 PONTAS (DESIGN ULTRA CLEAN & COMPACTO) */}
                       {activeActionMenuId === p.id && (
                         <div 
-                          className="absolute right-0 top-full mt-1.5 z-50 bg-white border border-[#e2e8f0] rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.08)] py-1.5 w-48 animate-in fade-in zoom-in-95 duration-100 text-left"
+                          className="absolute right-0 top-full mt-1.5 z-50 bg-white border border-[#e2e8f0] rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.08)] py-2 w-52 animate-in fade-in zoom-in-95 duration-100 text-left"
                           onClick={(e) => e.stopPropagation()}
                         >
                           {/* 1. Diagnóstico */}
@@ -507,7 +522,7 @@ function ProductsTab() {
                               setActiveActionMenuId(null)
                               setDiagnosticModal({ isOpen: true, product: p })
                             }}
-                            className="w-full px-3 py-1.5 text-[12px] font-medium text-[#333333] hover:bg-[#f4f4f5] hover:text-[#111111] flex items-center gap-2 transition-colors cursor-pointer"
+                            className="w-full px-4 py-2 text-[12.5px] font-medium text-[#333333] hover:bg-[#f4f4f5] hover:text-[#111111] flex items-center gap-2.5 transition-colors cursor-pointer"
                           >
                             <Info className="w-3.5 h-3.5 text-[#666666]" />
                             <span>Diagnóstico</span>
@@ -520,7 +535,7 @@ function ProductsTab() {
                                 setActiveActionMenuId(null)
                                 setActionModal({ isOpen: true, product: p, action: 'activate' })
                               }}
-                              className="w-full px-3 py-1.5 text-[12px] font-medium text-[#16a34a] hover:bg-[#f0fff4] flex items-center gap-2 transition-colors cursor-pointer"
+                              className="w-full px-4 py-2 text-[12.5px] font-medium text-[#16a34a] hover:bg-[#f0fff4] flex items-center gap-2.5 transition-colors cursor-pointer"
                             >
                               <PlayCircle className="w-3.5 h-3.5 text-[#16a34a]" />
                               <span>Ativar Anúncio</span>
@@ -531,7 +546,7 @@ function ProductsTab() {
                                 setActiveActionMenuId(null)
                                 setActionModal({ isOpen: true, product: p, action: 'pause' })
                               }}
-                              className="w-full px-3 py-1.5 text-[12px] font-medium text-[#333333] hover:bg-[#f4f4f5] hover:text-[#d97706] flex items-center gap-2 transition-colors cursor-pointer"
+                              className="w-full px-4 py-2 text-[12.5px] font-medium text-[#333333] hover:bg-[#f4f4f5] hover:text-[#d97706] flex items-center gap-2.5 transition-colors cursor-pointer"
                             >
                               <PauseCircle className="w-3.5 h-3.5 text-[#666666]" />
                               <span>Pausar Anúncio</span>
@@ -545,7 +560,7 @@ function ProductsTab() {
                                 setActiveActionMenuId(null)
                                 setActionModal({ isOpen: true, product: p, action: 'unlock' })
                               }}
-                              className="w-full px-3 py-1.5 text-[12px] font-medium text-[#4338ca] hover:bg-[#e0e7ff] flex items-center gap-2 transition-colors cursor-pointer"
+                              className="w-full px-4 py-2 text-[12.5px] font-medium text-[#4338ca] hover:bg-[#e0e7ff] flex items-center gap-2.5 transition-colors cursor-pointer"
                             >
                               <Unlock className="w-3.5 h-3.5 text-[#4338ca]" />
                               <span>Destravar Produto</span>
@@ -556,7 +571,7 @@ function ProductsTab() {
                                 setActiveActionMenuId(null)
                                 setActionModal({ isOpen: true, product: p, action: 'lock' })
                               }}
-                              className="w-full px-3 py-1.5 text-[12px] font-medium text-[#333333] hover:bg-[#f4f4f5] flex items-center gap-2 transition-colors cursor-pointer"
+                              className="w-full px-4 py-2 text-[12.5px] font-medium text-[#333333] hover:bg-[#f4f4f5] flex items-center gap-2.5 transition-colors cursor-pointer"
                             >
                               <Lock className="w-3.5 h-3.5 text-[#666666]" />
                               <span>Travar Estoque</span>
@@ -569,7 +584,7 @@ function ProductsTab() {
                               setActiveActionMenuId(null)
                               setActionModal({ isOpen: true, product: p, action: 'sync' })
                             }}
-                            className="w-full px-3 py-1.5 text-[12px] font-medium text-[#333333] hover:bg-[#f4f4f5] flex items-center gap-2 transition-colors cursor-pointer"
+                            className="w-full px-4 py-2 text-[12.5px] font-medium text-[#333333] hover:bg-[#f4f4f5] flex items-center gap-2.5 transition-colors cursor-pointer"
                           >
                             <RefreshCw className="w-3.5 h-3.5 text-[#666666]" />
                             <span>Sincronizar</span>
@@ -581,7 +596,7 @@ function ProductsTab() {
                               setActiveActionMenuId(null)
                               setShareProduct(p)
                             }}
-                            className="w-full px-3 py-1.5 text-[12px] font-medium text-[#333333] hover:bg-[#f4f4f5] flex items-center gap-2 transition-colors cursor-pointer"
+                            className="w-full px-4 py-2 text-[12.5px] font-medium text-[#333333] hover:bg-[#f4f4f5] flex items-center gap-2.5 transition-colors cursor-pointer"
                           >
                             <Share2 className="w-3.5 h-3.5 text-[#666666]" />
                             <span>Compartilhar</span>
@@ -593,7 +608,7 @@ function ProductsTab() {
                               setActiveActionMenuId(null)
                               setActionModal({ isOpen: true, product: p, action: isBlocked ? 'unblock' : 'block' })
                             }}
-                            className="w-full px-3 py-1.5 text-[12px] font-medium text-[#dc2626] hover:bg-[#fef2f2] flex items-center gap-2 transition-colors cursor-pointer"
+                            className="w-full px-4 py-2 text-[12.5px] font-medium text-[#dc2626] hover:bg-[#fef2f2] flex items-center gap-2.5 transition-colors cursor-pointer"
                           >
                             <ShieldAlert className="w-3.5 h-3.5 text-[#dc2626]" />
                             <span>{isBlocked ? 'Desbloquear' : 'Bloquear'}</span>
@@ -607,7 +622,7 @@ function ProductsTab() {
                               setActiveActionMenuId(null)
                               setDeleteModal({ isOpen: true, items: [p.id as string], name: p.name as string })
                             }}
-                            className="w-full px-3 py-1.5 text-[12px] font-medium text-[#dc2626] hover:bg-[#fef2f2] flex items-center gap-2 transition-colors cursor-pointer"
+                            className="w-full px-4 py-2 text-[12.5px] font-medium text-[#dc2626] hover:bg-[#fef2f2] flex items-center gap-2.5 transition-colors cursor-pointer"
                           >
                             <Trash2 className="w-3.5 h-3.5 text-[#dc2626]" />
                             <span>Excluir Produto</span>
@@ -726,7 +741,9 @@ function SuppliersTab() {
         )}
       </div>
       {loading ? (
-        <div className="bg-white rounded-2xl border border-[#e6e6e6] p-10 text-center text-[#999] text-[13px]">Carregando...</div>
+        <div className="bg-white rounded-2xl border border-[#e6e6e6]">
+          <LoadingState message="Carregando fornecedores..." padding={60} />
+        </div>
       ) : (
         <ModuleTable>
           <TableHead>
@@ -893,7 +910,9 @@ function PurchasesTab() {
         )}
       </div>
       {loading ? (
-        <div className="bg-white rounded-2xl border border-[#e6e6e6] p-10 text-center text-[#999] text-[13px]">Carregando...</div>
+        <div className="bg-white rounded-2xl border border-[#e6e6e6]">
+          <LoadingState message="Carregando compras..." padding={60} />
+        </div>
       ) : (
         <ModuleTable>
           <TableHead>
@@ -997,7 +1016,9 @@ function StockTab() {
         <StatCard label="Críticos" value={String(products?.filter((p: Record<string, unknown>) => (Number(p.stock) || 0) > 0 && (Number(p.stock) || 0) <= (Number(p.min_stock) || 0)).length || 0)} />
       </div>
       {loading ? (
-        <div className="bg-white rounded-2xl border border-[#e6e6e6] p-10 text-center text-[#999] text-[13px]">Carregando...</div>
+        <div className="bg-white rounded-2xl border border-[#e6e6e6]">
+          <LoadingState message="Carregando posição de estoque..." padding={60} />
+        </div>
       ) : (
         <ModuleTable>
           <TableHead><Th>SKU</Th><Th>Produto</Th><Th className="text-right">Estoque</Th><Th className="text-right">Mínimo</Th><Th className="text-right">Valor Unit.</Th><Th className="text-right">Valor Total</Th><Th className="text-center">Status</Th></TableHead>
@@ -1122,7 +1143,9 @@ function StockCountTab() {
       )}
 
       {loading ? (
-        <div className="bg-white rounded-2xl border border-[#e6e6e6] p-10 text-center text-[#999] text-[13px]">Carregando produtos...</div>
+        <div className="bg-white rounded-2xl border border-[#e6e6e6]">
+          <LoadingState message="Carregando produtos para conferência..." padding={60} />
+        </div>
       ) : (
         <>
           <ModuleTable>

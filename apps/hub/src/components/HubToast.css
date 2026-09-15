@@ -1,46 +1,130 @@
-.hub-toast-stack {
+/* Container fixo idêntico ao ToastContainer do FLOW */
+.hub-toast-container {
   position: fixed;
-  right: 24px;
-  bottom: 24px;
-  z-index: 100000;
+  bottom: 16px;
+  right: 16px;
+  z-index: 99999;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  width: min(380px, calc(100vw - 32px));
+  gap: 12px;
   pointer-events: none;
 }
 
-.hub-toast {
+/* Card Toast idêntico 1:1 ao FLOW */
+.hub-toast-card {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 320px;
+  max-width: calc(100vw - 32px);
+  padding: 16px;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #f0f0f0;
+  border-left-width: 4px;
+  border-left-style: solid;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  animation: hubSlideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+.hub-toast-card.cursor-pointer {
+  cursor: pointer;
+}
+
+/* Cores da tarja lateral esquerda */
+.hub-toast-card.border-success {
+  border-left-color: #38a169;
+}
+
+.hub-toast-card.border-error {
+  border-left-color: #e74c3c;
+}
+
+.hub-toast-card.border-warning {
+  border-left-color: #f59e0b;
+}
+
+.hub-toast-card.border-info {
+  border-left-color: #1f2328;
+}
+
+/* Ícone */
+.hub-toast-icon-wrap {
+  flex-shrink: 0;
+  margin-top: 2px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 14px 14px 14px 16px;
-  border: 1px solid;
-  border-radius: 12px;
-  background: #fff;
-  box-shadow: 0 14px 35px rgba(15, 23, 42, .16);
-  color: #1f2937;
+  justify-content: center;
+}
+
+.hub-toast-icon-wrap .text-\[\#38a169\] {
+  color: #38a169;
+}
+
+.hub-toast-icon-wrap .text-\[\#e74c3c\] {
+  color: #e74c3c;
+}
+
+.hub-toast-icon-wrap .text-\[\#f59e0b\] {
+  color: #f59e0b;
+}
+
+.hub-toast-icon-wrap .text-\[\#1f2328\] {
+  color: #1f2328;
+}
+
+/* Conteúdo */
+.hub-toast-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.hub-toast-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333333;
+  margin: 0 0 2px 0;
+  line-height: 1.25;
+}
+
+.hub-toast-msg {
   font-size: 13px;
-  line-height: 1.35;
-  animation: hubToastIn .2s ease-out;
-  pointer-events: auto;
+  color: #666666;
+  margin: 0;
+  line-height: 1.375;
+  word-break: break-word;
 }
 
-.hub-toast-success { border-color: #bbf7d0; }
-.hub-toast-success > svg { color: #16a34a; }
-.hub-toast-error { border-color: #fecaca; }
-.hub-toast-error > svg { color: #dc2626; }
-.hub-toast-info { border-color: #e5e7eb; }
-.hub-toast-info > svg { color: #2563eb; }
-.hub-toast span { flex: 1; }
-.hub-toast button { display: inline-flex; padding: 3px; border: 0; background: transparent; color: #9ca3af; }
-.hub-toast button:hover { color: #374151; }
-
-@keyframes hubToastIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+/* Botão Fechar */
+.hub-toast-close {
+  flex-shrink: 0;
+  color: #999999;
+  background: transparent;
+  border: none;
+  padding: 4px;
+  margin: -4px -4px 0 0;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease;
 }
 
-@media (max-width: 600px) {
-  .hub-toast-stack { right: 16px; bottom: 16px; }
+.hub-toast-close:hover {
+  color: #333333;
+}
+
+/* Animação suave idêntica ao FLOW */
+@keyframes hubSlideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }

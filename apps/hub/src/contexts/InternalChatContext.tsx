@@ -43,6 +43,22 @@ export function removeEmojis(str: string): string {
     .trim()
 }
 
+// Retorna avatar padrão confiável para perfis oficiais
+export function getAvatarForUser(id: string, name?: string, photo?: string | null): string | undefined {
+  if (photo) return photo
+  const n = (name || '').toLowerCase()
+  if (id === 'bad56b70-dcfd-44a9-a76b-76469e84db1c' || n.includes('admin demo')) {
+    return 'https://ykgprfzfnffooqmfbeox.supabase.co/storage/v1/object/public/user-avatars/bad56b70-dcfd-44a9-a76b-76469e84db1c-1788492640182.png'
+  }
+  if (id === '3af9068a-4b78-4c9c-8657-f83b93c01588' || n.includes('alison')) {
+    return 'https://ykgprfzfnffooqmfbeox.supabase.co/storage/v1/object/public/user-avatars/3af9068a-4b78-4c9c-8657-f83b93c01588-1787179225140.jpg'
+  }
+  if (id === 'cea2102a-360f-44bb-9e86-75c878650bab' || n.includes('nádia') || n.includes('nadia')) {
+    return 'https://ykgprfzfnffooqmfbeox.supabase.co/storage/v1/object/public/user-avatars/6f58029b-c770-4f25-a9f9-86dec6fb6137-1787168051706.jpeg'
+  }
+  return undefined
+}
+
 // Gera ID determinístico para DMs compartilhadas entre FLOW e HUB
 export function getDirectConvId(a: string, b: string): string {
   return 'direct-' + [a, b].sort().join('__')
@@ -59,9 +75,15 @@ export function getConversationDisplayName(
   }
   if (conv.id.startsWith('direct-')) {
     const ids = conv.id.replace('direct-', '').split('__')
-    const otherId = ids.find(id => id !== currentUserId) || ids[0]
-    const otherColab = collaborators.find(c => c.id === otherId)
-    if (otherColab) return otherColab.name
+    if (currentUserId && ids.includes(currentUserId)) {
+      const otherId = ids.find(id => id !== currentUserId)
+      const otherColab = collaborators.find(c => c.id === otherId)
+      if (otherColab) return otherColab.name
+    } else {
+      const partnerId = currentUserId ? ids.find(id => id !== currentUserId) : ids[0]
+      const otherColab = collaborators.find(c => c.id === partnerId)
+      if (otherColab) return otherColab.name
+    }
   }
   const otherMember = conv.members?.find(m => m.id !== currentUserId)
   if (otherMember) {
@@ -80,8 +102,13 @@ export function getConversationColab(
   if (conv.type === 'GROUP') return undefined
   if (conv.id.startsWith('direct-')) {
     const ids = conv.id.replace('direct-', '').split('__')
-    const otherId = ids.find(id => id !== currentUserId) || ids[0]
-    return collaborators.find(c => c.id === otherId)
+    if (currentUserId && ids.includes(currentUserId)) {
+      const otherId = ids.find(id => id !== currentUserId)
+      return collaborators.find(c => c.id === otherId)
+    } else {
+      const otherId = currentUserId ? ids.find(id => id !== currentUserId) : ids[0]
+      return collaborators.find(c => c.id === otherId)
+    }
   }
   const otherMember = conv.members?.find(m => m.id !== currentUserId)
   if (otherMember) {
@@ -139,19 +166,25 @@ function setLastReadMap(convId: string) {
   } catch {}
 }
 
-export function InternalChatProvider({ children }: { children: React.ReactNode }) {
+interface InternalChatProviderProps {
+  children: React.ReactNode
+  initialUser?: { id: string; name: string; email?: string; role?: string; photo_url?: string }
+}
+
+export function InternalChatProvider({ children, initialUser }: InternalChatProviderProps) {
   const [conversations, setConversations] = useState<InternalConversation[]>(DEFAULT_SYSTEM_CONVERSATIONS)
   const [activeConversation, setActiveConversationState] = useState<InternalConversation | null>(DEFAULT_SYSTEM_CONVERSATIONS[0])
   const [messagesMap, setMessagesMap] = useState<Record<string, InternalMessage[]>>({})
   const [collaborators, setCollaborators] = useState<ChatMember[]>([])
   const [currentUser, setCurrentUser] = useState<{ id: string; name: string; email?: string; role?: string; photo_url?: string } | null>(() => {
+    if (initialUser?.id) return initialUser
     if (typeof window !== 'undefined') {
       try {
         const cached = localStorage.getItem('teknix_chat_current_user')
         if (cached) return JSON.parse(cached)
       } catch {}
     }
-    return null
+    return initialUser || null
   })
 
   const [isFloatingOpen, setIsFloatingOpen] = useState(false)
@@ -177,11 +210,18 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
     currentUserRef.current = currentUser
   }, [activeConversation, isFloatingOpen, isFloatingMinimized, activeChatRoomId, currentUser])
 
+  const refreshActiveMessagesRef = useRef<((targetId?: string) => Promise<void>) | null>(null)
+
   const setActiveConversation = useCallback((c: InternalConversation | null) => {
+    activeConvRef.current = c
     setActiveConversationState(c)
-    if (c && floatingOpenRef.current && !floatingMinRef.current) {
-      setLastReadMap(c.id)
-      setConversations(prev => prev.map(item => item.id === c.id ? { ...item, unread_count: 0 } : item))
+    if (c) {
+      setLoadingMessages(true)
+      refreshActiveMessagesRef.current?.(c.id).finally(() => setLoadingMessages(false))
+      if (floatingOpenRef.current && !floatingMinRef.current) {
+        setLastReadMap(c.id)
+        setConversations(prev => prev.map(item => item.id === c.id ? { ...item, unread_count: 0 } : item))
+      }
     }
   }, [])
 
@@ -197,21 +237,29 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
             .eq('id', user.id)
             .maybeSingle()
 
-          const userName = profile?.name || user.user_metadata?.name || user.email?.split('@')[0] || 'Alison Thiago'
+          const userName = profile?.name || user.user_metadata?.name || user.email?.split('@')[0] || (user.id === 'bad56b70-dcfd-44a9-a76b-76469e84db1c' ? 'Admin Demo Teknix' : 'Alison Thiago')
+          const photo = getAvatarForUser(user.id, userName, profile?.avatar_url || profile?.photo_url || user.user_metadata?.avatar_url)
           const userObj = {
             id: user.id,
             name: removeEmojis(userName),
             email: user.email || profile?.email || 'alison@teknix.com.br',
-            role: profile?.role || 'ADMIN',
-            photo_url: profile?.avatar_url || profile?.photo_url || user.user_metadata?.avatar_url || 'https://ykgprfzfnffooqmfbeox.supabase.co/storage/v1/object/public/user-avatars/3af9068a-4b78-4c9c-8657-f83b93c01588-1787179225140.jpg'
+            role: profile?.role || (user.id === 'bad56b70-dcfd-44a9-a76b-76469e84db1c' ? 'MASTER' : 'ADMIN'),
+            photo_url: photo
           }
           setCurrentUser(userObj)
           try {
             localStorage.setItem('teknix_chat_current_user', JSON.stringify(userObj))
           } catch {}
         } else {
-          // Fallback seguro de perfil logado do HUB
-          const userObj = {
+          // Fallback seguro de perfil logado do HUB (respeita modo demo se ativo)
+          const isDemoActive = typeof window !== 'undefined' && localStorage.getItem('demo_user_active') === 'true'
+          const userObj = isDemoActive ? {
+            id: 'bad56b70-dcfd-44a9-a76b-76469e84db1c',
+            name: 'Admin Demo Teknix',
+            email: 'teste@teste.com',
+            role: 'MASTER',
+            photo_url: 'https://ykgprfzfnffooqmfbeox.supabase.co/storage/v1/object/public/user-avatars/bad56b70-dcfd-44a9-a76b-76469e84db1c-1788492640182.png'
+          } : {
             id: '3af9068a-4b78-4c9c-8657-f83b93c01588',
             name: 'Alison Thiago',
             email: 'alison@teknix.com.br',
@@ -232,16 +280,24 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
     const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
       fetchUser()
     })
-    return () => subscription.unsubscribe()
-  }, [])
 
-  // Filtro de colaboradores autorizados (remove clientes e contas de teste)
+    if (initialUser?.id) {
+      setCurrentUser(initialUser)
+      try {
+        localStorage.setItem('teknix_chat_current_user', JSON.stringify(initialUser))
+      } catch {}
+    }
+
+    return () => subscription.unsubscribe()
+  }, [initialUser])
+
+  // Filtro de colaboradores autorizados (remove apenas clientes externos)
   const isInternalCollaborator = useCallback((p: any) => {
     if (!p) return false
     const role = (p.role || '').toUpperCase()
     const name = (p.name || '').toLowerCase()
     if (role === 'CLIENTE' || role === 'CUSTOMER' || role === 'CLIENT') return false
-    if (name.includes('cliente a') || name.includes('cliente b') || name.includes('admin demo teknix')) return false
+    if (name.includes('cliente a') || name.includes('cliente b')) return false
     return true
   }, [])
 
@@ -274,12 +330,14 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
           else if (hasFlow) lastActivity = 'Online no FLOW'
           else if (isOnline) lastActivity = 'Online agora'
 
+          const photo = getAvatarForUser(p.id, p.name, p.avatar_url || p.photo_url)
+
           return {
             id: p.id,
             name: removeEmojis(p.name || p.email?.split('@')[0] || 'Colaborador'),
             email: p.email || '',
             role: p.role || 'Operador',
-            photo_url: p.avatar_url || p.photo_url,
+            photo_url: photo,
             online: isOnline,
             last_activity: lastActivity
           }
@@ -324,8 +382,8 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
       // 2. Conversas Salvas no Banco
       dbConversations.forEach((c: any) => {
         const isDirect = c.type === 'DIRECT' || c.id.startsWith('direct-')
-        if (isDirect && currentUid) {
-          // Garante que o usuário atual é participante desta conversa direta
+        if (isDirect) {
+          if (!currentUid) return // Sem usuário autenticado identificado, não carrega DMs
           const isParticipant = c.id.includes(currentUid) ||
             (Array.isArray(c.members) && c.members.some((m: any) => m.id === currentUid))
           if (!isParticipant) {
@@ -428,8 +486,8 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
   }, [refreshConversations])
 
   // 3. Carregar Mensagens da Conversa Ativa via API Centralizada
-  const refreshActiveMessages = useCallback(async () => {
-    const activeId = activeConvRef.current?.id
+  const refreshActiveMessages = useCallback(async (targetId?: string) => {
+    const activeId = targetId || activeConvRef.current?.id
     if (!activeId) return
 
     try {
@@ -466,11 +524,12 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
       console.warn('[InternalChat] Erro ao carregar mensagens:', err)
     }
   }, [])
+  refreshActiveMessagesRef.current = refreshActiveMessages
 
   useEffect(() => {
     if (!activeConversation?.id) return
     setLoadingMessages(true)
-    refreshActiveMessages().finally(() => setLoadingMessages(false))
+    refreshActiveMessages(activeConversation.id).finally(() => setLoadingMessages(false))
   }, [activeConversation?.id, refreshActiveMessages])
 
   // 4. Polling Suave de Fundo (a cada 3s)
@@ -544,22 +603,20 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
 
       // Notificação sonora / toast se a mensagem for de outro colaborador
       if (!isOwn) {
-        notifyHub(`${msg.sender_name || 'Chat Interno'}: ${msg.content || 'Nova mensagem'}`, 'info')
+        notifyHub({
+          title: `💬 ${msg.sender_name || 'Chat Interno'}`,
+          message: msg.content || 'Enviou uma nova mensagem',
+          type: 'info'
+        })
       }
 
       // Atualiza mensagens da conversa
       setMessagesMap(prev => {
         const updated = { ...prev }
+        // Atualiza apenas na conversa de destino
         const currentList = updated[msg.conversation_id] || []
         if (!currentList.some(m => m.id === msg.id)) {
           updated[msg.conversation_id] = [...currentList, msg]
-        }
-
-        if (msg.conversation_id !== 'conv-geral' && updated['conv-geral']) {
-          const geralList = updated['conv-geral']
-          if (!geralList.some(m => m.id === msg.id)) {
-            updated['conv-geral'] = [...geralList, msg]
-          }
         }
         return updated
       })
@@ -648,9 +705,9 @@ export function InternalChatProvider({ children }: { children: React.ReactNode }
     metadata?: any,
     replyTo?: any
   ) => {
-    const senderId = currentUser?.id || '3af9068a-4b78-4c9c-8657-f83b93c01588'
-    const senderName = currentUser?.name || 'Alison Thiago'
-    const senderPhoto = currentUser?.photo_url
+    const senderId = currentUser?.id || initialUser?.id || '3af9068a-4b78-4c9c-8657-f83b93c01588'
+    const senderName = currentUser?.name || initialUser?.name || 'Alison'
+    const senderPhoto = currentUser?.photo_url || getAvatarForUser(senderId, senderName)
 
     const newMessage: InternalMessage = {
       id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,

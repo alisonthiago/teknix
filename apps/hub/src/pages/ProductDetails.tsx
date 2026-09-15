@@ -20,7 +20,8 @@ import {
   ChevronDown,
   ChevronUp,
   ShieldCheck,
-  Edit
+  Edit,
+  RefreshCw
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { createPage } from '../services/pageBuilder'
@@ -255,7 +256,8 @@ export default function ProductDetails() {
     return (
       <div className="pd-page-container">
         <div style={{ padding: '80px 0', textAlign: 'center', color: '#64748b' }}>
-          Carregando visão geral do produto no HUB...
+          <RefreshCw className="hub-spin" size={24} style={{ marginBottom: 12 }} />
+          <div>Carregando visão geral do produto no HUB...</div>
         </div>
       </div>
     )
@@ -350,6 +352,7 @@ export default function ProductDetails() {
           <Link to="/hub/produtos" className="pd-btn-back" title="Voltar para Produtos" aria-label="Voltar para Produtos">
             <ArrowLeft size={18} />
           </Link>
+          <span className="pd-mobile-back-title">Produtos</span>
           <nav aria-label="Breadcrumb" className="pd-breadcrumbs">
             <Link to="/hub">Início</Link>
             <span className="pd-breadcrumbs-sep">/</span>

@@ -257,3 +257,58 @@
   background: #e2e3e5;
   color: #383d41;
 }
+
+/* ─── MOBILE ─── */
+@media (max-width: 768px) {
+  .orders-list-page {
+    gap: 12px;
+  }
+
+  .orders-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .search-box {
+    width: 100%;
+  }
+
+  .table-wrapper {
+    border-radius: 10px;
+  }
+
+  .data-table th {
+    padding: 10px 14px;
+    font-size: 10px;
+    white-space: nowrap;
+  }
+
+  .data-table td {
+    padding: 12px 14px;
+    font-size: 12.5px;
+    white-space: nowrap;
+  }
+
+  .customer-cell {
+    min-width: 160px;
+  }
+
+  .customer-name {
+    font-size: 12px;
+  }
+
+  .customer-email {
+    max-width: 140px;
+    font-size: 10px;
+  }
+
+  .order-number {
+    font-size: 12px;
+  }
+
+  .status-badge {
+    font-size: 10.5px;
+    padding: 3px 8px;
+  }
+}

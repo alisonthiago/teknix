@@ -112,23 +112,20 @@ export function CockpitCentralOperacao({ orders = [], products = [] }: CockpitDa
               `${totalActionsCount} ações prioritárias hoje`
             )}
           </h2>
-          <p className="text-[12px] text-[#777] mt-0.5">
-            Pedidos, separação, etiquetas e estoque em tempo real.
-          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <Link
             href="/pedidos"
-            className="px-4 py-2 bg-[#347ff2] hover:bg-[#2469d8] text-white text-[12px] font-medium rounded-xl transition-colors flex items-center gap-1.5 shadow-2xs"
+            className="h-[38px] px-4 bg-[#0071e3] hover:bg-[#0062c4] active:bg-[#004f9e] text-white text-[13px] font-semibold rounded-lg transition-colors flex items-center gap-2 shadow-none"
           >
-            <Package className="w-3.5 h-3.5" />
+            <Package className="w-4 h-4" />
             Ver Pedidos & Etiquetas
           </Link>
 
           <Link
             href="/operacao"
-            className="px-4 py-2 bg-white hover:bg-[#f8f8f8] text-[#333] border border-[#e6e6e6] text-[12px] font-medium rounded-xl transition-colors"
+            className="h-[38px] px-4 bg-white hover:bg-[#F7F7F7] text-[#333] border border-[#e6e6e6] text-[13px] font-medium rounded-lg transition-colors flex items-center gap-2"
           >
             Ver Estoque & Catálogo
           </Link>

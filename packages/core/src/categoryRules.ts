@@ -45,6 +45,7 @@ export interface CentralCategory {
   name: string
   slug: string
   parent_id: string | null
+  segment_id?: string | null
   description?: string
   image_url?: string
   icon?: string
@@ -270,6 +271,7 @@ export function parseCategoryRow(row: any): CentralCategory {
     name: row.name || '',
     slug: row.slug || '',
     parent_id: row.parent_id || null,
+    segment_id: row.segment_id || seo.segment_id || null,
     description: row.description || seo.description || '',
     image_url: row.image_url || seo.image_url || '',
     icon: row.icon || seo.icon || '',
@@ -316,6 +318,7 @@ export function formatCategoryPayload(cat: Partial<CentralCategory>) {
 
   const seoPayload = {
     ...existingSeo,
+    segment_id: cat.segment_id || null,
     linking_mode: cat.linking_mode || 'manual',
     rule_operator: cat.rule_operator || 'OR',
     rules: cat.rules || [],
@@ -339,6 +342,7 @@ export function formatCategoryPayload(cat: Partial<CentralCategory>) {
     slug: cat.slug?.trim(),
     description: cat.description || '',
     parent_id: cat.parent_id || null,
+    segment_id: cat.segment_id || null,
     image_url: effectiveImageUrl,
     status: cat.status || (cat.is_published === false ? 'inactive' : 'active'),
     sort_order: Number(cat.sort_order ?? 0),

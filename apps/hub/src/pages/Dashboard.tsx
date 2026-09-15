@@ -370,17 +370,18 @@ export default function Dashboard() {
     <div className="dash-page">
       {/* ── 1. Saudação do usuário ── */}
       <div className="dash-welcome">
-        <div className="dash-avatar">
+        <div className="dash-avatar dash-avatar-online">
           <img
             src={userPhoto}
             alt={userNickname}
             width={56} height={56}
             className="dash-avatar-img"
           />
+          <span className="dash-online-dot" aria-label="Online" title="Online" />
         </div>
         <div>
           <h1 className="dash-welcome-name">
-            Olá, {userNickname}
+            Olá, {userNickname} 👋
           </h1>
         </div>
       </div>

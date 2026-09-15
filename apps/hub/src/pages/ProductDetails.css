@@ -9,7 +9,7 @@
   padding: 24px 24px 80px;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: #333333;
-  background-color: #ffffff;
+  background-color: #f5f5f5;
 }
 
 /* ── Top Bar ── */
@@ -61,6 +61,10 @@
   background-color: #F7F7F7;
   color: #111111;
   border-color: #cbd5e1;
+}
+
+.pd-mobile-back-title {
+  display: none;
 }
 
 .pd-breadcrumbs {
@@ -191,24 +195,26 @@
 }
 
 .pd-header-thumb-box {
-  width: 96px;
-  height: 96px;
-  border-radius: 16px;
+  width: 120px;
+  height: 120px;
+  border-radius: 18px;
   border: 1px solid #e5e7eb;
-  padding: 10px;
+  padding: 6px;
   flex-shrink: 0;
   background-color: #F7F7F7;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
 }
 
 @media (min-width: 640px) {
   .pd-header-thumb-box {
-    width: 112px;
-    height: 112px;
+    width: 128px;
+    height: 128px;
+    border-radius: 20px;
+    padding: 8px;
   }
 }
 
@@ -217,6 +223,7 @@
   height: 100%;
   object-fit: contain;
   mix-blend-mode: multiply;
+  transition: transform 0.2s ease;
 }
 
 .pd-header-content {
@@ -451,6 +458,127 @@
   font-size: 12px;
   font-weight: 500;
   color: #666666;
+}
+
+@media (max-width: 640px) {
+  .pd-page-container {
+    padding: 12px 14px 60px !important;
+  }
+
+  .pd-topbar {
+    gap: 12px;
+    padding-bottom: 16px;
+  }
+
+  .pd-topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .pd-mobile-back-title {
+    display: inline-block;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2328;
+    letter-spacing: -0.015em;
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .pd-breadcrumbs {
+    font-size: 11px;
+  }
+
+  .pd-breadcrumbs-current {
+    max-width: 150px;
+  }
+
+  .pd-header-summary {
+    padding: 16px 0;
+  }
+
+  .pd-header-summary-inner {
+    gap: 16px;
+  }
+
+  .pd-header-summary-left {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .pd-header-thumb-box {
+    width: 150px;
+    height: 150px;
+    border-radius: 22px;
+    padding: 8px;
+    margin: 0 auto;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  }
+
+  .pd-badges-row {
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .pd-header-title {
+    white-space: normal;
+    text-align: center;
+    font-size: 17px;
+    line-height: 1.35;
+  }
+
+  .pd-header-meta-row {
+    justify-content: center;
+    gap: 6px 12px;
+    font-size: 11.5px;
+  }
+
+  .pd-header-summary-right {
+    width: 100%;
+    align-items: center;
+    padding-top: 0;
+  }
+
+  .pd-right-actions-row {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .pd-right-actions-row .pd-btn-primary {
+    width: 100%;
+    justify-content: center;
+    order: 10;
+  }
+
+  .pd-price-block {
+    align-items: center;
+    width: 100%;
+    text-align: center;
+  }
+
+  .pd-price-val {
+    font-size: 26px;
+  }
+
+  .pd-date-row {
+    justify-content: center;
+  }
+
+  .pd-metrics-section {
+    padding: 20px 0;
+  }
+
+  .pd-card {
+    padding: 16px !important;
+    border-radius: 14px !important;
+  }
 }
 
 /* ── Metrics Grid (5 Columns) ── */

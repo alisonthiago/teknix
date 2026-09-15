@@ -30,7 +30,7 @@ export function Tabs({
 
   return (
     <TabsContext.Provider value={{ activeTab, setActiveTab }}>
-      <div className={`bg-white rounded-2xl border border-[#e6e6e6] p-6 ${className}`}>{children}</div>
+      <div className={`bg-white rounded-2xl border border-[#e6e6e6] p-6 pb-8 ${className}`}>{children}</div>
     </TabsContext.Provider>
   )
 }
@@ -43,7 +43,7 @@ export function TabsList({
   className?: string
 }) {
   return (
-    <div       className={`flex gap-8 border-b border-[#eeeeee] overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${className}`}>
+    <div className={`flex gap-8 border-b border-[#eeeeee] overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${className}`}>
       {children}
     </div>
   )
@@ -64,7 +64,7 @@ export function TabsTrigger({
     <button
       type="button"
       onClick={() => setActiveTab(value)}
-      className={`px-2.5 pb-3 text-[13px] sm:text-[13.5px] transition-colors relative whitespace-nowrap cursor-pointer ${
+      className={`px-2.5 pb-3.5 pt-1 text-[13px] sm:text-[13.5px] transition-colors relative whitespace-nowrap cursor-pointer ${
         isActive
           ? 'text-[#111111] font-semibold'
           : 'text-[#666666] font-medium hover:text-[#111111]'
@@ -89,5 +89,5 @@ export function TabsContent({
 }) {
   const { activeTab } = useContext(TabsContext)
   if (activeTab !== value) return null
-  return <div className={`mt-6 ${className}`}>{children}</div>
+  return <div className={`mt-6 pb-2 ${className}`}>{children}</div>
 }

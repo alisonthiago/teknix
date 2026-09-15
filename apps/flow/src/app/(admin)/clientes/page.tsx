@@ -7,6 +7,7 @@ import { User, ShoppingCart, DollarSign, Search, MapPin, Phone, ArrowUpRight, St
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
 import { PageHeader } from '@/components/ui/module'
+import LoadingState from '@/components/ui/LoadingState'
 
 function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
@@ -155,7 +156,7 @@ export default function ClientesPage() {
       {/* Customers Table */}
       <div className="bg-white rounded-2xl border border-[#e6e6e6] overflow-hidden shadow-2xs">
         {loading ? (
-          <div className="p-12 text-center text-sm text-[#999]">Carregando clientes...</div>
+          <LoadingState message="Carregando clientes..." padding={60} />
         ) : filtered.length === 0 ? (
           <div className="p-12 text-center text-sm text-[#999]">Nenhum cliente encontrado.</div>
         ) : (

@@ -218,25 +218,25 @@ export default function ConnectMarketplaceModal({ open, onClose, onSuccess }: Co
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl w-full max-w-xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden border border-[#e6e6e6]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/65 backdrop-blur-[4px] p-3 sm:p-4 animate-in fade-in duration-200">
+      <div className="bg-white rounded-[14px] w-full max-w-xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] flex flex-col max-h-[90vh] overflow-hidden border border-[#e6e6e6]">
         
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-[#eeeeee]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#e6e6e6] bg-white">
           <div>
-            <h2 className="text-[17px] font-bold text-[#1f2328] flex items-center gap-2">
-              <Zap className="w-5 h-5 text-[#1f2328]" />
+            <h2 className="text-[16px] font-semibold text-[#111111] flex items-center gap-2">
+              <Zap className="w-4 h-4 text-[#111111]" />
               Conectar Canal de Venda
             </h2>
-            <p className="text-[12px] text-[#999] mt-0.5">
+            <p className="text-[12.5px] text-[#666666] mt-0.5">
               Selecione o marketplace para autenticar e sincronizar estoque e pedidos automaticamente.
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-full text-[#999] hover:bg-[#f5f5f5] hover:text-[#333] transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-[#64748b] hover:bg-[#f1f5f9] hover:text-[#111111] transition-colors cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 

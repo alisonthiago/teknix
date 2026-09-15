@@ -338,9 +338,9 @@ export default function CentralEtiquetasPage() {
               handleBatchPrint(allAvailableIds)
             }}
             disabled={stats.available === 0}
-            className={`h-[38px] px-4 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors shadow-2xs cursor-pointer ${
+            className={`h-[36px] px-4 rounded-lg text-[13.5px] font-semibold flex items-center gap-2 transition-colors cursor-pointer ${
               stats.available > 0
-                ? 'bg-[#1f2328] hover:bg-black text-white'
+                ? 'bg-[#0071e3] hover:bg-[#0062c4] text-white'
                 : 'bg-[#f5f5f5] text-[#999] cursor-not-allowed border border-[#e6e6e6]'
             }`}
           >
@@ -422,8 +422,8 @@ export default function CentralEtiquetasPage() {
             </button>
           </div>
 
-          {/* Filtros de Status (Estilo HostGator) */}
-          <div className="flex items-center gap-1.5 text-xs font-medium text-[#666666]">
+          {/* Filtros de Status (Padrão Oficial HUB) */}
+          <div className="flex items-center gap-1.5 text-xs font-medium text-[#666666] flex-wrap">
             <span className="pr-1 text-[#999999]">Filtrar:</span>
             {[
               { key: 'ALL', label: 'Todos' },
@@ -434,10 +434,10 @@ export default function CentralEtiquetasPage() {
               <button
                 key={f.key}
                 onClick={() => setStatusFilter(f.key as any)}
-                className={`label-status-filter px-3 py-1.5 rounded-full transition-colors cursor-pointer ${
+                className={`h-[29px] px-3 rounded-full text-xs font-medium transition-all cursor-pointer border whitespace-nowrap flex items-center justify-center ${
                   statusFilter === f.key
-                    ? 'is-active bg-white text-[#1f2328] font-bold'
-                    : 'bg-white text-[#666666] hover:bg-white hover:text-[#1f2328]'
+                    ? 'bg-[#0f172a] text-white border-[#0f172a] font-semibold'
+                    : 'bg-white text-[#475569] border-[#e2e8f0] hover:bg-[#F7F7F7] hover:border-[#cbd5e1] hover:text-[#0f172a]'
                 }`}
               >
                 {f.label}
@@ -447,24 +447,24 @@ export default function CentralEtiquetasPage() {
         </div>
 
         {/* Campo de Busca & Filtro de Canais */}
-        <div className="flex flex-col sm:flex-row items-center gap-3 py-2">
+        <div className="flex flex-col sm:flex-row items-center gap-3 py-1">
           <div className="relative flex-1 w-full">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#999999]" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#999999]" />
             <input
               type="text"
               placeholder="Buscar por pedido, SKU, produto, rastreamento ou comprador..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full pl-11 pr-4 py-3 bg-white border border-[#e2e8f0] focus:border-[#0f172a] rounded-2xl text-sm text-[#111111] placeholder:text-[#999999] focus:outline-none transition-all shadow-xs"
+              className="w-full h-[38px] pl-10 pr-9 bg-white border border-[#e2e8f0] focus:border-[#0f172a] rounded-lg text-sm text-[#111111] placeholder:text-[#999999] focus:outline-none transition-all shadow-none"
             />
             {search && (
-              <button onClick={() => setSearch('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#999999] hover:text-[#111111]">
+              <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#999999] hover:text-[#111111] cursor-pointer">
                 <X className="w-4 h-4" />
               </button>
             )}
           </div>
 
-          <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
+          <div className="flex items-center gap-1.5 flex-wrap w-full sm:w-auto">
             {['ALL', 'MERCADO_LIVRE', 'SHOPEE', 'TIKTOK', 'MAGALU'].map(m => {
               const label = m === 'ALL' ? 'Todos Canais' : m === 'MERCADO_LIVRE' ? 'Mercado Livre' : m === 'TIKTOK' ? 'TikTok' : m === 'MAGALU' ? 'Magalu' : 'Shopee'
               const isSelected = marketplaceFilter === m
@@ -472,10 +472,10 @@ export default function CentralEtiquetasPage() {
                 <button
                   key={m}
                   onClick={() => setMarketplaceFilter(m)}
-                  className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
+                  className={`h-[29px] px-3.5 rounded-full text-xs font-medium transition-all cursor-pointer border whitespace-nowrap flex items-center justify-center gap-1.5 ${
                     isSelected
-                      ? 'bg-[#347ff2] text-white border-[#347ff2]'
-                      : 'bg-white text-[#666666] border-[#e2e8f0] hover:border-[#347ff2] hover:bg-[#347ff2] hover:text-white'
+                      ? 'bg-[#0f172a] text-white border-[#0f172a] font-semibold'
+                      : 'bg-white text-[#475569] border-[#e2e8f0] hover:bg-[#F7F7F7] hover:border-[#cbd5e1] hover:text-[#0f172a]'
                   }`}
                 >
                   {label}

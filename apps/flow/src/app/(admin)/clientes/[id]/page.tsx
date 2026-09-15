@@ -14,6 +14,7 @@ import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
 import ShareContextModal from '@/components/internal-chat/ShareContextModal'
 import { useNotification } from '@/contexts/NotificationContext'
+import LoadingState from '@/components/ui/LoadingState'
 
 const QUICK_TEMPLATES = [
   'Olá! Seu pedido já está sendo preparado com muito cuidado e será enviado rapidamente.',
@@ -238,8 +239,8 @@ export default function ClienteProfilePage() {
       </div>
 
       {loading ? (
-        <div className="bg-white p-12 rounded-2xl border border-[#e6e6e6] text-center text-xs text-[#999]">
-          Carregando perfil e histórico de compras do cliente...
+        <div className="bg-white rounded-2xl border border-[#e6e6e6]">
+          <LoadingState message="Carregando perfil e histórico de compras do cliente..." padding={60} />
         </div>
       ) : orders.length === 0 ? (
         <div className="bg-white p-12 rounded-2xl border border-[#e6e6e6] text-center">
@@ -689,8 +690,8 @@ export default function ClienteProfilePage() {
                               <div className="p-3 rounded-xl border border-[#e6e6e6] bg-[#fafafa] space-y-2.5">
                                 <div className="flex items-start gap-2.5">
                                   <img src={pic} alt={prodTitle} className="w-12 h-12 object-contain rounded-lg border border-[#eee] bg-white p-1 shrink-0" />
-                                  <div className="min-w-0">
-                                    <h5 className="text-[12px] font-bold text-[#222] line-clamp-2 leading-snug">{prodTitle}</h5>
+                                  <div className="min-w-0 flex-1">
+                                    <h5 className="text-[12px] font-bold text-[#222] truncate leading-snug" title={prodTitle}>{prodTitle}</h5>
                                     <p className="text-[10px] text-[#888] mt-0.5">SKU: {sku || '—'}</p>
                                   </div>
                                 </div>

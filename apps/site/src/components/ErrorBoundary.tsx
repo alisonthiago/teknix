@@ -48,7 +48,7 @@ export default class ErrorBoundary extends Component<Props, State> {
           textAlign: 'center'
         }}>
           <div style={{
-            maxWidth: '520px',
+            maxWidth: '560px',
             width: '100%',
             background: '#ffffff',
             borderRadius: '16px',
@@ -56,6 +56,19 @@ export default class ErrorBoundary extends Component<Props, State> {
             border: '1px solid #e5e7eb',
             boxShadow: '0 10px 30px rgba(0,0,0,0.06)'
           }}>
+            <img
+              src="/erro-404-teknix.gif"
+              alt="Ilustração de um pequeno imprevisto"
+              style={{
+                display: 'block',
+                width: '100%',
+                maxWidth: '420px',
+                height: 'auto',
+                margin: '-14px auto 18px',
+                borderRadius: '12px'
+              }}
+            />
+
             <div style={{
               width: '56px',
               height: '56px',

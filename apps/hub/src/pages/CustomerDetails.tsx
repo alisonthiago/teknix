@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { ChevronLeft, User, Mail, Phone, MapPin, CreditCard, ShoppingBag, MessageCircle, DollarSign, ArrowUpRight } from 'lucide-react'
+import { ChevronLeft, User, Mail, Phone, MapPin, CreditCard, ShoppingBag, MessageCircle, DollarSign, ArrowUpRight, RefreshCw } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import type { Customer } from '../types/database'
 import './CustomerDetails.css'
@@ -146,8 +146,9 @@ export default function CustomerDetails() {
   if (loading) {
     return (
       <div className="customer-details-page">
-        <div style={{ padding: '60px 20px', textAlign: 'center', color: '#64748b' }}>
-          <p>Carregando dados do cliente...</p>
+        <div style={{ padding: '80px 20px', textAlign: 'center', color: '#64748b' }}>
+          <RefreshCw className="hub-spin" size={24} style={{ marginBottom: 12 }} />
+          <div>Carregando dados do cliente...</div>
         </div>
       </div>
     )

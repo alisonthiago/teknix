@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { RefreshCw } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import './BlogEditor.css'
 
@@ -397,9 +398,9 @@ export default function BlogEditor() {
 
   if (loading) {
     return (
-      <div className="blog-editor-loading">
-        <div className="blog-loading-spinner" />
-        <span>Carregando post...</span>
+      <div style={{ padding: '80px 20px', textAlign: 'center', color: '#64748b', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <RefreshCw size={24} className="hub-spin" style={{ marginBottom: 12 }} />
+        <div>Carregando post...</div>
       </div>
     )
   }

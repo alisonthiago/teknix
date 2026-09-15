@@ -8,7 +8,7 @@ import {
   Percent, Tag, DollarSign, Package, Layers, Sparkles,
   X, ExternalLink, Check, Play, Loader2, Film,
   HelpCircle, Wand2, Sliders, Zap, Battery, Shield, Wrench, Truck, Star,
-  LayoutTemplate, Copy, ArrowRight, MessageSquare, Search
+  LayoutTemplate, Copy, ArrowRight, MessageSquare, Search, RefreshCw
 } from 'lucide-react'
 import './ProductForm.css'
 import './ProductCommerce.css'
@@ -60,6 +60,9 @@ interface FormData {
   condition: string
   category_id: string
   additional_categories: string[]
+  model: string
+  model_types: string[]
+  usage_lines: string[]
   brand: string
   tags: string
   variations: { id: string; name: string; sku: string; price: number; stock: number }[]
@@ -110,6 +113,9 @@ const initialForm: FormData = {
   condition: 'new',
   category_id: '',
   additional_categories: [],
+  model: '',
+  model_types: [],
+  usage_lines: ['Uso Profissional'],
   brand: 'TEKNIX',
   tags: '',
   variations: [],
@@ -264,6 +270,85 @@ export default function ProductForm() {
   const [showPublishModal, setShowPublishModal] = useState(false)
   const [publishedSlug, setPublishedSlug] = useState('')
 
+  // ─── Controle do Stepper / Wizard de 3 Etapas ──────────────────────────
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1)
+  const [completedSteps, setCompletedSteps] = useState<{ 1: boolean; 2: boolean; 3: boolean }>({
+    1: false,
+    2: false,
+    3: false
+  })
+
+  function validateStep1(): boolean {
+    if (!form.name.trim()) {
+      setMessage({ type: 'error', text: 'Por favor, informe o nome do produto na Etapa 1.' })
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      return false
+    }
+    if (form.has_promo && form.promo_price > 0 && form.sell_price > 0 && Number(form.promo_price) >= Number(form.sell_price)) {
+      setMessage({ type: 'error', text: 'O preço promocional deve ser menor que o preço de venda.' })
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      return false
+    }
+    setMessage(null)
+    return true
+  }
+
+  function validateStep2(): boolean {
+    if (form.manage_stock && Number(form.stock_quantity) < 0) {
+      setMessage({ type: 'error', text: 'A quantidade em estoque não pode ser negativa.' })
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      return false
+    }
+    setMessage(null)
+    return true
+  }
+
+  function handleNextStep1() {
+    if (!validateStep1()) return
+    setCompletedSteps(prev => ({ ...prev, 1: true }))
+    setCurrentStep(2)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  function handleNextStep2() {
+    if (!validateStep2()) return
+    setCompletedSteps(prev => ({ ...prev, 2: true }))
+    setCurrentStep(3)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  function handlePrevStep2() {
+    setCurrentStep(1)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  function handlePrevStep3() {
+    setCurrentStep(2)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  function handleStepClick(targetStep: 1 | 2 | 3) {
+    if (targetStep === currentStep) return
+    if (targetStep < currentStep) {
+      setCurrentStep(targetStep)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      return
+    }
+    if (currentStep === 1) {
+      if (!validateStep1()) return
+      setCompletedSteps(prev => ({ ...prev, 1: true }))
+      if (targetStep === 3) {
+        if (!validateStep2()) return
+        setCompletedSteps(prev => ({ ...prev, 2: true }))
+      }
+    } else if (currentStep === 2) {
+      if (!validateStep2()) return
+      setCompletedSteps(prev => ({ ...prev, 2: true }))
+    }
+    setCurrentStep(targetStep)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   // Estados para Upload de Fotos e Vídeo
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isUploadingMedia, setIsUploadingMedia] = useState(false)
@@ -275,10 +360,23 @@ export default function ProductForm() {
   const [categorySearch, setCategorySearch] = useState('')
   const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false)
   const categoryDropdownRef = useRef<HTMLDivElement>(null)
+
+  const [modelSearch, setModelSearch] = useState('')
+  const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false)
+  const modelDropdownRef = useRef<HTMLDivElement>(null)
+  const [newModelName, setNewModelName] = useState('')
+  const [showAddModel, setShowAddModel] = useState(false)
+
+  const [newUsageLine, setNewUsageLine] = useState('')
+  const [showAddUsageLine, setShowAddUsageLine] = useState(false)
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target as Node)) {
         setIsCategoryDropdownOpen(false)
+      }
+      if (modelDropdownRef.current && !modelDropdownRef.current.contains(event.target as Node)) {
+        setIsModelDropdownOpen(false)
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
@@ -448,6 +546,13 @@ export default function ProductForm() {
           condition: data.condition || 'new',
           category_id: store?.category_id || data.category_id || '',
           additional_categories: Array.isArray(specs?.additional_categories) ? specs.additional_categories : [],
+          model: data.model || specs?.model || '',
+          model_types: Array.isArray(specs?.model_types) && specs.model_types.length
+            ? specs.model_types
+            : (data.model ? [data.model] : []),
+          usage_lines: Array.isArray(specs?.usage_lines) && specs.usage_lines.length
+            ? specs.usage_lines
+            : ['Uso Profissional'],
           brand: data.brand || 'TEKNIX',
           tags: Array.isArray(data.tags) ? data.tags.join(', ') : (data.tags || specs.tags || ''),
           variations: Array.isArray(data.variations) ? data.variations : [],
@@ -850,6 +955,8 @@ export default function ProductForm() {
           product_specifications: form.specifications.filter(item => item.label.trim() && item.value.trim()),
           additional_categories: form.additional_categories || [],
           tags: form.tags || '',
+          model_types: form.model_types || [],
+          usage_lines: form.usage_lines || [],
           editorial_showcase: form.editorial_showcase
         },
         seo: {
@@ -890,7 +997,9 @@ export default function ProductForm() {
   async function handleSubmit(e?: React.FormEvent, forcePublish?: boolean) {
     if (e) e.preventDefault()
     if (!form.name.trim()) {
-      setMessage({ type: 'error', text: 'Por favor, informe o nome do produto.' })
+      setCurrentStep(1)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      setMessage({ type: 'error', text: 'Por favor, informe o nome do produto na Etapa 1.' })
       return
     }
 
@@ -929,7 +1038,7 @@ export default function ProductForm() {
         name: cleanedName,
         sku: cleanSku,
         brand: form.brand || 'TEKNIX',
-        model: (form as any).model || null,
+        model: form.model_types?.[0] || (form as any).model || null,
         ean: form.barcode || null,
         category: form.category_id || 'Geral',
         cost_purchase: form.cost_price ? Number(form.cost_price) : 0,
@@ -1050,7 +1159,10 @@ export default function ProductForm() {
   if (loading) {
     return (
       <div className="product-form-container" style={{ justifyContent: 'center' }}>
-        <div style={{ color: '#6b7280', fontSize: '0.95rem' }}>Carregando dados do produto...</div>
+        <div style={{ padding: '80px 20px', textAlign: 'center', color: '#64748b' }}>
+          <RefreshCw className="hub-spin" size={24} style={{ marginBottom: 12 }} />
+          <div>Carregando dados do produto...</div>
+        </div>
       </div>
     )
   }
@@ -1077,6 +1189,64 @@ export default function ProductForm() {
           </div>
         </div>
 
+        {/* Stepper / Wizard Indicador de 3 Etapas (1:1 HUB Design) */}
+        <div className="product-wizard-stepper" role="navigation" aria-label="Etapas do cadastro de produto">
+          <div className="stepper-steps-row">
+            <button
+              type="button"
+              className={`stepper-step ${currentStep === 1 ? 'active' : completedSteps[1] ? 'completed' : 'pending'}`}
+              onClick={() => handleStepClick(1)}
+              title="Etapa 1: Informações"
+            >
+              <span className="stepper-circle">
+                {completedSteps[1] && currentStep !== 1 ? <Check size={14} strokeWidth={3} /> : '1'}
+              </span>
+              <span className="stepper-label">Informações</span>
+            </button>
+
+            <div className={`stepper-divider ${currentStep > 1 || completedSteps[1] ? 'active' : ''}`} />
+
+            <button
+              type="button"
+              className={`stepper-step ${currentStep === 2 ? 'active' : completedSteps[2] ? 'completed' : 'pending'}`}
+              onClick={() => handleStepClick(2)}
+              title="Etapa 2: Estoque e características"
+            >
+              <span className="stepper-circle">
+                {completedSteps[2] && currentStep !== 2 ? <Check size={14} strokeWidth={3} /> : '2'}
+              </span>
+              <span className="stepper-label">Estoque e características</span>
+            </button>
+
+            <div className={`stepper-divider ${currentStep > 2 || completedSteps[2] ? 'active' : ''}`} />
+
+            <button
+              type="button"
+              className={`stepper-step ${currentStep === 3 ? 'active' : completedSteps[3] ? 'completed' : 'pending'}`}
+              onClick={() => handleStepClick(3)}
+              title="Etapa 3: Publicação"
+            >
+              <span className="stepper-circle">
+                {completedSteps[3] && currentStep !== 3 ? <Check size={14} strokeWidth={3} /> : '3'}
+              </span>
+              <span className="stepper-label">Publicação</span>
+            </button>
+          </div>
+
+          <div className="stepper-mobile-summary">
+            <span>
+              Etapa {currentStep} de 3:{' '}
+              <strong>
+                {currentStep === 1
+                  ? 'Informações'
+                  : currentStep === 2
+                  ? 'Estoque e características'
+                  : 'Publicação'}
+              </strong>
+            </span>
+          </div>
+        </div>
+
         {message && (
           <div style={{
             padding: '12px 16px',
@@ -1091,8 +1261,8 @@ export default function ProductForm() {
           </div>
         )}
 
-        {/* Conteúdo da Aba 1: Dados do Produto */}
-        {activeTab === 'details' && (
+        {/* ── ETAPA 1: INFORMAÇÕES DO PRODUTO ── */}
+        {currentStep === 1 && (
           <>
             {/* 1. NOME E DESCRIÇÃO */}
             <div className="form-card">
@@ -1141,270 +1311,667 @@ export default function ProductForm() {
           </div>
         </div>
 
-        {/* 2. TIPO DE PRODUTO & CATEGORIAS (COMBINADOS E HARMONIZADOS) */}
-        <div className="form-card product-type-cat-card">
-          <div className="product-type-cat-grid">
-            {/* Coluna 1: Tipo de produto */}
-            <div className="product-type-column">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                <h2 className="card-title" style={{ margin: 0 }}>Tipo de produto</h2>
-              </div>
-
-              <div className="product-type-cards">
-                <button
-                  type="button"
-                  className={`product-type-option-card ${form.product_type === 'physical' ? 'active' : ''}`}
-                  onClick={() => setForm({ ...form, product_type: 'physical' })}
-                >
-                  <div className="type-option-radio">
-                    <span className={`type-radio-dot ${form.product_type === 'physical' ? 'active' : ''}`} />
-                  </div>
-                  <div className="type-option-text">
-                    <strong className="type-option-title">Físico</strong>
-                    <span className="type-option-desc">Requer frete e envio</span>
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  className={`product-type-option-card ${form.product_type === 'digital' ? 'active' : ''}`}
-                  onClick={() => setForm({ ...form, product_type: 'digital' })}
-                >
-                  <div className="type-option-radio">
-                    <span className={`type-radio-dot ${form.product_type === 'digital' ? 'active' : ''}`} />
-                  </div>
-                  <div className="type-option-text">
-                    <strong className="type-option-title">Digital / serviço</strong>
-                    <span className="type-option-desc">Sem cálculo de frete</span>
-                  </div>
-                </button>
-              </div>
+        {/* 2. CATEGORIAS */}
+        <div className="form-card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <h2 className="card-title" style={{ margin: 0 }}>Categorias</h2>
+              {([form.category_id, ...form.additional_categories].filter(Boolean).length > 0) && (
+                <span className="section-sub-hint">
+                  {`${[form.category_id, ...form.additional_categories].filter(Boolean).length} vinculada(s)`}
+                </span>
+              )}
             </div>
 
-            {/* Divisor Vertical */}
-            <div className="product-type-cat-divider" />
+            {!showAddCategory ? (
+              <button
+                type="button"
+                onClick={() => setShowAddCategory(true)}
+                className="btn-add-category-action"
+                title="Adicionar categoria"
+              >
+                <Plus size={15} strokeWidth={2.5} />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => { setShowAddCategory(false); setNewCategoryName('') }}
+                className="btn-add-category-action cancel"
+                title="Fechar"
+              >
+                <X size={15} strokeWidth={2.5} />
+              </button>
+            )}
+          </div>
 
-            {/* Coluna 2: Categorias */}
-            <div className="product-cat-column">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <h2 className="card-title" style={{ margin: 0 }}>Categorias</h2>
-                  {([form.category_id, ...form.additional_categories].filter(Boolean).length > 0) && (
-                    <span className="section-sub-hint">
-                      {`${[form.category_id, ...form.additional_categories].filter(Boolean).length} vinculada(s)`}
-                    </span>
-                  )}
-                </div>
+          {/* Form Inline para Adicionar Nova Categoria */}
+          {showAddCategory && (
+            <div className="add-category-inline-box" style={{ marginBottom: 12 }}>
+              <input
+                type="text"
+                className="form-input add-cat-input"
+                placeholder="Nome da categoria..."
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    handleCreateCategory()
+                  } else if (e.key === 'Escape') {
+                    setShowAddCategory(false)
+                    setNewCategoryName('')
+                  }
+                }}
+                autoFocus
+              />
+              <button
+                type="button"
+                className="btn-create-category-confirm"
+                onClick={handleCreateCategory}
+              >
+                <Check size={14} strokeWidth={2.5} />
+                <span>Criar</span>
+              </button>
+              <button
+                type="button"
+                className="btn-create-category-cancel"
+                onClick={() => { setShowAddCategory(false); setNewCategoryName('') }}
+              >
+                <X size={14} strokeWidth={2.5} />
+                <span>Cancelar</span>
+              </button>
+            </div>
+          )}
 
-                {!showAddCategory ? (
-                  <button
-                    type="button"
-                    onClick={() => setShowAddCategory(true)}
-                    className="btn-add-category-action"
-                    title="Adicionar categoria"
+          {/* Categorias Selecionadas */}
+          {([form.category_id, ...form.additional_categories].filter(Boolean).length > 0) && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
+              {[form.category_id, ...form.additional_categories].filter(Boolean).map(id => {
+                const cat = categories.find(c => c.id === id)
+                if (!cat) return null
+                const isPrimary = id === form.category_id
+                return (
+                  <div
+                    key={id}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      background: isPrimary ? 'rgba(181, 245, 0, 0.22)' : 'rgba(181, 245, 0, 0.10)',
+                      border: isPrimary ? '1px solid rgba(163, 230, 53, 0.65)' : '1px solid rgba(181, 245, 0, 0.35)',
+                      color: '#111111',
+                      padding: '5px 12px',
+                      borderRadius: 20,
+                      fontSize: '12.5px',
+                      fontWeight: 600,
+                      gap: 6,
+                      boxShadow: '0 1px 2px rgba(0, 0, 0, 0.02)',
+                      transition: 'all 0.15s ease'
+                    }}
                   >
-                    <Plus size={15} strokeWidth={2.5} />
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => { setShowAddCategory(false); setNewCategoryName('') }}
-                    className="btn-add-category-action cancel"
-                    title="Fechar"
-                  >
-                    <X size={15} strokeWidth={2.5} />
-                  </button>
+                    <span style={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: '50%',
+                      background: isPrimary ? '#B5F500' : '#84cc16',
+                      boxShadow: '0 0 0 1px rgba(0, 0, 0, 0.12)',
+                      flexShrink: 0
+                    }} />
+                    <span>{cat.name}</span>
+                    {isPrimary && (
+                      <span style={{
+                        fontSize: '10px',
+                        background: '#B5F500',
+                        color: '#000000',
+                        padding: '1px 6px',
+                        borderRadius: 8,
+                        fontWeight: 700,
+                        marginLeft: 2
+                      }}>
+                        Principal
+                      </span>
+                    )}
+                    <button 
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        if (id === form.category_id) {
+                          setForm({ ...form, category_id: form.additional_categories[0] || '', additional_categories: form.additional_categories.slice(1) })
+                        } else {
+                          setForm({ ...form, additional_categories: form.additional_categories.filter(x => x !== id) })
+                        }
+                      }}
+                      title="Remover categoria"
+                      style={{
+                        background: 'rgba(0, 0, 0, 0.05)',
+                        border: 'none',
+                        marginLeft: 4,
+                        cursor: 'pointer',
+                        color: '#374151',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: 16,
+                        height: 16,
+                        borderRadius: '50%',
+                        padding: 0,
+                        transition: 'all 0.15s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = '#fee2e2'
+                        e.currentTarget.style.color = '#dc2626'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'rgba(0, 0, 0, 0.05)'
+                        e.currentTarget.style.color = '#374151'
+                      }}
+                    >
+                      <X size={10} strokeWidth={2.5} />
+                    </button>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          {/* Input de Busca com Dropdown */}
+          <div className="cat-selector-wrap" ref={categoryDropdownRef}>
+            <div 
+              className={`cat-select-box ${isCategoryDropdownOpen ? 'open' : ''}`}
+              onClick={() => setIsCategoryDropdownOpen(true)}
+            >
+              <Search size={15} className="cat-search-icon" />
+              <input 
+                type="text" 
+                className="cat-search-input"
+                placeholder="Pesquise ou selecione para adicionar categoria..."
+                value={categorySearch}
+                onChange={e => {
+                  setCategorySearch(e.target.value)
+                  setIsCategoryDropdownOpen(true)
+                }}
+                onFocus={() => setIsCategoryDropdownOpen(true)}
+              />
+              <ChevronDown size={16} className={`cat-chevron ${isCategoryDropdownOpen ? 'rotated' : ''}`} />
+            </div>
+            {isCategoryDropdownOpen && (
+              <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#fff', border: '1px solid #e2e8f0', borderRadius: 8, marginTop: 4, zIndex: 20, maxHeight: 220, overflowY: 'auto', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04)' }}>
+                {categories.filter(c => c.name.toLowerCase().includes(categorySearch.toLowerCase())).map(c => {
+                  const isSelected = c.id === form.category_id || form.additional_categories.includes(c.id)
+                  return (
+                    <div 
+                      key={c.id} 
+                      style={{ padding: '9px 14px', cursor: 'pointer', background: isSelected ? '#F7F7F7' : 'transparent', fontSize: '13px', color: isSelected ? '#111111' : '#334155', fontWeight: isSelected ? 600 : 400, display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'background 0.1s ease' }}
+                      onClick={() => {
+                        if (isSelected) {
+                          if (c.id === form.category_id) {
+                            setForm({ ...form, category_id: form.additional_categories[0] || '', additional_categories: form.additional_categories.slice(1) })
+                          } else {
+                            setForm({ ...form, additional_categories: form.additional_categories.filter(x => x !== c.id) })
+                          }
+                        } else {
+                          if (!form.category_id) {
+                            setForm({ ...form, category_id: c.id })
+                          } else {
+                            setForm({ ...form, additional_categories: [...form.additional_categories, c.id] })
+                          }
+                        }
+                        setCategorySearch('')
+                      }}
+                      onMouseEnter={e => (e.currentTarget.style.background = isSelected ? '#F7F7F7' : '#fafafa')}
+                      onMouseLeave={e => (e.currentTarget.style.background = isSelected ? '#F7F7F7' : 'transparent')}
+                    >
+                      <span>{c.name}</span>
+                      {isSelected && <CheckCircle2 size={15} color="#111111" />}
+                    </div>
+                  )
+                })}
+                {categories.filter(c => c.name.toLowerCase().includes(categorySearch.toLowerCase())).length === 0 && (
+                  <div style={{ padding: '12px 14px', color: '#9ca3af', fontSize: '13px' }}>Nenhuma categoria encontrada.</div>
                 )}
               </div>
+            )}
+          </div>
+        </div>
 
-              {/* Form Inline para Adicionar Nova Categoria */}
-              {showAddCategory && (
-                <div className="add-category-inline-box">
-                  <input
-                    type="text"
-                    className="form-input add-cat-input"
-                    placeholder="Nome da categoria..."
-                    value={newCategoryName}
-                    onChange={(e) => setNewCategoryName(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault()
-                        handleCreateCategory()
-                      } else if (e.key === 'Escape') {
-                        setShowAddCategory(false)
-                        setNewCategoryName('')
+        {/* ── 2. MODELOS & TIPOS ── */}
+        <div className="form-card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <h2 className="card-title" style={{ margin: 0 }}>Modelos & Tipos</h2>
+              {form.model_types?.length > 0 && (
+                <span style={{
+                  fontSize: '11px',
+                  background: '#F7F7F7',
+                  color: '#111111',
+                  padding: '2px 8px',
+                  borderRadius: 10,
+                  fontWeight: 700,
+                  border: '1px solid #e5e7eb'
+                }}>
+                  {`${form.model_types.length} selecionado(s)`}
+                </span>
+              )}
+            </div>
+
+            {!showAddModel ? (
+              <button
+                type="button"
+                onClick={() => setShowAddModel(true)}
+                className="btn-add-category-action"
+                title="Adicionar modelo ou tipo"
+              >
+                <Plus size={15} strokeWidth={2.5} />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => { setShowAddModel(false); setNewModelName('') }}
+                className="btn-add-category-action cancel"
+                title="Fechar"
+              >
+                <X size={15} strokeWidth={2.5} />
+              </button>
+            )}
+          </div>
+
+          {/* Form Inline para Adicionar Novo Modelo ou Tipo */}
+          {showAddModel && (
+            <div className="add-category-inline-box" style={{ marginBottom: 12 }}>
+              <input
+                type="text"
+                className="form-input add-cat-input"
+                placeholder="Ex: Parafusadeira a Bateria, Motosserra 52cc..."
+                value={newModelName}
+                onChange={(e) => setNewModelName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    if (newModelName.trim()) {
+                      const val = newModelName.trim()
+                      if (!form.model_types.includes(val)) {
+                        setForm(f => ({ ...f, model_types: [...f.model_types, val], model: f.model || val }))
                       }
+                      setNewModelName('')
+                      setShowAddModel(false)
+                    }
+                  } else if (e.key === 'Escape') {
+                    setShowAddModel(false)
+                    setNewModelName('')
+                  }
+                }}
+                autoFocus
+              />
+              <button
+                type="button"
+                className="btn-create-category-confirm"
+                onClick={() => {
+                  if (newModelName.trim()) {
+                    const val = newModelName.trim()
+                    if (!form.model_types.includes(val)) {
+                      setForm(f => ({ ...f, model_types: [...f.model_types, val], model: f.model || val }))
+                    }
+                    setNewModelName('')
+                    setShowAddModel(false)
+                  }
+                }}
+              >
+                <Check size={14} strokeWidth={2.5} />
+                <span>Adicionar</span>
+              </button>
+              <button
+                type="button"
+                className="btn-create-category-cancel"
+                onClick={() => { setShowAddModel(false); setNewModelName('') }}
+              >
+                <X size={14} strokeWidth={2.5} />
+                <span>Cancelar</span>
+              </button>
+            </div>
+          )}
+
+          {/* Modelos/Tipos Selecionados */}
+          {form.model_types?.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
+              {form.model_types.map((m, idx) => (
+                <div
+                  key={idx}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    background: '#F7F7F7',
+                    border: '1px solid #e5e7eb',
+                    color: '#111111',
+                    padding: '5px 12px',
+                    borderRadius: 20,
+                    fontSize: '12.5px',
+                    fontWeight: 600,
+                    gap: 6,
+                    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.02)'
+                  }}
+                >
+                  <span style={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: '50%',
+                    background: '#111111',
+                    flexShrink: 0
+                  }} />
+                  <span>{m}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setForm(f => ({
+                        ...f,
+                        model_types: f.model_types.filter((_, i) => i !== idx),
+                        model: f.model === m ? (f.model_types.find(x => x !== m) || '') : f.model
+                      }))
                     }}
-                    autoFocus
-                  />
-                  <button
-                    type="button"
-                    className="btn-create-category-confirm"
-                    onClick={handleCreateCategory}
+                    title="Remover modelo"
+                    style={{
+                      background: 'rgba(0, 0, 0, 0.05)',
+                      border: 'none',
+                      marginLeft: 4,
+                      cursor: 'pointer',
+                      color: '#374151',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: 16,
+                      height: 16,
+                      borderRadius: '50%',
+                      padding: 0
+                    }}
                   >
-                    <Check size={14} strokeWidth={2.5} />
-                    <span>Criar</span>
-                  </button>
-                  <button
-                    type="button"
-                    className="btn-create-category-cancel"
-                    onClick={() => { setShowAddCategory(false); setNewCategoryName('') }}
-                  >
-                    <X size={14} strokeWidth={2.5} />
-                    <span>Cancelar</span>
+                    <X size={10} strokeWidth={2.5} />
                   </button>
                 </div>
-              )}
+              ))}
+            </div>
+          )}
 
-              {/* Categorias Selecionadas */}
-              {([form.category_id, ...form.additional_categories].filter(Boolean).length > 0) && (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
-                  {[form.category_id, ...form.additional_categories].filter(Boolean).map(id => {
-                    const cat = categories.find(c => c.id === id)
-                    if (!cat) return null
-                    const isPrimary = id === form.category_id
+          {/* Input de Busca / Seleção com Dropdown para Modelos & Tipos */}
+          <div className="cat-selector-wrap" ref={modelDropdownRef}>
+            <div
+              className={`cat-select-box ${isModelDropdownOpen ? 'open' : ''}`}
+              onClick={() => setIsModelDropdownOpen(true)}
+            >
+              <Search size={15} className="cat-search-icon" />
+              <input
+                type="text"
+                className="cat-search-input"
+                placeholder="Pesquise ou digite para adicionar modelo ou tipo..."
+                value={modelSearch}
+                onChange={e => {
+                  setModelSearch(e.target.value)
+                  setIsModelDropdownOpen(true)
+                }}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && modelSearch.trim()) {
+                    e.preventDefault()
+                    const val = modelSearch.trim()
+                    if (!form.model_types.includes(val)) {
+                      setForm(f => ({ ...f, model_types: [...f.model_types, val], model: f.model || val }))
+                    }
+                    setModelSearch('')
+                    setIsModelDropdownOpen(false)
+                  }
+                }}
+                onFocus={() => setIsModelDropdownOpen(true)}
+              />
+              <ChevronDown size={16} className={`cat-chevron ${isModelDropdownOpen ? 'rotated' : ''}`} />
+            </div>
+
+            {isModelDropdownOpen && (() => {
+              const suggestions = [
+                'Parafusadeira a Bateria',
+                'Parafusadeira Elétrica',
+                'Furadeira de Impacto',
+                'Esmerilhadeira Angular',
+                'Martelete Perfurador',
+                'Lixadeira e Politriz',
+                'Serra Circular',
+                'Serra Tico-Tico',
+                'Lavadora de Alta Pressão',
+                'Aspirador de Pó e Água',
+                'Motosserra a Gasolina',
+                'Roçadeira Lateral',
+                'Soprador de Folhas',
+                'Macaco Jacaré 2T',
+                'Macaco Hidráulico',
+                'Prensa Hidráulica',
+                'Compressor de Ar',
+                'Chave de Impacto Pneumática',
+                'Pistola de Pintura',
+                'Microfone de Lapela Sem Fio'
+              ].filter(s => s.toLowerCase().includes(modelSearch.toLowerCase().trim()))
+
+              return (
+                <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#fff', border: '1px solid #e2e8f0', borderRadius: 8, marginTop: 4, zIndex: 20, maxHeight: 220, overflowY: 'auto', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.08)' }}>
+                  {modelSearch.trim() && !suggestions.includes(modelSearch.trim()) && (
+                    <div
+                      style={{ padding: '9px 14px', cursor: 'pointer', background: 'rgba(181, 245, 0, 0.12)', fontSize: '13px', color: '#111', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6, borderBottom: '1px solid #e2e8f0' }}
+                      onClick={() => {
+                        const val = modelSearch.trim()
+                        if (!form.model_types.includes(val)) {
+                          setForm(f => ({ ...f, model_types: [...f.model_types, val], model: f.model || val }))
+                        }
+                        setModelSearch('')
+                        setIsModelDropdownOpen(false)
+                      }}
+                    >
+                      <Plus size={14} />
+                      <span>Adicionar &quot;{modelSearch.trim()}&quot; como novo modelo</span>
+                    </div>
+                  )}
+
+                  {suggestions.map(s => {
+                    const isSelected = form.model_types.includes(s)
                     return (
                       <div
-                        key={id}
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          background: isPrimary ? 'rgba(181, 245, 0, 0.22)' : 'rgba(181, 245, 0, 0.10)',
-                          border: isPrimary ? '1px solid rgba(163, 230, 53, 0.65)' : '1px solid rgba(181, 245, 0, 0.35)',
-                          color: '#111111',
-                          padding: '4px 10px',
-                          borderRadius: 20,
-                          fontSize: '12px',
-                          fontWeight: 600,
-                          gap: 6,
-                          boxShadow: '0 1px 2px rgba(0, 0, 0, 0.02)',
-                          transition: 'all 0.15s ease'
+                        key={s}
+                        style={{ padding: '9px 14px', cursor: 'pointer', background: isSelected ? '#F7F7F7' : 'transparent', fontSize: '13px', color: isSelected ? '#111' : '#334155', fontWeight: isSelected ? 600 : 400, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                        onClick={() => {
+                          if (isSelected) {
+                            setForm(f => ({
+                              ...f,
+                              model_types: f.model_types.filter(x => x !== s),
+                              model: f.model === s ? (f.model_types.find(x => x !== s) || '') : f.model
+                            }))
+                          } else {
+                            setForm(f => ({
+                              ...f,
+                              model_types: [...f.model_types, s],
+                              model: f.model || s
+                            }))
+                          }
+                          setModelSearch('')
                         }}
                       >
-                        <span style={{
-                          width: 6,
-                          height: 6,
-                          borderRadius: '50%',
-                          background: isPrimary ? '#B5F500' : '#84cc16',
-                          boxShadow: '0 0 0 1px rgba(0, 0, 0, 0.12)',
-                          flexShrink: 0
-                        }} />
-                        <span>{cat.name}</span>
-                        {isPrimary && (
-                          <span style={{
-                            fontSize: '10px',
-                            background: '#B5F500',
-                            color: '#000000',
-                            padding: '1px 6px',
-                            borderRadius: 8,
-                            fontWeight: 700,
-                            marginLeft: 2
-                          }}>
-                            Principal
-                          </span>
-                        )}
-                        <button 
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            if (id === form.category_id) {
-                              setForm({ ...form, category_id: form.additional_categories[0] || '', additional_categories: form.additional_categories.slice(1) })
-                            } else {
-                              setForm({ ...form, additional_categories: form.additional_categories.filter(x => x !== id) })
-                            }
-                          }}
-                          title="Remover categoria"
-                          style={{
-                            background: 'rgba(0, 0, 0, 0.05)',
-                            border: 'none',
-                            marginLeft: 4,
-                            cursor: 'pointer',
-                            color: '#374151',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: 16,
-                            height: 16,
-                            borderRadius: '50%',
-                            padding: 0,
-                            transition: 'all 0.15s ease'
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.background = '#fee2e2'
-                            e.currentTarget.style.color = '#dc2626'
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.background = 'rgba(0, 0, 0, 0.05)'
-                            e.currentTarget.style.color = '#374151'
-                          }}
-                        >
-                          <X size={10} strokeWidth={2.5} />
-                        </button>
+                        <span>{s}</span>
+                        {isSelected && <CheckCircle2 size={15} color="#111111" />}
                       </div>
                     )
                   })}
                 </div>
-              )}
+              )
+            })()}
+          </div>
+        </div>
 
-              {/* Input de Busca com Dropdown */}
-              <div className="cat-selector-wrap" ref={categoryDropdownRef}>
-                <div 
-                  className={`cat-select-box ${isCategoryDropdownOpen ? 'open' : ''}`}
-                  onClick={() => setIsCategoryDropdownOpen(true)}
-                >
-                  <Search size={15} className="cat-search-icon" />
-                  <input 
-                    type="text" 
-                    className="cat-search-input"
-                    placeholder="Pesquise ou selecione para adicionar..."
-                    value={categorySearch}
-                    onChange={e => {
-                      setCategorySearch(e.target.value)
-                      setIsCategoryDropdownOpen(true)
-                    }}
-                    onFocus={() => setIsCategoryDropdownOpen(true)}
-                  />
-                  <ChevronDown size={16} className={`cat-chevron ${isCategoryDropdownOpen ? 'rotated' : ''}`} />
-                </div>
-                {isCategoryDropdownOpen && (
-                  <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#fff', border: '1px solid #e2e8f0', borderRadius: 8, marginTop: 4, zIndex: 20, maxHeight: 200, overflowY: 'auto', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04)' }}>
-                    {categories.filter(c => c.name.toLowerCase().includes(categorySearch.toLowerCase())).map(c => {
-                      const isSelected = c.id === form.category_id || form.additional_categories.includes(c.id)
-                      return (
-                        <div 
-                          key={c.id} 
-                          style={{ padding: '8px 12px', cursor: 'pointer', background: isSelected ? '#F7F7F7' : 'transparent', fontSize: '13px', color: isSelected ? '#111111' : '#334155', fontWeight: isSelected ? 600 : 400, display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'background 0.1s ease' }}
-                          onClick={() => {
-                            if (isSelected) {
-                              if (c.id === form.category_id) {
-                                setForm({ ...form, category_id: form.additional_categories[0] || '', additional_categories: form.additional_categories.slice(1) })
-                              } else {
-                                setForm({ ...form, additional_categories: form.additional_categories.filter(x => x !== id) })
-                              }
-                            } else {
-                              if (!form.category_id) {
-                                setForm({ ...form, category_id: c.id })
-                              } else {
-                                setForm({ ...form, additional_categories: [...form.additional_categories, c.id] })
-                              }
-                            }
-                            setCategorySearch('')
-                          }}
-                          onMouseEnter={e => (e.currentTarget.style.background = isSelected ? '#F7F7F7' : '#fafafa')}
-                          onMouseLeave={e => (e.currentTarget.style.background = isSelected ? '#F7F7F7' : 'transparent')}
-                        >
-                          <span>{c.name}</span>
-                          {isSelected && <CheckCircle2 size={15} color="#111111" />}
-                        </div>
-                      )
-                    })}
-                    {categories.filter(c => c.name.toLowerCase().includes(categorySearch.toLowerCase())).length === 0 && (
-                      <div style={{ padding: '10px 12px', color: '#9ca3af', fontSize: '13px' }}>Nenhuma categoria encontrada.</div>
-                    )}
-                  </div>
-                )}
-              </div>
+        {/* ── 3. LINHA & USO ── */}
+        <div className="form-card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <h2 className="card-title" style={{ margin: 0 }}>Linha & Uso</h2>
+              {form.usage_lines?.length > 0 && (
+                <span style={{
+                  fontSize: '11px',
+                  background: '#F7F7F7',
+                  color: '#111111',
+                  padding: '2px 8px',
+                  borderRadius: 10,
+                  fontWeight: 700,
+                  border: '1px solid #e5e7eb'
+                }}>
+                  {`${form.usage_lines.length} selecionada(s)`}
+                </span>
+              )}
             </div>
+
+            {!showAddUsageLine ? (
+              <button
+                type="button"
+                onClick={() => setShowAddUsageLine(true)}
+                className="btn-add-category-action"
+                title="Adicionar linha personalizada"
+              >
+                <Plus size={15} strokeWidth={2.5} />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => { setShowAddUsageLine(false); setNewUsageLine('') }}
+                className="btn-add-category-action cancel"
+                title="Fechar"
+              >
+                <X size={15} strokeWidth={2.5} />
+              </button>
+            )}
+          </div>
+
+          {/* Chips Rápidos de Seleção de Linha */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
+            {[
+              'Uso Profissional',
+              'Industrial Pesado',
+              'Equipamento Novo 100%',
+              'Linha Hobby / Doméstico',
+              'Linha Automotiva'
+            ].map(line => {
+              const isSelected = form.usage_lines?.includes(line)
+              return (
+                <button
+                  key={line}
+                  type="button"
+                  onClick={() => {
+                    if (isSelected) {
+                      setForm(f => ({ ...f, usage_lines: f.usage_lines.filter(x => x !== line) }))
+                    } else {
+                      setForm(f => ({ ...f, usage_lines: [...(f.usage_lines || []), line] }))
+                    }
+                  }}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    padding: '6px 14px',
+                    borderRadius: 20,
+                    fontSize: '12.5px',
+                    fontWeight: isSelected ? 700 : 500,
+                    cursor: 'pointer',
+                    background: isSelected ? '#111111' : '#f4f4f5',
+                    color: isSelected ? '#ffffff' : '#3f3f46',
+                    border: isSelected ? '1px solid #000000' : '1px solid #e4e4e7',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  {isSelected && <Check size={13} strokeWidth={2.5} />}
+                  <span>{line}</span>
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Form Inline para Adicionar Linha Personalizada */}
+          {showAddUsageLine && (
+            <div className="add-category-inline-box" style={{ marginBottom: 12 }}>
+              <input
+                type="text"
+                className="form-input add-cat-input"
+                placeholder="Ex: Linha Construção Civil, Linha Agrícola..."
+                value={newUsageLine}
+                onChange={(e) => setNewUsageLine(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    if (newUsageLine.trim()) {
+                      const val = newUsageLine.trim()
+                      if (!form.usage_lines?.includes(val)) {
+                        setForm(f => ({ ...f, usage_lines: [...(f.usage_lines || []), val] }))
+                      }
+                      setNewUsageLine('')
+                      setShowAddUsageLine(false)
+                    }
+                  } else if (e.key === 'Escape') {
+                    setShowAddUsageLine(false)
+                    setNewUsageLine('')
+                  }
+                }}
+                autoFocus
+              />
+              <button
+                type="button"
+                className="btn-create-category-confirm"
+                onClick={() => {
+                  if (newUsageLine.trim()) {
+                    const val = newUsageLine.trim()
+                    if (!form.usage_lines?.includes(val)) {
+                      setForm(f => ({ ...f, usage_lines: [...(f.usage_lines || []), val] }))
+                    }
+                    setNewUsageLine('')
+                    setShowAddUsageLine(false)
+                  }
+                }}
+              >
+                <Check size={14} strokeWidth={2.5} />
+                <span>Adicionar</span>
+              </button>
+              <button
+                type="button"
+                className="btn-create-category-cancel"
+                onClick={() => { setShowAddUsageLine(false); setNewUsageLine('') }}
+              >
+                <X size={14} strokeWidth={2.5} />
+                <span>Cancelar</span>
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* 4. TIPO DE PRODUTO */}
+        <div className="form-card">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+            <h2 className="card-title" style={{ margin: 0 }}>Tipo de produto</h2>
+          </div>
+
+          <div className="product-type-cards">
+            <button
+              type="button"
+              className={`product-type-option-card ${form.product_type === 'physical' ? 'active' : ''}`}
+              onClick={() => setForm({ ...form, product_type: 'physical' })}
+            >
+              <div className="type-option-radio">
+                <span className={`type-radio-dot ${form.product_type === 'physical' ? 'active' : ''}`} />
+              </div>
+              <div className="type-option-text">
+                <strong className="type-option-title">Físico</strong>
+                <span className="type-option-desc">Requer frete e envio</span>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              className={`product-type-option-card ${form.product_type === 'digital' ? 'active' : ''}`}
+              onClick={() => setForm({ ...form, product_type: 'digital' })}
+            >
+              <div className="type-option-radio">
+                <span className={`type-radio-dot ${form.product_type === 'digital' ? 'active' : ''}`} />
+              </div>
+              <div className="type-option-text">
+                <strong className="type-option-title">Digital / serviço</strong>
+                <span className="type-option-desc">Sem cálculo de frete</span>
+              </div>
+            </button>
           </div>
         </div>
 
@@ -1671,18 +2238,70 @@ export default function ProductForm() {
           </label>
 
           <div className="commerce-settings">
-            <h3>Ofertas e condições na loja</h3>
-            <p className="field-hint">Os selos aparecem na imagem do card e na página do produto. O desconto é calculado pelos preços acima.</p>
-            <label className="toggle-switch-label"><input type="checkbox" checked={form.commerce.offerEnabled} onChange={e=>setForm({...form,commerce:{...form.commerce,offerEnabled:e.target.checked}})} />Ativar oferta com contagem regressiva</label>
-            {form.commerce.offerEnabled && <label className="form-group">Término da oferta (horário local)<input className="form-input" type="datetime-local" value={form.commerce.offerEndsAt ? new Date(Date.parse(form.commerce.offerEndsAt) - new Date(form.commerce.offerEndsAt).getTimezoneOffset()*60000).toISOString().slice(0,16) : ''} onChange={e=>setForm({...form,commerce:{...form.commerce,offerEndsAt:e.target.value ? new Date(e.target.value).toISOString() : null}})} /></label>}
-            <div className="form-row">
-              <label className="form-group">Selo na imagem<select className="form-input" value={form.commerce.badge} onChange={e=>setForm({...form,commerce:{...form.commerce,badge:e.target.value as ProductCommerce['badge']}})}><option value="none">Sem selo</option><option value="daily">Oferta do dia</option><option value="special">Oferta imperdível</option><option value="bestseller">Mais vendido</option></select><span className="field-hint">Use “Mais vendido” somente quando houver vendas que sustentem a informação.</span></label>
-              <label className="form-group">Parcelas sem juros<input className="form-input" type="number" min="1" max="24" step="1" value={form.commerce.installments} onChange={e=>setForm({...form,commerce:{...form.commerce,installments:Number(e.target.value)}})} /></label>
-              <label className="form-group">Desconto adicional no Pix (%)<input className="form-input" type="number" min="0" max="99.99" step="0.01" value={form.commerce.pixDiscountPercent} onChange={e=>setForm({...form,commerce:{...form.commerce,pixDiscountPercent:Number(e.target.value)}})} /></label>
+            <div>
+              <h3>Ofertas e condições na loja</h3>
+              <p className="field-hint">Os selos aparecem na imagem do card e na página do produto. O desconto é calculado pelos preços acima.</p>
             </div>
-            <div className="form-row" style={{ marginTop: 8 }}>
-              <label className="form-group">
-                Condição do Produto (Loja)
+
+            {/* Linha 1: Regras comerciais (3 colunas balanceadas) */}
+            <div className="form-row three-cols">
+              <div className="form-group">
+                <label>Selo na imagem</label>
+                <select
+                  className="form-input"
+                  value={form.commerce.badge}
+                  onChange={e => setForm({
+                    ...form,
+                    commerce: { ...form.commerce, badge: e.target.value as ProductCommerce['badge'] }
+                  })}
+                >
+                  <option value="none">Sem selo</option>
+                  <option value="daily">Oferta do dia</option>
+                  <option value="special">Oferta imperdível</option>
+                  <option value="bestseller">Mais vendido</option>
+                </select>
+                <span className="field-hint">Selo sobreposto na imagem principal.</span>
+              </div>
+
+              <div className="form-group">
+                <label>Parcelas sem juros</label>
+                <input
+                  className="form-input"
+                  type="number"
+                  min="1"
+                  max="24"
+                  step="1"
+                  value={form.commerce.installments}
+                  onChange={e => setForm({
+                    ...form,
+                    commerce: { ...form.commerce, installments: Number(e.target.value) }
+                  })}
+                />
+                <span className="field-hint">Número máximo de parcelas.</span>
+              </div>
+
+              <div className="form-group">
+                <label>Desconto adicional no Pix (%)</label>
+                <input
+                  className="form-input"
+                  type="number"
+                  min="0"
+                  max="99.99"
+                  step="0.01"
+                  value={form.commerce.pixDiscountPercent}
+                  onChange={e => setForm({
+                    ...form,
+                    commerce: { ...form.commerce, pixDiscountPercent: Number(e.target.value) }
+                  })}
+                />
+                <span className="field-hint">Aplicado na finalização via Pix.</span>
+              </div>
+            </div>
+
+            {/* Linha 2: Informações de destaque (2 colunas) */}
+            <div className="form-row two-cols">
+              <div className="form-group">
+                <label>Condição do Produto (Loja)</label>
                 <select
                   className="form-input"
                   value={form.commerce.condition || form.condition || 'Novo'}
@@ -1696,11 +2315,11 @@ export default function ProductForm() {
                   <option value="Recondicionado">Recondicionado</option>
                   <option value="Usado">Usado</option>
                 </select>
-                <span className="field-hint">Exibido no topo do produto (ex: Novo | +10 mil vendidos)</span>
-              </label>
+                <span className="field-hint">Exibido no topo do produto (ex: Novo).</span>
+              </div>
 
-              <label className="form-group">
-                Total de Vendas Exibido
+              <div className="form-group">
+                <label>Total de Vendas Exibido</label>
                 <input
                   className="form-input"
                   type="text"
@@ -1711,13 +2330,71 @@ export default function ProductForm() {
                     commerce: { ...form.commerce, soldCount: e.target.value }
                   })}
                 />
-                <span className="field-hint">Ex: +10 mil vendidos, +500 vendidos, +1000 vendidos</span>
+                <span className="field-hint">Ex: +10 mil vendidos, +500 vendidos.</span>
+              </div>
+            </div>
+
+            {/* Grupo de Toggles e Regras Automáticas */}
+            <div className="commerce-toggles-group">
+              <label className="toggle-switch-label" style={{ margin: 0 }}>
+                <input
+                  type="checkbox"
+                  className="toggle-switch-input"
+                  checked={form.commerce.offerEnabled}
+                  onChange={e => setForm({
+                    ...form,
+                    commerce: { ...form.commerce, offerEnabled: e.target.checked }
+                  })}
+                />
+                <span>Ativar oferta com contagem regressiva</span>
+              </label>
+
+              {form.commerce.offerEnabled && (
+                <div className="form-group" style={{ maxWidth: 320, paddingLeft: 24, marginTop: 4 }}>
+                  <label>Término da oferta (horário local)</label>
+                  <input
+                    className="form-input"
+                    type="datetime-local"
+                    value={form.commerce.offerEndsAt ? new Date(Date.parse(form.commerce.offerEndsAt) - new Date(form.commerce.offerEndsAt).getTimezoneOffset()*60000).toISOString().slice(0,16) : ''}
+                    onChange={e => setForm({
+                      ...form,
+                      commerce: { ...form.commerce, offerEndsAt: e.target.value ? new Date(e.target.value).toISOString() : null }
+                    })}
+                  />
+                </div>
+              )}
+
+              <label className="toggle-switch-label" style={{ margin: 0 }}>
+                <input
+                  type="checkbox"
+                  className="toggle-switch-input"
+                  checked={form.commerce.showLastUnit}
+                  onChange={e => setForm({
+                    ...form,
+                    commerce: { ...form.commerce, showLastUnit: e.target.checked }
+                  })}
+                />
+                <span>Mostrar “Última unidade” automaticamente quando o estoque controlado for 1</span>
+              </label>
+
+              <label className="toggle-switch-label" style={{ margin: 0 }}>
+                <input
+                  type="checkbox"
+                  className="toggle-switch-input"
+                  checked={form.free_shipping}
+                  onChange={e => setForm({ ...form, free_shipping: e.target.checked })}
+                />
+                <span>Frete grátis para este produto</span>
               </label>
             </div>
 
-            <label className="toggle-switch-label"><input type="checkbox" checked={form.commerce.showLastUnit} onChange={e=>setForm({...form,commerce:{...form.commerce,showLastUnit:e.target.checked}})} />Mostrar “Última unidade” automaticamente quando o estoque controlado for 1</label>
-            <label className="toggle-switch-label"><input type="checkbox" checked={form.free_shipping} onChange={e=>setForm({...form,free_shipping:e.target.checked})} />Frete grátis para este produto</label>
-            <p className="commerce-preview">Prévia: {productPricing(form.sell_price,form.has_promo?form.promo_price:null,form.commerce).pix.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})} no Pix · {form.commerce.installments}x sem juros. {form.commerce.condition || form.condition || 'Novo'} | {form.commerce.soldCount || '+10 mil vendidos'}</p>
+            {/* Prévia Comercial */}
+            <div className="commerce-preview">
+              <span style={{ fontWeight: 600, color: '#0f172a' }}>Prévia na loja:</span>
+              <span>
+                {productPricing(form.sell_price, form.has_promo ? form.promo_price : null, form.commerce).pix.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} no Pix · {form.commerce.installments}x sem juros · {form.commerce.condition || form.condition || 'Novo'} | {form.commerce.soldCount || '+10 mil vendidos'}
+              </span>
+            </div>
           </div>
 
           <div className="form-row" style={{ marginTop: 6 }}>
@@ -1744,8 +2421,12 @@ export default function ProductForm() {
             )}
           </div>
         </div>
+      </>
+    )}
 
-
+    {/* ── ETAPA 2: ESTOQUE E CARACTERÍSTICAS ── */}
+    {currentStep === 2 && (
+      <>
         {/* 5. INVENTÁRIO & CÓDIGOS */}
         <div className="form-card">
           <h2 className="card-title">Inventário</h2>
@@ -2059,7 +2740,12 @@ export default function ProductForm() {
             </div>
           )}
         </div>
+      </>
+    )}
 
+    {/* ── ETAPA 3: PUBLICAÇÃO ── */}
+    {currentStep === 3 && (
+      <>
         {/* 10. SEO E BUSCA NA LOJA */}
         <div className="form-card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -2366,10 +3052,8 @@ export default function ProductForm() {
             Esse produto possui frete grátis
           </label>
         </div>
-      </>
-    )}
 
-    {/* Conteúdo da Aba 2: Storytelling (Acordeão Compacto & Enxuto) */}
+    {/* Conteúdo da Vitrine Oficial & Storytelling (quando ativado) */}
     {activeTab === 'storytelling' && (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%' }}>
         {/* Barra de controle */}
@@ -3328,12 +4012,26 @@ export default function ProductForm() {
           ))}
           <button type="button" className="btn-secondary-action" onClick={() => updateShowcase((showcase: any) => ({ ...showcase, custom_faqs: [...(showcase.custom_faqs || []), { question: '', answer: '' }] }))}>+ Adicionar pergunta</button>
         </div>
+      </>
+    )}
 
+        {/* ── Rodapé Fixo com Botões Dinâmicos por Etapa ── */}
         <div className="product-form-footer">
           <div className="product-form-footer-content">
-            <button type="button" className="btn-secondary-action" onClick={() => navigate('/hub/produtos')}>
-              Cancelar
-            </button>
+            {currentStep === 1 ? (
+              <button type="button" className="btn-secondary-action" onClick={() => navigate('/hub/produtos')}>
+                Cancelar
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="btn-secondary-action"
+                onClick={currentStep === 2 ? handlePrevStep2 : handlePrevStep3}
+              >
+                Voltar
+              </button>
+            )}
+
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               {isEditing && (
                 <button
@@ -3347,6 +4045,7 @@ export default function ProductForm() {
                   <span>Editor Visual</span>
                 </button>
               )}
+
               <button
                 type="button"
                 className="btn-secondary-action"
@@ -3357,34 +4056,73 @@ export default function ProductForm() {
               >
                 Salvar no Catálogo
               </button>
-              <button
-                type="button"
-                className="btn-primary-action"
-                onClick={() => handleSubmit(undefined, true)}
-                disabled={saving}
-                style={{
-                  fontWeight: 600,
-                  transition: 'all 0.2s ease',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6
-                }}
-                title={form.published ? 'Atualizar publicação na loja oficial TEKNIX' : 'Publicar imediatamente na loja oficial TEKNIX'}
-              >
-                {saving ? (
-                  <>
-                    <Loader2 size={14} className="spinner-icon" />
-                    <span>Salvando...</span>
-                  </>
-                ) : form.published ? (
-                  <>
-                    <Check size={14} strokeWidth={2.5} />
-                    <span>Atualizar Publicação</span>
-                  </>
-                ) : (
-                  <span>Publicar</span>
-                )}
-              </button>
+
+              {currentStep === 1 ? (
+                <button
+                  type="button"
+                  className="btn-primary-action"
+                  onClick={handleNextStep1}
+                  disabled={saving}
+                  style={{
+                    fontWeight: 600,
+                    transition: 'all 0.2s ease',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6
+                  }}
+                  title="Avançar para Estoque e características"
+                >
+                  <span>Próximo</span>
+                  <ArrowRight size={14} />
+                </button>
+              ) : currentStep === 2 ? (
+                <button
+                  type="button"
+                  className="btn-primary-action"
+                  onClick={handleNextStep2}
+                  disabled={saving}
+                  style={{
+                    fontWeight: 600,
+                    transition: 'all 0.2s ease',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6
+                  }}
+                  title="Avançar para Publicação"
+                >
+                  <span>Próximo</span>
+                  <ArrowRight size={14} />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="btn-primary-action"
+                  onClick={() => handleSubmit(undefined, true)}
+                  disabled={saving}
+                  style={{
+                    fontWeight: 600,
+                    transition: 'all 0.2s ease',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6
+                  }}
+                  title={form.published ? 'Atualizar publicação na loja oficial TEKNIX' : 'Publicar imediatamente na loja oficial TEKNIX'}
+                >
+                  {saving ? (
+                    <>
+                      <Loader2 size={14} className="spinner-icon" />
+                      <span>Salvando...</span>
+                    </>
+                  ) : form.published ? (
+                    <>
+                      <Check size={14} strokeWidth={2.5} />
+                      <span>Atualizar Publicação</span>
+                    </>
+                  ) : (
+                    <span>Publicar produto</span>
+                  )}
+                </button>
+              )}
             </div>
           </div>
         </div>
