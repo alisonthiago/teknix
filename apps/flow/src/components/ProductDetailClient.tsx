@@ -1203,7 +1203,7 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
 
   return (
     <div className="product-detail-page pb-12">
-      <div className="mb-5">
+      <div className="mb-6 sm:mb-8">
         <Link href="/operacao" className="inline-flex items-center gap-1.5 text-xs text-[#888] hover:text-[#111] transition-colors font-medium">
           <ArrowLeft className="w-3.5 h-3.5" />
           Operação / Produtos
@@ -1211,7 +1211,7 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
       </div>
 
       {/* Main Product Hero */}
-      <div className="flex flex-col sm:flex-row items-start gap-5 lg:gap-8 w-full mb-5">
+      <div className="flex flex-col sm:flex-row items-start gap-5 lg:gap-8 w-full mt-6 sm:mt-8 mb-10 sm:mb-12 pb-4 sm:pb-6">
         
         {/* Photos Gallery */}
         <div className="w-full sm:w-36 lg:w-44 flex flex-col items-center gap-2.5 shrink-0">
@@ -1358,7 +1358,7 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
             </div>
 
             {/* Price & Stock Quick Highlight Bar (Compact Summary) */}
-            <div className="flex flex-wrap items-center gap-3 sm:gap-6 py-2 px-3.5 bg-[#f9fafb] border border-[#e5e7eb] rounded-xl text-xs text-[#374151]">
+            <div className="flex flex-wrap items-center gap-3 sm:gap-6 py-3 px-4 sm:py-3.5 sm:px-5 bg-[#f9fafb] border border-[#e5e7eb] rounded-xl text-xs text-[#374151] mt-3 sm:mt-4">
               <div className="flex items-center gap-1.5">
                 <span className="text-[#6b7280]">Estoque Central:</span>
                 <span className={`font-bold ${product.stock.physical > 0 ? 'text-[#16a34a]' : 'text-[#dc2626]'}`}>
@@ -1385,7 +1385,7 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
         </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-8 sm:mb-10">
         <StatBox label="Vendas" value={String(product.summary.total_sales)} />
         <StatBox label="Estoque Central" value={`${product.stock.physical} un`} />
         <StatBox label="Faturamento" value={formatBRL(product.summary.total_revenue)} />

@@ -323,7 +323,7 @@ export default function ClienteProfilePage() {
             const phoneInfo = formatCustomerPhone(customerPhone)
 
             return (
-              <div className="flex flex-col sm:flex-row items-start gap-5 lg:gap-8 w-full mb-5">
+              <div className="flex flex-col sm:flex-row items-start gap-5 lg:gap-8 w-full mt-6 sm:mt-8 mb-10 sm:mb-12 pb-4 sm:pb-6">
                 {/* Quadro da Foto / Avatar */}
                 <div className="w-full sm:w-36 lg:w-44 flex flex-col items-center gap-2.5 shrink-0">
                   <div className="relative w-full max-w-[200px] sm:max-w-none aspect-square rounded-2xl bg-white border border-[#e6e6e6] overflow-hidden flex items-center justify-center p-3 shadow-2xs group">
@@ -420,7 +420,7 @@ export default function ClienteProfilePage() {
                     </div>
 
                     {/* Barra de Destaque Compacta (idêntica ao rodapé do card no print) */}
-                    <div className="flex flex-wrap items-center gap-3 sm:gap-6 py-2 px-3.5 bg-[#f9fafb] border border-[#e5e7eb] rounded-xl text-xs text-[#374151]">
+                    <div className="flex flex-wrap items-center gap-3 sm:gap-6 py-3 px-4 sm:py-3.5 sm:px-5 bg-[#f9fafb] border border-[#e5e7eb] rounded-xl text-xs text-[#374151] mt-3 sm:mt-4">
                       <div className="flex items-center gap-1.5">
                         <span className="text-[#6b7280]">Total Comprado (LTV):</span>
                         <span className="font-bold text-[#16a34a]">
@@ -456,7 +456,7 @@ export default function ClienteProfilePage() {
           })()}
 
           {/* Cards de Métricas */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8 sm:mb-10">
             <div className="bg-white p-4 rounded-2xl border border-[#e6e6e6] shadow-2xs">
               <p className="text-[11px] font-bold text-[#888] uppercase">Total de Pedidos</p>
               <p className="text-xl font-black text-[#111] mt-1">{orders.length}</p>

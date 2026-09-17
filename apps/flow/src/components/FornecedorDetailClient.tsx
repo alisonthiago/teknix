@@ -125,8 +125,8 @@ export default function FornecedorDetailClient({ supplier }: { supplier: Supplie
 
   return (
     <div className="pb-24 max-w-7xl mx-auto">
-      {/* Navegação Topo */}
-      <div className="mb-4 sm:mb-6">
+      {/* Header com Navegação */}
+      <div className="flex items-center justify-between gap-4 border-b border-[#eeeeee] pb-4 mb-6 sm:mb-8">
         <div className="hub-mobile-header-title-row lg:hidden !justify-start gap-2.5 mb-2.5">
           <button 
             type="button" 
@@ -150,7 +150,7 @@ export default function FornecedorDetailClient({ supplier }: { supplier: Supplie
       </div>
 
       {/* Main Supplier Hero (1:1 Padrão da Tela de Produto) */}
-      <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 lg:gap-10 w-full mb-8">
+      <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 lg:gap-10 w-full mt-6 sm:mt-8 mb-10 sm:mb-12 pb-4 sm:pb-6">
         {/* Foto / Logo do Fornecedor */}
         <div className="w-full sm:w-40 lg:w-48 flex flex-col items-center gap-3 shrink-0">
           <div className="relative w-40 sm:w-full max-w-[240px] sm:max-w-none aspect-square rounded-2xl bg-white border border-[#e6e6e6] overflow-hidden flex items-center justify-center p-3 sm:p-4 shadow-2xs group">
@@ -305,7 +305,7 @@ export default function FornecedorDetailClient({ supplier }: { supplier: Supplie
             </div>
 
             {/* Highlight Cards Rápidos (Oculto no mobile, 1:1 com a página do produto) */}
-            <div className="hidden sm:grid sm:grid-cols-3 gap-4 sm:gap-6 p-5 sm:p-6 bg-white border border-[#e6e6e6] rounded-2xl mb-2 shadow-2xs">
+            <div className="hidden sm:grid sm:grid-cols-3 gap-4 sm:gap-6 p-5 sm:p-6 bg-white border border-[#e6e6e6] rounded-2xl mt-4 sm:mt-5 mb-2 shadow-2xs">
               <div>
                 <span className="text-[10px] uppercase font-bold text-[#888888] tracking-wider">Produtos Vinculados</span>
                 <div className="text-xl font-black mt-1 text-[#111111]">
@@ -333,7 +333,7 @@ export default function FornecedorDetailClient({ supplier }: { supplier: Supplie
       </div>
 
       {/* 4 Cards de Métricas (Mobile: 2x2, Desktop: 1x4) */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 mb-8 sm:mb-10">
         <StatBox 
           label="Produtos" 
           value={`${supplier.stats.products_count} un`} 
