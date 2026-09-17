@@ -226,277 +226,526 @@
   flex-shrink: 0;
 }
 
-/* ── Right Column: Permissions Matrix ── */
+/* ── Right Column: Clean Details Card ── */
 .colab-details-card {
   background: #ffffff;
   border: 1px solid #e6e6e6;
-  border-radius: 14px;
+  border-radius: 18px;
   padding: 24px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 22px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
-.colab-selected-header {
+/* ── Clean Header ── */
+.colab-clean-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   padding-bottom: 18px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #eeeeee;
   flex-wrap: wrap;
 }
 
-.colab-selected-meta h2 {
-  font-size: 18px;
-  font-weight: 800;
-  color: #111111;
-  margin: 0;
-}
-
-.colab-selected-meta p {
-  font-size: 12.5px;
-  color: #6b7280;
-  margin: 3px 0 0;
-}
-
-.colab-master-alert {
+.colab-clean-profile {
   display: flex;
   align-items: center;
-  gap: 12px;
-  background: #fffbeb;
-  border: 1px solid #fef3c7;
-  color: #b45309;
-  padding: 12px 16px;
-  border-radius: 10px;
-  font-size: 12.5px;
-}
-
-.colab-master-alert strong {
-  display: block;
-  font-weight: 700;
-  margin-bottom: 2px;
-}
-
-.colab-master-alert p {
-  margin: 0;
-  font-size: 12px;
-  color: #92400e;
-}
-
-/* ── Role Preset Cards ── */
-.colab-role-section {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.colab-section-label {
-  font-size: 13px;
-  font-weight: 800;
-  color: #111111;
-}
-
-.colab-role-cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 10px;
-}
-
-.colab-role-card {
-  background: #ffffff;
-  border: 1.5px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 10px 14px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  display: flex;
-  align-items: center;
-}
-
-.colab-role-card:hover {
-  border-color: #9ca3af;
-  background: #fafafa;
-}
-
-.colab-role-card.active {
-  border-color: #000000;
-  background: #F7F7F7;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-}
-
-.colab-role-radio-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.colab-role-name {
-  font-size: 13px;
-  font-weight: 800;
-  color: #111111;
-}
-
-.colab-role-desc {
-  font-size: 11px;
-  color: #6b7280;
-  line-height: 1.35;
-  margin: 0;
-}
-
-/* ── Modules Accordion & Matrix ── */
-.colab-matrix-section {
-  display: flex;
-  flex-direction: column;
   gap: 14px;
 }
 
-.colab-matrix-title {
+.colab-clean-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #f3f4f6;
+  border: 1.5px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 15px;
+  font-weight: 700;
+  color: #1f2328;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.colab-clean-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.colab-clean-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.colab-clean-name-row h2 {
+  font-size: 17px;
   font-weight: 800;
   color: #111111;
   margin: 0;
+  letter-spacing: -0.02em;
 }
 
-.colab-matrix-desc {
+.colab-badge-master {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10.5px;
+  font-weight: 800;
+  background: #1f2328;
+  color: #ffffff;
+  padding: 2px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.03em;
+}
+
+.colab-badge-active {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #16a34a;
+  background: #ecfdf5;
+  border: 1px solid #bbf7d0;
+  padding: 1.5px 8px;
+  border-radius: 20px;
+}
+
+.colab-clean-meta {
   font-size: 12px;
   color: #6b7280;
   margin: 2px 0 0;
 }
 
-.colab-modules-accordion {
+/* Save Button */
+.colab-btn-save {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #1f2328;
+  color: #ffffff;
+  border: 1px solid #1f2328;
+  border-radius: 12px;
+  padding: 9px 18px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.colab-btn-save:hover:not(:disabled) {
+  background: #000000;
+  border-color: #000000;
+}
+
+.colab-btn-save:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Master Alert Banner */
+.colab-clean-master-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+  padding: 11px 16px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.colab-clean-master-banner strong {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+/* ── Section Blocks ── */
+.colab-clean-section {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.colab-module-block {
-  border: 1px solid #e6e6e6;
-  border-radius: 12px;
-  overflow: hidden;
-  background: #ffffff;
-}
-
-.colab-module-header {
+.colab-clean-section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #f9fafb;
-  padding: 10px 16px;
-  border-bottom: 1px solid #f0f0f0;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
-.colab-module-name-wrap {
+.colab-clean-section-title {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #111111;
+  letter-spacing: -0.01em;
+}
+
+.colab-clean-section-hint {
+  font-size: 11.5px;
+  color: #6b7280;
+}
+
+/* ── Role Pills Row ── */
+.colab-clean-pills-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.colab-role-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.colab-role-pill:hover:not(:disabled) {
+  border-color: #1f2328;
+  color: #111111;
+  background: #fafafa;
+}
+
+.colab-role-pill.active {
+  background: #1f2328;
+  border-color: #1f2328;
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+}
+
+.colab-role-pill:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Matrix Header ── */
+.colab-clean-matrix-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.colab-clean-matrix-subtitle {
+  font-size: 11.5px;
+  color: #6b7280;
+  margin: 2px 0 0;
+}
+
+.colab-clean-matrix-actions {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.colab-module-title {
-  font-size: 13.5px;
-  font-weight: 800;
+.colab-clean-text-btn {
+  background: none;
+  border: none;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #0071e3;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: opacity 0.12s ease;
+}
+
+.colab-clean-text-btn:hover {
+  text-decoration: underline;
+}
+
+.colab-clean-dot {
+  color: #d1d5db;
+  font-size: 10px;
+}
+
+/* ── Modules List (Clean Accordion) ── */
+.colab-clean-modules-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.colab-clean-module {
+  border: 1px solid #e6e6e6;
+  border-radius: 12px;
+  background: #ffffff;
+  overflow: hidden;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.colab-clean-module:hover {
+  border-color: #d1d5db;
+}
+
+.colab-clean-module.expanded {
+  border-color: #1f2328;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.colab-clean-module-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px;
+  background: #ffffff;
+  gap: 12px;
+  user-select: none;
+}
+
+.colab-clean-module-left {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.colab-clean-module-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: #f3f4f6;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.colab-clean-module-icon.all-active {
+  background: #1f2328;
+  color: #ffffff;
+}
+
+.colab-clean-module-icon.part-active {
+  background: #fffbeb;
+  color: #d97706;
+}
+
+.colab-clean-module-info {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.colab-clean-module-name {
+  font-size: 13px;
+  font-weight: 700;
   color: #111111;
 }
 
-.colab-module-count {
-  font-size: 11.5px;
-  color: #888888;
+.colab-clean-module-status {
+  font-size: 11px;
 }
 
-.colab-select-all-btn {
-  background: none;
-  border: none;
-  color: #2563eb;
-  font-size: 12px;
+.colab-clean-module-status .text-green {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.colab-clean-module-status .text-amber {
+  color: #d97706;
+  font-weight: 600;
+}
+
+.colab-clean-module-status .text-muted {
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.colab-clean-module-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.colab-clean-toggle-all {
+  background: #f3f4f6;
+  border: 1px solid transparent;
+  color: #374151;
+  font-size: 11px;
   font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 8px;
   cursor: pointer;
-  padding: 2px 6px;
-  border-radius: 4px;
-  transition: background 0.12s ease;
+  transition: all 0.12s ease;
 }
 
-.colab-select-all-btn:hover {
-  background: #F7F7F7;
+.colab-clean-toggle-all:hover:not(:disabled) {
+  background: #e5e7eb;
+  color: #111111;
 }
 
-.colab-perms-grid {
+.colab-clean-toggle-all.is-all {
+  background: #ffffff;
+  border-color: #e5e7eb;
+  color: #6b7280;
+}
+
+.colab-clean-toggle-all:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.colab-clean-expand-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.colab-clean-expand-btn:hover {
+  background: #f3f4f6;
+  color: #111111;
+}
+
+.colab-chevron {
+  transition: transform 0.2s ease;
+}
+
+.colab-chevron.rotated {
+  transform: rotate(180deg);
+}
+
+/* ── Permissions Inside Expanded Module ── */
+.colab-clean-perms-list {
   display: grid;
   grid-template-columns: 1fr;
-  divide-y: 1px solid #f5f5f5;
+  border-top: 1px solid #f0f0f0;
+  background: #fafafa;
 }
 
 @media (min-width: 768px) {
-  .colab-perms-grid {
+  .colab-clean-perms-list {
     grid-template-columns: 1fr 1fr;
   }
 }
 
-.colab-perm-row {
+.colab-clean-perm-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 10px 16px;
-  border-bottom: 1px solid #f5f5f5;
+  gap: 10px;
+  padding: 10px 14px;
+  background: #fafafa;
   cursor: pointer;
   transition: background 0.12s ease;
+  border-bottom: 1px solid #f0f0f0;
 }
 
-.colab-perm-row:hover {
-  background: #fafafa;
+.colab-clean-perm-item:hover:not(.disabled) {
+  background: #f3f4f6;
 }
 
-.colab-perm-row.checked {
+.colab-clean-perm-item.checked {
   background: #ffffff;
 }
 
-.colab-perm-left {
+.colab-clean-perm-item.disabled {
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.colab-clean-checkbox-box {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 10px;
-  flex: 1;
-}
-
-.colab-checkbox {
-  margin: 0;
-  cursor: pointer;
-  accent-color: #000000;
-  width: 16px;
-  height: 16px;
-}
-
-.colab-perm-label {
-  font-size: 13px;
-  font-weight: 500;
-  color: #111111;
-}
-
-.colab-action-badge {
-  font-size: 10px;
-  font-weight: 800;
-  padding: 2px 7px;
-  border-radius: 4px;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
+  justify-content: center;
   flex-shrink: 0;
 }
 
-.action-view { background: #f3f4f6; color: #4b5563; }
-.action-create { background: #ecfdf5; color: #059669; }
-.action-edit { background: #F7F7F7; color: #2563eb; }
-.action-delete { background: #fef2f2; color: #dc2626; }
-.action-publish { background: #fdf4ff; color: #c026d3; }
-.action-manage { background: #fffbeb; color: #d97706; }
-.action-export { background: #f0fdf4; color: #15803d; }
-.action-upload { background: #f0fdfa; color: #0d9488; }
-.action-sync { background: #f3f4f6; color: #0284c7; }
+.colab-clean-input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
 
-/* ── Bottom Bar ── */
-.colab-bottom-bar {
+.colab-clean-custom-checkbox {
+  width: 17px;
+  height: 17px;
+  border-radius: 5px;
+  border: 1.5px solid #d1d5db;
+  background: #ffffff;
   display: flex;
-  justify-content: flex-end;
-  padding-top: 16px;
-  border-top: 1px solid #f0f0f0;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  transition: all 0.12s ease;
+}
+
+.colab-clean-custom-checkbox.checked {
+  background: #1f2328;
+  border-color: #1f2328;
+}
+
+.colab-clean-perm-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.colab-clean-perm-title {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #111111;
+  line-height: 1.3;
+}
+
+.colab-clean-perm-desc {
+  font-size: 11px;
+  color: #6b7280;
+  line-height: 1.25;
+  margin-top: 1px;
+}
+
+.colab-clean-action-badge {
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  flex-shrink: 0;
+  background: #f3f4f6;
+  color: #4b5563;
 }
 
 .colab-empty-selection {

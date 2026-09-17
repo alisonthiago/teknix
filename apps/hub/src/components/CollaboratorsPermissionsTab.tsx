@@ -18,7 +18,17 @@ import {
   Edit,
   Trash,
   Upload,
-  Globe
+  Globe,
+  LayoutDashboard,
+  BarChart3,
+  Package,
+  Layers,
+  ShoppingBag,
+  DollarSign,
+  CreditCard,
+  Settings,
+  ChevronDown,
+  Check
 } from 'lucide-react'
 import {
   PermissionsService,
@@ -29,12 +39,39 @@ import {
 } from '../services/permissionsService'
 import './CollaboratorsPermissionsTab.css'
 
+const MODULE_ICONS: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
+  dashboard: LayoutDashboard,
+  stats: BarChart3,
+  products: Package,
+  categories: Layers,
+  orders: ShoppingBag,
+  customers: Users,
+  finance: DollarSign,
+  mercado_pago: CreditCard,
+  integrations: RefreshCw,
+  users: ShieldCheck,
+  settings: Settings,
+}
+
 export default function CollaboratorsPermissionsTab() {
   const navigate = useNavigate()
   const [collaborators, setCollaborators] = useState<CollaboratorProfile[]>([])
   const [selectedColabId, setSelectedColabId] = useState<string | null>(null)
   const [selectedRole, setSelectedRole] = useState<CollaboratorProfile['role']>('ADMIN')
   const [permissionsMap, setPermissionsMap] = useState<Record<string, boolean>>({})
+  const [expandedModules, setExpandedModules] = useState<Record<string, boolean>>({})
+
+  function toggleExpand(key: string) {
+    setExpandedModules(prev => ({ ...prev, [key]: !prev[key] }))
+  }
+
+  function toggleAllModules(expand: boolean) {
+    const next: Record<string, boolean> = {}
+    modulesList.forEach(m => {
+      next[m.key] = expand
+    })
+    setExpandedModules(next)
+  }
 
   const [loading, setLoading] = useState<boolean>(true)
   const [saving, setSaving] = useState<boolean>(false)
@@ -305,141 +342,211 @@ export default function CollaboratorsPermissionsTab() {
           </div>
         </div>
 
-        {/* ── 2. Coluna de Edição de Permissões ── */}
+        {/* ── 2. Coluna de Edição de Permissões (Clean & Minimalist) ── */}
         <div className="colab-details-card">
           {selectedColab ? (
             <>
               {/* Header do Colaborador Selecionado */}
-              <div className="colab-selected-header">
-                <div className="colab-selected-meta">
-                  <h2>{selectedColab.name}</h2>
-                  <p>{selectedColab.email} • Status: <strong style={{ color: '#16a34a' }}>{selectedColab.status}</strong></p>
+              <div className="colab-clean-header">
+                <div className="colab-clean-profile">
+                  <div className="colab-clean-avatar">
+                    {selectedColab.photo_url ? (
+                      <img src={selectedColab.photo_url} alt={selectedColab.name} />
+                    ) : (
+                      selectedColab.name.substring(0, 2).toUpperCase()
+                    )}
+                  </div>
+                  <div>
+                    <div className="colab-clean-name-row">
+                      <h2>{selectedColab.name}</h2>
+                      {selectedColab.is_master ? (
+                        <span className="colab-badge-master">
+                          <ShieldCheck size={12} /> MASTER
+                        </span>
+                      ) : (
+                        <span className="colab-badge-active">Ativo</span>
+                      )}
+                    </div>
+                    <p className="colab-clean-meta">
+                      {selectedColab.email}
+                    </p>
+                  </div>
                 </div>
 
                 <button
-                  className="btn btn-primary"
+                  className="colab-btn-save"
                   onClick={handleSavePermissions}
                   disabled={saving || selectedColab.is_master}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                  title={selectedColab.is_master ? 'Colaborador MASTER possui permissões fixas totais' : 'Salvar permissões no banco'}
                 >
-                  <Save size={15} />
-                  {saving ? 'Salvando no Banco...' : 'Salvar Alterações'}
+                  <Save size={14} />
+                  <span>{saving ? 'Salvando...' : 'Salvar Alterações'}</span>
                 </button>
               </div>
 
               {selectedColab.is_master && (
-                <div className="colab-master-alert">
-                  <ShieldCheck size={16} />
-                  <strong>Superadministrador Principal (MASTER) — Acesso Total</strong>
+                <div className="colab-clean-master-banner">
+                  <ShieldCheck size={15} />
+                  <span>Superadministrador (MASTER) — Acesso total e irrestrito a todos os módulos e configurações.</span>
                 </div>
               )}
 
-              {/* Seletor de Perfil de Acesso */}
-              <div className="colab-role-section">
-                <label className="colab-section-label">Perfil de Acesso</label>
-                <div className="colab-role-cards-grid">
+              {/* Seletor de Perfil de Acesso — Pílulas Clean */}
+              <div className="colab-clean-section">
+                <div className="colab-clean-section-header">
+                  <label className="colab-clean-section-title">Perfil de Acesso</label>
+                  <span className="colab-clean-section-hint">
+                    {ROLE_LABELS[selectedRole]?.desc}
+                  </span>
+                </div>
+                <div className="colab-clean-pills-row">
                   {(Object.keys(ROLE_LABELS) as Array<CollaboratorProfile['role']>).map(roleKey => {
                     const isCurrent = selectedRole === roleKey
                     const info = ROLE_LABELS[roleKey]
                     return (
-                      <div
+                      <button
                         key={roleKey}
-                        className={`colab-role-card ${isCurrent ? 'active' : ''}`}
+                        type="button"
+                        className={`colab-role-pill ${isCurrent ? 'active' : ''}`}
                         onClick={() => !selectedColab.is_master && handleRoleChange(roleKey)}
+                        disabled={selectedColab.is_master}
+                        title={info.desc}
                       >
-                        <div className="colab-role-radio-row">
-                          <input
-                            type="radio"
-                            name="colab_role"
-                            checked={isCurrent}
-                            onChange={() => {}}
-                            disabled={selectedColab.is_master}
-                          />
-                          <span className="colab-role-name">{info.name}</span>
-                        </div>
-                      </div>
+                        {isCurrent && <Check size={12} strokeWidth={2.5} />}
+                        <span>{info.name}</span>
+                      </button>
                     )
                   })}
                 </div>
               </div>
 
-              {/* Matriz de Permissões por Módulo */}
-              <div className="colab-matrix-section">
-                <div className="colab-matrix-header-row">
+              {/* Matriz de Permissões por Módulo — Acordeão Elegante */}
+              <div className="colab-clean-section">
+                <div className="colab-clean-matrix-header">
                   <div>
-                    <h3 className="colab-matrix-title">Permissões por Módulo</h3>
+                    <h3 className="colab-clean-section-title">Permissões por Módulo</h3>
+                    <p className="colab-clean-matrix-subtitle">
+                      {Object.values(permissionsMap).filter(Boolean).length} de {HUB_PERMISSIONS_CATALOG.length} permissões ativas
+                    </p>
+                  </div>
+                  <div className="colab-clean-matrix-actions">
+                    <button
+                      type="button"
+                      className="colab-clean-text-btn"
+                      onClick={() => toggleAllModules(true)}
+                    >
+                      Expandir todos
+                    </button>
+                    <span className="colab-clean-dot">•</span>
+                    <button
+                      type="button"
+                      className="colab-clean-text-btn"
+                      onClick={() => toggleAllModules(false)}
+                    >
+                      Recolher todos
+                    </button>
                   </div>
                 </div>
 
-                <div className="colab-modules-accordion">
+                <div className="colab-clean-modules-list">
                   {modulesList.map(mod => {
-                    const allChecked = mod.items.every(p => !!permissionsMap[p.code])
+                    const IconComp = MODULE_ICONS[mod.key] || ShieldCheck
+                    const checkedCount = mod.items.filter(p => !!permissionsMap[p.code]).length
+                    const allChecked = checkedCount === mod.items.length
+                    const isExpanded = !!expandedModules[mod.key]
+
                     return (
-                      <div key={mod.key} className="colab-module-block">
-                        <div className="colab-module-header">
-                          <div className="colab-module-name-wrap">
-                            <span className="colab-module-title">{mod.name}</span>
-                            <span className="colab-module-count">({mod.items.length})</span>
-                          </div>
-                          
-                          <button
-                            type="button"
-                            className="colab-select-all-btn"
-                            onClick={() => handleToggleModuleAll(mod.key)}
-                            disabled={selectedColab.is_master}
+                      <div key={mod.key} className={`colab-clean-module ${isExpanded ? 'expanded' : ''}`}>
+                        <div className="colab-clean-module-bar">
+                          <div
+                            className="colab-clean-module-left"
+                            onClick={() => toggleExpand(mod.key)}
                           >
-                            {allChecked ? 'Desmarcar todas' : 'Selecionar todas'}
-                          </button>
+                            <div className={`colab-clean-module-icon ${allChecked ? 'all-active' : checkedCount > 0 ? 'part-active' : ''}`}>
+                              <IconComp size={15} />
+                            </div>
+                            <div className="colab-clean-module-info">
+                              <span className="colab-clean-module-name">{mod.name}</span>
+                              <span className="colab-clean-module-status">
+                                {allChecked ? (
+                                  <span className="text-green">Acesso Total ({mod.items.length}/{mod.items.length})</span>
+                                ) : checkedCount > 0 ? (
+                                  <span className="text-amber">{checkedCount}/{mod.items.length} ativas</span>
+                                ) : (
+                                  <span className="text-muted">Sem acesso</span>
+                                )}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="colab-clean-module-actions">
+                            <button
+                              type="button"
+                              className={`colab-clean-toggle-all ${allChecked ? 'is-all' : ''}`}
+                              onClick={() => handleToggleModuleAll(mod.key)}
+                              disabled={selectedColab.is_master}
+                            >
+                              {allChecked ? 'Desmarcar' : 'Permitir Tudo'}
+                            </button>
+
+                            <button
+                              type="button"
+                              className="colab-clean-expand-btn"
+                              onClick={() => toggleExpand(mod.key)}
+                              aria-label={isExpanded ? 'Recolher' : 'Expandir'}
+                            >
+                              <ChevronDown size={15} className={`colab-chevron ${isExpanded ? 'rotated' : ''}`} />
+                            </button>
+                          </div>
                         </div>
 
-                        <div className="colab-perms-grid">
-                          {mod.items.map(perm => {
-                            const isChecked = !!permissionsMap[perm.code]
-                            return (
-                              <label
-                                key={perm.code}
-                                className={`colab-perm-row ${isChecked ? 'checked' : ''}`}
-                              >
-                                <div className="colab-perm-left">
-                                  <input
-                                    type="checkbox"
-                                    checked={isChecked}
-                                    onChange={() => handleTogglePermission(perm.code)}
-                                    disabled={selectedColab.is_master}
-                                    className="colab-checkbox"
-                                  />
-                                  <span className="colab-perm-label">{perm.label}</span>
-                                </div>
-                                <span className={`colab-action-badge action-${perm.action}`}>
-                                  {perm.actionLabel}
-                                </span>
-                              </label>
-                            )
-                          })}
-                        </div>
+                        {isExpanded && (
+                          <div className="colab-clean-perms-list">
+                            {mod.items.map(perm => {
+                              const isChecked = !!permissionsMap[perm.code]
+                              return (
+                                <label
+                                  key={perm.code}
+                                  className={`colab-clean-perm-item ${isChecked ? 'checked' : ''} ${selectedColab.is_master ? 'disabled' : ''}`}
+                                >
+                                  <div className="colab-clean-checkbox-box">
+                                    <input
+                                      type="checkbox"
+                                      checked={isChecked}
+                                      onChange={() => handleTogglePermission(perm.code)}
+                                      disabled={selectedColab.is_master}
+                                      className="colab-clean-input"
+                                    />
+                                    <span className={`colab-clean-custom-checkbox ${isChecked ? 'checked' : ''}`}>
+                                      {isChecked && <Check size={11} strokeWidth={3} />}
+                                    </span>
+                                  </div>
+
+                                  <div className="colab-clean-perm-text">
+                                    <span className="colab-clean-perm-title">{perm.label}</span>
+                                    {perm.description && (
+                                      <span className="colab-clean-perm-desc">{perm.description}</span>
+                                    )}
+                                  </div>
+
+                                  <span className={`colab-clean-action-badge action-${perm.action}`}>
+                                    {perm.actionLabel}
+                                  </span>
+                                </label>
+                              )
+                            })}
+                          </div>
+                        )}
                       </div>
                     )
                   })}
                 </div>
-              </div>
-
-              {/* Botão Inferior de Salvamento */}
-              <div className="colab-bottom-bar">
-                <button
-                  className="btn btn-primary"
-                  onClick={handleSavePermissions}
-                  disabled={saving || selectedColab.is_master}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: 6, minWidth: 160, justifyContent: 'center' }}
-                >
-                  <Save size={15} />
-                  {saving ? 'Salvando no Banco...' : 'Salvar Alterações'}
-                </button>
               </div>
             </>
           ) : (
             <div className="colab-empty-selection">
               <Users size={32} />
-              <p>Selecione um colaborador.</p>
+              <p>Selecione um colaborador da lista à esquerda.</p>
             </div>
           )}
         </div>
