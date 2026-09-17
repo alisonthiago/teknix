@@ -387,13 +387,13 @@ function HeaderActions({
               }}
               className={
                 isMobile 
-                  ? "w-11 h-11 rounded-full flex items-center justify-center text-[#111] hover:bg-black/10 transition-colors relative cursor-pointer"
+                  ? "w-11.5 h-11.5 rounded-full flex items-center justify-center text-[#111] hover:bg-black/10 transition-colors relative cursor-pointer"
                   : "w-9.5 h-9.5 rounded-full hover:bg-[#f5f5f5] text-[#1f2328] flex items-center justify-center transition-colors border border-[#e6e6e6] hover:border-[#1f2328] bg-white shadow-xs relative cursor-pointer"
               }
               title="Notificações e Alertas"
             >
               {isMobile ? (
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-bell text-[#111] w-7 h-7" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-bell text-[#111] w-[30px] h-[30px]" aria-hidden="true">
                   <path d="M10.268 21a2 2 0 0 0 3.464 0" />
                   <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" />
                 </svg>
@@ -534,7 +534,7 @@ function HeaderActions({
             className="flex items-center gap-1.5 p-0.5 rounded-full hover:bg-black/10 transition-colors cursor-pointer"
           >
             <div className="flow-header-avatar-frame">
-              <div className="w-11 h-11 rounded-full overflow-hidden flex items-center justify-center bg-[#f1f5f9] border-2 border-white shrink-0 shadow-2xs">
+              <div className="w-11.5 h-11.5 rounded-full overflow-hidden flex items-center justify-center bg-[#f1f5f9] border-2 border-white shrink-0 shadow-2xs">
               {userAvatarUrl ? (
                 <img
                   alt={userName}
@@ -740,10 +740,10 @@ export default function Header({ userName, userRole, userEmail, userId, userAvat
             <button
               type="button"
               onClick={onMenuOpen}
-              className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-[#111] hover:bg-black/10 transition-colors cursor-pointer"
+              className="w-11.5 h-11.5 rounded-full flex items-center justify-center shrink-0 text-[#111] hover:bg-black/10 transition-colors cursor-pointer"
               aria-label="Abrir menu"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-menu w-7 h-7 text-[#111]" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-menu w-[30px] h-[30px] text-[#111]" aria-hidden="true">
                 <path d="M4 5h16" />
                 <path d="M4 12h16" />
                 <path d="M4 19h16" />
@@ -758,18 +758,18 @@ export default function Header({ userName, userRole, userEmail, userId, userAvat
             <button
               type="button"
               onClick={() => setCalcOpen(true)}
-              className="w-11 h-11 rounded-full flex items-center justify-center text-[#111] hover:bg-black/10 transition-colors cursor-pointer"
+              className="w-11.5 h-11.5 rounded-full flex items-center justify-center text-[#111] hover:bg-black/10 transition-colors cursor-pointer"
               title="Precificação Inteligente"
             >
-              <BadgeDollarSign className="w-7 h-7 text-[#111]" strokeWidth={1.75} />
+              <BadgeDollarSign className="w-[30px] h-[30px] text-[#111]" strokeWidth={2} />
             </button>
             <button
               type="button"
               onClick={() => setShowBasicCalc(!showBasicCalc)}
-              className="w-11 h-11 rounded-full flex items-center justify-center text-[#111] hover:bg-black/10 transition-colors cursor-pointer"
+              className="w-11.5 h-11.5 rounded-full flex items-center justify-center text-[#111] hover:bg-black/10 transition-colors cursor-pointer"
               title="Abrir Calculadora Básica"
             >
-              <Calculator className="w-7 h-7 text-[#111]" strokeWidth={1.75} />
+              <Calculator className="w-[30px] h-[30px] text-[#111]" strokeWidth={2} />
             </button>
             {showBasicCalc && <BasicCalculatorPopup onClose={() => setShowBasicCalc(false)} />}
 
