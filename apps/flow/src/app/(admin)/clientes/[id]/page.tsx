@@ -28,6 +28,56 @@ function formatBRL(val: number) {
   return `R$ ${val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }
 
+const AVATAR_PALETTES = [
+  { bg: '#EFF6FF', text: '#2563EB', border: '#DBEAFE' },
+  { bg: '#ECFDF5', text: '#059669', border: '#A7F3D0' },
+  { bg: '#FAF5FF', text: '#7C3AED', border: '#DDD6FE' },
+  { bg: '#FFF7ED', text: '#EA580C', border: '#FFEDD5' },
+  { bg: '#FDF2F8', text: '#DB2777', border: '#FCE7F3' },
+  { bg: '#F0FDF4', text: '#16A34A', border: '#DCFCE7' },
+  { bg: '#F1F5F9', text: '#475569', border: '#CBD5E1' }
+]
+
+function getAvatarStyle(name: string) {
+  let hash = 0
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash)
+  return AVATAR_PALETTES[Math.abs(hash) % AVATAR_PALETTES.length]
+}
+
+function getInitials(name: string) {
+  const clean = (name || '').trim().replace(/[^a-zA-Z0-9\s]/g, '')
+  if (!clean) return 'C'
+  const parts = clean.split(/\s+/)
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase()
+  return clean.slice(0, 2).toUpperCase()
+}
+
+function formatCustomerName(name: string) {
+  if (!name || name === '—') return 'Comprador'
+  if (name.includes(' ') && name === name.toUpperCase()) {
+    return name
+      .toLowerCase()
+      .split(' ')
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ')
+  }
+  return name
+}
+
+function formatCustomerPhone(phone?: string) {
+  if (!phone || phone === '—' || phone === 'XXXXXXX' || phone.includes('X') || phone.length < 8) {
+    return { isMasked: true, label: 'Telefone protegido pelo Mercado Livre' }
+  }
+  const nums = phone.replace(/\D/g, '')
+  if (nums.length === 11) {
+    return { isMasked: false, label: `(${nums.slice(0, 2)}) ${nums.slice(2, 7)}-${nums.slice(7)}` }
+  }
+  if (nums.length === 10) {
+    return { isMasked: false, label: `(${nums.slice(0, 2)}) ${nums.slice(2, 6)}-${nums.slice(6)}` }
+  }
+  return { isMasked: false, label: phone }
+}
+
 export default function ClienteProfilePage() {
   const params = useParams()
   const router = useRouter()
@@ -267,30 +317,51 @@ export default function ClienteProfilePage() {
         <>
           {/* Card Principal — Perfil 360° do Cliente */}
           <div className="bg-white rounded-2xl border border-[#e6e6e6] p-5 sm:p-6 shadow-2xs">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
-              <div className="flex items-start gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-[#f5f5f5] border border-[#e6e6e6] flex items-center justify-center text-[#111] text-xl font-extrabold uppercase shrink-0">
-                  {customerName.slice(0, 1)}
-                </div>
+            {(() => {
+              const displayName = formatCustomerName(customerName)
+              const avatarStyle = getAvatarStyle(customerName)
+              const initials = getInitials(displayName)
+              const phoneInfo = formatCustomerPhone(customerPhone)
 
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h1 className="text-xl sm:text-2xl font-black text-[#111] tracking-tight">{customerName}</h1>
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#ecfdf5] text-[#16a34a] border border-[#bbf7d0]">
-                      <ShieldCheck className="w-3.5 h-3.5" /> Comprador Verificado
-                    </span>
-                  </div>
+              return (
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
+                  <div className="flex items-start gap-4">
+                    {/* FOTO / AVATAR */}
+                    <div
+                      className="w-14 h-14 rounded-2xl border flex items-center justify-center text-xl font-extrabold uppercase shrink-0 shadow-xs"
+                      style={{
+                        backgroundColor: avatarStyle.bg,
+                        color: avatarStyle.text,
+                        borderColor: avatarStyle.border
+                      }}
+                    >
+                      {initials}
+                    </div>
 
-                  <div className="flex flex-wrap items-center gap-y-1.5 gap-x-4 mt-2 text-xs text-[#666]">
-                    {customerPhone !== '—' && (
-                      <span className="flex items-center gap-1.5 font-medium text-[#111]">
-                        <Phone className="w-3.5 h-3.5 text-[#666]" /> {customerPhone}
-                      </span>
-                    )}
-                    <span className="flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-[#999]" /> {customerAddress}
-                    </span>
-                  </div>
+                    <div>
+                      {/* NOME */}
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h1 className="text-xl sm:text-2xl font-black text-[#111] tracking-tight">{displayName}</h1>
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#ecfdf5] text-[#16a34a] border border-[#bbf7d0]">
+                          <ShieldCheck className="w-3.5 h-3.5" /> Comprador Verificado
+                        </span>
+                      </div>
+
+                      {/* NÚMERO / CONTATO */}
+                      <div className="flex flex-wrap items-center gap-y-1.5 gap-x-4 mt-2 text-xs text-[#666]">
+                        {phoneInfo.isMasked ? (
+                          <span className="flex items-center gap-1.5 font-medium text-[#86868b]">
+                            <ShieldCheck className="w-3.5 h-3.5 text-[#10b981]" /> {phoneInfo.label}
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-1.5 font-medium text-[#111]">
+                            <Phone className="w-3.5 h-3.5 text-[#666]" /> {phoneInfo.label}
+                          </span>
+                        )}
+                        <span className="flex items-center gap-1.5">
+                          <MapPin className="w-3.5 h-3.5 text-[#999]" /> {customerAddress}
+                        </span>
+                      </div>
 
                   <div className="flex items-center gap-2 mt-3">
                     <span className="text-[11px] font-bold text-[#888] uppercase tracking-wider">Canais de Compra:</span>
@@ -322,6 +393,8 @@ export default function ClienteProfilePage() {
                 </div>
               </div>
             </div>
+            )
+          })()}
           </div>
 
           {/* Cards de Métricas */}

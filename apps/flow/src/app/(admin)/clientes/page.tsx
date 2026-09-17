@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { User, ShoppingCart, DollarSign, Search, MapPin, Phone, ArrowUpRight, Store } from 'lucide-react'
+import { User, ShoppingCart, DollarSign, Search, MapPin, Phone, ArrowUpRight, Store, ShieldCheck } from 'lucide-react'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
 import { PageHeader } from '@/components/ui/module'
@@ -22,6 +22,56 @@ function StatCard({ label, value, sub }: { label: string; value: string; sub?: s
 
 function formatBRL(val: number) {
   return `R$ ${val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+}
+
+const AVATAR_PALETTES = [
+  { bg: '#EFF6FF', text: '#2563EB', border: '#DBEAFE' },
+  { bg: '#ECFDF5', text: '#059669', border: '#A7F3D0' },
+  { bg: '#FAF5FF', text: '#7C3AED', border: '#DDD6FE' },
+  { bg: '#FFF7ED', text: '#EA580C', border: '#FFEDD5' },
+  { bg: '#FDF2F8', text: '#DB2777', border: '#FCE7F3' },
+  { bg: '#F0FDF4', text: '#16A34A', border: '#DCFCE7' },
+  { bg: '#F1F5F9', text: '#475569', border: '#CBD5E1' }
+]
+
+function getAvatarStyle(name: string) {
+  let hash = 0
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash)
+  return AVATAR_PALETTES[Math.abs(hash) % AVATAR_PALETTES.length]
+}
+
+function getInitials(name: string) {
+  const clean = (name || '').trim().replace(/[^a-zA-Z0-9\s]/g, '')
+  if (!clean) return 'C'
+  const parts = clean.split(/\s+/)
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase()
+  return clean.slice(0, 2).toUpperCase()
+}
+
+function formatCustomerName(name: string) {
+  if (!name || name === '—') return 'Comprador'
+  if (name.includes(' ') && name === name.toUpperCase()) {
+    return name
+      .toLowerCase()
+      .split(' ')
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ')
+  }
+  return name
+}
+
+function formatCustomerPhone(phone?: string) {
+  if (!phone || phone === '—' || phone === 'XXXXXXX' || phone.includes('X') || phone.length < 8) {
+    return { isMasked: true, label: 'Telefone protegido (ML)' }
+  }
+  const nums = phone.replace(/\D/g, '')
+  if (nums.length === 11) {
+    return { isMasked: false, label: `(${nums.slice(0, 2)}) ${nums.slice(2, 7)}-${nums.slice(7)}` }
+  }
+  if (nums.length === 10) {
+    return { isMasked: false, label: `(${nums.slice(0, 2)}) ${nums.slice(2, 6)}-${nums.slice(6)}` }
+  }
+  return { isMasked: false, label: phone }
 }
 
 interface CustomerItem {
@@ -186,21 +236,41 @@ export default function ClientesPage() {
               <tbody className="divide-y divide-[#eeeeee]">
                 {paginatedCustomers.map((c, idx) => {
                   const customerSlug = encodeURIComponent(c.name.trim().toLowerCase().replace(/\s+/g, '-'))
+                  const displayName = formatCustomerName(c.name)
+                  const avatarStyle = getAvatarStyle(c.name)
+                  const initials = getInitials(displayName)
+                  const phoneInfo = formatCustomerPhone(c.phone)
 
                   return (
                     <tr key={idx} className="hover:bg-[#fafafa] transition-colors group">
-                      <td className="py-3 px-4 font-medium text-[#333] text-[13px]">
-                        <Link href={`/clientes/${customerSlug}`} className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-full bg-[#f5f5f5] border border-[#e6e6e6] flex items-center justify-center text-[#666] font-medium uppercase shrink-0">
-                            {c.name.slice(0, 1)}
+                      <td className="py-3 px-4 text-[13px]">
+                        <Link href={`/clientes/${customerSlug}`} className="flex items-center gap-3 group/client">
+                          {/* 1. FOTO / AVATAR */}
+                          <div
+                            className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs border transition-transform group-hover/client:scale-105"
+                            style={{
+                              backgroundColor: avatarStyle.bg,
+                              color: avatarStyle.text,
+                              borderColor: avatarStyle.border
+                            }}
+                          >
+                            {initials}
                           </div>
-                          <div>
-                            <p className="leading-tight font-medium text-[#333] hover:underline">
-                              {c.name}
+
+                          {/* 2. NOME DEPOIS 3. NÚMERO */}
+                          <div className="min-w-0">
+                            <p className="leading-tight font-semibold text-[#111111] group-hover/client:text-[#0071e3] transition-colors truncate">
+                              {displayName}
                             </p>
-                            {c.phone !== '—' && (
-                              <p className="text-[12px] text-[#999] flex items-center gap-1 mt-0.5 font-normal">
-                                <Phone className="w-3 h-3 text-[#ccc]" /> {c.phone}
+                            {phoneInfo.isMasked ? (
+                              <p className="text-[11px] text-[#86868b] flex items-center gap-1 mt-0.5 font-normal">
+                                <ShieldCheck className="w-3 h-3 text-[#10b981] shrink-0" />
+                                <span>{phoneInfo.label}</span>
+                              </p>
+                            ) : (
+                              <p className="text-[12px] text-[#555555] flex items-center gap-1 mt-0.5 font-normal">
+                                <Phone className="w-3 h-3 text-[#999] shrink-0" />
+                                <span>{phoneInfo.label}</span>
                               </p>
                             )}
                           </div>
