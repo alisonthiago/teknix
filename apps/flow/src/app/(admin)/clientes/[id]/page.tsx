@@ -315,20 +315,25 @@ export default function ClienteProfilePage() {
         </div>
       ) : (
         <>
-          {/* Card Principal — Perfil 360° do Cliente */}
-          <div className="bg-white rounded-2xl border border-[#e6e6e6] p-5 sm:p-6 shadow-2xs">
-            {(() => {
-              const displayName = formatCustomerName(customerName)
-              const avatarStyle = getAvatarStyle(customerName)
-              const initials = getInitials(displayName)
-              const phoneInfo = formatCustomerPhone(customerPhone)
+          {/* Main Hero (Layout aberto idêntico ao modelo do print) */}
+          {(() => {
+            const displayName = formatCustomerName(customerName)
+            const avatarStyle = getAvatarStyle(customerName)
+            const initials = getInitials(displayName)
+            const phoneInfo = formatCustomerPhone(customerPhone)
 
-              return (
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
-                  <div className="flex items-start gap-4">
-                    {/* FOTO / AVATAR */}
+            return (
+              <div className="flex flex-col sm:flex-row items-start gap-5 lg:gap-8 w-full mb-5">
+                {/* Quadro da Foto / Avatar */}
+                <div className="w-full sm:w-36 lg:w-44 flex flex-col items-center gap-2.5 shrink-0">
+                  <div className="relative w-full max-w-[200px] sm:max-w-none aspect-square rounded-2xl bg-white border border-[#e6e6e6] overflow-hidden flex items-center justify-center p-3 shadow-2xs group">
+                    <div className="absolute top-2.5 left-2.5 flex items-center gap-1">
+                      <span className="px-2 py-0.5 rounded-md bg-[#1f2328] text-white text-[10px] font-bold shadow-xs">
+                        Cliente
+                      </span>
+                    </div>
                     <div
-                      className="w-14 h-14 rounded-2xl border flex items-center justify-center text-xl font-extrabold uppercase shrink-0 shadow-xs"
+                      className="w-16 h-16 rounded-2xl border flex items-center justify-center text-2xl font-black uppercase shadow-xs transition-transform group-hover:scale-105"
                       style={{
                         backgroundColor: avatarStyle.bg,
                         color: avatarStyle.text,
@@ -337,65 +342,118 @@ export default function ClienteProfilePage() {
                     >
                       {initials}
                     </div>
+                  </div>
+                </div>
 
-                    <div>
-                      {/* NOME */}
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h1 className="text-xl sm:text-2xl font-black text-[#111] tracking-tight">{displayName}</h1>
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#ecfdf5] text-[#16a34a] border border-[#bbf7d0]">
-                          <ShieldCheck className="w-3.5 h-3.5" /> Comprador Verificado
+                {/* Detalhes do Cliente e Ações */}
+                <div className="flex-1 min-w-0 flex flex-col justify-between self-stretch w-full">
+                  <div>
+                    {/* Linha do Topo: Badges à esquerda e Botões de Ação à direita */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+                      <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#F7F7F7] text-[#1f2328] border border-[#e5e7eb] text-xs font-semibold shadow-2xs">
+                          <MarketplaceLogo name={channels[0] || 'Mercado Livre'} className="w-3.5 h-3.5 object-contain" />
+                          {channels[0] ? `${channels[0]} Oficial` : 'Mercado Livre Oficial'}
+                        </span>
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#ecfdf5] text-[#16a34a] border border-[#bbf7d0] text-xs font-semibold">
+                          <ShieldCheck className="w-3.5 h-3.5" />
+                          Comprador Verificado
+                        </span>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#f0fdf4] text-[#16a34a]">
+                          • Ativo
                         </span>
                       </div>
 
-                      {/* NÚMERO / CONTATO */}
-                      <div className="flex flex-wrap items-center gap-y-1.5 gap-x-4 mt-2 text-xs text-[#666]">
+                      {/* Botões de Ação */}
+                      <div className="flex items-center justify-center sm:justify-end gap-2 shrink-0 flex-wrap w-full sm:w-auto">
+                        <button
+                          type="button"
+                          onClick={() => setShowShareModal(true)}
+                          className="h-9 px-3.5 flex items-center gap-1.5 bg-white text-[#374151] border border-[#e5e7eb] rounded-xl hover:bg-[#f9fafb] hover:border-[#111] hover:text-[#111] text-xs font-semibold transition-all cursor-pointer shadow-xs shrink-0"
+                          title="Compartilhar cliente"
+                        >
+                          <Share2 className="w-3.5 h-3.5 text-[#374151]" />
+                          <span>Compartilhar</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab('mensagens')}
+                          className="h-9 px-3.5 flex items-center gap-1.5 bg-[#1f2328] hover:bg-black text-white rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-xs shrink-0"
+                          title="Ver mensagens"
+                        >
+                          <MessageSquare className="w-3.5 h-3.5 text-white" />
+                          <span>Mensagem</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Nome do Cliente */}
+                    <div className="mb-2 text-center sm:text-left">
+                      <h1 className="text-xl sm:text-2xl font-bold text-[#111111] leading-snug tracking-tight">
+                        {displayName}
+                      </h1>
+                    </div>
+
+                    {/* Sub-informações / Tags */}
+                    <div className="flex flex-wrap items-center gap-2 text-xs mb-3">
+                      <span className="inline-flex items-center gap-1.5 bg-[#F7F7F7] px-2.5 py-1 rounded-lg border border-[#e5e7eb] text-[#1f2328] font-medium text-[11px]">
                         {phoneInfo.isMasked ? (
-                          <span className="flex items-center gap-1.5 font-medium text-[#86868b]">
-                            <ShieldCheck className="w-3.5 h-3.5 text-[#10b981]" /> {phoneInfo.label}
-                          </span>
+                          <>
+                            <ShieldCheck className="w-3.5 h-3.5 text-[#10b981]" />
+                            <span className="text-[#666]">{phoneInfo.label}</span>
+                          </>
                         ) : (
-                          <span className="flex items-center gap-1.5 font-medium text-[#111]">
-                            <Phone className="w-3.5 h-3.5 text-[#666]" /> {phoneInfo.label}
-                          </span>
+                          <>
+                            <Phone className="w-3.5 h-3.5 text-[#888]" />
+                            <strong className="text-[#111] font-semibold">{phoneInfo.label}</strong>
+                          </>
                         )}
-                        <span className="flex items-center gap-1.5">
-                          <MapPin className="w-3.5 h-3.5 text-[#999]" /> {customerAddress}
+                      </span>
+                      <span className="inline-flex items-center gap-1.5 bg-[#F7F7F7] px-2.5 py-1 rounded-lg border border-[#e5e7eb] text-[#1f2328] font-medium text-[11px]">
+                        <MapPin className="w-3.5 h-3.5 text-[#888]" />
+                        <span className="text-[#111]">{customerAddress}</span>
+                      </span>
+                      <span className="inline-flex items-center gap-1.5 bg-[#F7F7F7] px-2.5 py-1 rounded-lg border border-[#e5e7eb] text-[#1f2328] font-medium text-[11px]">
+                        <ShoppingCart className="w-3.5 h-3.5 text-[#888]" />
+                        <strong className="text-[#111] font-semibold">{orders.length} {orders.length === 1 ? 'pedido' : 'pedidos'}</strong>
+                      </span>
+                    </div>
+
+                    {/* Barra de Destaque Compacta (idêntica ao rodapé do card no print) */}
+                    <div className="flex flex-wrap items-center gap-3 sm:gap-6 py-2 px-3.5 bg-[#f9fafb] border border-[#e5e7eb] rounded-xl text-xs text-[#374151]">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[#6b7280]">Total Comprado (LTV):</span>
+                        <span className="font-bold text-[#16a34a]">
+                          {formatBRL(totalSpent)}
                         </span>
                       </div>
-
-                  <div className="flex items-center gap-2 mt-3">
-                    <span className="text-[11px] font-bold text-[#888] uppercase tracking-wider">Canais de Compra:</span>
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      {channels.map((ch, i) => (
-                        <span key={i} className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-[#fffde7] text-[#856404] border border-[#ffeeba] text-xs font-bold">
-                          <MarketplaceLogo name={ch} className="w-3.5 h-3.5" /> {ch}
+                      <div className="h-3 w-px bg-[#e5e7eb] hidden sm:block" />
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[#6b7280]">Ticket Médio:</span>
+                        <span className="font-bold text-[#111]">
+                          {formatBRL(avgTicket)}
                         </span>
-                      ))}
+                      </div>
+                      <div className="h-3 w-px bg-[#e5e7eb] hidden sm:block" />
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[#6b7280]">Última Compra:</span>
+                        <span className="font-bold text-[#111]">
+                          {firstOrder?.created_at ? new Date(firstOrder.created_at).toLocaleDateString('pt-BR') : '20/08/2026'}
+                        </span>
+                      </div>
+                      <div className="h-3 w-px bg-[#e5e7eb] hidden sm:block" />
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[#6b7280]">Canais:</span>
+                        <span className="font-bold text-[#111]">
+                          {channels.join(', ') || 'Mercado Livre'}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-
-              {/* Total em Compras (LTV) e Compartilhar */}
-              <div className="flex flex-col items-end gap-2.5 shrink-0">
-                <button
-                  onClick={() => setShowShareModal(true)}
-                  className="px-4 py-2 bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
-                >
-                  <Share2 className="w-3.5 h-3.5" />
-                  <span>Compartilhar Cliente</span>
-                </button>
-
-                <div className="bg-[#fafafa] border border-[#e6e6e6] p-4 rounded-2xl md:text-right w-full">
-                  <p className="text-[11px] font-bold text-[#888] uppercase tracking-wider">Total em Compras (LTV)</p>
-                  <p className="text-2xl font-black text-[#16a34a] mt-0.5">{formatBRL(totalSpent)}</p>
-                  <p className="text-[11px] text-[#999] mt-0.5">{orders.length} pedido{orders.length !== 1 ? 's' : ''} realizados</p>
-                </div>
-              </div>
-            </div>
             )
           })()}
-          </div>
 
           {/* Cards de Métricas */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
