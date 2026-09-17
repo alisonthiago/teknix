@@ -48,7 +48,13 @@ export function TabsList({
 }) {
   const isRight = align === 'right' || className.includes('justify-end')
   return (
-    <div className={`flex items-center ${isRight ? 'justify-end gap-2 sm:gap-2.5' : 'gap-8'} border-b border-[#eeeeee] pb-3 mb-6 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${className}`}>
+    <div
+      className={`flex items-center ${
+        isRight
+          ? 'justify-end gap-2 sm:gap-2.5 shrink-0'
+          : 'gap-8 border-b border-[#eeeeee] pb-3 mb-6 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]'
+      } ${className}`}
+    >
       {children}
     </div>
   )

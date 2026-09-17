@@ -19,7 +19,8 @@ import {
   Package,
   Layers,
   ShoppingBag,
-  ShoppingCart
+  ShoppingCart,
+  ArrowLeft
 } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { PageHeader, StatCard } from '@/components/ui/module'
@@ -66,26 +67,46 @@ export default function AnalisesPage() {
 
   return (
     <div className="mp-stack">
-      <PageHeader title="Análises" />
+      <Tabs defaultValue="lucro-real" plain>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#eeeeee] pb-4 mb-6">
+          <div className="flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => window.history.back()}
+              className="hub-mobile-back-btn !w-8 !h-8 sm:!w-9 sm:!h-9 !rounded-xl"
+              aria-label="Voltar"
+              title="Voltar"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </button>
+            <div>
+              <h1 className="text-[15px] sm:text-[16px] font-bold tracking-tight text-[#111111] leading-tight">
+                Análises
+              </h1>
+              <p className="text-[11px] sm:text-xs text-[#888888] leading-tight mt-0.5">
+                DRE em tempo real, ranking de produtos, canais e reposição
+              </p>
+            </div>
+          </div>
 
-      <Tabs defaultValue="lucro-real">
-        <TabsList className="mb-4">
-          <TabsTrigger value="lucro-real">
-            <DollarSign className="w-3.5 h-3.5 mr-1.5 inline" /> Lucro
-          </TabsTrigger>
-          <TabsTrigger value="ranking">
-            <Trophy className="w-3.5 h-3.5 mr-1.5 inline" /> Ranking
-          </TabsTrigger>
-          <TabsTrigger value="marketplaces">
-            <Layers className="w-3.5 h-3.5 mr-1.5 inline" /> Canais
-          </TabsTrigger>
-          <TabsTrigger value="sugestao-compras">
-            <ShoppingCart className="w-3.5 h-3.5 mr-1.5 inline" /> Reposição
-          </TabsTrigger>
-          <TabsTrigger value="import-export">
-            <FileInput className="w-3.5 h-3.5 mr-1.5 inline" /> Planilhas
-          </TabsTrigger>
-        </TabsList>
+          <TabsList align="right" className="shrink-0">
+            <TabsTrigger variant="icon" value="lucro-real" title="Lucro">
+              <DollarSign size={19} strokeWidth={2} className="w-5 h-5 shrink-0" />
+            </TabsTrigger>
+            <TabsTrigger variant="icon" value="ranking" title="Ranking">
+              <Trophy size={19} strokeWidth={2} className="w-5 h-5 shrink-0" />
+            </TabsTrigger>
+            <TabsTrigger variant="icon" value="marketplaces" title="Canais">
+              <Layers size={19} strokeWidth={2} className="w-5 h-5 shrink-0" />
+            </TabsTrigger>
+            <TabsTrigger variant="icon" value="sugestao-compras" title="Reposição">
+              <ShoppingCart size={19} strokeWidth={2} className="w-5 h-5 shrink-0" />
+            </TabsTrigger>
+            <TabsTrigger variant="icon" value="import-export" title="Planilhas">
+              <FileInput size={19} strokeWidth={2} className="w-5 h-5 shrink-0" />
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* 1. ABA LUCRO REAL & DRE */}
         <TabsContent value="lucro-real">

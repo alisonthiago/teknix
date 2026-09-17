@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { BadgeDollarSign, Calculator, Percent, CircleDollarSign, Search } from 'lucide-react'
+import { BadgeDollarSign, Calculator, Percent, CircleDollarSign, Search, ArrowLeft } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { PageHeader, StatCard, ModuleTable, TableHead, Th, Td } from '@/components/ui/module'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
@@ -212,15 +212,47 @@ function SimulatorTab() {
 export default function PrecificacaoPage() {
   return (
     <div className="mp-stack">
-      <PageHeader title="Precificação" />
-      <Tabs defaultValue="custo-real">
-        <TabsList>
-          <TabsTrigger value="custo-real"><BadgeDollarSign className="w-3.5 h-3.5 mr-1 inline" /> Custo</TabsTrigger>
-          <TabsTrigger value="preco-sugerido"><Calculator className="w-3.5 h-3.5 mr-1 inline" /> Sugerido</TabsTrigger>
-          <TabsTrigger value="minha-margem"><Percent className="w-3.5 h-3.5 mr-1 inline" /> Margem</TabsTrigger>
-          <TabsTrigger value="preco-venda"><CircleDollarSign className="w-3.5 h-3.5 mr-1 inline" /> Venda</TabsTrigger>
-          <TabsTrigger value="simulador"><Search className="w-3.5 h-3.5 mr-1 inline" /> Simulador</TabsTrigger>
-        </TabsList>
+      <Tabs defaultValue="custo-real" plain>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#eeeeee] pb-4 mb-6">
+          <div className="flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => window.history.back()}
+              className="hub-mobile-back-btn !w-8 !h-8 sm:!w-9 sm:!h-9 !rounded-xl"
+              aria-label="Voltar"
+              title="Voltar"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </button>
+            <div>
+              <h1 className="text-[15px] sm:text-[16px] font-bold tracking-tight text-[#111111] leading-tight">
+                Precificação
+              </h1>
+              <p className="text-[11px] sm:text-xs text-[#888888] leading-tight mt-0.5">
+                Custo real, cálculo de margem e sugestão de preço por canal
+              </p>
+            </div>
+          </div>
+
+          <TabsList align="right" className="shrink-0">
+            <TabsTrigger variant="icon" value="custo-real" title="Custo">
+              <BadgeDollarSign size={19} strokeWidth={2} className="w-5 h-5 shrink-0" />
+            </TabsTrigger>
+            <TabsTrigger variant="icon" value="preco-sugerido" title="Sugerido">
+              <Calculator size={19} strokeWidth={2} className="w-5 h-5 shrink-0" />
+            </TabsTrigger>
+            <TabsTrigger variant="icon" value="minha-margem" title="Margem">
+              <Percent size={19} strokeWidth={2} className="w-5 h-5 shrink-0" />
+            </TabsTrigger>
+            <TabsTrigger variant="icon" value="preco-venda" title="Venda">
+              <CircleDollarSign size={19} strokeWidth={2} className="w-5 h-5 shrink-0" />
+            </TabsTrigger>
+            <TabsTrigger variant="icon" value="simulador" title="Simulador">
+              <Search size={19} strokeWidth={2} className="w-5 h-5 shrink-0" />
+            </TabsTrigger>
+          </TabsList>
+        </div>
+
         <TabsContent value="custo-real"><CustoRealTab /></TabsContent>
         <TabsContent value="preco-sugerido"><PrecoSugeridoTab /></TabsContent>
         <TabsContent value="minha-margem"><MinhaMargemTab /></TabsContent>

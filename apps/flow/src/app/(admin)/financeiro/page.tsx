@@ -410,23 +410,46 @@ export default function FinanceiroPage() {
 
   return (
     <div className="mp-stack">
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-5">
-        <div className="flex items-center gap-3">
-          <button type="button" className="hub-mobile-back-btn" aria-label="Voltar" onClick={() => window.history.back()}>
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <h1 className="!text-[24px] !leading-[1.2] font-bold text-[#111111]">Financeiro</h1>
+      <Tabs defaultValue="visao-geral" plain>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#eeeeee] pb-4 mb-6">
+          <div className="flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => window.history.back()}
+              className="hub-mobile-back-btn !w-8 !h-8 sm:!w-9 sm:!h-9 !rounded-xl"
+              aria-label="Voltar"
+              title="Voltar"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </button>
+            <div>
+              <h1 className="text-[15px] sm:text-[16px] font-bold tracking-tight text-[#111111] leading-tight">
+                Financeiro
+              </h1>
+              <p className="text-[11px] sm:text-xs text-[#888888] leading-tight mt-0.5">
+                Receita bruta, lucratividade, margens e fluxo de caixa
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 justify-between sm:justify-end flex-wrap sm:flex-nowrap">
+            <FilterBar mp={filterMp} setMp={setFilterMp} acc={filterAcc} setAcc={setFilterAcc} accounts={accounts || []} />
+            <TabsList align="right" className="shrink-0">
+              <TabsTrigger variant="icon" value="visao-geral" title="Visão Geral">
+                <BarChart3 size={19} strokeWidth={2} className="w-5 h-5 shrink-0" />
+              </TabsTrigger>
+              <TabsTrigger variant="icon" value="faturamento" title="Faturamento">
+                <DollarSign size={19} strokeWidth={2} className="w-5 h-5 shrink-0" />
+              </TabsTrigger>
+              <TabsTrigger variant="icon" value="lucro" title="Lucro">
+                <TrendingUp size={19} strokeWidth={2} className="w-5 h-5 shrink-0" />
+              </TabsTrigger>
+              <TabsTrigger variant="icon" value="margem" title="Margem">
+                <Percent size={19} strokeWidth={2} className="w-5 h-5 shrink-0" />
+              </TabsTrigger>
+            </TabsList>
+          </div>
         </div>
-        <FilterBar mp={filterMp} setMp={setFilterMp} acc={filterAcc} setAcc={setFilterAcc} accounts={accounts || []} />
-      </div>
-      
-      <Tabs defaultValue="visao-geral">
-        <TabsList>
-          <TabsTrigger value="visao-geral"><BarChart3 className="w-3.5 h-3.5 mr-1 inline" /> Visão Geral</TabsTrigger>
-          <TabsTrigger value="faturamento"><DollarSign className="w-3.5 h-3.5 mr-1 inline" /> Faturamento</TabsTrigger>
-          <TabsTrigger value="lucro"><TrendingUp className="w-3.5 h-3.5 mr-1 inline" /> Lucro</TabsTrigger>
-          <TabsTrigger value="margem"><Percent className="w-3.5 h-3.5 mr-1 inline" /> Margem</TabsTrigger>
-        </TabsList>
 
         {/* TAB 1: VISÃO GERAL */}
         <TabsContent value="visao-geral">

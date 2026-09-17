@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { DollarSign, Store, ShoppingBag, ArrowUpRight, Search, Layers, CheckCircle2, Package, User, MoreHorizontal } from 'lucide-react'
+import { DollarSign, Store, ShoppingBag, ArrowUpRight, Search, Layers, CheckCircle2, Package, User, MoreHorizontal, ArrowLeft } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { PageHeader, StatCard, SearchInput, ModuleTable, TableHead, Th, Td } from '@/components/ui/module'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
@@ -341,12 +341,38 @@ export default function VendasPage() {
   return (
     <div className="-mx-3 sm:-mx-6 lg:-mx-12 xl:-mx-16 px-3 sm:px-4 lg:px-6 xl:px-8">
       <div className="mp-stack">
-        <PageHeader title="Vendas" />
-        <Tabs defaultValue="vendas">
-          <TabsList>
-            <TabsTrigger value="vendas"><DollarSign className="w-3.5 h-3.5 mr-1 inline" /> Vendas</TabsTrigger>
-            <TabsTrigger value="marketplaces"><Store className="w-3.5 h-3.5 mr-1 inline" /> Canais</TabsTrigger>
-          </TabsList>
+        <Tabs defaultValue="vendas" plain>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#eeeeee] pb-4 mb-6">
+            <div className="flex items-center gap-2.5">
+              <button
+                type="button"
+                onClick={() => window.history.back()}
+                className="hub-mobile-back-btn !w-8 !h-8 sm:!w-9 sm:!h-9 !rounded-xl"
+                aria-label="Voltar"
+                title="Voltar"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </button>
+              <div>
+                <h1 className="text-[15px] sm:text-[16px] font-bold tracking-tight text-[#111111] leading-tight">
+                  Vendas
+                </h1>
+                <p className="text-[11px] sm:text-xs text-[#888888] leading-tight mt-0.5">
+                  Monitoramento de vendas, canais integrados e pedidos
+                </p>
+              </div>
+            </div>
+
+            <TabsList align="right" className="shrink-0">
+              <TabsTrigger variant="icon" value="vendas" title="Vendas">
+                <DollarSign size={19} strokeWidth={2} className="w-5 h-5 shrink-0" />
+              </TabsTrigger>
+              <TabsTrigger variant="icon" value="marketplaces" title="Canais">
+                <Store size={19} strokeWidth={2} className="w-5 h-5 shrink-0" />
+              </TabsTrigger>
+            </TabsList>
+          </div>
+
           <TabsContent value="vendas"><SalesTab /></TabsContent>
           <TabsContent value="marketplaces"><MarketplacesTab /></TabsContent>
         </Tabs>
