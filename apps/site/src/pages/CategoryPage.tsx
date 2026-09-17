@@ -12,7 +12,7 @@ import { findCoreCategory, fetchSubcategories } from '../services/categories'
 import { parseCategoryRow, type CentralCategory } from '../../../../packages/core/src/categoryRules'
 import ProductPage from './Product'
 import SEOHead from '../components/SEOHead'
-import { buildCategoryPageSchema, buildBreadcrumbSchema } from '../components/SchemaOrg'
+import { buildCategoryPageSchema, buildBreadcrumbSchema, buildFAQSchema } from '../components/SchemaOrg'
 import './CategoryPage.css'
 
 interface PageData {
@@ -248,6 +248,22 @@ export default function CategoryPage() {
         ? `/${segmento}/${categoria}`
         : `/categoria/${categorySlug}`
 
+  const categoryFaqs = [
+    {
+      question: `Quais marcas de ${categoryName} estão disponíveis na TEKNIX?`,
+      answer: `Na TEKNIX você encontra as principais marcas líderes de mercado em ${categoryName}, com procedência garantida, pronta-entrega e garantia de fábrica.`
+    },
+    {
+      question: `Como funciona a garantia dos produtos de ${categoryName}?`,
+      answer: `Todos os itens de ${categoryName} contam com garantia legal e contratual do fabricante, além do suporte técnico oficial pós-venda da TEKNIX.`
+    },
+    {
+      question: `Qual o prazo de entrega para itens de ${categoryName}?`,
+      answer: `Os pedidos são despachados rapidamente com frete expresso e rastreamento direto pelo site e canais de atendimento.`
+    }
+  ]
+  const categoryFaqSchema = buildFAQSchema(categoryFaqs)
+
   const categoryJsonLd = [
     buildCategoryPageSchema(categoryName, categoryPath),
     buildBreadcrumbSchema([
@@ -255,7 +271,8 @@ export default function CategoryPage() {
       ...(parentSlug ? [{ name: parentSlug.replace(/-/g, ' ').toUpperCase(), url: `https://teknixbrasil.com.br/categoria/${parentSlug}` }] : []),
       ...(segmento && !slug && !parentSlug ? [{ name: segmento, url: `https://teknixbrasil.com.br/${segmento}` }] : []),
       { name: categoryName, url: `https://teknixbrasil.com.br${categoryPath}` }
-    ])
+    ]),
+    ...(categoryFaqSchema ? [categoryFaqSchema] : [])
   ]
 
   return (

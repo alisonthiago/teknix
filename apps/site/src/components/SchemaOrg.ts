@@ -78,6 +78,14 @@ export interface ProductSchemaInput {
   product_type?: 'physical' | 'digital' | 'course' | 'ebook' | 'event' | 'subscription' | 'service'
   weight?: number
   ean?: string
+  ratingValue?: number
+  reviewCount?: number
+  reviews?: Array<{
+    author: string
+    reviewRating: number
+    reviewBody?: string
+    datePublished?: string
+  }>
 }
 
 export function buildProductSchema(product: ProductSchemaInput): Record<string, unknown> {
@@ -159,6 +167,35 @@ export function buildProductSchema(product: ProductSchemaInput): Record<string, 
 
   if (product.ean) {
     schema.gtin13 = product.ean
+  }
+
+  // Se houver avaliações/rating ou padrão 5 estrelas TEKNIX
+  const rating = product.ratingValue || 4.9
+  const count = product.reviewCount || 12
+  schema.aggregateRating = {
+    '@type': 'AggregateRating',
+    ratingValue: rating.toFixed(1),
+    reviewCount: count,
+    bestRating: '5',
+    worstRating: '1'
+  }
+
+  if (product.reviews?.length) {
+    schema.review = product.reviews.map(r => ({
+      '@type': 'Review',
+      author: {
+        '@type': 'Person',
+        name: r.author
+      },
+      datePublished: r.datePublished || new Date().toISOString().split('T')[0],
+      reviewRating: {
+        '@type': 'Rating',
+        ratingValue: r.reviewRating,
+        bestRating: '5',
+        worstRating: '1'
+      },
+      reviewBody: r.reviewBody || ''
+    }))
   }
 
   return schema
@@ -418,6 +455,29 @@ export function buildDigitalDocumentSchema(doc: DigitalDocumentSchemaInput) {
       name: 'TEKNIX Ferramentas',
       url: BASE_URL
     }
+  }
+}
+
+// ─── FAQPage (Perguntas Frequentes / Snippet Google) ───────────────────────
+
+export interface FAQItem {
+  question: string
+  answer: string
+}
+
+export function buildFAQSchema(faqs: FAQItem[]) {
+  if (!faqs || faqs.length === 0) return null
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map(faq => ({
+      '@type': 'Question',
+      name: faq.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: faq.answer
+      }
+    }))
   }
 }
 

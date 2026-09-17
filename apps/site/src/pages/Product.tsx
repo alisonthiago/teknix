@@ -20,7 +20,7 @@ import { commerceSignals } from '../services/storefrontCommerce'
 import { calculateMelhorEnvioQuote, type MelhorEnvioQuote } from '../services/melhorEnvioTest'
 import { remainingOfferTime } from '../services/productPresentation'
 import SEOHead from '../components/SEOHead'
-import { buildProductSchema, buildBreadcrumbSchema } from '../components/SchemaOrg'
+import { buildProductSchema, buildBreadcrumbSchema, buildFAQSchema } from '../components/SchemaOrg'
 
 function renderBenefitIcon(iconName?: string) {
   switch (iconName) {
@@ -464,6 +464,26 @@ export default function Product() {
   const sellerName = (currentProduct as any).seller_name || 'TEKNIX Loja Oficial'
   const sellerSlug = slugify(sellerName)
 
+  const productFaqs = [
+    {
+      question: `O ${currentProduct.name} possui garantia oficial?`,
+      answer: `Sim, todos os produtos comercializados na TEKNIX possuem garantia de fábrica oficial, nota fiscal eletrônica e suporte técnico dedicado.`
+    },
+    {
+      question: `Qual o prazo e forma de entrega de ${currentProduct.name}?`,
+      answer: `O envio é realizado para todo o território nacional com código de rastreamento enviado em tempo real por e-mail e WhatsApp.`
+    },
+    {
+      question: `Acompanha nota fiscal no meu nome ou empresa?`,
+      answer: `Sim, 100% das vendas emitidas pela TEKNIX contam com emissão imediata de Nota Fiscal Eletrônica (NF-e) para pessoa física (CPF) ou jurídica (CNPJ).`
+    },
+    {
+      question: `Quais são as condições de pagamento aceitas?`,
+      answer: `Aceitamos Pix com aprovação imediata e condições especiais, além de cartão de crédito parcelado em até 12x sem burocracia.`
+    }
+  ]
+  const faqSchema = buildFAQSchema(productFaqs)
+
   const productJsonLd = [
     buildProductSchema({
       id: currentProduct.id,
@@ -487,7 +507,8 @@ export default function Product() {
       { name: 'TEKNIX', url: 'https://teknixbrasil.com.br' },
       ...(currentProduct.category ? [{ name: currentProduct.category, url: `https://teknixbrasil.com.br/categoria/${categorySlug}` }] : []),
       { name: currentProduct.name, url: productCanonical }
-    ])
+    ]),
+    ...(faqSchema ? [faqSchema] : [])
   ]
 
   return (
