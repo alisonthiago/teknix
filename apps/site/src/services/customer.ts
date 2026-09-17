@@ -286,9 +286,16 @@ export async function getOrdersByUserId(userId: string): Promise<Order[]> {
       if (itemsError) throw itemsError
       const itemsByOrder: Record<string, OrderItem[]> = {}
       if (items) {
+        // Garantir unicidade estrita de itens por pedido e sku/produto
+        const seenItemKey = new Set<string>()
         items.forEach((item: any) => {
-          if (!itemsByOrder[item.order_id]) itemsByOrder[item.order_id] = []
           const prod = item.products
+          const sku = item.product_sku || prod?.sku || item.product_id || item.id
+          const uniqueKey = `${item.order_id}_${sku}`
+          if (seenItemKey.has(uniqueKey)) return
+          seenItemKey.add(uniqueKey)
+
+          if (!itemsByOrder[item.order_id]) itemsByOrder[item.order_id] = []
           itemsByOrder[item.order_id].push({
             id: item.id,
             order_id: item.order_id,
@@ -321,22 +328,33 @@ export async function getOrdersByUserId(userId: string): Promise<Order[]> {
 export async function getOrderByNumber(orderNumber: string): Promise<Order | null> {
   try {
     const cleanNum = orderNumber.trim().toUpperCase()
-    const { data: order, error } = await supabase
+    let { data: order, error } = await supabase
       .from('orders')
       .select('*')
-      .or(`order_number.ilike.${cleanNum},id.eq.${cleanNum}`)
+      .eq('order_number', cleanNum)
       .maybeSingle()
 
-    if (error || !order) return null
+    if (error) return null
+    if (!order) {
+      const byId = await supabase.from('orders').select('*').eq('id', cleanNum).maybeSingle()
+      order = byId.data
+    }
+    if (!order) return null
 
     const { data: items } = await supabase
       .from('order_items')
       .select('*, products(name, image_url, images, sku)')
       .eq('order_id', order.id)
 
-    const orderItems: OrderItem[] = (items || []).map((item: any) => {
+    const seenItemKey = new Set<string>()
+    const orderItems: OrderItem[] = []
+    for (const item of (items || [])) {
       const prod = item.products
-      return {
+      const sku = item.product_sku || prod?.sku || item.product_id || item.id
+      if (seenItemKey.has(sku)) continue
+      seenItemKey.add(sku)
+
+      orderItems.push({
         id: item.id,
         order_id: item.order_id,
         product_id: item.product_id,
@@ -348,8 +366,8 @@ export async function getOrderByNumber(orderNumber: string): Promise<Order | nul
         subtotal: Number(item.total || item.price * item.quantity || 0),
         is_digital: item.is_digital || false,
         download_url: item.download_url
-      }
-    })
+      })
+    }
 
     return {
       ...order,

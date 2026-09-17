@@ -1,8 +1,9 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import { SlidersHorizontal, ArrowUpDown, Search, X } from 'lucide-react'
 import { HubExportMenu } from './HubExportMenu'
 import type { BulkAction } from './HubBulkActions'
 import type { ExportColumn, ExportRow } from '../../../lib/exportTable'
+import DeleteConfirmationModal from '../../DeleteConfirmationModal'
 import './HubDataTable.css'
 
 export interface SortOption {
@@ -69,60 +70,90 @@ export function HubTableToolbar({
     return () => document.removeEventListener('keydown', onKey)
   }, [])
 
+  const [pendingDeleteAction, setPendingDeleteAction] = useState<BulkAction | null>(null)
+
   // Quando houver itens selecionados, a toolbar se transforma na barra de ações em massa
   if (selectedIds.length > 0) {
     const count = selectedIds.length
     const countText = `${count} ${count === 1 ? entityLabel : `${entityLabel}s`} ${count === 1 ? 'selecionado' : 'selecionados'}`
 
     return (
-      <div className="hub-table-toolbar hub-table-toolbar-selection" role="toolbar" aria-label="Ações de seleção">
-        <div className="hub-toolbar-selection-left">
-          <span className="hub-bulk-count">{countText}</span>
+      <>
+        <div className="hub-table-toolbar hub-table-toolbar-selection" role="toolbar" aria-label="Ações de seleção">
+          <div className="hub-toolbar-selection-left">
+            <span className="hub-bulk-count">{countText}</span>
 
-          {bulkActions && bulkActions.map((action, i) => (
-            <button
-              key={i}
-              className={`hub-toolbar-btn hub-bulk-action-btn${action.variant === 'danger' ? ' danger' : ''}`}
-              onClick={async () => {
-                await action.action(selectedIds)
-                onClearSelection?.()
-              }}
-              aria-label={action.label}
-            >
-              {action.icon}
-              {action.label}
-            </button>
-          ))}
+            {bulkActions && bulkActions.map((action, i) => {
+              const isDanger = action.variant === 'danger' || action.label.toLowerCase().includes('excluir')
+              return (
+                <button
+                  key={i}
+                  className={`hub-toolbar-btn hub-bulk-action-btn${isDanger ? ' danger' : ''}`}
+                  onClick={async () => {
+                    if (isDanger) {
+                      setPendingDeleteAction(action)
+                    } else {
+                      await action.action(selectedIds)
+                      onClearSelection?.()
+                    }
+                  }}
+                  aria-label={action.label}
+                >
+                  {action.icon}
+                  {action.label}
+                </button>
+              )
+            })}
 
-          {onClearSelection && (
-            <button
-              className="hub-toolbar-btn hub-bulk-clear-btn"
-              onClick={onClearSelection}
-              aria-label="Desmarcar seleção"
-              title="Desmarcar tudo"
-            >
-              <X size={13} style={{ marginRight: 4 }} />
-              Desmarcar
-            </button>
-          )}
+            {onClearSelection && (
+              <button
+                className="hub-toolbar-btn hub-bulk-clear-btn"
+                onClick={onClearSelection}
+                aria-label="Desmarcar seleção"
+                title="Desmarcar tudo"
+              >
+                <X size={13} style={{ marginRight: 4 }} />
+                Desmarcar
+              </button>
+            )}
+          </div>
+
+          <div className="hub-toolbar-selection-right">
+            {exportColumns && exportColumns.length > 0 && (
+              <div className="hub-toolbar-export-container">
+                <HubExportMenu
+                  columns={exportColumns}
+                  allRows={exportRows}
+                  selectedIds={selectedIds}
+                  getRowById={getRowById}
+                  exportTitle={exportTitle}
+                  filename={exportFilename}
+                  activeFilters={activeFilters}
+                />
+              </div>
+            )}
+          </div>
         </div>
 
-        <div className="hub-toolbar-selection-right">
-          {exportColumns && exportColumns.length > 0 && (
-            <div className="hub-toolbar-export-container">
-              <HubExportMenu
-                columns={exportColumns}
-                allRows={exportRows}
-                selectedIds={selectedIds}
-                getRowById={getRowById}
-                exportTitle={exportTitle}
-                filename={exportFilename}
-                activeFilters={activeFilters}
-              />
-            </div>
-          )}
-        </div>
-      </div>
+        {/* Modal de Confirmação Obrigatória com EXCLUIR */}
+        <DeleteConfirmationModal
+          isOpen={!!pendingDeleteAction}
+          onClose={() => setPendingDeleteAction(null)}
+          onConfirm={async () => {
+            const act = pendingDeleteAction
+            setPendingDeleteAction(null)
+            if (act) {
+              await act.action(selectedIds)
+              onClearSelection?.()
+            }
+          }}
+          itemName={countText}
+          description="Esta ação removerá permanentemente os registros selecionados do sistema TEKNIX."
+          actionWord="EXCLUIR"
+          actionTitle="Exclusão em Massa"
+          buttonText="Sim, Excluir"
+        />
+      </>
     )
   }
 

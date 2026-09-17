@@ -475,10 +475,10 @@ export default function Dashboard() {
           <div className="dash-cockpit-actions">
             <Link to="/hub/pedidos" className="dash-btn-dark">
               <Package size={13} aria-hidden />
-              Ver Pedidos &amp; Etiquetas
+              Pedidos
             </Link>
             <Link to="/hub/produtos" className="dash-btn-outline">
-              Ver Estoque &amp; Catálogo
+              Estoque
             </Link>
           </div>
         </div>

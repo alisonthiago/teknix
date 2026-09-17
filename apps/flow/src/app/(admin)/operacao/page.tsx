@@ -3,12 +3,12 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Plus, Download, Upload, Package, Truck, ShoppingCart, Warehouse, Eye, Edit, Trash2, ClipboardCheck, CheckCircle2, AlertTriangle, Building2, Ban, Printer, Share2, Layers } from 'lucide-react'
+import { ArrowLeft, Plus, Download, Upload, Package, Truck, ShoppingCart, Warehouse, Eye, Edit, Trash2, ClipboardCheck, CheckCircle2, AlertTriangle, Building2, Ban, Printer, Share2, Layers, ChevronRight, MapPin, Clock, FileSpreadsheet, FileText, ChevronDown, X } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { PageHeader, PrimaryButton, SecondaryButton, StatCard, SearchInput, ModuleTable, TableHead, Th, Td } from '@/components/ui/module'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
 import { createClient } from '@/utils/supabase/client'
-import { exportToExcel, importFromExcel } from '@/utils/excel'
+import { exportToExcel, importFromExcel, exportToPDF, type ExportColumnDef } from '@/utils/excel'
 import dynamic from 'next/dynamic'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
 import { useNotification } from '@/contexts/NotificationContext'
@@ -22,6 +22,8 @@ const SupplierCreateModal = dynamic(() => import('@/components/SupplierCreateMod
 const PurchaseCreateModal = dynamic(() => import('@/components/PurchaseCreateModal'), { ssr: false })
 const DeleteConfirmationModal = dynamic(() => import('@/components/DeleteConfirmationModal'), { ssr: false })
 import LoadingState from '@/components/ui/LoadingState'
+import { PaginationBar, usePagination } from '@/components/ui/pagination'
+import { matchesSearchQuery } from '@/lib/utils'
 
 function summarizeTitle(title?: string, maxLength = 36) {
   if (!title) return ''
@@ -40,6 +42,7 @@ function ProductsTab() {
   const [shareProduct, setShareProduct] = useState<any | null>(null)
   const [activeActionMenuId, setActiveActionMenuId] = useState<string | null>(null)
   const [pendingMatchesCount, setPendingMatchesCount] = useState(0)
+  const [showExportMenu, setShowExportMenu] = useState(false)
 
   // Carrega contagem de anúncios que precisam de vinculação
   useEffect(() => {
@@ -117,11 +120,11 @@ function ProductsTab() {
 
   const filtered = allList.filter((p: Record<string, any>) => {
     if (search) {
-      const q = search.toLowerCase()
-      const matchName = String(p.name || '').toLowerCase().includes(q)
-      const matchSku = String(p.sku || '').toLowerCase().includes(q)
-      const matchBrand = String(p.brand || '').toLowerCase().includes(q)
-      if (!matchName && !matchSku && !matchBrand) return false
+      const match = matchesSearchQuery(
+        [p.name, p.sku, p.brand, p.model, p.ean],
+        search
+      )
+      if (!match) return false
     }
 
     const stock = Number(p.stock) || 0
@@ -138,6 +141,15 @@ function ProductsTab() {
 
     return true
   })
+
+  const {
+    currentPage: productsPage,
+    setCurrentPage: setProductsPage,
+    pageSize: productsPageSize,
+    setPageSize: setProductsPageSize,
+    paginatedItems: paginatedProducts,
+    totalItems: totalProductsCount,
+  } = usePagination(filtered, 15)
 
   function calcCost(p: Record<string, unknown>) {
     return (Number(p.cost_purchase) || 0) + (Number(p.freight_purchase) || 0) + (Number(p.packaging_cost) || 0) + (Number(p.other_costs) || 0)
@@ -181,15 +193,38 @@ function ProductsTab() {
     refetch()
   }
 
-  const handleExportSelected = () => {
+  const PRODUCT_EXPORT_COLUMNS: ExportColumnDef[] = [
+    { key: 'sku', label: 'SKU' },
+    { key: 'name', label: 'Produto' },
+    { key: 'brand', label: 'Marca' },
+    { key: 'supplier', label: 'Fornecedor', format: (_v, r) => (r.suppliers as any)?.name || '—' },
+    { key: 'cost_purchase', label: 'Custo Compra (R$)', align: 'right', format: (_v, r) => `R$ ${calcCost(r).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` },
+    { key: 'stock', label: 'Estoque', align: 'right', format: (v) => String(Number(v) || 0) },
+    { key: 'status', label: 'Situação', align: 'center', format: (v) => String(v || 'ACTIVE').toUpperCase() }
+  ]
+
+  const handleExportSelectedExcel = () => {
     if (selectedItems.length === 0) return
     const dataToExport = products?.filter((p: any) => selectedItems.includes(p.id)) || []
-    exportToExcel(dataToExport, 'produtos_selecionados')
-    setSelectedItems([])
+    exportToExcel(dataToExport, 'produtos_selecionados', 'Produtos', PRODUCT_EXPORT_COLUMNS)
+    notify({ type: 'success', title: 'Excel Exportado', message: `${dataToExport.length} produtos exportados para planilha.` })
   }
 
-  const handleExportAll = () => {
-    exportToExcel(products || [], 'todos_os_produtos')
+  const handleExportSelectedPDF = () => {
+    if (selectedItems.length === 0) return
+    const dataToExport = products?.filter((p: any) => selectedItems.includes(p.id)) || []
+    exportToPDF(dataToExport, PRODUCT_EXPORT_COLUMNS, 'Catálogo de Produtos Selecionados', `${dataToExport.length} produto(s) selecionado(s)`)
+  }
+
+  const handleExportAllExcel = () => {
+    const dataToExport = filtered.length > 0 ? filtered : (products || [])
+    exportToExcel(dataToExport, 'catalogo_produtos', 'Produtos', PRODUCT_EXPORT_COLUMNS)
+    notify({ type: 'success', title: 'Excel Exportado', message: `${dataToExport.length} produtos exportados para planilha.` })
+  }
+
+  const handleExportAllPDF = () => {
+    const dataToExport = filtered.length > 0 ? filtered : (products || [])
+    exportToPDF(dataToExport, PRODUCT_EXPORT_COLUMNS, 'Catálogo Operacional de Produtos', `Situação: ${situationFilter} • Total: ${dataToExport.length} produtos`)
   }
 
   // Executa Ação de Marketplace (Pausar, Ativar, Bloquear, Travar, Sincronizar)
@@ -278,7 +313,7 @@ function ProductsTab() {
       />
 
       {/* Cards de Métricas */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
         <StatCard label="Produtos Cadastrados" value={String(products?.length || 0)} />
         <StatCard label="Estoque Total" value={String(products?.reduce((a: number, b: Record<string, unknown>) => a + (Number(b.stock) || 0), 0) || 0)} />
         <StatCard label="Pausados / Bloqueados" value={String((counts.PAUSED + counts.BLOCKED) || 0)} />
@@ -330,16 +365,61 @@ function ProductsTab() {
               )}
             </Link>
 
-            {/* Ações em Lote ou Botões de Ação */}
+            {/* Ações em Lote quando há seleção */}
             {selectedItems.length > 0 ? (
-              <div className="flex items-center gap-2 bg-[#f5f5f5] px-3 py-1 rounded-xl border border-[#1f2328]/20 shrink-0">
-                <span className="text-xs font-bold text-[#1f2328]">{selectedItems.length} sel.</span>
-                <button onClick={handleExportSelected} className="text-xs font-bold text-[#1f2328] hover:underline cursor-pointer">Exportar</button>
-                <button onClick={handleDeleteSelected} className="text-xs font-bold text-[#dc2626] hover:underline cursor-pointer">Excluir</button>
+              <div className="flex items-center gap-2 bg-[#f8fafc] border border-[#0071e3]/30 px-3 py-1 rounded-xl shadow-2xs shrink-0 flex-nowrap animate-in fade-in">
+                <span className="text-xs font-bold text-[#0071e3] whitespace-nowrap bg-[#eff6ff] px-2.5 py-1 rounded-lg border border-[#bfdbfe]">
+                  {selectedItems.length} selecionado{selectedItems.length > 1 ? 's' : ''}
+                </span>
+
+                {/* Baixar Excel Selecionados */}
+                <button
+                  type="button"
+                  onClick={handleExportSelectedExcel}
+                  className="h-[32px] px-2.5 bg-white hover:bg-[#f0fdf4] border border-[#bbf7d0] text-[#16a34a] hover:text-[#15803d] rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-none whitespace-nowrap"
+                  title="Baixar selecionados em planilha Excel (.xlsx)"
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-[#16a34a]" />
+                  <span>Excel</span>
+                </button>
+
+                {/* Baixar PDF Selecionados */}
+                <button
+                  type="button"
+                  onClick={handleExportSelectedPDF}
+                  className="h-[32px] px-2.5 bg-white hover:bg-[#fef2f2] border border-[#fecaca] text-[#dc2626] hover:text-[#b91c1c] rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-none whitespace-nowrap"
+                  title="Baixar ou imprimir selecionados em PDF"
+                >
+                  <FileText className="w-3.5 h-3.5 text-[#dc2626]" />
+                  <span>PDF</span>
+                </button>
+
+                {/* Excluir Selecionados */}
+                <button
+                  type="button"
+                  onClick={handleDeleteSelected}
+                  className="h-[32px] px-3 bg-[#dc2626] hover:bg-[#b91c1c] text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs whitespace-nowrap"
+                  title="Excluir produtos selecionados"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Excluir</span>
+                </button>
+
+                {/* Desmarcar */}
+                <button
+                  type="button"
+                  onClick={() => setSelectedItems([])}
+                  className="h-[32px] w-[32px] flex items-center justify-center bg-white hover:bg-[#f1f5f9] text-[#64748b] hover:text-[#111111] rounded-lg border border-[#e2e8f0] transition-all cursor-pointer shadow-none"
+                  title="Desmarcar seleção"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
               </div>
             ) : (
               <div className="flex items-center gap-2 shrink-0 flex-nowrap">
-                <SecondaryButton className="shrink-0 whitespace-nowrap" onClick={() => document.getElementById('import-products')?.click()}><Upload className="w-3.5 h-3.5" /> Importar</SecondaryButton>
+                <SecondaryButton className="shrink-0 whitespace-nowrap" onClick={() => document.getElementById('import-products')?.click()}>
+                  <Upload className="w-3.5 h-3.5" /> Importar
+                </SecondaryButton>
                 <input 
                   type="file" 
                   id="import-products" 
@@ -370,8 +450,73 @@ function ProductsTab() {
                     e.target.value = ''
                   }} 
                 />
-                <SecondaryButton className="shrink-0 whitespace-nowrap" onClick={handleExportAll}><Download className="w-3.5 h-3.5" /> Exportar</SecondaryButton>
-                <PrimaryButton className="shrink-0 whitespace-nowrap" onClick={() => setShowCreate(true)}><Plus className="w-3.5 h-3.5" /> Novo</PrimaryButton>
+
+                {/* Dropdown de Exportação: Excel e PDF */}
+                <div className="relative" onClick={(e) => e.stopPropagation()}>
+                  <SecondaryButton 
+                    className="shrink-0 whitespace-nowrap" 
+                    onClick={() => setShowExportMenu(!showExportMenu)}
+                  >
+                    <Download className="w-3.5 h-3.5" /> Exportar <ChevronDown className="w-3 h-3 text-[#888]" />
+                  </SecondaryButton>
+
+                  {showExportMenu && (
+                    <div 
+                      className="absolute right-0 top-full mt-1.5 w-52 bg-white rounded-xl shadow-xl border border-[#e2e8f0] py-1.5 z-50 animate-in fade-in zoom-in-95 text-left"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowExportMenu(false)
+                          handleExportAllExcel()
+                        }}
+                        className="w-full px-3.5 py-2 text-xs font-semibold text-[#111111] hover:bg-[#f0fdf4] hover:text-[#16a34a] flex items-center gap-2.5 transition-colors cursor-pointer text-left"
+                      >
+                        <FileSpreadsheet className="w-4 h-4 text-[#16a34a] shrink-0" />
+                        <div>
+                          <div className="font-bold">Baixar Excel (.xlsx)</div>
+                          <div className="text-[10px] text-[#666666] font-normal">Planilha formatada</div>
+                        </div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowExportMenu(false)
+                          handleExportAllPDF()
+                        }}
+                        className="w-full px-3.5 py-2 text-xs font-semibold text-[#111111] hover:bg-[#fef2f2] hover:text-[#dc2626] flex items-center gap-2.5 transition-colors cursor-pointer border-t border-[#f1f5f9] text-left"
+                      >
+                        <FileText className="w-4 h-4 text-[#dc2626] shrink-0" />
+                        <div>
+                          <div className="font-bold">Baixar PDF (.pdf)</div>
+                          <div className="text-[10px] text-[#666666] font-normal">Relatório para imprimir/salvar</div>
+                        </div>
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Botão Excluir informativo */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    notify({
+                      type: 'info',
+                      title: 'Selecione os produtos',
+                      message: 'Marque a caixinha de seleção dos produtos na tabela que deseja excluir.'
+                    })
+                  }}
+                  className="h-[38px] px-3 border border-[#fecaca] bg-[#fff5f5] hover:bg-[#fee2e2] text-[#dc2626] rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0 whitespace-nowrap"
+                  title="Excluir produtos (selecione na tabela)"
+                >
+                  <Trash2 className="w-3.5 h-3.5 text-[#dc2626]" />
+                  <span>Excluir</span>
+                </button>
+
+                <PrimaryButton className="shrink-0 whitespace-nowrap" onClick={() => setShowCreate(true)}>
+                  <Plus className="w-3.5 h-3.5" /> Novo
+                </PrimaryButton>
               </div>
             )}
           </div>
@@ -399,8 +544,8 @@ function ProductsTab() {
                 className="rounded border-[#ccc] text-[#111] focus:ring-[#16a34a]"
               />
             </Th>
-            <Th className="whitespace-nowrap">SKU</Th>
-            <Th className="min-w-[300px]">Produto & Canal</Th>
+            <Th className="min-w-[320px]">Produto</Th>
+            <Th className="whitespace-nowrap min-w-[130px]">Código SKU</Th>
             <Th className="whitespace-nowrap">Fornecedor</Th>
             <Th className="text-right whitespace-nowrap">Custo</Th>
             <Th className="text-right whitespace-nowrap">Estoque</Th>
@@ -408,7 +553,7 @@ function ProductsTab() {
             <Th className="text-right whitespace-nowrap w-24">Ações</Th>
           </TableHead>
           <tbody className="divide-y divide-[#eeeeee]">
-            {filtered.map((p: Record<string, any>) => {
+            {paginatedProducts.map((p: Record<string, any>) => {
               const cost = calcCost(p)
               const stock = Number(p.stock) || 0
               const minStock = Number(p.min_stock) || 0
@@ -440,42 +585,26 @@ function ProductsTab() {
                       />
                     </div>
                   </Td>
-                  <Td className="font-mono text-[#777777] text-[12px] whitespace-nowrap">{p.sku as string}</Td>
-                  <Td className="min-w-[300px]">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-white border border-[#e6e6e6] overflow-hidden flex items-center justify-center shrink-0 p-0.5">
+                  <Td className="min-w-[320px]">
+                    <div className="flex items-center gap-3.5">
+                      <div className="w-11 h-11 rounded-xl bg-white border border-[#e6e6e6] overflow-hidden flex items-center justify-center shrink-0 p-1">
                         {(p.image_url || (p.product_images as any)?.[0]?.url) ? (
                           <img src={(p.image_url as string) || (p.product_images as any)[0].url} alt="" className="w-full h-full object-contain" />
                         ) : (
-                          <Package className="w-4 h-4 text-[#ccc]" />
+                          <Package className="w-5 h-5 text-[#ccc]" />
                         )}
                       </div>
-                      <div className="flex flex-col justify-center min-w-0 flex-1">
-                        <p className="font-medium text-[#111111] text-[13px] leading-snug truncate max-w-sm" title={p.name as string}>
-                          {summarizeTitle(p.name as string, 36)}
+                      <div className="flex-1 min-w-0 flex items-center">
+                        <p className="font-semibold text-[#111111] text-[13px] leading-normal truncate max-w-md !m-0 !mb-0" title={p.name as string}>
+                          {p.name as string}
                         </p>
-                        <div className="flex items-center gap-1.5 mt-1">
-                          <span className="text-[11px] text-[#888888] leading-none shrink-0">
-                            {p.brand as string || 'Sem marca'}
-                          </span>
-                          {/* Badges dos Canais Conectados ao Produto Central */}
-                          {(p.is_site_published ?? true) && (
-                            <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-[#f1f5f9] text-[#334155] border border-[#cbd5e1] text-[10px] font-medium shrink-0 leading-none">
-                              Site
-                            </span>
-                          )}
-                          {(() => {
-                            const mlCount = (p.marketplace_listings as any[])?.filter((l: any) => !l.channel || l.channel === 'mercadolivre' || l.marketplace_id === 'mercadolivre').length || (String(p.sku || '').startsWith('MLB') ? 1 : 0)
-                            if (mlCount === 0) return null
-                            return (
-                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#fffde7] text-[#856404] border border-[#ffeeba] text-[10px] font-medium shrink-0 leading-none">
-                                <MarketplaceLogo name="Mercado Livre" className="w-3 h-3" /> ML {mlCount > 1 ? `(${mlCount})` : ''}
-                              </span>
-                            )
-                          })()}
-                        </div>
                       </div>
                     </div>
+                  </Td>
+                  <Td className="whitespace-nowrap">
+                    <span className="text-[11px] font-medium text-[#475569] bg-[#f1f5f9] px-2 py-0.5 rounded-md border border-[#e2e8f0] inline-block leading-tight">
+                      {p.sku as string || '—'}
+                    </span>
                   </Td>
                   <Td className="text-[#666666] text-[12.5px] whitespace-nowrap">{supplierName}</Td>
                   <Td className="text-right text-[12.5px] font-medium text-[#111111] whitespace-nowrap">
@@ -637,6 +766,20 @@ function ProductsTab() {
           </tbody>
         </ModuleTable>
       )}
+
+      {/* Limitador / Paginação em baixo */}
+      {filtered.length > 0 && (
+        <PaginationBar
+          currentPage={productsPage}
+          totalItems={totalProductsCount}
+          pageSize={productsPageSize}
+          onPageChange={setProductsPage}
+          onPageSizeChange={setProductsPageSize}
+          pageSizeOptions={[15, 30, 50, 100]}
+          itemName="produtos"
+        />
+      )}
+
       {showCreate && <ProductCreateModal open={showCreate} onClose={() => setShowCreate(false)} onCreated={() => { refetch() }} />}
     </div>
   )
@@ -644,9 +787,12 @@ function ProductsTab() {
 
 function SuppliersTab() {
   const router = useRouter()
+  const { notify } = useNotification()
   const [search, setSearch] = useState('')
   const [showCreate, setShowCreate] = useState(false)
   const [selectedItems, setSelectedItems] = useState<string[]>([])
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showExportMenu, setShowExportMenu] = useState(false)
   const { data: suppliers, loading, refetch } = useSupabaseQuery(async (s) => {
     const { data, error } = await s.from('suppliers').select('*').order('created_at', { ascending: false }).limit(100)
     if (error) throw error
@@ -673,23 +819,59 @@ function SuppliersTab() {
     }
   }
 
-  const handleDeleteSelected = async () => {
-    if (!confirm(`Tem certeza que deseja excluir ${selectedItems.length} fornecedor(es)?`)) return
+  const confirmDeleteSuppliers = async () => {
     const supabase = createClient()
     await supabase.from('suppliers').delete().in('id', selectedItems)
     setSelectedItems([])
+    setShowDeleteModal(false)
+    notify({ type: 'success', title: 'Fornecedores Excluídos', message: 'Os fornecedores selecionados foram excluídos com sucesso.' })
     refetch()
   }
 
-  const handleExportSelected = () => {
+  const SUPPLIER_EXPORT_COLUMNS: ExportColumnDef[] = [
+    { key: 'name', label: 'Fornecedor / Razão Social' },
+    { key: 'cnpj', label: 'CNPJ / CPF', format: (v) => (v as string) || '—' },
+    { key: 'contact', label: 'Contato', format: (v) => (v as string) || '—' },
+    { key: 'phone', label: 'Telefone', format: (v) => (v as string) || '—' },
+    { key: 'email', label: 'E-mail', format: (v) => (v as string) || '—' },
+    { key: 'city_state', label: 'Cidade/UF', format: (_v, r) => [r.city, r.state].filter(Boolean).join('/') || '—' },
+    { key: 'delivery_time', label: 'Prazo Entrega', align: 'right', format: (v) => v ? `${v} dias` : '—' }
+  ]
+
+  const handleExportSelectedExcel = () => {
     if (selectedItems.length === 0) return
     const dataToExport = suppliers?.filter((s: any) => selectedItems.includes(s.id)) || []
-    exportToExcel(dataToExport, 'fornecedores_selecionados')
-    setSelectedItems([])
+    exportToExcel(dataToExport, 'fornecedores_selecionados', 'Fornecedores', SUPPLIER_EXPORT_COLUMNS)
+    notify({ type: 'success', title: 'Excel Exportado', message: `${dataToExport.length} fornecedores exportados.` })
   }
 
-  const handleExportAll = () => {
-    exportToExcel(suppliers || [], 'todos_os_fornecedores')
+  const handleExportSelectedPDF = () => {
+    if (selectedItems.length === 0) return
+    const dataToExport = suppliers?.filter((s: any) => selectedItems.includes(s.id)) || []
+    exportToPDF(dataToExport, SUPPLIER_EXPORT_COLUMNS, 'Relatório de Fornecedores Selecionados', `${dataToExport.length} fornecedor(es) selecionado(s)`)
+  }
+
+  const handleExportAllExcel = () => {
+    const dataToExport = filtered.length > 0 ? filtered : (suppliers || [])
+    exportToExcel(dataToExport, 'fornecedores_cadastrados', 'Fornecedores', SUPPLIER_EXPORT_COLUMNS)
+    notify({ type: 'success', title: 'Excel Exportado', message: `${dataToExport.length} fornecedores exportados.` })
+  }
+
+  const handleExportAllPDF = () => {
+    const dataToExport = filtered.length > 0 ? filtered : (suppliers || [])
+    exportToPDF(dataToExport, SUPPLIER_EXPORT_COLUMNS, 'Relatório Geral de Fornecedores', `Total: ${dataToExport.length} fornecedores cadastrados`)
+  }
+
+  const handleDeleteSelected = () => {
+    if (selectedItems.length === 0) {
+      notify({
+        type: 'info',
+        title: 'Selecione fornecedores',
+        message: 'Marque a caixinha de seleção dos fornecedores na tabela que deseja excluir.'
+      })
+      return
+    }
+    setShowDeleteModal(true)
   }
 
   return (
@@ -697,113 +879,325 @@ function SuppliersTab() {
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
         <StatCard label="Fornecedores" value={String(suppliers?.length || 0)} />
       </div>
-      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:justify-between mb-4">
-        <SearchInput placeholder="Buscar fornecedor..." value={search} onChange={setSearch} />
-        {selectedItems.length > 0 ? (
-          <div className="flex items-center gap-2 bg-[#f5f5f5] px-3 py-1.5 rounded-md border border-[#1f2328]/20">
-            <span className="text-[12px] font-medium text-[#1f2328] mr-2">{selectedItems.length} selecionado(s)</span>
-            <button onClick={handleExportSelected} className="flex items-center gap-1.5 text-[12px] font-medium text-[#1f2328] bg-white px-2.5 py-1.5 rounded border border-[#1f2328]/20 hover:bg-[#1f2328] hover:text-white transition-colors cursor-pointer"><Download className="w-3.5 h-3.5" /> Exportar</button>
-            <button onClick={handleDeleteSelected} className="flex items-center gap-1.5 text-[12px] font-medium text-[#e74c3c] bg-white px-2.5 py-1.5 rounded border border-[#e74c3c]/20 hover:bg-[#e74c3c] hover:text-white transition-colors cursor-pointer"><Trash2 className="w-3.5 h-3.5" /> Excluir</button>
+
+      {/* TOOLBAR UNIFICADA DE FORNECEDORES */}
+      <div className="bg-white rounded-2xl border border-[#e6e6e6] p-3 shadow-2xs space-y-3 mb-4">
+        <div className="flex items-center justify-between gap-3 flex-nowrap overflow-x-auto [&::-webkit-scrollbar]:hidden">
+          {/* Campo de Busca */}
+          <div className="flex-1 min-w-[200px] max-w-sm">
+            <SearchInput placeholder="Buscar por fornecedor, CNPJ, contato..." value={search} onChange={setSearch} className="w-full max-w-none" />
           </div>
-        ) : (
-          <div className="flex flex-wrap items-center gap-2">
-            <SecondaryButton onClick={() => document.getElementById('import-suppliers')?.click()}><Upload className="w-3.5 h-3.5" /> Importar</SecondaryButton>
-            <input 
-              type="file" 
-              id="import-suppliers" 
-              className="hidden" 
-              accept=".xlsx,.xls,.csv" 
-              onChange={async (e) => {
-                const file = e.target.files?.[0]
-                if (!file) return
-                try {
-                  const data = await importFromExcel(file, {
-                    name: ['nome', 'name', 'fornecedor', 'razão', 'empresa'],
-                    cnpj: ['cnpj', 'documento'],
-                    phone: ['telefone', 'phone', 'celular', 'contato'],
-                    email: ['email', 'e-mail', 'correio']
-                  })
-                  if (data.length > 0) {
-                    const supabase = createClient()
-                    await supabase.from('suppliers').insert(data)
-                    refetch()
-                    alert(`${data.length} fornecedores importados com sucesso!`)
+
+          {/* Ações em Lote quando há seleção */}
+          {selectedItems.length > 0 ? (
+            <div className="flex items-center gap-2 bg-[#f8fafc] border border-[#0071e3]/30 px-3 py-1 rounded-xl shadow-2xs shrink-0 flex-nowrap animate-in fade-in">
+              <span className="text-xs font-bold text-[#0071e3] whitespace-nowrap bg-[#eff6ff] px-2.5 py-1 rounded-lg border border-[#bfdbfe]">
+                {selectedItems.length} selecionado{selectedItems.length > 1 ? 's' : ''}
+              </span>
+
+              {/* Baixar Excel Selecionados */}
+              <button
+                type="button"
+                onClick={handleExportSelectedExcel}
+                className="h-[32px] px-2.5 bg-white hover:bg-[#f0fdf4] border border-[#bbf7d0] text-[#16a34a] hover:text-[#15803d] rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-none whitespace-nowrap"
+                title="Baixar selecionados em planilha Excel (.xlsx)"
+              >
+                <FileSpreadsheet className="w-3.5 h-3.5 text-[#16a34a]" />
+                <span>Excel</span>
+              </button>
+
+              {/* Baixar PDF Selecionados */}
+              <button
+                type="button"
+                onClick={handleExportSelectedPDF}
+                className="h-[32px] px-2.5 bg-white hover:bg-[#fef2f2] border border-[#fecaca] text-[#dc2626] hover:text-[#b91c1c] rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-none whitespace-nowrap"
+                title="Baixar ou imprimir selecionados em PDF"
+              >
+                <FileText className="w-3.5 h-3.5 text-[#dc2626]" />
+                <span>PDF</span>
+              </button>
+
+              {/* Excluir Selecionados */}
+              <button
+                type="button"
+                onClick={handleDeleteSelected}
+                className="h-[32px] px-3 bg-[#dc2626] hover:bg-[#b91c1c] text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs whitespace-nowrap"
+                title="Excluir fornecedores selecionados"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Excluir</span>
+              </button>
+
+              {/* Desmarcar */}
+              <button
+                type="button"
+                onClick={() => setSelectedItems([])}
+                className="h-[32px] w-[32px] flex items-center justify-center bg-white hover:bg-[#f1f5f9] text-[#64748b] hover:text-[#111111] rounded-lg border border-[#e2e8f0] transition-all cursor-pointer shadow-none"
+                title="Desmarcar seleção"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 shrink-0 flex-nowrap">
+              <SecondaryButton className="shrink-0 whitespace-nowrap" onClick={() => document.getElementById('import-suppliers')?.click()}>
+                <Upload className="w-3.5 h-3.5" /> Importar
+              </SecondaryButton>
+              <input 
+                type="file" 
+                id="import-suppliers" 
+                className="hidden" 
+                accept=".xlsx,.xls,.csv" 
+                onChange={async (e) => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  try {
+                    const data = await importFromExcel(file, {
+                      name: ['nome', 'name', 'fornecedor', 'razão', 'empresa'],
+                      cnpj: ['cnpj', 'documento'],
+                      phone: ['telefone', 'phone', 'celular', 'contato'],
+                      email: ['email', 'e-mail', 'correio']
+                    })
+                    if (data.length > 0) {
+                      const supabase = createClient()
+                      await supabase.from('suppliers').insert(data)
+                      refetch()
+                      notify({ type: 'success', title: 'Fornecedores Importados', message: `${data.length} fornecedores importados com sucesso.` })
+                    }
+                  } catch (err) {
+                    notify({ type: 'error', title: 'Erro de Importação', message: 'Falha ao processar arquivo.' })
                   }
-                } catch (err) {
-                  alert('Erro ao importar arquivo.')
-                }
-                e.target.value = ''
-              }} 
-            />
-            <SecondaryButton onClick={handleExportAll}><Download className="w-3.5 h-3.5" /> Exportar</SecondaryButton>
-            <PrimaryButton onClick={() => setShowCreate(true)}><Plus className="w-3.5 h-3.5" /> Novo fornecedor</PrimaryButton>
-          </div>
-        )}
+                  e.target.value = ''
+                }} 
+              />
+
+              {/* Dropdown de Exportação: Excel e PDF */}
+              <div className="relative" onClick={(e) => e.stopPropagation()}>
+                <SecondaryButton 
+                  className="shrink-0 whitespace-nowrap" 
+                  onClick={() => setShowExportMenu(!showExportMenu)}
+                >
+                  <Download className="w-3.5 h-3.5" /> Exportar <ChevronDown className="w-3 h-3 text-[#888]" />
+                </SecondaryButton>
+
+                {showExportMenu && (
+                  <div 
+                    className="absolute right-0 top-full mt-1.5 w-52 bg-white rounded-xl shadow-xl border border-[#e2e8f0] py-1.5 z-50 animate-in fade-in zoom-in-95 text-left"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowExportMenu(false)
+                        handleExportAllExcel()
+                      }}
+                      className="w-full px-3.5 py-2 text-xs font-semibold text-[#111111] hover:bg-[#f0fdf4] hover:text-[#16a34a] flex items-center gap-2.5 transition-colors cursor-pointer text-left"
+                    >
+                      <FileSpreadsheet className="w-4 h-4 text-[#16a34a] shrink-0" />
+                      <div>
+                        <div className="font-bold">Baixar Excel (.xlsx)</div>
+                        <div className="text-[10px] text-[#666666] font-normal">Planilha formatada</div>
+                      </div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowExportMenu(false)
+                        handleExportAllPDF()
+                      }}
+                      className="w-full px-3.5 py-2 text-xs font-semibold text-[#111111] hover:bg-[#fef2f2] hover:text-[#dc2626] flex items-center gap-2.5 transition-colors cursor-pointer border-t border-[#f1f5f9] text-left"
+                    >
+                      <FileText className="w-4 h-4 text-[#dc2626] shrink-0" />
+                      <div>
+                        <div className="font-bold">Baixar PDF (.pdf)</div>
+                        <div className="text-[10px] text-[#666666] font-normal">Relatório para imprimir/salvar</div>
+                      </div>
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Botão Excluir informativo */}
+              <button
+                type="button"
+                onClick={handleDeleteSelected}
+                className="h-[38px] px-3 border border-[#fecaca] bg-[#fff5f5] hover:bg-[#fee2e2] text-[#dc2626] rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0 whitespace-nowrap"
+                title="Excluir fornecedores (selecione na tabela)"
+              >
+                <Trash2 className="w-3.5 h-3.5 text-[#dc2626]" />
+                <span>Excluir</span>
+              </button>
+
+              <PrimaryButton className="shrink-0 whitespace-nowrap" onClick={() => setShowCreate(true)}>
+                <Plus className="w-3.5 h-3.5" /> Novo fornecedor
+              </PrimaryButton>
+            </div>
+          )}
+        </div>
       </div>
       {loading ? (
         <div className="bg-white rounded-2xl border border-[#e6e6e6]">
           <LoadingState message="Carregando fornecedores..." padding={60} />
         </div>
+      ) : filtered.length === 0 ? (
+        <div className="bg-white rounded-2xl border border-[#e6e6e6] p-10 text-center space-y-2">
+          <Building2 className="w-8 h-8 text-[#ccc] mx-auto" />
+          <p className="text-sm font-bold text-[#111]">Nenhum fornecedor encontrado</p>
+          <p className="text-xs text-[#777]">Tente buscar com outro termo ou cadastre um novo fornecedor.</p>
+        </div>
       ) : (
-        <ModuleTable>
-          <TableHead>
-            <Th className="w-10">
-              <input 
-                type="checkbox" 
-                checked={filtered.length > 0 && selectedItems.length === filtered.length}
-                onChange={toggleSelectAll}
-                className="rounded border-[#ccc] text-[#1f2328] focus:ring-[#1f2328]"
-              />
-            </Th>
-            <Th>Fornecedor</Th><Th>Contato</Th><Th>Cidade</Th><Th className="text-right">Prazo</Th><Th className="text-right">Ações</Th>
-          </TableHead>
-          <tbody className="divide-y divide-[#eeeeee]">
-            {filtered.map((s: Record<string, unknown>) => (
-              <tr key={s.id as string} onClick={() => router.push(`/fornecedores/${s.id}`)} className="hover:bg-[#fafafa] transition-colors cursor-pointer">
-                <Td>
-                  <div onClick={(e) => e.stopPropagation()}>
+        <>
+          {/* Card list para celulares (< 640px) */}
+          <div className="block sm:hidden bg-white rounded-2xl border border-[#e6e6e6] divide-y divide-[#f1f5f9] overflow-hidden shadow-xs">
+            {filtered.map((s: Record<string, unknown>) => {
+              const id = s.id as string
+              const name = (s.name as string) || 'Fornecedor'
+              const cnpj = (s.cnpj as string) || (s.email as string) || 'Sem CNPJ'
+              const cityState = [s.city, s.state].filter(Boolean).join('/') || null
+              const isSelected = selectedItems.includes(id)
+
+              return (
+                <div 
+                  key={id} 
+                  onClick={() => router.push(`/fornecedores/${id}`)}
+                  className={`p-3.5 flex items-center gap-3 transition-colors cursor-pointer ${
+                    isSelected ? 'bg-[#f8fafc]' : 'hover:bg-[#fafafa]'
+                  }`}
+                >
+                  <div onClick={(e) => e.stopPropagation()} className="shrink-0">
                     <input 
                       type="checkbox" 
-                      checked={selectedItems.includes(s.id as string)}
-                      onChange={() => toggleSelect(s.id as string)}
-                      className="rounded border-[#ccc] text-[#1f2328] focus:ring-[#1f2328]"
+                      checked={isSelected}
+                      onChange={() => toggleSelect(id)}
+                      className="rounded border-[#ccc] text-[#1f2328] focus:ring-[#1f2328] w-4 h-4"
                     />
                   </div>
-                </Td>
-                <Td>
-                  <div className="flex items-center gap-4">
-                    <div className="w-11 h-11 rounded-full bg-[#f5f5f5] border-2 border-[#e6e6e6] overflow-hidden flex items-center justify-center flex-shrink-0">
-                      {s.logo_url ? (
-                        <img src={s.logo_url as string} alt={s.name as string} className="w-full h-full object-cover" />
-                      ) : (
-                        <Building2 className="w-5 h-5 text-[#ccc]" />
+
+                  <div className="w-12 h-12 rounded-xl bg-[#f8fafc] border border-[#e2e8f0] overflow-hidden flex items-center justify-center shrink-0 p-1">
+                    {s.logo_url ? (
+                      <img src={s.logo_url as string} alt={name} className="w-full h-full object-contain" />
+                    ) : (
+                      <Building2 className="w-5 h-5 text-[#94a3b8]" />
+                    )}
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-1.5 mb-0.5">
+                      <p className="font-bold text-[#111111] text-[13.5px] leading-snug truncate" title={name}>
+                        {name}
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-1.5 text-xs text-[#64748b]">
+                      <span className="font-mono text-[10.5px] bg-[#f1f5f9] text-[#334155] px-1.5 py-0.5 rounded border border-[#e2e8f0] leading-none">
+                        {cnpj}
+                      </span>
+                      {cityState && (
+                        <span className="text-[11px] text-[#475569] flex items-center gap-0.5">
+                          • {cityState}
+                        </span>
+                      )}
+                      {Boolean(s.delivery_time) && (
+                        <span className="text-[11px] text-[#16a34a] font-semibold flex items-center gap-0.5">
+                          • {String(s.delivery_time)}d
+                        </span>
                       )}
                     </div>
-                    <div className="flex flex-col justify-center">
-                      <p className="font-semibold text-[#1f2328] text-[14px] leading-tight mb-0.5">{s.name as string}</p>
-                      <p className="text-[13px] text-[#656d76] leading-tight">{s.cnpj as string || s.email as string || 'Sem CNPJ'}</p>
-                    </div>
                   </div>
-                </Td>
-                <Td>{s.contact as string || '—'}</Td>
-                <Td className="text-[#999]">{[s.city, s.state].filter(Boolean).join('/') || '—'}</Td>
-                <Td className="text-right text-[#999]">{s.delivery_time ? `${s.delivery_time} dias` : '—'}</Td>
-                <Td className="text-right"><div onClick={(e: React.MouseEvent) => e.stopPropagation()}><button onClick={() => router.push(`/fornecedores/${s.id}/editar`)} className="p-1.5 rounded hover:bg-[#f5f5f5] text-[#ccc] hover:text-[#666] cursor-pointer"><Edit className="w-3.5 h-3.5" /></button></div></Td>
-              </tr>
-            ))}
-          </tbody>
-        </ModuleTable>
+
+                  <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
+                    <button 
+                      onClick={() => router.push(`/fornecedores/${id}/editar`)} 
+                      className="w-8 h-8 flex items-center justify-center rounded-lg bg-white hover:bg-[#f1f5f9] border border-[#e2e8f0] text-[#64748b] hover:text-[#111] transition-colors"
+                      title="Editar"
+                    >
+                      <Edit className="w-3.5 h-3.5" />
+                    </button>
+                    <ChevronRight className="w-4 h-4 text-[#cbd5e1]" />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          {/* Tabela completa para Desktop (>= 640px) */}
+          <div className="hidden sm:block">
+            <ModuleTable>
+              <TableHead>
+                <Th className="w-10">
+                  <input 
+                    type="checkbox" 
+                    checked={filtered.length > 0 && selectedItems.length === filtered.length}
+                    onChange={toggleSelectAll}
+                    className="rounded border-[#ccc] text-[#1f2328] focus:ring-[#1f2328]"
+                  />
+                </Th>
+                <Th>Fornecedor</Th><Th>Contato</Th><Th>Cidade</Th><Th className="text-right">Prazo</Th><Th className="text-right">Ações</Th>
+              </TableHead>
+              <tbody className="divide-y divide-[#eeeeee]">
+                {filtered.map((s: Record<string, unknown>) => (
+                  <tr key={s.id as string} onClick={() => router.push(`/fornecedores/${s.id}`)} className="hover:bg-[#fafafa] transition-colors cursor-pointer">
+                    <Td>
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <input 
+                          type="checkbox" 
+                          checked={selectedItems.includes(s.id as string)}
+                          onChange={() => toggleSelect(s.id as string)}
+                          className="rounded border-[#ccc] text-[#1f2328] focus:ring-[#1f2328]"
+                        />
+                      </div>
+                    </Td>
+                    <Td>
+                      <div className="flex items-center gap-4">
+                        <div className="w-11 h-11 rounded-full bg-[#f5f5f5] border-2 border-[#e6e6e6] overflow-hidden flex items-center justify-center flex-shrink-0">
+                          {s.logo_url ? (
+                            <img src={s.logo_url as string} alt={s.name as string} className="w-full h-full object-cover" />
+                          ) : (
+                            <Building2 className="w-5 h-5 text-[#ccc]" />
+                          )}
+                        </div>
+                        <div className="flex flex-col justify-center">
+                          <p className="font-semibold text-[#1f2328] text-[14px] leading-tight mb-0.5">{s.name as string}</p>
+                          <p className="text-[13px] text-[#656d76] leading-tight">{s.cnpj as string || s.email as string || 'Sem CNPJ'}</p>
+                        </div>
+                      </div>
+                    </Td>
+                    <Td>{s.contact as string || '—'}</Td>
+                    <Td className="text-[#999]">{[s.city, s.state].filter(Boolean).join('/') || '—'}</Td>
+                    <Td className="text-right text-[#999]">{s.delivery_time ? `${s.delivery_time} dias` : '—'}</Td>
+                    <Td className="text-right"><div onClick={(e: React.MouseEvent) => e.stopPropagation()}><button onClick={() => router.push(`/fornecedores/${s.id}/editar`)} className="p-1.5 rounded hover:bg-[#f5f5f5] text-[#ccc] hover:text-[#666] cursor-pointer"><Edit className="w-3.5 h-3.5" /></button></div></Td>
+                  </tr>
+                ))}
+              </tbody>
+            </ModuleTable>
+          </div>
+        </>
       )}
       {showCreate && <SupplierCreateModal open={showCreate} onClose={() => setShowCreate(false)} onCreated={() => { refetch() }} />}
+      {showDeleteModal && (
+        <DeleteConfirmationModal
+          isOpen={showDeleteModal}
+          onClose={() => setShowDeleteModal(false)}
+          onConfirm={confirmDeleteSuppliers}
+          itemName={`${selectedItems.length} fornecedor(es)`}
+          description="Esta ação removerá permanentemente os fornecedores selecionados do banco de dados."
+          actionWord="EXCLUIR"
+          actionTitle="Exclusão de Fornecedores"
+          buttonText="Sim, Excluir"
+        />
+      )}
     </div>
   )
 }
 
 function PurchasesTab() {
   const router = useRouter()
+  const { notify } = useNotification()
   const [search, setSearch] = useState('')
   const [showCreate, setShowCreate] = useState(false)
   const [selectedItems, setSelectedItems] = useState<string[]>([])
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showExportMenu, setShowExportMenu] = useState(false)
   const { data: purchases, loading, refetch } = useSupabaseQuery(async (s) => {
     const { data, error } = await s.from('purchases').select('*, suppliers(name), purchase_items(*)').order('created_at', { ascending: false }).limit(100)
     if (error) throw error
@@ -832,23 +1226,58 @@ function PurchasesTab() {
     }
   }
 
-  const handleDeleteSelected = async () => {
-    if (!confirm(`Tem certeza que deseja excluir ${selectedItems.length} compra(s)? Essa ação não pode ser desfeita.`)) return
+  const confirmDeletePurchases = async () => {
     const supabase = createClient()
     await supabase.from('purchases').delete().in('id', selectedItems)
     setSelectedItems([])
+    setShowDeleteModal(false)
+    notify({ type: 'success', title: 'Compras Excluídas', message: 'Os registros de compra selecionados foram excluídos com sucesso.' })
     refetch()
   }
 
-  const handleExportSelected = () => {
+  const PURCHASE_EXPORT_COLUMNS: ExportColumnDef[] = [
+    { key: 'invoice', label: 'Nota Fiscal (NF)', format: (v) => (v as string) || 'S/N' },
+    { key: 'date', label: 'Data', format: (v) => v ? new Date(v as string).toLocaleDateString('pt-BR') : '—' },
+    { key: 'supplier', label: 'Fornecedor', format: (_v, r) => (r.suppliers as any)?.name || '—' },
+    { key: 'buyer', label: 'Comprador', format: (v) => (v as string) || '—' },
+    { key: 'total_cost', label: 'Valor Total (R$)', align: 'right', format: (v) => `R$ ${Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` },
+    { key: 'status', label: 'Status', align: 'center', format: (v) => v === 'CANCELED' ? 'Cancelada' : 'Concluída' }
+  ]
+
+  const handleExportSelectedExcel = () => {
     if (selectedItems.length === 0) return
     const dataToExport = purchases?.filter((p: any) => selectedItems.includes(p.id)) || []
-    exportToExcel(dataToExport, 'compras_selecionadas')
-    setSelectedItems([])
+    exportToExcel(dataToExport, 'compras_selecionadas', 'Compras', PURCHASE_EXPORT_COLUMNS)
+    notify({ type: 'success', title: 'Excel Exportado', message: `${dataToExport.length} compras exportadas.` })
   }
 
-  const handleExportAll = () => {
-    exportToExcel(purchases || [], 'todas_as_compras')
+  const handleExportSelectedPDF = () => {
+    if (selectedItems.length === 0) return
+    const dataToExport = purchases?.filter((p: any) => selectedItems.includes(p.id)) || []
+    exportToPDF(dataToExport, PURCHASE_EXPORT_COLUMNS, 'Relatório de Compras Selecionadas', `${dataToExport.length} compra(s) selecionada(s)`)
+  }
+
+  const handleExportAllExcel = () => {
+    const dataToExport = filtered.length > 0 ? filtered : (purchases || [])
+    exportToExcel(dataToExport, 'relatorio_compras', 'Compras', PURCHASE_EXPORT_COLUMNS)
+    notify({ type: 'success', title: 'Excel Exportado', message: `${dataToExport.length} compras exportadas.` })
+  }
+
+  const handleExportAllPDF = () => {
+    const dataToExport = filtered.length > 0 ? filtered : (purchases || [])
+    exportToPDF(dataToExport, PURCHASE_EXPORT_COLUMNS, 'Relatório Geral de Compras', `Total: ${dataToExport.length} registros`)
+  }
+
+  const handleDeleteSelected = () => {
+    if (selectedItems.length === 0) {
+      notify({
+        type: 'info',
+        title: 'Selecione as compras',
+        message: 'Marque a caixinha de seleção das compras na tabela que deseja excluir.'
+      })
+      return
+    }
+    setShowDeleteModal(true)
   }
 
   const [cancelModalId, setCancelModalId] = useState<string | null>(null)
@@ -867,47 +1296,160 @@ function PurchasesTab() {
         <StatCard label="Total Compras" value={String(purchases?.length || 0)} />
         <StatCard label="Valor Total" value={`R$ ${(purchases || []).reduce((a: number, b: Record<string, unknown>) => a + (Number(b.total_cost) || 0), 0).toLocaleString('pt-BR')}`} />
       </div>
-      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:justify-between mb-4">
-        <SearchInput placeholder="Buscar compra..." value={search} onChange={setSearch} />
-        {selectedItems.length > 0 ? (
-          <div className="flex items-center gap-2 bg-[#f5f5f5] px-3 py-1.5 rounded-md border border-[#1f2328]/20">
-            <span className="text-[12px] font-medium text-[#1f2328] mr-2">{selectedItems.length} selecionado(s)</span>
-            <button onClick={handleExportSelected} className="flex items-center gap-1.5 text-[12px] font-medium text-[#1f2328] bg-white px-2.5 py-1.5 rounded border border-[#1f2328]/20 hover:bg-[#1f2328] hover:text-white transition-colors cursor-pointer"><Download className="w-3.5 h-3.5" /> Exportar</button>
-            <button onClick={handleDeleteSelected} className="flex items-center gap-1.5 text-[12px] font-medium text-[#e74c3c] bg-white px-2.5 py-1.5 rounded border border-[#e74c3c]/20 hover:bg-[#e74c3c] hover:text-white transition-colors cursor-pointer"><Trash2 className="w-3.5 h-3.5" /> Excluir</button>
+
+      {/* TOOLBAR UNIFICADA DE COMPRAS */}
+      <div className="bg-white rounded-2xl border border-[#e6e6e6] p-3 shadow-2xs space-y-3 mb-4">
+        <div className="flex items-center justify-between gap-3 flex-nowrap overflow-x-auto [&::-webkit-scrollbar]:hidden">
+          {/* Campo de Busca */}
+          <div className="flex-1 min-w-[200px] max-w-sm">
+            <SearchInput placeholder="Buscar por nota, fornecedor..." value={search} onChange={setSearch} className="w-full max-w-none" />
           </div>
-        ) : (
-          <div className="flex flex-wrap items-center gap-2">
-            <SecondaryButton onClick={() => document.getElementById('import-purchases')?.click()}><Upload className="w-3.5 h-3.5" /> Importar</SecondaryButton>
-            <input 
-              type="file" 
-              id="import-purchases" 
-              className="hidden" 
-              accept=".xlsx,.xls,.csv" 
-              onChange={async (e) => {
-                const file = e.target.files?.[0]
-                if (!file) return
-                try {
-                  const data = await importFromExcel(file, {
-                    invoice: ['nota', 'nf', 'invoice', 'documento'],
-                    total_cost: ['custo total', 'total', 'valor', 'montante'],
-                    notes: ['observação', 'notas', 'observações', 'obs']
-                  })
-                  if (data.length > 0) {
-                    const supabase = createClient()
-                    await supabase.from('purchases').insert(data)
-                    refetch()
-                    alert(`${data.length} compras importadas com sucesso! (Atenção: Itens não são importados por esta via)`)
+
+          {/* Ações em Lote quando há seleção */}
+          {selectedItems.length > 0 ? (
+            <div className="flex items-center gap-2 bg-[#f8fafc] border border-[#0071e3]/30 px-3 py-1 rounded-xl shadow-2xs shrink-0 flex-nowrap animate-in fade-in">
+              <span className="text-xs font-bold text-[#0071e3] whitespace-nowrap bg-[#eff6ff] px-2.5 py-1 rounded-lg border border-[#bfdbfe]">
+                {selectedItems.length} selecionado{selectedItems.length > 1 ? 's' : ''}
+              </span>
+
+              {/* Baixar Excel Selecionados */}
+              <button
+                type="button"
+                onClick={handleExportSelectedExcel}
+                className="h-[32px] px-2.5 bg-white hover:bg-[#f0fdf4] border border-[#bbf7d0] text-[#16a34a] hover:text-[#15803d] rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-none whitespace-nowrap"
+                title="Baixar selecionados em planilha Excel (.xlsx)"
+              >
+                <FileSpreadsheet className="w-3.5 h-3.5 text-[#16a34a]" />
+                <span>Excel</span>
+              </button>
+
+              {/* Baixar PDF Selecionados */}
+              <button
+                type="button"
+                onClick={handleExportSelectedPDF}
+                className="h-[32px] px-2.5 bg-white hover:bg-[#fef2f2] border border-[#fecaca] text-[#dc2626] hover:text-[#b91c1c] rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-none whitespace-nowrap"
+                title="Baixar ou imprimir selecionados em PDF"
+              >
+                <FileText className="w-3.5 h-3.5 text-[#dc2626]" />
+                <span>PDF</span>
+              </button>
+
+              {/* Excluir Selecionados */}
+              <button
+                type="button"
+                onClick={handleDeleteSelected}
+                className="h-[32px] px-3 bg-[#dc2626] hover:bg-[#b91c1c] text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs whitespace-nowrap"
+                title="Excluir compras selecionadas"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Excluir</span>
+              </button>
+
+              {/* Desmarcar */}
+              <button
+                type="button"
+                onClick={() => setSelectedItems([])}
+                className="h-[32px] w-[32px] flex items-center justify-center bg-white hover:bg-[#f1f5f9] text-[#64748b] hover:text-[#111111] rounded-lg border border-[#e2e8f0] transition-all cursor-pointer shadow-none"
+                title="Desmarcar seleção"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 shrink-0 flex-nowrap">
+              <SecondaryButton className="shrink-0 whitespace-nowrap" onClick={() => document.getElementById('import-purchases')?.click()}>
+                <Upload className="w-3.5 h-3.5" /> Importar
+              </SecondaryButton>
+              <input 
+                type="file" 
+                id="import-purchases" 
+                className="hidden" 
+                accept=".xlsx,.xls,.csv" 
+                onChange={async (e) => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  try {
+                    const data = await importFromExcel(file, {
+                      invoice: ['nota', 'nf', 'invoice', 'documento'],
+                      total_cost: ['custo total', 'total', 'valor', 'montante'],
+                      notes: ['observação', 'notas', 'observações', 'obs']
+                    })
+                    if (data.length > 0) {
+                      const supabase = createClient()
+                      await supabase.from('purchases').insert(data)
+                      refetch()
+                      notify({ type: 'success', title: 'Compras Importadas', message: `${data.length} compras importadas com sucesso.` })
+                    }
+                  } catch (err) {
+                    notify({ type: 'error', title: 'Erro de Importação', message: 'Falha ao processar arquivo.' })
                   }
-                } catch (err) {
-                  alert('Erro ao importar arquivo.')
-                }
-                e.target.value = ''
-              }} 
-            />
-            <SecondaryButton onClick={handleExportAll}><Download className="w-3.5 h-3.5" /> Exportar</SecondaryButton>
-            <PrimaryButton onClick={() => setShowCreate(true)}><Plus className="w-3.5 h-3.5" /> Nova compra</PrimaryButton>
-          </div>
-        )}
+                  e.target.value = ''
+                }} 
+              />
+
+              {/* Dropdown de Exportação: Excel e PDF */}
+              <div className="relative" onClick={(e) => e.stopPropagation()}>
+                <SecondaryButton 
+                  className="shrink-0 whitespace-nowrap" 
+                  onClick={() => setShowExportMenu(!showExportMenu)}
+                >
+                  <Download className="w-3.5 h-3.5" /> Exportar <ChevronDown className="w-3 h-3 text-[#888]" />
+                </SecondaryButton>
+
+                {showExportMenu && (
+                  <div 
+                    className="absolute right-0 top-full mt-1.5 w-52 bg-white rounded-xl shadow-xl border border-[#e2e8f0] py-1.5 z-50 animate-in fade-in zoom-in-95 text-left"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowExportMenu(false)
+                        handleExportAllExcel()
+                      }}
+                      className="w-full px-3.5 py-2 text-xs font-semibold text-[#111111] hover:bg-[#f0fdf4] hover:text-[#16a34a] flex items-center gap-2.5 transition-colors cursor-pointer text-left"
+                    >
+                      <FileSpreadsheet className="w-4 h-4 text-[#16a34a] shrink-0" />
+                      <div>
+                        <div className="font-bold">Baixar Excel (.xlsx)</div>
+                        <div className="text-[10px] text-[#666666] font-normal">Planilha formatada</div>
+                      </div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowExportMenu(false)
+                        handleExportAllPDF()
+                      }}
+                      className="w-full px-3.5 py-2 text-xs font-semibold text-[#111111] hover:bg-[#fef2f2] hover:text-[#dc2626] flex items-center gap-2.5 transition-colors cursor-pointer border-t border-[#f1f5f9] text-left"
+                    >
+                      <FileText className="w-4 h-4 text-[#dc2626] shrink-0" />
+                      <div>
+                        <div className="font-bold">Baixar PDF (.pdf)</div>
+                        <div className="text-[10px] text-[#666666] font-normal">Relatório para imprimir/salvar</div>
+                      </div>
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Botão Excluir informativo */}
+              <button
+                type="button"
+                onClick={handleDeleteSelected}
+                className="h-[38px] px-3 border border-[#fecaca] bg-[#fff5f5] hover:bg-[#fee2e2] text-[#dc2626] rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0 whitespace-nowrap"
+                title="Excluir compras (selecione na tabela)"
+              >
+                <Trash2 className="w-3.5 h-3.5 text-[#dc2626]" />
+                <span>Excluir</span>
+              </button>
+
+              <PrimaryButton className="shrink-0 whitespace-nowrap" onClick={() => setShowCreate(true)}>
+                <Plus className="w-3.5 h-3.5" /> Nova compra
+              </PrimaryButton>
+            </div>
+          )}
+        </div>
       </div>
       {loading ? (
         <div className="bg-white rounded-2xl border border-[#e6e6e6]">
@@ -992,12 +1534,30 @@ function PurchasesTab() {
           buttonText="Sim, Cancelar"
         />
       )}
+      {showDeleteModal && (
+        <DeleteConfirmationModal
+          isOpen={showDeleteModal}
+          onClose={() => setShowDeleteModal(false)}
+          onConfirm={confirmDeletePurchases}
+          itemName={`${selectedItems.length} compra(s)`}
+          description="Esta ação removerá permanentemente os registros de compras selecionados do sistema TEKNIX."
+          actionWord="EXCLUIR"
+          actionTitle="Exclusão de Compras"
+          buttonText="Sim, Excluir"
+        />
+      )}
     </div>
   )
 }
 
 function StockTab() {
   const router = useRouter()
+  const { notify } = useNotification()
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'CRITICAL' | 'OUT_OF_STOCK' | 'NORMAL'>('ALL')
+  const [selectedItems, setSelectedItems] = useState<string[]>([])
+  const [showExportMenu, setShowExportMenu] = useState(false)
+
   const { data: products, loading } = useSupabaseQuery(async (s) => {
     const { data, error } = await s.from('products').select('*, product_images(url)').order('name').limit(200)
     if (error) throw error
@@ -1008,27 +1568,267 @@ function StockTab() {
     return (Number(p.cost_purchase) || 0) + (Number(p.freight_purchase) || 0) + (Number(p.packaging_cost) || 0) + (Number(p.other_costs) || 0)
   }
 
+  const allProducts = (products || []) as Record<string, any>[]
+
+  const counts = {
+    ALL: allProducts.length,
+    CRITICAL: allProducts.filter(p => {
+      const stock = Number(p.stock) || 0
+      const minStock = Number(p.min_stock) || 0
+      return stock > 0 && stock <= minStock
+    }).length,
+    OUT_OF_STOCK: allProducts.filter(p => (Number(p.stock) || 0) === 0).length,
+    NORMAL: allProducts.filter(p => {
+      const stock = Number(p.stock) || 0
+      const minStock = Number(p.min_stock) || 0
+      return stock > minStock
+    }).length,
+  }
+
+  const filtered = allProducts.filter(p => {
+    if (search) {
+      const match = matchesSearchQuery([p.name, p.sku, p.brand], search)
+      if (!match) return false
+    }
+    const stock = Number(p.stock) || 0
+    const minStock = Number(p.min_stock) || 0
+    if (statusFilter === 'OUT_OF_STOCK') return stock === 0
+    if (statusFilter === 'CRITICAL') return stock > 0 && stock <= minStock
+    if (statusFilter === 'NORMAL') return stock > minStock
+    return true
+  })
+
+  const toggleSelectAll = () => {
+    if (selectedItems.length === filtered.length) {
+      setSelectedItems([])
+    } else {
+      setSelectedItems(filtered.map((p: any) => p.id as string))
+    }
+  }
+
+  const toggleSelect = (id: string) => {
+    if (selectedItems.includes(id)) {
+      setSelectedItems(selectedItems.filter(i => i !== id))
+    } else {
+      setSelectedItems([...selectedItems, id])
+    }
+  }
+
+  const STOCK_EXPORT_COLUMNS: ExportColumnDef[] = [
+    { key: 'sku', label: 'SKU' },
+    { key: 'name', label: 'Produto' },
+    { key: 'brand', label: 'Marca', format: (v) => (v as string) || '—' },
+    { key: 'stock', label: 'Estoque Atual', align: 'right', format: (v) => String(Number(v) || 0) },
+    { key: 'min_stock', label: 'Estoque Mínimo', align: 'right', format: (v) => String(Number(v) || 0) },
+    { key: 'cost', label: 'Custo Unitário (R$)', align: 'right', format: (_v, r) => `R$ ${calcCost(r).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` },
+    { key: 'total_value', label: 'Valor Total (R$)', align: 'right', format: (_v, r) => `R$ ${(calcCost(r) * (Number(r.stock) || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` },
+    { key: 'status_label', label: 'Situação', align: 'center', format: (_v, r) => {
+      const s = Number(r.stock) || 0
+      const m = Number(r.min_stock) || 0
+      if (s === 0) return 'Esgotado'
+      if (s <= m) return 'Crítico'
+      return 'Normal'
+    }}
+  ]
+
+  const handleExportSelectedExcel = () => {
+    if (selectedItems.length === 0) return
+    const dataToExport = allProducts.filter((p: any) => selectedItems.includes(p.id))
+    exportToExcel(dataToExport, 'posicao_estoque_selecionados', 'Estoque', STOCK_EXPORT_COLUMNS)
+    notify({ type: 'success', title: 'Excel Exportado', message: `${dataToExport.length} itens exportados para planilha.` })
+  }
+
+  const handleExportSelectedPDF = () => {
+    if (selectedItems.length === 0) return
+    const dataToExport = allProducts.filter((p: any) => selectedItems.includes(p.id))
+    exportToPDF(dataToExport, STOCK_EXPORT_COLUMNS, 'Posição de Estoque (Itens Selecionados)', `${dataToExport.length} itens selecionados`)
+  }
+
+  const handleExportAllExcel = () => {
+    const dataToExport = filtered.length > 0 ? filtered : allProducts
+    exportToExcel(dataToExport, 'posicao_estoque_geral', 'Estoque', STOCK_EXPORT_COLUMNS)
+    notify({ type: 'success', title: 'Excel Exportado', message: `${dataToExport.length} itens exportados para planilha.` })
+  }
+
+  const handleExportAllPDF = () => {
+    const dataToExport = filtered.length > 0 ? filtered : allProducts
+    exportToPDF(dataToExport, STOCK_EXPORT_COLUMNS, 'Relatório Geral de Posição de Estoque', `Filtro: ${statusFilter} • Total: ${dataToExport.length} produtos`)
+  }
+
   return (
     <div>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-        <StatCard label="Produtos" value={String(products?.length || 0)} />
-        <StatCard label="Estoque Total" value={String(products?.reduce((a: number, b: Record<string, unknown>) => a + (Number(b.stock) || 0), 0) || 0)} />
-        <StatCard label="Críticos" value={String(products?.filter((p: Record<string, unknown>) => (Number(p.stock) || 0) > 0 && (Number(p.stock) || 0) <= (Number(p.min_stock) || 0)).length || 0)} />
+        <StatCard label="Produtos" value={String(allProducts.length)} />
+        <StatCard label="Estoque Total" value={String(allProducts.reduce((a: number, b: Record<string, unknown>) => a + (Number(b.stock) || 0), 0))} />
+        <StatCard label="Críticos" value={String(counts.CRITICAL)} />
+        <StatCard label="Esgotados" value={String(counts.OUT_OF_STOCK)} />
       </div>
+
+      {/* TOOLBAR UNIFICADA DE ESTOQUE */}
+      <div className="bg-white rounded-2xl border border-[#e6e6e6] p-3 shadow-2xs space-y-3 mb-4">
+        <div className="flex items-center justify-between gap-3 flex-nowrap overflow-x-auto [&::-webkit-scrollbar]:hidden">
+          {/* Campo de Busca */}
+          <div className="flex-1 min-w-[200px] max-w-sm">
+            <SearchInput placeholder="Buscar produto ou SKU..." value={search} onChange={setSearch} className="w-full max-w-none" />
+          </div>
+
+          {/* Filtro e Ações */}
+          <div className="flex items-center gap-2 shrink-0 flex-nowrap">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as any)}
+              className="h-[38px] px-3 bg-[#f8f9fa] hover:bg-[#f0f0f0] border border-[#e6e6e6] rounded-xl text-xs font-medium text-[#333] focus:outline-none focus:border-[#16a34a] cursor-pointer shadow-none shrink-0 transition-all"
+            >
+              <option value="ALL">Todos os Níveis ({counts.ALL})</option>
+              <option value="NORMAL">Normal ({counts.NORMAL})</option>
+              <option value="CRITICAL">Críticos ({counts.CRITICAL})</option>
+              <option value="OUT_OF_STOCK">Esgotados ({counts.OUT_OF_STOCK})</option>
+            </select>
+
+            {/* Ações em Lote quando há seleção */}
+            {selectedItems.length > 0 ? (
+              <div className="flex items-center gap-2 bg-[#f8fafc] border border-[#0071e3]/30 px-3 py-1 rounded-xl shadow-2xs shrink-0 flex-nowrap animate-in fade-in">
+                <span className="text-xs font-bold text-[#0071e3] whitespace-nowrap bg-[#eff6ff] px-2.5 py-1 rounded-lg border border-[#bfdbfe]">
+                  {selectedItems.length} selecionado{selectedItems.length > 1 ? 's' : ''}
+                </span>
+
+                {/* Baixar Excel Selecionados */}
+                <button
+                  type="button"
+                  onClick={handleExportSelectedExcel}
+                  className="h-[32px] px-2.5 bg-white hover:bg-[#f0fdf4] border border-[#bbf7d0] text-[#16a34a] hover:text-[#15803d] rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-none whitespace-nowrap"
+                  title="Baixar selecionados em planilha Excel (.xlsx)"
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-[#16a34a]" />
+                  <span>Excel</span>
+                </button>
+
+                {/* Baixar PDF Selecionados */}
+                <button
+                  type="button"
+                  onClick={handleExportSelectedPDF}
+                  className="h-[32px] px-2.5 bg-white hover:bg-[#fef2f2] border border-[#fecaca] text-[#dc2626] hover:text-[#b91c1c] rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-none whitespace-nowrap"
+                  title="Baixar ou imprimir selecionados em PDF"
+                >
+                  <FileText className="w-3.5 h-3.5 text-[#dc2626]" />
+                  <span>PDF</span>
+                </button>
+
+                {/* Desmarcar */}
+                <button
+                  type="button"
+                  onClick={() => setSelectedItems([])}
+                  className="h-[32px] w-[32px] flex items-center justify-center bg-white hover:bg-[#f1f5f9] text-[#64748b] hover:text-[#111111] rounded-lg border border-[#e2e8f0] transition-all cursor-pointer shadow-none"
+                  title="Desmarcar seleção"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 shrink-0 flex-nowrap">
+                {/* Dropdown de Exportação: Excel e PDF */}
+                <div className="relative" onClick={(e) => e.stopPropagation()}>
+                  <SecondaryButton 
+                    className="shrink-0 whitespace-nowrap" 
+                    onClick={() => setShowExportMenu(!showExportMenu)}
+                  >
+                    <Download className="w-3.5 h-3.5" /> Exportar <ChevronDown className="w-3 h-3 text-[#888]" />
+                  </SecondaryButton>
+
+                  {showExportMenu && (
+                    <div 
+                      className="absolute right-0 top-full mt-1.5 w-52 bg-white rounded-xl shadow-xl border border-[#e2e8f0] py-1.5 z-50 animate-in fade-in zoom-in-95 text-left"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowExportMenu(false)
+                          handleExportAllExcel()
+                        }}
+                        className="w-full px-3.5 py-2 text-xs font-semibold text-[#111111] hover:bg-[#f0fdf4] hover:text-[#16a34a] flex items-center gap-2.5 transition-colors cursor-pointer text-left"
+                      >
+                        <FileSpreadsheet className="w-4 h-4 text-[#16a34a] shrink-0" />
+                        <div>
+                          <div className="font-bold">Baixar Excel (.xlsx)</div>
+                          <div className="text-[10px] text-[#666666] font-normal">Planilha formatada</div>
+                        </div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowExportMenu(false)
+                          handleExportAllPDF()
+                        }}
+                        className="w-full px-3.5 py-2 text-xs font-semibold text-[#111111] hover:bg-[#fef2f2] hover:text-[#dc2626] flex items-center gap-2.5 transition-colors cursor-pointer border-t border-[#f1f5f9] text-left"
+                      >
+                        <FileText className="w-4 h-4 text-[#dc2626] shrink-0" />
+                        <div>
+                          <div className="font-bold">Baixar PDF (.pdf)</div>
+                          <div className="text-[10px] text-[#666666] font-normal">Relatório para imprimir/salvar</div>
+                        </div>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
       {loading ? (
         <div className="bg-white rounded-2xl border border-[#e6e6e6]">
           <LoadingState message="Carregando posição de estoque..." padding={60} />
         </div>
+      ) : filtered.length === 0 ? (
+        <div className="bg-white rounded-2xl border border-[#e6e6e6] p-10 text-center space-y-2">
+          <Warehouse className="w-8 h-8 text-[#ccc] mx-auto" />
+          <p className="text-sm font-bold text-[#111]">Nenhum item encontrado no estoque</p>
+          <p className="text-xs text-[#777]">Tente buscar com outro termo ou alterar o filtro.</p>
+        </div>
       ) : (
         <ModuleTable>
-          <TableHead><Th>SKU</Th><Th>Produto</Th><Th className="text-right">Estoque</Th><Th className="text-right">Mínimo</Th><Th className="text-right">Valor Unit.</Th><Th className="text-right">Valor Total</Th><Th className="text-center">Status</Th></TableHead>
+          <TableHead>
+            <Th className="w-10">
+              <input 
+                type="checkbox" 
+                checked={filtered.length > 0 && selectedItems.length === filtered.length}
+                onChange={toggleSelectAll}
+                className="rounded border-[#ccc] text-[#1f2328] focus:ring-[#1f2328]"
+              />
+            </Th>
+            <Th>SKU</Th>
+            <Th>Produto</Th>
+            <Th className="text-right">Estoque</Th>
+            <Th className="text-right">Mínimo</Th>
+            <Th className="text-right">Valor Unit.</Th>
+            <Th className="text-right">Valor Total</Th>
+            <Th className="text-center">Status</Th>
+          </TableHead>
           <tbody className="divide-y divide-[#eeeeee]">
-            {(products || []).map((p: Record<string, unknown>) => {
+            {filtered.map((p: Record<string, unknown>) => {
               const stock = Number(p.stock) || 0
               const minStock = Number(p.min_stock) || 0
               const cost = calcCost(p)
+              const isSelected = selectedItems.includes(p.id as string)
+
               return (
-                <tr key={p.id as string} onClick={() => router.push(`/produtos/${p.id}`)} className="hover:bg-[#fafafa] transition-colors cursor-pointer">
+                <tr 
+                  key={p.id as string} 
+                  onClick={() => router.push(`/produtos/${p.id}`)} 
+                  className={`hover:bg-[#fafafa] transition-colors cursor-pointer ${isSelected ? 'bg-[#f8fafc]' : ''}`}
+                >
+                  <Td>
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <input 
+                        type="checkbox" 
+                        checked={isSelected}
+                        onChange={() => toggleSelect(p.id as string)}
+                        className="rounded border-[#ccc] text-[#1f2328] focus:ring-[#1f2328]"
+                      />
+                    </div>
+                  </Td>
                   <Td className="font-mono text-[#999]">{p.sku as string}</Td>
                   <Td>
                     <div className="flex items-center gap-4">
@@ -1210,21 +2010,53 @@ function StockCountTab() {
 
 export default function OperacaoPage() {
   return (
-    <div className="mp-stack">
-      <PageHeader title="Operação" />
-      <Tabs defaultValue="produtos">
-        <TabsList>
-          <TabsTrigger value="produtos"><Package className="w-3.5 h-3.5 mr-1 inline" /> Produtos</TabsTrigger>
-          <TabsTrigger value="fornecedores"><Truck className="w-3.5 h-3.5 mr-1 inline" /> Fornecedores</TabsTrigger>
-          <TabsTrigger value="compras"><ShoppingCart className="w-3.5 h-3.5 mr-1 inline" /> Compras</TabsTrigger>
-          <TabsTrigger value="estoque"><Warehouse className="w-3.5 h-3.5 mr-1 inline" /> Estoque</TabsTrigger>
-          <TabsTrigger value="conferencia"><ClipboardCheck className="w-3.5 h-3.5 mr-1 inline" /> Conferência</TabsTrigger>
-        </TabsList>
-        <TabsContent value="produtos"><ProductsTab /></TabsContent>
-        <TabsContent value="fornecedores"><SuppliersTab /></TabsContent>
-        <TabsContent value="compras"><PurchasesTab /></TabsContent>
-        <TabsContent value="estoque"><StockTab /></TabsContent>
-        <TabsContent value="conferencia"><StockCountTab /></TabsContent>
+    <div className="mp-stack space-y-6">
+      <Tabs defaultValue="produtos" plain>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#eeeeee] pb-4 mb-6">
+          <div className="flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => window.history.back()}
+              className="hub-mobile-back-btn !w-8 !h-8 sm:!w-9 sm:!h-9 !rounded-xl"
+              aria-label="Voltar"
+              title="Voltar"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </button>
+            <div>
+              <h1 className="text-[15px] sm:text-[16px] font-bold tracking-tight text-[#111111] leading-tight">
+                Operação
+              </h1>
+              <p className="text-[11px] sm:text-xs text-[#888888] leading-tight mt-0.5">
+                Painel de produtos, fornecedores, compras e conferência de estoque
+              </p>
+            </div>
+          </div>
+
+          <TabsList align="right" className="!border-b-0 !pb-0 !mb-0 shrink-0">
+            <TabsTrigger variant="icon" value="produtos" title="Produtos">
+              <Package size={19} strokeWidth={2} className="w-5 h-5 shrink-0" style={{ width: '19px', height: '19px', minWidth: '19px', minHeight: '19px', display: 'block' }} />
+            </TabsTrigger>
+            <TabsTrigger variant="icon" value="fornecedores" title="Fornecedores">
+              <Truck size={19} strokeWidth={2} className="w-5 h-5 shrink-0" style={{ width: '19px', height: '19px', minWidth: '19px', minHeight: '19px', display: 'block' }} />
+            </TabsTrigger>
+            <TabsTrigger variant="icon" value="compras" title="Compras">
+              <ShoppingCart size={19} strokeWidth={2} className="w-5 h-5 shrink-0" style={{ width: '19px', height: '19px', minWidth: '19px', minHeight: '19px', display: 'block' }} />
+            </TabsTrigger>
+            <TabsTrigger variant="icon" value="estoque" title="Estoque">
+              <Warehouse size={19} strokeWidth={2} className="w-5 h-5 shrink-0" style={{ width: '19px', height: '19px', minWidth: '19px', minHeight: '19px', display: 'block' }} />
+            </TabsTrigger>
+            <TabsTrigger variant="icon" value="conferencia" title="Conferência">
+              <ClipboardCheck size={19} strokeWidth={2} className="w-5 h-5 shrink-0" style={{ width: '19px', height: '19px', minWidth: '19px', minHeight: '19px', display: 'block' }} />
+            </TabsTrigger>
+          </TabsList>
+        </div>
+
+        <TabsContent value="produtos" className="space-y-6"><ProductsTab /></TabsContent>
+        <TabsContent value="fornecedores" className="space-y-6"><SuppliersTab /></TabsContent>
+        <TabsContent value="compras" className="space-y-6"><PurchasesTab /></TabsContent>
+        <TabsContent value="estoque" className="space-y-6"><StockTab /></TabsContent>
+        <TabsContent value="conferencia" className="space-y-6"><StockCountTab /></TabsContent>
       </Tabs>
     </div>
   )

@@ -9,12 +9,12 @@ function shouldShowOnPath(pathname: string, settings: WhatsappSettings): boolean
   if (mode === 'all') return true
 
   const isHome = pathname === '/'
-  const isProduct = pathname.startsWith('/produto/')
   const isCart = pathname === '/sacola' || pathname === '/carrinho'
   const isCheckout = pathname.startsWith('/checkout')
-  const isAccount = pathname.startsWith('/conta') || pathname.startsWith('/pedidos') || pathname.startsWith('/itens-salvos') || pathname.startsWith('/buscar-pedido')
+  const isAccount = pathname.startsWith('/conta') || pathname.startsWith('/pedidos') || pathname.startsWith('/itens-salvos') || pathname.startsWith('/buscar-pedido') || pathname.startsWith('/login') || pathname.startsWith('/cadastro')
   const isInstitutional = pathname.startsWith('/ajuda') || pathname.startsWith('/legal') || pathname.startsWith('/news') || pathname.startsWith('/blog') || pathname === '/sobre-nos'
-  const isCategories = pathname.startsWith('/produtos') || pathname.startsWith('/categoria') || (!isHome && !isProduct && !isCart && !isCheckout && !isAccount && !isInstitutional)
+  const isCategories = pathname.startsWith('/produtos') || pathname.startsWith('/categoria') || pathname.startsWith('/marcas') || pathname.startsWith('/marca/') || pathname.startsWith('/lojas') || pathname.startsWith('/loja/')
+  const isProduct = pathname.startsWith('/produto/') || (!isHome && !isCart && !isCheckout && !isAccount && !isInstitutional && !isCategories)
 
   const matchedKeys: string[] = []
   if (isHome) matchedKeys.push('home')

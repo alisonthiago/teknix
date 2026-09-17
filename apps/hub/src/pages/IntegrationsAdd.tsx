@@ -395,13 +395,10 @@ export default function IntegrationsAdd() {
 
           return (
             <div key={item.id} className="integration-card">
-              <div className="card-top">
+              {/* 1. Logo em cima */}
+              <div className="card-top-row">
                 <div className="card-logo">
-                  <IntegrationLogoRenderer code={item.id} size={32} />
-                </div>
-                <div className="card-info">
-                  <h3 className="card-title">{item.name}</h3>
-                  <span className="card-category-badge">{item.category}</span>
+                  <IntegrationLogoRenderer code={item.id} size={36} />
                 </div>
                 {isConnected ? (
                   <span className="card-status-badge connected">
@@ -421,35 +418,43 @@ export default function IntegrationsAdd() {
                 )}
               </div>
 
-              <p style={{ fontSize: '12.5px', color: '#6b7280', margin: '4px 0 0', lineHeight: 1.4 }}>
-                {item.description}
-              </p>
+              {/* 2. Texto em baixo */}
+              <div className="card-content-body">
+                <div className="card-title-group">
+                  <h3 className="card-title">{item.name}</h3>
+                  <span className="card-category-badge">{item.category}</span>
+                </div>
 
-              <div className="card-meta">
-                <div>
-                  <strong>Ambiente:</strong> {existing?.environment === 'production' ? 'Produção' : item.defaultEnv === 'production' ? 'Produção' : 'Sandbox (Testes)'}
+                <p className="card-description">
+                  {item.description}
+                </p>
+
+                <div className="card-meta">
+                  <div>
+                    <strong>Ambiente:</strong> {existing?.environment === 'production' ? 'Produção' : item.defaultEnv === 'production' ? 'Produção' : 'Sandbox (Testes)'}
+                  </div>
+                </div>
+
+                <div className="card-help">
+                  <span className="card-help-text">Precisa de ajuda para configurar?</span>
+                  <a
+                    href={item.docUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="card-help-link"
+                  >
+                    <ExternalLink size={11} /> Saiba mais
+                  </a>
                 </div>
               </div>
 
-              <div className="card-help">
-                <span className="card-help-text">Precisa de ajuda para configurar?</span>
-                <a
-                  href={item.docUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="card-help-link"
-                >
-                  <ExternalLink size={11} /> {item.docLabel}
-                </a>
-              </div>
-
+              {/* 3. Botões abaixo alinhados para o lado esquerdo */}
               <div className="card-actions">
                 {isConnected || isSandbox ? (
                   <>
                     <button
                       type="button"
                       className="btn btn-secondary"
-                      style={{ fontSize: '12.5px', padding: '6px 12px' }}
                       onClick={() => navigate('/hub/integracoes')}
                     >
                       Ver Conectado
@@ -457,7 +462,6 @@ export default function IntegrationsAdd() {
                     <button
                       type="button"
                       className="btn btn-secondary"
-                      style={{ fontSize: '12.5px', padding: '6px 12px' }}
                       onClick={() => handleOpenConfigure(item)}
                     >
                       <Key size={13} /> Reconfigurar
@@ -468,7 +472,6 @@ export default function IntegrationsAdd() {
                     <button
                       type="button"
                       className="btn btn-primary"
-                      style={{ fontSize: '12.5px', padding: '6px 12px', flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
                       onClick={() => handleOpenConfigure(item)}
                     >
                       <Key size={13} /> Conectar & Configurar
@@ -476,7 +479,6 @@ export default function IntegrationsAdd() {
                     <button
                       type="button"
                       className="btn btn-secondary"
-                      style={{ fontSize: '12.5px', padding: '6px 12px' }}
                       onClick={() => handleQuickActivate(item)}
                       title="Ativar rapidamente este serviço"
                     >

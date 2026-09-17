@@ -105,20 +105,20 @@ export default function ColaboradoresPage() {
                 <tr className="border-b border-[#f5f5f5]">
                   <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Nome</th>
                   <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">E-mail</th>
-                  <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Função</th>
-                  <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Último acesso</th>
-                  <th className="text-center py-3.5 px-5 font-medium text-[#999] text-xs">Status</th>
+                  <th className="hidden sm:table-cell text-left py-3.5 px-5 font-medium text-[#999] text-xs">Função</th>
+                  <th className="hidden sm:table-cell text-left py-3.5 px-5 font-medium text-[#999] text-xs">Último acesso</th>
+                  <th className="hidden sm:table-cell text-center py-3.5 px-5 font-medium text-[#999] text-xs">Status</th>
                   <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs w-20">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#eeeeee]">
                 {users.map(u => (
                   <tr key={u.id} className="hover:bg-[#fafafa]">
-                    <td className="py-2.5 px-3 font-medium text-[#333]">{u.name} {(u as any).is_master && <span className="ml-2 text-xs bg-[#333] text-white px-1.5 py-0.5 rounded">MASTER</span>}</td>
-                    <td className="py-2.5 px-3 text-[#999]">{u.email}</td>
-                    <td className="py-2.5 px-3"><span className={`inline-flex px-2 py-[2px] rounded text-xs font-medium ${ROLE_COLORS[u.role] || 'bg-[#f5f5f5] text-[#666]'}`}>{ROLE_LABELS[u.role] || u.role}</span></td>
-                    <td className="py-2.5 px-3 text-[#999]">{u.last_login ? new Date(u.last_login).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—'}</td>
-                    <td className="py-2.5 px-3 text-center"><span className={`inline-flex px-2 py-[2px] rounded text-xs font-medium ${u.status === 'ACTIVE' ? 'bg-[#f0fff4] text-[#38a169]' : 'bg-[#f5f5f5] text-[#999]'}`}>{u.status === 'ACTIVE' ? 'Ativo' : u.status}</span></td>
+                    <td className="py-3 px-3 sm:px-5 font-medium text-[#333] align-top">{u.name} {(u as any).is_master && <span className="ml-1 text-[10px] bg-[#333] text-white px-1.5 py-0.5 rounded">MASTER</span>}</td>
+                    <td className="py-3 px-3 sm:px-5 text-[#999] text-xs break-all align-top">{u.email}</td>
+                    <td className="hidden sm:table-cell py-2.5 px-3"><span className={`inline-flex px-2 py-[2px] rounded text-xs font-medium ${ROLE_COLORS[u.role] || 'bg-[#f5f5f5] text-[#666]'}`}>{ROLE_LABELS[u.role] || u.role}</span></td>
+                    <td className="hidden sm:table-cell py-2.5 px-3 text-[#999]">{u.last_login ? new Date(u.last_login).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—'}</td>
+                    <td className="hidden sm:table-cell py-2.5 px-3 text-center"><span className={`inline-flex px-2 py-[2px] rounded text-xs font-medium ${u.status === 'ACTIVE' ? 'bg-[#f0fff4] text-[#38a169]' : 'bg-[#f5f5f5] text-[#999]'}`}>{u.status === 'ACTIVE' ? 'Ativo' : u.status}</span></td>
                     <td className="py-2.5 px-3 text-right">
                       <div className="flex items-center justify-end gap-1">
                         <button onClick={() => handleEdit(u)} className="p-1.5 rounded hover:bg-[#e6e6e6] text-[#666] transition-colors" title="Editar">

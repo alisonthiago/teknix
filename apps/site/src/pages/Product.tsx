@@ -19,6 +19,8 @@ import { productPricing, cleanProductTitle, normalizeShowcase, type ProductEdito
 import { commerceSignals } from '../services/storefrontCommerce'
 import { calculateMelhorEnvioQuote, type MelhorEnvioQuote } from '../services/melhorEnvioTest'
 import { remainingOfferTime } from '../services/productPresentation'
+import SEOHead from '../components/SEOHead'
+import { buildProductSchema, buildBreadcrumbSchema } from '../components/SchemaOrg'
 
 function renderBenefitIcon(iconName?: string) {
   switch (iconName) {
@@ -242,6 +244,15 @@ export default function Product() {
   }, [productId])
 
   useEffect(() => {
+    if (!product) return
+    const availableStock = Math.max(0, Math.floor(Number(product.stock) || 0))
+    setQuantity(currentQuantity => availableStock > 0
+      ? Math.min(Math.max(1, currentQuantity), availableStock)
+      : 1
+    )
+  }, [product?.id, product?.stock])
+
+  useEffect(() => {
     const updateStickyNav = () => {
       const isVisible = window.scrollY > 420
       setShowStickyNav(isVisible)
@@ -275,6 +286,10 @@ export default function Product() {
 
   if (!product) return <div className="ui container" style={{paddingBlock:48}}><Editable as="h1" widgetId="product-2">Produto não encontrado</Editable><Link to="/produtos">Ver produtos</Link></div>
   const currentProduct = product
+  const availableStock = Math.max(0, Math.floor(Number(currentProduct.stock) || 0))
+  const normalizedQuantity = availableStock > 0
+    ? Math.min(Math.max(1, quantity), availableStock)
+    : 1
 
   const pricing = productPricing(currentProduct.price,currentProduct.promo_price,currentProduct.commerce,pricingTime)
   const {base:basePrice,current:finalPrice,pix:pixPrice,discount:discountPercent,commerce} = pricing
@@ -304,10 +319,10 @@ export default function Product() {
       price: basePrice,
       promo_price: finalPrice,
       image: displayProductImages[0] || productImages[0],
-      quantity: quantity,
-      stock: currentProduct.stock || 0
+      quantity: normalizedQuantity,
+      stock: availableStock
     })
-    showToast(`Adicionado à sacola (${quantity}x)`)
+    showToast(`Adicionado à sacola (${normalizedQuantity}x)`)
   }
 
   const handleOneClickBuy = () => {
@@ -329,8 +344,8 @@ export default function Product() {
       price: basePrice,
       promo_price: finalPrice,
       image: displayProductImages[0] || productImages[0],
-      quantity: quantity,
-      stock: currentProduct.stock || 0
+      quantity: normalizedQuantity,
+      stock: availableStock
     })
 
     const isProd = typeof window !== 'undefined' && (
@@ -430,8 +445,63 @@ export default function Product() {
   const customFaqs = ((rawShowcase as any)?.custom_faqs || []).filter((item: any) => item?.question?.trim() && item?.answer?.trim())
   const displayFaqs = customFaqs
 
+  const productSeoTitle = `${cleanProductTitle(currentProduct.name)} | TEKNIX Ferramentas`
+  const productSeoDescription = conciseDescription(currentProduct.description)
+  const productSeoImage = (currentProduct.images?.[0] || currentProduct.image_url) ?? undefined
+
+  const slugify = (text: string) => text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+
+  const productSlug = currentProduct.slug || currentProduct.sku || currentProduct.id
+  const productCanonical = `https://teknixbrasil.com.br/${productSlug}`
+  const isProductIndexable = currentProduct.status === 'active' && currentProduct.store_meta?.published !== false
+  const categorySlug = currentProduct.category ? slugify(currentProduct.category) : ''
+  const brandSlug = currentProduct.brand ? slugify(currentProduct.brand) : 'teknix'
+  const sellerName = (currentProduct as any).seller_name || 'TEKNIX Loja Oficial'
+  const sellerSlug = slugify(sellerName)
+
+  const productJsonLd = [
+    buildProductSchema({
+      id: currentProduct.id,
+      name: currentProduct.name,
+      description: productSeoDescription,
+      image: productSeoImage,
+      images: currentProduct.images,
+      price: currentProduct.price ?? 0,
+      promo_price: currentProduct.promo_price ?? undefined,
+      sku: currentProduct.sku ?? undefined,
+      slug: currentProduct.slug ?? undefined,
+      brand: (currentProduct as any).brand || 'TEKNIX',
+      seller: sellerName,
+      seller_url: `https://teknixbrasil.com.br/loja/${sellerSlug}`,
+      stock: currentProduct.stock ?? 0,
+      category: currentProduct.category ?? undefined,
+      product_type: (currentProduct as any).product_type || 'physical',
+      ean: currentProduct.ean || undefined
+    }),
+    buildBreadcrumbSchema([
+      { name: 'TEKNIX', url: 'https://teknixbrasil.com.br' },
+      ...(currentProduct.category ? [{ name: currentProduct.category, url: `https://teknixbrasil.com.br/categoria/${categorySlug}` }] : []),
+      { name: currentProduct.name, url: productCanonical }
+    ])
+  ]
+
   return (
     <PageWidgets key={currentProduct.id} scope={`product:${currentProduct.id}`} product={currentProduct}><div className="product-detail-page-root">
+      <SEOHead
+        title={productSeoTitle}
+        description={productSeoDescription}
+        image={productSeoImage}
+        canonical={productCanonical}
+        noindex={!isProductIndexable}
+        ogType="product"
+        jsonLd={productJsonLd}
+      />
+
       {showCepModal && (
         <div className="pdp-cep-modal" role="dialog" aria-modal="true" aria-labelledby="pdp-cep-title" onMouseDown={() => setShowCepModal(false)}>
           <div className="pdp-cep-modal-card" onMouseDown={event => event.stopPropagation()}>
@@ -597,12 +667,22 @@ export default function Product() {
                 <Link to="/produtos" title="Produtos">Produtos</Link>
                 <Editable as="span" widgetId="product-control-2" className="divider">/</Editable>
               </li>
-              <li>
-                <Link to="/categoria/ferramentas-eletricas" title="Máquinas de Solda">
-                  {currentProduct.category || 'Máquinas de Solda'}
-                </Link>
-                <Editable as="span" widgetId="product-control-3" className="divider">/</Editable>
-              </li>
+              {currentProduct.category && (
+                <li>
+                  <Link to={`/categoria/${categorySlug}`} title={currentProduct.category}>
+                    {currentProduct.category}
+                  </Link>
+                  <Editable as="span" widgetId="product-control-3" className="divider">/</Editable>
+                </li>
+              )}
+              {currentProduct.brand && (
+                <li>
+                  <Link to={`/marca/${brandSlug}`} title={currentProduct.brand}>
+                    {currentProduct.brand}
+                  </Link>
+                  <Editable as="span" widgetId="product-control-brand-div" className="divider">/</Editable>
+                </li>
+              )}
               <li className="active-breadcrumb" title={cleanProductTitle(currentProduct.name)}>{cleanProductTitle(currentProduct.name)}</li>
             </ul>
           </div>
@@ -872,10 +952,14 @@ export default function Product() {
                         <div className="pdp-specs-table-wrapper">
                           <table className="pdp-specs-table">
                             <tbody>
-                              <tr>
-                                <th>Marca</th>
-                                <td>{currentProduct.brand || 'Não informada'}</td>
-                              </tr>
+                                <tr>
+                                  <th>Marca</th>
+                                  <td>
+                                    <Link to={`/marca/${brandSlug}`} style={{ color: '#0066cc', textDecoration: 'none', fontWeight: 500 }}>
+                                      {currentProduct.brand || 'TEKNIX'}
+                                    </Link>
+                                  </td>
+                                </tr>
                               <tr>
                                 <th>Modelo</th>
                                 <td>{currentProduct.model || currentProduct.name}</td>
@@ -983,6 +1067,23 @@ export default function Product() {
 
               {/* 2. Título do Produto */}
               <Editable as="h1" widgetId="product-5" className="ml-pdp-title notranslate">{cleanProductTitle(currentProduct.name)}</Editable>
+
+              {/* Marca & Loja / Vendedor - Links Internos Oficiais */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 4, marginBottom: 8, flexWrap: 'wrap', fontSize: '0.85rem' }}>
+                <span style={{ color: '#64748b' }}>
+                  Marca:{' '}
+                  <Link to={`/marca/${brandSlug}`} style={{ color: '#0066cc', fontWeight: 600, textDecoration: 'none' }}>
+                    {currentProduct.brand || 'TEKNIX'}
+                  </Link>
+                </span>
+                <span style={{ color: '#cbd5e1' }}>•</span>
+                <span style={{ color: '#64748b' }}>
+                  Vendido por:{' '}
+                  <Link to={`/loja/${sellerSlug}`} style={{ color: '#0066cc', fontWeight: 600, textDecoration: 'none' }}>
+                    {sellerName}
+                  </Link>
+                </span>
+              </div>
 
               {/* 3. Avaliação Estrelas */}
               {(pricing.commerce.ratingScore ?? 0) > 0 && (
@@ -1115,12 +1216,16 @@ export default function Product() {
               {/* 5. CARD DE COMPRA RESUMIDO & MODERNO */}
               <div className="ml-pdp-buy-box">
                 {/* 1. Botões de Compra (Layout da Plataforma Jet) */}
-                {(currentProduct.stock ?? 1) > 0 ? (
+                {availableStock > 0 ? (
                   <div className="flex buy-wish" style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 24 }}>
                     <div className="jet-product-quantity" style={{ display: 'flex', border: '1px solid #e5e7eb', borderRadius: 8, height: 48, background: '#fff' }}>
-                      <Editable as="button" widgetId="product-control-32" type="button" className="minus" aria-label="Menos" onClick={() => setQuantity(q => Math.max(1, q - 1))} style={{ width: 40, border: 'none', background: 'transparent', fontSize: '1.2rem', cursor: 'pointer' }}>-</Editable>
-                      <input aria-label="Quantidade" id="quantityItemDetail" className="quantity" type="tel" value={quantity} onChange={e => setQuantity(Math.max(1, parseInt(e.target.value) || 1))} style={{ width: 40, border: 'none', textAlign: 'center', fontWeight: 600, fontSize: '1rem', color: '#111827', pointerEvents: 'none' }} />
-                      <Editable as="button" widgetId="product-control-33" type="button" className="plus" aria-label="Mais" onClick={() => setQuantity(q => q + 1)} style={{ width: 40, border: 'none', background: 'transparent', fontSize: '1.2rem', cursor: 'pointer' }}>+</Editable>
+                      <Editable as="button" widgetId="product-control-32" type="button" className="minus" aria-label="Menos" disabled={normalizedQuantity <= 1} onClick={() => setQuantity(q => Math.max(1, q - 1))} style={{ width: 40, border: 'none', background: 'transparent', fontSize: '1.2rem', cursor: normalizedQuantity <= 1 ? 'not-allowed' : 'pointer', opacity: normalizedQuantity <= 1 ? 0.45 : 1 }}>-</Editable>
+                      <input aria-label="Quantidade" id="quantityItemDetail" className="quantity" type="tel" inputMode="numeric" min="1" max={availableStock} value={normalizedQuantity} onChange={e => {
+                        const digits = e.target.value.replace(/\D/g, '')
+                        const enteredQuantity = Number(digits)
+                        setQuantity(digits ? Math.min(Math.max(1, enteredQuantity), availableStock) : 1)
+                      }} style={{ width: 40, border: 'none', textAlign: 'center', fontWeight: 600, fontSize: '1rem', color: '#111827' }} />
+                      <Editable as="button" widgetId="product-control-33" type="button" className="plus" aria-label="Mais" disabled={normalizedQuantity >= availableStock} onClick={() => setQuantity(q => Math.min(availableStock, q + 1))} style={{ width: 40, border: 'none', background: 'transparent', fontSize: '1.2rem', cursor: normalizedQuantity >= availableStock ? 'not-allowed' : 'pointer', opacity: normalizedQuantity >= availableStock ? 0.45 : 1 }}>+</Editable>
                     </div>
 
                     <div className="jet-product-add-cart" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -1218,8 +1323,8 @@ export default function Product() {
                         type="submit" 
                         disabled={freightLoading || cep.replace(/\D/g, '').length < 8} 
                         style={{ 
-                          background: '#0066cc', 
-                          color: '#ffffff', 
+                          background: (freightLoading || cep.replace(/\D/g, '').length < 8) ? '#d1d5db' : '#3483fa',
+                          color: (freightLoading || cep.replace(/\D/g, '').length < 8) ? '#6b7280' : '#ffffff',
                           border: 'none', 
                           borderRadius: 6,
                           height: 36,
@@ -1386,7 +1491,7 @@ export default function Product() {
                 {/* 3. Ações Extras de Contato / Disponibilidade */}
                 <div className="tkx-extra-actions">
                   <button type="button" className="tkx-btn-immediate">Disponível</button>
-                  <a href={`https://api.whatsapp.com/send?phone=5546999155875&text=${encodeURIComponent(`Olá, tenho dúvidas sobre o produto: ${currentProduct.name} - Código: ${currentProduct.sku || '58'}`)}`} target="_blank" rel="noreferrer" className="tkx-btn-whatsapp">
+                  <a href={`https://api.whatsapp.com/send?phone=5511920505472&text=${encodeURIComponent(`Olá, tenho dúvidas sobre o produto: ${currentProduct.name} - Código: ${currentProduct.sku || '58'}`)}`} target="_blank" rel="noreferrer" className="tkx-btn-whatsapp">
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2z"/></svg>
                     Tire suas dúvidas
                   </a>
@@ -1405,7 +1510,7 @@ export default function Product() {
                   </div>
                 </div>
                 <div className="ml-pdp-store-actions">
-                  <a href="https://api.whatsapp.com/send?phone=5546999155875" target="_blank" rel="noreferrer">
+                  <a href="https://api.whatsapp.com/send?phone=5511920505472" target="_blank" rel="noreferrer">
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z" /><path d="M8 10h8M8 14h5" /></svg>
                     Fale conosco
                   </a>

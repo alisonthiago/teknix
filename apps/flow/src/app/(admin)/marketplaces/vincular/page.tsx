@@ -157,7 +157,7 @@ export default function VincularPage() {
           <div className="mt-5">
             <Link
               href="/operacao"
-              className="px-4 py-2 bg-[#0f172a] hover:bg-[#1e293b] text-white text-xs font-bold rounded-xl transition-all shadow-xs inline-flex items-center gap-2"
+              className="px-4 py-2 bg-[#000000] hover:bg-[#1e293b] text-white text-xs font-bold rounded-xl transition-all shadow-xs inline-flex items-center gap-2"
             >
               Ir para Catálogo de Produtos
             </Link>
@@ -300,7 +300,7 @@ export default function VincularPage() {
                           <button
                             onClick={() => handleAction(item.id, 'LINK', candidate.id)}
                             disabled={isLoading}
-                            className="px-4 py-2 bg-[#0f172a] hover:bg-[#1e293b] text-white text-xs font-bold rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                            className="px-4 py-2 bg-[#000000] hover:bg-[#1e293b] text-white text-xs font-bold rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                           >
                             <Link2 className="w-3.5 h-3.5" /> Vincular a este Produto
                           </button>

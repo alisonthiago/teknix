@@ -3,6 +3,8 @@ import { useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import PageRenderer from '../components/PageRenderer'
 import { SiteLayout } from '../App'
+import SEOHead from '../components/SEOHead'
+import { buildWebPageSchema } from '../components/SchemaOrg'
 
 interface PageData {
   id: string
@@ -17,6 +19,7 @@ interface PageData {
   page_bg?: string
   seo_title?: string
   seo_description?: string
+  og_image?: string
 }
 
 export default function DynamicPage() {
@@ -37,7 +40,7 @@ export default function DynamicPage() {
       // Carrega exclusivamente páginas com status 'published'
       const { data: pageData, error:loadError } = await supabase
         .from('pages')
-        .select('id,page_styles')
+        .select('id,page_styles,seo_title,seo_description,og_image')
         .in('slug', possibleSlugs)
         .eq('status', 'published')
         .neq('type', 'widget_overrides')
@@ -46,7 +49,14 @@ export default function DynamicPage() {
 
       if (cancelled) return
       if(loadError)setError('Não foi possível carregar esta página. Tente novamente.')
-      setPage(pageData?.page_styles?.published_snapshot_v2?.page || null)
+      const resolvedPage = pageData?.page_styles?.published_snapshot_v2?.page || null
+      if (resolvedPage && pageData) {
+        // Enriquece com dados de SEO do banco
+        resolvedPage.seo_title = pageData.seo_title
+        resolvedPage.seo_description = pageData.seo_description
+        resolvedPage.og_image = pageData.og_image
+      }
+      setPage(resolvedPage)
       setLoading(false)
     }
 
@@ -103,11 +113,29 @@ export default function DynamicPage() {
   const hideHeader = isCanvas || !!page.hide_header
   const hideFooter = isCanvas || !!page.hide_footer
 
+  const pageTitle = page.seo_title || page.title
+  const pageDescription = page.seo_description
+  const pageImage = (page as any).og_image
+  const pageJsonLd = buildWebPageSchema(
+    pageTitle || 'Página | TEKNIX',
+    location.pathname,
+    pageDescription
+  )
+
   return (
     <SiteLayout hideHeader={hideHeader} hideFooter={hideFooter}>
-      <div className="dynamic-page-root" style={{ background: page.page_bg || undefined, minHeight: isCanvas ? '100vh' : undefined }}>
-        {page.seo_title && <title>{page.seo_title}</title>}
-        {page.seo_description && <meta name="description" content={page.seo_description} />}
+      <SEOHead
+        title={pageTitle ? `${pageTitle} | TEKNIX` : undefined}
+        description={pageDescription}
+        image={pageImage}
+        ogType="website"
+        jsonLd={pageJsonLd}
+      />
+      <div
+        className="dynamic-page-root"
+        data-page-slug={page.slug}
+        style={{ background: page.page_bg || undefined, minHeight: isCanvas ? '100vh' : undefined }}
+      >
         <PageRenderer pageId={page.id} />
       </div>
     </SiteLayout>

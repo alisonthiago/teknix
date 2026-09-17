@@ -20,7 +20,7 @@ export async function getProductDetail(id: string) {
     return a + Number(oi.unit_cost || product.cost_purchase || 0) * Number(oi.quantity || 0)
   }, 0)
   const totalProfit = totalRevenue - totalCost
-  const avgMargin = totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0
+  const avgMargin = totalRevenue > 0 ? Number(((totalProfit / totalRevenue) * 100).toFixed(1)) : 0
   const avgTicket = (orderItems || []).length > 0 ? totalRevenue / (orderItems || []).length : 0
 
   const rawImages = (product.product_images as any[] || []).sort((a, b) => (a.sort_order ?? a.display_order ?? 0) - (b.sort_order ?? b.display_order ?? 0))
@@ -51,14 +51,20 @@ export async function getProductDetail(id: string) {
       packaging: Number(product.packaging_cost || 0), other: Number(product.other_costs || 0),
       real: Number(product.cost_real || product.cost_purchase || 0),
     },
-    pricing: {
-      current_price: Number((product as any).site_price || product.current_price || (orderItems?.[0]?.unit_price) || 0), 
-      suggested_price: Number(product.cost_real || product.cost_purchase || 0) * 1.5,
-      minimum_price: Number(product.cost_real || product.cost_purchase || 0) * 1.1,
-      profit: (Number((product as any).site_price || product.current_price || (orderItems?.[0]?.unit_price) || 0) - Number(product.cost_purchase || 0)),
-      margin: Number((product as any).site_price || product.current_price || (orderItems?.[0]?.unit_price) || 0) > 0
-        ? ((Number((product as any).site_price || product.current_price || (orderItems?.[0]?.unit_price) || 0) - Number(product.cost_purchase || 0)) / Number((product as any).site_price || product.current_price || (orderItems?.[0]?.unit_price) || 0) * 100) : 0,
-    },
+    pricing: (() => {
+      const price = Number((product as any).site_price || product.current_price || (orderItems?.[0]?.unit_price) || 0)
+      const cost = Number(product.cost_purchase || 0)
+      const realCost = Number(product.cost_real || cost)
+      const profit = price - cost
+      const margin = price > 0 ? Number(((profit / price) * 100).toFixed(1)) : 0
+      return {
+        current_price: price,
+        suggested_price: realCost * 1.5,
+        minimum_price: realCost * 1.1,
+        profit,
+        margin,
+      }
+    })(),
     site_published: Boolean((product as any).is_site_published ?? true),
     site_price: Number((product as any).site_price || product.current_price || 0),
     stock: {
@@ -293,15 +299,25 @@ export async function getOrderDetail(id: string) {
         shipping_method: 'Mercado Envios',
         shipping_cost: 0,
         tracking_code: `BR${Math.floor(100000000 + Math.random() * 900000000)}MEL`,
-        order_items: (sale.sale_items || []).map((si: any) => ({
-          product_id: si.product_id,
-          sku: si.products?.sku || 'SKU-PRODUTO',
-          product_name: si.products?.name || 'Produto Mercado Livre',
-          quantity: si.quantity || 1,
-          unit_price: si.unit_price || 0,
-          total_price: Number(si.unit_price || 0) * Number(si.quantity || 1),
-          products: si.products
-        }))
+        order_items: (() => {
+          const rawSaleItems = (sale.sale_items || [])
+          const map = new Map<string, any>()
+          for (const si of rawSaleItems) {
+            const sku = si.products?.sku || si.product_id || 'SKU'
+            if (!map.has(sku)) {
+              map.set(sku, {
+                product_id: si.product_id,
+                sku: si.products?.sku || 'SKU-PRODUTO',
+                product_name: si.products?.name || 'Produto Mercado Livre',
+                quantity: si.quantity || 1,
+                unit_price: si.unit_price || 0,
+                total_price: Number(si.unit_price || 0) * Number(si.quantity || 1),
+                products: si.products
+              })
+            }
+          }
+          return Array.from(map.values())
+        })()
       }
     }
   }
@@ -329,21 +345,50 @@ export async function getOrderDetail(id: string) {
     },
     date: order.created_at ? new Date(order.created_at as string).toLocaleDateString('pt-BR') : 'Hoje',
     status: (order.status as string) || 'PAGO',
-    items: (order.order_items as Record<string, unknown>[] || []).map((item: Record<string, unknown>) => {
-      const prod = item.products as Record<string, unknown> | null
-      const rawImages = (prod?.product_images as any[] || []).sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
-      const imageUrl = rawImages[0]?.url || (prod as any)?.image_url || (item as any)?.image_url || 'https://http2.mlstatic.com/D_NQ_NP_2X_789396-MLB78028328731_072024-F.webp'
+    items: (() => {
+      const raw = (order.order_items as Record<string, unknown>[] || [])
+      const itemMap = new Map<string, any>()
+      const duplicateIdsToDelete: string[] = []
 
-      return {
-        product_id: (prod?.id as string) || (item.product_id as string) || null,
-        sku: (prod?.sku as string) || (item.sku as string) || '—',
-        name: (prod?.name as string) || (item.product_name as string) || 'Produto Mercado Livre',
-        quantity: Number(item.quantity || 1), 
-        price: Number(item.unit_price || 0),
-        total: Number(item.total_price || (Number(item.unit_price || 0) * Number(item.quantity || 1))),
-        image: imageUrl
+      for (const item of raw) {
+        const prod = item.products as Record<string, unknown> | null
+        const sku = (prod?.sku as string) || (item.sku as string) || (item.product_id as string) || (item.product_name as string) || 'ITEM'
+        const rawImages = (prod?.product_images as any[] || []).sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
+        const imageUrl = rawImages[0]?.url || (prod as any)?.image_url || (item as any)?.image_url || 'https://http2.mlstatic.com/D_NQ_NP_2X_789396-MLB78028328731_072024-F.webp'
+
+        if (!itemMap.has(sku)) {
+          itemMap.set(sku, {
+            id: item.id,
+            product_id: (prod?.id as string) || (item.product_id as string) || null,
+            sku: (prod?.sku as string) || (item.sku as string) || '—',
+            name: (prod?.name as string) || (item.product_name as string) || 'Produto Mercado Livre',
+            quantity: Number(item.quantity || 1), 
+            price: Number(item.unit_price || 0),
+            total: Number(item.total_price || (Number(item.unit_price || 0) * Number(item.quantity || 1))),
+            image: imageUrl
+          })
+        } else {
+          // Identificou duplicata histórica no banco! Salva ID para expurgo
+          if (item.id && typeof item.id === 'string') {
+            duplicateIdsToDelete.push(item.id)
+          }
+        }
       }
-    }),
+
+      // Se encontrou duplicatas acumuladas no banco neste pedido, limpa automaticamente em background!
+      if (duplicateIdsToDelete.length > 0) {
+        ;(async () => {
+          try {
+            await s.from('order_items').delete().in('id', duplicateIdsToDelete)
+            console.log(`[getOrderDetail] Expurgo de ${duplicateIdsToDelete.length} itens duplicados no pedido ${order.id}`)
+          } catch {
+            // Silently ignore background cleanup error
+          }
+        })()
+      }
+
+      return Array.from(itemMap.values())
+    })(),
     payment: {
       method: (order.payment_method as string) || 'PIX',
       installments: Number(order.installments || 1),
@@ -428,7 +473,7 @@ export async function getSupplierDetail(id: string) {
   const { data: supplier } = await s.from('suppliers').select('*').eq('id', id).single()
   if (!supplier) return null
 
-  const { data: products } = await s.from('products').select('id, sku, name, cost_purchase, stock').eq('supplier_id', id)
+  const { data: products } = await s.from('products').select('id, sku, name, cost_purchase, stock, image_url, product_images(url)').eq('supplier_id', id)
   const { data: purchases } = await s.from('purchases').select('*, purchase_items(*)').eq('supplier_id', id).order('created_at', { ascending: false })
   const { data: contacts } = await s.from('supplier_contacts').select('*').eq('supplier_id', id).order('created_at', { ascending: true })
 
@@ -457,10 +502,15 @@ export async function getSupplierDetail(id: string) {
       phone: c.phone as string,
       is_whatsapp: Boolean(c.is_whatsapp)
     })),
-    products: (products || []).map((p: Record<string, unknown>) => ({
-      id: p.id as string, sku: p.sku as string, name: p.name as string,
-      cost: Number(p.cost_purchase || 0), stock: Number(p.stock || 0),
-    })),
+    products: (products || []).map((p: Record<string, unknown>) => {
+      const imgs = (p.product_images as any[] || []).map(img => img.url).filter(Boolean)
+      const primaryImage = (p.image_url as string) || imgs[0] || null
+      return {
+        id: p.id as string, sku: p.sku as string, name: p.name as string,
+        cost: Number(p.cost_purchase || 0), stock: Number(p.stock || 0),
+        image: primaryImage,
+      }
+    }),
     purchases: (purchases || []).map((p: Record<string, unknown>) => ({
       id: p.id as string, date: p.created_at ? new Date(p.created_at as string).toLocaleDateString('pt-BR') : '—',
       invoice: (p.invoice as string) || '—',

@@ -2016,10 +2016,13 @@
   justify-content: center;
   gap: var(--tkn-space-8);
   width: 100%;
-  height: 48px;
-  background: #242424;
-  color: #ffffff;
-  border-radius: 8px;
+  height: auto;
+  min-height: 40px;
+  padding: 8px 0;
+  background: transparent;
+  color: #111111;
+  border: 0;
+  border-radius: 0;
   font-size: var(--tkn-text-14);
   font-weight: var(--tkn-weight-semibold);
   text-decoration: none;
@@ -2029,8 +2032,8 @@
 }
 
 .tkn-drawer-btn-primary:hover {
-  background: #000000;
-  color: #ffffff;
+  background: transparent;
+  color: #555555;
 }
 
 .tkn-drawer-btn-primary:active {
@@ -2096,8 +2099,8 @@
 .tkn-drawer-scroll-body { min-height: 0; }
 .tkn-drawer-footer { flex-shrink: 0; box-shadow: none; }
 .tkn-drawer-footer [class*="-label"] { text-transform: none; letter-spacing: 0; }
-.tkn-drawer-user-action { background: #242424; color: white; padding: var(--tkn-space-8) var(--tkn-space-12); font-weight: var(--tkn-weight-medium); }
-.tkn-drawer-user-action:hover { background: #444; color: white; }
+.tkn-drawer-user-action { background: #B5F500; color: #000; padding: var(--tkn-space-8) var(--tkn-space-16); border-radius: 999px; font-weight: var(--tkn-weight-semibold); }
+.tkn-drawer-user-action:hover { background: #A2E000; color: #000; }
 .dsvia-drawer-panel :is(a, button):focus-visible { outline: 2px solid #555; outline-offset: 3px; }
 
 .dsvia-mobile-hamburger-btn {

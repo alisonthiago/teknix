@@ -81,7 +81,7 @@
 }
 
 .mgl-footer-col-title {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   color: #222222;
   margin: 0 0 14px 0;
@@ -99,7 +99,7 @@
 
 .mgl-footer-col-list a {
   color: #555555;
-  font-size: 12px;
+  font-size: 13px;
   text-decoration: none;
   transition: color 0.15s ease;
   line-height: 1.4;
@@ -317,6 +317,9 @@
 }
 
 @media (max-width: 640px) {
+  .mgl-footer-col-title { font-size: 15px; }
+  .mgl-footer-col-list a { font-size: 14px; }
+
   .mgl-footer-grid {
     grid-template-columns: 1fr;
     gap: 20px;

@@ -10,6 +10,7 @@ import { getProducts } from '../services/products'
 import type { Product as ProductType } from '../types/database'
 import StorefrontProductCard from '../components/StorefrontProductCard'
 import { storefrontCard } from '../services/storefrontCommerce'
+import SEOHead from '../components/SEOHead'
 import './SearchResults.css'
 
 function formatMoney(value: number) {
@@ -92,6 +93,11 @@ export default function SearchResults() {
 
   return (
     <div className="search-results-page">
+      <SEOHead
+        title={searchTerm ? `Busca: "${searchTerm}" | TEKNIX` : 'Catálogo de Produtos | TEKNIX'}
+        description={searchTerm ? `Resultados da busca por "${searchTerm}" na TEKNIX Ferramentas.` : 'Catálogo completo de ferramentas profissionais TEKNIX.'}
+        noindex={true}
+      />
       <EditableFlow id="catalog-page" label="Catálogo de produtos">
       {/* ── BREADCRUMB ── */}
       <Editable as="div" widgetId="catalog-breadcrumb" label="Breadcrumb do catálogo" widgetType="container" editorKind="container" className="search-breadcrumb" renderContent={false}>
@@ -214,7 +220,7 @@ export default function SearchResults() {
                 {sortedAndFilteredProducts.map((product) => (
                   <Editable as="div" key={product.id} widgetId={`catalog-product-${product.id}`} label={`Produto ${product.name}`} widgetType="storefrontCard" editorKind="container" style={{ display: 'contents' }} renderContent={false}>
                     <StorefrontProductCard
-                      to={`/${encodeURIComponent(product.sku || product.id)}`}
+                      to={`/${encodeURIComponent(product.slug || product.sku || product.id)}`}
                       product={{
                         ...storefrontCard(product),
                         id: product.id,

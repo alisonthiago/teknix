@@ -93,15 +93,14 @@ export async function syncOrder(resource: string, sellerId: string) {
   }
   const orderStatus = statusMap[orderData.status] || 'PAGO'
 
-  // 6. Upsert Seguro na tabela public.orders
-  const { data: existingOrder } = await supabase
+  // 6. Upsert Seguro na tabela public.orders (com remoção de duplicatas)
+  const { data: existingOrders } = await supabase
     .from('orders')
     .select('id')
     .eq('order_number', orderNumber)
-    .maybeSingle()
 
-  let dbOrderId: string | null = existingOrder?.id || null
-  if (existingOrder) {
+  let dbOrderId: string | null = (existingOrders && existingOrders.length > 0) ? existingOrders[0].id : null
+  if (existingOrders && existingOrders.length > 0) {
     await supabase
       .from('orders')
       .update({
@@ -114,7 +113,13 @@ export async function syncOrder(resource: string, sellerId: string) {
         notes: address ? `${address}, ${city} - BR-${state} CEP: ${zip}` : 'Pedido Mercado Livre',
         updated_at: new Date().toISOString()
       })
-      .eq('id', existingOrder.id)
+      .eq('id', existingOrders[0].id)
+
+    // Se houver ordens duplicadas salvas com o mesmo order_number, remove excedentes
+    if (existingOrders.length > 1) {
+      const dupOrderIds = existingOrders.slice(1).map(o => o.id)
+      await supabase.from('orders').delete().in('id', dupOrderIds)
+    }
   } else {
     const { data: newOrder, error: insOrderErr } = await supabase
       .from('orders')
@@ -139,15 +144,14 @@ export async function syncOrder(resource: string, sellerId: string) {
     dbOrderId = newOrder?.id || null
   }
 
-  // 7. Upsert Seguro na tabela public.sales
-  const { data: existingSale } = await supabase
+  // 7. Upsert Seguro na tabela public.sales (com remoção de duplicatas)
+  const { data: existingSales } = await supabase
     .from('sales')
     .select('id')
     .eq('order_id', orderNumber)
-    .maybeSingle()
 
-  let dbSaleId: string | null = existingSale?.id || null
-  if (existingSale) {
+  let dbSaleId: string | null = (existingSales && existingSales.length > 0) ? existingSales[0].id : null
+  if (existingSales && existingSales.length > 0) {
     await supabase
       .from('sales')
       .update({
@@ -155,7 +159,12 @@ export async function syncOrder(resource: string, sellerId: string) {
         status: orderData.status === 'paid' ? 'COMPLETED' : 'PENDING',
         updated_at: new Date().toISOString()
       })
-      .eq('id', existingSale.id)
+      .eq('id', existingSales[0].id)
+
+    if (existingSales.length > 1) {
+      const dupSaleIds = existingSales.slice(1).map(s => s.id)
+      await supabase.from('sales').delete().in('id', dupSaleIds)
+    }
   } else {
     const { data: newSale, error: insSaleErr } = await supabase
       .from('sales')
@@ -192,7 +201,7 @@ export async function syncOrder(resource: string, sellerId: string) {
     .select('id')
     .single()
 
-  // 9. Processar Itens do Pedido e Atualizar Estoque com Idempotência
+  // 9. Processar Itens do Pedido e Atualizar Estoque com Idempotência Estrita
   if (orderData.order_items && Array.isArray(orderData.order_items)) {
     for (const item of orderData.order_items) {
       const sku = item.item?.seller_custom_field || item.item?.seller_sku || item.item?.id
@@ -210,21 +219,29 @@ export async function syncOrder(resource: string, sellerId: string) {
 
       const productId = product?.id || null
 
-      // Gravar order_items
+      // Gravar order_items com verificação estrita e remoção de duplicatas
       if (dbOrderId) {
-        const { data: existingOrderItem } = await supabase
+        const { data: existingOrderItems } = await supabase
           .from('order_items')
           .select('id')
           .eq('order_id', dbOrderId)
           .eq('sku', sku)
-          .maybeSingle()
 
-        if (existingOrderItem) {
+        if (existingOrderItems && existingOrderItems.length > 0) {
+          const keepOrderItemId = existingOrderItems[0].id
           await supabase.from('order_items').update({
+            product_id: productId,
+            product_name: itemTitle,
             quantity,
             unit_price: unitPrice,
             total_price: unitPrice * quantity
-          }).eq('id', existingOrderItem.id)
+          }).eq('id', keepOrderItemId)
+
+          // Deleta quaisquer duplicatas acumuladas anteriormente
+          if (existingOrderItems.length > 1) {
+            const dupOrderItemIds = existingOrderItems.slice(1).map(i => i.id)
+            await supabase.from('order_items').delete().in('id', dupOrderItemIds)
+          }
         } else {
           await supabase.from('order_items').insert({
             order_id: dbOrderId,
@@ -238,40 +255,73 @@ export async function syncOrder(resource: string, sellerId: string) {
         }
       }
 
-      // Gravar marketplace_order_items
+      // Gravar marketplace_order_items com deduplicação
       if (mirrorOrder?.id) {
-        await supabase.from('marketplace_order_items').upsert({
-          order_id: mirrorOrder.id,
-          product_id: productId,
-          external_item_id: item.item?.id,
-          seller_sku: sku,
-          quantity,
-          unit_price: unitPrice,
-          total_price: unitPrice * quantity,
-          updated_at: new Date().toISOString()
-        })
+        const { data: existingMktItems } = await supabase
+          .from('marketplace_order_items')
+          .select('id')
+          .eq('order_id', mirrorOrder.id)
+          .eq('seller_sku', sku)
+
+        if (existingMktItems && existingMktItems.length > 0) {
+          await supabase.from('marketplace_order_items').update({
+            product_id: productId,
+            external_item_id: item.item?.id,
+            quantity,
+            unit_price: unitPrice,
+            total_price: unitPrice * quantity,
+            updated_at: new Date().toISOString()
+          }).eq('id', existingMktItems[0].id)
+
+          if (existingMktItems.length > 1) {
+            const dupMktIds = existingMktItems.slice(1).map(i => i.id)
+            await supabase.from('marketplace_order_items').delete().in('id', dupMktIds)
+          }
+        } else {
+          await supabase.from('marketplace_order_items').insert({
+            order_id: mirrorOrder.id,
+            product_id: productId,
+            external_item_id: item.item?.id,
+            seller_sku: sku,
+            quantity,
+            unit_price: unitPrice,
+            total_price: unitPrice * quantity,
+            updated_at: new Date().toISOString()
+          })
+        }
       }
 
-      // Gravar sale_items
+      // Gravar sale_items com deduplicação
       if (dbSaleId) {
         const cost = Number(product?.cost_purchase || 0)
         const profit = (unitPrice * quantity) - (cost * quantity) - saleFee
         const margin = unitPrice > 0 ? (profit / (unitPrice * quantity)) * 100 : 0
 
-        const { data: existingSaleItem } = await supabase
+        let saleItemQuery = supabase
           .from('sale_items')
           .select('id')
           .eq('sale_id', dbSaleId)
-          .maybeSingle()
 
-        if (existingSaleItem) {
+        if (productId) {
+          saleItemQuery = saleItemQuery.eq('product_id', productId)
+        }
+
+        const { data: existingSaleItems } = await saleItemQuery
+
+        if (existingSaleItems && existingSaleItems.length > 0) {
+          const keepSaleItemId = existingSaleItems[0].id
           await supabase.from('sale_items').update({
             quantity,
             unit_price: unitPrice,
             cost_at_sale: cost,
             profit,
             margin
-          }).eq('id', existingSaleItem.id)
+          }).eq('id', keepSaleItemId)
+
+          if (existingSaleItems.length > 1) {
+            const dupSaleItemIds = existingSaleItems.slice(1).map(i => i.id)
+            await supabase.from('sale_items').delete().in('id', dupSaleItemIds)
+          }
         } else {
           await supabase.from('sale_items').insert({
             sale_id: dbSaleId,

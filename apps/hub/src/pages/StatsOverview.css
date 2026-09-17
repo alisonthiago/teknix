@@ -402,14 +402,24 @@
 @media (max-width: 480px) {
   .stats-metrics-grid {
     grid-template-columns: 1fr !important;
-    gap: 10px !important;
+    gap: 16px !important;
   }
   .stat-card {
-    padding: 16px !important;
-    min-height: auto !important;
+    padding: 20px !important;
+    min-height: 140px !important;
   }
   .stat-card-value {
-    font-size: 1.35rem !important;
+    font-size: 1.5rem !important;
+  }
+
+  .stat-card-label {
+    font-size: 0.9375rem !important;
+    color: #27313b !important;
+  }
+
+  .stat-card-hint {
+    font-size: 0.8125rem !important;
+    color: #3f4a57 !important;
   }
 }
 

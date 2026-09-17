@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "sitemaps": "node ../../scripts/generate-sitemaps.mjs",
+    "build": "node ../../scripts/generate-sitemaps.mjs && tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
     "analyze": "tsx analyze-db.ts"

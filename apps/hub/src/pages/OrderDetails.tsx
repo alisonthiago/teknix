@@ -16,6 +16,7 @@ import {
   ArrowLeft,
   Check,
   Package,
+  PackageCheck,
   Truck,
   User,
   MapPin,
@@ -451,6 +452,12 @@ export default function OrderDetails() {
     ? order.customer_name.split(' ').map(n => n[0]).filter(Boolean).slice(0, 2).join('').toUpperCase()
     : 'TK'
 
+  const isPending = order.status === 'pending';
+  const isPaid = order.status === 'paid' || order.payment_status === 'approved';
+  const isPreparing = order.status === 'preparing';
+  const isShipped = order.status === 'shipped';
+  const isDelivered = order.status === 'delivered';
+
   return (
     <div className="order-details-container">
 
@@ -570,36 +577,188 @@ export default function OrderDetails() {
         </div>
       </div>
 
-      {/* ─── STEPPER / PROGRESSO VISUAL DO PEDIDO ───────────────────────── */}
+      {/* ─── STEPPER / PROGRESSO VISUAL DO PEDIDO (ONDA OFICIAL TEKNIX) ───────────────────────── */}
       {!isCancelled ? (
-        <div className="order-stepper-card">
-          <div className="order-stepper-track">
-            <div className="order-step-connector">
-              <div
-                className="order-step-connector-fill"
-                style={{ width: `${Math.min(100, Math.max(0, (currentStep / (steps.length - 1)) * 100))}%` }}
+        <div className="order-stepper-card tracker-loading">
+          {/* DESKTOP: ONDA HORIZONTAL (1:1 COM O SITE) */}
+          <div className="tracker-wave-desktop desktop-only" aria-label="Linha do tempo do pedido">
+            <svg className="tracker-wave-desktop-svg" viewBox="0 0 1000 170" fill="none" preserveAspectRatio="none">
+              <path
+                d="M 70,45 C 177.5,45 177.5,85 285,85 C 392.5,85 392.5,45 500,45 C 607.5,45 607.5,85 715,85 C 822.5,85 822.5,45 930,45"
+                stroke="#e2e8f0"
+                strokeWidth="4"
+                strokeLinecap="round"
               />
+              <path
+                className="wave-active-path desktop-active-path"
+                pathLength="1"
+                d={
+                  isDelivered
+                    ? "M 70,45 C 177.5,45 177.5,85 285,85 C 392.5,85 392.5,45 500,45 C 607.5,45 607.5,85 715,85 C 822.5,85 822.5,45 930,45"
+                    : isShipped
+                    ? "M 70,45 C 177.5,45 177.5,85 285,85 C 392.5,85 392.5,45 500,45 C 607.5,45 607.5,85 715,85"
+                    : isPreparing
+                    ? "M 70,45 C 177.5,45 177.5,85 285,85 C 392.5,85 392.5,45 500,45"
+                    : isPaid
+                    ? "M 70,45 C 177.5,45 177.5,85 285,85"
+                    : "M 70,45 C 177.5,45 177.5,45 70,45"
+                }
+                stroke="#b5f500"
+                strokeWidth="4"
+                strokeLinecap="round"
+              />
+            </svg>
+
+            {/* Step 1: Pedido Criado (Alto) */}
+            <div className="d-wave-step step-1 completed">
+              <div className="d-wave-bullet anim-bullet-1">
+                <ShoppingBag size={25} strokeWidth={2} />
+              </div>
+              <div className="d-wave-content">
+                <strong className="d-wave-title">Pedido Criado</strong>
+                <span className="d-wave-sub">{formatDate(order.created_at)}</span>
+              </div>
             </div>
 
-            {steps.map((s, idx) => {
-              const isCompleted = currentStep > idx
-              const isActive = currentStep === idx
-              const IconComp = s.icon
-              return (
-                <div
-                  key={s.label}
-                  className={`order-step-item ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}`}
-                >
-                  <div className="order-step-circle">
-                    {isCompleted ? <Check size={16} /> : <IconComp size={16} />}
-                  </div>
-                  <div className="order-step-info">
-                    <div className="order-step-label">{s.label}</div>
-                    <div className="order-step-sub">{s.sub}</div>
-                  </div>
-                </div>
-              )
-            })}
+            {/* Step 2: Pagamento (Baixo) */}
+            <div className={`d-wave-step step-2 ${isPaid || isPreparing || isShipped || isDelivered ? 'completed' : isPending ? 'active' : 'upcoming'}`}>
+              <div className={`d-wave-bullet anim-bullet-2 ${isPending ? 'active-halo' : ''}`}>
+                <CreditCard size={25} strokeWidth={2} />
+              </div>
+              <div className="d-wave-content">
+                <strong className="d-wave-title">Pagamento</strong>
+                <span className="d-wave-sub">
+                  {isPaid || isPreparing || isShipped || isDelivered ? 'Aprovado' : 'Aguardando'}
+                </span>
+              </div>
+            </div>
+
+            {/* Step 3: Preparação (Alto) */}
+            <div className={`d-wave-step step-3 ${isShipped || isDelivered ? 'completed' : isPreparing ? 'active' : 'upcoming'}`}>
+              <div className={`d-wave-bullet anim-bullet-3 ${isPreparing ? 'active-halo' : ''}`}>
+                <PackageCheck size={25} strokeWidth={2} />
+              </div>
+              <div className="d-wave-content">
+                <strong className="d-wave-title">Preparação</strong>
+                <span className={`d-wave-sub ${isPreparing ? 'active-green' : ''}`}>
+                  {isShipped || isDelivered ? 'Pronto' : isPreparing ? 'Em Separação' : 'Separação'}
+                </span>
+              </div>
+            </div>
+
+            {/* Step 4: Despachado (Baixo) */}
+            <div className={`d-wave-step step-4 ${isDelivered ? 'completed' : isShipped ? 'active' : 'upcoming'}`}>
+              <div className={`d-wave-bullet anim-bullet-4 ${isShipped ? 'active-halo' : ''}`}>
+                <Truck size={25} strokeWidth={2} />
+              </div>
+              <div className="d-wave-content">
+                <strong className="d-wave-title">Despachado</strong>
+                <span className={`d-wave-sub ${isShipped ? 'active-green' : ''}`}>
+                  {isDelivered ? 'Concluído' : isShipped ? 'Em Transporte' : 'Aguardando'}
+                </span>
+              </div>
+            </div>
+
+            {/* Step 5: Entregue (Alto) */}
+            <div className={`d-wave-step step-5 ${isDelivered ? 'completed' : 'upcoming'}`}>
+              <div className={`d-wave-bullet ${isDelivered ? '' : 'upcoming-bullet'}`}>
+                <CheckCircle2 size={24} strokeWidth={2} />
+              </div>
+              <div className="d-wave-content">
+                <strong className="d-wave-title">Entregue</strong>
+                <span className="d-wave-sub">
+                  {isDelivered ? 'Concluído' : 'Aguardando'}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* MOBILE: SERPENTINA ONDULADA CURVA */}
+          <div className="tracker-wave-mobile mobile-only" aria-label="Linha do tempo do pedido">
+            <svg className="tracker-wave-svg" viewBox="0 0 320 530" fill="none" preserveAspectRatio="xMidYMid meet">
+              <path
+                d="M 45,45 C 45,100 95,100 95,155 C 95,210 45,210 45,265 C 45,320 95,320 95,375 C 95,430 45,430 45,485"
+                stroke="#e2e8f0"
+                strokeWidth="4"
+                strokeLinecap="round"
+              />
+              <path
+                className="wave-active-path mobile-active-path"
+                pathLength="1"
+                d={
+                  isDelivered
+                    ? "M 45,45 C 45,100 95,100 95,155 C 95,210 45,210 45,265 C 45,320 95,320 95,375 C 95,430 45,430 45,485"
+                    : isShipped
+                    ? "M 45,45 C 45,100 95,100 95,155 C 95,210 45,210 45,265 C 45,320 95,320 95,375"
+                    : isPreparing
+                    ? "M 45,45 C 45,100 95,100 95,155 C 95,210 45,210 45,265"
+                    : isPaid
+                    ? "M 45,45 C 45,100 95,100 95,155"
+                    : "M 45,45"
+                }
+                stroke="#b5f500"
+                strokeWidth="4"
+                strokeLinecap="round"
+              />
+            </svg>
+
+            <div className="wave-step step-1 completed">
+              <div className="wave-bullet anim-bullet-1">
+                <ShoppingBag size={25} strokeWidth={2} />
+              </div>
+              <div className="wave-content">
+                <strong className="wave-title">Pedido Criado</strong>
+                <span className="wave-sub">{formatDate(order.created_at)}</span>
+              </div>
+            </div>
+
+            <div className={`wave-step step-2 ${isPaid || isPreparing || isShipped || isDelivered ? 'completed' : isPending ? 'active' : 'upcoming'}`}>
+              <div className={`wave-bullet anim-bullet-2 ${isPending ? 'active-halo' : ''}`}>
+                <CreditCard size={25} strokeWidth={2} />
+              </div>
+              <div className="wave-content">
+                <strong className="wave-title">Pagamento</strong>
+                <span className="wave-sub">
+                  {isPaid || isPreparing || isShipped || isDelivered ? 'Aprovado' : 'Aguardando'}
+                </span>
+              </div>
+            </div>
+
+            <div className={`wave-step step-3 ${isShipped || isDelivered ? 'completed' : isPreparing ? 'active' : 'upcoming'}`}>
+              <div className={`wave-bullet anim-bullet-3 ${isPreparing ? 'active-halo' : ''}`}>
+                <PackageCheck size={25} strokeWidth={2} />
+              </div>
+              <div className="wave-content">
+                <strong className="wave-title">Preparação</strong>
+                <span className={`wave-sub ${isPreparing ? 'active-green' : ''}`}>
+                  {isShipped || isDelivered ? 'Pronto' : isPreparing ? 'Em Separação' : 'Separação'}
+                </span>
+              </div>
+            </div>
+
+            <div className={`wave-step step-4 ${isDelivered ? 'completed' : isShipped ? 'active' : 'upcoming'}`}>
+              <div className={`wave-bullet anim-bullet-4 ${isShipped ? 'active-halo' : ''}`}>
+                <Truck size={25} strokeWidth={2} />
+              </div>
+              <div className="wave-content">
+                <strong className="wave-title">Despachado</strong>
+                <span className={`wave-sub ${isShipped ? 'active-green' : ''}`}>
+                  {isDelivered ? 'Concluído' : isShipped ? 'Em Transporte' : 'Aguardando'}
+                </span>
+              </div>
+            </div>
+
+            <div className={`wave-step step-5 ${isDelivered ? 'completed' : 'upcoming'}`}>
+              <div className={`wave-bullet ${isDelivered ? '' : 'upcoming-bullet'}`}>
+                <CheckCircle2 size={24} strokeWidth={2} />
+              </div>
+              <div className="wave-content">
+                <strong className="wave-title">Entregue</strong>
+                <span className="wave-sub">
+                  {isDelivered ? 'Concluído' : 'Aguardando'}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       ) : (

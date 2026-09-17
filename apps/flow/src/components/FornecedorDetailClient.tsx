@@ -1,42 +1,57 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { 
-  ArrowLeft, Truck, Clock, Phone, Mail, MessageCircle, 
-  MoreVertical, Plus, FileText, Link as LinkIcon, Loader2, 
-  Copy, Check, MapPin, Building2, ExternalLink, Edit3, CreditCard,
-  Trash2, Upload
+  ArrowLeft, Building2, Phone, MessageCircle, 
+  Plus, FileText, Copy, Check, MapPin, 
+  Edit3, CreditCard, Clock, Package, ShoppingCart, 
+  DollarSign, CheckCircle2, ChevronRight, ExternalLink, Trash2
 } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { createClient } from '@/utils/supabase/client'
 import SupplierCatalogsEditor from '@/components/SupplierCatalogsEditor'
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal'
+import { createClient } from '@/utils/supabase/client'
 import type { SupplierDetail } from '@/lib/detail-types'
 
 function formatBRL(value: number) {
   return `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }
 
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return <h3 className="text-[13px] font-semibold text-[#333] mb-3">{children}</h3>
-}
-
-function InfoRow({ label, value, mono, bold }: { label: string; value: string; mono?: boolean; bold?: boolean }) {
+function WhatsAppIcon({ className = 'w-5 h-5' }: { className?: string }) {
   return (
-    <div className="flex justify-between py-1.5 border-b border-[#f5f5f5] last:border-0">
-      <span className="text-sm text-[#999]">{label}</span>
-      <span className={`text-sm ${mono ? 'font-mono' : ''} ${bold ? 'font-medium text-[#333]' : 'text-[#666]'}`}>{value}</span>
-    </div>
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      aria-hidden="true"
+    >
+      <path
+        d="M17.5 14.39c-.28-.14-1.66-.82-1.92-.91-.26-.1-.45-.14-.64.14-.19.28-.73.91-.9 1.1-.17.18-.34.2-.62.07-.28-.14-1.18-.43-2.24-1.38-.83-.74-1.39-1.65-1.55-1.93-.16-.28-.02-.43.12-.57.13-.13.28-.34.42-.51.14-.17.19-.29.28-.48.09-.19.05-.36-.02-.5-.07-.14-.64-1.54-.88-2.11-.23-.55-.47-.48-.64-.49-.17-.01-.36-.01-.55-.01-.19 0-.5.07-.76.36-.26.28-1 1-1 2.43s1.02 2.81 1.16 3c.14.19 2.01 3.07 4.87 4.31.68.29 1.21.46 1.63.6.68.22 1.3.19 1.79.12.55-.08 1.66-.68 1.89-1.33.24-.65.24-1.22.17-1.33-.07-.12-.26-.19-.54-.33z"
+        fill="currentColor"
+      />
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M12 2C6.48 2 2 6.48 2 12c0 1.82.49 3.53 1.34 5L2 22l5.17-1.32A9.94 9.94 0 0 0 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm0 18.2c-1.58 0-3.07-.44-4.35-1.22l-.31-.19-3.07.78.82-2.99-.2-.32A8.17 8.17 0 0 1 3.8 12c0-4.52 3.68-8.2 8.2-8.2 4.52 0 8.2 3.68 8.2 8.2 0 4.52-3.68 8.2-8.2 8.2z"
+        fill="currentColor"
+      />
+    </svg>
   )
 }
 
-function StatBox({ label, value, sub }: { label: string; value: string; sub?: string }) {
+function StatusBadge({ status }: { status: string }) {
+  const s = String(status || 'ACTIVE').toUpperCase()
+  const isActive = s === 'ACTIVE'
   return (
-    <div className="bg-white border border-[#e6e6e6] rounded-md p-3">
-      <div className="text-[11px] text-[#999] mb-1">{label}</div>
-      <div className="text-[16px] font-semibold text-[#333]">{value}</div>
-      {sub && <div className="text-xs text-[#ccc] mt-0.5">{sub}</div>}
-    </div>
+    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border shadow-2xs ${
+      isActive ? 'bg-[#ecfdf5] border-[#bbf7d0] text-[#16a34a]' : 'bg-[#fef2f2] border-[#fecaca] text-[#dc2626]'
+    }`}>
+      <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-[#16a34a]' : 'bg-[#dc2626]'}`} />
+      {isActive ? 'Ativo' : 'Inativo'}
+    </span>
   )
 }
 
@@ -45,22 +60,24 @@ function CopyButton({ text, label = 'Copiar' }: { text?: string | null; label?: 
   if (!text || text === '—') return null
   return (
     <button
-      onClick={() => {
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation()
         navigator.clipboard.writeText(text)
         setCopied(true)
         setTimeout(() => setCopied(false), 2000)
       }}
-      className="text-[11px] font-medium text-[#666] hover:text-[#333] hover:underline flex items-center gap-1 cursor-pointer"
+      className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#64748b] hover:text-[#0f172a] hover:underline cursor-pointer transition-colors"
       title={`Copiar ${label}`}
     >
       {copied ? (
         <>
-          <Check className="w-3 h-3 text-[#38a169]" />
-          <span className="text-[#38a169]">Copiado!</span>
+          <Check className="w-3 h-3 text-[#16a34a]" />
+          <span className="text-[#16a34a] font-bold">Copiado!</span>
         </>
       ) : (
         <>
-          <Copy className="w-3 h-3 text-[#999]" />
+          <Copy className="w-3 h-3 text-[#94a3b8]" />
           <span>{label}</span>
         </>
       )}
@@ -68,852 +85,660 @@ function CopyButton({ text, label = 'Copiar' }: { text?: string | null; label?: 
   )
 }
 
-function SupplierCatalogsDisplay({ supplierId }: { supplierId: string }) {
-  const [catalogs, setCatalogs] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const [uploading, setUploading] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-
-  const fetchCatalogs = async () => {
-    const supabase = createClient()
-    const { data } = await supabase
-      .from('supplier_catalogs')
-      .select('*')
-      .eq('supplier_id', supplierId)
-      .order('created_at', { ascending: false })
-    setCatalogs(data || [])
-    setLoading(false)
-  }
-
-  useEffect(() => {
-    fetchCatalogs()
-  }, [supplierId])
-
-  const handleUploadFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
-    if (!files || files.length === 0) return
-
-    setUploading(true)
-    try {
-      const file = files[0]
-      if (file.size > 50 * 1024 * 1024) {
-        alert('O arquivo excede o limite máximo de 50MB.')
-        return
-      }
-
-      const supabase = createClient()
-      const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
-      const fileExt = file.name.split('.').pop() || (isPdf ? 'pdf' : 'jpg')
-      const fileName = `${supplierId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
-
-      let publicUrl = ''
-
-      const { error: uploadError } = await supabase.storage
-        .from('supplier-catalogs')
-        .upload(fileName, file, {
-          contentType: file.type || (isPdf ? 'application/pdf' : 'image/jpeg'),
-          upsert: true
-        })
-
-      if (!uploadError) {
-        const { data: urlData } = supabase.storage
-          .from('supplier-catalogs')
-          .getPublicUrl(fileName)
-        publicUrl = urlData.publicUrl
-      } else {
-        const formData = new FormData()
-        formData.append('file', file)
-        formData.append('supplierId', supplierId)
-
-        const res = await fetch('/api/upload/catalog', {
-          method: 'POST',
-          body: formData
-        })
-
-        const rawText = await res.text()
-        let data: any = {}
-        try {
-          data = JSON.parse(rawText)
-        } catch {
-          throw new Error(`Erro do servidor (${res.status}): ${rawText.slice(0, 100)}`)
-        }
-
-        if (!res.ok) {
-          throw new Error(data.error || 'Falha ao enviar arquivo.')
-        }
-        publicUrl = data.catalog?.file_url || ''
-      }
-
-      if (publicUrl) {
-        const title = file.name.replace(/\.[^/.]+$/, '').trim()
-        await supabase
-          .from('supplier_catalogs')
-          .insert({
-            supplier_id: supplierId,
-            title,
-            file_url: publicUrl,
-            file_name: file.name,
-            file_size_bytes: file.size,
-            file_type: isPdf ? 'PDF' : 'IMAGEM'
-          })
-      }
-
-      await fetchCatalogs()
-    } catch (err: any) {
-      console.error(err)
-      alert(err.message || 'Erro no upload do catálogo.')
-    } finally {
-      setUploading(false)
-      if (fileInputRef.current) fileInputRef.current.value = ''
-    }
-  }
-
-  const handleDeleteCatalog = async (e: React.MouseEvent, id: string, fileUrl: string, fileType?: string) => {
-    e.preventDefault()
-    e.stopPropagation()
-
-    if (!confirm('Deseja realmente apagar este catálogo?')) return
-
-    try {
-      const supabase = createClient()
-      await supabase.from('supplier_catalogs').delete().eq('id', id)
-
-      if (fileType === 'PDF' || fileType === 'IMAGEM' || (fileUrl && fileUrl.includes('supplier-catalogs'))) {
-        const urlParts = (fileUrl || '').split('/')
-        const fileName = urlParts.slice(-2).join('/')
-        await supabase.storage.from('supplier-catalogs').remove([fileName])
-      }
-
-      setCatalogs(prev => prev.filter(c => c.id !== id))
-    } catch (err) {
-      console.error(err)
-      alert('Não foi possível excluir o catálogo.')
-    }
-  }
-
-  if (loading) return (
-    <div className="bg-white border border-[#e6e6e6] rounded-md p-4 flex justify-center py-6">
-      <Loader2 className="w-5 h-5 animate-spin text-[#999]" />
-    </div>
-  )
-
+function StatBox({ label, value, sub, icon: Icon }: { label: string; value: string; sub?: string; icon?: any }) {
   return (
-    <div className="bg-white border border-[#e6e6e6] rounded-md p-4">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-[13px] font-semibold text-[#333]">Catálogos</h3>
-        <div>
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleUploadFile}
-            accept=".pdf,.png,.jpg,.jpeg,.webp"
-            className="hidden"
-          />
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploading}
-            className="h-[28px] px-2.5 bg-[#f5f5f5] hover:bg-[#ebebeb] text-[#333] border border-[#e0e0e0] rounded-md text-[11px] font-medium flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
-          >
-            {uploading ? (
-              <>
-                <Loader2 className="w-3 h-3 animate-spin text-[#333]" />
-                <span>Enviando...</span>
-              </>
-            ) : (
-              <>
-                <Upload className="w-3 h-3 text-[#666]" />
-                <span>+ Enviar Catálogo</span>
-              </>
-            )}
-          </button>
-        </div>
+    <div className="bg-white border border-[#e6e6e6] rounded-2xl p-4 sm:p-5 shadow-2xs hover:border-[#cbd5e1] transition-all flex flex-col justify-between min-w-0 overflow-hidden">
+      <div className="flex items-center justify-between gap-1 mb-1.5">
+        <span className="text-xs font-semibold text-[#64748b] truncate" title={label}>{label}</span>
+        {Icon && <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#94a3b8] shrink-0" />}
       </div>
-
-      {catalogs.length === 0 ? (
-        <div className="py-6 text-center border border-dashed border-[#e6e6e6] rounded-md bg-[#fafafa]">
-          <FileText className="w-7 h-7 text-[#ccc] mx-auto mb-1.5" />
-          <p className="text-sm text-[#666] font-medium">Nenhum catálogo cadastrado</p>
-          <p className="text-[11px] text-[#999] mt-0.5">Faça upload de tabelas de preços ou PDFs</p>
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploading}
-            className="mt-2 text-[11px] text-[#1f2328] hover:underline font-semibold"
-          >
-            + Enviar arquivo PDF / Imagem
-          </button>
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {catalogs.map(cat => {
-            const rawUrl = cat.file_url || cat.url || ''
-            const url = rawUrl.includes('/storage/v1/object/public/')
-              ? `/storage/${rawUrl.split('/storage/v1/object/public/')[1]}`
-              : rawUrl
-            const isPdf = (cat.file_type || '').toUpperCase() === 'PDF' || url.toLowerCase().includes('.pdf')
-            return (
-              <div 
-                key={cat.id} 
-                className="group relative border border-[#e6e6e6] rounded-md p-3 flex flex-col items-center justify-center bg-[#fafafa] hover:bg-[#f5f5f5] transition-colors"
-              >
-                {/* Botão de Excluir / Apagar Catálogo */}
-                <button
-                  onClick={(e) => handleDeleteCatalog(e, cat.id, rawUrl, cat.file_type)}
-                  className="absolute top-2 right-2 p-1 rounded-md bg-white border border-[#e6e6e6] text-[#999] hover:text-[#e74c3c] hover:border-[#ffcdd2] opacity-0 group-hover:opacity-100 transition-all cursor-pointer shadow-xs z-10"
-                  title="Apagar este catálogo"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-
-                <a
-                  href={url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex flex-col items-center justify-center w-full text-center cursor-pointer"
-                >
-                  {isPdf ? (
-                    <FileText className="w-7 h-7 text-[#e74c3c] mb-2" />
-                  ) : (
-                    <LinkIcon className="w-7 h-7 text-[#666] mb-2" />
-                  )}
-                  <span className="text-[11px] text-center font-medium text-[#333] line-clamp-2 w-full" title={cat.title}>
-                    {cat.title}
-                  </span>
-                  <span className="text-xs text-[#1f2328] mt-1 group-hover:underline">
-                    Abrir / Baixar ↗
-                  </span>
-                </a>
-              </div>
-            )
-          })}
-        </div>
-      )}
-    </div>
-  )
-}
-
-function VisaoGeralTab({ supplier }: { supplier: SupplierDetail }) {
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-      <div className="lg:col-span-2 space-y-4">
-        <div className="bg-white border border-[#e6e6e6] rounded-md p-4">
-          <SectionTitle>Produtos fornecidos ({supplier.products.length})</SectionTitle>
-          <div className="table-container">
-             <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-[#f5f5f5]">
-                  <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">SKU</th>
-                  <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Produto</th>
-                  <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Custo</th>
-                  <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Estoque</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#eeeeee]">
-                {supplier.products.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="py-6 text-center text-[#999]">Nenhum produto vinculado a este fornecedor.</td>
-                  </tr>
-                ) : (
-                  supplier.products.map(p => (
-                    <tr key={p.id} className="hover:bg-[#f5f5f5]/50 transition-colors">
-                      <td className="py-2.5 px-3 font-mono text-[#999]">
-                        <Link href={`/produtos/${p.id}`} className="hover:text-[#1f2328] hover:underline font-mono">
-                          {p.sku}
-                        </Link>
-                      </td>
-                      <td className="py-2.5 px-3">
-                        <Link href={`/produtos/${p.id}`} className="text-[#333] font-medium hover:text-[#1f2328] hover:underline inline-flex items-center gap-1.5 group">
-                          <span>{p.name}</span>
-                          <ExternalLink className="w-3 h-3 text-[#999] opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
-                        </Link>
-                      </td>
-                      <td className="py-2.5 px-3 text-right text-[#999]">{formatBRL(p.cost)}</td>
-                      <td className="py-2.5 px-3 text-right">
-                        <span className={`font-medium ${p.stock === 0 ? 'text-[#e74c3c]' : p.stock <= 10 ? 'text-[#e67e22]' : 'text-[#333]'}`}>
-                          {p.stock}
-                        </span>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div className="bg-white border border-[#e6e6e6] rounded-md p-4">
-          <SectionTitle>Histórico de compras</SectionTitle>
-          <div className="table-container">
-             <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-[#f5f5f5]">
-                  <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">Data</th>
-                  <th className="text-left py-3.5 px-5 font-medium text-[#999] text-xs">NF</th>
-                  <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Itens</th>
-                  <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Total</th>
-                  <th className="text-center py-3.5 px-5 font-medium text-[#999] text-xs">Status</th>
-                  <th className="text-right py-3.5 px-5 font-medium text-[#999] text-xs">Nota</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#eeeeee]">
-                {supplier.purchases.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="py-6 text-center text-[#999]">Nenhuma compra registrada ainda.</td>
-                  </tr>
-                ) : (
-                  supplier.purchases.map(p => (
-                    <tr key={p.id} className="hover:bg-[#fafafa] transition-colors">
-                      <td className="py-2.5 px-3 text-[#999]">{p.date}</td>
-                      <td className="py-2.5 px-3 font-mono text-[#333]">{p.invoice || 'S/N'}</td>
-                      <td className="py-2.5 px-3 text-right text-[#999]">{p.items}</td>
-                      <td className="py-2.5 px-3 text-right font-medium text-[#333]">{formatBRL(p.total)}</td>
-                      <td className="py-2.5 px-3 text-center">
-                        <span className="inline-flex px-2 py-[2px] rounded text-xs font-medium bg-[#f0fff4] text-[#38a169]">
-                          {p.status}
-                        </span>
-                      </td>
-                      <td className="py-2.5 px-3 text-right">
-                        <Link 
-                          href={`/purchases/${p.id}/nota`} 
-                          className="inline-flex items-center justify-center w-7 h-7 rounded bg-[#f5f5f5] text-[#666] hover:bg-[#1f2328] hover:text-white transition-colors" 
-                          title="Ver Nota Interna"
-                        >
-                          <FileText className="w-3.5 h-3.5" />
-                        </Link>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        <SupplierCatalogsDisplay supplierId={supplier.id} />
-
-        <div className="bg-white border border-[#e6e6e6] rounded-md p-4">
-          <SectionTitle>Condições Comerciais</SectionTitle>
-          <div className="space-y-1">
-            <InfoRow label="Prazo de entrega" value={`${supplier.delivery_time} dias`} />
-            <InfoRow label="Pedido mínimo" value={formatBRL(supplier.min_order)} />
-            <InfoRow label="Condição de pagamento" value={supplier.payment_terms} />
-            <InfoRow label="Cidade / Matriz" value={`${supplier.city}/${supplier.state}`} />
-          </div>
-        </div>
-
-        <div className="bg-white border border-[#e6e6e6] rounded-md p-4">
-          <SectionTitle>Contatos</SectionTitle>
-          <div className="space-y-1">
-            {supplier.contacts?.map(c => (
-              <InfoRow 
-                key={c.id} 
-                label={c.name || (c.is_whatsapp ? 'WhatsApp' : 'Telefone')} 
-                value={c.phone} 
-                bold={!!c.name}
-              />
-            ))}
-            {(!supplier.contacts || supplier.contacts.length === 0) && (
-              <>
-                <InfoRow label="Responsável" value={supplier.contact} bold />
-                {supplier.phone && supplier.phone !== '—' && <InfoRow label="Telefone" value={supplier.phone} />}
-                {supplier.whatsapp && supplier.whatsapp !== '—' && <InfoRow label="WhatsApp" value={supplier.whatsapp} />}
-              </>
-            )}
-            {supplier.email && supplier.email !== '—' && <InfoRow label="E-mail" value={supplier.email} />}
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function InformacoesTab({ supplier }: { supplier: SupplierDetail }) {
-  const pickupAddr = supplier.pickup_address || supplier.address
-
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {/* Dados Cadastrais & Fiscais */}
-      <div className="bg-white border border-[#e6e6e6] rounded-md p-4 space-y-3">
-        <div className="flex items-center justify-between pb-2 border-b border-[#f5f5f5]">
-          <SectionTitle>Dados Cadastrais & Fiscais</SectionTitle>
-          <CopyButton text={supplier.cnpj} label="Copiar CNPJ" />
-        </div>
-        <div className="space-y-1">
-          <InfoRow label="Razão Social / Nome" value={supplier.name} bold />
-          <InfoRow label="CNPJ" value={supplier.cnpj} mono bold />
-          <InfoRow label="Status" value={supplier.status === 'ACTIVE' || !supplier.status ? 'Ativo' : 'Inativo'} />
-          <InfoRow label="Cadastro no Sistema" value={supplier.created_at} />
-          <InfoRow label="Matriz Fiscal" value={`${supplier.city}/${supplier.state}`} />
-          {supplier.address && <InfoRow label="Endereço Fiscal" value={supplier.address} />}
-        </div>
-      </div>
-
-      {/* Locais de Coleta e Distribuição */}
-      <div className="bg-white border border-[#e6e6e6] rounded-md p-4 space-y-3">
-        <div className="flex items-center justify-between pb-2 border-b border-[#f5f5f5]">
-          <SectionTitle>Endereços & Locais de Retirada</SectionTitle>
-          {pickupAddr && <CopyButton text={pickupAddr} label="Copiar Endereço" />}
-        </div>
-        <div className="space-y-2">
-          <div>
-            <span className="text-[11px] text-[#999]">Endereço para Retirada / Coleta</span>
-            <p className="text-[13px] font-medium text-[#333] mt-0.5">{pickupAddr || 'Não informado'}</p>
-            {pickupAddr && pickupAddr !== '—' && (
-              <a
-                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(pickupAddr)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-[11px] text-[#666] hover:text-[#333] hover:underline mt-1"
-              >
-                <span>Ver no Google Maps</span>
-                <ExternalLink className="w-3 h-3" />
-              </a>
-            )}
-          </div>
-
-          {supplier.distributor_city && (
-            <div className="pt-2 border-t border-[#f5f5f5]">
-              <span className="text-[11px] text-[#999]">Distribuidor Regional</span>
-              <p className="text-[13px] font-medium text-[#333] mt-0.5">{supplier.distributor_city}/{supplier.distributor_state}</p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Condições Comerciais */}
-      <div className="bg-white border border-[#e6e6e6] rounded-md p-4 space-y-3">
-        <div className="pb-2 border-b border-[#f5f5f5]">
-          <SectionTitle>Prazos & Condições Comerciais</SectionTitle>
-        </div>
-        <div className="space-y-1">
-          <InfoRow label="Prazo Médio de Entrega" value={`${supplier.delivery_time} dias`} bold />
-          <InfoRow label="Pedido Mínimo" value={formatBRL(supplier.min_order)} bold />
-          <InfoRow label="Condição de Pagamento" value={supplier.payment_terms || 'À vista'} />
-          <InfoRow label="Frete" value={supplier.freight && supplier.freight > 0 ? formatBRL(supplier.freight) : 'FOB / A combinar'} />
-        </div>
-      </div>
-
-      {/* Contatos e Canais Diretos */}
-      <div className="bg-white border border-[#e6e6e6] rounded-md p-4 space-y-3">
-        <div className="pb-2 border-b border-[#f5f5f5]">
-          <SectionTitle>Contatos & Canais de Atendimento</SectionTitle>
-        </div>
-        <div className="space-y-2">
-          {supplier.contacts && supplier.contacts.length > 0 ? (
-            supplier.contacts.map(c => (
-              <div key={c.id} className="flex items-center justify-between p-2 rounded-md bg-[#fafafa] border border-[#eeeeee]">
-                <div>
-                  <span className="text-sm font-medium text-[#333] block">{c.name || (c.is_whatsapp ? 'WhatsApp' : 'Telefone')}</span>
-                  <span className="text-[11px] text-[#999] font-mono">{c.phone}</span>
-                </div>
-                {c.is_whatsapp ? (
-                  <a
-                    href={`https://wa.me/55${c.phone.replace(/\D/g, '')}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 px-2 py-1 rounded bg-[#f0fff4] text-[#38a169] text-[11px] font-medium hover:bg-[#dcfce7]"
-                  >
-                    <MessageCircle className="w-3 h-3 text-[#38a169]" />
-                    Chamar
-                  </a>
-                ) : (
-                  <a
-                    href={`tel:${c.phone.replace(/\D/g, '')}`}
-                    className="inline-flex items-center gap-1 px-2 py-1 rounded bg-white text-[#666] border border-[#e6e6e6] text-[11px] font-medium hover:bg-[#f5f5f5]"
-                  >
-                    <Phone className="w-3 h-3 text-[#999]" />
-                    Ligar
-                  </a>
-                )}
-              </div>
-            ))
-          ) : (
-            <div className="space-y-1">
-              <InfoRow label="Responsável" value={supplier.contact} bold />
-              {supplier.phone && supplier.phone !== '—' && <InfoRow label="Telefone" value={supplier.phone} />}
-              {supplier.whatsapp && supplier.whatsapp !== '—' && <InfoRow label="WhatsApp" value={supplier.whatsapp} />}
-            </div>
-          )}
-          {supplier.email && supplier.email !== '—' && (
-            <div className="pt-2 border-t border-[#f5f5f5]">
-              <InfoRow label="E-mail de Pedidos" value={supplier.email} />
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function DadosBancariosTab({ supplier }: { supplier: SupplierDetail }) {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {/* Card Chave PIX — Padrão do Sistema */}
-      <div className="bg-white border border-[#e6e6e6] rounded-md p-4 flex flex-col justify-between">
-        <div>
-          <div className="flex items-center justify-between pb-2 border-b border-[#f5f5f5] mb-3">
-            <SectionTitle>Chave PIX</SectionTitle>
-            {supplier.pix_key && supplier.pix_key !== '—' && (
-              <CopyButton text={supplier.pix_key} label="Copiar Chave" />
-            )}
-          </div>
-
-          <div className="bg-[#fafafa] rounded-md p-3 border border-[#eeeeee] mb-3">
-            <span className="text-xs font-medium text-[#999] uppercase tracking-wider block mb-1">Chave Cadastrada</span>
-            <div className="text-[14px] font-mono font-medium text-[#333] select-all break-all">
-              {supplier.pix_key || 'Chave PIX não cadastrada'}
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <InfoRow label="Favorecido" value={supplier.name} bold />
-            <InfoRow label="CNPJ do Favorecido" value={supplier.cnpj} mono />
-          </div>
-        </div>
-      </div>
-
-      {/* Card Dados da Conta Bancária — Padrão do Sistema */}
-      <div className="bg-white border border-[#e6e6e6] rounded-md p-4 space-y-3">
-        <div className="pb-2 border-b border-[#f5f5f5]">
-          <SectionTitle>Conta Bancária (TED / Transferência)</SectionTitle>
-        </div>
-
-        <div className="space-y-1">
-          <InfoRow label="Banco" value={supplier.bank} bold />
-          <InfoRow label="Agência" value={supplier.agency} mono />
-          <InfoRow label="Conta Corrente" value={supplier.account} mono />
-          <InfoRow label="Titular" value={supplier.name} />
-          <InfoRow label="CNPJ" value={supplier.cnpj} mono />
-          <InfoRow label="Condição de Pagamento" value={supplier.payment_terms || 'À vista'} />
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function CatalogosTab({ supplier }: { supplier: SupplierDetail }) {
-  return (
-    <div className="bg-white border border-[#e6e6e6] rounded-md p-5">
-      <SectionTitle>Gerenciar Catálogos do Fornecedor</SectionTitle>
-      <p className="text-sm text-[#666] mb-4">
-        Faça upload de arquivos PDF ou imagens de catálogos (até 50MB), adicione links externos ou exclua catálogos antigos.
-      </p>
-      <SupplierCatalogsEditor supplierId={supplier.id} />
-    </div>
-  )
-}
-
-function TimelineTab({ supplier }: { supplier: SupplierDetail }) {
-  return (
-    <div className="bg-white border border-[#e6e6e6] rounded-md overflow-hidden">
-      <div className="px-4 py-3 border-b border-[#e6e6e6]">
-        <SectionTitle>Histórico de atividades</SectionTitle>
-      </div>
-      <div className="divide-y divide-[#eeeeee]">
-        {supplier.timeline.length === 0 ? (
-          <div className="p-8 text-center text-[#999] text-sm">Nenhum histórico de atividade registrado.</div>
-        ) : (
-          supplier.timeline.map((h, i) => (
-            <div key={i} className="px-4 py-3 flex items-start gap-3 hover:bg-[#fafafa] transition-colors">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#1f2328] mt-1.5 shrink-0" />
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-[#333]">{h.action}</span>
-                </div>
-                <div className="text-[11px] text-[#666] mt-0.5">{h.details}</div>
-              </div>
-              <div className="text-xs text-[#ccc] text-right shrink-0">
-                <div>{h.date}</div>
-                <div>{h.time}</div>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
+      <div className="text-lg sm:text-2xl font-black text-[#111111] tracking-tight truncate" title={value}>{value}</div>
+      {sub && <div className="text-[11px] text-[#999999] mt-0.5 truncate">{sub}</div>}
     </div>
   )
 }
 
 export default function FornecedorDetailClient({ supplier }: { supplier: SupplierDetail }) {
-  const [copiedField, setCopiedField] = useState<string | null>(null)
-
-  const copyToClipboard = (text: string, field: string) => {
-    if (!text || text === '—') return
-    navigator.clipboard.writeText(text)
-    setCopiedField(field)
-    setTimeout(() => setCopiedField(null), 2000)
-  }
-
+  const router = useRouter()
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
   const rawWhatsApp = supplier.contacts?.find(c => c.is_whatsapp)?.phone || supplier.whatsapp
   const rawPhone = supplier.contacts?.find(c => !c.is_whatsapp)?.phone || supplier.phone
 
   const hasWhatsApp = Boolean(rawWhatsApp && rawWhatsApp !== '—' && rawWhatsApp.replace(/\D/g, '').length >= 8)
-  const hasPhone = Boolean(rawPhone && rawPhone !== '—' && rawPhone.replace(/\D/g, '').length >= 8 && rawPhone !== rawWhatsApp)
+  const hasPhone = Boolean((rawPhone && rawPhone !== '—' && rawPhone.replace(/\D/g, '').length >= 8) || (rawWhatsApp && rawWhatsApp !== '—' && rawWhatsApp.replace(/\D/g, '').length >= 8))
   
   const mainWhatsApp = hasWhatsApp ? rawWhatsApp : null
-  const mainPhone = hasPhone ? rawPhone : null
+  const mainPhone = (rawPhone && rawPhone !== '—' && rawPhone.replace(/\D/g, '').length >= 8) ? rawPhone : (hasWhatsApp ? rawWhatsApp : null)
   const pickupAddr = supplier.pickup_address || supplier.address
 
+  const handleDelete = async () => {
+    try {
+      const supabase = createClient()
+      const { error } = await supabase.from('suppliers').delete().eq('id', supplier.id)
+      if (error) throw error
+      router.push('/operacao')
+    } catch (err) {
+      console.error('Erro ao excluir fornecedor:', err)
+      alert('Erro ao excluir fornecedor.')
+    }
+  }
+
   return (
-    <div>
-      <div className="mb-4">
-        <Link href="/operacao" className="inline-flex items-center gap-1.5 text-sm text-[#999] hover:text-[#333] transition-colors">
-          <ArrowLeft className="w-3.5 h-3.5" />
+    <div className="pb-24 max-w-7xl mx-auto">
+      {/* Navegação Topo */}
+      <div className="mb-4 sm:mb-6">
+        <div className="hub-mobile-header-title-row lg:hidden !justify-start gap-2.5 mb-2.5">
+          <button 
+            type="button" 
+            className="hub-mobile-back-btn" 
+            aria-label="Voltar" 
+            onClick={() => window.history.back()}
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+          <h1 className="hub-mobile-page-title !text-[15px] truncate font-bold text-[#111111]">
+            {supplier.name}
+          </h1>
+        </div>
+        <Link 
+          href="/operacao" 
+          className="hidden lg:inline-flex items-center gap-1.5 text-xs font-semibold text-[#888888] hover:text-[#111111] transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
           Operação / Fornecedores
         </Link>
       </div>
 
-      {/* Cartão do Fornecedor — Padrão Visual do Sistema */}
-      <div className="bg-white border border-[#e6e6e6] rounded-md p-5 mb-4">
-        <div className="flex flex-col sm:flex-row items-start gap-5">
-          <div className="w-16 h-16 rounded-md bg-[#f5f5f5] border border-[#e6e6e6] flex items-center justify-center shrink-0 overflow-hidden">
+      {/* Main Supplier Hero (1:1 Padrão da Tela de Produto) */}
+      <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 lg:gap-10 w-full mb-8">
+        {/* Foto / Logo do Fornecedor */}
+        <div className="w-full sm:w-40 lg:w-48 flex flex-col items-center gap-3 shrink-0">
+          <div className="relative w-40 sm:w-full max-w-[240px] sm:max-w-none aspect-square rounded-2xl bg-white border border-[#e6e6e6] overflow-hidden flex items-center justify-center p-3 sm:p-4 shadow-2xs group">
             {supplier.logo_url ? (
-              <img src={supplier.logo_url} alt={supplier.name} className="w-full h-full object-cover" />
+              <img 
+                src={supplier.logo_url} 
+                alt={supplier.name} 
+                className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105" 
+              />
             ) : (
-              <Truck className="w-8 h-8 text-[#ccc]" />
+              <Building2 className="w-16 h-16 text-[#94a3b8]" />
             )}
-          </div>
-          <div className="flex-1 min-w-0 pt-0.5">
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-              <div>
-                <h1 className="text-[18px] font-semibold text-[#333]">{supplier.name}</h1>
-                <div className="flex flex-wrap items-center gap-2 mt-1">
-                  <span className="text-[11px] font-mono text-[#999]">{supplier.cnpj}</span>
-                  <span className="text-xs text-[#ccc]">•</span>
-                  <span className="text-sm text-[#999]">{supplier.city}/{supplier.state}</span>
-                  {supplier.distributor_city && (
-                    <>
-                      <span className="text-xs text-[#ccc]">•</span>
-                      <span className="text-sm text-[#999]">Distr: {supplier.distributor_city}/{supplier.distributor_state}</span>
-                    </>
-                  )}
-                  <span className="text-xs text-[#ccc]">•</span>
-                  <span className={`inline-flex px-2 py-[2px] rounded text-xs font-medium ${
-                    supplier.status === 'ACTIVE' || !supplier.status
-                      ? 'bg-[#f0fff4] text-[#38a169]'
-                      : 'bg-[#fff5f5] text-[#e74c3c]'
-                  }`}>
-                    {supplier.status === 'ACTIVE' || !supplier.status ? 'Ativo' : 'Inativo'}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 relative">
-                <Link 
-                  href={`/purchases/new?supplier=${supplier.id}`}
-                  className="h-[30px] inline-flex items-center gap-1.5 px-3 bg-[#1f2328] hover:bg-[#111827] text-white text-sm font-medium rounded-md transition-colors"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  Comprar
-                </Link>
-                <Link
-                  href={`/fornecedores/${supplier.id}/editar`}
-                  className="h-[30px] inline-flex items-center gap-1.5 px-3 bg-white hover:bg-[#f5f5f5] text-[#666] text-sm font-medium rounded-md border border-[#e6e6e6] transition-colors"
-                  title="Editar Fornecedor"
-                >
-                  <Edit3 className="w-3.5 h-3.5" />
-                  Editar
-                </Link>
-                <button
-                  onClick={(e) => {
-                    const menu = e.currentTarget.nextElementSibling
-                    if (menu) menu.classList.toggle('hidden')
-                  }}
-                  className="p-1.5 rounded-md border border-[#e6e6e6] text-[#666] hover:bg-[#f5f5f5] transition-colors"
-                >
-                  <MoreVertical className="w-4 h-4" />
-                </button>
-                <div className="absolute right-0 mt-1 w-40 bg-white border border-[#e6e6e6] rounded-md shadow-lg hidden z-10">
-                  <Link href={`/fornecedores/${supplier.id}/editar`} className="flex items-center gap-2 px-3 py-2 text-[11px] text-[#333] hover:bg-[#f5f5f5]">
-                    <Edit3 className="w-3 h-3" />
-                    Editar
-                  </Link>
-                  <Link href={`/purchases/new?supplier=${supplier.id}`} className="flex items-center gap-2 px-3 py-2 text-[11px] text-[#333] hover:bg-[#f5f5f5]">
-                    <Plus className="w-3 h-3" />
-                    Nova compra
-                  </Link>
-                  {mainWhatsApp && (
-                    <a href={`https://wa.me/55${mainWhatsApp.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-3 py-2 text-[11px] text-[#38a169] hover:bg-[#f5f5f5]">
-                      <MessageCircle className="w-3 h-3" />
-                      WhatsApp
-                    </a>
-                  )}
-                  {supplier.email && supplier.email !== '—' && (
-                    <a href={`mailto:${supplier.email}`} className="flex items-center gap-2 px-3 py-2 text-[11px] text-[#666] hover:text-[#333] hover:bg-[#f5f5f5]">
-                      <Mail className="w-3 h-3" />
-                      E-mail
-                    </a>
-                  )}
-                </div>
-              </div>
+            <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
+              <span className="px-2 py-0.5 rounded-md bg-[#1f2328] text-white text-[10px] font-bold shadow-xs">
+                Fornecedor
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Informações em Destaque — Padrão do Sistema */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-4 mt-4 border-t border-[#f5f5f5]">
-          {/* Card 1: CNPJ */}
-          <div className="bg-[#fafafa] border border-[#eeeeee] rounded-md p-3 flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-[11px] font-medium text-[#999] flex items-center gap-1.5">
-                  <Building2 className="w-3.5 h-3.5 text-[#999]" />
-                  CNPJ
+        {/* Detalhes do Fornecedor e Ações */}
+        <div className="flex-1 min-w-0 flex flex-col justify-between self-stretch w-full">
+          <div>
+            {/* Topo: Badges & Botões de Ação */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-5">
+              {/* Badges */}
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#F7F7F7] text-[#1f2328] border border-[#e5e7eb] text-xs font-semibold shadow-2xs">
+                  <Building2 className="w-3.5 h-3.5 text-[#1f2328]" />
+                  {supplier.city || 'Brasil'}/{supplier.state || 'BR'}
                 </span>
-                {supplier.cnpj && supplier.cnpj !== '—' && (
-                  <button
-                    onClick={() => copyToClipboard(supplier.cnpj, 'cnpj')}
-                    className="text-[11px] font-medium text-[#666] hover:text-[#333] hover:underline flex items-center gap-1 cursor-pointer"
-                  >
-                    {copiedField === 'cnpj' ? (
-                      <>
-                        <Check className="w-3 h-3 text-[#38a169]" />
-                        <span className="text-[#38a169]">Copiado!</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-3 h-3 text-[#999]" />
-                        <span>Copiar</span>
-                      </>
-                    )}
-                  </button>
+                {supplier.distributor_city && (
+                  <span className="inline-flex items-center px-3 py-1.5 rounded-xl bg-[#F7F7F7] text-[#4b5563] text-xs font-semibold border border-[#e5e7eb]">
+                    Distr: {supplier.distributor_city}/{supplier.distributor_state}
+                  </span>
                 )}
+                <StatusBadge status={supplier.status} />
               </div>
-              <div className="text-[13px] font-mono font-medium text-[#333] select-all">
-                {supplier.cnpj || '—'}
-              </div>
-            </div>
-            <div className="mt-1.5 text-[11px] text-[#999]">
-              Matriz: <span className="text-[#666]">{supplier.city}/{supplier.state}</span>
-            </div>
-          </div>
 
-          {/* Card 2: Endereço para Retirada */}
-          <div className="bg-[#fafafa] border border-[#eeeeee] rounded-md p-3 flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-[11px] font-medium text-[#999] flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-[#999]" />
-                  Endereço para Retirada
-                </span>
-                {pickupAddr && pickupAddr !== '—' && (
-                  <button
-                    onClick={() => copyToClipboard(pickupAddr, 'address')}
-                    className="text-[11px] font-medium text-[#666] hover:text-[#333] hover:underline flex items-center gap-1 cursor-pointer"
-                  >
-                    {copiedField === 'address' ? (
-                      <>
-                        <Check className="w-3 h-3 text-[#38a169]" />
-                        <span className="text-[#38a169]">Copiado!</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-3 h-3 text-[#999]" />
-                        <span>Copiar</span>
-                      </>
-                    )}
-                  </button>
-                )}
-              </div>
-              <div className="text-sm font-medium text-[#333] line-clamp-2" title={pickupAddr || 'Não cadastrado'}>
-                {pickupAddr || 'Endereço não informado'}
-              </div>
-            </div>
-            {pickupAddr && pickupAddr !== '—' ? (
-              <a
-                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(pickupAddr)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-1.5 inline-flex items-center gap-1 text-[11px] text-[#666] hover:text-[#333] hover:underline"
-              >
-                <span>Ver no Google Maps</span>
-                <ExternalLink className="w-3 h-3" />
-              </a>
-            ) : (
-              <div className="mt-1.5 text-[11px] text-[#ccc]">Cadastre ao editar</div>
-            )}
-          </div>
-
-          {/* Card 3: Telefone & WhatsApp */}
-          <div className="bg-[#fafafa] border border-[#eeeeee] rounded-md p-3 flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-[11px] font-medium text-[#999] flex items-center gap-1.5">
-                  <Phone className="w-3.5 h-3.5 text-[#999]" />
-                  Telefone & WhatsApp
-                </span>
-              </div>
-              <div className="flex flex-wrap items-center gap-1.5 mt-1">
-                {mainWhatsApp && (
+              {/* Botões de Ação (1:1 com os 4 botões do produto) */}
+              <div className="product-action-icons flex items-center justify-center sm:justify-end gap-2.5 shrink-0 flex-wrap w-full sm:w-auto">
+                {/* Botão 1: WhatsApp */}
+                {mainWhatsApp ? (
                   <a
                     href={`https://wa.me/55${mainWhatsApp.replace(/\D/g, '')}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#f0fff4] text-[#38a169] text-[11px] font-medium hover:bg-[#dcfce7] transition-colors"
-                    title="Chamar no WhatsApp"
+                    className="h-10 w-10 sm:h-10.5 sm:w-10.5 flex items-center justify-center bg-white text-[#16a34a] border border-[#bbf7d0] rounded-xl sm:rounded-2xl hover:bg-[#ecfdf5] hover:border-[#16a34a] transition-all cursor-pointer shadow-xs shrink-0"
+                    title="Conversar no WhatsApp"
                   >
-                    <MessageCircle className="w-3 h-3 text-[#38a169]" />
-                    <span>{mainWhatsApp}</span>
+                    <WhatsAppIcon className="w-5 h-5 text-[#16a34a] shrink-0" />
                   </a>
+                ) : (
+                  <button
+                    type="button"
+                    disabled
+                    className="h-10 w-10 sm:h-10.5 sm:w-10.5 flex items-center justify-center bg-white text-[#cbd5e1] border border-[#e5e7eb] rounded-xl sm:rounded-2xl cursor-not-allowed opacity-50 shrink-0"
+                    title="WhatsApp não cadastrado"
+                  >
+                    <WhatsAppIcon className="w-5 h-5 text-[#cbd5e1] shrink-0" />
+                  </button>
                 )}
-                {mainPhone && (
+
+                {/* Botão 2: Comprar */}
+                <Link 
+                  href={`/purchases/new?supplier=${supplier.id}`}
+                  className="h-10 px-4 sm:h-10.5 sm:px-4.5 flex items-center gap-2 bg-white text-[#374151] border border-[#e5e7eb] rounded-xl sm:rounded-2xl hover:bg-[#f9fafb] hover:border-[#111] hover:text-[#111] text-xs sm:text-sm font-semibold transition-all cursor-pointer shadow-xs shrink-0"
+                  title="Fazer Pedido de Compra"
+                >
+                  <ShoppingCart size={18} strokeWidth={2} className="w-4.5 h-4.5 text-[#374151] shrink-0" style={{ width: '18px', height: '18px', minWidth: '18px', minHeight: '18px', display: 'block' }} />
+                  <span className="hidden sm:inline">Comprar</span>
+                </Link>
+
+                {/* Botão 3: Editar */}
+                <Link 
+                  href={`/fornecedores/${supplier.id}/editar`}
+                  className="h-10 px-4.5 sm:h-10.5 sm:px-5 flex items-center gap-2 bg-[#1f2328] hover:bg-black text-white rounded-xl sm:rounded-2xl text-xs sm:text-sm font-semibold transition-all cursor-pointer shadow-xs shrink-0"
+                  title="Editar Fornecedor"
+                >
+                  <Edit3 size={18} strokeWidth={2} className="w-4.5 h-4.5 text-white shrink-0" style={{ width: '18px', height: '18px', minWidth: '18px', minHeight: '18px', display: 'block' }} />
+                  <span>Editar</span>
+                </Link>
+
+                {/* Botão 4: Ligar / Telefone */}
+                {mainPhone ? (
                   <a
                     href={`tel:${mainPhone.replace(/\D/g, '')}`}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white text-[#666] border border-[#e6e6e6] text-[11px] font-medium hover:bg-[#f5f5f5] transition-colors"
+                    className="h-10 w-10 sm:h-10.5 sm:w-10.5 flex items-center justify-center bg-white text-[#374151] border border-[#e5e7eb] rounded-xl sm:rounded-2xl hover:bg-[#f9fafb] hover:border-[#111] hover:text-[#111] transition-all cursor-pointer shadow-xs shrink-0"
+                    title="Ligar para fornecedor"
                   >
-                    <Phone className="w-3 h-3 text-[#999]" />
-                    <span>{mainPhone}</span>
+                    <Phone size={19} strokeWidth={2} className="w-5 h-5 text-[#374151] shrink-0" style={{ width: '19px', height: '19px', minWidth: '19px', minHeight: '19px', display: 'block' }} />
                   </a>
+                ) : (
+                  <button
+                    type="button"
+                    disabled
+                    className="h-10 w-10 sm:h-10.5 sm:w-10.5 flex items-center justify-center bg-white text-[#cbd5e1] border border-[#e5e7eb] rounded-xl sm:rounded-2xl cursor-not-allowed opacity-50 shrink-0"
+                    title="Telefone não cadastrado"
+                  >
+                    <Phone size={19} strokeWidth={2} className="w-5 h-5 text-[#cbd5e1] shrink-0" style={{ width: '19px', height: '19px', minWidth: '19px', minHeight: '19px', display: 'block' }} />
+                  </button>
                 )}
-                {!mainWhatsApp && !mainPhone && (
-                  <span className="text-[11px] text-[#999]">Nenhum telefone informado</span>
-                )}
+
+                {/* Botão 5: Excluir */}
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteModal(true)}
+                  className="h-10 w-10 sm:h-10.5 sm:w-10.5 flex items-center justify-center bg-white text-[#ef4444] border border-[#fecaca] hover:bg-[#fef2f2] hover:border-[#ef4444] rounded-xl sm:rounded-2xl transition-all focus:outline-none cursor-pointer shadow-xs shrink-0"
+                  title="Excluir fornecedor"
+                >
+                  <Trash2 size={19} strokeWidth={2} className="w-5 h-5 text-[#ef4444] shrink-0" style={{ width: '19px', height: '19px', minWidth: '19px', minHeight: '19px', display: 'block' }} />
+                </button>
               </div>
             </div>
-            {supplier.email && supplier.email !== '—' && (
-              <div className="mt-1.5 text-[11px] text-[#999] flex items-center gap-1 truncate">
-                <Mail className="w-3 h-3 shrink-0 text-[#999]" />
-                <a href={`mailto:${supplier.email}`} className="text-[#666] hover:text-[#333] hover:underline truncate" title={supplier.email}>
-                  {supplier.email}
-                </a>
+
+            {/* Nome do Fornecedor */}
+            <h1 className="text-xl sm:text-2xl font-black text-[#111111] leading-snug mb-3 text-center sm:text-left">
+              {supplier.name}
+            </h1>
+
+            {/* Chips de Metadados (Marca / SKU / EAN equivalente) */}
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 text-xs mb-5">
+              <span className="inline-flex items-center gap-1.5 bg-[#F7F7F7] px-3 py-1.5 rounded-xl border border-[#e5e7eb] text-[#1f2328] font-mono">
+                <span className="text-[#888] font-sans">CNPJ:</span>
+                <strong className="text-[#111] font-bold">{supplier.cnpj || '—'}</strong>
+                {supplier.cnpj && supplier.cnpj !== '—' && (
+                  <CopyButton text={supplier.cnpj} label="Copiar" />
+                )}
+              </span>
+
+              <span className="inline-flex items-center gap-1.5 bg-[#F7F7F7] px-3 py-1.5 rounded-xl border border-[#e5e7eb] text-[#1f2328] font-medium">
+                <span className="text-[#888]">Retirada:</span>
+                <strong className="text-[#111] font-bold truncate max-w-[180px] sm:max-w-xs" title={pickupAddr || 'Matriz'}>
+                  {pickupAddr || 'Matriz'}
+                </strong>
+                {pickupAddr && pickupAddr !== '—' && (
+                  <CopyButton text={pickupAddr} label="Copiar" />
+                )}
+              </span>
+
+              <span className="inline-flex items-center gap-1.5 bg-[#F7F7F7] px-3 py-1.5 rounded-xl border border-[#e5e7eb] text-[#1f2328] font-medium">
+                <span className="text-[#888]">Prazo:</span>
+                <strong className="text-[#16a34a] font-bold">
+                  {supplier.delivery_time ? `${supplier.delivery_time} dias` : 'A combinar'}
+                </strong>
+              </span>
+
+              <span className="inline-flex items-center gap-1.5 bg-[#F7F7F7] px-3 py-1.5 rounded-xl border border-[#e5e7eb] text-[#1f2328] font-medium">
+                <span className="text-[#888]">Mínimo:</span>
+                <strong className="text-[#111] font-bold">{formatBRL(supplier.min_order || 0)}</strong>
+              </span>
+            </div>
+
+            {/* Highlight Cards Rápidos (Oculto no mobile, 1:1 com a página do produto) */}
+            <div className="hidden sm:grid sm:grid-cols-3 gap-4 sm:gap-6 p-5 sm:p-6 bg-white border border-[#e6e6e6] rounded-2xl mb-2 shadow-2xs">
+              <div>
+                <span className="text-[10px] uppercase font-bold text-[#888888] tracking-wider">Produtos Vinculados</span>
+                <div className="text-xl font-black mt-1 text-[#111111]">
+                  {supplier.stats.products_count} itens
+                </div>
+                <div className="text-xs text-[#666666] mt-0.5">Catálogo cadastrado</div>
               </div>
-            )}
+              <div>
+                <span className="text-[10px] uppercase font-bold text-[#888888] tracking-wider">Total Comprado (LTV)</span>
+                <div className="text-xl font-black text-[#16a34a] mt-1">
+                  {formatBRL(supplier.stats.total_purchased)}
+                </div>
+                <div className="text-xs text-[#666666] mt-0.5">Volume acumulado</div>
+              </div>
+              <div>
+                <span className="text-[10px] uppercase font-bold text-[#888888] tracking-wider">Condição Padrão</span>
+                <div className="text-xl font-black text-[#111111] mt-1">
+                  {supplier.payment_terms || 'À vista'}
+                </div>
+                <div className="text-xs text-[#666666] mt-0.5">Prazo de faturamento</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-        <StatBox label="Produtos" value={String(supplier.stats.products_count)} />
-        <StatBox label="Total compras" value={formatBRL(supplier.stats.total_purchased)} />
-        <StatBox label="Pedidos" value={String(supplier.stats.total_orders)} />
-        <StatBox label="Ticket médio" value={formatBRL(supplier.stats.avg_ticket)} />
+      {/* 4 Cards de Métricas (Mobile: 2x2, Desktop: 1x4) */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 mb-6">
+        <StatBox 
+          label="Produtos" 
+          value={`${supplier.stats.products_count} un`} 
+          sub="No catálogo"
+          icon={Package} 
+        />
+        <StatBox 
+          label="Total Compras" 
+          value={formatBRL(supplier.stats.total_purchased)} 
+          sub="Volume total"
+          icon={DollarSign} 
+        />
+        <StatBox 
+          label="Pedidos" 
+          value={`${supplier.stats.total_orders} ped`} 
+          sub="Compras feitas"
+          icon={ShoppingCart} 
+        />
+        <StatBox 
+          label="Ticket Médio" 
+          value={formatBRL(supplier.stats.avg_ticket)} 
+          sub="Média p/ compra"
+          icon={CheckCircle2} 
+        />
       </div>
 
-      <Tabs defaultValue="visao-geral">
-        <TabsList className="mb-4 flex-wrap">
-          <TabsTrigger value="visao-geral">
-            <Truck className="w-3.5 h-3.5 mr-1.5 inline" /> Visão geral
+      {/* Abas de Navegação */}
+      <Tabs defaultValue="produtos">
+        <TabsList>
+          <TabsTrigger value="produtos">
+            <Package className="w-3.5 h-3.5 mr-1.5 inline" />
+            Produtos ({supplier.products.length})
           </TabsTrigger>
-          <TabsTrigger value="informacoes">
-            <Building2 className="w-3.5 h-3.5 mr-1.5 inline" /> Informações da Empresa
+          <TabsTrigger value="compras">
+            <ShoppingCart className="w-3.5 h-3.5 mr-1.5 inline" />
+            Compras ({supplier.purchases.length})
           </TabsTrigger>
           <TabsTrigger value="dados-bancarios">
-            <CreditCard className="w-3.5 h-3.5 mr-1.5 inline" /> Dados Bancários
+            <CreditCard className="w-3.5 h-3.5 mr-1.5 inline" />
+            Dados Bancários
           </TabsTrigger>
           <TabsTrigger value="catalogos">
-            <FileText className="w-3.5 h-3.5 mr-1.5 inline" /> Catálogos
+            <FileText className="w-3.5 h-3.5 mr-1.5 inline" />
+            Catálogos
           </TabsTrigger>
-          <TabsTrigger value="timeline">
-            <Clock className="w-3.5 h-3.5 mr-1.5 inline" /> Histórico
+          <TabsTrigger value="historico">
+            <Clock className="w-3.5 h-3.5 mr-1.5 inline" />
+            Linha do Tempo
           </TabsTrigger>
         </TabsList>
-        <TabsContent value="visao-geral"><VisaoGeralTab supplier={supplier} /></TabsContent>
-        <TabsContent value="informacoes"><InformacoesTab supplier={supplier} /></TabsContent>
-        <TabsContent value="dados-bancarios"><DadosBancariosTab supplier={supplier} /></TabsContent>
-        <TabsContent value="catalogos"><CatalogosTab supplier={supplier} /></TabsContent>
-        <TabsContent value="timeline"><TimelineTab supplier={supplier} /></TabsContent>
+
+        {/* ABA 1: PRODUTOS FORNECIDOS */}
+        <TabsContent value="produtos">
+          <div className="bg-white border border-[#e6e6e6] rounded-2xl p-4 sm:p-6 shadow-2xs space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#f0f0f0]">
+              <div>
+                <h3 className="text-sm font-bold text-[#111111]">Catálogo de Produtos do Fornecedor</h3>
+                <p className="text-xs text-[#666666] mt-0.5">Produtos vinculados para compras e reposição.</p>
+              </div>
+              <span className="px-2.5 py-1 bg-[#f8fafc] text-[#334155] border border-[#e2e8f0] rounded-lg text-xs font-bold shrink-0">
+                {supplier.products.length} itens
+              </span>
+            </div>
+
+            {supplier.products.length === 0 ? (
+              <div className="p-8 text-center text-[#888888]">
+                <Package className="w-10 h-10 mx-auto text-[#cbd5e1] mb-2" />
+                <p className="text-sm font-semibold text-[#334155]">Nenhum produto vinculado a este fornecedor</p>
+                <p className="text-xs text-[#94a3b8] mt-1">Ao cadastrar ou editar produtos, selecione este fornecedor para vinculá-los.</p>
+              </div>
+            ) : (
+              <>
+                {/* Visualização em Lista / Cards para Mobile (< 640px) */}
+                <div className="block sm:hidden divide-y divide-[#f1f5f9] rounded-xl border border-[#e2e8f0] overflow-hidden bg-white">
+                  {supplier.products.map(p => (
+                    <Link
+                      key={p.id}
+                      href={`/produtos/${p.id}`}
+                      className="p-3.5 flex items-center gap-3 hover:bg-[#fafafa] transition-colors"
+                    >
+                      <div className="w-11 h-11 rounded-xl bg-white border border-[#e2e8f0] flex items-center justify-center shrink-0 overflow-hidden p-1">
+                        {p.image ? (
+                          <img src={p.image} alt={p.name} className="w-full h-full object-contain" />
+                        ) : (
+                          <Package className="w-5 h-5 text-[#94a3b8]" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                          <span className="text-[10px] font-mono font-semibold text-[#475569] bg-[#f1f5f9] px-1.5 py-0.5 rounded border border-[#e2e8f0]">
+                            {p.sku}
+                          </span>
+                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                            p.stock === 0 ? 'bg-[#fee2e2] text-[#dc2626]' : p.stock <= 10 ? 'bg-[#fef3c7] text-[#d97706]' : 'bg-[#ecfdf5] text-[#16a34a]'
+                          }`}>
+                            {p.stock} un
+                          </span>
+                        </div>
+                        <p className="text-xs font-semibold text-[#111111] truncate">{p.name}</p>
+                        <p className="text-xs font-bold text-[#16a34a] mt-0.5">Custo: {formatBRL(p.cost)}</p>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-[#cbd5e1] shrink-0" />
+                    </Link>
+                  ))}
+                </div>
+
+                {/* Tabela para Telas Maiores (>= 640px) */}
+                <div className="hidden sm:block overflow-x-auto rounded-xl border border-[#e2e8f0]">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-[#f8fafc] border-b border-[#e2e8f0] text-xs font-bold text-[#64748b]">
+                        <th className="text-left py-3 px-4">Produto</th>
+                        <th className="text-left py-3 px-4">Código SKU</th>
+                        <th className="text-right py-3 px-4">Custo Unitário</th>
+                        <th className="text-right py-3 px-4">Estoque Central</th>
+                        <th className="text-center py-3 px-4 w-20">Ação</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#f1f5f9]">
+                      {supplier.products.map(p => (
+                        <tr key={p.id} className="hover:bg-[#fafafa] transition-colors group">
+                          <td className="py-3 px-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-9 h-9 rounded-lg bg-[#f8fafc] border border-[#e2e8f0] flex items-center justify-center shrink-0 overflow-hidden p-0.5">
+                                {p.image ? (
+                                  <img src={p.image} alt={p.name} className="w-full h-full object-contain" />
+                                ) : (
+                                  <Package className="w-4 h-4 text-[#94a3b8]" />
+                                )}
+                              </div>
+                              <span className="font-semibold text-xs text-[#111111] group-hover:underline">
+                                {p.name}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="py-3 px-4 font-mono text-xs text-[#475569]">
+                            {p.sku}
+                          </td>
+                          <td className="py-3 px-4 text-right font-bold text-xs text-[#16a34a]">
+                            {formatBRL(p.cost)}
+                          </td>
+                          <td className="py-3 px-4 text-right">
+                            <span className={`inline-block font-bold text-xs px-2 py-0.5 rounded ${
+                              p.stock === 0 ? 'bg-[#fee2e2] text-[#dc2626]' : p.stock <= 10 ? 'bg-[#fef3c7] text-[#d97706]' : 'bg-[#ecfdf5] text-[#16a34a]'
+                            }`}>
+                              {p.stock} un
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-center">
+                            <Link 
+                              href={`/produtos/${p.id}`}
+                              className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-[#64748b] hover:text-[#111111] hover:bg-[#f1f5f9] transition-colors"
+                              title="Ver Detalhes"
+                            >
+                              <ChevronRight className="w-4 h-4" />
+                            </Link>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
+          </div>
+        </TabsContent>
+
+        {/* ABA 2: HISTÓRICO DE COMPRAS */}
+        <TabsContent value="compras">
+          <div className="bg-white border border-[#e6e6e6] rounded-2xl p-4 sm:p-6 shadow-2xs space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#f0f0f0]">
+              <div>
+                <h3 className="text-sm font-bold text-[#111111]">Histórico de Pedidos de Compra</h3>
+                <p className="text-xs text-[#666666] mt-0.5">Todas as aquisições realizadas com este fornecedor.</p>
+              </div>
+              <Link
+                href={`/purchases/new?supplier=${supplier.id}`}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1f2328] hover:bg-black text-white text-xs font-semibold rounded-xl shadow-xs transition-colors"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Nova Compra</span>
+              </Link>
+            </div>
+
+            {supplier.purchases.length === 0 ? (
+              <div className="p-8 text-center text-[#888888]">
+                <ShoppingCart className="w-10 h-10 mx-auto text-[#cbd5e1] mb-2" />
+                <p className="text-sm font-semibold text-[#334155]">Nenhuma compra registrada</p>
+                <p className="text-xs text-[#94a3b8] mt-1">Crie a primeira compra para movimentar o histórico e faturamento deste fornecedor.</p>
+              </div>
+            ) : (
+              <>
+                {/* Mobile: Cards de Compra */}
+                <div className="block sm:hidden divide-y divide-[#f1f5f9] rounded-xl border border-[#e2e8f0] overflow-hidden bg-white">
+                  {supplier.purchases.map(p => (
+                    <Link
+                      key={p.id}
+                      href={`/purchases/${p.id}/nota`}
+                      className="p-3.5 flex items-center justify-between gap-3 hover:bg-[#fafafa] transition-colors"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-mono text-xs font-bold text-[#111111]">
+                            NF: {p.invoice || 'S/N'}
+                          </span>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#f1f5f9] text-[#475569] border border-[#e2e8f0]">
+                            {p.status}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-[#64748b]">
+                          <span>{p.date}</span>
+                          <span>•</span>
+                          <span>{p.items} {p.items === 1 ? 'item' : 'itens'}</span>
+                        </div>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <span className="text-xs font-bold text-[#111111] block">
+                          {formatBRL(p.total)}
+                        </span>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-[#cbd5e1] shrink-0" />
+                    </Link>
+                  ))}
+                </div>
+
+                {/* Desktop: Tabela de Compras */}
+                <div className="hidden sm:block overflow-x-auto rounded-xl border border-[#e2e8f0]">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-[#f8fafc] border-b border-[#e2e8f0] text-xs font-bold text-[#64748b]">
+                        <th className="text-left py-3 px-4">Nota Fiscal</th>
+                        <th className="text-left py-3 px-4">Data</th>
+                        <th className="text-center py-3 px-4">Itens</th>
+                        <th className="text-center py-3 px-4">Status</th>
+                        <th className="text-right py-3 px-4">Total</th>
+                        <th className="text-center py-3 px-4 w-20">Ação</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#f1f5f9]">
+                      {supplier.purchases.map(p => (
+                        <tr key={p.id} className="hover:bg-[#fafafa] transition-colors group">
+                          <td className="py-3 px-4 font-mono font-bold text-xs text-[#111111]">
+                            {p.invoice || 'S/N'}
+                          </td>
+                          <td className="py-3 px-4 text-xs text-[#64748b]">
+                            {p.date}
+                          </td>
+                          <td className="py-3 px-4 text-center text-xs text-[#475569]">
+                            {p.items} un
+                          </td>
+                          <td className="py-3 px-4 text-center">
+                            <span className="inline-block text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#f1f5f9] text-[#475569] border border-[#e2e8f0]">
+                              {p.status}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-right font-bold text-xs text-[#111111]">
+                            {formatBRL(p.total)}
+                          </td>
+                          <td className="py-3 px-4 text-center">
+                            <Link 
+                              href={`/purchases/${p.id}/nota`}
+                              className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-[#64748b] hover:text-[#111111] hover:bg-[#f1f5f9] transition-colors"
+                              title="Ver Nota"
+                            >
+                              <ChevronRight className="w-4 h-4" />
+                            </Link>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
+          </div>
+        </TabsContent>
+
+        {/* ABA 3: DADOS BANCÁRIOS & FATURAMENTO */}
+        <TabsContent value="dados-bancarios">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+            {/* Card PIX */}
+            <div className="bg-white border border-[#e6e6e6] rounded-2xl p-4 sm:p-6 shadow-2xs flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between pb-3 border-b border-[#f1f5f9] mb-4">
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="w-4 h-4 text-[#16a34a]" />
+                    <h3 className="text-sm font-bold text-[#111111]">Chave PIX Cadastrada</h3>
+                  </div>
+                  {supplier.pix_key && supplier.pix_key !== '—' && (
+                    <CopyButton text={supplier.pix_key} label="Copiar Chave" />
+                  )}
+                </div>
+
+                <div className="bg-[#f8fafc] rounded-xl p-3.5 border border-[#e2e8f0] mb-3">
+                  <span className="text-[10px] font-bold text-[#64748b] uppercase tracking-wider block mb-1">
+                    Chave para Pagamento
+                  </span>
+                  <div className="text-sm sm:text-base font-mono font-bold text-[#0f172a] select-all break-all">
+                    {supplier.pix_key || 'Nenhuma chave cadastrada'}
+                  </div>
+                </div>
+
+                <div className="space-y-1.5 text-xs">
+                  <div className="flex justify-between py-1.5 border-b border-[#f1f5f9]">
+                    <span className="text-[#64748b]">Favorecido:</span>
+                    <strong className="text-[#111111] font-semibold">{supplier.name}</strong>
+                  </div>
+                  <div className="flex justify-between py-1.5 border-b border-[#f1f5f9]">
+                    <span className="text-[#64748b]">CNPJ do Favorecido:</span>
+                    <strong className="font-mono text-[#111111]">{supplier.cnpj}</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Card Transferência Bancária */}
+            <div className="bg-white border border-[#e6e6e6] rounded-2xl p-4 sm:p-6 shadow-2xs">
+              <div className="flex items-center gap-2 pb-3 border-b border-[#f1f5f9] mb-4">
+                <Building2 className="w-4 h-4 text-[#2563eb]" />
+                <h3 className="text-sm font-bold text-[#111111]">Dados Bancários (TED / DOC)</h3>
+              </div>
+
+              <div className="space-y-2 text-xs">
+                <div className="flex justify-between py-1.5 border-b border-[#f1f5f9]">
+                  <span className="text-[#64748b]">Banco:</span>
+                  <strong className="text-[#111111] font-semibold">{supplier.bank || '—'}</strong>
+                </div>
+                <div className="flex justify-between py-1.5 border-b border-[#f1f5f9]">
+                  <span className="text-[#64748b]">Agência:</span>
+                  <strong className="font-mono text-[#111111]">{supplier.agency || '—'}</strong>
+                </div>
+                <div className="flex justify-between py-1.5 border-b border-[#f1f5f9]">
+                  <span className="text-[#64748b]">Conta Corrente:</span>
+                  <strong className="font-mono text-[#111111]">{supplier.account || '—'}</strong>
+                </div>
+                <div className="flex justify-between py-1.5 border-b border-[#f1f5f9]">
+                  <span className="text-[#64748b]">Titular da Conta:</span>
+                  <strong className="text-[#111111]">{supplier.name}</strong>
+                </div>
+                <div className="flex justify-between py-1.5">
+                  <span className="text-[#64748b]">Condição de Pagamento:</span>
+                  <strong className="text-[#16a34a] font-bold">{supplier.payment_terms || 'À vista'}</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* ABA 4: CATÁLOGOS & ARQUIVOS */}
+        <TabsContent value="catalogos">
+          <div className="bg-white border border-[#e6e6e6] rounded-2xl p-4 sm:p-6 shadow-2xs">
+            <div className="pb-3 mb-4 border-b border-[#f1f5f9]">
+              <h3 className="text-sm sm:text-base font-bold text-[#111111]">Catálogos e Tabelas de Preço</h3>
+              <p className="text-xs text-[#666666] mt-0.5">
+                Faça upload de arquivos PDF, tabelas e catálogos de produtos deste fornecedor.
+              </p>
+            </div>
+            <SupplierCatalogsEditor supplierId={supplier.id} />
+          </div>
+        </TabsContent>
+
+        {/* ABA 5: HISTÓRICO / LINHA DO TEMPO */}
+        <TabsContent value="historico">
+          <div className="bg-white border border-[#e6e6e6] rounded-2xl overflow-hidden shadow-2xs">
+            <div className="p-4 sm:p-5 border-b border-[#f1f5f9]">
+              <h3 className="text-sm font-bold text-[#111111]">Linha do Tempo de Atividades</h3>
+              <p className="text-xs text-[#666666] mt-0.5">Histórico recente de pedidos e compras realizadas.</p>
+            </div>
+
+            <div className="divide-y divide-[#f1f5f9]">
+              {supplier.timeline.length === 0 ? (
+                <div className="p-8 text-center text-[#888888] text-xs">
+                  Nenhuma atividade registrada até o momento.
+                </div>
+              ) : (
+                supplier.timeline.map((h, i) => (
+                  <div key={i} className="p-3.5 flex items-start gap-3 hover:bg-[#fafafa] transition-colors">
+                    <div className="w-2 h-2 rounded-full bg-[#1f2328] mt-1.5 shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-[#111111]">{h.action}</p>
+                      <p className="text-xs text-[#64748b] mt-0.5">{h.details}</p>
+                    </div>
+                    <div className="text-right text-xs text-[#94a3b8] shrink-0">
+                      <div>{h.date}</div>
+                      <div>{h.time}</div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </TabsContent>
       </Tabs>
+
+      {/* Modal de Confirmação com EXCLUIR */}
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        itemName={supplier.name}
+        description="Esta ação excluirá o fornecedor permanentemente do sistema TEKNIX."
+        actionWord="EXCLUIR"
+        actionTitle="Excluir Fornecedor"
+        buttonText="Sim, Excluir"
+      />
     </div>
   )
 }

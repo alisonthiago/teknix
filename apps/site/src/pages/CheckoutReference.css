@@ -2992,6 +2992,30 @@
 
 /* Mobile: evita overflow horizontal no card Pix e no formulário do checkout. */
 @media (max-width: 760px) {
+  #root .tkn-checkout-back {
+    padding-left: 24px;
+    padding-top: 12px;
+    box-sizing: border-box;
+  }
+
+  #root .tkn-checkout-content {
+    padding-inline: 24px;
+    padding-bottom: 40px;
+    box-sizing: border-box;
+  }
+
+  #root .tkn-checkout-content > h1[data-widget-id="checkout-11"] {
+    padding-inline: 16px;
+    box-sizing: border-box;
+  }
+
+  /* Espaçamento interno do bloco do produto no checkout mobile. */
+  #root .tkn-checkout-products {
+    width: 100%;
+    padding-inline: 16px;
+    box-sizing: border-box;
+  }
+
   #root .tkn-checkout,
   #root .tkn-checkout-main,
   #root .tkn-checkout-shell,
@@ -3006,7 +3030,7 @@
 
   #root .tkn-checkout-shell {
     width: 100%;
-    padding-inline: 12px;
+    padding-inline: 20px;
   }
 
   #root .tkn-checkout-main {
@@ -3070,8 +3094,14 @@
   }
 
   #root .tkn-checkout-content .tkn-checkout-payment-icon {
+    display: block !important;
     width: 32px;
     height: 32px;
+    min-width: 32px;
+    min-height: 32px;
+    object-fit: contain;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 
   #root .tkn-checkout-content .tkn-checkout-payment small {

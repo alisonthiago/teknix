@@ -76,7 +76,7 @@ export default function AdminChrome({
               }}
             />
           </div>
-          <main className="flex-1 w-full max-w-[1400px] mx-auto px-3 sm:px-6 lg:px-12 xl:px-16 py-4 lg:py-8 print:p-0 print:max-w-none print:w-full">
+          <main className="flow-page-content flex-1 w-full max-w-[1400px] mx-auto px-3 sm:px-6 lg:px-12 xl:px-16 py-4 lg:py-8 print:p-0 print:max-w-none print:w-full">
             {children}
           </main>
         </div>
@@ -86,4 +86,3 @@ export default function AdminChrome({
     </InternalChatProvider>
   )
 }
-

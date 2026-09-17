@@ -153,7 +153,10 @@ export default function StorefrontProductCard({ product: p, to, instance="catalo
   const showShipping = cardSchema.show_shipping !== false
   const showButton = cardSchema.show_button === true || !!cardSchema.button_text
   const buttonText = (cardEdit?.content?.button_text as string) || cardSchema.button_text || 'Comprar Agora'
-  const buttonLink = (cardEdit?.content?.button_link as string) || cardSchema.button_link || to || `/produtos/${p.id}`
+  const pAny = p as any
+  const productSlug = pAny.slug || pAny.store_meta?.slug || pAny.commerceProduct?.slug || pAny.sku || pAny.id
+  const targetProductPath = to || (productSlug ? `/${encodeURIComponent(String(productSlug).replace(/^\/+/, ''))}` : `/${pAny.id}`)
+  const buttonLink = (cardEdit?.content?.button_link as string) || cardSchema.button_link || targetProductPath
 
   const cardCustomStyles: React.CSSProperties = {
     // Card container
@@ -425,8 +428,8 @@ export default function StorefrontProductCard({ product: p, to, instance="catalo
 
   return (
     <Editable
-      as={to ? Link : 'div'}
-      to={to}
+      as={Link}
+      to={targetProductPath}
       widgetId={cardWidgetId}
       globalKey="component:product-card"
       widgetType="storefrontCard"

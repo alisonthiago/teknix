@@ -19,7 +19,7 @@ import {
 import { InternalChatProvider } from '../contexts/InternalChatContext'
 import FloatingMessenger from './internal-chat/FloatingMessenger'
 import { TeknixLogo } from './TeknixLogo'
-import { User, Users, Settings, Layers, LogOut, Eye, EyeOff, ChevronDown, ChevronRight, CreditCard, Shield, RefreshCw, ExternalLink, X, PanelLeft, ChevronsUpDown, Bell, CheckCheck } from 'lucide-react'
+import { User, Users, Settings, Layers, LogOut, Eye, EyeOff, ChevronDown, ChevronRight, ChevronLeft, CreditCard, Shield, RefreshCw, ExternalLink, X, PanelLeft, ChevronsUpDown, Bell, CheckCheck, ArrowLeft } from 'lucide-react'
 import './HubLayout.css'
 
 // ─── Ícones originais + logos de integração ────────────────────────────────
@@ -501,6 +501,9 @@ function HubLayoutContent() {
           {/* Título da Página no Mobile (oculto no Painel no celular) */}
           {!isDetailPageWithBack && getPageTitle(location.pathname) !== 'Painel' && (
             <div className="hub-mobile-header-title-row">
+              <button type="button" className="btn-back-to-settings" onClick={() => navigate(-1)} title="Voltar" aria-label="Voltar">
+                <ChevronLeft size={20} />
+              </button>
               <h1 className="hub-mobile-page-title">{getPageTitle(location.pathname)}</h1>
             </div>
           )}
@@ -929,6 +932,15 @@ function HubLayoutContent() {
                     <Shield size={17} className="modern-item-icon" />
                     <span>Segurança da conta</span>
                   </Link>
+                  <div className="modern-menu-divider" />
+                  <button
+                    type="button"
+                    className="modern-user-item modern-user-logout"
+                    onClick={() => { setShowUserDropdown(false); handleLogout() }}
+                  >
+                    <LogOut size={17} className="modern-item-icon" />
+                    <span>Sair</span>
+                  </button>
                 </div>
               </div>
             </div>

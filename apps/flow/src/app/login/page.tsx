@@ -121,32 +121,6 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-[#1a1a1a] via-[#2a2a2a] to-[#000000]">
         {/* Grid pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
-        {/* Lime glow */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[380px] w-[380px] rounded-full bg-[#B5F500] opacity-20 blur-[120px]" />
-        {/* Promo content */}
-        <div className="relative z-10 flex flex-col justify-center px-14 xl:px-20 text-white">
-          <span className="text-[11px] font-bold tracking-[0.2em] text-[#B5F500] uppercase mb-6">
-            TEKNIX • PAINEL DE OPERAÇÕES
-          </span>
-          <h2 className="text-[36px] xl:text-[42px] font-semibold leading-tight mb-4">
-            Controle sua loja<br />em um só lugar.
-          </h2>
-          <p className="text-[16px] text-white/60 leading-relaxed mb-8 max-w-sm">
-            Produtos, pedidos, vendas e integrações organizados para você trabalhar melhor.
-          </p>
-          <div className="flex flex-col gap-3">
-            {['Gestão simples e centralizada', 'Acompanhe seus resultados', 'Venda com mais eficiência'].map((item) => (
-              <div key={item} className="flex items-center gap-3">
-                <div className="w-5 h-5 rounded-full bg-[#B5F500]/20 border border-[#B5F500]/40 flex items-center justify-center shrink-0">
-                  <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                    <path d="M1 4L3.5 6.5L9 1" stroke="#B5F500" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
-                <span className="text-[14px] text-white/80">{item}</span>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   )

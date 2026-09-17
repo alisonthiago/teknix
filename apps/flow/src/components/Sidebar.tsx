@@ -16,6 +16,7 @@ import {
   Store,
   Radio,
   Tag,
+  Layers,
   ExternalLink,
   X,
 } from 'lucide-react'
@@ -50,6 +51,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: '/pedidos', label: 'Pedidos', icon: ShoppingCart, permission: 'orders.view' },
       { href: '/vendas', label: 'Vendas', icon: DollarSign, permission: 'sales.view' },
       { href: '/operacao', label: 'Catálogo & Estoque', icon: Package, permission: 'products.view' },
+      { href: '/multicanal', label: 'Multicanal', icon: Layers, permission: null },
       { href: '/marketplaces', label: 'Marketplaces', icon: Store, permission: 'marketplaces.view' },
       { href: '/clientes', label: 'Clientes & CRM', icon: User, permission: null },
     ],

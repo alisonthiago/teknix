@@ -91,7 +91,7 @@ export default function AnalisesPage() {
         <TabsContent value="lucro-real">
           <div className="space-y-4">
             {/* Top Metrics Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <StatCard label="Faturamento Bruto" value={formatBRL(profitMetrics.totalRevenue)} subtitle={`${profitMetrics.ordersCount} pedidos faturados`} />
               <StatCard label="Custos de Produtos (CMV)" value={formatBRL(profitMetrics.totalCOGS)} subtitle="Custo das mercadorias vendidas" />
               <StatCard label="Taxas & Comissões" value={formatBRL(profitMetrics.totalFees)} subtitle="Tarifas de marketplaces" />

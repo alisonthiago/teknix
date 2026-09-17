@@ -199,7 +199,7 @@ export default function InvoicesList() {
   const countErrors = invoices.filter(i => i.status === 'rejeitada' || i.status === 'dados_incompletos').length
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div className="invoices-page-container" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {/* Stats */}
       <div className="hub-kpi-grid">
         {[
@@ -248,8 +248,8 @@ export default function InvoicesList() {
         exportTitle="Notas Fiscais"
         exportFilename="notas-fiscais"
         entityLabel="nota"
-        emptyMessage="Nenhuma nota fiscal encontrada."
-        emptyDescription={search ? `Nenhum resultado para "${search}".` : 'Quando os pedidos forem faturados, as notas aparecerão aqui.'}
+        emptyMessage="Nenhuma nota ainda."
+        emptyDescription={search ? `Nenhum resultado para "${search}".` : 'As notas aparecerão aqui após o faturamento.'}
         renderRowActions={(inv, onClose) => inv.order_id ? (
           <Link
             to={`/hub/pedidos/${inv.order_id}`}

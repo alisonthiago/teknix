@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { ArrowLeft } from 'lucide-react'
 
 export function PageHeader({
   title,
@@ -16,9 +17,19 @@ export function PageHeader({
   if (!description && !actions && !children) return null
   return (
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5">
-      {description ? (
-        <p className="text-[13px] text-[#666666] leading-relaxed">{description}</p>
-      ) : null}
+      <div className="w-full">
+        {title ? (
+          <div className="hub-mobile-header-title-row lg:hidden !justify-start gap-3 mb-3">
+            <button type="button" className="hub-mobile-back-btn" aria-label="Voltar" onClick={() => window.history.back()}>
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <h1 className="hub-mobile-page-title !text-[16px]">{title}</h1>
+          </div>
+        ) : null}
+        {description ? (
+          <p className="text-[13px] text-[#666666] leading-relaxed">{description}</p>
+        ) : null}
+      </div>
       {(actions || children) && (
         <div className="flex items-center gap-2.5 shrink-0 sm:ml-auto flex-wrap">
           {actions}
@@ -50,7 +61,8 @@ export function PrimaryButton({
       onClick={onClick}
       disabled={disabled}
       title={title}
-      className={`mp-btn-primary ${className}`}
+      style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+      className={`btn btn-primary ${className}`}
     >
       {children}
     </button>
@@ -78,7 +90,8 @@ export function SecondaryButton({
       onClick={onClick}
       disabled={disabled}
       title={title}
-      className={`mp-btn-secondary ${className}`}
+      style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+      className={`btn btn-secondary ${className}`}
     >
       {children}
     </button>
@@ -108,9 +121,9 @@ export function GhostButton({
 export function StatCard({ label, value, subtitle }: { label: string; value: string; subtitle?: string }) {
   return (
     <div className="bg-white rounded-2xl border border-[#e6e6e6] p-5 shadow-none space-y-1">
-      <p className="text-[11px] font-semibold text-[#8a8a8a] tracking-wider uppercase">{label}</p>
-      <p className="text-2xl sm:text-[26px] font-bold text-[#111111] tracking-tight truncate">{value}</p>
-      {subtitle && <p className="text-xs text-[#666666] truncate">{subtitle}</p>}
+      <p className="text-[12px] font-semibold text-[#8a8a8a] tracking-wider uppercase">{label}</p>
+      <p className="!text-[24px] sm:text-[26px] font-bold text-[#111111] tracking-tight truncate">{value}</p>
+      {subtitle && <p className="text-[12px] text-[#666666] truncate">{subtitle}</p>}
     </div>
   )
 }
@@ -204,4 +217,3 @@ export function StatusBadge({ status, children }: { status: 'success' | 'warning
     </span>
   )
 }
-

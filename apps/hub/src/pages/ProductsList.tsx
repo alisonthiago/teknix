@@ -23,6 +23,7 @@ import {
 } from 'lucide-react'
 import './ProductsList.css'
 import { exportToPDF, exportToXLSX } from '../lib/exportTable'
+import DeleteConfirmationModal from '../components/DeleteConfirmationModal'
 
 function formatMoney(value: number) {
   return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -44,6 +45,11 @@ export default function ProductsList() {
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [inlinePrices, setInlinePrices] = useState<Record<string, { price: string; promo: string }>>({})
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
+  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; ids: string[]; name: string }>({
+    isOpen: false,
+    ids: [],
+    name: ''
+  })
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -71,9 +77,12 @@ export default function ProductsList() {
         setProducts(data)
         const initialPrices: Record<string, { price: string; promo: string }> = {}
         data.forEach(p => {
+          const storeMeta = Array.isArray((p as any).store_meta) ? (p as any).store_meta[0] : (p as any).store_meta
+          const curPrice = (p as any).site_price || storeMeta?.sale_price || p.price || 0
+          const curPromo = storeMeta?.promotional_price || p.promo_price || ''
           initialPrices[p.id] = {
-            price: p.price ? p.price.toString() : '0',
-            promo: p.promo_price ? p.promo_price.toString() : ''
+            price: curPrice ? curPrice.toString() : '0',
+            promo: curPromo ? curPromo.toString() : ''
           }
         })
         setInlinePrices(initialPrices)
@@ -102,9 +111,17 @@ export default function ProductsList() {
     const numValue = parseFloat(value) || 0
     try {
       if (field === 'price') {
-        await supabase.from('products').update({ price: numValue, sell_price: numValue }).eq('id', id)
+        // Atualiza tanto site_price na tabela central products quanto sale_price em product_store_metadata
+        await supabase.from('products').update({ site_price: numValue, updated_at: new Date().toISOString() }).eq('id', id)
+        const { data: meta } = await supabase.from('product_store_metadata').select('id').eq('product_id', id).maybeSingle()
+        if (meta?.id) {
+          await supabase.from('product_store_metadata').update({ sale_price: numValue, updated_at: new Date().toISOString() }).eq('id', meta.id)
+        }
       } else {
-        await supabase.from('products').update({ promo_price: numValue > 0 ? numValue : null }).eq('id', id)
+        const { data: meta } = await supabase.from('product_store_metadata').select('id').eq('product_id', id).maybeSingle()
+        if (meta?.id) {
+          await supabase.from('product_store_metadata').update({ promotional_price: numValue > 0 ? numValue : null, updated_at: new Date().toISOString() }).eq('id', meta.id)
+        }
       }
     } catch (e) {
       console.error('Error saving inline price:', e)
@@ -113,6 +130,17 @@ export default function ProductsList() {
 
   async function toggleProductPublish(productId: string, willPublish: boolean) {
     try {
+      // 1. Atualiza na tabela central products (FLOW / Operação)
+      await supabase
+        .from('products')
+        .update({
+          is_site_published: willPublish,
+          status: willPublish ? 'ACTIVE' : 'PAUSED',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', productId)
+
+      // 2. Atualiza em mão dupla no product_store_metadata (HUB / SITE)
       const { data: existing } = await supabase
         .from('product_store_metadata')
         .select('id')
@@ -139,6 +167,7 @@ export default function ProductsList() {
         const currentMeta = Array.isArray((p as any).store_meta) ? (p as any).store_meta[0] : (p as any).store_meta
         return {
           ...p,
+          is_site_published: willPublish,
           store_meta: { ...(currentMeta || {}), published: willPublish }
         }
       }))
@@ -147,27 +176,32 @@ export default function ProductsList() {
     }
   }
 
-  async function handleDelete(id: string) {
-    if (confirm('Deseja realmente excluir este produto?')) {
-      try {
-        await supabase.from('products').delete().eq('id', id)
-      } catch (e) {
-        console.error(e)
-      }
-      setProducts(products.filter(p => p.id !== id))
-    }
+  function requestDelete(product: Product) {
+    setDeleteModal({
+      isOpen: true,
+      ids: [product.id],
+      name: product.name
+    })
   }
 
-  async function handleBulkDelete() {
+  function requestBulkDelete() {
     if (selectedIds.length === 0) return
-    if (!confirm(`Deseja realmente excluir os ${selectedIds.length} produtos selecionados?`)) return
+    setDeleteModal({
+      isOpen: true,
+      ids: [...selectedIds],
+      name: `${selectedIds.length} produto(s) selecionado(s)`
+    })
+  }
+
+  async function confirmDeleteProducts() {
     try {
-      await supabase.from('products').delete().in('id', selectedIds)
-      setProducts(products.filter(p => !selectedIds.includes(p.id)))
-      setSelectedIds([])
+      await supabase.from('products').delete().in('id', deleteModal.ids)
+      setProducts(products.filter(p => !deleteModal.ids.includes(p.id)))
+      setSelectedIds(selectedIds.filter(id => !deleteModal.ids.includes(id)))
+      setDeleteModal({ isOpen: false, ids: [], name: '' })
     } catch (e) {
-      console.error('Erro ao excluir produtos em massa:', e)
-      alert('Erro ao excluir produtos.')
+      console.error('Erro ao excluir produto:', e)
+      alert('Erro ao excluir produto.')
     }
   }
 
@@ -335,7 +369,7 @@ export default function ProductsList() {
               </span>
               <button
                 className="btn-filter-action"
-                onClick={handleBulkDelete}
+                onClick={requestBulkDelete}
                 style={{ color: '#dc2626', borderColor: '#fca5a5', background: '#fef2f2', fontWeight: 600 }}
               >
                 <Trash2 size={13} /> Excluir selecionados
@@ -419,12 +453,12 @@ export default function ProductsList() {
           ) : (
             filteredProducts.map((product, index) => {
               const storeMeta = Array.isArray((product as any).store_meta) ? (product as any).store_meta[0] : (product as any).store_meta
-              const rawPrice = storeMeta?.sale_price ?? (product as any).sell_price ?? product.price ?? 0
+              const rawPrice = (product as any).site_price ?? storeMeta?.sale_price ?? (product as any).sell_price ?? product.price ?? 0
               const salePrice = Number(rawPrice)
               const rawPromo = storeMeta?.promotional_price ?? product.promo_price ?? null
               const promoPrice = (rawPromo && Number(rawPromo) > 0) ? Number(rawPromo) : null
               const imgUrl = (product.images && product.images[0]) || product.image_url || (product as any).main_image || ''
-              const isPub = Boolean(storeMeta?.published ?? (product as any).published)
+              const isPub = Boolean((product as any).is_site_published ?? storeMeta?.published ?? (product as any).published)
               const isMenuOpen = openMenuId === product.id
               const isNearBottom = index >= Math.max(0, filteredProducts.length - 2) && filteredProducts.length >= 3
 
@@ -570,7 +604,7 @@ export default function ProductsList() {
 
                           <a
                             className="product-dropdown-item"
-                            href={`http://localhost:5173/produtos/${product.slug || product.id}`}
+                            href={`http://localhost:5173/${(product as any).store_meta?.slug || (product.name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || product.slug || product.id}`}
                             target="_blank"
                             rel="noreferrer"
                             onClick={() => setOpenMenuId(null)}
@@ -584,7 +618,8 @@ export default function ProductsList() {
                             className="product-dropdown-item"
                             onClick={() => {
                               setOpenMenuId(null)
-                              navigator.clipboard?.writeText(`http://localhost:5173/produtos/${product.slug || product.id}`)
+                              const targetSlug = (product as any).store_meta?.slug || (product.name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || product.slug || product.id
+                              navigator.clipboard?.writeText(`http://localhost:5173/${targetSlug}`)
                               alert('Link público do produto copiado!')
                             }}
                           >
@@ -611,7 +646,7 @@ export default function ProductsList() {
                             className="product-dropdown-item delete"
                             onClick={() => {
                               setOpenMenuId(null)
-                              handleDelete(product.id)
+                              requestDelete(product)
                             }}
                           >
                             <Trash2 size={15} />
@@ -636,6 +671,18 @@ export default function ProductsList() {
         </div>
 
       </div>
+
+      {/* Modal de Confirmação com EXCLUIR */}
+      <DeleteConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, ids: [], name: '' })}
+        onConfirm={confirmDeleteProducts}
+        itemName={deleteModal.name}
+        description="Esta ação removerá permanentemente os produtos selecionados do catálogo e banco de dados."
+        actionWord="EXCLUIR"
+        actionTitle="Exclusão de Produtos"
+        buttonText="Sim, Excluir"
+      />
     </div>
   )
 }

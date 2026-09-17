@@ -197,9 +197,9 @@ export async function fetchHomeData(): Promise<HomeData> {
       tagline: p.category || 'Destaque TEKNIX',
       callout: (p.stock || 0) > 0 ? `Em estoque: ${p.stock} unidades — Frete Rápido` : 'Sob encomenda',
       buttonText: 'Comprar agora',
-      buttonLink: `/produto/${p.slug || p.sku || p.id}`,
+      buttonLink: `/${p.slug || p.sku || p.id}`,
       secondaryButtonText: 'Ver detalhes',
-      secondaryButtonLink: `/produto/${p.slug || p.sku || p.id}`,
+      secondaryButtonLink: `/${p.slug || p.sku || p.id}`,
       imageUrl: p.image_url || 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=1400&q=80',
       productId: p.id
     }))
@@ -210,9 +210,9 @@ export async function fetchHomeData(): Promise<HomeData> {
       subtitle: p.promo_price ? `Oferta: R$ ${Number(p.promo_price).toFixed(2)}` : `A partir de R$ ${Number(p.price || 0).toFixed(2)}`,
       tagline: p.category || 'Destaque',
       buttonText: 'Ver Oferta',
-      buttonLink: `/produto/${p.slug || p.sku || p.id}`,
+      buttonLink: `/${p.slug || p.sku || p.id}`,
       secondaryButtonText: 'Comprar',
-      secondaryButtonLink: `/produto/${p.slug || p.sku || p.id}`,
+      secondaryButtonLink: `/${p.slug || p.sku || p.id}`,
       imageUrl: p.image_url || 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=800&q=80',
       productId: p.id
     }))

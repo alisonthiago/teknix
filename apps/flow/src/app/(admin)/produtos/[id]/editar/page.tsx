@@ -30,7 +30,6 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-[#333]">Editar Produto</h2>
-          <p className="text-[#999]">Atualize as informações básicas e custos.</p>
         </div>
         <Link href={`/produtos/${id}`}>
           <Button variant="outline">Cancelar</Button>

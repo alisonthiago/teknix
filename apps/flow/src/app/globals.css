@@ -1,24 +1,32 @@
 @import '../design-system/index.css';
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-/* Dropdowns neutros em todo o Flow: sem destaque azul nativo. */
+/* Forçar color-scheme light em todo o Flow para evitar texto branco no macOS / tema escuro */
+html,
+body,
+:root {
+  color-scheme: light;
+}
+
+/* Dropdowns neutros em todo o Flow: sem destaque azul nativo e com texto escuro garantido. */
 select,
 select option,
 select option:checked,
 select option:hover {
-  background-color: #ffffff;
-  color: #242424;
+  background-color: #ffffff !important;
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
 }
 
 select {
-  color-scheme: light;
+  color-scheme: light !important;
 }
 
 .product-detail-page {
   font-family: var(--font-family-base, 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
 }
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -378,7 +386,7 @@ select {
 
 .sidebar-toggle:hover {
   background: #ffffff;
-  color: #0f172a;
+  color: #000000;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
@@ -712,8 +720,20 @@ table {
 @layer components {
   .mp-card {
     @apply bg-white rounded-[14px] border border-[#e6e6e6];
-    padding: var(--mp-card-padding);
+    padding: 24px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  }
+
+  @media (min-width: 640px) {
+    .mp-card {
+      padding: 24px 32px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .mp-card {
+      padding: 24px 36px;
+    }
   }
 
   .mp-card-sm {
@@ -842,6 +862,16 @@ table {
     box-shadow: none;
   }
 
+  .header-live-button-outside {
+    background: #ffffff !important;
+    border-color: #e6e6e6 !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+  }
+  .header-live-button-outside:hover {
+    background: #f9fafb !important;
+    border-color: #1f2328 !important;
+  }
+
   .hub-live-revenue-btn {
     display: inline-flex;
     align-items: center;
@@ -850,7 +880,7 @@ table {
     background: transparent;
     padding: 0 4px 0 0;
     cursor: pointer;
-    color: #0f172a;
+    color: #000000;
     text-decoration: none;
     line-height: 1;
   }
@@ -893,7 +923,7 @@ table {
     font-size: 11.5px;
     font-weight: 700;
     letter-spacing: -0.01em;
-    color: #0f172a;
+    color: #000000;
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
     user-select: none;
@@ -918,7 +948,7 @@ table {
 
   .hub-live-eye-btn:hover {
     background: rgba(0, 0, 0, 0.08);
-    color: #0f172a;
+    color: #000000;
   }
 
   /* ── Header User Trigger Button (1:1 com HUB) ── */
@@ -935,6 +965,20 @@ table {
     cursor: pointer;
     transition: all 0.15s ease;
     box-shadow: none;
+  }
+
+  /* Cabeçalho: os controles ficam integrados ao pill verde, sem contorno escuro. */
+  .hub-live-revenue-capsule,
+  .mp-wpn-header-user-btn {
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .hub-live-revenue-capsule:hover,
+  .mp-wpn-header-user-btn:hover {
+    background: transparent !important;
+    border-color: transparent !important;
   }
 
   .mp-wpn-header-user-btn:hover {
@@ -985,11 +1029,12 @@ table {
   @media (max-width: 1024px) {
     .hub-mobile-header-bar {
       display: block;
+      position: -webkit-sticky;
       position: sticky;
       top: 0;
       z-index: 40;
       padding: 10px 14px 14px;
-      background: #ffffff;
+      background: #f5f5f5;
       min-width: 0;
       overflow: hidden;
     }
@@ -1000,7 +1045,7 @@ table {
       display: flex !important;
       align-items: center !important;
       justify-content: space-between !important;
-      padding: 8px 10px !important;
+      padding: 21px 14px !important;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
       width: 100%;
       box-sizing: border-box;
@@ -1029,7 +1074,7 @@ table {
     }
 
     .hub-mobile-page-title {
-      font-size: 22px;
+      font-size: 18px;
       font-weight: 600;
       color: #1f2328;
       letter-spacing: -0.02em;
@@ -1047,7 +1092,7 @@ table {
   }
 
   .mp-stack {
-    @apply flex flex-col gap-3 sm:gap-4;
+    @apply flex flex-col gap-6 sm:gap-10;
   }
 
   /* ─── Tipografia estilo Nubank/MP — título + descrição ─── */
@@ -1197,8 +1242,8 @@ button:disabled {
   background-color: #F7F7F7 !important;
 }
 
-.label-view-tab:not([class*="bg-[#0f172a]"]):not([class*="bg-[#1f2328]"]) { background-color: transparent !important; }
-.label-view-tab:not([class*="bg-[#0f172a]"]):not([class*="bg-[#1f2328]"]):hover { background-color: transparent !important; }
+.label-view-tab:not([class*="bg-[#000000]"]):not([class*="bg-[#1f2328]"]) { background-color: transparent !important; }
+.label-view-tab:not([class*="bg-[#000000]"]):not([class*="bg-[#1f2328]"]):hover { background-color: transparent !important; }
 
 .label-status-filter,
 .label-status-filter:hover,
@@ -1245,14 +1290,212 @@ html, body, table, button, input, select {
   text-rendering: optimizeLegibility;
 }
 
+/* Campos consistentes em todo o FLOW: texto centralizado e placeholder sem corte. */
+input, select, textarea {
+  box-sizing: border-box;
+  line-height: 1.35;
+}
+
+input::placeholder, textarea::placeholder {
+  line-height: 1.35;
+  opacity: 1;
+}
+
+/* Selects do FLOW: evita texto branco/invisível em campos com fundo claro. */
+select {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+  -webkit-text-fill-color: #000000 !important;
+}
+
+select option {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+}
+
 /* ==========================================================================
    PREVENÇÃO GLOBAL DE ZOOM EM FORMULÁRIOS NO MOBILE (iOS SAFARI / CHROME)
    ========================================================================== */
+@media (max-width: 768px) {
+  .sales-filters {
+    flex-wrap: wrap !important;
+    overflow: visible !important;
+  }
+
+  .sales-filters > .relative {
+    flex: 1 1 100% !important;
+    min-width: 0 !important;
+  }
+
+  .sales-filters > select {
+    flex: 1 1 calc(50% - 6px) !important;
+    width: auto !important;
+    min-width: 0 !important;
+  }
+
+  .sales-table {
+    width: 100% !important;
+    min-width: 0 !important;
+    table-layout: fixed;
+  }
+
+  .sales-table th,
+  .sales-table td {
+    padding: 14px 8px !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .sales-table th:nth-child(3),
+  .sales-table td:nth-child(3),
+  .sales-table th:nth-child(4),
+  .sales-table td:nth-child(4),
+  .sales-table th:nth-child(5),
+  .sales-table td:nth-child(5),
+  .sales-table th:nth-child(6),
+  .sales-table td:nth-child(6) {
+    display: none;
+  }
+
+  .sales-table th:nth-child(1),
+  .sales-table td:nth-child(1) { width: 48%; }
+  .sales-table th:nth-child(2),
+  .sales-table td:nth-child(2) { width: 22%; }
+  .sales-table th:nth-child(7),
+  .sales-table td:nth-child(7) { width: 20%; }
+  .sales-table th:nth-child(8),
+  .sales-table td:nth-child(8) { width: 10%; }
+}
+
+@media (max-width: 390px) {
+  .sales-table th,
+  .sales-table td {
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+  }
+
+  .sales-table th:nth-child(7),
+  .sales-table td:nth-child(7) { display: none; }
+  .sales-table th:nth-child(8),
+  .sales-table td:nth-child(8) { width: 18%; }
+  .sales-table th:nth-child(1),
+  .sales-table td:nth-child(1) { width: 58%; }
+  .sales-table th:nth-child(2),
+  .sales-table td:nth-child(2) { width: 24%; }
+}
+
+@media (max-width: 480px) {
+  .sales-table th:nth-child(2),
+  .sales-table td:nth-child(2) {
+    display: none;
+  }
+
+  .sales-table th:nth-child(1),
+  .sales-table td:nth-child(1) { width: 64%; }
+  .sales-table th:nth-child(7),
+  .sales-table td:nth-child(7) { width: 24%; }
+  .sales-table th:nth-child(8),
+  .sales-table td:nth-child(8) { width: 12%; }
+}
+
+@media (max-width: 640px) {
+  .finance-filter {
+    display: block !important;
+    width: 100% !important;
+    min-height: 38px !important;
+    color: #111111 !important;
+    background-color: #ffffff !important;
+    -webkit-text-fill-color: #111111 !important;
+    opacity: 1 !important;
+  }
+
+  .operacao-actions {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    gap: 8px !important;
+  }
+
+  .operacao-actions > button {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .operacao-actions > button:last-of-type {
+    grid-column: 1 / -1;
+  }
+
+  .multichannel-page {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  .multichannel-page > .flex:first-child {
+    min-width: 0;
+  }
+
+  .multichannel-page > .flex:first-child > div:first-child {
+    min-width: 0;
+  }
+
+  .multichannel-page > .flex:first-child h1 {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .multichannel-page > .flex:first-child .btn-primary {
+    width: 100%;
+  }
+
+  .multichannel-page > .grid.grid-cols-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .multichannel-page .overflow-x-auto {
+    max-width: 100%;
+  }
+
+  .multichannel-page .flex.flex-col.sm\:flex-row {
+    min-width: 0;
+  }
+
+  .multichannel-page .flex.items-center.gap-2.self-end {
+    align-self: stretch;
+    justify-content: space-between;
+  }
+
+  .multichannel-page .flex.items-center.gap-2.self-end button {
+    flex: 1 1 0;
+  }
+
+  .multichannel-page .flex.items-center.gap-3.self-end {
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .multichannel-page .flex.items-center.gap-3.self-end .btn-primary {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .multichannel-page [class*="rounded-3xl"] {
+    min-width: 0;
+  }
+}
+
 @media (max-width: 768px) {
   input,
   select,
   textarea {
     font-size: max(16px, 1rem) !important;
+    min-height: 42px;
+    padding-top: 9px;
+    padding-bottom: 9px;
   }
   html,
   body {
@@ -1465,7 +1708,7 @@ html, body, table, button, input, select {
 }
 
 .modern-user-header-card:hover {
-  background: #f8fafc;
+  background: #fafafa;
   border-color: #e2e8f0;
 }
 
@@ -1546,7 +1789,7 @@ html, body, table, button, input, select {
 }
 
 .modern-user-item:hover {
-  background: #f8fafc;
+  background: #fafafa;
   color: #111827;
 }
 
@@ -1737,7 +1980,7 @@ html, body, table, button, input, select {
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
-  background: #0f172a;
+  background: #000000;
   border: 2px solid #ffffff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
@@ -1765,7 +2008,7 @@ html, body, table, button, input, select {
 .mp-widget-title {
   font-size: 14px;
   font-weight: 700;
-  color: #0f172a;
+  color: #000000;
   letter-spacing: -0.01em;
 }
 
@@ -1841,7 +2084,7 @@ html, body, table, button, input, select {
 }
 
 .mp-widget-account-item.hub {
-  background: #f8fafc;
+  background: #fafafa;
   border: 1px solid #e2e8f0;
   padding: 9px 11px;
   border-radius: 12px;
@@ -1877,7 +2120,7 @@ html, body, table, button, input, select {
 }
 
 .mp-widget-account-avatar.initials {
-  background: #0f172a;
+  background: #000000;
   color: #ffffff;
   font-size: 11px;
   font-weight: 700;
@@ -1904,7 +2147,7 @@ html, body, table, button, input, select {
 .mp-widget-account-name {
   font-size: 12.5px;
   font-weight: 600;
-  color: #0f172a;
+  color: #000000;
 }
 
 .mp-widget-badge {
@@ -2088,4 +2331,107 @@ nextjs-portal,
   border-radius: 50%;
   background: #19c968;
   z-index: 2;
+}
+
+@media (max-width: 640px) {
+  .labels-mode-row { gap: 10px !important; }
+  .labels-tabs { width: 100%; }
+  .labels-tabs button { flex: 1 1 0; min-width: 0; padding-left: 8px !important; padding-right: 8px !important; font-size: 12px !important; }
+  .labels-status { width: 100%; padding: 2px 0; gap: 6px !important; }
+  .labels-status > span { width: 100%; padding-bottom: 1px; }
+  .labels-status button { flex: 1 1 0; min-width: 0; padding-left: 8px !important; padding-right: 8px !important; }
+  .labels-search-row { gap: 9px !important; }
+  .labels-channel-filters { gap: 6px !important; }
+  .labels-channel-filters button { flex: 1 1 auto; }
+}
+
+/* Espaçamento interno padrão das páginas do FLOW no mobile. */
+@media (max-width: 767px) {
+  .flow-page-content {
+    padding-left: 40px !important;
+    padding-right: 40px !important;
+  }
+
+  .flow-page-content .mp-stack {
+    gap: 32px !important;
+  }
+
+  /* Espaçamento consistente entre seções em todas as páginas do FLOW. */
+  .flow-page-content > * + * {
+    margin-top: 32px;
+  }
+
+  /* Padding interno uniforme dos cards em todas as páginas mobile. */
+  .flow-page-content .mp-card,
+  .flow-page-content .mp-card-flush,
+  .flow-page-content .dn-card,
+  .flow-page-content .pd-card,
+  .flow-page-content .bg-white.border {
+    padding: 20px !important;
+  }
+}
+
+/* ── Mobile Header Title Pattern (HUB) ── */
+.hub-mobile-header-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.hub-mobile-back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  background-color: #ffffff;
+  border: 1px solid #e6e6e6;
+  border-radius: 12px;
+  color: #444444;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.hub-mobile-back-btn:hover {
+  background-color: #f9fafb;
+}
+
+.hub-mobile-back-btn svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 1.5px;
+}
+
+.hub-mobile-page-title {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  color: #111111;
+  letter-spacing: -0.01em;
+  margin: 0;
+  line-height: 1.2;
+}
+
+/* Correção final de contraste dos campos select em todas as páginas do FLOW. */
+html body select,
+html body select option,
+html body select option:checked {
+  color: #000000 !important;
+  background: #ffffff !important;
+  -webkit-text-fill-color: #000000 !important;
+  opacity: 1 !important;
+}
+
+.product-action-icons svg,
+.product-action-icons button svg,
+.product-action-icons [data-slot="dropdown-menu-trigger"] svg {
+  display: block !important;
+  width: 16px !important;
+  height: 16px !important;
+  min-width: 16px !important;
+  min-height: 16px !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }

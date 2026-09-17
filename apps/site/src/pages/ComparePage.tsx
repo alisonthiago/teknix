@@ -59,7 +59,7 @@ export default function ComparePage() {
                     >
                       <Trash2 size={14} />
                     </button>
-                    <Link to={`/produtos/${product.slug}`} className="compare-product-link">
+                    <Link to={`/${product.slug || product.id}`} className="compare-product-link">
                       <img
                         src={product.image_url}
                         alt={product.name}

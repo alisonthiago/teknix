@@ -99,7 +99,7 @@ export default function SegmentPage() {
               {products.map((product) => (
                 <Link
                   key={product.id}
-                  to={`/produtos/${product.sku || product.id}`}
+                  to={`/${product.slug || product.sku || product.id}`}
                   className="segment-product-card"
                 >
                   <div className="segment-product-image">

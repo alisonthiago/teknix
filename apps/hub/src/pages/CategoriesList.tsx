@@ -6,6 +6,7 @@ import {
   type HubColumn,
   useBulkDelete
 } from '../components/ui/HubDataTable'
+import DeleteConfirmationModal from '../components/DeleteConfirmationModal'
 import {
   type CentralCategory,
   parseCategoryRow,
@@ -34,6 +35,7 @@ export default function CategoriesList() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [statusTab, setStatusTab] = useState<'all' | 'published' | 'draft' | 'inactive' | 'smart'>('all')
+  const [deleteTarget, setDeleteTarget] = useState<CentralCategory | null>(null)
 
   // Carregamento central
   async function loadData() {
@@ -158,13 +160,12 @@ export default function CategoriesList() {
   }
 
   async function handleDelete(cat: CentralCategory) {
-    const subcats = categories.filter(c => c.parent_id === cat.id)
-    const subcatMsg = subcats.length > 0 ? `\nAtenção: esta categoria possui ${subcats.length} subcategorias vinculadas!` : ''
+    setDeleteTarget(cat)
+  }
 
-    if (!confirm(`Excluir a categoria "${cat.name}"?${subcatMsg}\nOs produtos vinculados não serão excluídos.`)) {
-      return
-    }
-
+  async function confirmDeleteCategory() {
+    if (!deleteTarget) return
+    const cat = deleteTarget
     const { error } = await supabase
       .from('store_categories')
       .delete()
@@ -174,6 +175,7 @@ export default function CategoriesList() {
       alert(`Erro ao excluir: ${error.message}`)
     } else {
       setCategories(prev => prev.filter(c => c.id !== cat.id))
+      setDeleteTarget(null)
     }
   }
 
@@ -344,6 +346,7 @@ export default function CategoriesList() {
   const siteUrl = import.meta.env.VITE_SITE_URL || 'http://localhost:5173'
 
   return (
+    <>
     <HubDataTable
       title="Categorias"
       columns={columns}
@@ -486,5 +489,16 @@ export default function CategoriesList() {
       ]}
       onRowClick={(cat) => navigate(`/hub/categorias/${cat.id}`)}
     />
+    <DeleteConfirmationModal
+      isOpen={!!deleteTarget}
+      onClose={() => setDeleteTarget(null)}
+      onConfirm={confirmDeleteCategory}
+      itemName={deleteTarget?.name}
+      description={deleteTarget ? `Atenção: esta ação removerá a categoria "${deleteTarget.name}" do sistema TEKNIX. Os produtos vinculados não serão excluídos.` : undefined}
+      actionWord="EXCLUIR"
+      actionTitle="Exclusão de Categoria"
+      buttonText="Sim, Excluir"
+    />
+    </>
   )
 }

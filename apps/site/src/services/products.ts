@@ -111,7 +111,7 @@ function mapProduct(p: any): Product {
     height: p.height ? Number(p.height) : null,
     video_url: p.video_url || meta?.video_url || (typeof specs === 'object' && !Array.isArray(specs) ? specs.video_url : null) || meta?.seo?.video_url || meta?.seo?.commerce?.video_url || '',
     status: p.status || 'active',
-    slug: meta?.slug || p.slug || p.id,
+    slug: meta?.slug || slugify(p.name) || p.slug || p.id,
     image_url: meta?.seo?.store_image || p.main_image || p.image_url || galleryImages[0] || images[0] || 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=600&auto=format&fit=crop&q=80',
     images: [...new Set([meta?.seo?.store_image || p.main_image || p.image_url || galleryImages[0] || images[0], ...galleryImages, ...images].filter(Boolean))],
     short_description: meta?.short_description || p.short_description || '',
@@ -313,12 +313,29 @@ export async function getProductById(id: string) {
 
   // Garante autenticação de catálogo para permissão de leitura no Supabase RLS
   await ensureCatalogAuth()
+  const cleanId = id.trim()
+  const cleanSlug = slugify(cleanId)
   
   try {
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
+    // 1. Busca por slug no product_store_metadata (URL pública oficial)
+    const { data: metadata } = await storeClient.from('product_store_metadata')
+      .select('product_id')
+      .or(`slug.ilike.${cleanId},slug.ilike.${cleanSlug}`)
+      .maybeSingle()
+      
+    if (metadata?.product_id) {
+      const { data } = await storeClient.from('products')
+        .select('*, store_meta:product_store_metadata(*)')
+        .eq('id', metadata.product_id)
+        .maybeSingle()
+      if (data) return mapProduct(data)
+    }
+
+    // 2. Busca por ID direto (UUID) ou SKU
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cleanId)
     const orCondition = isUuid 
-      ? `id.eq.${id},sku.ilike.${id},slug.ilike.${id},mercadolivre_item_id.ilike.${id}`
-      : `sku.ilike.${id},slug.ilike.${id},mercadolivre_item_id.ilike.${id}`
+      ? `id.eq.${cleanId},sku.ilike.${cleanId}`
+      : `sku.ilike.${cleanId}`
       
     const { data } = await storeClient.from('products')
       .select('*, store_meta:product_store_metadata(*)')
@@ -326,20 +343,24 @@ export async function getProductById(id: string) {
       .maybeSingle()
       
     if (data) return mapProduct(data)
-  } catch {
-    // Fallback silencioso
+
+    // 3. Fallback inteligente: encontra produto cujo nome vira esse slug
+    const { data: allProds } = await storeClient.from('products')
+      .select('*, store_meta:product_store_metadata(*)')
+      .limit(200)
+
+    if (allProds && allProds.length > 0) {
+      const found = allProds.find(p => {
+        const meta = Array.isArray(p.store_meta) ? p.store_meta[0] : p.store_meta
+        const pSlug = meta?.slug || slugify(p.name)
+        return pSlug === cleanSlug || pSlug === cleanId || slugify(p.name) === cleanSlug
+      })
+      if (found) return mapProduct(found)
+    }
+  } catch (err) {
+    console.warn('[getProductById] Erro ao buscar produto:', err)
   }
-  
-  try {
-    const { data: metadata } = await storeClient.from('product_store_metadata')
-      .select('product_id').ilike('slug', id).maybeSingle()
-    if (!metadata) return null
-    const { data } = await storeClient.from('products')
-      .select('*, store_meta:product_store_metadata(*)').eq('id', metadata.product_id).maybeSingle()
-    return data ? mapProduct(data) : null
-  } catch {
-    return null
-  }
+  return null
 }
 
 export async function getProductBySku(sku: string) {

@@ -23,7 +23,12 @@
   .product-detail-page-root .main-product-img { max-height:320px; }
 }
 @media(max-width:600px) {
-  .product-detail-page-root #overview > .ui.container { padding-inline: var(--tkn-space-16); }
+  /* Mais respiro interno nas páginas padrão de produto no celular. */
+  .product-detail-page-root #overview > .ui.container,
+  .product-detail-page-root .bread-detail > .ui.container {
+    padding-inline: 24px;
+    box-sizing: border-box;
+  }
   #root .product-detail-page-root h1.jet-product-name { font-size: var(--tkn-text-20); }
   .product-detail-page-root .container-info { border:0; padding: 0; }
   .product-detail-page-root .bread-detail { padding-block:var(--tkn-space-12); }

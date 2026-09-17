@@ -106,7 +106,7 @@ export default function Account() {
     setEditingProfile(false)
     setEditingAddress(false)
     if (!user) { setAccountLoading(false); return }
-    Promise.all([getCustomerByUserId(user.id), getAddressesByUserId(user.id).catch(() => {
+    Promise.all([getCustomerByUserId(user.id).catch(() => null), getAddressesByUserId(user.id).catch(() => {
       if (active) setAddressError('O serviço de endereços está indisponível. Tente novamente mais tarde.')
       return []
     })])
@@ -264,7 +264,7 @@ export default function Account() {
           </Link>
 
           <a
-            href="https://wa.me/5546999155875?text=Ol%C3%A1,%20gostaria%20de%20atendimento%20TEKNIX"
+            href="https://wa.me/5511920505472?text=Ol%C3%A1,%20gostaria%20de%20atendimento%20TEKNIX"
             target="_blank"
             rel="noreferrer"
             className="cb-account-nav-item"
@@ -685,9 +685,15 @@ export default function Account() {
                 <Editable as="p" widgetId="account-34" className="cb-account-support-label">
                   📱 WhatsApp Oficial
                 </Editable>
-                <Editable as="p" widgetId="account-35" className="cb-account-support-value">
-                  (46) 99915-5875
-                </Editable>
+                <a
+                  href="https://wa.me/5511920505472?text=Ol%C3%A1,%20gostaria%20de%20atendimento%20TEKNIX"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="cb-account-support-value"
+                  style={{ color: '#059669', textDecoration: 'none', fontWeight: 600 }}
+                >
+                  Iniciar atendimento online →
+                </a>
               </div>
 
               <div className="cb-account-support-contact">
@@ -705,7 +711,7 @@ export default function Account() {
                 Fechar
               </button>
               <a
-                href="https://wa.me/5546999155875?text=Ol%C3%A1,%20gostaria%20de%20atendimento%20TEKNIX"
+                href="https://wa.me/5511920505472?text=Ol%C3%A1,%20gostaria%20de%20atendimento%20TEKNIX"
                 target="_blank"
                 rel="noreferrer"
                 className="cb-btn-save"

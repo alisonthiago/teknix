@@ -992,3 +992,35 @@
 .link-view-order:hover {
   text-decoration: underline;
 }
+
+/* Responsividade Mobile - Melhoria no Drawer */
+@media (max-width: 768px) {
+  .drawer-fields-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+  .drawer-body {
+    padding: 16px !important;
+  }
+  .drawer-card {
+    padding: 16px !important;
+  }
+  .field-label {
+    font-size: 10px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #9ca3af !important;
+    margin-bottom: 2px;
+  }
+  .field-value {
+    font-size: 14px !important;
+    font-weight: 500;
+    color: #0f172a !important;
+    line-height: 1.4;
+    word-break: break-word;
+  }
+  .drawer-card-title h4 {
+    font-size: 14px !important;
+    color: #1e293b !important;
+  }
+}

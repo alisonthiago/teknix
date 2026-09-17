@@ -11,6 +11,8 @@ import type { Product } from '../types/database'
 import { findCoreCategory, fetchSubcategories } from '../services/categories'
 import { parseCategoryRow, type CentralCategory } from '../../../../packages/core/src/categoryRules'
 import ProductPage from './Product'
+import SEOHead from '../components/SEOHead'
+import { buildCategoryPageSchema, buildBreadcrumbSchema } from '../components/SchemaOrg'
 import './CategoryPage.css'
 
 interface PageData {
@@ -26,7 +28,13 @@ function formatMoney(value: number) {
 }
 
 export default function CategoryPage() {
-  const { segmento, categoria, slug } = useParams<{ segmento: string; categoria: string; slug: string }>()
+  const { segmento, categoria, slug, parentSlug, subSlug } = useParams<{
+    segmento?: string
+    categoria?: string
+    slug?: string
+    parentSlug?: string
+    subSlug?: string
+  }>()
   const [searchParams, setSearchParams] = useSearchParams()
   const [page, setPage] = useState<PageData | null>(null)
   const [category, setCategory] = useState<CentralCategory | null>(null)
@@ -43,8 +51,8 @@ export default function CategoryPage() {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
   const PAGE_SIZE = 12
 
-  // Resolve o identificador da categoria: slug único (/categoria/:slug) ou segmento/categoria
-  const categorySlug = slug || categoria || ''
+  // Resolve o identificador da categoria: subcategoria (/categoria/:parentSlug/:subSlug), slug único (/categoria/:slug) ou segmento/categoria
+  const categorySlug = subSlug || slug || categoria || ''
   const searchTerm = searchParams.get('q') || searchParams.get('search') || ''
 
   useEffect(() => {
@@ -60,7 +68,11 @@ export default function CategoryPage() {
     let cancelled = false
     async function load() {
       // 3. Verifica se existe página personalizada da categoria no PageBuilder
-      const categoryPath = slug ? `/categoria/${slug}` : `/${segmento}/${categoria}`
+      const categoryPath = parentSlug && subSlug
+        ? `/categoria/${parentSlug}/${subSlug}`
+        : slug
+          ? `/categoria/${slug}`
+          : `/${segmento}/${categoria}`
       const { data: pageData } = await supabase
         .from('pages')
         .select('id, title, slug, status, type,page_styles')
@@ -155,7 +167,7 @@ export default function CategoryPage() {
 
     load().catch(() => { if (!cancelled) { setNotFound(true); setLoading(false) } })
     return () => { cancelled = true }
-  }, [categorySlug, segmento, categoria, slug, sortBy, searchTerm, selectedBrand])
+  }, [categorySlug, segmento, categoria, slug, parentSlug, subSlug, sortBy, searchTerm, selectedBrand])
 
   const sortedAndFilteredProducts = useMemo(() => {
     return products.filter(
@@ -227,15 +239,54 @@ export default function CategoryPage() {
     )
   }
 
+  const categoryName = category?.name || page?.title || categorySlug
+  const categoryPath = parentSlug && subSlug
+    ? `/categoria/${parentSlug}/${subSlug}`
+    : slug
+      ? `/categoria/${slug}`
+      : segmento && categoria
+        ? `/${segmento}/${categoria}`
+        : `/categoria/${categorySlug}`
+
+  const categoryJsonLd = [
+    buildCategoryPageSchema(categoryName, categoryPath),
+    buildBreadcrumbSchema([
+      { name: 'TEKNIX', url: 'https://teknixbrasil.com.br' },
+      ...(parentSlug ? [{ name: parentSlug.replace(/-/g, ' ').toUpperCase(), url: `https://teknixbrasil.com.br/categoria/${parentSlug}` }] : []),
+      ...(segmento && !slug && !parentSlug ? [{ name: segmento, url: `https://teknixbrasil.com.br/${segmento}` }] : []),
+      { name: categoryName, url: `https://teknixbrasil.com.br${categoryPath}` }
+    ])
+  ]
+
   return (
     <div className="category-page">
+      <SEOHead
+        title={`${categoryName} | TEKNIX Ferramentas`}
+        description={`Explore ${categoryName} na TEKNIX. Ferramentas profissionais com qualidade e desempenho para qualquer projeto.`}
+        canonical={`https://teknixbrasil.com.br${categoryPath}`}
+        ogType="website"
+        jsonLd={categoryJsonLd}
+      />
       <EditableFlow id="category-page" label="Estrutura da categoria">
+
       {(page || category) && (
         <Editable as="div" widgetId="category-hero" label="Cabeçalho da categoria" widgetType="container" editorKind="container" renderContent={false} className="category-hero">
           <div className="category-hero-inner">
             <nav className="category-breadcrumb">
               <Link to="/">Home</Link>
               <span>/</span>
+              {parentSlug && (
+                <>
+                  <Link to={`/categoria/${parentSlug}`}>{parentSlug.replace(/-/g, ' ')}</Link>
+                  <span>/</span>
+                </>
+              )}
+              {segmento && !slug && !parentSlug && (
+                <>
+                  <Link to={`/${segmento}`}>{segmento}</Link>
+                  <span>/</span>
+                </>
+              )}
               <span className="current">{category?.name || page?.title}</span>
             </nav>
             <Editable as="h1" widgetId="categorypage-3" className="category-title">{category?.name || page?.title}</Editable>
@@ -245,7 +296,11 @@ export default function CategoryPage() {
             {subcategories.length > 0 && (
               <div className="category-subcategories-bar">
                 {subcategories.map((sub) => (
-                  <Link key={sub.id} to={`/categoria/${sub.slug}`} className="subcategory-pill">
+                  <Link
+                    key={sub.id}
+                    to={slug ? `/categoria/${slug}/${sub.slug}` : `/categoria/${sub.slug}`}
+                    className="subcategory-pill"
+                  >
                     {sub.name}
                   </Link>
                 ))}
@@ -357,7 +412,7 @@ export default function CategoryPage() {
                   {paginatedProducts.map((product) => (
                     <Editable as="div" key={product.id} widgetId={`category-product-${product.id}`} productId={product.id} label={`Produto: ${product.name}`} widgetType="storefrontCard" editorKind="widget" renderContent={false} style={{ display: 'contents' }}>
                       <StorefrontProductCard
-                        to={`/produtos/${encodeURIComponent(product.sku || product.id)}`}
+                        to={`/${encodeURIComponent(product.slug || product.sku || product.id)}`}
                         product={{
                           ...storefrontCard(product),
                           id: product.id,

@@ -115,6 +115,22 @@
   cursor: pointer;
 }
 
+@media (max-width: 639px) {
+  .customers-list-page .hub-table-row {
+    min-width: 600px !important;
+  }
+
+  .customers-list-page .hub-cell-bold,
+  .customers-list-page .hub-cell-text {
+    font-size: 14px !important;
+    color: #1f2937 !important;
+  }
+
+  .customers-list-page .hub-cell-bold {
+    font-weight: 600 !important;
+  }
+}
+
 .customer-info,
 .contact-info {
   min-width: 0;

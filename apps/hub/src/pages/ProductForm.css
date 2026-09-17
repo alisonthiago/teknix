@@ -771,7 +771,7 @@
 }
 
 .btn-upload-link:hover {
-  background: #f8fafc;
+  background: #fafafa;
   border-color: #111111;
   color: #000000;
 }
@@ -1036,7 +1036,7 @@
 }
 
 .btn-video-card-edit {
-  background: #f8fafc;
+  background: #fafafa;
   border: 1px solid #e2e8f0;
   color: #111111;
   font-size: 12px;
@@ -1053,7 +1053,7 @@
 }
 
 .btn-video-card-delete {
-  background: #f8fafc;
+  background: #fafafa;
   border: 1px solid #e2e8f0;
   color: #64748b;
   width: 32px;
@@ -1328,14 +1328,14 @@
 }
 
 .btn-add-category-action:hover {
-  background: #f8fafc !important;
+  background: #fafafa !important;
   border-color: #111111 !important;
   color: #000000 !important;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 .btn-add-category-action.cancel {
-  background: #f8fafc !important;
+  background: #fafafa !important;
   border-color: #e2e8f0 !important;
   color: #64748b !important;
 }
@@ -1353,7 +1353,7 @@
   gap: 8px;
   margin-bottom: 8px;
   padding: 8px 10px;
-  background: #f8fafc;
+  background: #fafafa;
   border: 1px dashed #cbd5e1;
   border-radius: 8px;
   animation: fadeInDown 0.15s ease-out;
@@ -1567,7 +1567,13 @@
 
 @media (max-width: 640px) {
   .product-form-footer {
-    padding: 8px 12px;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    z-index: 9999 !important;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom)) !important;
   }
   .product-form-footer-content {
     flex-direction: column-reverse;
@@ -2145,7 +2151,7 @@
 }
 
 .stepper-step:hover:not(:disabled) {
-  background: #f8fafc;
+  background: #fafafa;
 }
 
 .stepper-circle {

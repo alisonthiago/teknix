@@ -22,23 +22,24 @@ interface ConfigCardProps {
 function ConfigCard({ icon, title, description, badge, badgeColor, onClick }: ConfigCardProps) {
   return (
     <button
+      type="button"
       onClick={onClick}
-      className="bg-white border border-[#e6e6e6] rounded-xl p-5 text-left hover:border-[#16a34a] hover:shadow-xs transition-all group w-full"
+      className="bg-white border border-[#e6e6e6] rounded-xl p-5 text-left hover:border-[#16a34a] hover:shadow-xs transition-all group w-full h-auto min-h-[92px] block cursor-pointer"
     >
       <div className="flex items-start gap-4">
         <div className="w-10 h-10 rounded-xl bg-[#f5f5f5] flex items-center justify-center flex-shrink-0 group-hover:bg-[#EEFFB3]/50 transition-colors">
           {icon}
         </div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <h3 className="text-[13px] font-semibold text-[#333]">{title}</h3>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="text-[13px] font-semibold text-[#333] !m-0 !mb-0 leading-tight">{title}</h3>
             {badge && (
               <span className={`inline-flex px-1.5 py-[1px] rounded text-[9px] font-medium ${badgeColor || 'bg-[#f5f5f5] text-[#999]'}`}>
                 {badge}
               </span>
             )}
           </div>
-          <p className="text-[11px] text-[#999] mt-1 leading-relaxed">{description}</p>
+          <p className="text-[11px] text-[#999] !mt-1.5 !mb-0 leading-relaxed">{description}</p>
         </div>
       </div>
     </button>

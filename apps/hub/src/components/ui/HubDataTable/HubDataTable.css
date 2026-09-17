@@ -1016,6 +1016,63 @@
     margin: 12px 0;
     padding: 0;
   }
+
+  .hub-table-header {
+    display: none !important; /* Hide header on mobile to use card layout */
+  }
+  
+  .hub-table-card {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+
+  .hub-table-row {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    padding: 24px 20px !important;
+    gap: 16px !important;
+    height: auto !important;
+    min-height: auto !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    margin-bottom: 16px;
+    background: #ffffff !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02) !important;
+    position: relative;
+  }
+  
+  .hub-table-row > div {
+    width: 100%;
+    justify-content: flex-start !important;
+  }
+  
+  .hub-checkbox-cell {
+    position: absolute !important;
+    right: 20px;
+    top: 24px;
+    width: auto !important;
+    justify-content: flex-end !important;
+  }
+
+  .hub-actions-cell {
+    position: absolute !important;
+    right: 20px;
+    bottom: 24px;
+    width: auto !important;
+    justify-content: flex-end !important;
+  }
+  
+  .hub-cell-text, .hub-cell-bold, .hub-cell-muted {
+    font-size: 13px !important;
+    white-space: normal !important;
+    word-break: break-word;
+  }
+
   /* Search ocupa a linha inteira em mobile */
   .hub-search-wrap {
     flex: 1 1 100%;
@@ -1068,17 +1125,8 @@
     flex-shrink: 0 !important;
     white-space: nowrap !important;
   }
-  /* Card da tabela com scroll horizontal suave e contenção */
-  .hub-table-card {
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-    border-radius: 12px !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  }
-  .hub-table-header,
-  .hub-table-row {
-    min-width: 740px !important;
-  }
+  /* Removemos o min-width: 740px conflitante daqui para garantir o layout de cards no celular */
+  
   /* Paginação centralizada e quebra de linha em mobile */
   .hub-table-footer {
     flex-direction: column;

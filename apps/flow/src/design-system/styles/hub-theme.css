@@ -64,15 +64,16 @@
   --hub-card-icon-color: #111111;
   --hub-card-icon-radius: 10px;
 
-  /* ── Botões Globais ── */
+  /* ── Botões Globais (1:1 Oficial HUB TEKNIX) ── */
   --hub-btn-height: 38px;
   --hub-btn-radius: 8px;
-  --hub-btn-gap: 8px;
+  --hub-btn-gap: 6px;
   
-  /* Botão Primário (Preto Antracite) */
-  --hub-btn-primary-bg: #1f2328;
-  --hub-btn-primary-hover: #000000;
-  --hub-btn-primary-color: #ffffff;
+  /* Botão Primário (Azul Oficial TEKNIX #0071e3) */
+  --hub-btn-primary-bg: var(--button-primary, #0071e3);
+  --hub-btn-primary-hover: var(--button-primary-hover, #0062c4);
+  --hub-btn-primary-active: var(--button-primary-active, #004f9e);
+  --hub-btn-primary-color: var(--button-primary-text, #ffffff);
   --hub-btn-primary-size: 13.5px;
   --hub-btn-primary-weight: 600;
 
@@ -322,44 +323,94 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--hub-btn-gap);
-  height: var(--hub-btn-height);
+  gap: 6px;
+  height: 38px;
+  min-height: 38px;
   padding: 0 16px;
-  border-radius: var(--hub-btn-radius);
+  border-radius: 8px;
   font-family: inherit;
+  font-size: 13.5px;
   cursor: pointer;
   transition: all 0.15s ease;
   white-space: nowrap;
   text-decoration: none;
   border: none;
+  box-sizing: border-box;
 }
 
 :is(.hub-layout, .flow-layout) .btn-primary,
-:is(.hub-layout, .flow-layout) .hub-btn-primary {
-  background: var(--hub-btn-primary-bg) !important;
-  color: var(--hub-btn-primary-color) !important;
-  font-size: var(--hub-btn-primary-size) !important;
-  font-weight: var(--hub-btn-primary-weight) !important;
+:is(.hub-layout, .flow-layout) .hub-btn-primary,
+:is(.hub-layout, .flow-layout) .btn-primary-action,
+:is(.hub-layout, .flow-layout) .btn-action-primary {
+  background: var(--button-primary, #0071e3) !important;
+  border: 1px solid var(--button-primary, #0071e3) !important;
+  color: #ffffff !important;
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  border-radius: 8px !important;
+  padding: 0 16px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  box-shadow: 0 1px 2px rgba(0, 113, 227, 0.15) !important;
 }
 
 :is(.hub-layout, .flow-layout) .btn-primary:hover,
-:is(.hub-layout, .flow-layout) .hub-btn-primary:hover {
-  background: var(--hub-btn-primary-hover) !important;
+:is(.hub-layout, .flow-layout) .hub-btn-primary:hover,
+:is(.hub-layout, .flow-layout) .btn-primary-action:hover,
+:is(.hub-layout, .flow-layout) .btn-action-primary:hover {
+  background: var(--button-primary-hover, #0062c4) !important;
+  border-color: var(--button-primary-hover, #0062c4) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 4px rgba(0, 113, 227, 0.25) !important;
+}
+
+:is(.hub-layout, .flow-layout) .btn-primary:active,
+:is(.hub-layout, .flow-layout) .hub-btn-primary:active,
+:is(.hub-layout, .flow-layout) .btn-primary-action:active,
+:is(.hub-layout, .flow-layout) .btn-action-primary:active {
+  background: var(--button-primary-active, #004f9e) !important;
+  border-color: var(--button-primary-active, #004f9e) !important;
+  color: #ffffff !important;
+}
+
+:is(.hub-layout, .flow-layout) .btn-primary:disabled,
+:is(.hub-layout, .flow-layout) .hub-btn-primary:disabled,
+:is(.hub-layout, .flow-layout) .btn-primary-action:disabled,
+:is(.hub-layout, .flow-layout) .btn-action-primary:disabled {
+  background: #f0f0f0 !important;
+  border-color: #e5e5e5 !important;
+  color: #a0a0a0 !important;
+  cursor: not-allowed !important;
+  opacity: 0.65 !important;
+  box-shadow: none !important;
 }
 
 :is(.hub-layout, .flow-layout) .btn-secondary,
 :is(.hub-layout, .flow-layout) .hub-btn-secondary {
-  background: var(--hub-btn-secondary-bg) !important;
-  border: var(--hub-btn-secondary-border) !important;
-  color: var(--hub-btn-secondary-color) !important;
-  font-size: var(--hub-btn-secondary-size) !important;
-  font-weight: var(--hub-btn-secondary-weight) !important;
+  background: #ffffff !important;
+  border: 1px solid #e6e6e6 !important;
+  color: #333333 !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  border-radius: 8px !important;
+  padding: 0 16px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
 }
 
 :is(.hub-layout, .flow-layout) .btn-secondary:hover,
 :is(.hub-layout, .flow-layout) .hub-btn-secondary:hover {
-  background: var(--hub-btn-secondary-hover) !important;
+  background: #F7F7F7 !important;
   border-color: #d1d5db !important;
+  color: #111111 !important;
 }
 
 /* ── Banners de Alerta ── */
@@ -741,3 +792,35 @@
   gap: 10px;
 }
 
+/* Variantes usadas em algumas telas do Flow: mesmo contrato visual do botão
+   oficial, mantendo a semântica de primário/secundário de cada ação. */
+:is(.hub-layout, .flow-layout) :is(.mp-btn-primary, .mp-btn-secondary, .mp-btn-outline) {
+  box-sizing: border-box;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  padding: 0 16px !important;
+  border-radius: 8px !important;
+  font-family: inherit;
+  font-size: 13.5px !important;
+  line-height: 1 !important;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+:is(.hub-layout, .flow-layout) .mp-btn-primary {
+  background: var(--button-primary, #0071e3) !important;
+  border: 1px solid var(--button-primary, #0071e3) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+:is(.hub-layout, .flow-layout) :is(.mp-btn-secondary, .mp-btn-outline) {
+  background: #ffffff !important;
+  border: 1px solid #e6e6e6 !important;
+  color: #333333 !important;
+  font-weight: 500 !important;
+}

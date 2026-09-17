@@ -491,7 +491,7 @@ function getChannelCollaborators(channel: { id: string; name?: string; members?:
                 <TeknixT className="w-5 h-5 text-[#16a34a]" />
               </div>
               <div>
-                <h2 className="text-[16px] font-bold text-[#0f172a] leading-tight">Chat Interno</h2>
+                <h2 className="text-[16px] font-bold text-[#000000] leading-tight">Chat Interno</h2>
               </div>
             </div>
 
@@ -575,14 +575,14 @@ function getChannelCollaborators(channel: { id: string; name?: string; members?:
                         </div>
                         <div className="min-w-0 flex-1 pr-2">
                           <div className="flex items-center justify-between">
-                            <p className={`truncate text-[14px] leading-tight ${c.unread_count > 0 ? 'font-black text-[#0f172a]' : 'font-bold text-[#1e293b]'}`}>{displayName}</p>
+                            <p className={`truncate text-[14px] leading-tight ${c.unread_count > 0 ? 'font-black text-[#000000]' : 'font-bold text-[#1e293b]'}`}>{displayName}</p>
                             {c.last_message?.created_at && (
                               <span className={`text-[11px] shrink-0 ${c.unread_count > 0 ? 'font-bold text-[#16a34a]' : 'font-normal text-[#94a3b8]'}`}>
                                 {new Date(c.last_message.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                               </span>
                             )}
                           </div>
-                          <p className={`truncate text-[12px] mt-1 ${c.unread_count > 0 ? 'font-bold text-[#0f172a]' : 'text-[#64748b] font-normal'}`}>
+                          <p className={`truncate text-[12px] mt-1 ${c.unread_count > 0 ? 'font-bold text-[#000000]' : 'text-[#64748b] font-normal'}`}>
                             {c.last_message?.content || 'Nenhuma mensagem ainda'}
                           </p>
                         </div>
@@ -759,7 +759,7 @@ function getChannelCollaborators(channel: { id: string; name?: string; members?:
               </div>
 
               <div className="min-w-0">
-                <p className="text-[15px] font-bold text-[#0f172a] leading-tight truncate max-w-[200px]">
+                <p className="text-[15px] font-bold text-[#000000] leading-tight truncate max-w-[200px]">
                   {activeDisplayName}
                 </p>
                 <p className={`text-[11px] font-medium mt-0.5 truncate ${
@@ -931,7 +931,7 @@ function getChannelCollaborators(channel: { id: string; name?: string; members?:
                     <ImageIcon className="w-4 h-4 text-[#16a34a]" />
                   </div>
                   <div>
-                    <h3 className="text-[15px] font-bold text-[#0f172a] leading-tight">Enviar Foto</h3>
+                    <h3 className="text-[15px] font-bold text-[#000000] leading-tight">Enviar Foto</h3>
                     <p className="text-[11px] text-[#94a3b8]">Para {activeDisplayName}</p>
                   </div>
                 </div>
@@ -947,7 +947,7 @@ function getChannelCollaborators(channel: { id: string; name?: string; members?:
               {/* Conteúdo do Modal */}
               <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-4">
                 {imagePreviewUrl ? (
-                  <div className="relative group rounded-2xl overflow-hidden border border-[#e2e8f0] bg-[#f8fafc] flex flex-col items-center justify-center p-3">
+                  <div className="relative group rounded-2xl overflow-hidden border border-[#e2e8f0] bg-[#fafafa] flex flex-col items-center justify-center p-3">
                     <img
                       src={imagePreviewUrl}
                       alt="Preview"
@@ -969,7 +969,7 @@ function getChannelCollaborators(channel: { id: string; name?: string; members?:
                 ) : (
                   <div
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex-1 min-h-[220px] border-2 border-dashed border-[#cbd5e1] hover:border-[#16a34a] rounded-2xl flex flex-col items-center justify-center p-8 bg-[#f8fafc] hover:bg-[#f0fdf4] transition-all cursor-pointer text-center group"
+                    className="flex-1 min-h-[220px] border-2 border-dashed border-[#cbd5e1] hover:border-[#16a34a] rounded-2xl flex flex-col items-center justify-center p-8 bg-[#fafafa] hover:bg-[#f0fdf4] transition-all cursor-pointer text-center group"
                   >
                     <div className="w-14 h-14 rounded-2xl bg-white shadow-xs border border-[#e2e8f0] group-hover:border-[#bbf7d0] flex items-center justify-center mb-3 transition-colors">
                       <ImageIcon className="w-7 h-7 text-[#94a3b8] group-hover:text-[#16a34a] transition-colors" />
@@ -1002,7 +1002,7 @@ function getChannelCollaborators(channel: { id: string; name?: string; members?:
                         handleSendImage()
                       }
                     }}
-                    className="w-full bg-[#f8fafc] border border-[#e2e8f0] focus:border-[#16a34a] focus:bg-white rounded-xl px-3.5 py-2.5 text-[13px] text-[#1e293b] placeholder:text-[#94a3b8] focus:outline-none transition-all"
+                    className="w-full bg-[#fafafa] border border-[#e2e8f0] focus:border-[#16a34a] focus:bg-white rounded-xl px-3.5 py-2.5 text-[13px] text-[#1e293b] placeholder:text-[#94a3b8] focus:outline-none transition-all"
                   />
                 </div>
               </div>

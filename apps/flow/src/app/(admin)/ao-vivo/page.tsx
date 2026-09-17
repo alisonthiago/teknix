@@ -29,6 +29,7 @@ import {
   Tag,
   Flame,
   ArrowRight,
+  ArrowLeft,
   Printer,
   MapPin,
   FileText
@@ -322,119 +323,125 @@ export default function MonitorAoVivoPage() {
   }, [filteredOrders, liveData?.products])
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300 pb-12">
+    <div className="space-y-8 animate-in fade-in duration-300 pt-4 pb-12">
 
       {/* 🔴 HEADER SUPERIOR DO MONITOR AO VIVO */}
-      <div className="bg-white rounded-2xl border border-[#e6e6e6] p-3 sm:p-4 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5">
-          <div className="relative flex items-center justify-center">
-            <span className="absolute w-3 h-3 rounded-full bg-[#e74c3c] animate-ping opacity-75" />
-            <span className="relative w-2.5 h-2.5 rounded-full bg-[#e74c3c]" />
+      <div className="flex flex-col gap-3">
+        {/* Linha 1: Título e Status */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 w-full">
+          <div className="flex items-center gap-2 min-w-0">
+            <Link
+              href="/dashboard"
+              aria-label="Voltar ao início"
+              className="hidden sm:flex w-8 h-8 rounded-lg border border-[#e6e6e6] bg-white items-center justify-center text-[#666] hover:text-[#111] hover:bg-[#f5f5f5] transition-colors shrink-0"
+            >
+              <ArrowLeft className="w-5 h-5" stroke="#666666" strokeWidth={2.5} />
+            </Link>
+            <span className="relative flex h-2.5 w-2.5 shrink-0">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500" />
+            </span>
+            <h1 style={{ fontSize: '24px', lineHeight: '1.2' }} className="text-[24px] sm:text-[24px] font-black text-[#1f2328] tracking-tight truncate">
+              Monitor ao Vivo Multicanal
+            </h1>
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-[14px] sm:text-[15px] font-black text-[#1f2328] tracking-tight">
-                Monitor ao Vivo Multicanal
-              </h1>
-              <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-gradient-to-r from-[#e74c3c] to-[#ff6b6b] text-white flex items-center gap-1.5 uppercase tracking-wider shadow-sm shadow-red-200">
-                <Radio className="w-2.5 h-2.5 animate-pulse" />
-                Em Tempo Real (2s)
-              </span>
-            </div>
-            <p className="text-[11px] text-[#999] mt-0.5">
-              Vendas, faturamento e logística em tempo real de todos os canais.
-            </p>
-          </div>
+          <span className="hidden sm:flex self-start sm:self-auto px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-gradient-to-r from-[#e74c3c] to-[#ff6b6b] text-white items-center gap-1 shrink-0 uppercase tracking-wider shadow-xs shadow-red-200">
+            <Radio className="w-2.5 h-2.5 animate-pulse" />
+            Ao Vivo (2s)
+          </span>
         </div>
 
-         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-           {/* Alerta Sonoro */}
-           <button
-             onClick={() => setSoundEnabled(!soundEnabled)}
-             className={`p-2 sm:px-3 sm:py-2 rounded-xl text-[11px] font-bold border flex items-center gap-1.5 transition-all cursor-pointer ${soundEnabled
-                 ? 'bg-gradient-to-r from-[#B5F500] to-[#9ed600] border-[#8cc000] text-[#1f2328] shadow-md shadow-green-200 hover:shadow-lg hover:shadow-green-300 scale-[1.02]'
-                 : 'bg-[#f5f5f5] border-[#ddd] text-[#888] hover:bg-[#eee] hover:border-[#ccc]'
-               }`}
-             title={soundEnabled ? 'Som de nova venda ativado' : 'Som desativado'}
-           >
-             {soundEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
-             <span className="hidden sm:inline">{soundEnabled ? 'Alerta Sonoro' : 'Mudo'}</span>
-           </button>
+        {/* Linha 2: Controles & Filtro de Período com a Mesma Altura */}
+        <div className="flex items-center justify-between gap-2 w-full pt-0.5">
+          {/* Filtro de Período */}
+          <div className="h-[34px] flex items-center bg-[#f3f4f6] p-0.5 rounded-xl border border-[#e5e7eb] text-[11px] font-bold text-[#666] flex-1 max-w-sm">
+            {[
+              { id: 'NOW', label: 'Agora' },
+              { id: 'TODAY', label: 'Hoje' },
+              { id: '24H', label: '24h' },
+              { id: '7D', label: '7D' }
+            ].map(p => (
+              <button
+                key={p.id}
+                onClick={() => setPeriod(p.id as any)}
+                className={`h-full flex-1 flex items-center justify-center rounded-lg text-center transition-all ${period === p.id
+                    ? 'bg-white text-[#1f2328] shadow-xs font-extrabold'
+                    : 'hover:text-[#111]'
+                  }`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
 
-           {/* Refresh Manual */}
-           <button
-             onClick={() => refetch()}
-             className="p-2 sm:px-3 sm:py-2 rounded-xl border border-[#e6e6e6] bg-white hover:bg-[#fafafa] text-[#333] text-[11px] font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm hover:shadow-md hover:border-[#d0d0d0] active:scale-[0.98]"
-             title="Atualizar dados agora"
-           >
-             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-             <span className="hidden sm:inline">Atualizar</span>
-           </button>
+          {/* Botões de Ação com a mesma altura (34px) */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            {/* Alerta Sonoro */}
+            <button
+              onClick={() => setSoundEnabled(!soundEnabled)}
+              className={`h-[34px] px-2.5 sm:px-3 rounded-xl text-[11px] font-bold border flex items-center justify-center gap-1.5 transition-all cursor-pointer ${soundEnabled
+                  ? 'bg-[#B5F500] border-[#9ed600] text-[#1f2328]'
+                  : 'bg-[#f5f5f5] border-[#ddd] text-[#888] hover:bg-[#eee]'
+                }`}
+              title={soundEnabled ? 'Som ativado' : 'Som mudo'}
+            >
+              {soundEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
+              <span className="hidden sm:inline">{soundEnabled ? 'Alerta Sonoro' : 'Mudo'}</span>
+            </button>
 
-           {/* Filtro de Período */}
-           <div className="flex bg-[#f0f0f0] p-1 rounded-xl border border-[#e0e0e0] text-[11px] font-bold text-[#666] shadow-inner">
-             {[
-               { id: 'NOW', label: 'Agora' },
-               { id: 'TODAY', label: 'Hoje' },
-               { id: '24H', label: '24h' },
-               { id: '7D', label: '7D' }
-             ].map(p => (
-               <button
-                 key={p.id}
-                 onClick={() => setPeriod(p.id as any)}
-                 className={`px-3 py-1.5 rounded-lg transition-all ${period === p.id
-                     ? 'bg-white text-[#1f2328] shadow-md font-extrabold ring-1 ring-black/5'
-                     : 'hover:text-[#333] hover:bg-white/50'
-                   }`}
-               >
-                 {p.label}
-               </button>
-             ))}
-           </div>
-
-         </div>
+            {/* Refresh Manual */}
+            <button
+              onClick={() => refetch()}
+              className="w-[34px] sm:w-auto h-[34px] p-0 sm:px-3 rounded-xl border border-[#e6e6e6] bg-white hover:bg-[#fafafa] text-[#333] text-[11px] font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs"
+              title="Atualizar dados agora"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">Atualizar</span>
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* CARD PRINCIPAL DESTAQUE (VENDAS DE HOJE) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-        <div className="lg:col-span-8 space-y-6">
+        <div className="lg:col-span-8 space-y-8">
 
-          <div className="bg-[#B5F500] rounded-3xl p-6 sm:p-7 shadow-md border border-[#a2e000] text-[#1f2328] relative overflow-hidden">
-            <div className="flex items-center justify-between">
-              <span className="text-[14px] font-bold text-[#333] uppercase tracking-wide flex items-center gap-2">
-                <Flame className="w-5 h-5 text-[#e74c3c]" />
+          <div className="bg-[#B5F500] rounded-2xl sm:rounded-3xl p-5 pb-6 sm:p-7 shadow-xs border border-[#a2e000] text-[#1f2328] relative overflow-hidden">
+            <div className="flex items-center justify-between gap-2 mb-4">
+              <span className="text-[13px] sm:text-[14px] font-bold text-[#1f2328] uppercase tracking-wide flex items-center gap-1.5">
+                <Flame className="w-4 h-4 text-[#e74c3c]" />
                 Vendas {period === 'NOW' ? 'ao Vivo' : period === 'TODAY' ? 'de Hoje' : 'do Período'}
               </span>
 
-              <span className="flex items-center gap-1.5 text-sm font-bold px-3 py-1 rounded-full bg-black/10 text-[#333]">
+              <span className="flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full bg-black/10 text-[#1f2328] shrink-0">
                 <span className="w-2 h-2 rounded-full bg-[#e74c3c] animate-pulse" />
-                {lastUpdateSeconds <= 3 ? 'Atualizado agora' : `Atualizado há ${lastUpdateSeconds}s`}
+                {lastUpdateSeconds <= 3 ? 'Agora' : `${lastUpdateSeconds}s`}
               </span>
             </div>
 
-            <div className="mt-4 mb-3">
-              <div className="text-[34px] sm:text-[46px] font-black tracking-tight text-[#111] font-sans flex items-baseline gap-2">
-                <span className="text-[22px] sm:text-[28px] font-bold">R$</span>
+            <div className="my-5 pb-2">
+              <div className="text-[32px] sm:text-[44px] font-black tracking-tight text-[#111] font-sans flex items-baseline gap-1.5">
+                <span className="text-[20px] sm:text-[24px] font-bold text-[#333]">R$</span>
                 {metrics.totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
-              <div className="flex items-center gap-2 text-sm font-semibold text-[#444] mt-1">
-                <span>{new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' })}, {new Date().toLocaleTimeString('pt-BR')}</span>
-                <span>•</span>
-                <span>{metrics.totalOrders} pedidos confirmados</span>
+              <div className="text-xs sm:text-sm font-semibold text-[#444] mt-2">
+                {metrics.totalOrders} pedidos confirmados
               </div>
             </div>
 
-            <div className="pt-4 border-t border-black/10 flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-4 text-sm font-bold text-[#333]">
+            <div className="pt-3.5 border-t border-black/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-[#222] flex-wrap">
                 <span>{metrics.totalUnits} itens</span>
+                <span>•</span>
                 <span>{metrics.uniqueBuyers} compradores</span>
-                <span>{metrics.pendingShipments} para despachar</span>
+                <span>•</span>
+                <span>{metrics.pendingShipments} a despachar</span>
               </div>
 
               <Link
                 href="/pedidos"
-                className="px-4 py-2 rounded-xl bg-black text-white text-sm font-bold hover:bg-[#333] transition-all flex items-center gap-1.5 shadow-sm"
+                className="w-full sm:w-auto justify-center px-4 py-2 rounded-xl bg-black text-white text-xs sm:text-sm font-bold hover:bg-[#333] transition-all flex items-center gap-1.5 shadow-xs"
               >
                 <span>Painel de Expedição</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -443,62 +450,53 @@ export default function MonitorAoVivoPage() {
           </div>
 
           {/* 📊 GRID DE MÉTRICAS-CHAVE */}
-          <div className="bg-white rounded-2xl border border-[#e6e6e6] p-5 shadow-xs">
-            <h3 className="text-[13px] font-bold uppercase tracking-wider text-[#999] mb-4 flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-[#5c8a00]" />
-              Métricas de Vendas & Operação
+          <div className="bg-white rounded-2xl border border-[#e6e6e6] p-4 pb-6 sm:p-5 shadow-xs">
+            <h3 style={{ fontSize: '16px' }} className="text-[16px] font-bold uppercase tracking-wider text-[#999] mb-4 pb-2 flex items-center gap-1.5">
+              <TrendingUp className="w-4 h-4 text-[#5c8a00] shrink-0" />
+              <span>Métricas Operacionais</span>
             </h3>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              <div className="p-4 rounded-xl bg-[#fafafa] border border-[#eeeeee]">
-                <span className="text-sm font-semibold text-[#888] block">Total Compradores</span>
-                <span className="text-[20px] font-extrabold text-[#1f2328] mt-1 block">{metrics.uniqueBuyers}</span>
-                <span className="text-xs text-[#38a169] font-medium">Clientes únicos</span>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-2.5">
+              <div className="p-3 rounded-xl bg-[#fafafa] border border-[#eeeeee]">
+                <span className="text-xs font-semibold text-[#888] block truncate">Compradores</span>
+                <span className="text-[18px] sm:text-[20px] font-extrabold text-[#1f2328] mt-0.5 block">{metrics.uniqueBuyers}</span>
               </div>
 
-              <div className="p-4 rounded-xl bg-[#fafafa] border border-[#eeeeee]">
-                <span className="text-sm font-semibold text-[#888] block">Qtd. de Vendas</span>
-                <span className="text-[20px] font-extrabold text-[#1f2328] mt-1 block">{metrics.totalOrders}</span>
-                <span className="text-xs text-[#5c8a00] font-bold">Pedidos faturados</span>
+              <div className="p-3 rounded-xl bg-[#fafafa] border border-[#eeeeee]">
+                <span className="text-xs font-semibold text-[#888] block truncate">Vendas</span>
+                <span className="text-[18px] sm:text-[20px] font-extrabold text-[#1f2328] mt-0.5 block">{metrics.totalOrders}</span>
               </div>
 
-              <div className="p-4 rounded-xl bg-[#fafafa] border border-[#eeeeee]">
-                <span className="text-xs font-semibold text-[#999] block">Itens Vendidos</span>
-                <span className="text-[20px] font-extrabold text-[#1f2328] mt-1 block">{metrics.totalUnits} <span className="text-sm font-normal text-[#888]">u.</span></span>
-                <span className="text-xs text-[#666] font-medium">Unidades totais</span>
+              <div className="p-3 rounded-xl bg-[#fafafa] border border-[#eeeeee]">
+                <span className="text-xs font-semibold text-[#888] block truncate">Itens Vendidos</span>
+                <span className="text-[18px] sm:text-[20px] font-extrabold text-[#1f2328] mt-0.5 block">{metrics.totalUnits} <span className="text-xs font-normal text-[#888]">un.</span></span>
               </div>
 
-              <div className="p-4 rounded-xl bg-[#fafafa] border border-[#eeeeee]">
-                <span className="text-xs font-semibold text-[#999] block">Ticket Médio</span>
-                <span className="text-[20px] font-extrabold text-[#1f2328] mt-1 block">R$ {Math.round(metrics.ticketMedio)}</span>
-                <span className="text-xs text-[#888] font-medium">Valor médio</span>
+              <div className="p-3 rounded-xl bg-[#fafafa] border border-[#eeeeee]">
+                <span className="text-xs font-semibold text-[#888] block truncate">Ticket Médio</span>
+                <span className="text-[18px] sm:text-[20px] font-extrabold text-[#1f2328] mt-0.5 block">R$ {Math.round(metrics.ticketMedio)}</span>
               </div>
 
-              <div className="p-4 rounded-xl bg-[#fafafa] border border-[#eeeeee]">
-                <span className="text-sm font-semibold text-[#888] block">Para Despachar</span>
-                <span className="text-[20px] font-extrabold text-[#e67e22] mt-1 block">{metrics.pendingShipments}</span>
-                <span className="text-xs text-[#e67e22] font-medium">Aguardando envio</span>
+              <div className="p-3 rounded-xl bg-[#fafafa] border border-[#eeeeee]">
+                <span className="text-xs font-semibold text-[#888] block truncate">A Despachar</span>
+                <span className="text-[18px] sm:text-[20px] font-extrabold text-[#e67e22] mt-0.5 block">{metrics.pendingShipments}</span>
               </div>
 
-              <div className="p-4 rounded-xl bg-[#fafafa] border border-[#eeeeee]">
-                <span className="text-sm font-semibold text-[#888] block">Etiquetas Prontas</span>
-                <span className="text-[20px] font-extrabold text-[#38a169] mt-1 block">{metrics.readyToShip}</span>
-                <span className="text-xs text-[#38a169] font-medium">Rastreio gerado</span>
+              <div className="p-3 rounded-xl bg-[#fafafa] border border-[#eeeeee]">
+                <span className="text-xs font-semibold text-[#888] block truncate">Etiquetas Prontas</span>
+                <span className="text-[18px] sm:text-[20px] font-extrabold text-[#38a169] mt-0.5 block">{metrics.readyToShip}</span>
               </div>
             </div>
           </div>
 
           {/* 🚚 DETALHES COMPLETOS DE ENVIO E EXPEDIÇÃO AO VIVO */}
-          <div className="bg-white rounded-2xl border border-[#e6e6e6] p-4 shadow-xs space-y-3">
+          <div className="bg-white rounded-2xl border border-[#e6e6e6] p-4 pb-6 shadow-xs space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#f0f0f0] pb-3">
               <div>
-                <h3 className="text-[13px] font-bold text-[#1f2328] flex items-center gap-1.5">
+                <h3 style={{ fontSize: '16px' }} className="text-[16px] font-bold text-[#1f2328] flex items-center gap-1.5">
                   <Truck className="w-4 h-4 text-[#5c8a00]" />
                   Envio ao Vivo
                 </h3>
-                <p className="text-[11px] text-[#999] mt-0.5">
-                  Etiquetas, rastreio e endereços.
-                </p>
               </div>
 
               {/* Filtros de Envio */}
@@ -613,11 +611,11 @@ export default function MonitorAoVivoPage() {
         </div>
 
         {/* Coluna Direita: Canais e Feed de Eventos */}
-        <div className="lg:col-span-4 space-y-6">
+        <div className="lg:col-span-4 space-y-8">
 
           {/* 🟢 CANAIS CONECTADOS AO VIVO */}
           <div className="bg-white rounded-2xl border border-[#e6e6e6] p-5 shadow-xs">
-            <h3 className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-[#999] mb-3 flex items-center justify-between">
+            <h3 style={{ fontSize: '16px' }} className="text-[16px] font-semibold uppercase tracking-wide text-[#999] mb-6 flex items-center justify-between">
               <span>Canais ao Vivo</span>
               <span className="flex items-center gap-1 text-xs text-[#38a169] font-bold">
                 <span className="w-2 h-2 rounded-full bg-[#38a169] animate-pulse" />
@@ -646,7 +644,7 @@ export default function MonitorAoVivoPage() {
                     <span className="text-sm font-bold text-[#333]">{c.name}</span>
                   </div>
                   <span className="text-sm font-bold px-2 py-0.5 rounded-full bg-[#fafafa] border border-[#eee] text-[#555]">
-                    {c.count} pedidos
+                    {c.count}
                   </span>
                 </div>
               ))}
@@ -656,7 +654,7 @@ export default function MonitorAoVivoPage() {
           {/* 🔴 TIMELINE / FEED AO VIVO */}
           <div className="bg-white rounded-2xl border border-[#e6e6e6] p-5 shadow-xs flex flex-col h-[460px]">
             <div className="flex items-center justify-between mb-3 shrink-0">
-              <h3 className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-[#999] flex items-center gap-2">
+              <h3 style={{ fontSize: '16px' }} className="text-[16px] font-semibold uppercase tracking-wide text-[#999] flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#e74c3c] animate-ping" />
                 Feed Operacional ao Vivo
               </h3>
@@ -700,9 +698,6 @@ export default function MonitorAoVivoPage() {
                           {new Date(evt.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
-                      <p className="text-sm text-[#666] line-clamp-2 mt-0.5 leading-relaxed">
-                        {evt.description}
-                      </p>
                       <div className="mt-1 flex items-center gap-2 text-xs font-semibold text-[#888]">
                         <span className="px-1.5 py-0.5 bg-[#f0f0f0] rounded text-[#555]">{evt.channel}</span>
                         {evt.amount && (
@@ -718,7 +713,7 @@ export default function MonitorAoVivoPage() {
 
           {/* 🏆 PRODUTOS CAMPEÕES */}
           <div className="bg-white rounded-2xl border border-[#e6e6e6] p-5 shadow-xs">
-            <h3 className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-[#999] mb-3">
+            <h3 style={{ fontSize: '16px' }} className="text-[16px] font-semibold uppercase tracking-wide text-[#999] mb-4">
               Campeões de Vendas Hoje
             </h3>
 
@@ -754,12 +749,12 @@ export default function MonitorAoVivoPage() {
       {/* 📦 MODAL DETALHE COMPLETO DO PEDIDO */}
       {selectedOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-[#e6e6e6] max-h-[90vh] overflow-y-auto space-y-4">
+          <div className="bg-white rounded-3xl max-w-xl w-full p-4 sm:p-6 shadow-2xl border border-[#e6e6e6] max-h-[90vh] overflow-y-auto space-y-5">
 
             <div className="flex items-center justify-between border-b border-[#eee] pb-4">
               <div>
-                <span className="text-sm font-bold uppercase text-[#999]">Detalhes do Pedido & Envio</span>
-                <h3 className="text-[18px] font-black text-[#1f2328]">{selectedOrder.order_number}</h3>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#999]">Detalhes do pedido</span>
+                <h3 className="text-[20px] font-black text-[#111] mt-1">{selectedOrder.order_number}</h3>
               </div>
               <button
                 onClick={() => setSelectedOrder(null)}
@@ -790,12 +785,12 @@ export default function MonitorAoVivoPage() {
 
             {/* Endereço e Logística */}
             <div className="p-3.5 bg-white rounded-xl border border-[#e6e6e6] text-sm space-y-1.5">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 pb-1">
                 <span className="font-bold text-[#111] flex items-center gap-1.5">
                   <Truck className="w-4 h-4 text-[#16a34a]" />
                   Dados de Envio & Rastreamento
                 </span>
-                <span className="text-sm font-bold text-[#555]">{selectedOrder.shipping_method || 'Mercado Envios'}</span>
+                <span className="text-xs font-semibold text-[#777]">{selectedOrder.shipping_method || 'Mercado Envios'}</span>
               </div>
               <p className="text-[#333]"><strong>Destinatário / Endereço:</strong> {selectedOrder.shipping_address || 'Endereço registrado no marketplace'}</p>
               <p className="text-[#333]"><strong>Cidade/UF:</strong> {selectedOrder.shipping_city || 'São Paulo'} - {selectedOrder.shipping_state || 'SP'} (CEP: {selectedOrder.shipping_zip || '00000-000'})</p>
@@ -803,15 +798,15 @@ export default function MonitorAoVivoPage() {
             </div>
 
             <div>
-              <h4 className="text-sm font-bold text-[#333] mb-2 uppercase tracking-wide">Produtos no Pedido:</h4>
+              <h4 className="text-[13px] font-bold text-[#555] mb-2 uppercase tracking-wide">Produtos no pedido</h4>
               <div className="space-y-2">
                 {selectedOrder.order_items?.map((it: any) => (
-                  <div key={it.id} className="p-3 bg-[#fafafa] rounded-xl border border-[#eee] flex items-center justify-between text-sm">
-                    <div>
-                      <span className="font-bold text-[#333] block">{it.product_name}</span>
-                      <span className="text-sm text-[#888]">SKU: {it.sku} • Qtd: {it.quantity} un.</span>
+                  <div key={it.id} className="px-3.5 py-4 bg-[#fafafa] rounded-xl border border-[#eee] flex items-start justify-between gap-3 text-sm">
+                    <div className="min-w-0">
+                      <span className="font-bold text-[#333] block leading-snug">{it.product_name}</span>
+                      <span className="text-xs text-[#888] block mt-1.5">SKU: {it.sku} • Qtd: {it.quantity} un.</span>
                     </div>
-                    <span className="font-bold text-[#1f2328]">R$ {Number(it.total_price || 0).toFixed(2)}</span>
+                    <span className="font-bold text-[#111] whitespace-nowrap">R$ {Number(it.total_price || 0).toFixed(2)}</span>
                   </div>
                 ))}
               </div>

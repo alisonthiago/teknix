@@ -164,184 +164,258 @@
 .order-stepper-card {
   background: #ffffff;
   border: 1px solid #e5e7eb;
-  border-radius: 16px;
-  padding: 42px 32px 40px 32px;
-  margin: 40px 0 48px 0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02), 0 4px 14px rgba(0, 0, 0, 0.02);
+  border-radius: 20px;
+  padding: 36px 32px 32px 32px;
+  margin: 32px 0 40px 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02), 0 4px 16px rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
-.order-stepper-track {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+/* Visibilidade Desktop vs Mobile */
+.desktop-only {
+  display: block !important;
+}
+
+.mobile-only {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none !important;
+  }
+  .mobile-only {
+    display: block !important;
+  }
+  .order-stepper-card {
+    padding: 24px 16px 28px 16px;
+    margin: 20px 0 32px 0;
+  }
+}
+
+/* ── DESKTOP: ONDA HORIZONTAL (1:1 COM A LOJA TEKNIX) ── */
+.tracker-wave-desktop {
   position: relative;
+  width: 100%;
+  max-width: 980px;
+  height: 175px;
+  margin: 0 auto;
 }
 
-.order-step-item {
+.tracker-wave-desktop-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.d-wave-step {
+  position: absolute;
   display: flex;
   flex-direction: column;
   align-items: center;
-  position: relative;
-  z-index: 2;
-  flex: 1;
   text-align: center;
+  transform: translateX(-50%);
+  z-index: 2;
+  width: 130px;
 }
 
-.order-step-circle {
-  width: 40px;
-  height: 40px;
+.d-wave-step.step-1 { left: 7%; top: 18px; }
+.d-wave-step.step-2 { left: 28.5%; top: 58px; }
+.d-wave-step.step-3 { left: 50%; top: 18px; }
+.d-wave-step.step-4 { left: 71.5%; top: 58px; }
+.d-wave-step.step-5 { left: 93%; top: 18px; }
+
+.d-wave-bullet {
+  width: 54px;
+  height: 54px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
-  font-weight: 600;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   background: #ffffff;
-  border: 2px solid #e5e7eb;
-  color: #999999;
-  margin-bottom: 10px;
+  border: 2px solid #cbd5e1;
+  color: #94a3b8;
+  margin-bottom: 8px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  transition: all 0.25s ease;
 }
 
-.order-step-item.completed .order-step-circle {
-  background: #111111;
-  border-color: #111111;
-  color: #B5F500;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-}
-
-.order-step-item.active .order-step-circle {
-  background: #B5F500;
-  border-color: #B5F500;
+.d-wave-step.completed .d-wave-bullet {
+  background: #b5f500;
+  border-color: #b5f500;
   color: #111111;
-  box-shadow: 0 0 0 5px rgba(181, 245, 0, 0.32), 0 2px 8px rgba(181, 245, 0, 0.3);
+  box-shadow: 0 4px 16px rgba(181, 245, 0, 0.45);
 }
 
-.order-step-info {
+.d-wave-bullet.active-halo {
+  background: #b5f500;
+  border: 3.5px solid #d9f99d;
+  color: #111111;
+  box-shadow: 0 0 0 10px rgba(181, 245, 0, 0.25), 0 4px 20px rgba(181, 245, 0, 0.5);
+  animation: waveHaloPulse 2s infinite;
+}
+
+.d-wave-bullet.upcoming-bullet {
+  background: #ffffff;
+  border: 2px solid #cbd5e1;
+  color: #64748b;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.d-wave-content {
   display: flex;
   flex-direction: column;
   align-items: center;
+  text-align: center;
 }
 
-.order-step-label {
-  font-size: 13px;
-  font-weight: 500;
-  color: #666666;
-  transition: color 0.2s ease;
+.d-wave-title {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 3px;
+  line-height: 1.25;
 }
 
-.order-step-item.completed .order-step-label {
-  font-weight: 550;
-  color: #111111;
-}
-
-.order-step-item.active .order-step-label {
-  font-weight: 600;
-  color: #111111;
-}
-
-.order-step-sub {
-  font-size: 11px;
-  color: #999999;
-  margin-top: 3px;
+.d-wave-sub {
+  display: block;
+  font-size: 12px;
+  color: #94a3b8;
   font-weight: 400;
+  line-height: 1.3;
 }
 
-.order-step-item.active .order-step-sub {
-  color: #333333;
-  font-weight: 500;
+.d-wave-sub.active-green {
+  color: #15803d;
+  font-weight: 600;
 }
 
-.order-step-connector {
+/* ── MOBILE: SERPENTINA ONDULADA CURVA ── */
+.tracker-wave-mobile {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  height: 540px;
+  margin: 0 auto;
+}
+
+.tracker-wave-svg {
   position: absolute;
-  top: 20px;
-  left: 10%;
-  right: 10%;
-  height: 3px;
-  background: #f0f0f0;
-  border-radius: 9999px;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   z-index: 1;
+  pointer-events: none;
 }
 
-.order-step-connector-fill {
-  height: 100%;
-  background: #B5F500;
-  border-radius: 9999px;
-  transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 0 6px rgba(181, 245, 0, 0.4);
+.wave-step {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  z-index: 2;
+  width: calc(100% - 60px);
+}
+
+.wave-step.step-1 { top: 18px; left: 18px; }
+.wave-step.step-2 { top: 128px; left: 68px; }
+.wave-step.step-3 { top: 238px; left: 18px; }
+.wave-step.step-4 { top: 348px; left: 68px; }
+.wave-step.step-5 { top: 458px; left: 18px; }
+
+.wave-bullet {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  border: 2px solid #cbd5e1;
+  color: #94a3b8;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  transition: all 0.25s ease;
+}
+
+.wave-step.completed .wave-bullet {
+  background: #b5f500;
+  border-color: #b5f500;
+  color: #111111;
+  box-shadow: 0 4px 16px rgba(181, 245, 0, 0.45);
+}
+
+.wave-bullet.active-halo {
+  background: #b5f500;
+  border: 3.5px solid #d9f99d;
+  color: #111111;
+  box-shadow: 0 0 0 10px rgba(181, 245, 0, 0.25), 0 4px 20px rgba(181, 245, 0, 0.5);
+  animation: waveHaloPulse 2s infinite;
+}
+
+.wave-bullet.upcoming-bullet {
+  background: #ffffff;
+  border: 2px solid #cbd5e1;
+  color: #64748b;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.wave-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.wave-title {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 2px;
+  line-height: 1.25;
+}
+
+.wave-sub {
+  display: block;
+  font-size: 12px;
+  color: #94a3b8;
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+.wave-sub.active-green {
+  color: #15803d;
+  font-weight: 600;
+}
+
+@keyframes waveHaloPulse {
+  0% { box-shadow: 0 0 0 6px rgba(181, 245, 0, 0.25), 0 4px 16px rgba(181, 245, 0, 0.4); }
+  50% { box-shadow: 0 0 0 14px rgba(181, 245, 0, 0.15), 0 4px 24px rgba(181, 245, 0, 0.6); }
+  100% { box-shadow: 0 0 0 6px rgba(181, 245, 0, 0.25), 0 4px 16px rgba(181, 245, 0, 0.4); }
+}
+
+/* Animação do traçado da onda ao carregar */
+.tracker-loading .wave-active-path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: trackerWaveDraw 2.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes trackerWaveDraw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
 }
 
 @media (max-width: 768px) {
-  .order-stepper-card {
-    padding: 32px 20px 30px 20px;
-    margin: 28px 0 36px 0;
-    border-radius: 18px;
-  }
-  .order-stepper-track {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0;
-    position: relative;
-  }
-  .order-step-connector {
-    display: none;
-  }
-  .order-step-item {
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 16px;
-    text-align: left;
-    width: 100%;
-    position: relative;
-    padding-bottom: 26px;
-  }
-  .order-step-item:last-child {
-    padding-bottom: 0;
-  }
-  /* Linha conectora vertical entre as etapas no celular */
-  .order-step-item:not(:last-child)::after {
-    content: '';
-    position: absolute;
-    top: 46px;
-    left: 22px;
-    bottom: 0;
-    width: 2px;
-    background: #e5e7eb;
-    z-index: 1;
-  }
-  .order-step-item.completed:not(:last-child)::after {
-    background: #111111;
-  }
-  .order-step-circle {
-    width: 46px;
-    height: 46px;
-    font-size: 14px;
-    margin-bottom: 0;
-    flex-shrink: 0;
-    position: relative;
-    z-index: 2;
-  }
-  .order-step-circle svg {
-    width: 20px !important;
-    height: 20px !important;
-  }
-  .order-step-info {
-    align-items: flex-start;
-    text-align: left;
-    padding-top: 3px;
-  }
-  .order-step-label {
-    font-size: 15px;
-    font-weight: 600;
-    line-height: 1.3;
-    color: #111111;
-  }
-  .order-step-sub {
-    font-size: 13px;
-    margin-top: 3px;
-    color: #666666;
-  }
-
   /* Wrapper de scroll da tabela de produtos */
   .order-products-table-wrap {
     overflow-x: auto;
@@ -387,7 +461,8 @@
     padding: 16px 14px 48px;
   }
 
-  .order-main-col {
+  .order-main-col,
+  .order-sidebar-col {
     gap: 14px;
     min-width: 0;
     width: 100%;
@@ -1015,4 +1090,93 @@
   justify-content: flex-end;
   gap: 10px;
   margin-top: 16px;
+}
+
+
+/* ==========================================================================
+   MOBILE: Correção da Tabela de Produtos (Design em Cartões Empilhados)
+   ========================================================================== */
+@media (max-width: 768px) {
+  .order-products-table-wrap {
+    overflow: visible !important;
+    padding: 0 !important;
+  }
+  .order-products-table {
+    min-width: 0 !important;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+  .order-products-table thead {
+    display: none; /* Oculta o cabeçalho no celular */
+  }
+  .order-products-table tbody {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 16px;
+    gap: 16px;
+    background: #fafafa;
+  }
+  .order-products-table tr {
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    gap: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  }
+  .order-products-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 !important;
+    border: none !important;
+    white-space: normal;
+    text-align: right !important;
+  }
+  
+  /* Célula do Produto (1º TD) ocupando toda a largura no topo do cartão */
+  .order-products-table td:nth-child(1) {
+    width: 100%;
+    border-bottom: 1px dashed #e2e8f0 !important;
+    padding-bottom: 14px !important;
+    margin-bottom: 4px;
+    text-align: left !important;
+  }
+  .order-product-cell {
+    width: 100%;
+    align-items: flex-start;
+  }
+  .order-product-thumb {
+    width: 48px;
+    height: 48px;
+    background: #fff;
+  }
+  .order-product-name {
+    font-size: 13.5px;
+    line-height: 1.4;
+  }
+
+  /* Labels Injetados via CSS para Qtd, Preço e Total no mobile */
+  .order-products-table td:nth-child(2)::before {
+    content: 'Quantidade:';
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 500;
+  }
+  .order-products-table td:nth-child(3)::before {
+    content: 'Preço Unitário:';
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 500;
+  }
+  .order-products-table td:nth-child(4)::before {
+    content: 'Total:';
+    font-size: 13px;
+    color: #0f172a;
+    font-weight: 700;
+  }
 }

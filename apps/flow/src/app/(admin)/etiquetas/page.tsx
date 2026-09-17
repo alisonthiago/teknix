@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import {
   Tag,
+  ArrowLeft,
   Printer,
   Search,
   CheckSquare,
@@ -17,10 +18,12 @@ import {
   Eye,
   X,
   Check,
-  Loader2
+  Loader2,
+  User,
 } from 'lucide-react'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
 import { playNotificationSound } from '@/utils/audio-chime'
+import { PaginationBar, usePagination } from '@/components/ui/pagination'
 
 type ViewMode = 'ORDERS' | 'PRODUCTS' | 'HISTORY'
 type LabelStatus = 'AVAILABLE' | 'QUEUED' | 'PRINTING' | 'PRINTED' | 'ERROR' | 'UNAVAILABLE'
@@ -215,6 +218,42 @@ export default function CentralEtiquetasPage() {
     return Array.from(map.values()).sort((a, b) => b.orders.length - a.orders.length)
   }, [filteredOrders])
 
+  // Paginação de Pedidos
+  const {
+    currentPage: ordersPage,
+    setCurrentPage: setOrdersPage,
+    pageSize: ordersPageSize,
+    setPageSize: setOrdersPageSize,
+    paginatedItems: paginatedOrders,
+    totalItems: totalOrdersCount,
+  } = usePagination(filteredOrders, 10)
+
+  // Paginação de Produtos Agrupados
+  const {
+    currentPage: productsPage,
+    setCurrentPage: setProductsPage,
+    pageSize: productsPageSize,
+    setPageSize: setProductsPageSize,
+    paginatedItems: paginatedProductGroups,
+    totalItems: totalProductGroupsCount,
+  } = usePagination(groupedByProduct, 10)
+
+  // Paginação de Histórico de Impressão
+  const {
+    currentPage: historyPage,
+    setCurrentPage: setHistoryPage,
+    pageSize: historyPageSize,
+    setPageSize: setHistoryPageSize,
+    paginatedItems: paginatedLogs,
+    totalItems: totalLogsCount,
+  } = usePagination(printLogs, 15)
+
+  // Resetar página ao mudar filtros de busca ou status
+  useEffect(() => {
+    setOrdersPage(1)
+    setProductsPage(1)
+  }, [search, statusFilter, marketplaceFilter])
+
   // Seleção
   const toggleSelectOrder = (id: string) => {
     setSelectedOrderIds(prev =>
@@ -222,8 +261,21 @@ export default function CentralEtiquetasPage() {
     )
   }
 
+  const isPageSelected = paginatedOrders.length > 0 && paginatedOrders.every(o => selectedOrderIds.includes(o.id))
+  const isAllFilteredSelected = filteredOrders.length > 0 && filteredOrders.every(o => selectedOrderIds.includes(o.id))
+
+  const toggleSelectCurrentPage = () => {
+    if (isPageSelected) {
+      const pageIds = paginatedOrders.map(o => o.id)
+      setSelectedOrderIds(prev => prev.filter(id => !pageIds.includes(id)))
+    } else {
+      const pageIds = paginatedOrders.map(o => o.id)
+      setSelectedOrderIds(prev => Array.from(new Set([...prev, ...pageIds])))
+    }
+  }
+
   const selectAll = () => {
-    if (selectedOrderIds.length === filteredOrders.length) {
+    if (isAllFilteredSelected) {
       setSelectedOrderIds([])
     } else {
       setSelectedOrderIds(filteredOrders.map(o => o.id))
@@ -316,20 +368,25 @@ export default function CentralEtiquetasPage() {
 
       {/* ── 1. CABEÇALHO CLEAN & ESPAÇOSO ─────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#e6e6e6]/60">
-        <div>
-          <h1 className="text-[26px] font-bold text-[#111111] tracking-tight leading-tight">
+        {/* Título Mobile (Escondido no desktop) */}
+        <div className="hub-mobile-header-title-row lg:hidden !justify-start gap-3">
+          <button type="button" className="hub-mobile-back-btn" aria-label="Voltar" onClick={() => window.history.back()}>
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <h1 className="hub-mobile-page-title !text-[16px]">
             Central de Etiquetas
           </h1>
         </div>
 
         {/* Botões de Ação */}
-        <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
+        <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
           <button
             onClick={() => setShowConfigModal(true)}
-            className="h-[38px] px-3.5 bg-white border border-[#e6e6e6] hover:bg-[#F7F7F7] text-[#333] rounded-lg text-sm font-normal flex items-center gap-2 transition-colors cursor-pointer shadow-2xs"
+            className="h-[38px] flex-1 sm:flex-none px-3 sm:px-3.5 bg-white border border-[#e6e6e6] hover:bg-[#F7F7F7] text-[#333] rounded-lg text-xs sm:text-sm font-normal flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
           >
-            <Sliders className="w-4 h-4 text-[#666]" />
-            <span>Configurar Impressora</span>
+            <Sliders className="w-4 h-4 text-[#666] shrink-0" />
+            <span className="hidden sm:inline">Configurar Impressora</span>
+            <span className="sm:hidden">Configurar</span>
           </button>
 
           <button
@@ -338,17 +395,20 @@ export default function CentralEtiquetasPage() {
               handleBatchPrint(allAvailableIds)
             }}
             disabled={stats.available === 0}
-            className={`h-[36px] px-4 rounded-lg text-[13.5px] font-semibold flex items-center gap-2 transition-colors cursor-pointer ${
+            className={`h-[38px] flex-1 sm:flex-none px-3 sm:px-4 rounded-lg text-xs sm:text-[13.5px] font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
               stats.available > 0
-                ? 'bg-[#0071e3] hover:bg-[#0062c4] text-white'
+                ? 'bg-[#0071e3] hover:bg-[#0062c4] text-white shadow-2xs'
                 : 'bg-[#f5f5f5] text-[#999] cursor-not-allowed border border-[#e6e6e6]'
             }`}
           >
-            <Printer className="w-4 h-4" />
-            <span>
+            <Printer className="w-4 h-4 shrink-0" />
+            <span className="hidden sm:inline">
               {stats.available > 0
-                ? `Imprimir ${stats.available} etiqueta${stats.available > 1 ? 's' : ''} pendente${stats.available > 1 ? 's' : ''}`
-                : 'Nenhuma etiqueta pendente'}
+                ? `Imprimir ${stats.available} pendente${stats.available > 1 ? 's' : ''}`
+                : 'Nenhuma pendente'}
+            </span>
+            <span className="sm:hidden whitespace-nowrap">
+              {stats.available > 0 ? `Imprimir (${stats.available})` : 'Nenhuma'}
             </span>
           </button>
         </div>
@@ -356,27 +416,27 @@ export default function CentralEtiquetasPage() {
 
       {/* ── 2. CARDS RESUMO COM RESPIRO E MINIMALISMO ────────────────────── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white p-6 rounded-2xl border border-[#eef2f6] shadow-xs space-y-1">
-          <p className="text-xs font-semibold text-[#666666] tracking-wide">Total de Pedidos</p>
-          <p className="text-3xl font-bold text-[#111111]">{stats.total}</p>
+        <div className="bg-white p-5 rounded-2xl border border-[#e6e6e6] shadow-none space-y-1">
+          <p className="text-[11px] font-semibold text-[#8a8a8a] tracking-wider uppercase">Total de Pedidos</p>
+          <p className="text-2xl sm:text-3xl font-bold text-[#111111] tracking-tight">{stats.total}</p>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-[#eef2f6] shadow-xs space-y-1">
+        <div className="bg-white p-5 rounded-2xl border border-[#e6e6e6] shadow-none space-y-1">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-semibold text-[#16a34a] tracking-wide">Aguardando Impressão</p>
+            <p className="text-[11px] font-semibold text-[#8a8a8a] tracking-wider uppercase">Aguardando Impressão</p>
             {stats.available > 0 && <span className="w-2 h-2 rounded-full bg-[#16a34a]" />}
           </div>
-          <p className="text-3xl font-bold text-[#16a34a]">{stats.available}</p>
+          <p className="text-2xl sm:text-3xl font-bold text-[#111111] tracking-tight">{stats.available}</p>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-[#eef2f6] shadow-xs space-y-1">
-          <p className="text-xs font-semibold text-[#666666] tracking-wide">Impressas Hoje</p>
-          <p className="text-3xl font-bold text-[#111111]">{stats.printedToday}</p>
+        <div className="bg-white p-5 rounded-2xl border border-[#e6e6e6] shadow-none space-y-1">
+          <p className="text-[11px] font-semibold text-[#8a8a8a] tracking-wider uppercase">Impressas Hoje</p>
+          <p className="text-2xl sm:text-3xl font-bold text-[#111111] tracking-tight">{stats.printedToday}</p>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-[#eef2f6] shadow-xs space-y-1">
-          <p className="text-xs font-semibold text-[#666666] tracking-wide">Com Erro / Indisponível</p>
-          <p className="text-3xl font-bold text-[#666666]">{stats.errors}</p>
+        <div className="bg-white p-5 rounded-2xl border border-[#e6e6e6] shadow-none space-y-1">
+          <p className="text-[11px] font-semibold text-[#8a8a8a] tracking-wider uppercase">Com Erro / Indisp.</p>
+          <p className="text-2xl sm:text-3xl font-bold text-[#111111] tracking-tight">{stats.errors}</p>
         </div>
       </div>
 
@@ -384,35 +444,35 @@ export default function CentralEtiquetasPage() {
       <div className="space-y-4">
         
         {/* Abas e Filtro de Status */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="labels-mode-row flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           
           {/* Abas de Modo de Visualização */}
-          <div className="inline-flex items-center gap-1 p-1 bg-[#f0f0f0] rounded-lg">
+          <div className="labels-tabs flex sm:inline-flex items-center gap-1 p-1 bg-[#f0f0f0] rounded-lg overflow-x-auto w-full sm:w-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <button
               onClick={() => setViewMode('ORDERS')}
-              className={`px-3 py-1.5 rounded-md text-[13px] font-medium transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-md text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                 viewMode === 'ORDERS'
                   ? 'bg-white text-[#111111] shadow-2xs'
                   : 'text-[#666666] hover:text-[#111111]'
               }`}
             >
-              Por Pedido ({filteredOrders.length})
+              Pedidos ({filteredOrders.length})
             </button>
 
             <button
               onClick={() => setViewMode('PRODUCTS')}
-              className={`px-3 py-1.5 rounded-md text-[13px] font-medium transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-md text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                 viewMode === 'PRODUCTS'
                   ? 'bg-white text-[#111111] shadow-2xs'
                   : 'text-[#666666] hover:text-[#111111]'
               }`}
             >
-              Agrupado por Produto ({groupedByProduct.length})
+              Produtos ({groupedByProduct.length})
             </button>
 
             <button
               onClick={() => setViewMode('HISTORY')}
-              className={`px-3 py-1.5 rounded-md text-[13px] font-medium transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-md text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                 viewMode === 'HISTORY'
                   ? 'bg-white text-[#111111] shadow-2xs'
                   : 'text-[#666666] hover:text-[#111111]'
@@ -423,21 +483,21 @@ export default function CentralEtiquetasPage() {
           </div>
 
           {/* Filtros de Status (Padrão Oficial HUB) */}
-          <div className="flex items-center gap-1.5 text-xs font-medium text-[#666666] flex-wrap">
-            <span className="pr-1 text-[#999999]">Filtrar:</span>
+          <div className="labels-status flex items-center gap-2 text-xs font-medium text-[#6b7280] flex-wrap">
+            <span className="pr-1 text-[#333333] font-semibold text-xs">Status:</span>
             {[
               { key: 'ALL', label: 'Todos' },
-              { key: 'AVAILABLE', label: 'Disponíveis' },
+              { key: 'AVAILABLE', label: 'Pendentes' },
               { key: 'PRINTED', label: 'Impressas' },
-              { key: 'ERROR', label: 'Com Erro' },
+              { key: 'ERROR', label: 'Erros' },
             ].map(f => (
               <button
                 key={f.key}
                 onClick={() => setStatusFilter(f.key as any)}
-                className={`h-[29px] px-3 rounded-full text-xs font-medium transition-all cursor-pointer border whitespace-nowrap flex items-center justify-center ${
+                className={`h-[38px] min-h-[38px] px-4.5 rounded-xl text-[13px] font-semibold transition-all cursor-pointer border whitespace-nowrap flex items-center justify-center ${
                   statusFilter === f.key
-                    ? 'bg-[#0f172a] text-white border-[#0f172a] font-semibold'
-                    : 'bg-white text-[#475569] border-[#e2e8f0] hover:bg-[#F7F7F7] hover:border-[#cbd5e1] hover:text-[#0f172a]'
+                    ? 'bg-[#000000] text-white border-[#000000] shadow-xs'
+                    : 'bg-white text-[#333333] border-[#e2e8f0] hover:bg-[#F7F7F7] hover:border-[#cbd5e1] hover:text-[#000000]'
                 }`}
               >
                 {f.label}
@@ -447,7 +507,7 @@ export default function CentralEtiquetasPage() {
         </div>
 
         {/* Campo de Busca & Filtro de Canais */}
-        <div className="flex flex-col sm:flex-row items-center gap-3 py-1">
+        <div className="labels-search-row flex flex-col sm:flex-row items-center gap-3 py-1">
           <div className="relative flex-1 w-full">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#999999]" />
             <input
@@ -455,7 +515,7 @@ export default function CentralEtiquetasPage() {
               placeholder="Buscar por pedido, SKU, produto, rastreamento ou comprador..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full h-[38px] pl-10 pr-9 bg-white border border-[#e2e8f0] focus:border-[#0f172a] rounded-lg text-sm text-[#111111] placeholder:text-[#999999] focus:outline-none transition-all shadow-none"
+              className="w-full h-[42px] pl-10 pr-9 bg-white border border-[#e2e8f0] focus:border-[#000000] rounded-lg text-sm leading-normal text-[#111111] placeholder:text-[#9ca3af] focus:outline-none transition-all shadow-none"
             />
             {search && (
               <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#999999] hover:text-[#111111] cursor-pointer">
@@ -464,7 +524,7 @@ export default function CentralEtiquetasPage() {
             )}
           </div>
 
-          <div className="flex items-center gap-1.5 flex-wrap w-full sm:w-auto">
+          <div className="labels-channel-filters flex items-center gap-2 flex-wrap w-full sm:w-auto">
             {['ALL', 'MERCADO_LIVRE', 'SHOPEE', 'TIKTOK', 'MAGALU'].map(m => {
               const label = m === 'ALL' ? 'Todos Canais' : m === 'MERCADO_LIVRE' ? 'Mercado Livre' : m === 'TIKTOK' ? 'TikTok' : m === 'MAGALU' ? 'Magalu' : 'Shopee'
               const isSelected = marketplaceFilter === m
@@ -472,10 +532,10 @@ export default function CentralEtiquetasPage() {
                 <button
                   key={m}
                   onClick={() => setMarketplaceFilter(m)}
-                  className={`h-[29px] px-3.5 rounded-full text-xs font-medium transition-all cursor-pointer border whitespace-nowrap flex items-center justify-center gap-1.5 ${
+                  className={`h-[38px] min-h-[38px] px-4 rounded-xl text-[13px] font-semibold transition-all cursor-pointer border whitespace-nowrap flex items-center justify-center gap-1.5 ${
                     isSelected
-                      ? 'bg-[#0f172a] text-white border-[#0f172a] font-semibold'
-                      : 'bg-white text-[#475569] border-[#e2e8f0] hover:bg-[#F7F7F7] hover:border-[#cbd5e1] hover:text-[#0f172a]'
+                      ? 'bg-[#000000] text-white border-[#000000] shadow-xs'
+                      : 'bg-white text-[#333333] border-[#e2e8f0] hover:bg-[#F7F7F7] hover:border-[#cbd5e1] hover:text-[#000000]'
                   }`}
                 >
                   {label}
@@ -534,129 +594,146 @@ export default function CentralEtiquetasPage() {
           ) : (
             <div className="divide-y divide-[#f1f5f9]">
               {/* Header da Lista */}
-              <div className="flex items-center justify-between px-6 py-4 bg-[#F7F7F7] text-xs font-semibold text-[#666666]">
-                <div className="flex items-center gap-4">
-                  <button onClick={selectAll} className="cursor-pointer text-[#666666]">
-                    {selectedOrderIds.length === filteredOrders.length && filteredOrders.length > 0 ? (
+              <div className="hidden sm:flex items-center justify-between px-6 py-4 bg-[#F7F7F7] text-xs font-semibold text-[#666666]">
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={toggleSelectCurrentPage}
+                    className="cursor-pointer text-[#666666] flex items-center gap-2 hover:text-[#111111] transition-colors"
+                    title="Selecionar todos da página atual"
+                  >
+                    {isPageSelected ? (
                       <CheckSquare className="w-4 h-4 text-[#16a34a]" />
                     ) : (
                       <Square className="w-4 h-4 text-[#cbd5e1]" />
                     )}
+                    <span>Página atual ({paginatedOrders.length})</span>
                   </button>
-                  <span>Produto / Pedido</span>
+
+                  {filteredOrders.length > paginatedOrders.length && (
+                    <>
+                      <span className="text-[#d1d5db]">|</span>
+                      <button
+                        onClick={selectAll}
+                        className="text-xs text-[#16a34a] hover:underline font-semibold cursor-pointer"
+                      >
+                        {isAllFilteredSelected
+                          ? 'Desmarcar todos'
+                          : `Selecionar todas as ${filteredOrders.length} etiquetas`}
+                      </button>
+                    </>
+                  )}
                 </div>
-                <div className="flex items-center gap-12 pr-6">
-                  <span className="hidden md:inline">Canal</span>
-                  <span className="hidden sm:inline">Destinatário & Rastreio</span>
-                  <span>Status</span>
-                  <span>Ação</span>
+
+                <div className="text-xs text-[#888888]">
+                  Total: <strong className="text-[#111111]">{filteredOrders.length}</strong> {filteredOrders.length === 1 ? 'etiqueta' : 'etiquetas'}
                 </div>
               </div>
 
               {/* Linhas de Pedidos */}
-              {filteredOrders.map(order => {
-                const isSelected = selectedOrderIds.includes(order.id)
-                return (
-                   <div
-                     key={order.id}
-                     className={`flex items-center justify-between px-6 py-6 hover:bg-[#fafafa] transition-colors ${
-                       isSelected ? 'bg-[#f0fdf4]/50' : ''
-                     }`}
-                   >
-                    {/* Checkbox e Produto */}
-                    <div className="flex items-center gap-4 min-w-0 flex-1 pr-4">
-                      <button onClick={() => toggleSelectOrder(order.id)} className="cursor-pointer shrink-0">
-                        {isSelected ? (
-                          <CheckSquare className="w-4 h-4 text-[#16a34a]" />
-                        ) : (
-                          <Square className="w-4 h-4 text-[#cbd5e1] hover:text-[#666666]" />
-                        )}
-                      </button>
-
-                      <img
-                        src={order.productImage}
-                        alt={order.productName}
-                        className="w-11 h-11 rounded-xl object-contain border border-[#e2e8f0] bg-[#F7F7F7] p-0.5 shrink-0"
-                      />
-
-                      <div className="min-w-0 space-y-0.5">
-                        <p className="font-medium text-[13.5px] text-[#1f2328] truncate max-w-[320px]">
-                          {order.productName}
-                        </p>
-                        <div className="flex items-center gap-2 text-xs text-[#666666]">
-                          <span className="font-mono">SKU: {order.productSku}</span>
-                          <span>·</span>
-                          <span className="font-normal text-[#1f2328]">#{order.orderNumber}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Canal, Rastreio, Status e Ação */}
-                    <div className="flex items-center gap-8 shrink-0">
-                      {/* Canal */}
-                      <div className="hidden md:flex items-center gap-2 min-w-[110px]">
-                        <MarketplaceLogo name={order.marketplaceName} className="w-4 h-4" />
-                        <span className="text-xs font-medium text-[#333333]">{order.marketplaceName}</span>
-                      </div>
-
-                      {/* Rastreio */}
-                      <div className="hidden sm:block min-w-[150px] space-y-0.5">
-                        <p className="text-xs font-medium text-[#1f2328] truncate max-w-[140px]">{order.customerName}</p>
-                        <p className="font-mono text-xs font-medium text-[#16a34a]">{order.trackingCode}</p>
-                      </div>
-
-                      {/* Status */}
-                      <div className="min-w-[90px] text-center">
-                        {order.labelStatus === 'AVAILABLE' && (
-                          <span className="px-3 py-1 rounded-full text-xs font-medium bg-[#fef9c3] text-[#a16207]">
-                            Disponível
-                          </span>
-                        )}
-                        {order.labelStatus === 'PRINTED' && (
-                          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-[#ecfdf5] text-[#16a34a]">
-                            Impressa
-                          </span>
-                        )}
-                        {order.labelStatus === 'ERROR' && (
-                          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-[#fee2e2] text-[#dc2626]">
-                            Erro
-                          </span>
-                        )}
-                        {order.labelStatus === 'UNAVAILABLE' && (
-                          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-[#f1f5f9] text-[#666666]">
-                            Indisponível
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Ações */}
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          onClick={() => {
-                            setPreviewOrder(order)
-                            setShowPreviewModal(true)
-                          }}
-                          className="p-2 rounded-xl text-[#999999] hover:text-[#111111] hover:bg-[#f1f5f9] transition-colors cursor-pointer"
-                          title="Prévia da Etiqueta"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-
-                        <button
-                          onClick={() => handleBatchPrint([order.id], order.labelStatus === 'PRINTED')}
-                          className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                            order.labelStatus === 'AVAILABLE'
-                              ? 'bg-[#16a34a] hover:bg-[#15803d] text-white shadow-xs'
-                              : 'bg-white border border-[#e2e8f0] text-[#333333] hover:border-[#0f172a]'
-                          }`}
-                        >
-                          {order.labelStatus === 'PRINTED' ? 'Reimprimir' : 'Imprimir'}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+              <div className="space-y-4 p-4 sm:p-6">
+                {paginatedOrders.map(order => {
+                  const isSelected = selectedOrderIds.includes(order.id)
+                  return (
+                    <div
+                      key={order.id}
+                      className={`bg-white border border-[#e6e6e6] rounded-xl py-5 px-6 sm:px-8 hover:bg-[#f8f9fa] hover:border-[#cbd5e1] transition-all shadow-2xs ${
+                        isSelected ? 'bg-[#f0fdf4]/50 border-[#16a34a]' : ''
+                      }`}
+                    >
+                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5">
+                       {/* Select & Marketplace Logo */}
+                       <div className="flex items-center gap-3.5 shrink-0">
+                         <div onClick={e => e.stopPropagation()}>
+                            <button onClick={() => toggleSelectOrder(order.id)} className="cursor-pointer shrink-0 flex items-center justify-center">
+                              {isSelected ? (
+                                <CheckSquare className="w-5 h-5 text-[#16a34a]" />
+                              ) : (
+                                <Square className="w-5 h-5 text-[#cbd5e1] hover:text-[#666666]" />
+                              )}
+                            </button>
+                         </div>
+                         <div className="w-14 h-14 rounded-md bg-[#f5f5f5] border border-[#e6e6e6] flex items-center justify-center flex-shrink-0">
+                           <MarketplaceLogo name={order.marketplaceName} className="w-8 h-8 object-contain flex-shrink-0" />
+                         </div>
+                       </div>
+                       
+                       <div className="flex-1 min-w-0 w-full">
+                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                           <div>
+                             <h1 style={{ fontSize: '14px', lineHeight: '1.2' }} className="!text-[14px] leading-tight font-bold text-[#111111]">#{order.orderNumber}</h1>
+                             <p className="font-medium text-[13.5px] text-[#6b7280] truncate max-w-sm leading-snug mt-1">
+                               {order.productName}
+                             </p>
+                             <div className="flex flex-wrap items-center gap-2.5 mt-2.5">
+                               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#F7F7F7] text-[#1f2328] border border-[#e5e7eb] text-xs shadow-2xs">
+                                 <User className="w-3.5 h-3.5 text-[#1f2328]" />
+                                 <span className="text-[#666666] font-medium">Cliente:</span>
+                                 <strong className="text-[#111111] font-extrabold text-[13px]">{order.customerName}</strong>
+                               </span>
+                               <span className="text-sm font-semibold text-[#666666] bg-[#F7F7F7] px-2.5 py-1 rounded-xl border border-[#e2e8f0]">
+                                 {order.marketplaceName}
+                               </span>
+                               {order.labelStatus === 'AVAILABLE' && (
+                                 <span className="px-2.5 py-1 rounded-xl text-xs font-medium bg-[#fef9c3] text-[#a16207]">Disponível</span>
+                               )}
+                               {order.labelStatus === 'PRINTED' && (
+                                 <span className="px-2.5 py-1 rounded-xl text-xs font-semibold bg-[#ecfdf5] text-[#16a34a]">Impressa</span>
+                               )}
+                               {order.labelStatus === 'ERROR' && (
+                                 <span className="px-2.5 py-1 rounded-xl text-xs font-semibold bg-[#fee2e2] text-[#dc2626]">Erro</span>
+                               )}
+                               {order.labelStatus === 'UNAVAILABLE' && (
+                                 <span className="px-2.5 py-1 rounded-xl text-xs font-semibold bg-[#f1f5f9] text-[#666666]">Indisponível</span>
+                               )}
+                             </div>
+                           </div>
+                           
+                           <div className="w-full sm:w-auto sm:text-right bg-[#F7F7F7] sm:bg-transparent p-3 sm:p-0 rounded-xl border sm:border-0 border-[#e2e8f0] shrink-0 mt-2 sm:mt-0">
+                             <div className="flex items-center gap-3 justify-between sm:justify-end pb-3 sm:pb-3 border-b border-[#e2e8f0] sm:border-0">
+                               <span className="sm:hidden text-xs font-semibold text-[#666]">Ações:</span>
+                               <div className="flex items-center gap-2">
+                                 <button
+                                   onClick={(e) => { e.stopPropagation(); setPreviewOrder(order); setShowPreviewModal(true); }}
+                                   className="w-11 h-10 flex items-center justify-center rounded-xl text-[#555555] hover:text-[#111111] bg-white border border-[#e6e6e6] sm:border-0 sm:bg-transparent hover:bg-[#f1f5f9] transition-colors cursor-pointer"
+                                   title="Prévia da Etiqueta"
+                                 >
+                                   <Eye className="w-[18px] h-[18px]" strokeWidth={2.2} />
+                                 </button>
+                                 <button
+                                   onClick={(e) => { e.stopPropagation(); handleBatchPrint([order.id], order.labelStatus === 'PRINTED'); }}
+                                   className="h-10 px-4 rounded-xl text-xs font-semibold transition-all cursor-pointer bg-white border border-[#e2e8f0] text-[#333333] hover:border-[#000000]"
+                                 >
+                                   {order.labelStatus === 'PRINTED' ? 'Reimprimir' : 'Imprimir'}
+                                 </button>
+                               </div>
+                             </div>
+                              <p className="text-[10px] font-semibold text-[#888888] uppercase tracking-wider mt-2 sm:mt-1">Rastreio</p>
+                              <div className="text-xs sm:text-[13px] font-bold text-[#16a34a] mt-0.5 font-mono truncate max-w-full sm:max-w-[220px]" title={order.trackingCode}>
+                                {order.trackingCode}
+                              </div>
+                           </div>
+                         </div>
+                       </div>
+                     </div>
+                   </div>
                 )
               })}
+              </div>
+
+              {/* Limitador e Paginação em baixo */}
+              {totalOrdersCount > 0 && (
+                <div className="p-4 sm:p-6 border-t border-[#f1f5f9] bg-[#fafafa]/50">
+                  <PaginationBar
+                    currentPage={ordersPage}
+                    totalItems={totalOrdersCount}
+                    pageSize={ordersPageSize}
+                    onPageChange={setOrdersPage}
+                    onPageSizeChange={setOrdersPageSize}
+                    pageSizeOptions={[10, 20, 50, 100]}
+                    itemName="etiquetas"
+                  />
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -666,22 +743,22 @@ export default function CentralEtiquetasPage() {
       {/* VISTA 2: AGRUPADO POR PRODUTO                                       */}
       {/* ════════════════════════════════════════════════════════════════════ */}
       {viewMode === 'PRODUCTS' && (
-        <div className="space-y-4">
-          {groupedByProduct.map(group => (
+        <div className="space-y-6">
+          {paginatedProductGroups.map(group => (
             <div
               key={group.sku}
-              className="bg-white rounded-3xl border border-[#eef2f6] shadow-xs p-6 space-y-4"
+              className="bg-white rounded-3xl border border-[#eef2f6] shadow-xs p-6 sm:p-7 space-y-6"
             >
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-[#f1f5f9]">
-                <div className="flex items-center gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5 pb-5 border-b border-[#f1f5f9]">
+                <div className="flex items-center gap-4 sm:gap-5">
                   <img
                     src={group.image}
                     alt={group.name}
-                    className="w-14 h-14 rounded-2xl object-contain border border-[#e2e8f0] bg-[#F7F7F7] p-1 shrink-0"
+                    className="w-16 h-16 rounded-2xl object-contain border border-[#e2e8f0] bg-[#F7F7F7] p-1.5 shrink-0"
                   />
-                  <div className="space-y-0.5">
-                    <h3 className="font-bold text-base text-[#111111]">{group.name}</h3>
-                    <div className="flex items-center gap-2 text-xs text-[#666666]">
+                  <div className="space-y-1.5">
+                    <h3 className="font-bold text-base text-[#111111] leading-snug">{group.name}</h3>
+                    <div className="flex items-center gap-2.5 text-xs text-[#666666] flex-wrap">
                       <span className="font-mono">SKU: {group.sku}</span>
                       <span>·</span>
                       <span className="font-bold text-[#16a34a]">{group.orders.length} vendas</span>
@@ -691,17 +768,17 @@ export default function CentralEtiquetasPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3 shrink-0">
                   <button
                     onClick={() => selectProductOrders(group.orders)}
-                    className="px-4 py-2 bg-white border border-[#e2e8f0] hover:border-[#0f172a] text-[#111111] rounded-xl text-xs font-semibold transition-all cursor-pointer"
+                    className="h-[38px] px-4 bg-white border border-[#e2e8f0] hover:border-[#000000] text-[#111111] rounded-xl text-[13px] font-semibold transition-all cursor-pointer flex items-center justify-center"
                   >
                     Selecionar Todas ({group.orders.length})
                   </button>
 
                   <button
                     onClick={() => handleBatchPrint(group.orders.map(o => o.id))}
-                    className="px-4 py-2 bg-[#16a34a] hover:bg-[#15803d] text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
+                    className="h-[38px] px-4.5 bg-[#16a34a] hover:bg-[#15803d] text-white rounded-xl text-[13px] font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs"
                   >
                     <Printer className="w-4 h-4" />
                     <span>Imprimir {group.orders.length} etiquetas</span>
@@ -710,33 +787,33 @@ export default function CentralEtiquetasPage() {
               </div>
 
               {/* Lista dos Pedidos */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {group.orders.map(order => {
                   const isSelected = selectedOrderIds.includes(order.id)
                   return (
                     <div
                       key={order.id}
                       onClick={() => toggleSelectOrder(order.id)}
-                      className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
+                      className={`p-4 sm:p-4.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
                         isSelected
                           ? 'bg-[#f0fdf4] border-[#86efac]'
-                          : 'bg-[#fafafa] border-[#e2e8f0] hover:border-[#cbd5e1]'
+                          : 'bg-[#fafafa] border-[#e2e8f0] hover:border-[#cbd5e1] hover:bg-white'
                       }`}
                     >
-                      <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex items-center gap-3.5 min-w-0">
                         {isSelected ? (
                           <CheckSquare className="w-4 h-4 text-[#16a34a] shrink-0" />
                         ) : (
                           <Square className="w-4 h-4 text-[#cbd5e1] shrink-0" />
                         )}
-                        <div className="min-w-0 space-y-0.5">
+                        <div className="min-w-0 space-y-1">
                           <p className="font-bold text-xs text-[#111111] truncate">Pedido #{order.orderNumber}</p>
                           <p className="text-xs text-[#666666] truncate">{order.customerName}</p>
-                          <p className="font-mono text-xs text-[#16a34a]">{order.trackingCode}</p>
+                          <p className="font-mono text-xs text-[#16a34a] font-medium">{order.trackingCode}</p>
                         </div>
                       </div>
 
-                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 ml-2 ${
+                      <span className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ml-2 ${
                         order.labelStatus === 'AVAILABLE'
                           ? 'bg-[#fef9c3] text-[#a16207]'
                           : 'bg-[#ecfdf5] text-[#16a34a]'
@@ -749,6 +826,19 @@ export default function CentralEtiquetasPage() {
               </div>
             </div>
           ))}
+
+          {/* Limitador e Paginação em baixo - Produtos */}
+          {totalProductGroupsCount > 0 && (
+            <PaginationBar
+              currentPage={productsPage}
+              totalItems={totalProductGroupsCount}
+              pageSize={productsPageSize}
+              onPageChange={setProductsPage}
+              onPageSizeChange={setProductsPageSize}
+              pageSizeOptions={[5, 10, 20, 50]}
+              itemName="produtos agrupados"
+            />
+          )}
         </div>
       )}
 
@@ -764,19 +854,19 @@ export default function CentralEtiquetasPage() {
             </div>
             <button
               onClick={fetchLabelsData}
-              className="p-2 border border-[#e2e8f0] hover:border-[#0f172a] rounded-xl text-[#666666] hover:text-[#111111] transition-all cursor-pointer"
+              className="p-2 border border-[#e2e8f0] hover:border-[#000000] rounded-xl text-[#666666] hover:text-[#111111] transition-all cursor-pointer"
             >
               <RefreshCw className="w-4 h-4" />
             </button>
           </div>
 
           <div className="divide-y divide-[#f1f5f9]">
-            {printLogs.length === 0 ? (
+            {paginatedLogs.length === 0 ? (
               <div className="py-16 text-center text-xs text-[#999999]">
                 Nenhum registro de impressão encontrado.
               </div>
             ) : (
-              printLogs.map(log => (
+              paginatedLogs.map(log => (
                 <div key={log.id} className="flex items-center justify-between px-6 py-4 hover:bg-[#fafafa]">
                   <div className="space-y-0.5">
                     <p className="font-bold text-sm text-[#111111]">Pedido #{log.orderNumber}</p>
@@ -793,7 +883,7 @@ export default function CentralEtiquetasPage() {
                         const found = orders.find(o => o.orderNumber === log.orderNumber)
                         if (found) handleBatchPrint([found.id], true)
                       }}
-                      className="px-3.5 py-1.5 bg-white border border-[#e2e8f0] hover:border-[#0f172a] text-[#111111] rounded-xl text-xs font-semibold transition-all cursor-pointer"
+                      className="px-3.5 py-1.5 bg-white border border-[#e2e8f0] hover:border-[#000000] text-[#111111] rounded-xl text-xs font-semibold transition-all cursor-pointer"
                     >
                       Reimprimir
                     </button>
@@ -802,6 +892,21 @@ export default function CentralEtiquetasPage() {
               ))
             )}
           </div>
+
+          {/* Limitador e Paginação em baixo - Histórico */}
+          {totalLogsCount > 0 && (
+            <div className="p-4 sm:p-6 border-t border-[#f1f5f9] bg-[#fafafa]/50">
+              <PaginationBar
+                currentPage={historyPage}
+                totalItems={totalLogsCount}
+                pageSize={historyPageSize}
+                onPageChange={setHistoryPage}
+                onPageSizeChange={setHistoryPageSize}
+                pageSizeOptions={[10, 15, 30, 50]}
+                itemName="registros"
+              />
+            </div>
+          )}
         </div>
       )}
 

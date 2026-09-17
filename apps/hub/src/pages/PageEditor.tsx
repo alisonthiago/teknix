@@ -451,7 +451,7 @@ function initialWidgetContent(type: string): Record<string, any> {
       title: 'Rodapé da Loja',
       company_info: 'TEKNIX FERRAMENTAS LTDA • CNPJ: 63.623.515/0001-68',
       copyright: 'Todos os direitos reservados.',
-      whatsapp: '(46) 99915-5875',
+      whatsapp: '11920505472',
       email: 'sac@teknix.com.br',
       searched_heading: 'PRODUTOS MAIS BUSCADOS',
       searched_columns: 7,
@@ -4789,7 +4789,7 @@ export default function PageEditor() {
                                 <ControlRow label="WhatsApp de Vendas">
                                   <input
                                     type="text"
-                                    placeholder="(46) 99915-5875"
+                                    placeholder="1192050-5472"
                                     value={String(c.whatsapp || '')}
                                     onChange={e => patch({ content: { whatsapp: e.target.value } })}
                                   />

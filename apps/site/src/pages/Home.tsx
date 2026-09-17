@@ -4,7 +4,10 @@ import PageRenderer from '../components/PageRenderer'
 import {supabase} from '../lib/supabase'
 import TeknixHeader from '../components/TeknixHeader'
 import TeknixFooter from '../components/TeknixFooter'
+import SEOHead from '../components/SEOHead'
+import { buildWebSiteSchema, buildOrganizationSchema } from '../components/SchemaOrg'
 import './Home.css'
+
 export default function Home() {
   const [pageId, setPageId] = useState<string | null>(null)
   const [ready, setReady] = useState(false)
@@ -52,9 +55,17 @@ export default function Home() {
     }
   }, [])
 
+  const homeJsonLd = [buildWebSiteSchema(), buildOrganizationSchema()]
+
   if (pageId && ready) {
     return (
       <>
+        <SEOHead
+          title="TEKNIX Ferramentas | Feito para Fazer"
+          description="Ferramentas profissionais com a qualidade que você precisa para realizar qualquer projeto com excelência. Feito para fazer."
+          ogType="website"
+          jsonLd={homeJsonLd}
+        />
         <TeknixHeader />
         <PageRenderer pageId={pageId} />
         <TeknixFooter />
@@ -62,6 +73,16 @@ export default function Home() {
     )
   }
 
-  return <StorefrontHome />
+  return (
+    <>
+      <SEOHead
+        title="TEKNIX Ferramentas | Feito para Fazer"
+        description="Ferramentas profissionais com a qualidade que você precisa para realizar qualquer projeto com excelência. Feito para fazer."
+        ogType="website"
+        jsonLd={homeJsonLd}
+      />
+      <StorefrontHome />
+    </>
+  )
 }
 

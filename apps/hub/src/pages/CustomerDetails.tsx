@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { ChevronLeft, User, Mail, Phone, MapPin, CreditCard, ShoppingBag, MessageCircle, DollarSign, ArrowUpRight, RefreshCw } from 'lucide-react'
+import { ChevronLeft, User, Mail, Phone, MapPin, CreditCard, ShoppingBag, MessageCircle, DollarSign, ArrowUpRight, RefreshCw, Share2, Edit } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import type { Customer } from '../types/database'
 import './CustomerDetails.css'
@@ -194,11 +194,21 @@ export default function CustomerDetails() {
           </div>
         </div>
 
-        <div className="cd-header-actions">
+        <div className="cd-header-actions" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <button type="button" className="cd-icon-btn" onClick={() => {
+            navigator.clipboard.writeText(window.location.href);
+            alert('Link copiado para a área de transferência!');
+          }} title="Compartilhar cliente">
+            <Share2 size={16} />
+          </button>
+          
+          <Link to={`/hub/clientes/edite/${id}`} className="cd-icon-btn" title="Editar cliente">
+            <Edit size={16} />
+          </Link>
+
           {cleanPhone && (
-            <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="cd-btn-whatsapp">
-              <MessageCircle size={15} />
-              <span>Conversar no WhatsApp</span>
+            <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="cd-icon-btn cd-icon-whatsapp" title="Conversar no WhatsApp">
+              <MessageCircle size={16} />
             </a>
           )}
         </div>

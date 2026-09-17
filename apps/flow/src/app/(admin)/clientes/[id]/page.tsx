@@ -15,6 +15,7 @@ import { MarketplaceLogo } from '@/components/MarketplaceLogos'
 import ShareContextModal from '@/components/internal-chat/ShareContextModal'
 import { useNotification } from '@/contexts/NotificationContext'
 import LoadingState from '@/components/ui/LoadingState'
+import { PaginationBar, usePagination } from '@/components/ui/pagination'
 
 const QUICK_TEMPLATES = [
   'Olá! Seu pedido já está sendo preparado com muito cuidado e será enviado rapidamente.',
@@ -81,6 +82,15 @@ export default function ClienteProfilePage() {
   const totalSpent = orders.reduce((a, b) => a + Number(b.total_amount || 0), 0)
   const totalItems = orders.reduce((a, b) => a + (b.order_items?.reduce((x: number, y: any) => x + Number(y.quantity || 1), 0) || 1), 0)
   const avgTicket = orders.length > 0 ? totalSpent / orders.length : 0
+
+  const {
+    currentPage: ordersPage,
+    setCurrentPage: setOrdersPage,
+    pageSize: ordersPageSize,
+    setPageSize: setOrdersPageSize,
+    paginatedItems: paginatedOrders,
+    totalItems: totalOrdersCount,
+  } = usePagination(orders, 5)
 
   const channels = Array.from(new Set(orders.map(o => (o.marketplaces as any)?.name || 'Mercado Livre')))
 
@@ -229,9 +239,15 @@ export default function ClienteProfilePage() {
 
       {/* Botão Voltar */}
       <div>
+        <div className="hub-mobile-header-title-row lg:hidden !justify-start gap-3 mb-3">
+          <button type="button" className="hub-mobile-back-btn" aria-label="Voltar" onClick={() => window.history.back()}>
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <h1 className="hub-mobile-page-title !text-[16px]">Cliente: {customerName}</h1>
+        </div>
         <Link
           href="/clientes"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#666] hover:text-[#111] transition-colors"
+          className="hidden lg:inline-flex items-center gap-1.5 text-xs font-semibold text-[#666] hover:text-[#111] transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Voltar para Central de Clientes
@@ -366,131 +382,148 @@ export default function ClienteProfilePage() {
 
             {/* Conteúdo Aba 1: Pedidos & Compras */}
             {activeTab === 'pedidos' && (
-              <div className="divide-y divide-[#eee]">
-                {orders.map((ord) => {
-                  const mpName = (ord.marketplaces as any)?.name || 'Mercado Livre'
-                  const rawItems = ord.order_items || []
-                  
-                  // Se não houver order_items no banco, garante a exibição com base nos dados do pedido
-                  const items = rawItems.length > 0 ? rawItems : [
-                    {
-                      id: 'fallback-item',
-                      sku: ord.sku || 'LAVA-JATO-21V',
-                      quantity: 1,
-                      unit_price: ord.total_amount || 0,
-                      products: {
-                        id: ord.product_id || 'prod-1',
-                        name: ord.product_name || 'Lava Jato Lavadora Portátil De Alta Pressão 21v',
+              <div>
+                <div className="divide-y divide-[#eee]">
+                  {paginatedOrders.map((ord) => {
+                    const mpName = (ord.marketplaces as any)?.name || 'Mercado Livre'
+                    const rawItems = ord.order_items || []
+                    
+                    // Se não houver order_items no banco, garante a exibição com base nos dados do pedido
+                    const items = rawItems.length > 0 ? rawItems : [
+                      {
+                        id: 'fallback-item',
                         sku: ord.sku || 'LAVA-JATO-21V',
-                        image_url: 'https://http2.mlstatic.com/D_NQ_NP_2X_789396-MLB78028328731_072024-F.webp'
+                        quantity: 1,
+                        unit_price: ord.total_amount || 0,
+                        products: {
+                          id: ord.product_id || 'prod-1',
+                          name: ord.product_name || 'Lava Jato Lavadora Portátil De Alta Pressão 21v',
+                          sku: ord.sku || 'LAVA-JATO-21V',
+                          image_url: 'https://http2.mlstatic.com/D_NQ_NP_2X_789396-MLB78028328731_072024-F.webp'
+                        }
                       }
-                    }
-                  ]
+                    ]
 
-                  const isCancelled = String(ord.status || '').toUpperCase() === 'CANCELADO'
+                    const isCancelled = String(ord.status || '').toUpperCase() === 'CANCELADO'
 
-                  return (
-                    <div key={ord.id} className="p-5 sm:p-6 space-y-4 hover:bg-[#fafafa] transition-colors">
-                      {/* Top Bar do Pedido */}
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#eee]">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-[#f5f5f5] border border-[#e6e6e6] flex items-center justify-center shrink-0">
-                            <MarketplaceLogo name={mpName} className="w-6 h-6" />
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <Link
-                                href={`/pedidos/${ord.id}`}
-                                className="text-[14px] font-extrabold text-[#111] hover:text-[#1f2328] hover:underline font-mono"
-                              >
-                                {ord.order_number}
-                              </Link>
-                              <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${
-                                isCancelled
-                                  ? 'bg-[#fee2e2] text-[#dc2626] border-[#fecaca]'
-                                  : 'bg-[#ecfdf5] text-[#16a34a] border-[#bbf7d0]'
-                              }`}>
-                                {ord.status || 'CONCLUÍDO'}
-                              </span>
+                    return (
+                      <div key={ord.id} className="p-5 sm:p-6 space-y-4 hover:bg-[#fafafa] transition-colors">
+                        {/* Top Bar do Pedido */}
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#eee]">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-[#f5f5f5] border border-[#e6e6e6] flex items-center justify-center shrink-0">
+                              <MarketplaceLogo name={mpName} className="w-6 h-6" />
                             </div>
-                            <p className="text-[11px] text-[#666] flex items-center gap-1.5 mt-0.5">
-                              <Calendar className="w-3 h-3 text-[#999]" />
-                              {ord.created_at ? new Date(ord.created_at).toLocaleDateString('pt-BR') : '20/08/2026'} • {mpName}
-                            </p>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <Link
+                                  href={`/pedidos/${ord.id}`}
+                                  className="text-[14px] font-extrabold text-[#111] hover:text-[#1f2328] hover:underline font-mono"
+                                >
+                                  {ord.order_number}
+                                </Link>
+                                <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${
+                                  isCancelled
+                                    ? 'bg-[#fee2e2] text-[#dc2626] border-[#fecaca]'
+                                    : 'bg-[#ecfdf5] text-[#16a34a] border-[#bbf7d0]'
+                                }`}>
+                                  {ord.status || 'CONCLUÍDO'}
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-[#666] flex items-center gap-1.5 mt-0.5">
+                                <Calendar className="w-3 h-3 text-[#999]" />
+                                {ord.created_at ? new Date(ord.created_at).toLocaleDateString('pt-BR') : '20/08/2026'} • {mpName}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-3 self-end sm:self-center">
+                            <div className="text-right">
+                              <p className="text-[10px] font-bold text-[#888] uppercase">Total Cobrado</p>
+                              <p className="text-[16px] font-black text-[#111]">{formatBRL(Number(ord.total_amount || 0))}</p>
+                            </div>
+
+                            <Link
+                              href={`/pedidos/${ord.id}/etiqueta`}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#333333] border border-[#e2e8f0] text-[11px] font-bold transition-colors"
+                            >
+                              <Printer className="w-3.5 h-3.5" />
+                              Etiqueta
+                            </Link>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-3 self-end sm:self-center">
-                          <div className="text-right">
-                            <p className="text-[10px] font-bold text-[#888] uppercase">Total Cobrado</p>
-                            <p className="text-[16px] font-black text-[#111]">{formatBRL(Number(ord.total_amount || 0))}</p>
-                          </div>
+                        {/* Produtos do Pedido */}
+                        <div className="space-y-2">
+                          <p className="text-[11px] font-bold uppercase tracking-wider text-[#888]">Produtos neste Pedido:</p>
+                          {items.map((it: any, idx: number) => {
+                            const prod = it.products
+                            const pic = prod?.image_url || it.image_url || 'https://http2.mlstatic.com/D_NQ_NP_2X_789396-MLB78028328731_072024-F.webp'
+                            const prodTitle = prod?.name || it.product_name || 'Lava Jato Lavadora Portátil De Alta Pressão 21v'
 
-                          <Link
-                            href={`/pedidos/${ord.id}/etiqueta`}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#333333] border border-[#e2e8f0] text-[11px] font-bold transition-colors"
-                          >
-                            <Printer className="w-3.5 h-3.5" />
-                            Etiqueta
+                            return (
+                              <div key={idx} className="flex items-center justify-between gap-4 p-3 bg-white rounded-xl border border-[#e6e6e6]">
+                                <div className="flex items-center gap-3 min-w-0">
+                                  <div className="w-12 h-12 rounded-xl bg-[#fafafa] border border-[#eee] overflow-hidden flex items-center justify-center shrink-0 p-1">
+                                    <img src={pic} alt="" className="w-full h-full object-contain" />
+                                  </div>
+
+                                  <div className="min-w-0">
+                                    {prod?.id ? (
+                                      <Link
+                                        href={`/produtos/${prod.id}`}
+                                        className="text-[12px] font-bold text-[#111] hover:text-[#1f2328] hover:underline truncate block"
+                                      >
+                                        {prodTitle}
+                                      </Link>
+                                    ) : (
+                                      <p className="text-[12px] font-bold text-[#111] truncate">{prodTitle}</p>
+                                    )}
+                                    <p className="text-[11px] text-[#666] font-mono mt-0.5">SKU: {it.sku || prod?.sku || 'LAVA-JATO-21V'}</p>
+                                  </div>
+                                </div>
+
+                                <div className="text-right shrink-0">
+                                  <p className="text-[12px] font-extrabold text-[#111]">
+                                    {it.quantity || 1}x {formatBRL(Number(it.unit_price || ord.total_amount || 0))}
+                                  </p>
+                                  <p className="text-[11px] font-bold text-[#16a34a]">
+                                    Total: {formatBRL(Number(it.quantity || 1) * Number(it.unit_price || ord.total_amount || 0))}
+                                  </p>
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+
+                        {/* Rastreamento e Logística */}
+                        <div className="flex items-center justify-between text-xs bg-[#fafafa] px-3.5 py-2.5 rounded-xl border border-[#eee]">
+                          <span className="text-[#333] font-medium flex items-center gap-1.5">
+                            <Truck className="w-3.5 h-3.5 text-[#5c8a00]" /> Rastreamento: <strong className="font-mono text-[#111]">{ord.tracking_code || 'MEL47814652332'}</strong>
+                          </span>
+                          <Link href={`/pedidos/${ord.id}`} className="text-[#111] font-bold hover:underline flex items-center gap-1 text-[11px]">
+                            Ver Detalhes do Pedido <ExternalLink className="w-3 h-3 text-[#666]" />
                           </Link>
                         </div>
                       </div>
+                    )
+                  })}
+                </div>
 
-                      {/* Produtos do Pedido */}
-                      <div className="space-y-2">
-                        <p className="text-[11px] font-bold uppercase tracking-wider text-[#888]">Produtos neste Pedido:</p>
-                        {items.map((it: any, idx: number) => {
-                          const prod = it.products
-                          const pic = prod?.image_url || it.image_url || 'https://http2.mlstatic.com/D_NQ_NP_2X_789396-MLB78028328731_072024-F.webp'
-                          const prodTitle = prod?.name || it.product_name || 'Lava Jato Lavadora Portátil De Alta Pressão 21v'
-
-                          return (
-                            <div key={idx} className="flex items-center justify-between gap-4 p-3 bg-white rounded-xl border border-[#e6e6e6]">
-                              <div className="flex items-center gap-3 min-w-0">
-                                <div className="w-12 h-12 rounded-xl bg-[#fafafa] border border-[#eee] overflow-hidden flex items-center justify-center shrink-0 p-1">
-                                  <img src={pic} alt="" className="w-full h-full object-contain" />
-                                </div>
-
-                                <div className="min-w-0">
-                                  {prod?.id ? (
-                                    <Link
-                                      href={`/produtos/${prod.id}`}
-                                      className="text-[12px] font-bold text-[#111] hover:text-[#1f2328] hover:underline truncate block"
-                                    >
-                                      {prodTitle}
-                                    </Link>
-                                  ) : (
-                                    <p className="text-[12px] font-bold text-[#111] truncate">{prodTitle}</p>
-                                  )}
-                                  <p className="text-[11px] text-[#666] font-mono mt-0.5">SKU: {it.sku || prod?.sku || 'LAVA-JATO-21V'}</p>
-                                </div>
-                              </div>
-
-                              <div className="text-right shrink-0">
-                                <p className="text-[12px] font-extrabold text-[#111]">
-                                  {it.quantity || 1}x {formatBRL(Number(it.unit_price || ord.total_amount || 0))}
-                                </p>
-                                <p className="text-[11px] font-bold text-[#16a34a]">
-                                  Total: {formatBRL(Number(it.quantity || 1) * Number(it.unit_price || ord.total_amount || 0))}
-                                </p>
-                              </div>
-                            </div>
-                          )
-                        })}
-                      </div>
-
-                      {/* Rastreamento e Logística */}
-                      <div className="flex items-center justify-between text-xs bg-[#fafafa] px-3.5 py-2.5 rounded-xl border border-[#eee]">
-                        <span className="text-[#333] font-medium flex items-center gap-1.5">
-                          <Truck className="w-3.5 h-3.5 text-[#5c8a00]" /> Rastreamento: <strong className="font-mono text-[#111]">{ord.tracking_code || 'MEL47814652332'}</strong>
-                        </span>
-                        <Link href={`/pedidos/${ord.id}`} className="text-[#111] font-bold hover:underline flex items-center gap-1 text-[11px]">
-                          Ver Detalhes do Pedido <ExternalLink className="w-3 h-3 text-[#666]" />
-                        </Link>
-                      </div>
-                    </div>
-                  )
-                })}
+                {/* Limitador / Paginação em baixo */}
+                {orders.length > 0 && (
+                  <div className="p-4 border-t border-[#eee] bg-[#fafafa]/50">
+                    <PaginationBar
+                      currentPage={ordersPage}
+                      totalItems={totalOrdersCount}
+                      pageSize={ordersPageSize}
+                      onPageChange={setOrdersPage}
+                      onPageSizeChange={setOrdersPageSize}
+                      pageSizeOptions={[3, 5, 10, 20]}
+                      itemName="pedidos"
+                    />
+                  </div>
+                )}
               </div>
             )}
 

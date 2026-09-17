@@ -21,12 +21,14 @@ import {
   ChevronUp,
   ShieldCheck,
   Edit,
-  RefreshCw
+  RefreshCw,
+  Trash2
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { createPage } from '../services/pageBuilder'
 import { normalizeShowcase } from '../../../../packages/core/src/productCommerce'
 import { MercadoLivreLogo, IntegrationLogoRenderer } from '../components/IntegrationLogos'
+import DeleteConfirmationModal from '../components/DeleteConfirmationModal'
 import './ProductDetails.css'
 
 function summarizeProductName(name: string, maxLength = 48) {
@@ -39,6 +41,7 @@ function summarizeProductName(name: string, maxLength = 48) {
 export default function ProductDetails() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [product, setProduct] = useState<any | null>(null)
   const [loading, setLoading] = useState(true)
   const [editingPage, setEditingPage] = useState(false)
@@ -59,6 +62,18 @@ export default function ProductDetails() {
     mlSold: 0,
     storeSold: 0
   })
+
+  const handleDelete = async () => {
+    if (!product?.id) return
+    try {
+      const { error } = await supabase.from('products').delete().eq('id', product.id)
+      if (error) throw error
+      navigate('/hub/produtos')
+    } catch (err) {
+      console.error('Erro ao excluir produto:', err)
+      alert('Erro ao excluir produto.')
+    }
+  }
 
   useEffect(() => {
     if (id) {
@@ -339,8 +354,9 @@ export default function ProductDetails() {
   )
 
   const siteBaseUrl = import.meta.env.VITE_SITE_URL || (import.meta.env.DEV ? 'http://localhost:5173' : 'https://www.teknixbrasil.com.br')
-  const productPublicSlug = meta?.slug || product.slug || product.sku || product.id
-  const productPublicUrl = `${siteBaseUrl}/produto/${productPublicSlug}`
+  const cleanNameSlug = (product.name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+  const productPublicSlug = meta?.slug || cleanNameSlug || product.slug || product.sku || product.id
+  const productPublicUrl = `${siteBaseUrl}/${productPublicSlug}`
   const createdDateStr = product.created_at ? new Date(product.created_at).toLocaleDateString('pt-BR') : '30/08/2026'
 
   return (
@@ -522,6 +538,22 @@ export default function ProductDetails() {
                 <Check size={15} />
                 Salvar produto
               </Link>
+
+              {/* Botão de Excluir Padrão */}
+              <button
+                type="button"
+                className="h-10 w-10 sm:h-10.5 sm:w-10.5 flex items-center justify-center bg-white text-[#ef4444] border border-[#fecaca] hover:bg-[#fef2f2] hover:border-[#ef4444] rounded-xl sm:rounded-2xl transition-all focus:outline-none cursor-pointer shadow-xs shrink-0"
+                title="Excluir produto"
+                onClick={() => setShowDeleteModal(true)}
+              >
+                <Trash2
+                  size={19}
+                  strokeWidth={2}
+                  className="lucide lucide-trash2 lucide-trash-2 w-5 h-5 text-[#ef4444] shrink-0"
+                  aria-hidden="true"
+                  style={{ width: '19px', height: '19px', minWidth: '19px', minHeight: '19px', display: 'block' }}
+                />
+              </button>
             </div>
 
             <div className="pd-price-block">
@@ -1000,7 +1032,17 @@ export default function ProductDetails() {
           </section>
         </aside>
       </main>
-      {/* ── END: MainContentGrid ── */}
+      {/* Modal de Confirmação com EXCLUIR */}
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        itemName={product?.name}
+        description="Esta ação removerá permanentemente este produto da base de dados e do catálogo da TEKNIX."
+        actionWord="EXCLUIR"
+        actionTitle="Excluir Produto"
+        buttonText="Sim, Excluir"
+      />
     </div>
   )
 }

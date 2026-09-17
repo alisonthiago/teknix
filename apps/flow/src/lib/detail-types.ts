@@ -121,7 +121,7 @@ export interface SupplierDetail {
   status: string
   created_at: string
   contacts: Array<{ id: string; name: string | null; phone: string; is_whatsapp: boolean }>
-  products: Array<{ id: string; sku: string; name: string; cost: number; stock: number }>
+  products: Array<{ id: string; sku: string; name: string; cost: number; stock: number; image?: string | null }>
   purchases: Array<{ id: string; date: string; invoice: string; items: number; total: number; status: string }>
   stats: { total_purchased: number; total_orders: number; avg_ticket: number; products_count: number }
   timeline: Array<{ date: string; time: string; action: string; details: string }>

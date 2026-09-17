@@ -256,11 +256,11 @@ export default function StockNotificationsList() {
         exportTitle="Avisos de Estoque"
         exportFilename="avisos-estoque"
         entityLabel="aviso"
-        emptyMessage="Nenhuma solicitação encontrada."
+        emptyMessage="Nenhum aviso ainda."
         emptyDescription={
           notifications.length === 0
-            ? 'Assim que um cliente solicitar aviso de reposição, aparecerá aqui.'
-            : 'Nenhum registro corresponde aos filtros selecionados.'
+            ? 'Novos avisos aparecerão aqui.'
+            : 'Nenhum registro corresponde aos filtros.'
         }
         bulkActions={[
           { label: 'Excluir', icon: <Trash2 size={13} />, action: confirmDelete, variant: 'danger' },

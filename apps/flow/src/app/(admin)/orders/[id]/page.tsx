@@ -35,10 +35,17 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
 
   if (!order) notFound()
 
-  const { data: items } = await supabase
+  const { data: rawItems } = await supabase
     .from('order_items')
     .select('*, products(name, sku)')
     .eq('order_id', id)
+
+  const itemsMap = new Map<string, any>()
+  for (const it of (rawItems || [])) {
+    const key = it.sku || it.product_id || it.id
+    if (!itemsMap.has(key)) itemsMap.set(key, it)
+  }
+  const items = Array.from(itemsMap.values())
 
   const { data: history } = await supabase
     .from('order_status_history')

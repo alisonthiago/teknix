@@ -8,7 +8,7 @@ export default function TeknixFooter() {
   const footerEdit = useWidgetEdit('chrome:footer', 'chrome:footer')
 
   const footerContent = (footerEdit?.content || {}) as Record<string, any>
-  const whatsapp = String(footerContent.whatsapp || '(46) 99915-5875')
+  const whatsapp = String(footerContent.whatsapp || '11920505472')
   const whatsappClean = whatsapp.replace(/\D/g, '')
 
   if (footerEdit?.hidden) return null

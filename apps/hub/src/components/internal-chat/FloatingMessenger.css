@@ -916,7 +916,7 @@
   border-radius: 16px;
   overflow: hidden;
   border: 1px solid #e2e8f0;
-  background-color: #f8fafc;
+  background-color: #fafafa;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -971,7 +971,7 @@
 }
 
 .hub-chat-upload-btn-cancel:hover {
-  background-color: #f8fafc;
+  background-color: #fafafa;
   color: #334155;
 }
 

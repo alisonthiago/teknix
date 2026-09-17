@@ -41,6 +41,10 @@ import HelpTopic from './pages/HelpTopic'
 import LegalPage from './pages/LegalPage'
 import EmailPreview from './pages/EmailPreview'
 import MelhorEnvioTest from './pages/MelhorEnvioTest'
+import SitemapPage from './pages/SitemapPage'
+import MerchantFeedPage from './pages/MerchantFeedPage'
+import BrandPage from './pages/BrandPage'
+import StorePage from './pages/StorePage'
 import './App.css'
 
 import TeknixHeader from './components/TeknixHeader'
@@ -220,7 +224,18 @@ function App() {
               {/* Ambiente privado de homologação, fora do layout e da navegação pública. */}
               <Route path="/integracoes/melhor-envio/teste" element={<MelhorEnvioTest />} />
               <Route path="/preview/:id" element={<SiteLayout><PagePreview /></SiteLayout>} />
-              <Route path="/__widget-preview/:id" element={<SiteLayout><WidgetPreview /></SiteLayout>} />
+              {/* Sitemaps XML dinâmicos e modulares */}
+              <Route path="/sitemap.xml" element={<SitemapPage />} />
+              <Route path="/sitemap-products.xml" element={<SitemapPage />} />
+              <Route path="/sitemap-categories.xml" element={<SitemapPage />} />
+              <Route path="/sitemap-brands.xml" element={<SitemapPage />} />
+              <Route path="/sitemap-stores.xml" element={<SitemapPage />} />
+              <Route path="/sitemap-blog.xml" element={<SitemapPage />} />
+              <Route path="/sitemap-pages.xml" element={<SitemapPage />} />
+              {/* Google Merchant Center XML Feed */}
+              <Route path="/merchant-feed.xml" element={<MerchantFeedPage />} />
+              {/* Validação Google Search Console por arquivo HTML */}
+              <Route path="/googlec2bf8a2dc9f8b874.html" element={<div style={{ fontFamily: 'monospace', padding: 20 }}>google-site-verification: googlec2bf8a2dc9f8b874.html</div>} />
               {/* 0. Home oficial */}
               <Route path="/" element={<Home />} />
 
@@ -239,7 +254,7 @@ function App() {
               <Route path="/account" element={<SiteLayout><Account /></SiteLayout>} />
               <Route path="/pedidos" element={<SiteLayout><OrdersList /></SiteLayout>} />
               <Route path="/order/list" element={<SiteLayout><OrdersList /></SiteLayout>} />
-              <Route path="/buscar-pedido" element={<SiteLayout><OrderLookup /></SiteLayout>} />
+              <Route path="/buscar-pedido" element={<SiteLayout hideHeader hideFooter><OrderLookup /></SiteLayout>} />
               <Route path="/localizar-pedido" element={<SiteLayout><OrderLookup /></SiteLayout>} />
               <Route path="/order/link/verify" element={<SiteLayout><OrderLookup /></SiteLayout>} />
               <Route path="/salvos" element={<SiteLayout><SavedItems /></SiteLayout>} />
@@ -267,28 +282,35 @@ function App() {
               {/* 5b. Catálogo de Produtos (legado) */}
               <Route path="/produtos" element={<SiteLayout><SearchResults /></SiteLayout>} />
 
-              {/* 6. Página de Produto */}
+              {/* 6a. Redirecionamentos 301 de URLs legadas com prefixo para a raiz canônica oficial */}
               <Route path="/produto/:slug" element={<LegacyProductRedirect />} />
               <Route path="/produto/:categoria/:slug" element={<LegacyProductRedirect />} />
-              {/* URL pública direta do produto, sem o prefixo /produto(s). */}
-              <Route path="/:slug" element={<SiteLayout><Product /></SiteLayout>} />
-              {/* Compatibilidade: URLs antigas no plural são normalizadas para o singular. */}
               <Route path="/produtos/:slug" element={<LegacyProductRedirect />} />
 
               {/* 6b. Comparar Produtos */}
               <Route path="/comparar" element={<SiteLayout><ComparePage /></SiteLayout>} />
 
-              {/* 6c. Blog público — precisa vir antes da rota genérica de categorias */}
+              {/* 6c. Blog público */}
               <Route path="/blog" element={<SiteLayout><Blog /></SiteLayout>} />
               <Route path="/blog/:slug" element={<SiteLayout><Blog /></SiteLayout>} />
 
-              {/* 7. Página de Categoria (segmento/categoria) */}
+              {/* 6d. Marcas e Fabricantes */}
+              <Route path="/marcas" element={<SiteLayout><BrandPage /></SiteLayout>} />
+              <Route path="/marca/:brand" element={<SiteLayout><BrandPage /></SiteLayout>} />
+
+              {/* 6e. Lojas e Vendedores Marketplace */}
+              <Route path="/lojas" element={<SiteLayout><StorePage /></SiteLayout>} />
+              <Route path="/loja/:store" element={<SiteLayout><StorePage /></SiteLayout>} />
+
+              {/* 7. Páginas de Categoria e Subcategorias */}
+              <Route path="/categoria/:parentSlug/:subSlug" element={<SiteLayout><CategoryPage /></SiteLayout>} />
+              <Route path="/categoria/:slug" element={<SiteLayout><CategoryPage /></SiteLayout>} />
               <Route path="/:segmento/:categoria" element={<SiteLayout><CategoryPage /></SiteLayout>} />
 
-              {/* 7b. Página de Categoria por slug único */}
-              <Route path="/categoria/:slug" element={<SiteLayout><CategoryPage /></SiteLayout>} />
+              {/* 8. Página de Produto Oficial na RAIZ do domínio: https://teknixbrasil.com.br/{slug} */}
+              <Route path="/:slug" element={<SiteLayout><Product /></SiteLayout>} />
 
-              {/* 8. Rota catch-all — páginas dinâmicas do Page Builder */}
+              {/* 9. Rota catch-all — páginas dinâmicas do Page Builder */}
               <Route path="*" element={<DynamicPage />} />
             </Routes></PageScope></SiteStandards>
           </CompareProvider>

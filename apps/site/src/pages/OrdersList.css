@@ -40,7 +40,7 @@
 
 /* ── Local Nav ── */
 .teknix-orders-localnav {
-  height: 56px;
+  min-height: 56px;
   border-bottom: 1px solid #e5e7eb;
   background-color: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
@@ -49,10 +49,12 @@
   top: 0;
   z-index: 100;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  margin: 16px 0 40px;
+  padding-bottom: 24px;
 }
 
 .teknix-orders-localnav-inner {
-  height: 56px;
+  min-height: 56px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -98,6 +100,10 @@
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   white-space: nowrap;
 }
+
+/* Navegação compacta: os ícones representam cada destino. */
+.teknix-orders-localnav-link > span { display: none; }
+.teknix-orders-localnav-link svg { width: 20px; height: 20px; flex-shrink: 0; }
 
 .teknix-orders-localnav-link:hover {
   color: #000000;
@@ -199,25 +205,26 @@
 }
 
 .teknix-orders-tabs {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 3px;
-  background: #f2f2f7;
-  padding: 3px;
-  border-radius: 12px;
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  background: #f7f7f7;
+  padding: 4px;
+  border-radius: 14px;
+  border: 1px solid #e5e5e5;
+  box-sizing: border-box;
 }
 
 .teknix-orders-tab {
   background: transparent;
   border: none;
-  border-radius: 9px;
-  padding: 7px 14px;
+  border-radius: 10px;
+  padding: 8px 14px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   white-space: nowrap;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 500;
   color: #636366;
   cursor: pointer;
@@ -230,10 +237,10 @@
 }
 
 .teknix-orders-tab.active {
-  background: #ffffff;
-  color: #1d1d1f;
+  background: #B5F500;
+  color: #000000;
   font-weight: 600;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 1px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
 }
 
 .order-tab-count {
@@ -274,7 +281,7 @@
 .teknix-orders-search-input {
   width: 100%;
   height: 42px;
-  padding: 0 var(--tkn-space-32) 0 var(--tkn-space-32);
+  padding: 0 36px 0 38px;
   border-radius: 10px;
   border: 1px solid var(--tkn-orders-border);
   background: #ffffff;
@@ -1457,11 +1464,13 @@
   }
 
   .teknix-orders-localnav {
-    height: 52px;
+    min-height: 52px;
+    padding-bottom: 0;
+    margin-bottom: 56px;
   }
 
   .teknix-orders-localnav-inner {
-    height: 52px;
+    min-height: 52px;
     padding: 0;
     flex-direction: row;
     align-items: center;
@@ -1473,7 +1482,7 @@
   }
 
   .teknix-orders-localnav-links {
-    width: 100%;
+    width: min(100%, 420px);
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     padding: 3px;
@@ -1484,26 +1493,30 @@
 
   .teknix-orders-localnav-link {
     justify-content: center;
-    padding: 6px 2px;
-    font-size: 11px;
+    padding: 10px 2px;
+    min-height: 42px;
+    font-size: 0;
     border-radius: 8px;
-    gap: 4px;
+    gap: 0;
   }
 
+  .teknix-orders-localnav-link > span { display: none; }
+
   .teknix-orders-localnav-link svg {
-    width: 13px;
-    height: 13px;
+    width: 20px;
+    height: 20px;
     flex-shrink: 0;
   }
 
   .teknix-orders-tabs {
-    display: flex;
-    overflow-x: auto;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    overflow: hidden;
     width: 100%;
     box-sizing: border-box;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
-    gap: 4px;
+    gap: 3px;
     padding: 3px;
   }
 
@@ -1512,9 +1525,244 @@
   }
 
   .teknix-orders-tab {
-    flex: 0 0 auto;
+    min-width: 0;
     justify-content: center;
-    padding: 6px 12px;
-    font-size: 12px;
+    padding: 6px 2px;
+    gap: 2px;
+    font-size: 10px !important;
+    letter-spacing: -0.02em;
+  }
+
+  .teknix-orders-tab .order-tab-count {
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    font-size: 10px;
   }
 }
+
+@media (max-width: 380px) {
+  .teknix-orders-tab {
+    padding-inline: 2px;
+    gap: 2px;
+    font-size: 10px !important;
+  }
+
+  .teknix-orders-tab .order-tab-count {
+    min-width: 14px;
+    padding-inline: 3px;
+    font-size: 9px;
+  }
+}
+
+/* WAVE TRACKER */
+.tracker-wave-desktop {
+  position: relative;
+  width: 100%;
+  max-width: 980px;
+  height: 175px;
+  margin: 0 auto;
+}
+
+.tracker-wave-desktop-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.d-wave-step {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transform: translateX(-50%);
+  z-index: 2;
+  width: 130px;
+}
+
+.d-wave-step.step-1 { left: 7%; top: 18px; }
+.d-wave-step.step-2 { left: 28.5%; top: 58px; }
+.d-wave-step.step-3 { left: 50%; top: 18px; }
+.d-wave-step.step-4 { left: 71.5%; top: 58px; }
+.d-wave-step.step-5 { left: 93%; top: 18px; }
+
+.d-wave-bullet {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  border: 2px solid #cbd5e1;
+  color: #94a3b8;
+  margin-bottom: 8px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  transition: all 0.25s ease;
+}
+
+.d-wave-step.completed .d-wave-bullet {
+  background: #b5f500;
+  border-color: #b5f500;
+  color: #111111;
+  box-shadow: 0 4px 16px rgba(181, 245, 0, 0.45);
+}
+
+.d-wave-bullet.active-halo {
+  background: #b5f500;
+  border: 3.5px solid #d9f99d;
+  color: #111111;
+  box-shadow: 0 0 0 10px rgba(181, 245, 0, 0.25), 0 4px 20px rgba(181, 245, 0, 0.5);
+  animation: waveHaloPulse 2s infinite;
+}
+
+.d-wave-bullet.upcoming-bullet {
+  background: #ffffff;
+  border: 2px solid #cbd5e1;
+  color: #64748b;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.d-wave-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.d-wave-title {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 3px;
+  line-height: 1.25;
+}
+
+.d-wave-sub {
+  display: block;
+  font-size: 12px;
+  color: #94a3b8;
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+.d-wave-sub.active-green {
+  color: #15803d;
+  font-weight: 600;
+}
+
+/* ── MOBILE: SERPENTINA ONDULADA CURVA ── */
+.tracker-wave-mobile {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  height: 540px;
+  margin: 0 auto;
+}
+
+.tracker-wave-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.wave-step {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  z-index: 2;
+  width: calc(100% - 60px);
+}
+
+.wave-step.step-1 { top: 18px; left: 18px; }
+.wave-step.step-2 { top: 128px; left: 68px; }
+.wave-step.step-3 { top: 238px; left: 18px; }
+.wave-step.step-4 { top: 348px; left: 68px; }
+.wave-step.step-5 { top: 458px; left: 18px; }
+
+.wave-bullet {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  border: 2px solid #cbd5e1;
+  color: #94a3b8;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  transition: all 0.25s ease;
+}
+
+.wave-step.completed .wave-bullet {
+  background: #b5f500;
+  border-color: #b5f500;
+  color: #111111;
+  box-shadow: 0 4px 16px rgba(181, 245, 0, 0.45);
+}
+
+.wave-bullet.active-halo {
+  background: #b5f500;
+  border: 3.5px solid #d9f99d;
+  color: #111111;
+  box-shadow: 0 0 0 10px rgba(181, 245, 0, 0.25), 0 4px 20px rgba(181, 245, 0, 0.5);
+  animation: waveHaloPulse 2s infinite;
+}
+
+.wave-bullet.upcoming-bullet {
+  background: #ffffff;
+  border: 2px solid #cbd5e1;
+  color: #64748b;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.wave-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.wave-title {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 2px;
+  line-height: 1.25;
+}
+
+.wave-sub {
+  display: block;
+  font-size: 12px;
+  color: #94a3b8;
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+.wave-sub.active-green {
+  color: #15803d;
+  font-weight: 600;
+}
+
+@keyframes waveHaloPulse {
+  0% { box-shadow: 0 0 0 6px rgba(181, 245, 0, 0.25), 0 4px 16px rgba(181, 245, 0, 0.4); }
+  50% { box-shadow: 0 0 0 14px rgba(181, 245, 0, 0.15), 0 4px 24px rgba(181, 245, 0, 0.6); }
+  100% { box-shadow: 0 0 0 6px rgba(181, 245, 0, 0.25), 0 4px 16px rgba(181, 245, 0, 0.4); }
+}
+
+/* Animação do traçado da onda ao carregar */
+.tracker-loading .wave-active-path { stroke-dasharray: 1; stroke-dashoffset: 1; animation: trackerWaveDraw 2.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; } @keyframes trackerWaveDraw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }

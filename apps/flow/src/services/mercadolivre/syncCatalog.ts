@@ -206,15 +206,14 @@ export async function syncMercadoLivreAccount(
         }
         const orderStatus = statusMap[ord.status] || 'PAGO'
 
-        // A. Upsert into orders
-        const { data: existingOrder } = await supabase
+        // A. Upsert into orders com verificação estrita e remoção de duplicatas
+        const { data: existingOrders } = await supabase
           .from('orders')
           .select('id')
           .eq('order_number', orderNumber)
-          .maybeSingle()
 
-        let dbOrderId: string | null = existingOrder?.id || null
-        if (existingOrder) {
+        let dbOrderId: string | null = (existingOrders && existingOrders.length > 0) ? existingOrders[0].id : null
+        if (existingOrders && existingOrders.length > 0) {
           await supabase
             .from('orders')
             .update({
@@ -226,7 +225,12 @@ export async function syncMercadoLivreAccount(
               notes: `${address}, ${city} - BR-${state} CEP: ${zip}`,
               updated_at: new Date().toISOString()
             })
-            .eq('id', existingOrder.id)
+            .eq('id', existingOrders[0].id)
+
+          if (existingOrders.length > 1) {
+            const dupOrderIds = existingOrders.slice(1).map(o => o.id)
+            await supabase.from('orders').delete().in('id', dupOrderIds)
+          }
         } else {
           const { data: newOrder } = await supabase
             .from('orders')
@@ -247,15 +251,14 @@ export async function syncMercadoLivreAccount(
           dbOrderId = newOrder?.id || null
         }
 
-        // B. Upsert into sales
-        const { data: existingSale } = await supabase
+        // B. Upsert into sales com verificação estrita e remoção de duplicatas
+        const { data: existingSales } = await supabase
           .from('sales')
           .select('id')
           .eq('order_id', orderNumber)
-          .maybeSingle()
 
-        let dbSaleId: string | null = existingSale?.id || null
-        if (existingSale) {
+        let dbSaleId: string | null = (existingSales && existingSales.length > 0) ? existingSales[0].id : null
+        if (existingSales && existingSales.length > 0) {
           await supabase
             .from('sales')
             .update({
@@ -263,7 +266,12 @@ export async function syncMercadoLivreAccount(
               status: ord.status === 'paid' ? 'COMPLETED' : 'PENDING',
               updated_at: new Date().toISOString()
             })
-            .eq('id', existingSale.id)
+            .eq('id', existingSales[0].id)
+
+          if (existingSales.length > 1) {
+            const dupSaleIds = existingSales.slice(1).map(s => s.id)
+            await supabase.from('sales').delete().in('id', dupSaleIds)
+          }
         } else {
           const { data: newSale } = await supabase
             .from('sales')
@@ -362,30 +370,74 @@ export async function syncMercadoLivreAccount(
             }
 
             if (dbOrderId) {
-              await supabase.from('order_items').upsert({
-                order_id: dbOrderId,
-                product_id: resolvedProductId,
-                product_name: itemTitle,
-                sku: itemSku,
-                quantity: itemQty,
-                unit_price: itemPrice,
-                total_price: itemQty * itemPrice
-              })
+              const { data: existingItems } = await supabase
+                .from('order_items')
+                .select('id')
+                .eq('order_id', dbOrderId)
+                .eq('sku', itemSku)
+
+              if (existingItems && existingItems.length > 0) {
+                // Atualizar o primeiro registro
+                await supabase.from('order_items').update({
+                  product_id: resolvedProductId,
+                  product_name: itemTitle,
+                  quantity: itemQty,
+                  unit_price: itemPrice,
+                  total_price: itemQty * itemPrice
+                }).eq('id', existingItems[0].id)
+
+                // Deletar quaisquer duplicatas excedentes no banco
+                if (existingItems.length > 1) {
+                  const dupIds = existingItems.slice(1).map(i => i.id)
+                  await supabase.from('order_items').delete().in('id', dupIds)
+                }
+              } else {
+                await supabase.from('order_items').insert({
+                  order_id: dbOrderId,
+                  product_id: resolvedProductId,
+                  product_name: itemTitle,
+                  sku: itemSku,
+                  quantity: itemQty,
+                  unit_price: itemPrice,
+                  total_price: itemQty * itemPrice
+                })
+              }
             }
 
             if (dbSaleId) {
               const profit = (itemPrice * itemQty) - (resolvedCost * itemQty) - itemFee
               const margin = itemPrice > 0 ? (profit / (itemPrice * itemQty)) * 100 : 0
 
-              await supabase.from('sale_items').upsert({
-                sale_id: dbSaleId,
-                product_id: resolvedProductId,
-                quantity: itemQty,
-                unit_price: itemPrice,
-                cost_at_sale: resolvedCost,
-                profit,
-                margin
-              })
+              const { data: existingSaleItems } = await supabase
+                .from('sale_items')
+                .select('id')
+                .eq('sale_id', dbSaleId)
+                .eq('product_id', resolvedProductId)
+
+              if (existingSaleItems && existingSaleItems.length > 0) {
+                await supabase.from('sale_items').update({
+                  quantity: itemQty,
+                  unit_price: itemPrice,
+                  cost_at_sale: resolvedCost,
+                  profit,
+                  margin
+                }).eq('id', existingSaleItems[0].id)
+
+                if (existingSaleItems.length > 1) {
+                  const dupIds = existingSaleItems.slice(1).map(i => i.id)
+                  await supabase.from('sale_items').delete().in('id', dupIds)
+                }
+              } else {
+                await supabase.from('sale_items').insert({
+                  sale_id: dbSaleId,
+                  product_id: resolvedProductId,
+                  quantity: itemQty,
+                  unit_price: itemPrice,
+                  cost_at_sale: resolvedCost,
+                  profit,
+                  margin
+                })
+              }
             }
           }
         }

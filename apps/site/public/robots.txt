@@ -1,0 +1,46 @@
+# TEKNIX — Robots.txt
+# https://www.teknixbrasil.com.br
+
+# Permite todos os rastreadores para o conteúdo público oficial
+User-agent: *
+
+# Bloqueia páginas privadas, administrativas e de checkout
+Disallow: /login
+Disallow: /cadastro
+Disallow: /password
+Disallow: /conta
+Disallow: /conta/
+Disallow: /minha-conta
+Disallow: /pedidos
+Disallow: /sacola
+Disallow: /checkout
+Disallow: /buscar-pedido
+Disallow: /localizar-pedido
+Disallow: /salvos
+Disallow: /itens-salvos
+Disallow: /auth/
+Disallow: /integracoes/
+Disallow: /email-preview
+Disallow: /emails
+Disallow: /preview/
+Disallow: /__widget-preview/
+
+# Bloqueia indexação de buscas internas (evita index bloat)
+Disallow: /busca
+Disallow: /buscar
+Disallow: /*?*q=
+Disallow: /*?*search=
+
+# Sitemaps Oficiais (com subdivisões modulares)
+Sitemap: https://teknixbrasil.com.br/sitemap.xml
+Sitemap: https://teknixbrasil.com.br/sitemap-products.xml
+Sitemap: https://teknixbrasil.com.br/sitemap-categories.xml
+Sitemap: https://teknixbrasil.com.br/sitemap-brands.xml
+Sitemap: https://teknixbrasil.com.br/sitemap-pages.xml
+
+# Motores de Busca
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /

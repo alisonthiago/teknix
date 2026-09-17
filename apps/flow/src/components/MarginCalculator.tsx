@@ -236,8 +236,8 @@ function SimulatorTab({ initialProduct, onShare }: { initialProduct?: Product | 
         )}
 
         <div>
-          <h3 className="text-[12.5px] font-semibold text-[#111111] mb-2 flex items-center justify-between">
-            <span>Marketplace (Auto-Config)</span>
+          <h3 className="text-[11px] sm:text-[12.5px] font-semibold text-[#111111] mb-2 flex items-center justify-between">
+            <span></span>
             {selectedMktId && (
               <span className="text-[10px] font-medium text-[#16a34a] bg-[#ecfdf5] border border-[#bbf7d0] px-2 py-0.5 rounded-full flex items-center gap-1">
                 <Info className="w-3 h-3"/> {activeMpConfig?.name}
@@ -286,58 +286,58 @@ function SimulatorTab({ initialProduct, onShare }: { initialProduct?: Product | 
 
         {/* Custos (R$) */}
         <div className="space-y-1.5">
-          <h3 className="text-[9.5px] font-bold text-[#888888] uppercase tracking-wider">Custos (R$)</h3>
+          <h3 style={{ fontSize: '16px', lineHeight: '1.25' }} className="text-[16px] sm:text-[16px] font-semibold sm:font-bold text-[#888888] uppercase tracking-wider">Custos (R$)</h3>
           <div className="grid grid-cols-3 gap-2">
             <div>
               <label className="block text-[10.5px] font-medium text-[#666666] mb-1">Produto</label>
-              <input type="number" value={custo || ''} onChange={e => setCusto(+e.target.value)} className="w-full h-[36px] border border-[#e6e6e6] rounded-lg px-2.5 text-[13px] outline-none focus:border-[#0071e3] transition-colors text-[#111111] bg-white" />
+              <input type="number" inputMode="decimal" value={custo || ''} onChange={e => setCusto(+e.target.value)} className="w-full h-[36px] border border-[#e6e6e6] rounded-lg px-2.5 text-[13px] outline-none focus:border-[#0071e3] transition-colors text-[#111111] bg-white" />
             </div>
             <div>
               <label className="block text-[10.5px] font-medium text-[#666666] mb-1">Frete</label>
-              <input type="number" value={freteLogistica || ''} onChange={e => setFreteLogistica(+e.target.value)} className="w-full h-[36px] border border-[#e6e6e6] rounded-lg px-2.5 text-[13px] outline-none focus:border-[#0071e3] transition-colors text-[#111111] bg-white" />
+              <input type="number" inputMode="decimal" value={freteLogistica || ''} onChange={e => setFreteLogistica(+e.target.value)} className="w-full h-[36px] border border-[#e6e6e6] rounded-lg px-2.5 text-[13px] outline-none focus:border-[#0071e3] transition-colors text-[#111111] bg-white" />
             </div>
             <div>
               <label className="block text-[10.5px] font-medium text-[#666666] mb-1">Embalagem</label>
-              <input type="number" value={embalagem || ''} onChange={e => setEmbalagem(+e.target.value)} className="w-full h-[36px] border border-[#e6e6e6] rounded-lg px-2.5 text-[13px] outline-none focus:border-[#0071e3] transition-colors text-[#111111] bg-white" />
+              <input type="number" inputMode="decimal" value={embalagem || ''} onChange={e => setEmbalagem(+e.target.value)} className="w-full h-[36px] border border-[#e6e6e6] rounded-lg px-2.5 text-[13px] outline-none focus:border-[#0071e3] transition-colors text-[#111111] bg-white" />
             </div>
             <div>
               <label className="block text-[10.5px] font-medium text-[#666666] mb-1">Frete MKT</label>
-              <input type="number" value={freteMarketplace || ''} onChange={e => setFreteMarketplace(+e.target.value)} className="w-full h-[36px] border border-[#e6e6e6] rounded-lg px-2.5 text-[13px] outline-none focus:border-[#0071e3] transition-colors text-[#111111] bg-white" />
+              <input type="number" inputMode="decimal" value={freteMarketplace || ''} onChange={e => setFreteMarketplace(+e.target.value)} className="w-full h-[36px] border border-[#e6e6e6] rounded-lg px-2.5 text-[13px] outline-none focus:border-[#0071e3] transition-colors text-[#111111] bg-white" />
             </div>
             <div>
               <label className="block text-[10.5px] font-medium text-[#666666] mb-1">Tarifa Fixa</label>
-              <input type="number" value={tarifaFixa || ''} onChange={e => setTarifaFixa(+e.target.value)} className="w-full h-[36px] border border-[#e6e6e6] rounded-lg px-2.5 text-[13px] outline-none focus:border-[#0071e3] transition-colors text-[#111111] bg-white" />
+              <input type="number" inputMode="decimal" value={tarifaFixa || ''} onChange={e => setTarifaFixa(+e.target.value)} className="w-full h-[36px] border border-[#e6e6e6] rounded-lg px-2.5 text-[13px] outline-none focus:border-[#0071e3] transition-colors text-[#111111] bg-white" />
             </div>
           </div>
         </div>
 
         {/* Variáveis (%) */}
         <div className="space-y-1.5">
-          <h3 className="text-[9.5px] font-bold text-[#888888] uppercase tracking-wider">Variáveis (%)</h3>
+          <h3 style={{ fontSize: '16px', lineHeight: '1.25' }} className="text-[16px] sm:text-[16px] font-semibold sm:font-bold text-[#888888] uppercase tracking-wider">Variáveis (%)</h3>
           <div className="grid grid-cols-3 gap-2">
             <div>
               <label className="block text-[10.5px] font-bold text-[#0071e3] mb-1">Margem</label>
-              <input type="number" value={margemLiquida || ''} onChange={e => setMargemLiquida(+e.target.value)} className="w-full h-[36px] border-2 border-[#0071e3] rounded-lg px-2.5 text-[13px] font-semibold outline-none transition-colors text-[#111111] bg-white" />
+              <input type="number" inputMode="decimal" value={margemLiquida || ''} onChange={e => setMargemLiquida(+e.target.value)} className="w-full h-[36px] border-2 border-[#0071e3] rounded-lg px-2.5 text-[13px] font-semibold outline-none transition-colors text-[#111111] bg-white" />
             </div>
             <div>
               <label className="block text-[10.5px] font-medium text-[#666666] mb-1">Imposto</label>
-              <input type="number" value={imposto || ''} onChange={e => setImposto(+e.target.value)} className="w-full h-[36px] border border-[#e6e6e6] rounded-lg px-2.5 text-[13px] outline-none focus:border-[#0071e3] transition-colors text-[#111111] bg-white" />
+              <input type="number" inputMode="decimal" value={imposto || ''} onChange={e => setImposto(+e.target.value)} className="w-full h-[36px] border border-[#e6e6e6] rounded-lg px-2.5 text-[13px] outline-none focus:border-[#0071e3] transition-colors text-[#111111] bg-white" />
             </div>
             <div>
               <label className="block text-[10.5px] font-medium text-[#666666] mb-1">Comissão</label>
-              <input type="number" value={comissaoMkt || ''} onChange={e => setComissaoMkt(+e.target.value)} className="w-full h-[36px] border border-[#e6e6e6] rounded-lg px-2.5 text-[13px] outline-none focus:border-[#0071e3] transition-colors text-[#111111] bg-white" />
+              <input type="number" inputMode="decimal" value={comissaoMkt || ''} onChange={e => setComissaoMkt(+e.target.value)} className="w-full h-[36px] border border-[#e6e6e6] rounded-lg px-2.5 text-[13px] outline-none focus:border-[#0071e3] transition-colors text-[#111111] bg-white" />
             </div>
             <div>
               <label className="block text-[10.5px] font-medium text-[#666666] mb-1">Ads</label>
-              <input type="number" value={publicidade || ''} onChange={e => setPublicidade(+e.target.value)} className="w-full h-[36px] border border-[#e6e6e6] rounded-lg px-2.5 text-[13px] outline-none focus:border-[#0071e3] transition-colors text-[#111111] bg-white" />
+              <input type="number" inputMode="decimal" value={publicidade || ''} onChange={e => setPublicidade(+e.target.value)} className="w-full h-[36px] border border-[#e6e6e6] rounded-lg px-2.5 text-[13px] outline-none focus:border-[#0071e3] transition-colors text-[#111111] bg-white" />
             </div>
             <div>
               <label className="block text-[10.5px] font-medium text-[#666666] mb-1">Juros</label>
-              <input type="number" value={juros || ''} onChange={e => setJuros(+e.target.value)} className="w-full h-[36px] border border-[#e6e6e6] rounded-lg px-2.5 text-[13px] outline-none focus:border-[#0071e3] transition-colors text-[#111111] bg-white" />
+              <input type="number" inputMode="decimal" value={juros || ''} onChange={e => setJuros(+e.target.value)} className="w-full h-[36px] border border-[#e6e6e6] rounded-lg px-2.5 text-[13px] outline-none focus:border-[#0071e3] transition-colors text-[#111111] bg-white" />
             </div>
             <div>
               <label className="block text-[10.5px] font-medium text-[#666666] mb-1">Reserva</label>
-              <input type="number" value={reserva || ''} onChange={e => setReserva(+e.target.value)} className="w-full h-[36px] border border-[#e6e6e6] rounded-lg px-2.5 text-[13px] outline-none focus:border-[#0071e3] transition-colors text-[#111111] bg-white" />
+              <input type="number" inputMode="decimal" value={reserva || ''} onChange={e => setReserva(+e.target.value)} className="w-full h-[36px] border border-[#e6e6e6] rounded-lg px-2.5 text-[13px] outline-none focus:border-[#0071e3] transition-colors text-[#111111] bg-white" />
             </div>
           </div>
         </div>
@@ -357,7 +357,7 @@ function SimulatorTab({ initialProduct, onShare }: { initialProduct?: Product | 
                 <Check className="w-3 h-3" />
               </div>
               <p className="text-[10px] font-semibold text-[#15803d] leading-snug">
-                Vendendo por <span className="underline decoration-2">{formatCurrency(precoSugerido)}</span>, você ganha <span className="underline decoration-2">{formatCurrency(lucroLiq)}</span> por venda.
+                Venda: <span className="underline decoration-2">{formatCurrency(precoSugerido)}</span> · Lucro: <span className="underline decoration-2">{formatCurrency(lucroLiq)}</span>
               </p>
             </div>
 
@@ -483,11 +483,11 @@ Vendendo por ${formatCurrency(precoSugerido)}, você ganha ${formatCurrency(lucr
       </div>
 
       {/* Barra Fixa Inferior no Mobile (visível apenas em telas menores < lg) */}
-      <div className="lg:hidden sticky -bottom-4 sm:-bottom-5 -mx-4 sm:-mx-8 bg-white/95 backdrop-blur-md border-t border-[#e6e6e6] px-4 py-2.5 flex items-center justify-between gap-3 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] z-20">
+      <div className="lg:hidden sticky -bottom-8 sm:-bottom-9 -mx-4 sm:-mx-8 bg-white/95 backdrop-blur-md border-t border-[#e6e6e6] px-4 pt-4 pb-2.5 flex items-center justify-between gap-3 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] z-20">
         <div className="flex flex-col min-w-0">
           <span className="text-[9.5px] font-semibold text-[#888888] uppercase tracking-wider">Venda / Lucro</span>
           <div className="flex items-baseline gap-1.5 truncate">
-            <span className="text-[15px] font-bold text-[#111111]">{formatCurrency(precoSugerido)}</span>
+            <span className="text-[21px] font-extrabold text-[#111111] tracking-[-0.02em]">{formatCurrency(precoSugerido)}</span>
             <span className="text-[11px] font-bold text-[#16a34a]">+{formatCurrency(lucroLiq)} ({margemLiquida}%)</span>
           </div>
         </div>
@@ -510,10 +510,11 @@ MEU LUCRO REAL: ${formatCurrency(lucroLiq)} (Margem: ${margemLiquida}%)
 Vendendo por ${formatCurrency(precoSugerido)}, você ganha ${formatCurrency(lucroLiq)} por venda.`
             onShare(summary)
           }}
-          className="h-[38px] px-4 flex items-center justify-center gap-1.5 bg-[#0071e3] hover:bg-[#0062c4] active:bg-[#004f9e] text-white text-xs font-semibold rounded-lg transition-all cursor-pointer shrink-0 shadow-sm"
+          aria-label="Compartilhar precificação"
+          title="Compartilhar precificação"
+          className="h-[38px] w-[42px] px-0 flex items-center justify-center bg-[#0071e3] hover:bg-[#0062c4] active:bg-[#004f9e] text-white rounded-lg transition-all cursor-pointer shrink-0 shadow-sm"
         >
-          <Share2 className="w-3.5 h-3.5" />
-          <span>Compartilhar</span>
+          <Share2 className="w-4 h-4" />
         </button>
       </div>
     </div>
@@ -643,9 +644,9 @@ function CompareTab() {
       </div>
 
       <div>
-        <h4 className="text-xs font-semibold text-[#666666] mb-3 flex items-center justify-between">
-          <span>Comparativo de Venda (Automático)</span>
-          <span className="text-[#0071e3] font-semibold cursor-pointer hover:underline text-[11.5px]" onClick={loadAllFees}>Sincronizar APIs</span>
+        <h4 className="text-[13px] font-semibold text-[#666666] mb-3 flex items-center justify-between gap-2">
+          <span>Comparar preços</span>
+          <span className="text-[#0071e3] font-semibold cursor-pointer hover:underline text-[11px] whitespace-nowrap" onClick={loadAllFees}>Atualizar taxas</span>
         </h4>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {MARKETPLACE_CONFIG.map(mp => {
@@ -675,17 +676,17 @@ function CompareTab() {
             return (
               <button
                 key={mp.id}
-                className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-[#e6e6e6] hover:border-[#1f2328] hover:bg-[#f5f5f5]/30 transition-all text-center relative"
+                className="flex flex-col items-center gap-1 p-2.5 rounded-xl border border-[#e6e6e6] hover:border-[#1f2328] hover:bg-[#f5f5f5]/30 transition-all text-center relative"
               >
                 {mp.id === 'mercado_livre' && (
                   <div className="absolute top-1 right-1 w-2 h-2 rounded-full bg-green-500 animate-pulse" title="API Sincronizada"></div>
                 )}
                 <MarketplaceLogo name={mp.name} className="w-6 h-6" />
                 <span className="text-[10px] font-medium text-[#666]">{mp.name}</span>
-                <span className="text-[10px] text-[#999]">{comissaoMkt}% taxa</span>
+                <span className="text-[10px] text-[#999]">Taxa {comissaoMkt}%</span>
                 <span className="text-xs font-bold text-[#1f2328]">{formatCurrency(preco)}</span>
                 <span className={`text-[10px] font-medium ${lucro >= 0 ? 'text-[#00a650]' : 'text-[#f23d4f]'}`}>
-                  Lucro: {formatCurrency(lucro)}
+                  Lucro {formatCurrency(lucro)}
                 </span>
               </button>
             )
@@ -874,12 +875,12 @@ export default function MarginCalculator({ open, onClose }: MarginCalculatorProp
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6" ref={overlayRef}>
       <div className="absolute inset-0 bg-slate-900/65 backdrop-blur-[4px]" onClick={onClose} />
 
-      <div className="relative bg-white rounded-2xl border border-[#e6e6e6] w-full max-w-5xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] flex flex-col overflow-hidden max-h-[88vh]">
+      <div className="relative bg-white rounded-2xl border border-[#e6e6e6] w-full max-w-5xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] flex flex-col overflow-hidden max-h-[88vh] p-4 sm:p-6">
         
         {/* Header */}
         <div className="sticky top-0 bg-white z-10 px-4 sm:px-8 py-3.5 sm:py-4 border-b border-[#e6e6e6] flex items-center justify-between">
           <div className="flex flex-col">
-            <h2 className="text-[16px] sm:text-[16.5px] font-semibold text-[#111111] flex items-center gap-2.5">
+            <h2 className="text-[14px] sm:text-[16.5px] font-semibold text-[#111111] flex items-center gap-2.5">
               <Calculator className="w-4 h-4 text-[#0071e3]" />
               Precificação Inteligente
             </h2>
@@ -903,7 +904,7 @@ export default function MarginCalculator({ open, onClose }: MarginCalculatorProp
         </div>
 
         {/* Tabs */}
-        <div className="border-b border-[#e6e6e6] px-4 sm:px-8 py-2 sm:py-2.5 flex items-center justify-start bg-white shrink-0">
+        <div className="border-b border-[#e6e6e6] px-4 sm:px-8 py-4 sm:py-5 flex items-center justify-start bg-white shrink-0">
           <div className="bg-[#f0f2f5] p-1 rounded-xl flex items-center w-full sm:w-auto gap-1">
             <TabButton active={activeTab === 'simulador'} onClick={() => setActiveTab('simulador')} icon={TrendingUp} label="Simulador" />
             <TabButton active={activeTab === 'produtos'} onClick={() => setActiveTab('produtos')} icon={Package} label="Produtos" />

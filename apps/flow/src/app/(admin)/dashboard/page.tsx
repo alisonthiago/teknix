@@ -132,7 +132,7 @@ export default function DashboardPage() {
     <div className="mp-stack">
       {/* User Welcome Banner */}
       {userProfile && (
-        <div className="flex items-center gap-4 mb-2">
+        <div className="flex items-center gap-4">
           <div className="relative p-[2px] rounded-full bg-gradient-to-br from-[#ff4b3e] via-[#ff8b1f] to-[#ffd21c] flex-shrink-0 shadow-sm">
             <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white bg-white flex items-center justify-center">
               {userProfile.photo_url ? (
@@ -144,17 +144,16 @@ export default function DashboardPage() {
             <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#19c968] border-2 border-white" aria-label="Online" title="Online" />
           </div>
           <div>
-            <h1 className="text-[24px] sm:text-[26px] font-semibold text-[#111827] tracking-tight">Olá, {userProfile.name?.split(' ')[0]}</h1>
-            <p className="text-[13px] text-[#666666] font-normal">Bem-vindo de volta!</p>
+            <h1 className="text-[24px] sm:text-[26px] font-semibold text-black tracking-tight">Olá, {userProfile.name?.split(' ')[0]}</h1>
           </div>
         </div>
       )}
 
       {/* Global Filter Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 bg-white border border-[#e6e6e6] rounded-lg px-4 py-3">
-        <div className="flex items-center gap-2 text-xs text-[#999]">
-          <Filter className="w-4 h-4" />
-          <span className="font-medium">Filtros</span>
+        <div className="flex items-center gap-2 text-xs text-[#222222]">
+          <Filter className="w-4 h-4 text-[#222222]" />
+          <span className="font-semibold text-[#111111]">Filtros</span>
         </div>
         <div className="grid grid-cols-2 sm:flex items-center gap-2 flex-1">
           <select
@@ -163,41 +162,45 @@ export default function DashboardPage() {
               setSelectedMarketplace(e.target.value)
               setSelectedAccount('ALL')
             }}
-            className="w-full sm:w-auto px-3 h-[38px] border border-[#e6e6e6] rounded-lg text-xs text-[#111] bg-white focus:outline-none focus:border-[#1f2328] cursor-pointer"
+            style={{ color: '#111111', backgroundColor: '#ffffff', colorScheme: 'light', WebkitTextFillColor: '#111111' }}
+            className="w-full sm:w-auto px-3 h-[38px] border border-[#e6e6e6] rounded-lg text-xs font-medium text-[#111111] bg-white focus:outline-none focus:border-[#1f2328] cursor-pointer"
           >
-            <option value="ALL">Todos os marketplaces</option>
+            <option value="ALL" style={{ color: '#111111', backgroundColor: '#ffffff' }}>Todos os marketplaces</option>
             {filterData?.marketplaces.map(mp => (
-              <option key={mp.id} value={mp.id}>{mp.name}</option>
+              <option key={mp.id} value={mp.id} style={{ color: '#111111', backgroundColor: '#ffffff' }}>{mp.name}</option>
             ))}
           </select>
 
           <select
             value={selectedAccount}
             onChange={e => setSelectedAccount(e.target.value)}
-            className="w-full sm:w-auto px-3 h-[38px] border border-[#e6e6e6] rounded-lg text-xs text-[#111] bg-white focus:outline-none focus:border-[#1f2328] cursor-pointer"
+            style={{ color: '#111111', backgroundColor: '#ffffff', colorScheme: 'light', WebkitTextFillColor: '#111111' }}
+            className="w-full sm:w-auto px-3 h-[38px] border border-[#e6e6e6] rounded-lg text-xs font-medium text-[#111111] bg-white focus:outline-none focus:border-[#1f2328] cursor-pointer"
           >
-            <option value="ALL">Todas as contas</option>
+            <option value="ALL" style={{ color: '#111111', backgroundColor: '#ffffff' }}>Todas as contas</option>
             {filteredAccounts.map(acc => (
-              <option key={acc.id} value={acc.id}>{acc.account_name}</option>
+              <option key={acc.id} value={acc.id} style={{ color: '#111111', backgroundColor: '#ffffff' }}>{acc.account_name}</option>
             ))}
           </select>
 
           <select
             value={period}
             onChange={e => setPeriod(e.target.value)}
-            className="col-span-2 w-full sm:col-span-1 sm:w-auto px-3 h-[38px] border border-[#e6e6e6] rounded-lg text-xs text-[#111] bg-white focus:outline-none focus:border-[#1f2328] cursor-pointer"
+            style={{ color: '#111111', backgroundColor: '#ffffff', colorScheme: 'light', WebkitTextFillColor: '#111111' }}
+            className="col-span-2 w-full sm:col-span-1 sm:w-auto px-3 h-[38px] border border-[#e6e6e6] rounded-lg text-xs font-medium text-[#111111] bg-white focus:outline-none focus:border-[#1f2328] cursor-pointer"
           >
-            <option value="7">Últimos 7 dias</option>
-            <option value="30">Últimos 30 dias</option>
-            <option value="90">Últimos 90 dias</option>
+            <option value="7" style={{ color: '#111111', backgroundColor: '#ffffff' }}>Últimos 7 dias</option>
+            <option value="30" style={{ color: '#111111', backgroundColor: '#ffffff' }}>Últimos 30 dias</option>
+            <option value="90" style={{ color: '#111111', backgroundColor: '#ffffff' }}>Últimos 90 dias</option>
           </select>
         </div>
 
-        <span className="text-[10px] text-[#999] hidden sm:block">{getFilterLabel()}</span>
+        <span className="text-[11px] font-medium text-[#555555] hidden sm:block">{getFilterLabel()}</span>
       </div>
 
       {/* CARD DESTAQUE VENDAS DE HOJE (MONITOR AO VIVO) */}
-      <div className="bg-[#B5F500] rounded-2xl px-5 sm:px-6 py-4 sm:py-6 shadow-sm border border-[#a2e000] text-[#111] flex flex-col md:flex-row md:items-center justify-between gap-4">
+      {/* CARD DESTAQUE VENDAS DE HOJE (MONITOR AO VIVO) */}
+      <div className="bg-[#B5F500] rounded-2xl py-5 sm:py-6 px-6 sm:px-8 lg:px-10 shadow-sm border border-[#a2e000] text-[#111] flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-2xl bg-black/10 flex items-center justify-center shrink-0">
             <span className="relative flex h-3.5 w-3.5">
@@ -246,14 +249,14 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-4">
         {/* Card principal — Faturamento com tabs */}
         <div className="xl:col-span-5 mp-card-flush flex flex-col">
-          <div className="px-4 sm:px-6 pt-4 sm:pt-5">
+          <div className="px-6 sm:px-8 lg:px-9 pt-5 sm:pt-6">
             <div className="mp-card-tabs">
               {tabs.map(t => (
                 <button key={t.id} onClick={() => setTab(t.id)} className={`mp-card-tab ${tab === t.id ? 'mp-card-tab-active' : ''}`}>{t.label}</button>
               ))}
             </div>
           </div>
-          <div className="px-4 sm:px-6 py-4 sm:py-6 flex-1">
+          <div className="px-6 sm:px-8 lg:px-9 py-5 sm:py-6 flex-1">
             <div className="flex items-start justify-between gap-4">
               <div>
                 {hidden ? (
@@ -307,7 +310,7 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Últimos Pedidos (1:1 com o HUB) ── */}
-      <div className="mp-card" style={{ padding: '20px 24px' }}>
+      <div className="mp-card !py-6 !px-6 sm:!px-8 lg:!px-10">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 16, borderBottom: '1px solid #f0f0f0', marginBottom: 4 }}>
           <div>
             <h2 className="mp-section-title">Últimos Pedidos</h2>

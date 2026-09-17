@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { DollarSign, Store, ShoppingBag, ArrowUpRight, Search, Layers, CheckCircle2, ChevronRight, Package, User, Share2 } from 'lucide-react'
+import { DollarSign, Store, ShoppingBag, ArrowUpRight, Search, Layers, CheckCircle2, Package, User, MoreHorizontal } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { PageHeader, StatCard, SearchInput, ModuleTable, TableHead, Th, Td } from '@/components/ui/module'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
@@ -20,6 +20,7 @@ function SalesTab() {
   const [filterMp, setFilterMp] = useState('all')
   const [filterAcc, setFilterAcc] = useState('all')
   const [shareSale, setShareSale] = useState<any | null>(null)
+  const [actionSale, setActionSale] = useState<any | null>(null)
 
   const { data: sales, loading: loadingSales } = useSupabaseQuery(async (s) => {
     const { data } = await s
@@ -121,36 +122,36 @@ function SalesTab() {
   return (
     <div className="space-y-4">
       {/* Top Stat Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-        <div className="bg-white px-5 py-6 rounded-2xl border border-[#e6e6e6] shadow-2xs">
-          <p className="text-[10px] sm:text-xs font-normal text-[#999] uppercase tracking-wide">Receita de Vendas</p>
-          <p className="text-2xl font-semibold text-[#111] mt-1 tracking-tight">{formatBRL(totalRevenue)}</p>
-          <div className="flex items-center gap-1 text-xs font-medium text-[#16a34a] mt-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="bg-white px-3 py-4 sm:px-5 sm:py-6 rounded-xl sm:rounded-2xl border border-[#e6e6e6] shadow-none">
+          <p className="text-[10px] sm:text-[11px] font-semibold text-[#999] uppercase tracking-wider">Receita de Vendas</p>
+          <p className="text-xl sm:text-2xl font-bold text-[#111] mt-1 tracking-tight">{formatBRL(totalRevenue)}</p>
+          <div className="flex items-center gap-1 text-[10px] sm:text-xs font-medium text-[#16a34a] mt-2">
             <ArrowUpRight className="w-3.5 h-3.5" /> 100% faturamento ativo
           </div>
         </div>
 
-        <div className="bg-white px-5 py-6 rounded-2xl border border-[#e6e6e6] shadow-2xs">
-          <p className="text-[10px] sm:text-xs font-normal text-[#999] uppercase tracking-wide">Total de Vendas</p>
-          <p className="text-2xl font-semibold text-[#111] mt-1 tracking-tight">{filtered.length}</p>
-          <p className="text-xs text-[#777] font-normal mt-2">Pedidos processados</p>
+        <div className="bg-white px-3 py-4 sm:px-5 sm:py-6 rounded-xl sm:rounded-2xl border border-[#e6e6e6] shadow-none">
+          <p className="text-[10px] sm:text-[11px] font-semibold text-[#999] uppercase tracking-wider">Total de Vendas</p>
+          <p className="text-xl sm:text-2xl font-bold text-[#111] mt-1 tracking-tight">{filtered.length}</p>
+          <p className="text-[10px] sm:text-xs text-[#777] font-normal mt-1 sm:mt-2">Pedidos processados</p>
         </div>
 
-        <div className="bg-white px-5 py-6 rounded-2xl border border-[#e6e6e6] shadow-2xs">
-          <p className="text-[10px] sm:text-xs font-normal text-[#999] uppercase tracking-wide">Itens Vendidos</p>
-          <p className="text-2xl font-semibold text-[#111] mt-1 tracking-tight">{totalItems}</p>
-          <p className="text-xs text-[#777] font-normal mt-2">Unidades expedidas</p>
+        <div className="bg-white px-3 py-4 sm:px-5 sm:py-6 rounded-xl sm:rounded-2xl border border-[#e6e6e6] shadow-none">
+          <p className="text-[10px] sm:text-[11px] font-semibold text-[#999] uppercase tracking-wider">Itens Vendidos</p>
+          <p className="text-xl sm:text-2xl font-bold text-[#111] mt-1 tracking-tight">{totalItems}</p>
+          <p className="text-[10px] sm:text-xs text-[#777] font-normal mt-1 sm:mt-2">Unidades expedidas</p>
         </div>
 
-        <div className="bg-white px-5 py-6 rounded-2xl border border-[#e6e6e6] shadow-2xs">
-          <p className="text-[10px] sm:text-xs font-normal text-[#999] uppercase tracking-wide">Ticket Médio</p>
-          <p className="text-2xl font-semibold text-[#111] mt-1 tracking-tight">{formatBRL(totalRevenue / Math.max(1, filtered.length))}</p>
-          <p className="text-xs text-[#16a34a] font-medium mt-2">Média por venda</p>
+        <div className="bg-white px-3 py-4 sm:px-5 sm:py-6 rounded-xl sm:rounded-2xl border border-[#e6e6e6] shadow-none">
+          <p className="text-[10px] sm:text-[11px] font-semibold text-[#999] uppercase tracking-wider">Ticket Médio</p>
+          <p className="text-xl sm:text-2xl font-bold text-[#111] mt-1 tracking-tight">{formatBRL(totalRevenue / Math.max(1, filtered.length))}</p>
+          <p className="text-[10px] sm:text-xs text-[#16a34a] font-medium mt-1 sm:mt-2">Média por venda</p>
         </div>
       </div>
 
       {/* Filtros em uma única linha */}
-      <div className="flex items-center gap-2.5 flex-nowrap overflow-x-auto [&::-webkit-scrollbar]:hidden">
+      <div className="sales-filters flex items-center gap-2.5 flex-nowrap overflow-x-auto [&::-webkit-scrollbar]:hidden">
         <div className="flex-1 min-w-[200px] relative">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#999]" />
           <input
@@ -164,7 +165,7 @@ function SalesTab() {
         <select 
           value={filterMp} 
           onChange={e => { setFilterMp(e.target.value); setFilterAcc('all') }} 
-          className="h-[38px] px-3 border border-[#e6e6e6] rounded-lg text-sm font-normal text-[#111] focus:outline-none focus:border-[#1f2328] bg-white transition-colors cursor-pointer shrink-0"
+          className="w-[220px] flex-none h-[38px] px-3 border border-[#e6e6e6] rounded-lg text-sm font-normal text-[#111] focus:outline-none focus:border-[#1f2328] bg-white transition-colors cursor-pointer"
         >
           <option value="all">Todos marketplaces</option>
           <option value="Mercado Livre">Mercado Livre</option>
@@ -175,7 +176,7 @@ function SalesTab() {
         <select 
           value={filterAcc} 
           onChange={e => setFilterAcc(e.target.value)} 
-          className="h-[38px] px-3 border border-[#e6e6e6] rounded-lg text-sm font-normal text-[#111] focus:outline-none focus:border-[#1f2328] bg-white transition-colors cursor-pointer shrink-0"
+          className="w-[180px] flex-none h-[38px] px-3 border border-[#e6e6e6] rounded-lg text-sm font-normal text-[#111] focus:outline-none focus:border-[#1f2328] bg-white transition-colors cursor-pointer"
         >
           <option value="all">Todas contas</option>
           {(accounts || []).map((a: Record<string, unknown>) => (
@@ -192,7 +193,7 @@ function SalesTab() {
       ) : (
         <div className="bg-white rounded-xl border border-[#e6e6e6] overflow-hidden shadow-none">
           <div className="overflow-x-auto">
-            <table className="w-full text-left">
+            <table className="sales-table w-full text-left">
               <thead className="bg-[#fafafa] border-b border-[#f0f0f0]">
                 <tr>
                   <th className="text-left py-2.5 px-4 font-semibold text-[#666666] text-[11px] uppercase tracking-wider">Pedido / ID</th>
@@ -212,27 +213,30 @@ function SalesTab() {
                     onClick={() => router.push(`/pedidos/${s.orderId || s.id}`)} 
                     className="hover:bg-[#fafafa] transition-colors cursor-pointer group"
                   >
-                    <td className="py-3 px-4 font-mono font-medium text-[#111111] text-[12.5px]">
+                    <td
+                      className="py-4 px-4 text-[#111111]"
+                      style={{ fontSize: '12px', fontFamily: 'inherit', fontWeight: 400 }}
+                    >
                       {s.orderId}
                     </td>
-                    <td className="py-3 px-4 text-[#555555]">
+                    <td className="py-4 px-4 text-[#555555]">
                       <div className="flex items-center" title={s.marketplaceName}>
                         <MarketplaceLogo name={s.marketplaceName} className="w-4 h-4" />
                       </div>
                     </td>
-                    <td className="py-3 px-4 text-[12px] text-[#666666] font-normal">
+                    <td className="py-4 px-4 text-[12px] text-[#666666] font-normal">
                       {s.accountName}
                     </td>
-                    <td className="py-3 px-4 text-[#666666] font-normal text-[12px]">
+                    <td className="py-4 px-4 text-[#666666] font-normal text-[12px]">
                       {s.date} <span className="text-[#999999] text-[11px]">{s.time}</span>
                     </td>
-                    <td className="py-3 px-4 text-right font-medium text-[#333333] text-[12.5px]">
+                    <td className="py-4 px-4 text-right font-medium text-[#333333] text-[12.5px]">
                       {s.itemsCount} un
                     </td>
-                    <td className="py-3 px-4 text-right font-semibold text-[#111111] text-[13px]">
+                    <td className="py-4 px-4 text-right font-semibold text-[#111111] text-[13px]">
                       {formatBRL(s.revenue)}
                     </td>
-                    <td className="py-3 px-4 text-center">
+                    <td className="py-4 px-4 text-center">
                       <span className={`inline-flex px-2 py-0.5 rounded-full text-[11px] font-medium ${
                         s.status === 'CONCLUIDO' 
                           ? 'bg-[#ecfdf5] text-[#16a34a] border border-[#bbf7d0]' 
@@ -241,22 +245,32 @@ function SalesTab() {
                         {s.status === 'CONCLUIDO' ? 'Concluída' : 'Cancelada'}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-right">
-                      <div className="flex items-center justify-end gap-1.5" onClick={e => e.stopPropagation()}>
+                    <td className="py-4 px-4 text-right">
+                      <div className="relative flex items-center justify-end" onClick={e => e.stopPropagation()}>
                         <button
-                          onClick={() => setShareSale(s)}
-                          title="Compartilhar no Chat com a Equipe"
+                          onClick={() => setActionSale(actionSale?.id === s.id ? null : s)}
+                          title="Mais ações"
+                          aria-label="Mais ações"
                           className="w-7 h-7 flex items-center justify-center rounded-lg border border-[#e6e6e6] bg-white hover:bg-[#F7F7F7] text-[#555555] transition-all cursor-pointer shadow-none"
                         >
-                          <Share2 className="w-3.5 h-3.5" />
+                          <MoreHorizontal className="w-3.5 h-3.5" />
                         </button>
-                        <button
-                          onClick={() => router.push(`/pedidos/${s.orderId || s.id}`)}
-                          className="w-7 h-7 flex items-center justify-center rounded-lg border border-[#e6e6e6] bg-white hover:bg-[#F7F7F7] text-[#555555] transition-all cursor-pointer shadow-none"
-                          title="Abrir Detalhes do Pedido"
-                        >
-                          <ChevronRight className="w-3.5 h-3.5" />
-                        </button>
+                        {actionSale?.id === s.id && (
+                          <div className="absolute left-0 right-auto top-9 z-20 min-w-[180px] rounded-lg border border-[#e6e6e6] bg-white p-1.5 text-left shadow-lg">
+                            <button
+                              onClick={() => { setActionSale(null); setShareSale(s) }}
+                              className="w-full rounded-md px-3 py-2 text-left text-xs text-[#333] hover:bg-[#f5f5f5]"
+                            >
+                              Compartilhar no chat
+                            </button>
+                            <button
+                              onClick={() => router.push(`/pedidos/${s.orderId || s.id}`)}
+                              className="w-full rounded-md px-3 py-2 text-left text-xs text-[#333] hover:bg-[#f5f5f5]"
+                            >
+                              Abrir detalhes
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -340,4 +354,3 @@ export default function VendasPage() {
     </div>
   )
 }
-

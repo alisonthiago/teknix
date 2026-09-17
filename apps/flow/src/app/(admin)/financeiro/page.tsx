@@ -2,11 +2,10 @@
 
 import { useState, useMemo } from 'react'
 import { 
-  TrendingUp, DollarSign, BarChart3, Percent, ArrowUpRight, 
+  TrendingUp, DollarSign, BarChart3, Percent, ArrowUpRight, ArrowLeft,
   ArrowDownRight, PieChart, ShieldCheck, Zap, Layers, Sparkles, ChevronDown 
 } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { PageHeader } from '@/components/ui/module'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
 
@@ -30,16 +29,16 @@ function FilterBar({ mp, setMp, acc, setAcc, accounts }: {
   })
 
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 mb-5">
+    <div className="flex flex-col sm:flex-row sm:items-center gap-2.5">
       <select value={mp} onChange={e => { setMp(e.target.value); setAcc('all') }}
-        className="w-full sm:w-auto h-[38px] px-3 border border-[#e6e6e6] rounded-lg text-sm font-normal text-[#111] focus:outline-none focus:border-[#1f2328] bg-white transition-colors cursor-pointer">
+        className="finance-filter w-full sm:w-auto h-[38px] px-3 border border-[#e6e6e6] rounded-lg text-sm font-normal text-[#111] focus:outline-none focus:border-[#1f2328] bg-white transition-colors cursor-pointer">
         <option value="all">Todos marketplaces</option>
         {(marketplaces || []).map((m: Record<string, unknown>) => (
           <option key={m.id as string} value={m.id as string}>{m.name as string}</option>
         ))}
       </select>
       <select value={acc} onChange={e => setAcc(e.target.value)}
-        className="w-full sm:w-auto h-[38px] px-3 border border-[#e6e6e6] rounded-lg text-sm font-normal text-[#111] focus:outline-none focus:border-[#1f2328] bg-white transition-colors cursor-pointer">
+        className="finance-filter w-full sm:w-auto h-[38px] px-3 border border-[#e6e6e6] rounded-lg text-sm font-normal text-[#111] focus:outline-none focus:border-[#1f2328] bg-white transition-colors cursor-pointer">
         <option value="all">Todas contas</option>
         {filteredAccounts.map((a: Record<string, unknown>) => (
           <option key={a.id as string} value={a.id as string}>{a.account_name as string}</option>
@@ -411,8 +410,15 @@ export default function FinanceiroPage() {
 
   return (
     <div className="mp-stack">
-      <PageHeader title="Financeiro & DRE" />
-      <FilterBar mp={filterMp} setMp={setFilterMp} acc={filterAcc} setAcc={setFilterAcc} accounts={accounts || []} />
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-5">
+        <div className="flex items-center gap-3">
+          <button type="button" className="hub-mobile-back-btn" aria-label="Voltar" onClick={() => window.history.back()}>
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <h1 className="!text-[24px] !leading-[1.2] font-bold text-[#111111]">Financeiro</h1>
+        </div>
+        <FilterBar mp={filterMp} setMp={setFilterMp} acc={filterAcc} setAcc={setFilterAcc} accounts={accounts || []} />
+      </div>
       
       <Tabs defaultValue="visao-geral">
         <TabsList>

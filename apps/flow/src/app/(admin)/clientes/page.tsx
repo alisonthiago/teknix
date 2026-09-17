@@ -8,6 +8,7 @@ import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
 import { MarketplaceLogo } from '@/components/MarketplaceLogos'
 import { PageHeader } from '@/components/ui/module'
 import LoadingState from '@/components/ui/LoadingState'
+import { PaginationBar, usePagination } from '@/components/ui/pagination'
 
 function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
@@ -101,6 +102,15 @@ export default function ClientesPage() {
   const totalSpentAll = customers.reduce((a, b) => a + b.totalSpent, 0)
   const avgTicket = customers.length > 0 ? totalSpentAll / customers.length : 0
 
+  const {
+    currentPage: clientesPage,
+    setCurrentPage: setClientesPage,
+    pageSize: clientesPageSize,
+    setPageSize: setClientesPageSize,
+    paginatedItems: paginatedCustomers,
+    totalItems: totalClientesCount,
+  } = usePagination(filtered, 10)
+
   return (
     <div className="mp-stack">
       <PageHeader title="Clientes" />
@@ -174,7 +184,7 @@ export default function ClientesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#eeeeee]">
-                {filtered.map((c, idx) => {
+                {paginatedCustomers.map((c, idx) => {
                   const customerSlug = encodeURIComponent(c.name.trim().toLowerCase().replace(/\s+/g, '-'))
 
                   return (
@@ -243,6 +253,21 @@ export default function ClientesPage() {
                 })}
               </tbody>
             </table>
+
+            {/* Limitador / Paginação em baixo */}
+            {filtered.length > 0 && (
+              <div className="p-4 border-t border-[#eee] bg-[#fafafa]/40">
+                <PaginationBar
+                  currentPage={clientesPage}
+                  totalItems={totalClientesCount}
+                  pageSize={clientesPageSize}
+                  onPageChange={setClientesPage}
+                  onPageSizeChange={setClientesPageSize}
+                  pageSizeOptions={[10, 25, 50, 100]}
+                  itemName="clientes"
+                />
+              </div>
+            )}
           </div>
         )}
       </div>

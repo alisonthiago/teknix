@@ -320,7 +320,7 @@ export default function MessageCardRenderer({ message, isMe, showChannel, channe
                   target="_blank"
                   rel="noopener noreferrer"
                   download={fileName}
-                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#1e293b] hover:bg-[#0f172a] text-white text-[11px] font-semibold rounded-lg transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#1e293b] hover:bg-[#000000] text-white text-[11px] font-semibold rounded-lg transition-colors cursor-pointer"
                 >
                   <Download className="w-3.5 h-3.5" />
                   Baixar Arquivo

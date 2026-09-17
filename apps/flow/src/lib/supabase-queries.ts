@@ -114,6 +114,20 @@ export async function getOrders() {
     .select('*, marketplaces(name, code, logo), order_items(*, products(name, sku))')
     .order('created_at', { ascending: false })
   if (error) throw error
+
+  if (data) {
+    for (const ord of data as any[]) {
+      if (ord.order_items && Array.isArray(ord.order_items)) {
+        const map = new Map<string, any>()
+        for (const item of ord.order_items) {
+          const key = item.sku || item.product_id || item.id
+          if (!map.has(key)) map.set(key, item)
+        }
+        ord.order_items = Array.from(map.values())
+      }
+    }
+  }
+
   return data
 }
 
@@ -125,6 +139,16 @@ export async function getOrder(id: string) {
     .eq('id', id)
     .single()
   if (error) throw error
+
+  if (data && (data as any).order_items && Array.isArray((data as any).order_items)) {
+    const map = new Map<string, any>()
+    for (const item of (data as any).order_items) {
+      const key = item.sku || item.product_id || item.id
+      if (!map.has(key)) map.set(key, item)
+    }
+    ;(data as any).order_items = Array.from(map.values())
+  }
+
   return data
 }
 
@@ -157,6 +181,20 @@ export async function getSales() {
     .select('*, marketplaces(name, code, logo), sale_items(*, products(name, sku))')
     .order('created_at', { ascending: false })
   if (error) throw error
+
+  if (data) {
+    for (const sale of data as any[]) {
+      if (sale.sale_items && Array.isArray(sale.sale_items)) {
+        const map = new Map<string, any>()
+        for (const item of sale.sale_items) {
+          const key = item.product_id || item.id
+          if (!map.has(key)) map.set(key, item)
+        }
+        sale.sale_items = Array.from(map.values())
+      }
+    }
+  }
+
   return data
 }
 
@@ -168,6 +206,16 @@ export async function getSale(id: string) {
     .eq('id', id)
     .single()
   if (error) throw error
+
+  if (data && (data as any).sale_items && Array.isArray((data as any).sale_items)) {
+    const map = new Map<string, any>()
+    for (const item of (data as any).sale_items) {
+      const key = item.product_id || item.id
+      if (!map.has(key)) map.set(key, item)
+    }
+    ;(data as any).sale_items = Array.from(map.values())
+  }
+
   return data
 }
 

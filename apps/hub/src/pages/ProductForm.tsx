@@ -923,14 +923,38 @@ export default function ProductForm() {
         ? existing.seo
         : {}
 
-      const requestedSlug = form.seo_slug || form.slug || `produto-${productId}`
-      const { data: slugOwner } = await supabase
-        .from('product_store_metadata')
-        .select('product_id')
-        .eq('slug', requestedSlug)
-        .neq('product_id', productId)
-        .maybeSingle()
-      const uniqueSlug = slugOwner ? `${requestedSlug}-${productId.slice(0, 8)}` : requestedSlug
+      const cleanNameSlug = (form.name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+      let candidateSlug = form.seo_slug || form.slug || cleanNameSlug || `produto-${productId.slice(0, 6)}`
+
+      // Lista oficial de caminhos e rotas reservados do sistema
+      const RESERVED_SYSTEM_PATHS = [
+        'login', 'cadastro', 'password', 'conta', 'pedidos', 'sacola', 'checkout',
+        'categoria', 'loja', 'lojas', 'marca', 'marcas', 'blog', 'ajuda', 'legal',
+        'institucional', 'produtos', 'busca', 'buscar', 'sitemap', 'api', 'admin',
+        'hub', 'editor', 'salvos', 'itens-salvos', 'auth', 'email-preview', 'emails'
+      ]
+
+      if (RESERVED_SYSTEM_PATHS.includes(candidateSlug.toLowerCase())) {
+        candidateSlug = `${candidateSlug}-produto`
+      }
+
+      // Verificação e resolução controlada de colisão (ex: microfone-sem-fio, microfone-sem-fio-2)
+      let uniqueSlug = candidateSlug
+      let collisionCounter = 1
+      while (true) {
+        const { data: slugOwner } = await supabase
+          .from('product_store_metadata')
+          .select('product_id')
+          .eq('slug', uniqueSlug)
+          .neq('product_id', productId)
+          .maybeSingle()
+
+        if (!slugOwner) {
+          break
+        }
+        collisionCounter++
+        uniqueSlug = `${candidateSlug}-${collisionCounter}`
+      }
 
       // Localiza o segmento correspondente à categoria selecionada
       const selectedCategory = categories.find(c => c.id === form.category_id)
@@ -1147,7 +1171,8 @@ export default function ProductForm() {
   }
 
   const siteBaseUrl = import.meta.env.DEV ? 'http://localhost:5173' : (window.location.hostname.includes('teknixbrasil.com.br') ? 'https://www.teknixbrasil.com.br' : 'http://localhost:5173')
-  const productPublicUrl = `${siteBaseUrl}/produto/${form.seo_slug || form.slug || form.sku || form.id || ''}`
+  const cleanFormNameSlug = (form.name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+  const productPublicUrl = `${siteBaseUrl}/${form.seo_slug || form.slug || cleanFormNameSlug || form.sku || form.id || ''}`
 
   // Margem e lucro calculados
   const profit = (form.sell_price || 0) - (form.cost_price || 0)
@@ -2807,7 +2832,7 @@ export default function ProductForm() {
 
           <div className="google-preview-box" style={{ marginTop: 10 }}>
             <div className="google-preview-url">
-              https://teknix.com.br/produtos/{form.seo_slug || form.slug || 'nome-do-produto'}
+              https://teknixbrasil.com.br/{form.seo_slug || form.slug || 'nome-do-produto'}
             </div>
             <div className="google-preview-title">
               {form.seo_title || form.name || 'Título SEO do Produto — Loja TEKNIX'}
@@ -4162,7 +4187,7 @@ export default function ProductForm() {
                 Fechar
               </button>
               <a
-                href={`https://teknixbrasil.com.br/produto/${publishedSlug || form.seo_slug || form.slug || id}`}
+                href={`${siteBaseUrl}/${publishedSlug || form.seo_slug || form.slug || id}`}
                 target="_blank"
                 rel="noreferrer"
                 className="btn-modal-view-store"

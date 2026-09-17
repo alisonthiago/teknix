@@ -129,7 +129,13 @@ export async function getOrderItems(orderId: string) {
     return []
   }
 
-  return data as OrderItem[]
+  const map = new Map<string, any>()
+  for (const it of (data || [])) {
+    const key = (it as any).sku || (it as any).product_id || (it as any).id
+    if (!map.has(key)) map.set(key, it)
+  }
+
+  return Array.from(map.values()) as OrderItem[]
 }
 
 export async function getAddressesByUserId(userId: string) {

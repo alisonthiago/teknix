@@ -103,25 +103,38 @@
   color: #666666;
 }
 
-.cd-btn-whatsapp {
+.cd-icon-btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  background: #16a34a;
-  color: #ffffff;
-  padding: 0 16px;
+  justify-content: center;
+  width: 38px;
   height: 38px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  transition: all 0.2s ease;
+  cursor: pointer;
   text-decoration: none;
-  transition: all 0.15s ease;
-  box-shadow: 0 1px 3px rgba(22, 163, 74, 0.2);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-.cd-btn-whatsapp:hover {
-  background: #15803d;
-  color: #ffffff;
+.cd-icon-btn:hover {
+  background: #fafafa;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+.cd-icon-whatsapp {
+  color: #16a34a;
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.cd-icon-whatsapp:hover {
+  background: #dcfce7;
+  color: #15803d;
+  border-color: #86efac;
 }
 
 /* ── KPI Grid ── */
@@ -393,29 +406,38 @@
   }
 
   .cd-profile-summary {
-    gap: 12px;
+    flex-direction: column;
     align-items: center;
+    gap: 16px;
+    text-align: center;
   }
 
   .cd-avatar {
-    width: 46px;
-    height: 46px;
-    font-size: 18px;
+    width: 64px;
+    height: 64px;
+    font-size: 24px;
     flex-shrink: 0;
   }
 
   .cd-profile-info {
     min-width: 0;
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
   }
 
   .cd-name-row {
-    gap: 8px;
+    display: flex;
+    flex-direction: column;
     align-items: center;
+    gap: 6px;
   }
 
   .cd-name-row h1 {
     font-size: 1.25rem;
+    line-height: 1.2;
     word-break: break-word;
   }
 
@@ -425,12 +447,14 @@
   }
 
   .cd-email-sub {
-    font-size: 12px;
+    font-size: 13px;
+    color: #475569;
     word-break: break-all;
   }
 
   .cd-header-actions {
     width: 100%;
+    justify-content: center;
   }
 
   .cd-btn-whatsapp {
@@ -448,10 +472,11 @@
   }
 
   .cd-kpi-card {
-    padding: 12px 14px;
+    padding: 20px 16px;
     border-radius: 12px;
-    gap: 6px;
+    gap: 10px;
     min-width: 0;
+    min-height: 142px;
   }
 
   .cd-kpi-title {
@@ -489,7 +514,7 @@
 
   /* Cards */
   .cd-card {
-    padding: 16px;
+    padding: 18px;
     border-radius: 14px;
     gap: 14px;
     box-sizing: border-box;
@@ -513,7 +538,7 @@
 
   .cd-info-row {
     padding: 10px 12px;
-    background: #f8fafc;
+    background: #fafafa;
     border: 1px solid #edf2f7;
     border-radius: 10px;
     gap: 3px;
@@ -527,7 +552,7 @@
   }
 
   .cd-info-value {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     color: #0f172a;
     word-break: break-word;
@@ -552,7 +577,7 @@
   .cd-table th {
     padding: 9px 14px;
     font-size: 10.5px;
-    background: #f8fafc;
+    background: #fafafa;
     white-space: nowrap;
   }
 
@@ -590,4 +615,3 @@
     gap: 8px;
   }
 }
-

@@ -431,3 +431,7 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+.invoices-page-container .hub-empty-icon {
+  width: 56px;
+  height: 56px;
+}

@@ -38,7 +38,8 @@ export default function Bag() {
               <EditableFlow id="bag-items" label="Produtos da sacola" compact>
               {items.map(item => {
                 const price = item.promo_price && item.promo_price > 0 ? item.promo_price : item.price
-                const productUrl = '/produtos/' + encodeURIComponent(item.id)
+                const productSlug = (item as any).slug || (item as any).store_meta?.slug || item.sku || item.id
+                const productUrl = '/' + encodeURIComponent(String(productSlug).replace(/^\/+/, ''))
                 const cardKey = `bag-item-${item.id}`
                 return <Editable as="article" key={item.id} widgetId={cardKey} productId={item.id} label={`Produto: ${item.name}`} widgetType="storefrontCard" editorKind="widget" renderContent={false} className="cb-bag-item">
                   <Editable as={Link} widgetId={`${cardKey}-image`} productId={item.id} label={`Imagem: ${item.name}`} widgetType="image" content={{ src: item.image || '', alt: item.name }} renderContent={false} to={productUrl} className="cb-bag-item-image" aria-label={'Ver ' + item.name}>

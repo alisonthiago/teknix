@@ -268,7 +268,7 @@ export default function Header() {
                     {cartItems.map(item => (
                       <Link
                         key={item.id}
-                        to={`/produto/${item.id}`}
+                        to={`/${item.slug || item.id}`}
                         className="apple-bag-flyout-item-row"
                         onClick={closeCart}
                       >

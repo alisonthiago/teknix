@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useFavorites } from '../context/FavoritesContext'
 import { useCart } from '../context/CartContext'
-import { ShoppingBag, Trash2, Check, ArrowRight, Heart, Truck, ShieldCheck, ChevronRight } from 'lucide-react'
+import { ShoppingBag, Trash2, Check, Heart, Truck, ShieldCheck, ChevronRight } from 'lucide-react'
 import { Editable } from '../components/page-widgets/PageWidgets'
 import EditableFlow from '../components/page-widgets/EditableFlow'
 import './SavedItems.css'
@@ -70,7 +70,7 @@ export default function SavedItems() {
                   )}
                 </div>
                 <Editable as="p" widgetId="saveditems-2" className="apple-saved-desc">
-                  Seus produtos favoritos reunidos com preços atualizados e entrega rápida para você decidir no seu tempo.
+                  Seus produtos favoritos em um só lugar.
                 </Editable>
               </div>
 
@@ -105,11 +105,10 @@ export default function SavedItems() {
               </div>
               <Editable as="h2" widgetId="saveditems-3" className="apple-saved-empty-heading">Sua lista de salvos está vazia</Editable>
               <Editable as="p" widgetId="saveditems-4" className="apple-saved-empty-desc">
-                Toque no ícone de coração nos produtos que você gostar. Eles ficarão guardados aqui para você consultar, comparar especificações e comprar quando desejar.
+                Salve produtos para consultar depois.
               </Editable>
               <Link to="/produtos" className="apple-saved-empty-shop-link">
                 Explorar Catálogo TEKNIX
-                <ArrowRight size={16} style={{ marginLeft: 8 }} />
               </Link>
 
               {/* Categorias Rápidas */}
@@ -127,7 +126,7 @@ export default function SavedItems() {
             <Editable as="div" widgetId="saved-grid" label="Grade de itens salvos" widgetType="grid" editorKind="container" renderContent={false} className="apple-saved-items-grid">
               <EditableFlow id="saved-items" label="Cards dos itens salvos" compact>
                 {favorites.map(item => {
-                  const productUrl = `/produto/${item.slug || item.id}`
+                  const productUrl = `/${item.slug || item.id}`
                   const isAdded = addedIds[item.id]
                   const installmentVal = (item.price / 10).toFixed(2).replace('.', ',')
 

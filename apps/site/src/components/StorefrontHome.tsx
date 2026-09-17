@@ -341,7 +341,7 @@ export default function StorefrontHome() {
       return {
         id: p.id,
         sku: p.sku,
-        to: `/${encodeURIComponent(p.sku || p.slug || p.id)}`,
+        to: `/${encodeURIComponent(p.slug || p.store_meta?.slug || p.sku || p.id)}`,
         title: p.name,
         img: p.image_url || p.images?.[0] || '',
         oldPrice: hasDiscount ? money(base) : null,

@@ -560,6 +560,17 @@
 
 .dn-chart-title-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
+@media (max-width: 639px) {
+  .dn-chart-title-row {
+    padding-top: 10px;
+  }
+
+  .dn-chart-badge {
+    padding: 2px 6px;
+    font-size: 9px;
+  }
+}
+
 .dn-chart-title {
   font-size: 18px;
   font-weight: 600;

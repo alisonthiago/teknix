@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import SEOHead from '../components/SEOHead'
+import { buildArticleSchema } from '../components/SchemaOrg'
 import './Blog.css'
 
 type BlogBlock = { id: string; type: string; content?: string; imageUrl?: string; imageCaption?: string; listItems?: string[] }
-type BlogPost = { id: string; title: string; slug: string; summary?: string; cover_image?: string; author_name?: string; published_at?: string; seo_title?: string; seo_description?: string; blocks?: BlogBlock[] }
+type BlogPost = { id: string; title: string; slug: string; summary?: string; cover_image?: string; author_name?: string; published_at?: string; updated_at?: string; seo_title?: string; seo_description?: string; blocks?: BlogBlock[] }
 
 function RenderBlock({ block }: { block: BlogBlock }) {
   if (block.type === 'heading1') return <h1>{block.content}</h1>
@@ -35,26 +37,51 @@ export default function Blog() {
 
   useEffect(() => {
     if (!post) return
-    document.title = post.seo_title || `${post.title} | TEKNIX`
-    let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null
-    if (!meta) { meta = document.createElement('meta'); meta.name = 'description'; document.head.appendChild(meta) }
-    meta.content = post.seo_description || post.summary || ''
+    // Registra visualização
     void supabase.from('blog_events').insert({ post_id: post.id, event_type: 'view', page_url: window.location.href })
   }, [post])
 
   if (loading) return <div className="public-blog-state">Carregando…</div>
   if (slug && !post) return <div className="public-blog-state"><h1>Artigo não encontrado</h1><Link to="/blog">Voltar ao Blog</Link></div>
 
+  // ─── Listagem de artigos ───────────────────────────────────────────────────
   if (!slug) return (
-    <div className="public-blog-index">
-      <header><span>TEKNIX BLOG</span><h1>Conteúdo para quem faz acontecer.</h1></header>
-      <div className="public-blog-grid">{posts.map(item => <article key={item.id}><Link to={`/blog/${item.slug}`}>{item.cover_image && <img src={item.cover_image} alt="" />}<div><small>{item.published_at ? new Date(item.published_at).toLocaleDateString('pt-BR') : ''}</small><h2>{item.title}</h2><p>{item.summary}</p><strong>Ler artigo →</strong></div></Link></article>)}</div>
-    </div>
+    <>
+      <SEOHead
+        title="Blog TEKNIX | Conteúdo para quem faz acontecer"
+        description="Artigos, dicas e novidades sobre ferramentas, tecnologia e inovação. Conteúdo da TEKNIX para profissionais que fazem acontecer."
+        ogType="website"
+      />
+      <div className="public-blog-index">
+        <header><span>TEKNIX BLOG</span><h1>Conteúdo para quem faz acontecer.</h1></header>
+        <div className="public-blog-grid">{posts.map(item => <article key={item.id}><Link to={`/blog/${item.slug}`}>{item.cover_image && <img src={item.cover_image} alt="" />}<div><small>{item.published_at ? new Date(item.published_at).toLocaleDateString('pt-BR') : ''}</small><h2>{item.title}</h2><p>{item.summary}</p><strong>Ler artigo →</strong></div></Link></article>)}</div>
+      </div>
+    </>
   )
 
-  return <article className="public-blog-post">
-    <header><Link to="/blog">← Blog</Link><h1>{post!.title}</h1>{post!.summary && <p>{post!.summary}</p>}<small>{post!.author_name || 'TEKNIX'} · {post!.published_at ? new Date(post!.published_at).toLocaleDateString('pt-BR') : ''}</small></header>
-    {post!.cover_image && <img className="public-blog-cover" src={post!.cover_image} alt={post!.title} />}
-    <div className="public-blog-content">{(post!.blocks || []).map(block => <RenderBlock key={block.id} block={block} />)}</div>
-  </article>
+  // ─── Artigo individual ────────────────────────────────────────────────────
+  const articleJsonLd = buildArticleSchema({
+    title: post!.seo_title || post!.title,
+    description: post!.seo_description || post!.summary,
+    image: post!.cover_image,
+    slug: post!.slug,
+    author: post!.author_name,
+    publishedAt: post!.published_at,
+    updatedAt: post!.updated_at
+  })
+
+  return (
+    <article className="public-blog-post">
+      <SEOHead
+        title={post!.seo_title || `${post!.title} | TEKNIX Blog`}
+        description={post!.seo_description || post!.summary}
+        image={post!.cover_image}
+        ogType="article"
+        jsonLd={articleJsonLd}
+      />
+      <header><Link to="/blog">← Blog</Link><h1>{post!.title}</h1>{post!.summary && <p>{post!.summary}</p>}<small>{post!.author_name || 'TEKNIX'} · {post!.published_at ? new Date(post!.published_at).toLocaleDateString('pt-BR') : ''}</small></header>
+      {post!.cover_image && <img className="public-blog-cover" src={post!.cover_image} alt={post!.title} />}
+      <div className="public-blog-content">{(post!.blocks || []).map(block => <RenderBlock key={block.id} block={block} />)}</div>
+    </article>
+  )
 }

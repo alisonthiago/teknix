@@ -425,6 +425,7 @@
     margin-left: 0 !important;
     min-width: 0;
     width: 100%;
+    padding-bottom: 40px;
     /* Não usar overflow-x:hidden aqui — corrigir os filhos individualmente */
   }
 }
@@ -457,6 +458,7 @@
 
   .hub-mobile-header-bar {
     display: block;
+    position: -webkit-sticky;
     position: sticky;
     top: 0;
     z-index: 40;
@@ -474,7 +476,8 @@
     align-items: center !important;
     justify-content: space-between !important;
     /* Padding adaptativo: menos espaço em telas estreitas */
-    padding: 8px 10px !important;
+    /* Mesmo espaçamento interno vertical e horizontal do header do FLOW. */
+    padding: 21px 14px !important;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
     width: 100%;
     box-sizing: border-box;
@@ -498,14 +501,51 @@
   .hub-mobile-header-title-row {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    margin-top: 14px;
-    margin-bottom: 8px;
-    padding: 2px 4px 0;
+    justify-content: flex-start;
+    margin-top: 24px;
+    margin-bottom: 0;
+    padding: 2px 40px 0;
+    gap: 8px;
+  }
+
+  .btn-back-to-settings {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid var(--tk-color-border, #e5e7eb);
+    background: #ffffff;
+    color: var(--tk-color-text-secondary, #4b5563);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+  }
+
+  .btn-back-to-settings:hover {
+    background: var(--tk-color-surface-hover, #f3f4f6);
+    color: var(--tk-color-text-primary, #000000);
+    border-color: #d1d5db;
+    transform: translateX(-1px);
+  }
+
+  .hub-mobile-back-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #475569;
+    cursor: pointer;
+    flex: 0 0 auto;
   }
 
   .hub-mobile-page-title {
-    font-size: 18px;
+    font-size: 18px !important;
     font-weight: 600;
     color: #1f2328;
     letter-spacing: -0.015em;
@@ -992,7 +1032,7 @@
 }
 
 .modern-user-header-card:hover {
-  background: #f8fafc;
+  background: #fafafa;
   border-color: #e2e8f0;
 }
 
@@ -1075,6 +1115,21 @@
 .modern-user-item:hover {
   background: #f4f4f5;
   color: #111827;
+}
+
+.modern-user-logout {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font-family: inherit;
+  justify-content: flex-start !important;
+  padding-left: 15px !important;
+}
+
+.modern-user-logout:hover {
+  color: #dc2626;
+  background: #fef2f2;
 }
 
 .modern-user-item.active {
@@ -1161,7 +1216,7 @@
   .flow-user-dropdown,
   .flow-notification-dropdown {
     position: fixed !important;
-    top: 82px !important;
+    top: 96px !important;
     left: 16px !important;
     right: 16px !important;
     width: auto !important;
@@ -1377,7 +1432,7 @@
 }
 
 .mp-widget-account-item.flow {
-  background: #f8fafc;
+  background: #fafafa;
   border: 1px solid #e2e8f0;
   padding: 9px 11px;
   border-radius: 12px;
@@ -1560,7 +1615,7 @@
 }
 
 .flow-notification-settings:hover {
-  background: #f8fafc !important;
+  background: #fafafa !important;
   color: #111827 !important;
   border-color: #cbd5e1 !important;
   transform: scale(1.05) !important;
@@ -1583,7 +1638,7 @@
   font-size: 13px;
   font-weight: 500;
   color: #64748b;
-  background: #f8fafc;
+  background: #fafafa;
   border: 1px solid #f1f5f9;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -1838,7 +1893,7 @@
 }
 
 .modern-notification-footer-btn:hover {
-  background: #f8fafc !important;
+  background: #fafafa !important;
   color: #111827 !important;
 }
 
@@ -1932,7 +1987,7 @@
     /* width: 100%; max-width: 100% — sem forçar 100vw que causa overflow */
     width: 100%;
     max-width: 100%;
-    padding: 20px 14px 32px;
+    padding: 20px 40px 32px;
     box-sizing: border-box;
     /* Conter filhos que transbordam internamente */
     overflow-x: clip;

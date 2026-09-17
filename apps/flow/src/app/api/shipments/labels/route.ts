@@ -30,6 +30,18 @@ export async function GET(req: NextRequest) {
       .order('created_at', { ascending: false })
       .limit(100)
 
+    // 3. Buscar catálogo de produtos cadastrados para enriquecer itens e trazer fotos reais
+    const { data: catalogProducts } = await supabase
+      .from('products')
+      .select('id, name, sku, image_url, cost_purchase, stock')
+
+    const productBySku = new Map<string, any>()
+    const productByName = new Map<string, any>()
+    for (const p of catalogProducts || []) {
+      if (p.sku) productBySku.set(p.sku.trim().toLowerCase(), p)
+      if (p.name) productByName.set(p.name.trim().toLowerCase(), p)
+    }
+
     const ordersData = orders || []
     const sellerIds = Array.from(new Set(
       ordersData
@@ -69,7 +81,15 @@ export async function GET(req: NextRequest) {
 
       const productSku = product?.sku || firstItem?.sku || 'SKU-PADRAO'
       const productName = product?.name || firstItem?.product_name || 'Produto'
-      let productImage = product?.image_url || firstItem?.image_url || ''
+      
+      const matchedProduct = 
+        product || 
+        (productSku && productBySku.get(productSku.trim().toLowerCase())) ||
+        (productName && productByName.get(productName.trim().toLowerCase())) ||
+        null
+
+      let productImage = matchedProduct?.image_url || firstItem?.image_url || ''
+      const productStock = matchedProduct?.stock ?? (product?.stock || 0)
       const sellerId = o.marketplace_accounts?.seller_id
       const token = sellerId ? tokenCache.get(sellerId) : undefined
 
@@ -109,7 +129,7 @@ export async function GET(req: NextRequest) {
         productName,
         productSku,
         productImage,
-        productStock: product?.stock || 0,
+        productStock: productStock,
         itemQuantity: firstItem?.quantity || 1,
         totalItemsCount: items.reduce((acc: number, item: any) => acc + (item.quantity || 1), 0),
         shippingAddress: o.notes || 'Endereço não informado',

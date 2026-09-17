@@ -221,7 +221,7 @@ export default function MessageCardRenderer({ message, isMe, showChannel, channe
 
         return (
           <div className="chat-card-box" style={{ maxWidth: 280, padding: 12 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 8, background: '#f8fafc', borderRadius: 10, border: '1px solid #e2e8f0' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 8, background: '#fafafa', borderRadius: 10, border: '1px solid #e2e8f0' }}>
               <div style={{ width: 34, height: 34, borderRadius: 8, background: '#ffffff', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 {isPdf ? (
                   <FileText size={18} color="#ef4444" />

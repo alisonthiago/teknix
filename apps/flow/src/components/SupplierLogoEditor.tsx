@@ -67,8 +67,8 @@ export default function SupplierLogoEditor({ supplierId, currentLogoUrl }: { sup
         )}
       </div>
       <div className="flex flex-col">
-        <span className="text-[13px] font-medium text-[#333]">Logomarca do Fornecedor</span>
-        <span className="text-[11px] text-[#999]">Clique na imagem para alterar. As mudanças são salvas automaticamente.</span>
+        <span className="text-[13px] font-semibold text-[#111]">Logomarca</span>
+        <span className="text-[11px] text-[#888]">Toque para alterar imagem</span>
       </div>
       <input 
         type="file" 

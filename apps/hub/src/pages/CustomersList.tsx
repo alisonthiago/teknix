@@ -36,10 +36,10 @@ const COLUMNS: HubColumn<CustomerWithMetrics>[] = [
     render: (c) => (
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         <div style={{
-          width: 34, height: 34, borderRadius: '50%', flexShrink: 0,
+          width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
           background: stringToColor(c.name || '?'), color: '#fff',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 14, fontWeight: 700
+          fontSize: 16, fontWeight: 700
         }}>
           {(c.name || '?').charAt(0).toUpperCase()}
         </div>
@@ -213,7 +213,7 @@ export default function CustomersList() {
   )
 
   return (
-    <>
+    <div className="customers-list-page">
       <HubDataTable
         title="Clientes"
         headerActions={
@@ -305,6 +305,6 @@ export default function CustomersList() {
           </form>
         </div>
       )}
-    </>
+    </div>
   )
 }

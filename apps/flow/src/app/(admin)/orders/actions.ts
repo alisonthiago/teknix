@@ -45,10 +45,17 @@ export async function getOrder(id: string) {
 
   if (!order) return null
 
-  const { data: items } = await supabase
+  const { data: rawItems } = await supabase
     .from('order_items')
     .select('*, products(name, sku, image_url)')
     .eq('order_id', id)
+
+  const itemsMap = new Map<string, any>()
+  for (const item of (rawItems || [])) {
+    const key = item.sku || item.product_id || item.id
+    if (!itemsMap.has(key)) itemsMap.set(key, item)
+  }
+  const items = Array.from(itemsMap.values())
 
   const { data: history } = await supabase
     .from('order_status_history')
@@ -56,7 +63,7 @@ export async function getOrder(id: string) {
     .eq('order_id', id)
     .order('created_at', { ascending: false })
 
-  return { ...order, items: items || [], history: history || [] }
+  return { ...order, items, history: history || [] }
 }
 
 export async function createOrder(formData: FormData) {

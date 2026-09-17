@@ -378,10 +378,8 @@ export function IntegrationLogoRenderer({
         width={size}
         height={size}
         style={{
-          width: 'auto',
-          height: 'auto',
-          maxWidth: `${Math.round(size * 2.2)}px`,
-          maxHeight: `${size}px`,
+          maxWidth: '100%',
+          maxHeight: '100%',
           objectFit: 'contain',
           display: 'inline-block',
           verticalAlign: 'middle'

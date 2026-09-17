@@ -470,6 +470,29 @@
     padding-bottom: 16px;
   }
 
+  .pd-card-header {
+    margin-bottom: 18px;
+    gap: 10px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .pd-main-left,
+  .pd-main-right {
+    gap: 28px;
+  }
+
+  .pd-card-title-wrap {
+    min-width: 0;
+  }
+
+  .pd-card-title-wrap h2 {
+    font-size: 13.5px;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    overflow-wrap: anywhere;
+  }
+
   .pd-topbar-left {
     display: flex;
     align-items: center;
@@ -522,6 +545,7 @@
   .pd-badges-row {
     justify-content: center;
     gap: 6px;
+    margin-bottom: 20px;
   }
 
   .pd-header-title {
@@ -576,7 +600,7 @@
   }
 
   .pd-card {
-    padding: 16px !important;
+    padding: 24px !important;
     border-radius: 14px !important;
   }
 }

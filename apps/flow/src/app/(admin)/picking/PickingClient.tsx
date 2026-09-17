@@ -92,7 +92,7 @@ export default function PickingClient({ orders }: { orders: PickingOrder[] }) {
                 <button
                   onClick={() => handleStart(order.id)}
                   disabled={processing === order.id}
-                  className="flex-1 py-2.5 bg-[#0f172a] text-white text-sm font-semibold rounded-xl hover:bg-[#1e293b] disabled:opacity-50 transition-all cursor-pointer shadow-xs"
+                  className="flex-1 py-2.5 bg-[#000000] text-white text-sm font-semibold rounded-xl hover:bg-[#1e293b] disabled:opacity-50 transition-all cursor-pointer shadow-xs"
                 >
                   {processing === order.id ? 'Iniciando...' : 'Iniciar Separação'}
                 </button>

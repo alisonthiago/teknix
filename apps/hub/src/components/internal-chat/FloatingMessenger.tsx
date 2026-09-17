@@ -938,7 +938,7 @@ function getChannelCollaborators(channel: { id: string; name?: string; members?:
                 ) : (
                   <div
                     onClick={() => fileInputRef.current?.click()}
-                    style={{ width: '100%', maxWidth: 320, height: 180, border: '2px dashed #cbd5e1', borderRadius: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: '#f8fafc', gap: 8 }}
+                    style={{ width: '100%', maxWidth: 320, height: 180, border: '2px dashed #cbd5e1', borderRadius: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: '#fafafa', gap: 8 }}
                   >
                     <ImageIcon size={32} color="#94a3b8" />
                     <span style={{ fontSize: 13, color: '#64748b', fontWeight: 600 }}>Clique para escolher uma imagem</span>

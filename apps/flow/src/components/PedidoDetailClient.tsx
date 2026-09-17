@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useMemo } from 'react'
 import { ArrowLeft, Package, Clock, Loader2, CheckCircle2, Send, Printer, User, Calendar, ShoppingCart, RefreshCw, Box, Truck, MessageSquare, Share2, FileText } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import type { OrderDetail } from '@/lib/detail-types'
@@ -23,13 +23,17 @@ function summarizeTitle(title?: string, maxLength = 36) {
 
 const SC: Record<string, { l: string; c: string }> = {
   NOVO: { l: 'Novo', c: 'bg-[#f5f5f5] text-[#1f2328]' },
-  PAGO: { l: 'Pago', c: 'bg-[#f5f5f5] text-[#1f2328]' },
-  AGUARDANDO_SEPARACAO: { l: 'Aguardando', c: 'bg-[#fffaf0] text-[#e67e22]' },
-  EM_SEPARACAO: { l: 'Separação', c: 'bg-[#fffaf0] text-[#e67e22]' },
+  PAGO: { l: 'Pago', c: 'bg-[#ecfdf5] text-[#16a34a]' },
+  PAID: { l: 'Pago', c: 'bg-[#ecfdf5] text-[#16a34a]' },
+  AGUARDANDO_SEPARACAO: { l: 'Aguardando Separação', c: 'bg-[#fffaf0] text-[#e67e22]' },
+  EM_SEPARACAO: { l: 'Em Separação', c: 'bg-[#fffaf0] text-[#e67e22]' },
   SEPARADO: { l: 'Separado', c: 'bg-[#f0f0ff] text-[#6c5ce7]' },
+  ETIQUETA_IMPRESSA: { l: 'Etiqueta Impressa', c: 'bg-[#ecfdf5] text-[#16a34a]' },
+  EMBALADO: { l: 'Embalado', c: 'bg-[#f5f5f5] text-[#1f2328]' },
   ENVIADO: { l: 'Enviado', c: 'bg-[#f5f5f5] text-[#1f2328]' },
   ENTREGUE: { l: 'Entregue', c: 'bg-[#f0fff4] text-[#38a169]' },
   CANCELADO: { l: 'Cancelado', c: 'bg-[#fff5f5] text-[#e74c3c]' },
+  DEVOLVIDO: { l: 'Devolvido', c: 'bg-[#fff5f5] text-[#e74c3c]' },
 }
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
@@ -57,12 +61,12 @@ function StatBox({ label, value, sub }: { label: string; value: string; sub?: st
 
 function VisaoGeralTab({ order }: { order: OrderDetail }) {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-      <div className="lg:col-span-2 space-y-4">
-        <div className="bg-white border border-[#e6e6e6] rounded-xl p-4 shadow-none">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="lg:col-span-2 space-y-8">
+        <div className="bg-white border border-[#e6e6e6] rounded-xl p-8 shadow-none">
           <SectionTitle>Itens do pedido</SectionTitle>
-          <div className="table-container">
-            <table className="w-full text-left">
+          <div className="table-container overflow-x-auto">
+            <table className="w-full min-w-[640px] text-left">
               <thead>
                 <tr className="border-b border-[#f0f0f0] bg-[#fafafa]">
                   <th className="text-left py-2.5 px-3 font-semibold text-[#666666] text-[11px] uppercase tracking-wider">SKU</th>
@@ -75,8 +79,8 @@ function VisaoGeralTab({ order }: { order: OrderDetail }) {
               <tbody className="divide-y divide-[#f5f5f5]">
                 {order.items.map((item, i) => (
                   <tr key={i} className="hover:bg-[#fafafa] transition-colors">
-                    <td className="py-2.5 px-3 font-mono text-[11px] text-[#777777]">{item.sku}</td>
-                    <td className="py-2.5 px-3 text-[#111111]">
+                    <td className="py-4 px-3 font-mono text-[11px] text-[#777777]">{item.sku}</td>
+                    <td className="py-4 px-3 text-[#111111]">
                       {item.product_id ? (
                         <Link
                           href={`/produtos/${item.product_id}`}
@@ -109,9 +113,9 @@ function VisaoGeralTab({ order }: { order: OrderDetail }) {
                         </div>
                       )}
                     </td>
-                    <td className="py-2.5 px-3 text-right text-[#555555] font-medium text-[12.5px]">{item.quantity}</td>
-                    <td className="py-2.5 px-3 text-right text-[#777777] text-[12.5px]">{formatBRL(item.price)}</td>
-                    <td className="py-2.5 px-3 text-right font-semibold text-[#111111] text-[13px]">{formatBRL(item.total)}</td>
+                    <td className="py-4 px-3 text-right text-[#555555] font-medium text-[12.5px]">{item.quantity}</td>
+                    <td className="py-4 px-3 text-right text-[#777777] text-[12.5px]">{formatBRL(item.price)}</td>
+                    <td className="py-4 px-3 text-right font-semibold text-[#111111] text-[13px]">{formatBRL(item.total)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -119,7 +123,7 @@ function VisaoGeralTab({ order }: { order: OrderDetail }) {
           </div>
         </div>
 
-        <div className="bg-white border border-[#e6e6e6] rounded-xl p-4 shadow-none">
+        <div className="bg-white border border-[#e6e6e6] rounded-xl p-8 shadow-none">
           <SectionTitle>Pagamento</SectionTitle>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
             <InfoRow label="Método" value={order.payment.method} bold />
@@ -133,7 +137,7 @@ function VisaoGeralTab({ order }: { order: OrderDetail }) {
 
       <div className="space-y-4">
         {/* Card Cliente */}
-        <div className="bg-white border border-[#e6e6e6] rounded-xl p-4 shadow-none">
+        <div className="bg-white border border-[#e6e6e6] rounded-xl p-8 shadow-none">
           <SectionTitle>Dados do Cliente</SectionTitle>
           <div className="p-3 bg-[#fafafa] rounded-lg border border-[#eef2f6] mb-3">
             <div className="flex items-center gap-2.5">
@@ -166,7 +170,7 @@ function VisaoGeralTab({ order }: { order: OrderDetail }) {
         </div>
 
         {/* Card Frete & Envio */}
-        <div className="bg-white border border-[#e6e6e6] rounded-xl p-4 shadow-none">
+        <div className="bg-white border border-[#e6e6e6] rounded-xl p-8 shadow-none">
           <SectionTitle>Frete & Entrega</SectionTitle>
           <div className="space-y-1">
             <InfoRow label="Canal de Envio" value={order.marketplace} bold />
@@ -347,14 +351,15 @@ function OrderActions({ order }: { order: OrderDetail }) {
         defaultNote={shareModal.note}
       />
 
-      <div className="flex items-center gap-2 mt-3 pb-6 sm:justify-end">
+      <div className="flex items-center gap-2 mb-3 justify-start sm:justify-end">
         {/* Botão Imprimir — sempre visível */}
         <button
           onClick={() => window.print()}
-          className="inline-flex items-center gap-1.5 bg-white border border-[#e6e6e6] text-[#444444] text-sm font-medium px-3 py-1.5 rounded-xl hover:bg-[#f5f5f5] hover:border-[#d0d0d0] transition-colors print:hidden"
+          style={{ minHeight: '32px', height: '32px' }}
+          className="inline-flex items-center gap-1.5 bg-white border border-[#e6e6e6] text-[#444444] text-xs font-medium px-3 rounded-lg hover:bg-[#f5f5f5] hover:border-[#d0d0d0] transition-colors print:hidden shadow-xs cursor-pointer"
           title="Imprimir pedido"
         >
-          <Printer className="w-3.5 h-3.5" />
+          <Printer className="w-3.5 h-3.5 text-[#666666]" />
           Imprimir
         </button>
 
@@ -362,9 +367,10 @@ function OrderActions({ order }: { order: OrderDetail }) {
           <button
             onClick={() => handleAction(() => moveOrderToPaid(order.id))}
             disabled={isPending}
-            className="inline-flex items-center gap-1.5 bg-[#38a169] text-white text-sm font-medium px-3 py-1.5 rounded-xl hover:bg-[#2d8f55] transition-colors disabled:opacity-50"
+            style={{ minHeight: '32px', height: '32px' }}
+            className="inline-flex items-center gap-1.5 bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-semibold px-3 rounded-lg transition-colors disabled:opacity-50 cursor-pointer shadow-xs"
           >
-            {isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />}
+            {isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
             Confirmar Pagamento
           </button>
         )}
@@ -372,9 +378,10 @@ function OrderActions({ order }: { order: OrderDetail }) {
           <button
             onClick={() => handleAction(() => moveOrderStatus(order.id, 'AGUARDANDO_SEPARACAO'))}
             disabled={isPending}
-            className="inline-flex items-center gap-1.5 bg-[#e67e22] text-white text-sm font-medium px-3 py-1.5 rounded-xl hover:bg-[#d35400] transition-colors disabled:opacity-50"
+            style={{ minHeight: '32px', height: '32px' }}
+            className="inline-flex items-center gap-1.5 bg-[#e67e22] hover:bg-[#d35400] text-white text-xs font-semibold px-3 rounded-lg transition-colors disabled:opacity-50 cursor-pointer shadow-xs"
           >
-            {isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Package className="w-3 h-3" />}
+            {isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Package className="w-3.5 h-3.5" />}
             Enviar para Separação
           </button>
         )}
@@ -383,7 +390,24 @@ function OrderActions({ order }: { order: OrderDetail }) {
   )
 }
 
-export default function PedidoDetailClient({ order }: { order: OrderDetail }) {
+export default function PedidoDetailClient({ order: rawOrder }: { order: OrderDetail }) {
+  // Deduplicação defensiva estrita de itens para eliminar qualquer risco de duplicata
+  const cleanItems = useMemo(() => {
+    const map = new Map<string, OrderDetail['items'][0]>()
+    for (const it of rawOrder.items) {
+      const key = it.sku || it.product_id || it.name
+      if (!map.has(key)) {
+        map.set(key, it)
+      }
+    }
+    return Array.from(map.values())
+  }, [rawOrder.items])
+
+  const order = useMemo(() => ({
+    ...rawOrder,
+    items: cleanItems
+  }), [rawOrder, cleanItems])
+
   const sc = SC[order.status] || { l: order.status, c: 'bg-[#f5f5f5] text-[#666]' }
 
   return (
@@ -395,16 +419,18 @@ export default function PedidoDetailClient({ order }: { order: OrderDetail }) {
         </Link>
       </div>
 
-      <div className="bg-white border border-[#e6e6e6] rounded-md p-5 mb-4">
-        <div className="flex flex-col sm:flex-row items-start gap-5">
-          <div className="w-full sm:w-14 h-14 rounded-md bg-[#f5f5f5] border border-[#e6e6e6] flex items-center justify-center flex-shrink-0">
-            <MarketplaceLogo name={order.marketplace} className="w-8 h-8" />
+      <div className="bg-white border border-[#e6e6e6] rounded-xl py-5 px-6 sm:px-8 mb-4 shadow-none">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+          <div className="w-14 h-14 rounded-xl bg-[#f5f5f5] border border-[#e6e6e6] flex items-center justify-center shrink-0">
+            <MarketplaceLogo name={order.marketplace} className="w-8 h-8 object-contain" />
           </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+          <div className="flex-1 min-w-0 w-full">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h1 className="text-xl font-bold text-[#111111]">{order.order_number}</h1>
-                <div className="flex flex-wrap items-center gap-2.5 mt-2">
+                <h1 style={{ fontSize: '15px', lineHeight: '1.2' }} className="!text-[15px] font-bold text-[#111111]">
+                  #{order.order_number}
+                </h1>
+                <div className="flex flex-wrap items-center gap-2 mt-2">
                   <Link
                     href={`/clientes/${encodeURIComponent(order.customer.name.trim().toLowerCase().replace(/\s+/g, '-'))}`}
                     className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#F7F7F7] hover:bg-[#f0f0f0] text-[#1f2328] border border-[#e5e7eb] font-bold text-xs shadow-2xs transition-all hover:scale-[1.02] cursor-pointer group"
@@ -424,9 +450,9 @@ export default function PedidoDetailClient({ order }: { order: OrderDetail }) {
               </div>
               <div className="sm:text-right bg-[#F7F7F7] sm:bg-transparent p-4 sm:p-0 rounded-2xl border sm:border-0 border-[#e2e8f0] shrink-0">
                 <OrderActions order={order} />
-                <p className="text-sm font-bold text-[#666666] uppercase tracking-wider">Total do Pedido</p>
+                <p className="text-xs font-bold text-[#888888] uppercase tracking-wider">Total do Pedido</p>
                 <div className="text-2xl sm:text-3xl font-black text-[#111111] mt-0.5">{formatBRL(order.payment.total)}</div>
-                <div className="text-xs font-semibold text-[#666666] mt-1.5 flex sm:justify-end items-center gap-1.5">
+                <div className="text-xs font-medium text-[#777777] mt-1.5 flex sm:justify-end items-center gap-1.5">
                   <Calendar className="w-3.5 h-3.5 text-[#999999]" /> {order.date}
                 </div>
               </div>

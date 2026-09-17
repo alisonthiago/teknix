@@ -687,7 +687,7 @@ export default function SettingsHub() {
                           )}
                           {previewSimulatedPage === 'products' && (
                             <div style={{ display: 'flex', gap: 12, padding: 10, background: '#ffffff', borderRadius: 8, border: '1px solid #e2e8f0', height: 180 }}>
-                              <div style={{ width: '45%', background: '#f8fafc', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: '#94a3b8' }}>
+                              <div style={{ width: '45%', background: '#fafafa', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: '#94a3b8' }}>
                                 Foto do Produto
                               </div>
                               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8, justifyContent: 'center' }}>
@@ -700,7 +700,7 @@ export default function SettingsHub() {
                           {previewSimulatedPage === 'cart' && (
                             <div style={{ padding: 12, background: '#ffffff', borderRadius: 8, border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: 8 }}>
                               <div style={{ fontSize: 11, fontWeight: 700, color: '#0f172a' }}>Sua Sacola de Compras (1 item)</div>
-                              <div style={{ height: 32, background: '#f8fafc', borderRadius: 4, border: '1px solid #f1f5f9' }} />
+                              <div style={{ height: 32, background: '#fafafa', borderRadius: 4, border: '1px solid #f1f5f9' }} />
                               <div style={{ height: 24, background: '#0071e3', borderRadius: 4, width: '100%', marginTop: 8 }} />
                             </div>
                           )}

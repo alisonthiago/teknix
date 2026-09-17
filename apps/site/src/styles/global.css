@@ -486,6 +486,12 @@ img {
 }
 
 @media (max-width: 767px) {
+  /* Respiro lateral da landing TKX-MPHEED no mobile. */
+  .dynamic-page-root[data-page-slug="/TKX-MPHEED"],
+  .dynamic-page-root[data-page-slug="TKX-MPHEED"] {
+    padding-inline: 16px;
+  }
+
   .section-containers, .section-containers-wrap, [data-section-id] > .section-containers, [data-section-id] > div:first-child {
     flex-direction: column !important;
     flex-wrap: wrap !important;

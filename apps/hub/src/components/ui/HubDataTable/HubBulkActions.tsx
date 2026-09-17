@@ -27,15 +27,9 @@ export function HubBulkActions(_props: HubBulkActionsProps) {
 /** Hook utilitário para exclusão em massa com confirmação */
 export function useBulkDelete(
   onDelete: (ids: string[]) => Promise<void> | void,
-  entityLabel = 'registro'
+  _entityLabel = 'registro'
 ) {
   return async function handleBulkDelete(ids: string[]) {
-    const label = ids.length === 1 ? `este ${entityLabel}` : `estes ${ids.length} ${entityLabel}s`
-    const confirmed = window.confirm(
-      `Tem certeza que deseja excluir ${label}?\nEssa ação não pode ser desfeita.`
-    )
-    if (confirmed) {
-      await onDelete(ids)
-    }
+    await onDelete(ids)
   }
 }

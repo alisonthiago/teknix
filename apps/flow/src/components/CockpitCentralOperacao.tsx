@@ -99,8 +99,8 @@ export function CockpitCentralOperacao({ orders = [], products = [] }: CockpitDa
   const totalActionsCount = urgentItems.length + (toShipOrders.length > 0 ? 1 : 0) + (lowStockProducts.length > 0 ? 1 : 0)
 
   return (
-    <div className="bg-white border border-[#e6e6e6] rounded-md p-5">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#f0f0f0]">
+    <div className="bg-white border border-[#e6e6e6] rounded-2xl py-6 px-6 sm:px-8 lg:px-10 shadow-xs">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4.5 border-b border-[#f0f0f0]">
         <div>
           <span className="text-[11px] font-medium text-[#777] uppercase tracking-wider">
             Cockpit de Operação
@@ -133,7 +133,7 @@ export function CockpitCentralOperacao({ orders = [], products = [] }: CockpitDa
       </div>
 
       {/* 4 Clean Metric Columns */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-5">
         <div>
           <div className="flex items-center gap-1.5 text-[11px] text-[#777] font-normal">
             <span className="w-2 h-2 rounded-full bg-[#e74c3c]" />

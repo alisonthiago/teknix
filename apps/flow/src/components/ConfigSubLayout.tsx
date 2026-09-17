@@ -46,16 +46,18 @@ export function ConfigRow({ label, value, mono }: { label: string; value: string
 
 export function Toggle({ label, description, enabled, onChange }: { label: string; description?: string; enabled: boolean; onChange: (v: boolean) => void }) {
   return (
-    <div className="flex items-center justify-between py-3 border-b border-[#f5f5f5] last:border-0 gap-3">
-      <div className="flex-1 mr-4">
+    <div className="flex items-center justify-between py-3.5 border-b border-[#f5f5f5] last:border-0 gap-3">
+      <div className="flex-1 min-w-0 mr-2">
         <div className="text-[12px] font-medium text-[#333]">{label}</div>
         {description && <div className="text-[11px] text-[#999] mt-0.5">{description}</div>}
       </div>
       <button
+        type="button"
         onClick={() => onChange(!enabled)}
-        className={`relative w-10 h-[22px] rounded-full transition-colors flex-shrink-0 ${enabled ? 'bg-[#1f2328]' : 'bg-[#ccc]'}`}
+        style={{ width: 36, height: 20, minHeight: 20, padding: 0 }}
+        className={`relative rounded-full transition-colors flex-shrink-0 ${enabled ? 'bg-[#000000]' : 'bg-[#d1d5db]'}`}
       >
-        <div className={`absolute top-[3px] w-4 h-4 rounded-full bg-white transition-transform ${enabled ? 'translate-x-[22px]' : 'translate-x-[3px]'}`} />
+        <div className={`absolute top-[3px] left-0 w-3.5 h-3.5 rounded-full bg-white shadow-sm transition-transform ${enabled ? 'translate-x-[19px]' : 'translate-x-[3px]'}`} />
       </button>
     </div>
   )
